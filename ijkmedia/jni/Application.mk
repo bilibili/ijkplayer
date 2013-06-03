@@ -13,5 +13,6 @@ APP_CFLAGS += -O3 -Wall -pipe \
     -D__ARM_ARCH_5__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5TE__ \
     -DANDROID -DNDEBUG
 
+# armeabi-v7a
 APP_CFLAGS += -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=softfp
 APP_LDFLAGS += -Wl,--fix-cortex-a8
