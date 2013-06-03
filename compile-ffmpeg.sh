@@ -334,5 +334,6 @@ $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack 
     -o $FF_PREFIX/libffmpeg.so
 
 cp $FF_PREFIX/libffmpeg.so $FF_PREFIX/libffmpeg-debug.so
-$STRIP --strip-unneeded $FF_PREFIX/libffmpeg.so
+cp $FF_PREFIX/libffmpeg.so $FF_PREFIX/libffmpeg-release.so
+$STRIP --strip-unneeded $FF_PREFIX/libffmpeg-release.so
 
