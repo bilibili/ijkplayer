@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player;
+package tv.danmaku.ijk.media.widget;
 
 import java.util.Locale;
 import android.util.Log;
