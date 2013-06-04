@@ -1,5 +1,5 @@
 #! /bin/sh
 
-cd ijkmedia
+cd ijkmediaplayer
 cd jni
 ndk-build

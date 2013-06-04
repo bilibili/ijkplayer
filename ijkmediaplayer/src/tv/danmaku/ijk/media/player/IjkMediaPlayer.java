@@ -1,0 +1,395 @@
+package tv.danmaku.ijk.media.player;
+
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.SurfaceTexture;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.PowerManager;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+
+public class IjkMediaPlayer extends AbstractMediaPlayer {
+    private final static String TAG = IjkMediaPlayer.class.getName();
+
+    static {
+        System.loadLibrary("ffplay");
+        native_init();
+    }
+
+    private int mNativeContext; // accessed by native methods
+    private int mNativeSurfaceTexture; // accessed by native methods
+    private int mListenerContext; // accessed by native methods
+    private SurfaceHolder mSurfaceHolder;
+    private EventHandler mEventHandler;
+    private PowerManager.WakeLock mWakeLock = null;
+    private boolean mScreenOnWhilePlaying;
+    private boolean mStayAwake;
+
+    /**
+     * Default constructor. Consider using one of the create() methods for
+     * synchronously instantiating a IjkMediaPlayer from a Uri or resource.
+     * <p>
+     * When done with the IjkMediaPlayer, you should call {@link #release()}, to
+     * free the resources. If not released, too many IjkMediaPlayer instances
+     * may result in an exception.
+     * </p>
+     */
+    public IjkMediaPlayer() {
+        Looper looper;
+        if ((looper = Looper.myLooper()) != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else {
+            mEventHandler = null;
+        }
+
+        /*
+         * Native setup requires a weak reference to our object. It's easier to
+         * create it here than in C++.
+         */
+        native_setup(new WeakReference<IjkMediaPlayer>(this));
+    }
+
+    /*
+     * Update the IjkMediaPlayer SurfaceTexture. Call after setting a new
+     * display surface.
+     */
+    private native void _setVideoSurface(Surface surface);
+
+    /**
+     * Sets the {@link SurfaceHolder} to use for displaying the video portion of
+     * the media.
+     * 
+     * Either a surface holder or surface must be set if a display or video sink
+     * is needed. Not calling this method or {@link #setSurface(Surface)} when
+     * playing back a video will result in only the audio track being played. A
+     * null surface holder or surface will result in only the audio track being
+     * played.
+     * 
+     * @param sh
+     *            the SurfaceHolder to use for video display
+     */
+    @Override
+    public void setDisplay(SurfaceHolder sh) {
+        mSurfaceHolder = sh;
+        Surface surface;
+        if (sh != null) {
+            surface = sh.getSurface();
+        } else {
+            surface = null;
+        }
+        _setVideoSurface(surface);
+        updateSurfaceScreenOn();
+    }
+
+    /**
+     * Sets the {@link Surface} to be used as the sink for the video portion of
+     * the media. This is similar to {@link #setDisplay(SurfaceHolder)}, but
+     * does not support {@link #setScreenOnWhilePlaying(boolean)}. Setting a
+     * Surface will un-set any Surface or SurfaceHolder that was previously set.
+     * A null surface will result in only the audio track being played.
+     * 
+     * If the Surface sends frames to a {@link SurfaceTexture}, the timestamps
+     * returned from {@link SurfaceTexture#getTimestamp()} will have an
+     * unspecified zero point. These timestamps cannot be directly compared
+     * between different media sources, different instances of the same media
+     * source, or multiple runs of the same program. The timestamp is normally
+     * monotonically increasing and is unaffected by time-of-day adjustments,
+     * but it is reset when the position is set.
+     * 
+     * @param surface
+     *            The {@link Surface} to be used for the video portion of the
+     *            media.
+     */
+    @Override
+    public void setSurface(Surface surface) {
+        if (mScreenOnWhilePlaying && surface != null) {
+            DebugLog.w(TAG,
+                    "setScreenOnWhilePlaying(true) is ineffective for Surface");
+        }
+        mSurfaceHolder = null;
+        _setVideoSurface(surface);
+        updateSurfaceScreenOn();
+    }
+
+    /**
+     * Sets the data source (file-path or http/rtsp URL) to use.
+     * 
+     * @param path
+     *            the path of the file, or the http/rtsp URL of the stream you
+     *            want to play
+     * @throws IllegalStateException
+     *             if it is called in an invalid state
+     * 
+     *             <p>
+     *             When <code>path</code> refers to a local file, the file may
+     *             actually be opened by a process other than the calling
+     *             application. This implies that the pathname should be an
+     *             absolute path (as any other process runs with unspecified
+     *             current working directory), and that the pathname should
+     *             reference a world-readable file. As an alternative, the
+     *             application could first open the file for reading, and then
+     *             use the file descriptor form
+     *             {@link #setDataSource(FileDescriptor)}.
+     */
+    @Override
+    public void setDataSource(String path) throws IOException,
+            IllegalArgumentException, SecurityException, IllegalStateException {
+        _setDataSource(path, null, null);
+    }
+
+    private native void _setDataSource(String path, String[] keys,
+            String[] values) throws IOException, IllegalArgumentException,
+            SecurityException, IllegalStateException;
+
+    @Override
+    public native void prepareAsync() throws IllegalStateException;
+
+    @Override
+    public void start() throws IllegalStateException {
+        stayAwake(true);
+        _start();
+    }
+
+    private native void _start() throws IllegalStateException;
+
+    @Override
+    public void stop() throws IllegalStateException {
+        stayAwake(false);
+        _stop();
+    }
+
+    private native void _stop() throws IllegalStateException;
+
+    @Override
+    public void pause() throws IllegalStateException {
+        stayAwake(false);
+        _pause();
+    }
+
+    private native void _pause() throws IllegalStateException;
+
+    @SuppressLint("Wakelock")
+    @Override
+    public void setWakeMode(Context context, int mode) {
+        boolean washeld = false;
+        if (mWakeLock != null) {
+            if (mWakeLock.isHeld()) {
+                washeld = true;
+                mWakeLock.release();
+            }
+            mWakeLock = null;
+        }
+
+        PowerManager pm = (PowerManager) context
+                .getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(mode | PowerManager.ON_AFTER_RELEASE,
+                IjkMediaPlayer.class.getName());
+        mWakeLock.setReferenceCounted(false);
+        if (washeld) {
+            mWakeLock.acquire();
+        }
+    }
+
+    @Override
+    public void setScreenOnWhilePlaying(boolean screenOn) {
+        if (mScreenOnWhilePlaying != screenOn) {
+            if (screenOn && mSurfaceHolder == null) {
+                DebugLog.w(TAG,
+                        "setScreenOnWhilePlaying(true) is ineffective without a SurfaceHolder");
+            }
+            mScreenOnWhilePlaying = screenOn;
+            updateSurfaceScreenOn();
+        }
+    }
+
+    @SuppressLint("Wakelock")
+    private void stayAwake(boolean awake) {
+        if (mWakeLock != null) {
+            if (awake && !mWakeLock.isHeld()) {
+                mWakeLock.acquire();
+            } else if (!awake && mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
+        }
+        mStayAwake = awake;
+        updateSurfaceScreenOn();
+    }
+
+    private void updateSurfaceScreenOn() {
+        if (mSurfaceHolder != null) {
+            mSurfaceHolder.setKeepScreenOn(mScreenOnWhilePlaying && mStayAwake);
+        }
+    }
+
+    @Override
+    public native int getVideoWidth();
+
+    @Override
+    public native int getVideoHeight();
+
+    @Override
+    public native boolean isPlaying();
+
+    @Override
+    public native void seekTo(int msec) throws IllegalStateException;
+
+    @Override
+    public native int getCurrentPosition();
+
+    @Override
+    public native int getDuration();
+
+    /**
+     * Releases resources associated with this IjkMediaPlayer object. It is
+     * considered good practice to call this method when you're done using the
+     * IjkMediaPlayer. In particular, whenever an Activity of an application is
+     * paused (its onPause() method is called), or stopped (its onStop() method
+     * is called), this method should be invoked to release the IjkMediaPlayer
+     * object, unless the application has a special need to keep the object
+     * around. In addition to unnecessary resources (such as memory and
+     * instances of codecs) being held, failure to call this method immediately
+     * if a IjkMediaPlayer object is no longer needed may also lead to
+     * continuous battery consumption for mobile devices, and playback failure
+     * for other applications if no multiple instances of the same codec are
+     * supported on a device. Even if multiple instances of the same codec are
+     * supported, some performance degradation may be expected when unnecessary
+     * multiple instances are used at the same time.
+     */
+    @Override
+    public void release() {
+        stayAwake(false);
+        updateSurfaceScreenOn();
+        resetListeners();
+        _release();
+    }
+
+    private native void _release();
+
+    @Override
+    public void reset() {
+        stayAwake(false);
+        _reset();
+        // make sure none of the listeners get called anymore
+        mEventHandler.removeCallbacksAndMessages(null);
+    }
+
+    private native void _reset();
+
+    @Override
+    public native void setAudioStreamType(int streamtype);
+
+    private static native final void native_init();
+
+    private native final void native_setup(Object IjkMediaPlayer_this);
+
+    private native final void native_finalize();
+
+    protected void finalize() {
+        native_finalize();
+    }
+
+    private static class EventHandler extends Handler {
+        private IjkMediaPlayer mIjkMediaPlayer;
+
+        public EventHandler(IjkMediaPlayer mp, Looper looper) {
+            super(looper);
+            mIjkMediaPlayer = mp;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (mIjkMediaPlayer.mNativeContext == 0) {
+                DebugLog.w(TAG,
+                        "IjkMediaPlayer went away with unhandled events");
+                return;
+            }
+            switch (msg.what) {
+            case MEDIA_PREPARED:
+                mIjkMediaPlayer.notifyOnPrepared(mIjkMediaPlayer);
+                return;
+
+            case MEDIA_PLAYBACK_COMPLETE:
+                mIjkMediaPlayer.notifyOnCompletion(mIjkMediaPlayer);
+                mIjkMediaPlayer.stayAwake(false);
+                return;
+
+            case MEDIA_BUFFERING_UPDATE:
+                mIjkMediaPlayer.notifyOnBufferingUpdate(mIjkMediaPlayer,
+                        msg.arg1);
+                return;
+
+            case MEDIA_SEEK_COMPLETE:
+                mIjkMediaPlayer.notifyOnSeekComplete(mIjkMediaPlayer);
+                return;
+
+            case MEDIA_SET_VIDEO_SIZE:
+                mIjkMediaPlayer.notifyOnVideoSizeChanged(mIjkMediaPlayer,
+                        msg.arg1, msg.arg2);
+                return;
+
+            case MEDIA_ERROR:
+                DebugLog.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
+                if (!mIjkMediaPlayer.notifyOnError(mIjkMediaPlayer, msg.arg1,
+                        msg.arg2)) {
+                    mIjkMediaPlayer.notifyOnCompletion(mIjkMediaPlayer);
+                }
+                mIjkMediaPlayer.stayAwake(false);
+                return;
+
+            case MEDIA_INFO:
+                if (msg.arg1 != MEDIA_INFO_VIDEO_TRACK_LAGGING) {
+                    DebugLog.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
+                }
+                mIjkMediaPlayer.notifyOnInfo(mIjkMediaPlayer, msg.arg1,
+                        msg.arg2);
+                // No real default action so far.
+                return;
+            case MEDIA_TIMED_TEXT:
+                // do nothing
+                break;
+
+            case MEDIA_NOP: // interface test message - ignore
+                break;
+
+            default:
+                DebugLog.e(TAG, "Unknown message type " + msg.what);
+                return;
+            }
+        }
+    }
+
+    /*
+     * Called from native code when an interesting event happens. This method
+     * just uses the EventHandler system to post the event back to the main app
+     * thread. We use a weak reference to the original IjkMediaPlayer object so
+     * that the native code is safe from the object disappearing from underneath
+     * it. (This is the cookie passed to native_setup().)
+     */
+    private static void postEventFromNative(Object IjkMediaPlayer_ref,
+            int what, int arg1, int arg2, Object obj) {
+        @SuppressWarnings("rawtypes")
+        IjkMediaPlayer mp = (IjkMediaPlayer) ((WeakReference) IjkMediaPlayer_ref)
+                .get();
+        if (mp == null) {
+            return;
+        }
+
+        if (what == MEDIA_INFO && arg1 == MEDIA_INFO_STARTED_AS_NEXT) {
+            // this acquires the wakelock if needed, and sets the client side
+            // state
+            mp.start();
+        }
+        if (mp.mEventHandler != null) {
+            Message m = mp.mEventHandler.obtainMessage(what, arg1, arg2, obj);
+            mp.mEventHandler.sendMessage(m);
+        }
+    }
+}
