@@ -35,7 +35,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private final static String TAG = IjkMediaPlayer.class.getName();
 
     static {
-        System.loadLibrary("ffplay");
+        System.loadLibrary("ffmpeg");
+        System.loadLibrary("ijkplayer");
         native_init();
     }
 
