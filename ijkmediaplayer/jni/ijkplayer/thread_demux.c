@@ -23,7 +23,7 @@
  */
 
 #include <string.h>
-#include "ijkplayer.h"
+#include "ffplay.h"
 
 #if 0
 /* this thread gets the stream from the disk or the network */

@@ -22,6 +22,7 @@
  */
 
 #include <assert.h>
+#include <string.h>
 #include <jni.h>
 #include "ijkplayer.h"
 
