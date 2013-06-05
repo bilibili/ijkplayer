@@ -1,5 +1,5 @@
 /*****************************************************************************
- * pkt_queue.c
+ * internal.h
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -22,36 +22,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef PKT_QUEUE_H
-#define PKT_QUEUE_H
+#ifndef PLAYER_H
+#define PLAYER_H
 
-#include <minisdl/minisdl_thread.h>
-#include <libavformat/avformat.h>
+#include <inttypes.h>
 
-typedef struct MyAVPacketList {
-    AVPacket pkt;
-    struct MyAVPacketList *next;
-    int serial;
-} MyAVPacketList;
-
-typedef struct PacketQueue {
-    MyAVPacketList *first_pkt, *last_pkt;
-    int nb_packets;
-    int size;
-    int abort_request;
-    int serial;
-    SDL_mutex *mutex;
-    SDL_cond *cond;
-} PacketQueue;
-
-void packet_queue_init(PacketQueue *q);
-void packet_queue_destroy(PacketQueue *q);
-
-void packet_queue_start(PacketQueue *q);
-void packet_queue_abort(PacketQueue *q);
-void packet_queue_flush(PacketQueue *q);
-
-int packet_queue_put(PacketQueue *q, AVPacket *pkt);
-int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial);
+enum {
+    AV_SYNC_AUDIO_MASTER, /* default choice */
+    AV_SYNC_VIDEO_MASTER,
+    AV_SYNC_EXTERNAL_CLOCK, /* synchronize to an external clock */
+};
 
 #endif

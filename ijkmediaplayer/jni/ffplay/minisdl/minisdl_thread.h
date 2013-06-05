@@ -1,5 +1,5 @@
 /*****************************************************************************
- * pkt_queue.c
+ * minisdl_thread.h
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -22,36 +22,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef PKT_QUEUE_H
-#define PKT_QUEUE_H
+#ifndef MINISDL_THREAD_H
+#define MINISDL_THREAD_H
 
-#include <minisdl/minisdl_thread.h>
-#include <libavformat/avformat.h>
+#include <stdint.h>
+#include <pthread.h>
 
-typedef struct MyAVPacketList {
-    AVPacket pkt;
-    struct MyAVPacketList *next;
-    int serial;
-} MyAVPacketList;
+#define SDL_MUTEX_TIMEDOUT  1
+#define SDL_MUTEX_MAXWAIT   (~(uint32_t)0)
 
-typedef struct PacketQueue {
-    MyAVPacketList *first_pkt, *last_pkt;
-    int nb_packets;
-    int size;
-    int abort_request;
-    int serial;
-    SDL_mutex *mutex;
-    SDL_cond *cond;
-} PacketQueue;
+typedef struct SDL_mutex {
+    pthread_mutex_t id;
+} SDL_mutex;
 
-void packet_queue_init(PacketQueue *q);
-void packet_queue_destroy(PacketQueue *q);
+SDL_mutex  *SDL_CreateMutex(void);
+void        SDL_DestroyMutex(SDL_mutex * mutex);
+int         SDL_LockMutex(SDL_mutex * mutex);
+int         SDL_UnlockMutex(SDL_mutex * mutex);
+//int         SDL_TryLockMutex(SDL_mutex * mutex);
 
-void packet_queue_start(PacketQueue *q);
-void packet_queue_abort(PacketQueue *q);
-void packet_queue_flush(PacketQueue *q);
+typedef struct SDL_cond {
+    pthread_cond_t id;
+} SDL_cond;
 
-int packet_queue_put(PacketQueue *q, AVPacket *pkt);
-int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial);
+SDL_cond   *SDL_CreateCond(void);
+void        SDL_DestroyCond(SDL_cond * cond);
+int         SDL_CondSignal(SDL_cond * cond);
+int         SDL_CondBroadcast(SDL_cond * cond);
+int         SDL_CondWaitTimeout(SDL_cond * cond, SDL_mutex * mutex, uint32_t ms);
+int         SDL_CondWait(SDL_cond * cond, SDL_mutex * mutex);
 
 #endif

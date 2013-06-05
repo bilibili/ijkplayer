@@ -24,16 +24,16 @@
 
 #include "pkt_queue.h"
 
-AVPacket g_flush_pkt;
+static AVPacket g_flush_pkt;
 
 int packet_queue_put(PacketQueue *q, AVPacket *pkt);
 
-int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
+static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
 {
     MyAVPacketList *pkt1;
 
     if (q->abort_request)
-       return -1;
+        return -1;
 
     pkt1 = av_malloc(sizeof(MyAVPacketList));
     if (!pkt1)
@@ -52,7 +52,7 @@ int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
     q->nb_packets++;
     q->size += pkt1->pkt.size + sizeof(*pkt1);
     /* XXX: should duplicate packet data in DV case */
-    pthread_cond_signal(&q->cond);
+    SDL_CondSignal(q->cond);
     return 0;
 }
 
@@ -64,9 +64,9 @@ int packet_queue_put(PacketQueue *q, AVPacket *pkt)
     if (pkt != &g_flush_pkt && av_dup_packet(pkt) < 0)
         return -1;
 
-    pthread_mutex_lock(&q->mutex);
+    SDL_LockMutex(q->mutex);
     ret = packet_queue_put_private(q, pkt);
-    pthread_mutex_unlock(&q->mutex);
+    SDL_UnlockMutex(q->mutex);
 
     if (pkt != &g_flush_pkt && ret < 0)
         av_free_packet(pkt);
@@ -78,8 +78,8 @@ int packet_queue_put(PacketQueue *q, AVPacket *pkt)
 void packet_queue_init(PacketQueue *q)
 {
     memset(q, 0, sizeof(PacketQueue));
-    pthread_mutex_init(&q->mutex, NULL);
-    pthread_cond_init(&q->cond, NULL);
+    q->mutex = SDL_CreateMutex();
+    q->cond = SDL_CreateCond();
     q->abort_request = 1;
 }
 
@@ -87,7 +87,7 @@ void packet_queue_flush(PacketQueue *q)
 {
     MyAVPacketList *pkt, *pkt1;
 
-    pthread_mutex_lock(&q->mutex);
+    SDL_LockMutex(q->mutex);
     for (pkt = q->first_pkt; pkt != NULL; pkt = pkt1) {
         pkt1 = pkt->next;
         av_free_packet(&pkt->pkt);
@@ -97,33 +97,33 @@ void packet_queue_flush(PacketQueue *q)
     q->first_pkt = NULL;
     q->nb_packets = 0;
     q->size = 0;
-    pthread_mutex_unlock(&q->mutex);
+    SDL_UnlockMutex(q->mutex);
 }
 
 void packet_queue_destroy(PacketQueue *q)
 {
     packet_queue_flush(q);
-    pthread_mutex_destroy(&q->mutex);
-    pthread_cond_destroy(&q->cond);
+    SDL_DestroyMutex(q->mutex);
+    SDL_DestroyCond(q->cond);
 }
 
 void packet_queue_abort(PacketQueue *q)
 {
-    pthread_mutex_lock(&q->mutex);
+    SDL_LockMutex(q->mutex);
 
     q->abort_request = 1;
 
-    pthread_cond_signal(&q->cond);
+    SDL_CondSignal(q->cond);
 
-    pthread_mutex_unlock(&q->mutex);
+    SDL_UnlockMutex(q->mutex);
 }
 
 void packet_queue_start(PacketQueue *q)
 {
-    pthread_mutex_lock(&q->mutex);
+    SDL_LockMutex(q->mutex);
     q->abort_request = 0;
     packet_queue_put_private(q, &g_flush_pkt);
-    pthread_mutex_unlock(&q->mutex);
+    SDL_UnlockMutex(q->mutex);
 }
 
 /* return < 0 if aborted, 0 if no packet and > 0 if packet.  */
@@ -132,7 +132,7 @@ int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial)
     MyAVPacketList *pkt1;
     int ret;
 
-    pthread_mutex_lock(&q->mutex);
+    SDL_LockMutex(q->mutex);
 
     for (;;) {
         if (q->abort_request) {
@@ -157,9 +157,9 @@ int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial)
             ret = 0;
             break;
         } else {
-            pthread_cond_wait(&q->cond, &q->mutex);
+            SDL_CondWait(q->cond, q->mutex);
         }
     }
-    pthread_mutex_unlock(&q->mutex);
+    SDL_UnlockMutex(q->mutex);
     return ret;
 }
