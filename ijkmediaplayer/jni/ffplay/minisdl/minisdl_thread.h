@@ -36,20 +36,28 @@ typedef struct SDL_mutex {
 } SDL_mutex;
 
 SDL_mutex  *SDL_CreateMutex(void);
-void        SDL_DestroyMutex(SDL_mutex * mutex);
-int         SDL_LockMutex(SDL_mutex * mutex);
-int         SDL_UnlockMutex(SDL_mutex * mutex);
-//int         SDL_TryLockMutex(SDL_mutex * mutex);
+void        SDL_DestroyMutex(SDL_mutex *mutex);
+int         SDL_LockMutex(SDL_mutex *mutex);
+int         SDL_UnlockMutex(SDL_mutex *mutex);
+//int         SDL_TryLockMutex(SDL_mutex *mutex);
 
 typedef struct SDL_cond {
     pthread_cond_t id;
 } SDL_cond;
 
 SDL_cond   *SDL_CreateCond(void);
-void        SDL_DestroyCond(SDL_cond * cond);
-int         SDL_CondSignal(SDL_cond * cond);
-int         SDL_CondBroadcast(SDL_cond * cond);
-int         SDL_CondWaitTimeout(SDL_cond * cond, SDL_mutex * mutex, uint32_t ms);
-int         SDL_CondWait(SDL_cond * cond, SDL_mutex * mutex);
+void        SDL_DestroyCond(SDL_cond *cond);
+int         SDL_CondSignal(SDL_cond *cond);
+int         SDL_CondBroadcast(SDL_cond *cond);
+int         SDL_CondWaitTimeout(SDL_cond *cond, SDL_mutex *mutex, uint32_t ms);
+int         SDL_CondWait(SDL_cond *cond, SDL_mutex *mutex);
+
+typedef struct SDL_Thread
+{
+    pthread_t id;
+} SDL_Thread;
+
+SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data);
+void        SDL_WaitThread(SDL_Thread *thread, int *status);
 
 #endif

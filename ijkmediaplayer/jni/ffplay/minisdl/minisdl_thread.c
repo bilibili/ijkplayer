@@ -150,3 +150,21 @@ int SDL_CondWait(SDL_cond *cond, SDL_mutex *mutex)
 
     return pthread_cond_wait(&cond->id, &mutex->id);
 }
+
+SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data)
+{
+    if (pthread_create(&thread->id, NULL, fn, data) != 0) {
+        return NULL;
+    }
+
+    return thread;
+}
+
+void SDL_WaitThread(SDL_Thread *thread, int *status)
+{
+    assert(thread);
+    if (!thread)
+        return;
+
+    pthread_join(thread, status ? &status : NULL);
+}
