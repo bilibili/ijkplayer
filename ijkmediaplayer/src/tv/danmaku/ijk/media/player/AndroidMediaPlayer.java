@@ -20,17 +20,21 @@
 package tv.danmaku.ijk.media.player;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-public class AndroidMediaPlayer extends AbstractMediaPlayer {
+public final class AndroidMediaPlayer extends AbstractMediaPlayer {
     private MediaPlayer mInternalMediaPlayer;
+    private MediaPlayerListenerAdapter mInternalListenerAdapter;
 
     public AndroidMediaPlayer() {
         mInternalMediaPlayer = new MediaPlayer();
+        mInternalListenerAdapter = new MediaPlayerListenerAdapter(this);
+        attachInternalListeners();
     }
 
     @Override
@@ -112,15 +116,85 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     @Override
     public void release() {
         mInternalMediaPlayer.release();
+
+        resetListeners();
+        attachInternalListeners();
     }
 
     @Override
     public void reset() {
         mInternalMediaPlayer.reset();
+
+        resetListeners();
+        attachInternalListeners();
     }
 
     @Override
     public void setAudioStreamType(int streamtype) {
         mInternalMediaPlayer.setAudioStreamType(streamtype);
+    }
+
+    /*--------------------
+     * Listeners adapter
+     */
+    private final void attachInternalListeners() {
+        mInternalMediaPlayer.setOnPreparedListener(mInternalListenerAdapter);
+        mInternalMediaPlayer
+                .setOnBufferingUpdateListener(mInternalListenerAdapter);
+        mInternalMediaPlayer.setOnCompletionListener(mInternalListenerAdapter);
+        mInternalMediaPlayer
+                .setOnSeekCompleteListener(mInternalListenerAdapter);
+        mInternalMediaPlayer
+                .setOnVideoSizeChangedListener(mInternalListenerAdapter);
+        mInternalMediaPlayer.setOnErrorListener(mInternalListenerAdapter);
+        mInternalMediaPlayer.setOnInfoListener(mInternalListenerAdapter);
+    }
+
+    private static class MediaPlayerListenerAdapter implements
+            MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener,
+            MediaPlayer.OnBufferingUpdateListener,
+            MediaPlayer.OnSeekCompleteListener,
+            MediaPlayer.OnVideoSizeChangedListener,
+            MediaPlayer.OnErrorListener, MediaPlayer.OnInfoListener {
+        public WeakReference<AndroidMediaPlayer> mWeakMediaPlayer;
+
+        public MediaPlayerListenerAdapter(AndroidMediaPlayer mp) {
+            mWeakMediaPlayer = new WeakReference<AndroidMediaPlayer>(mp);
+        }
+
+        @Override
+        public boolean onInfo(MediaPlayer mp, int what, int extra) {
+            return notifyOnInfo(mWeakMediaPlayer.get(), what, extra);
+        }
+
+        @Override
+        public boolean onError(MediaPlayer mp, int what, int extra) {
+            return notifyOnError(mWeakMediaPlayer.get(), what, extra);
+        }
+
+        @Override
+        public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+            notifyOnVideoSizeChanged(mWeakMediaPlayer.get(), width, height);
+        }
+
+        @Override
+        public void onSeekComplete(MediaPlayer mp) {
+            notifyOnSeekComplete(mWeakMediaPlayer.get());
+        }
+
+        @Override
+        public void onBufferingUpdate(MediaPlayer mp, int percent) {
+            notifyOnBufferingUpdate(mWeakMediaPlayer.get(), percent);
+        }
+
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+            notifyOnCompletion(mWeakMediaPlayer.get());
+        }
+
+        @Override
+        public void onPrepared(MediaPlayer mp) {
+            notifyOnPrepared(mWeakMediaPlayer.get());
+        }
     }
 }

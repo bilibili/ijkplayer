@@ -33,7 +33,7 @@ import android.os.PowerManager;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-public class IjkMediaPlayer extends AbstractMediaPlayer {
+public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private final static String TAG = IjkMediaPlayer.class.getName();
 
     static {
@@ -332,33 +332,30 @@ public class IjkMediaPlayer extends AbstractMediaPlayer {
             }
             switch (msg.what) {
             case MEDIA_PREPARED:
-                mIjkMediaPlayer.notifyOnPrepared(mIjkMediaPlayer);
+                notifyOnPrepared(mIjkMediaPlayer);
                 return;
 
             case MEDIA_PLAYBACK_COMPLETE:
-                mIjkMediaPlayer.notifyOnCompletion(mIjkMediaPlayer);
+                notifyOnCompletion(mIjkMediaPlayer);
                 mIjkMediaPlayer.stayAwake(false);
                 return;
 
             case MEDIA_BUFFERING_UPDATE:
-                mIjkMediaPlayer.notifyOnBufferingUpdate(mIjkMediaPlayer,
-                        msg.arg1);
+                notifyOnBufferingUpdate(mIjkMediaPlayer, msg.arg1);
                 return;
 
             case MEDIA_SEEK_COMPLETE:
-                mIjkMediaPlayer.notifyOnSeekComplete(mIjkMediaPlayer);
+                notifyOnSeekComplete(mIjkMediaPlayer);
                 return;
 
             case MEDIA_SET_VIDEO_SIZE:
-                mIjkMediaPlayer.notifyOnVideoSizeChanged(mIjkMediaPlayer,
-                        msg.arg1, msg.arg2);
+                notifyOnVideoSizeChanged(mIjkMediaPlayer, msg.arg1, msg.arg2);
                 return;
 
             case MEDIA_ERROR:
                 DebugLog.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
-                if (!mIjkMediaPlayer.notifyOnError(mIjkMediaPlayer, msg.arg1,
-                        msg.arg2)) {
-                    mIjkMediaPlayer.notifyOnCompletion(mIjkMediaPlayer);
+                if (!notifyOnError(mIjkMediaPlayer, msg.arg1, msg.arg2)) {
+                    notifyOnCompletion(mIjkMediaPlayer);
                 }
                 mIjkMediaPlayer.stayAwake(false);
                 return;
@@ -367,8 +364,7 @@ public class IjkMediaPlayer extends AbstractMediaPlayer {
                 if (msg.arg1 != MEDIA_INFO_VIDEO_TRACK_LAGGING) {
                     DebugLog.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
                 }
-                mIjkMediaPlayer.notifyOnInfo(mIjkMediaPlayer, msg.arg1,
-                        msg.arg2);
+                notifyOnInfo(mIjkMediaPlayer, msg.arg1, msg.arg2);
                 // No real default action so far.
                 return;
             case MEDIA_TIMED_TEXT:

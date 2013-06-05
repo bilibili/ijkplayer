@@ -175,44 +175,45 @@ public abstract class AbstractMediaPlayer {
         mOnInfoListener = null;
     }
 
-    protected final void notifyOnPrepared(AbstractMediaPlayer mp) {
-        if (mOnPreparedListener != null)
-            mOnPreparedListener.onPrepared(mp);
+    protected static final void notifyOnPrepared(AbstractMediaPlayer mp) {
+        if (mp != null && mp.mOnPreparedListener != null)
+            mp.mOnPreparedListener.onPrepared(mp);
     }
 
-    protected final void notifyOnCompletion(AbstractMediaPlayer mp) {
-        if (mOnCompletionListener != null)
-            mOnCompletionListener.onCompletion(mp);
+    protected static final void notifyOnCompletion(AbstractMediaPlayer mp) {
+        if (mp != null && mp.mOnCompletionListener != null)
+            mp.mOnCompletionListener.onCompletion(mp);
     }
 
-    protected final void notifyOnBufferingUpdate(AbstractMediaPlayer mp,
+    protected static final void notifyOnBufferingUpdate(AbstractMediaPlayer mp,
             int percent) {
-        if (mOnBufferingUpdateListener != null)
-            mOnBufferingUpdateListener.onBufferingUpdate(mp, percent);
+        if (mp != null && mp.mOnBufferingUpdateListener != null)
+            mp.mOnBufferingUpdateListener.onBufferingUpdate(mp, percent);
     }
 
-    protected final void notifyOnSeekComplete(AbstractMediaPlayer mp) {
-        if (mOnSeekCompleteListener != null)
-            mOnSeekCompleteListener.onSeekComplete(mp);
+    protected static final void notifyOnSeekComplete(AbstractMediaPlayer mp) {
+        if (mp != null && mp.mOnSeekCompleteListener != null)
+            mp.mOnSeekCompleteListener.onSeekComplete(mp);
     }
 
-    protected final void notifyOnVideoSizeChanged(AbstractMediaPlayer mp,
-            int width, int height) {
-        if (mOnVideoSizeChangedListener != null)
-            mOnVideoSizeChangedListener.onVideoSizeChanged(mp, width, height);
+    protected static final void notifyOnVideoSizeChanged(
+            AbstractMediaPlayer mp, int width, int height) {
+        if (mp != null && mp.mOnVideoSizeChangedListener != null)
+            mp.mOnVideoSizeChangedListener
+                    .onVideoSizeChanged(mp, width, height);
     }
 
-    protected final boolean notifyOnError(AbstractMediaPlayer mp, int what,
-            int extra) {
-        if (mOnErrorListener != null)
-            return mOnErrorListener.onError(mp, what, extra);
+    protected static final boolean notifyOnError(AbstractMediaPlayer mp,
+            int what, int extra) {
+        if (mp != null && mp.mOnErrorListener != null)
+            return mp.mOnErrorListener.onError(mp, what, extra);
         return false;
     }
 
-    protected final boolean notifyOnInfo(AbstractMediaPlayer mp, int what,
-            int extra) {
-        if (mOnInfoListener != null)
-            return mOnInfoListener.onInfo(mp, what, extra);
+    protected static final boolean notifyOnInfo(AbstractMediaPlayer mp,
+            int what, int extra) {
+        if (mp != null && mp.mOnInfoListener != null)
+            return mp.mOnInfoListener.onInfo(mp, what, extra);
         return false;
     }
 }
