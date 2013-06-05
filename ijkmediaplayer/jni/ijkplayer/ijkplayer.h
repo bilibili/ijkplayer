@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ffplay.h
+ * ijkplayer.h
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -22,10 +22,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef FFPLAY_H
-#define FFPLAY_H
+#ifndef IJKPLAYER_H
+#define IJKPLAYER_H
 
 #include <inttypes.h>
+#include "minisdl/minisdl_thread.h"
 #include "pkt_queue.h"
 
 #ifdef CONFIG_AVFILTER

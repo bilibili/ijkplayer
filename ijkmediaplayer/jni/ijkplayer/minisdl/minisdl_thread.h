@@ -55,6 +55,9 @@ int         SDL_CondWait(SDL_cond *cond, SDL_mutex *mutex);
 typedef struct SDL_Thread
 {
     pthread_t id;
+    int (*func)(void *);
+    void *data;
+    int retval;
 } SDL_Thread;
 
 SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data);

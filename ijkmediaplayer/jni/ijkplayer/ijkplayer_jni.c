@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ffplay.c
+ * ijkplayer.c
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -22,4 +22,4 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <jni.h>
+#include "ijkplayer.h"

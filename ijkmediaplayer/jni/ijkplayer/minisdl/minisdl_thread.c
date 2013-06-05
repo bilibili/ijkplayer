@@ -151,9 +151,19 @@ int SDL_CondWait(SDL_cond *cond, SDL_mutex *mutex)
     return pthread_cond_wait(&cond->id, &mutex->id);
 }
 
+static void *SDL_RunThread(void *data)
+{
+    SDL_Thread *thread = data;
+    thread->retval = thread->func(thread->data);
+    return NULL;
+}
+
 SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data)
 {
-    if (pthread_create(&thread->id, NULL, fn, data) != 0) {
+    thread->func = fn;
+    thread->data = data;
+    thread->retval = 0;
+    if (pthread_create(&thread->id, NULL, SDL_RunThread, thread) != 0) {
         return NULL;
     }
 
@@ -166,5 +176,8 @@ void SDL_WaitThread(SDL_Thread *thread, int *status)
     if (!thread)
         return;
 
-    pthread_join(thread, status ? &status : NULL);
+    pthread_join(thread->id, NULL);
+
+    if (status)
+        *status = thread->retval;
 }
