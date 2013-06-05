@@ -1,6 +1,7 @@
 # -----
 build/
 .DS_Store
+.cproject
 
 # built application files
 *.apk
