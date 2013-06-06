@@ -25,14 +25,14 @@ LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
 
 LOCAL_C_CFLAGS := -std=c99
 
-# LOCAL_LDLIBS += -ldl -llog
+LOCAL_LDLIBS += -llog
 
 LOCAL_SRC_FILES := ijkplayer_jni.c
 LOCAL_SRC_FILES += ijkplayer.c
 LOCAL_SRC_FILES += pkt_queue.c
 LOCAL_SRC_FILES += minisdl/minisdl_thread.c
 
-LOCAL_SHARED_LIBRARIES := ffmpeg
+LOCAL_SHARED_LIBRARIES := ffmpeg helpers
 
 LOCAL_MODULE := ijkplayer
 include $(BUILD_SHARED_LIBRARY)

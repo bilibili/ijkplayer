@@ -67,6 +67,11 @@ void ijkmp_stop(IjkMediaPlayer *mp)
     // FIXME: implement
 }
 
+void ijkmp_pause(IjkMediaPlayer *mp)
+{
+    // FIXME: implement
+}
+
 int ijkmp_get_video_width(IjkMediaPlayer *mp)
 {
     // FIXME: implement
@@ -80,11 +85,6 @@ int ijkmp_get_video_height(IjkMediaPlayer *mp)
 }
 
 void ijkmp_seek_to(IjkMediaPlayer *mp, int msec)
-{
-    // FIXME: implement
-}
-
-void ijkmp_pause(IjkMediaPlayer *mp)
 {
     // FIXME: implement
 }

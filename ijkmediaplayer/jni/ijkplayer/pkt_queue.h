@@ -22,8 +22,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef PKT_QUEUE_H
-#define PKT_QUEUE_H
+#ifndef IJKPLAYER__PKT_QUEUE_H
+#define IJKPLAYER__PKT_QUEUE_H
 
 #include <minisdl/minisdl_thread.h>
 #include <libavformat/avformat.h>

@@ -20,8 +20,8 @@
  * This file may be included by C or C++ code, which is trouble because jni.h
  * uses different typedefs for JNIEnv in each language.
  */
-#ifndef NATIVEHELPER_JNIHELP_H_
-#define NATIVEHELPER_JNIHELP_H_
+#ifndef HELPERS__JNIHELP_H
+#define HELPERS__JNIHELP_H
 
 #include <jni.h>
 #include <android/log.h>
@@ -105,7 +105,6 @@ void jniLogException(C_JNIEnv* env, int priority, const char* tag, jthrowable ex
 #ifdef __cplusplus
 }
 #endif
-
 
 /*
  * For C++ code, we provide inlines that map to the C functions.  g++ always
@@ -192,4 +191,24 @@ inline void jniLogException(JNIEnv* env, int priority, const char* tag, jthrowab
     _rc; })
 #endif
 
-#endif  /* NATIVEHELPER_JNIHELP_H_ */
+#define JNI_CHECK_RET_VOID(condition__, env__, exception__, msg__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                jniThrowException(env__, exception__, msg__); \
+            } \
+            return; \
+        } \
+    }while(0)
+
+#define JNI_CHECK_RET(condition__, env__, exception__, msg__, ret__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                jniThrowException(env__, exception__, msg__); \
+            } \
+            return ret__; \
+        } \
+    }while(0)
+
+#endif  /* HELPERS__JNIHELP_H */

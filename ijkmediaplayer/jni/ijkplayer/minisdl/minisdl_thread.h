@@ -22,8 +22,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef MINISDL_THREAD_H
-#define MINISDL_THREAD_H
+#ifndef MINISDL__MINISDL_THREAD_H
+#define MINISDL__MINISDL_THREAD_H
 
 #include <stdint.h>
 #include <pthread.h>

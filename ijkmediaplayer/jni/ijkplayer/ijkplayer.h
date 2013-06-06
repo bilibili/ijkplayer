@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER_H
-#define IJKPLAYER_H
+#ifndef IJKPLAYER__IJKPLAYER_H
+#define IJKPLAYER__IJKPLAYER_H
 
 #include <stdbool.h>
 
@@ -39,10 +39,10 @@ void ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
 void ijkmp_prepare_async(IjkMediaPlayer *mp);
 void ijkmp_start(IjkMediaPlayer *mp);
 void ijkmp_stop(IjkMediaPlayer *mp);
+void ijkmp_pause(IjkMediaPlayer *mp);
 int  ijkmp_get_video_width(IjkMediaPlayer *mp);
 int  ijkmp_get_video_height(IjkMediaPlayer *mp);
 void ijkmp_seek_to(IjkMediaPlayer *mp, int msec);
-void ijkmp_pause(IjkMediaPlayer *mp);
 bool ijkmp_is_playing(IjkMediaPlayer *mp);
 int  ijkmp_get_current_position(IjkMediaPlayer *mp);
 int  ijkmp_get_duration(IjkMediaPlayer *mp);
