@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkplayer.h
+ * loghelper.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,34 +21,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER_H
-#define IJKPLAYER_H
+#ifndef LOGHELPER_H
+#define LOGHELPER_H
 
-#include <stdbool.h>
+#include <android/log.h>
 
-struct IjkMediaPlayer;
+#ifndef LOG_TAG
+#define LOG_TAG "IJKMEDIA"
+#endif
 
-typedef struct IjkMediaPlayer {
-    void *ffplayer;
-} IjkMediaPlayer;
-
-void ijkmp_init(IjkMediaPlayer *mp);
-void ijkmp_destroy(IjkMediaPlayer *mp);
-
-void ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
-void ijkmp_prepare_async(IjkMediaPlayer *mp);
-void ijkmp_start(IjkMediaPlayer *mp);
-void ijkmp_stop(IjkMediaPlayer *mp);
-int  ijkmp_get_video_width(IjkMediaPlayer *mp);
-int  ijkmp_get_video_height(IjkMediaPlayer *mp);
-void ijkmp_seek_to(IjkMediaPlayer *mp, int msec);
-void ijkmp_pause(IjkMediaPlayer *mp);
-bool ijkmp_is_playing(IjkMediaPlayer *mp);
-int  ijkmp_get_current_position(IjkMediaPlayer *mp);
-int  ijkmp_get_duration(IjkMediaPlayer *mp);
-void ijkmp_reset(IjkMediaPlayer *mp);
-
-// android api
-void ijkmp_set_video_surface(IjkMediaPlayer *mp, void *surface);
+#define ALOG(level, TAG, ...)    ((void)__android_log_print(level, TAG, __VA_ARGS__))
+#define ALOGV(...)  ALOG(ANDROID_LOG_VERBOSE,   LOG_TAG, __VA_ARGS__)
+#define ALOGD(...)  ALOG(ANDROID_LOG_DEBUG,     LOG_TAG, __VA_ARGS__)
+#define ALOGI(...)  ALOG(ANDROID_LOG_INFO,      LOG_TAG, __VA_ARGS__)
+#define ALOGW(...)  ALOG(ANDROID_LOG_WARN,      LOG_TAG, __VA_ARGS__)
+#define ALOGE(...)  ALOG(ANDROID_LOG_ERROR,     LOG_TAG, __VA_ARGS__)
+#define LOG_ALWAYS_FATAL(...)   do { ALOGE(__VA_ARGS__); exit(1); } while (0)
 
 #endif
+

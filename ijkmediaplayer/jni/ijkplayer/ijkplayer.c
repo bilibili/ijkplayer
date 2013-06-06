@@ -21,10 +21,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ffplay.h"
 #include "ijkplayer.h"
 
 #include "ffplay.h"
+
+void ijkmp_init(IjkMediaPlayer *mp)
+{
+    ijkmp_destroy(mp);
+    mp->ffplayer = malloc(sizeof(FFPlayer));
+}
+
+void ijkmp_destroy(IjkMediaPlayer *mp)
+{
+    if (!mp)
+        return;
+
+    // FIXME: implement
+    free(mp->ffplayer);
+    memset(mp, 0, sizeof(mp));
+}
 
 void ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
 {
@@ -90,11 +105,6 @@ int ijkmp_get_duration(IjkMediaPlayer *mp)
 {
     // FIXME: implement
     return 0;
-}
-
-void ijkmp_release(IjkMediaPlayer *mp)
-{
-    // FIXME: implement
 }
 
 void ijkmp_reset(IjkMediaPlayer *mp)

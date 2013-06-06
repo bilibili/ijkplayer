@@ -223,8 +223,8 @@ typedef struct VideoState {
     SDL_cond *continue_read_thread;
 } VideoState;
 
-typedef struct IjkMediaPlayer {
+typedef struct FFPlayer {
     VideoState is;
-} IjkMediaPlayer;
+} FFPlayer;
 
 #endif

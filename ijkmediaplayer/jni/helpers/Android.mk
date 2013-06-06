@@ -18,21 +18,37 @@
 
 LOCAL_PATH := $(call my-dir)
 
+
+#--------------------
+# C files
+#--------------------
 include $(CLEAR_VARS)
-LOCAL_C_INCLUDES += $(LOCAL_PATH)
-LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
-LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
-
 LOCAL_C_CFLAGS := -std=c99
+LOCAL_SRC_FILES := loghelper.c
+LOCAL_MODULE := helpers_c
+include $(BUILD_STATIC_LIBRARY)
 
-# LOCAL_LDLIBS += -ldl -llog
 
-LOCAL_SRC_FILES := ijkplayer_jni.c
-LOCAL_SRC_FILES += ijkplayer.c
-LOCAL_SRC_FILES += pkt_queue.c
-LOCAL_SRC_FILES += minisdl/minisdl_thread.c
+#--------------------
+# CPP files
+# to suppress ugly c99 warning
+#--------------------
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES := JNIHelp.cpp
+LOCAL_MODULE := helpers_cpp
+include $(BUILD_STATIC_LIBRARY)
 
-LOCAL_SHARED_LIBRARIES := ffmpeg
 
-LOCAL_MODULE := ijkplayer
+#--------------------
+# so
+#--------------------
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES := JNIHelp.cpp
+
+LOCAL_LDLIBS += -llog
+LOCAL_MODULE := helpers
+
+LOCAL_STATIC_LIBRARIES := helpers_c helpers_cpp
+LOCAL_SHARED_LIBRARIES := libstlport
+
 include $(BUILD_SHARED_LIBRARY)

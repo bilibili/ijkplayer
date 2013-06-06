@@ -24,18 +24,43 @@
 #include <assert.h>
 #include <string.h>
 #include <jni.h>
+#include "helpers/loghelper.h"
+#include "helpers/JNIHelp.h"
 #include "ijkplayer.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
 
-static jclass g_jclz_ijkplayer;
+
+typedef struct player_fields_t {
+    jclass      clazz;
+
+    jfieldID    context;
+    jfieldID    surface_texture;
+
+    jmethodID   post_event;
+} player_fields_t;
+static player_fields_t g_jni_player_fields;
+
+
+inline static int jni_get_int_fields(JNIEnv* env, jobject thiz, jfieldID field)
+{
+    return (*env)->GetIntField(env, thiz, field);
+}
+
+static IjkMediaPlayer *get_media_player(JNIEnv* env, jobject thiz)
+{
+    // FIXME: lock ref count
+    IjkMediaPlayer *mp = (IjkMediaPlayer *)jni_get_int_fields(env, thiz, g_jni_player_fields.context);
+    return mp;
+}
 
 static void
 IjkMediaPlayer_setDataSourceAndHeaders(
         JNIEnv *env, jobject thiz, jstring path,
         jobjectArray keys, jobjectArray values) {
-    // FIXME: implement
+    //IjkMediaPlayer *mp = get_media_player(env, thiz);
+    //ijkmp_set_data_source(mp, path);
 }
 
 static void
@@ -173,9 +198,9 @@ static JNINativeMethod g_ijkplayer_methods[] = {
 };
 
 void jni_init(JavaVM *vm, JNIEnv* env) {
-    g_jclz_ijkplayer = (*env)->FindClass(env, JNI_CLASS_IJKPLAYER);
+    g_jni_player_fields.clazz = (*env)->FindClass(env, JNI_CLASS_IJKPLAYER);
 
-    (*env)->RegisterNatives(env, g_jclz_ijkplayer, g_ijkplayer_methods, sizeof(g_ijkplayer_methods) / sizeof(JNINativeMethod));
+    (*env)->RegisterNatives(env, g_jni_player_fields.clazz, g_ijkplayer_methods, NELEM(g_ijkplayer_methods));
 }
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved)
