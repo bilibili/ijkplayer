@@ -310,7 +310,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private native void _reset();
 
     @Override
-    public native void setAudioStreamType(int streamtype);
+    public void setAudioStreamType(int streamtype) {
+        // do nothing
+    }
 
     private static native final void native_init();
 

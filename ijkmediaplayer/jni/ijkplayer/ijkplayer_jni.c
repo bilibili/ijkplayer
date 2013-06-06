@@ -267,12 +267,6 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 }
 
 static void
-IjkMediaPlayer_setAudioStreamType(JNIEnv *env, jobject thiz, int streamtype)
-{
-// FIXME: implement
-}
-
-static void
 IjkMediaPlayer_native_init(JNIEnv *env)
 {
 // FIXME: implement
@@ -311,7 +305,6 @@ static JNINativeMethod g_methods[] = {
     { "getDuration", "()I", (void *) IjkMediaPlayer_getDuration },
     { "_release", "()V", (void *) IjkMediaPlayer_release },
     { "_reset", "()V", (void *) IjkMediaPlayer_reset },
-    { "setAudioStreamType", "(I)V", (void *) IjkMediaPlayer_setAudioStreamType },
     { "native_init", "()V", (void *) IjkMediaPlayer_native_init },
     { "native_setup", "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_setup },
     { "native_finalize", "()V", (void *) IjkMediaPlayer_native_finalize },
