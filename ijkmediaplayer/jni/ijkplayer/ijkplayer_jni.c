@@ -45,7 +45,6 @@ static player_fields_t g_clazz;
 
 static IjkMediaPlayer *get_media_player(JNIEnv* env, jobject thiz)
 {
-    // FIXME: lock ref count
     pthread_mutex_lock(&g_clazz.mutex);
 
     IjkMediaPlayer *mp = (IjkMediaPlayer *) (intptr_t) (*env)->GetLongField(env, thiz, g_clazz.mNativeMediaPlayer);

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ffplay.h
+ * ffplayer.h
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -22,8 +22,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef FFPLAY_H
-#define FFPLAY_H
+#ifndef IJKPLAYER__FFPLAYER_H
+#define IJKPLAYER__FFPLAYER_H
 
 #include <inttypes.h>
 #include "ijksdl/ijksdl.h"
@@ -218,8 +218,31 @@ typedef struct VideoState {
     SDL_cond *continue_read_thread;
 } VideoState;
 
+/*----------------------------------------
+ *
+ */
 typedef struct FFPlayer {
     VideoState is;
 } FFPlayer;
+
+void ijkff_global_init();
+void ijkff_global_uninit();
+
+/*
+ * ffmpeg api listed below must be locked
+ *
+ *  av_set_cpu_flags_mask();
+ *  av_register_all();
+ *  avcodec_register_all();
+ *
+ *  avcodec_open
+ *  avcodec_open2
+ *  avcodec_close
+ *
+ *  avformat_find_stream_info
+ *  av_find_stream_info
+ */
+void ijkff_avcodec_lock();
+void ijkff_avcodec_unlock();
 
 #endif

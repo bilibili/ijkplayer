@@ -25,7 +25,7 @@
 
 #include <assert.h>
 #include "ijkerror.h"
-#include "ffplay.h"
+#include "ffplayer.h"
 
 IjkMediaPlayer *ijkmp_create()
 {
