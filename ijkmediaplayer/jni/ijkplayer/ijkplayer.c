@@ -51,6 +51,15 @@ void ijkmp_shutdown(IjkMediaPlayer *mp)
     // FIXME: implement
 }
 
+inline static void ijkmp_free(IjkMediaPlayer *mp)
+{
+    memset(mp->ffplayer, 0, sizeof(FFPlayer));
+    free(mp->ffplayer);
+
+    memset(mp, 0, sizeof(IjkMediaPlayer));
+    free(mp);
+}
+
 void ijkmp_inc_ref(IjkMediaPlayer *mp)
 {
     assert(mp);
@@ -65,24 +74,9 @@ void ijkmp_dec_ref(IjkMediaPlayer **pmp)
     int ref_count = __sync_fetch_and_sub(&mp->ref_count, 1);
     if (ref_count == 0) {
         ijkmp_shutdown(mp);
-        *pmp = NULL;
+        ijkmp_free(mp);
     }
-}
-
-void ijkmp_init(IjkMediaPlayer *mp)
-{
-    ijkmp_destroy(mp);
-    mp->ffplayer = malloc(sizeof(FFPlayer));
-}
-
-void ijkmp_destroy(IjkMediaPlayer *mp)
-{
-    if (!mp)
-        return;
-
-    // FIXME: implement
-    free(mp->ffplayer);
-    memset(mp, 0, sizeof(mp));
+    *pmp = NULL;
 }
 
 void ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
