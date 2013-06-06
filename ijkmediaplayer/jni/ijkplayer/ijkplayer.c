@@ -23,7 +23,51 @@
 
 #include "ijkplayer.h"
 
+#include <assert.h>
+#include "ijkerror.h"
 #include "ffplay.h"
+
+IjkMediaPlayer *ijkmp_create()
+{
+    IjkMediaPlayer *mp = (IjkMediaPlayer *) malloc(sizeof(IjkMediaPlayer));
+    if (!mp) {
+        return NULL;
+    }
+    memset(mp, 0, sizeof(IjkMediaPlayer));
+
+    mp->ffplayer = malloc(sizeof(FFPlayer));
+    if (!mp) {
+        free(mp);
+        return NULL;
+    }
+    memset(mp->ffplayer, 0, sizeof(FFPlayer));
+
+    return mp;
+}
+
+void ijkmp_shutdown(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    // FIXME: implement
+}
+
+void ijkmp_inc_ref(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    __sync_fetch_and_add(&mp->ref_count, 1);
+}
+
+void ijkmp_dec_ref(IjkMediaPlayer **pmp)
+{
+    assert(pmp);
+    assert(*pmp);
+    IjkMediaPlayer *mp = *pmp;
+    int ref_count = __sync_fetch_and_sub(&mp->ref_count, 1);
+    if (ref_count == 0) {
+        ijkmp_shutdown(mp);
+        *pmp = NULL;
+    }
+}
 
 void ijkmp_init(IjkMediaPlayer *mp)
 {

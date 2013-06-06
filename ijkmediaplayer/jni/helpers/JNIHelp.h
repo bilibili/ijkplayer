@@ -191,6 +191,16 @@ inline void jniLogException(JNIEnv* env, int priority, const char* tag, jthrowab
     _rc; })
 #endif
 
+#define JNI_CHECK_GOTO(condition__, env__, exception__, msg__, label__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                jniThrowException(env__, exception__, msg__); \
+            } \
+            goto label__; \
+        } \
+    }while(0)
+
 #define JNI_CHECK_RET_VOID(condition__, env__, exception__, msg__) \
     do { \
         if (!(condition__)) { \

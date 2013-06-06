@@ -29,23 +29,34 @@
 struct IjkMediaPlayer;
 
 typedef struct IjkMediaPlayer {
+    volatile int ref_count;
     void *ffplayer;
 } IjkMediaPlayer;
 
-void ijkmp_init(IjkMediaPlayer *mp);
-void ijkmp_destroy(IjkMediaPlayer *mp);
+// ref_count is 0 after open
+IjkMediaPlayer *ijkmp_create();
+
+// preferred to be called explicity, can be called multiple times
+// NOTE: ijkmp_shutdown may block thread
+void ijkmp_shutdown(IjkMediaPlayer *mp);
+
+void ijkmp_inc_ref(IjkMediaPlayer *mp);
+
+// call close at last release, also free memory
+// NOTE: ijkmp_dec_ref may block thread
+void ijkmp_dec_ref(IjkMediaPlayer **pmp);
 
 void ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
 void ijkmp_prepare_async(IjkMediaPlayer *mp);
 void ijkmp_start(IjkMediaPlayer *mp);
 void ijkmp_stop(IjkMediaPlayer *mp);
 void ijkmp_pause(IjkMediaPlayer *mp);
-int  ijkmp_get_video_width(IjkMediaPlayer *mp);
-int  ijkmp_get_video_height(IjkMediaPlayer *mp);
+int ijkmp_get_video_width(IjkMediaPlayer *mp);
+int ijkmp_get_video_height(IjkMediaPlayer *mp);
 void ijkmp_seek_to(IjkMediaPlayer *mp, int msec);
 bool ijkmp_is_playing(IjkMediaPlayer *mp);
-int  ijkmp_get_current_position(IjkMediaPlayer *mp);
-int  ijkmp_get_duration(IjkMediaPlayer *mp);
+int ijkmp_get_current_position(IjkMediaPlayer *mp);
+int ijkmp_get_duration(IjkMediaPlayer *mp);
 void ijkmp_reset(IjkMediaPlayer *mp);
 
 // android api

@@ -21,6 +21,8 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
+import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
@@ -40,9 +42,15 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         native_init();
     }
 
-    private int mNativeContext; // accessed by native methods
-    private int mNativeSurfaceTexture; // accessed by native methods
-    private int mListenerContext; // accessed by native methods
+    @AccessedByNative
+    private long mNativeMediaPlayer;
+
+    @AccessedByNative
+    private int mNativeSurfaceTexture;
+
+    @AccessedByNative
+    private int mListenerContext;
+
     private SurfaceHolder mSurfaceHolder;
     private EventHandler mEventHandler;
     private PowerManager.WakeLock mWakeLock = null;
@@ -324,7 +332,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
         @Override
         public void handleMessage(Message msg) {
-            if (mIjkMediaPlayer.mNativeContext == 0) {
+            if (mIjkMediaPlayer.mNativeMediaPlayer == 0) {
                 DebugLog.w(TAG,
                         "IjkMediaPlayer went away with unhandled events");
                 return;
