@@ -44,18 +44,15 @@ typedef struct player_fields_t {
 } player_fields_t;
 static player_fields_t g_clazz;
 
-inline static int jni_get_int_fields(JNIEnv* env, jobject thiz, jfieldID field)
-{
-    return (*env)->GetIntField(env, thiz, field);
-}
-
 static IjkMediaPlayer *get_media_player(JNIEnv* env, jobject thiz)
 {
     // FIXME: lock ref count
     pthread_mutex_lock(&g_clazz.mutex);
 
-    IjkMediaPlayer *mp = (IjkMediaPlayer *) jni_get_int_fields(env, thiz, g_clazz.mNativeMediaPlayer);
-    ijkmp_inc_ref(mp);
+    IjkMediaPlayer *mp = (IjkMediaPlayer *) (*env)->GetLongField(env, thiz, g_clazz.mNativeMediaPlayer);
+    if (mp) {
+        ijkmp_inc_ref(mp);
+    }
 
     pthread_mutex_unlock(&g_clazz.mutex);
     return mp;
