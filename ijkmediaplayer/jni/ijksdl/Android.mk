@@ -18,39 +18,10 @@
 
 LOCAL_PATH := $(call my-dir)
 
-
-#--------------------
-# C files
-#--------------------
 include $(CLEAR_VARS)
 LOCAL_C_CFLAGS := -std=c99
 
-LOCAL_SRC_FILES := loghelp.c
+LOCAL_SRC_FILES := ijksdl_thread.c
 
-LOCAL_MODULE := helpers_c
+LOCAL_MODULE := ijksdl
 include $(BUILD_STATIC_LIBRARY)
-
-
-#--------------------
-# CPP files
-# to suppress ugly c99 warning
-#--------------------
-include $(CLEAR_VARS)
-LOCAL_SRC_FILES := jnihelp.cpp
-
-LOCAL_MODULE := helpers_cpp
-include $(BUILD_STATIC_LIBRARY)
-
-
-#--------------------
-# so
-#--------------------
-include $(CLEAR_VARS)
-LOCAL_LDLIBS += -llog
-
-LOCAL_SRC_FILES := jnihelp.cpp
-
-LOCAL_MODULE := helpers
-LOCAL_STATIC_LIBRARIES := helpers_c helpers_cpp
-LOCAL_SHARED_LIBRARIES := libstlport
-include $(BUILD_SHARED_LIBRARY)

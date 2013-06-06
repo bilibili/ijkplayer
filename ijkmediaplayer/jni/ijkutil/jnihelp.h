@@ -20,8 +20,8 @@
  * This file may be included by C or C++ code, which is trouble because jni.h
  * uses different typedefs for JNIEnv in each language.
  */
-#ifndef HELPERS__JNIHELP_H
-#define HELPERS__JNIHELP_H
+#ifndef IJKUTIL__JNIHELP_H
+#define IJKUTIL__JNIHELP_H
 
 #include <jni.h>
 #include <android/log.h>

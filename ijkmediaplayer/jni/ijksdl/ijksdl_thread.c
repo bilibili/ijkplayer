@@ -1,5 +1,5 @@
 /*****************************************************************************
- * minisdl_thread.c
+ * ijksdl_thread.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -23,7 +23,7 @@
 
 #include <errno.h>
 #include <assert.h>
-#include "minisdl_thread.h"
+#include "ijksdl_thread.h"
 
 SDL_mutex *SDL_CreateMutex(void)
 {

@@ -26,7 +26,7 @@
 #define FFPLAY_H
 
 #include <inttypes.h>
-#include "minisdl/minisdl_thread.h"
+#include "ijksdl/ijksdl.h"
 #include "pkt_queue.h"
 
 #ifdef CONFIG_AVFILTER
@@ -38,28 +38,23 @@
 //#define MIN_FRAMES 5
 
 /* SDL audio buffer size, in samples. Should be small to have precise
-   A/V sync as SDL does not have hardware buffer fullness info. */
+ A/V sync as SDL does not have hardware buffer fullness info. */
 #define SDL_AUDIO_BUFFER_SIZE 1024
 
 /* no AV sync correction is done if below the AV sync threshold */
 //#define AV_SYNC_THRESHOLD 0.01
 /* no AV correction is done if too big error */
 //#define AV_NOSYNC_THRESHOLD 10.0
-
 /* maximum audio speed change to get correct sync */
 //#define SAMPLE_CORRECTION_PERCENT_MAX 10
-
 /* external clock speed adjustment constants for realtime sources based on buffer fullness */
 //#define EXTERNAL_CLOCK_SPEED_MIN  0.900
 //#define EXTERNAL_CLOCK_SPEED_MAX  1.010
 //#define EXTERNAL_CLOCK_SPEED_STEP 0.001
-
 /* we use about AUDIO_DIFF_AVG_NB A-V differences to make the average */
 //#define AUDIO_DIFF_AVG_NB   20
-
 /* polls for possible required screen refresh at least this often, should be less than 1/fps */
 //#define REFRESH_RATE 0.01
-
 /* NOTE: the size must be big enough to compensate the hardware audio buffersize size */
 /* TODO: We assume that a decoded and resampled frame fits into this buffer */
 #define SAMPLE_ARRAY_SIZE (8 * 65536)
@@ -75,8 +70,8 @@
 #define SUBPICTURE_QUEUE_SIZE 4
 
 typedef struct VideoPicture {
-    double pts;             // presentation timestamp for this picture
-    int64_t pos;            // byte position in file
+    double pts; // presentation timestamp for this picture
+    int64_t pos; // byte position in file
     // SDL_Overlay *bmp;
     int width, height; /* source height & width */
     AVRational sample_aspect_ratio;
@@ -128,10 +123,10 @@ typedef struct VideoState {
     int audio_stream;
 
     int av_sync_type;
-    double external_clock;                   ///< external clock base
-    double external_clock_drift;             ///< external clock base - time (av_gettime) at which we updated external_clock
-    int64_t external_clock_time;             ///< last reference time
-    double external_clock_speed;             ///< speed of the external clock
+    double external_clock; ///< external clock base
+    double external_clock_drift; ///< external clock base - time (av_gettime) at which we updated external_clock
+    int64_t external_clock_time; ///< last reference time
+    double external_clock_speed; ///< speed of the external clock
 
     double audio_clock;
     int audio_clock_serial;
@@ -193,18 +188,18 @@ typedef struct VideoState {
     int video_stream;
     AVStream *video_st;
     PacketQueue videoq;
-    double video_current_pts;       // current displayed pts
+    double video_current_pts; // current displayed pts
     double video_current_pts_drift; // video_current_pts - time (av_gettime) at which we updated video_current_pts - used to have running video pts
-    int64_t video_current_pos;      // current displayed file pos
-    double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
+    int64_t video_current_pos; // current displayed file pos
+    double max_frame_duration; // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
     int video_clock_serial;
     VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE];
     int pictq_size, pictq_rindex, pictq_windex;
     SDL_mutex *pictq_mutex;
     SDL_cond *pictq_cond;
-#if !CONFIG_AVFILTER
+    #if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;
-#endif
+    #endif
     // SDL_Rect last_display_rect;
 
     char filename[1024];
@@ -212,8 +207,8 @@ typedef struct VideoState {
     int step;
 
 #if CONFIG_AVFILTER
-    AVFilterContext *in_video_filter;   // the first filter in the video chain
-    AVFilterContext *out_video_filter;  // the last filter in the video chain
+    AVFilterContext *in_video_filter; // the first filter in the video chain
+    AVFilterContext *out_video_filter;// the last filter in the video chain
     int use_dr1;
     FrameBuffer *buffer_pool;
 #endif

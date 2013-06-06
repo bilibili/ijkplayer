@@ -25,8 +25,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <jni.h>
-#include "helpers/loghelp.h"
-#include "helpers/jnihelp.h"
+#include "ijkutil/ijkutil.h"
 #include "ijkplayer.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"

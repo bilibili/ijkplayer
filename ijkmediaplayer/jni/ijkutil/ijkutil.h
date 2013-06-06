@@ -1,5 +1,5 @@
 /*****************************************************************************
- * loghelper.c
+ * ijkutil.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,22 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef HELPERS__LOGHELP_H
-#define HELPERS__LOGHELP_H
+#ifndef IJKUTIL__IJKUTIL_H
+#define IJKUTIL__IJKUTIL_H
 
-#include <android/log.h>
-
-#ifndef LOG_TAG
-#define LOG_TAG "IJKMEDIA"
-#endif
-
-#define ALOG(level, TAG, ...)    ((void)__android_log_print(level, TAG, __VA_ARGS__))
-#define ALOGV(...)  ALOG(ANDROID_LOG_VERBOSE,   LOG_TAG, __VA_ARGS__)
-#define ALOGD(...)  ALOG(ANDROID_LOG_DEBUG,     LOG_TAG, __VA_ARGS__)
-#define ALOGI(...)  ALOG(ANDROID_LOG_INFO,      LOG_TAG, __VA_ARGS__)
-#define ALOGW(...)  ALOG(ANDROID_LOG_WARN,      LOG_TAG, __VA_ARGS__)
-#define ALOGE(...)  ALOG(ANDROID_LOG_ERROR,     LOG_TAG, __VA_ARGS__)
-#define LOG_ALWAYS_FATAL(...)   do { ALOGE(__VA_ARGS__); exit(1); } while (0)
+#include "loghelp.h"
+#include "jnihelp.h"
 
 #endif
-

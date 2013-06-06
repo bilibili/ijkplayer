@@ -1,8 +1,7 @@
 /*****************************************************************************
- * pkt_queue.c
+ * loghelper.h
  *****************************************************************************
  *
- * copyright (c) 2001 Fabrice Bellard
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -22,36 +21,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__PKT_QUEUE_H
-#define IJKPLAYER__PKT_QUEUE_H
+#ifndef IJKUTIL__LOGHELP_H
+#define IJKUTIL__LOGHELP_H
 
-#include <ijksdl/ijksdl_thread.h>
-#include <libavformat/avformat.h>
+#include <android/log.h>
 
-typedef struct MyAVPacketList {
-    AVPacket pkt;
-    struct MyAVPacketList *next;
-    int serial;
-} MyAVPacketList;
+#ifndef LOG_TAG
+#define LOG_TAG "IJKMEDIA"
+#endif
 
-typedef struct PacketQueue {
-    MyAVPacketList *first_pkt, *last_pkt;
-    int nb_packets;
-    int size;
-    int abort_request;
-    int serial;
-    SDL_mutex *mutex;
-    SDL_cond *cond;
-} PacketQueue;
-
-void packet_queue_init(PacketQueue *q);
-void packet_queue_destroy(PacketQueue *q);
-
-void packet_queue_start(PacketQueue *q);
-void packet_queue_abort(PacketQueue *q);
-void packet_queue_flush(PacketQueue *q);
-
-int packet_queue_put(PacketQueue *q, AVPacket *pkt);
-int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial);
+#define ALOG(level, TAG, ...)    ((void)__android_log_print(level, TAG, __VA_ARGS__))
+#define ALOGV(...)  ALOG(ANDROID_LOG_VERBOSE,   LOG_TAG, __VA_ARGS__)
+#define ALOGD(...)  ALOG(ANDROID_LOG_DEBUG,     LOG_TAG, __VA_ARGS__)
+#define ALOGI(...)  ALOG(ANDROID_LOG_INFO,      LOG_TAG, __VA_ARGS__)
+#define ALOGW(...)  ALOG(ANDROID_LOG_WARN,      LOG_TAG, __VA_ARGS__)
+#define ALOGE(...)  ALOG(ANDROID_LOG_ERROR,     LOG_TAG, __VA_ARGS__)
+#define LOG_ALWAYS_FATAL(...)   do { ALOGE(__VA_ARGS__); exit(1); } while (0)
 
 #endif
+
