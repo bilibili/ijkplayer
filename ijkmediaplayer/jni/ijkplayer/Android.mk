@@ -19,13 +19,12 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
+LOCAL_C_CFLAGS := -std=c99
+LOCAL_LDLIBS += -llog
+
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
-
-LOCAL_C_CFLAGS := -std=c99
-
-LOCAL_LDLIBS += -llog
 
 LOCAL_SRC_FILES := ijkplayer_jni.c
 LOCAL_SRC_FILES += ijkplayer.c

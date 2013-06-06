@@ -20,6 +20,8 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_C_CFLAGS := -std=c99
+
 LOCAL_SRC_FILES := minisdl_thread.c
+
 LOCAL_MODULE := minisdl
 include $(BUILD_STATIC_LIBRARY)
