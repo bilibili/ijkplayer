@@ -28,8 +28,9 @@ APP_CFLAGS := -O3 -Wall -pipe \
     -fstrict-aliasing -Werror=strict-aliasing \
     -fmodulo-sched -fmodulo-sched-allow-regmoves \
     -Wno-psabi -Wa,--noexecstack \
-    -D__ARM_ARCH_5__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5TE__ \
     -DANDROID -DNDEBUG
+
+# -D__ARM_ARCH_5__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5TE__
 
 # armeabi-v7a
 APP_CFLAGS += -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=softfp
