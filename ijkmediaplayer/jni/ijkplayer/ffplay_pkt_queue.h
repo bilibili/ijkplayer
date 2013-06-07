@@ -1,5 +1,5 @@
 /*****************************************************************************
- * pkt_queue.c
+ * ffplay_pkt_queue.c
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -22,8 +22,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__PKT_QUEUE_H
-#define IJKPLAYER__PKT_QUEUE_H
+#ifndef IJKPLAYER__FFPLAY_PKT_QUEUE_H
+#define IJKPLAYER__FFPLAY_PKT_QUEUE_H
 
 #include <ijksdl/ijksdl_thread.h>
 #include <libavformat/avformat.h>

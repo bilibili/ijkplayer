@@ -22,7 +22,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "pkt_queue.h"
+#include "ffplay_pkt_queue.h"
 
 static AVPacket flush_pkt;
 

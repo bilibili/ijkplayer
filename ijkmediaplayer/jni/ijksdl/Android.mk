@@ -19,9 +19,9 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-LOCAL_C_CFLAGS := -std=c99
+LOCAL_C_CFLAGS += -std=c99
 
-LOCAL_SRC_FILES := ijksdl_thread.c
+LOCAL_SRC_FILES += ijksdl_thread.c
 
 LOCAL_MODULE := ijksdl
 include $(BUILD_STATIC_LIBRARY)

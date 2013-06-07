@@ -23,9 +23,9 @@ LOCAL_PATH := $(call my-dir)
 # C files
 #--------------------
 include $(CLEAR_VARS)
-LOCAL_C_CFLAGS := -std=c99
+LOCAL_C_CFLAGS += -std=c99
 
-LOCAL_SRC_FILES := loghelp.c
+LOCAL_SRC_FILES += loghelp.c
 
 LOCAL_MODULE := ijkutil_c
 include $(BUILD_STATIC_LIBRARY)
@@ -36,7 +36,7 @@ include $(BUILD_STATIC_LIBRARY)
 # to suppress ugly c99 warning
 #--------------------
 include $(CLEAR_VARS)
-LOCAL_SRC_FILES := jnihelp.cpp
+LOCAL_SRC_FILES += jnihelp.cpp
 
 LOCAL_MODULE := ijkutil_cpp
 include $(BUILD_STATIC_LIBRARY)
@@ -48,7 +48,7 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_LDLIBS += -llog
 
-LOCAL_SRC_FILES := jnihelp.cpp
+LOCAL_SRC_FILES += jnihelp.cpp
 
 LOCAL_MODULE := ijkutil
 LOCAL_STATIC_LIBRARIES := ijkutil_c ijkutil_cpp
