@@ -58,15 +58,15 @@ typedef struct FFPlayer {
     // int             av_sync_type = AV_SYNC_AUDIO_MASTER;
     int64_t         start_time;
     int64_t         duration;
-    // int             workaround_bugs = 1;
-    // int             fast = 0;
+    int             workaround_bugs;
+    int             fast;
     int             genpts;
-    // int             lowres = 0;
-    // int             idct = FF_IDCT_AUTO;
-    // enum AVDiscard  skip_frame       = AVDISCARD_DEFAULT;
-    // enum AVDiscard  skip_idct        = AVDISCARD_DEFAULT;
-    // enum AVDiscard  skip_loop_filter = AVDISCARD_DEFAULT;
-    // int             error_concealment = 3;
+    int             lowres;
+    int             idct;
+    enum AVDiscard  skip_frame;
+    enum AVDiscard  skip_idct;
+    enum AVDiscard  skip_loop_filter;
+    int             error_concealment;
     // int             decoder_reorder_pts = -1;
     int             autoexit;
     // int             exit_on_keydown;
@@ -75,9 +75,9 @@ typedef struct FFPlayer {
     // int             framedrop = -1;
     int             infinite_buffer;
     enum ShowMode   show_mode;
-    // const char     *audio_codec_name;
-    // const char     *subtitle_codec_name;
-    // const char     *video_codec_name;
+    char            *audio_codec_name;
+    char            *subtitle_codec_name;
+    char            *video_codec_name;
     // double          rdftspeed = 0.02;
     // int64_t         cursor_last_shown;
     // int             cursor_hidden = 0;
@@ -85,9 +85,15 @@ typedef struct FFPlayer {
     // char            *vfilters = NULL;
     #endif
 
+    /* current context */
+    //static int is_full_screen;
+    int64_t         audio_callback_time;
+
     /* callback */
     int             (*decode_interrupt_cb)(void *ctx);
 } FFPlayer;
+
+#define IJKFF_SAFE_FREE(p) do {free(p); p = NULL;} while(0)
 
 inline static void ijkff_reset(FFPlayer *ffp)
 {
@@ -98,8 +104,7 @@ inline static void ijkff_reset(FFPlayer *ffp)
     av_dict_free(&ffp->codec_opts);
 
     /* ffplay options specified by the user */
-    free(ffp->input_filename);
-    ffp->input_filename         = NULL;
+    IJKFF_SAFE_FREE(ffp->input_filename);
     ffp->audio_disable          = 0;
     ffp->video_disable          = 0;
     ffp->subtitle_disable       = 0;
@@ -110,11 +115,25 @@ inline static void ijkff_reset(FFPlayer *ffp)
     ffp->show_status            = 1;
     ffp->start_time             = AV_NOPTS_VALUE;
     ffp->duration               = AV_NOPTS_VALUE;
+    ffp->workaround_bugs        = 1;
+    ffp->fast                   = 0;
     ffp->genpts                 = 0;
+    ffp->lowres                 = 0;
+    ffp->idct                   = FF_IDCT_AUTO;
+    ffp->skip_frame             = AVDISCARD_DEFAULT;
+    ffp->skip_idct              = AVDISCARD_DEFAULT;
+    ffp->skip_loop_filter       = AVDISCARD_DEFAULT;
+    ffp->error_concealment      = 3;
     ffp->autoexit               = 0;
     ffp->loop                   = 1;
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
+    IJKFF_SAFE_FREE(ffp->audio_codec_name);
+    IJKFF_SAFE_FREE(ffp->subtitle_codec_name);
+    IJKFF_SAFE_FREE(ffp->video_codec_name);
+
+    /* current context */
+    ffp->audio_callback_time    = 0;
 
     /* callback */
     ffp->decode_interrupt_cb    = NULL;

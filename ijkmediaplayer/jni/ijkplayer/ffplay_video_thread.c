@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ffplay_pkt_queue.c
+ * ffplay_video_thread.c
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -22,38 +22,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__FFPLAY_PKT_QUEUE_H
-#define IJKPLAYER__FFPLAY_PKT_QUEUE_H
-
-#include <ijksdl/ijksdl_mutex.h>
-#include <libavformat/avformat.h>
-
-typedef struct MyAVPacketList {
-    AVPacket pkt;
-    struct MyAVPacketList *next;
-    int serial;
-} MyAVPacketList;
-
-typedef struct PacketQueue {
-    MyAVPacketList *first_pkt, *last_pkt;
-    int nb_packets;
-    int size;
-    int abort_request;
-    int serial;
-    SDL_mutex *mutex;
-    SDL_cond *cond;
-} PacketQueue;
-
-void packet_queue_init(PacketQueue *q);
-void packet_queue_destroy(PacketQueue *q);
-
-void packet_queue_start(PacketQueue *q);
-void packet_queue_abort(PacketQueue *q);
-void packet_queue_flush(PacketQueue *q);
-
-int packet_queue_put(PacketQueue *q, AVPacket *pkt);
-int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial);
-
-AVPacket *packet_get_flush_pkt();
-
-#endif
+int ijkff_video_thread(void *arg)
+{
+    // FIXME: implement
+    return 0;
+}

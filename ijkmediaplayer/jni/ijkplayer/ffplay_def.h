@@ -26,8 +26,12 @@
 #define IJKPLAYER__FFPLAY_DEF_H
 
 #include <inttypes.h>
+#include "libavformat/avformat.h"
+#include "libavcodec/avfft.h"
+#include "libswresample/swresample.h"
 #include "ijksdl/ijksdl.h"
 #include "ffplay_pkt_queue.h"
+#include "ffplay_cmdutils.h"
 
 #ifdef CONFIG_AVFILTER
 #undef CONFIG_AVFILTER
@@ -44,10 +48,10 @@
 /* no AV sync correction is done if below the AV sync threshold */
 // #define AV_SYNC_THRESHOLD 0.01
 /* no AV correction is done if too big error */
-// #define AV_NOSYNC_THRESHOLD 10.0
+#define AV_NOSYNC_THRESHOLD 10.0
 
 /* maximum audio speed change to get correct sync */
-// #define SAMPLE_CORRECTION_PERCENT_MAX 10
+#define SAMPLE_CORRECTION_PERCENT_MAX 10
 
 /* external clock speed adjustment constants for realtime sources based on buffer fullness */
 // #define EXTERNAL_CLOCK_SPEED_MIN  0.900
@@ -55,7 +59,7 @@
 // #define EXTERNAL_CLOCK_SPEED_STEP 0.001
 
 /* we use about AUDIO_DIFF_AVG_NB A-V differences to make the average */
-// #define AUDIO_DIFF_AVG_NB   20
+#define AUDIO_DIFF_AVG_NB   20
 
 /* polls for possible required screen refresh at least this often, should be less than 1/fps */
 // #define REFRESH_RATE 0.01
@@ -167,9 +171,9 @@ typedef struct VideoState {
     int16_t sample_array[SAMPLE_ARRAY_SIZE];
     int sample_array_index;
     int last_i_start;
-    // RDFTContext *rdft;
+    RDFTContext *rdft;
     int rdft_bits;
-    // FFTSample *rdft_data;
+    FFTSample *rdft_data;
     int xpos;
     double last_vis_time;
 
@@ -223,13 +227,8 @@ typedef struct VideoState {
     SDL_cond *continue_read_thread;
 } VideoState;
 
-/* PLACEHOLD: options variables has been moved to ffplayer.h */
-
-/* current context */
-// static int is_full_screen;
-// static int64_t audio_callback_time;
-
-// static AVPacket flush_pkt;
+/* PLACEHOLD: options has been moved to ffplayer.h */
+/* PLACEHOLD: current context has been moved to ffplayer.h */
 /* PLACEHOLD: flush_pkt has been moved to pkt_queue.c */
 
 #define FF_ALLOC_EVENT   (SDL_USEREVENT)
@@ -237,6 +236,9 @@ typedef struct VideoState {
 
 // static SDL_Surface *screen;
 
-void print_error(const char *filename, int err);
+/* extra forward declaration */
+int ijkff_read_thread(void *arg);
+int ijkff_video_thread(void *arg);
+int ijkff_subtitle_thread(void *arg);
 
 #endif
