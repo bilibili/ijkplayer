@@ -24,28 +24,45 @@
 
 #include "ffplayer.h"
 
+#include <stdbool.h>
+
+static bool g_ffmpeg_global_inited = false;
 static pthread_mutex_t g_avcodec_mutex;
 
 void ijkff_global_init()
 {
+    if (g_ffmpeg_global_inited)
+        return;
+
     pthread_mutex_init(&g_avcodec_mutex, NULL);
 
-    av_set_cpu_flags_mask();
     av_register_all();
     avcodec_register_all();
+
+    avformat_network_init();
+
+    g_ffmpeg_global_inited = true;
 }
 
 void ijkff_global_uninit()
 {
+    if (!g_ffmpeg_global_inited)
+        return;
+
     pthread_mutex_destroy(&g_avcodec_mutex);
+    g_ffmpeg_global_inited = false;
 }
 
 void ijkff_avcodec_lock()
 {
+    if (!g_ffmpeg_global_inited)
+        return;
     pthread_mutex_lock(&g_avcodec_mutex);
 }
 
 void ijkff_avcodec_unlock()
 {
+    if (!g_ffmpeg_global_inited)
+        return;
     pthread_mutex_unlock(&g_avcodec_mutex);
 }

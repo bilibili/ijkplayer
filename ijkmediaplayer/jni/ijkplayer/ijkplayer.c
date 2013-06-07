@@ -27,6 +27,22 @@
 #include "ijkerror.h"
 #include "ffplayer.h"
 
+static int decode_interrupt_cb(void *ctx)
+{
+    VideoState *is = ctx;
+    return is->abort_request;
+}
+
+void ijkmp_global_init()
+{
+    ijkff_global_init();
+}
+
+void ijkmp_global_uninit()
+{
+    ijkff_global_uninit();
+}
+
 IjkMediaPlayer *ijkmp_create()
 {
     IjkMediaPlayer *mp = (IjkMediaPlayer *) malloc(sizeof(IjkMediaPlayer));
@@ -41,6 +57,11 @@ IjkMediaPlayer *ijkmp_create()
         return NULL;
     }
     memset(mp->ffplayer, 0, sizeof(FFPlayer));
+
+    FFPlayer *ffp = (FFPlayer *)&mp->ffplayer;
+    ijkff_reset(ffp);
+
+    ffp->decode_interrupt_cb = decode_interrupt_cb;
 
     return mp;
 }

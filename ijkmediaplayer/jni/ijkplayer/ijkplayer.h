@@ -36,6 +36,9 @@ typedef struct IjkMediaPlayer {
 // ref_count is 0 after open
 IjkMediaPlayer *ijkmp_create();
 
+void ijkmp_global_init();
+void ijkmp_global_uninit();
+
 // preferred to be called explicity, can be called multiple times
 // NOTE: ijkmp_shutdown may block thread
 void ijkmp_shutdown(IjkMediaPlayer *mp);

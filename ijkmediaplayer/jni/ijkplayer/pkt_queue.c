@@ -24,7 +24,7 @@
 
 #include "pkt_queue.h"
 
-static AVPacket g_flush_pkt;
+static AVPacket flush_pkt;
 
 int packet_queue_put(PacketQueue *q, AVPacket *pkt);
 
@@ -33,14 +33,14 @@ static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
     MyAVPacketList *pkt1;
 
     if (q->abort_request)
-        return -1;
+       return -1;
 
     pkt1 = av_malloc(sizeof(MyAVPacketList));
     if (!pkt1)
         return -1;
     pkt1->pkt = *pkt;
     pkt1->next = NULL;
-    if (pkt == &g_flush_pkt)
+    if (pkt == &flush_pkt)
         q->serial++;
     pkt1->serial = q->serial;
 
@@ -61,14 +61,14 @@ int packet_queue_put(PacketQueue *q, AVPacket *pkt)
     int ret;
 
     /* duplicate the packet */
-    if (pkt != &g_flush_pkt && av_dup_packet(pkt) < 0)
+    if (pkt != &flush_pkt && av_dup_packet(pkt) < 0)
         return -1;
 
     SDL_LockMutex(q->mutex);
     ret = packet_queue_put_private(q, pkt);
     SDL_UnlockMutex(q->mutex);
 
-    if (pkt != &g_flush_pkt && ret < 0)
+    if (pkt != &flush_pkt && ret < 0)
         av_free_packet(pkt);
 
     return ret;
@@ -122,7 +122,7 @@ void packet_queue_start(PacketQueue *q)
 {
     SDL_LockMutex(q->mutex);
     q->abort_request = 0;
-    packet_queue_put_private(q, &g_flush_pkt);
+    packet_queue_put_private(q, &flush_pkt);
     SDL_UnlockMutex(q->mutex);
 }
 
@@ -162,4 +162,9 @@ int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial)
     }
     SDL_UnlockMutex(q->mutex);
     return ret;
+}
+
+int packet_queue_put_flush_pkt(PacketQueue *q)
+{
+    return packet_queue_put(q, &flush_pkt);
 }
