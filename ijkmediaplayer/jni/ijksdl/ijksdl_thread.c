@@ -32,6 +32,12 @@ static void *SDL_RunThread(void *data)
     return NULL;
 }
 
+SDL_Thread *SDL_CreateThread(int (*fn)(void *), void *data)
+{
+    // FIXME: imeplement
+    return NULL;
+}
+
 SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data)
 {
     thread->func = fn;

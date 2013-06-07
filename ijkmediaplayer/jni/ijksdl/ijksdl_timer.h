@@ -21,22 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_THREAD_H
-#define IJKSDL__IJKSDL_THREAD_H
+#ifndef IJKSDL__IJKSDL_TIMER_H
+#define IJKSDL__IJKSDL_TIMER_H
 
-#include <stdint.h>
-#include <pthread.h>
+#include "ijksdl_stdinc.h"
 
-typedef struct SDL_Thread
-{
-    pthread_t id;
-    int (*func)(void *);
-    void *data;
-    int retval;
-} SDL_Thread;
-
-SDL_Thread *SDL_CreateThread(int (*fn)(void *), void *data);
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data);
-void SDL_WaitThread(SDL_Thread *thread, int *status);
+void SDL_Delay(Uint32 ms);
 
 #endif

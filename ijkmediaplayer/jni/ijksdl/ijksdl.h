@@ -2,7 +2,6 @@
  * ijksdl.h
  *****************************************************************************
  *
- * copyright (c) 2001 Fabrice Bellard
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -25,13 +24,13 @@
 #ifndef IJKSDL__IJKSDL_H
 #define IJKSDL__IJKSDL_H
 
+#include "ijksdl_audio.h"
+#include "ijksdl_event.h"
+#include "ijksdl_error.h"
 #include "ijksdl_mutex.h"
 #include "ijksdl_thread.h"
-#include "ijksdl_event.h"
-
-#include "ijksdl_rect.h"
+#include "ijksdl_timer.h"
 #include "ijksdl_overlay.h"
-
-#include "ijksdl_audio.h"
+#include "ijksdl_rect.h"
 
 #endif

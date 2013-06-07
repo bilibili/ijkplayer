@@ -162,4 +162,6 @@ typedef union SDL_Event
 #endif
 } SDL_Event;
 
+int SDL_PushEvent(SDL_Event * event);
+
 #endif

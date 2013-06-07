@@ -35,4 +35,6 @@ typedef uint32_t    Uint32;
 typedef int64_t     Sint64;
 typedef uint64_t    Uint64;
 
+char *SDL_getenv(const char *name);
+
 #endif

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_thread.h
+ * ijksdl_thread.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,22 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_THREAD_H
-#define IJKSDL__IJKSDL_THREAD_H
+#include "ijksdl_timer.h"
+#include <unistd.h>
 
-#include <stdint.h>
-#include <pthread.h>
-
-typedef struct SDL_Thread
+void SDL_Delay(Uint32 ms)
 {
-    pthread_t id;
-    int (*func)(void *);
-    void *data;
-    int retval;
-} SDL_Thread;
-
-SDL_Thread *SDL_CreateThread(int (*fn)(void *), void *data);
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data);
-void SDL_WaitThread(SDL_Thread *thread, int *status);
-
-#endif
+    sleep(ms * 1000);
+}
