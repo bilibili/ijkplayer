@@ -26,10 +26,12 @@
 #define IJKPLAYER__FFPLAY_DEF_H
 
 #include <inttypes.h>
+
 #include "libavformat/avformat.h"
 #include "libavcodec/avfft.h"
 #include "libswresample/swresample.h"
-#include "ijksdl/ijksdl.h"
+
+#include "ffplay_sdl.h"
 #include "ffplay_pkt_queue.h"
 #include "ffplay_cmdutils.h"
 

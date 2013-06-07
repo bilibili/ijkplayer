@@ -23,6 +23,7 @@
  */
 
 #include <string.h>
+#include "ffplay_sdl.h"
 #include "ffplayer.h"
 
 /* ffplay.c 1082 */

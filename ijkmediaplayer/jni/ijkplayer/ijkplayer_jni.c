@@ -79,7 +79,8 @@ static IjkMediaPlayer *set_media_player(JNIEnv* env, jobject thiz, IjkMediaPlaye
 static void
 IjkMediaPlayer_setDataSourceAndHeaders(
         JNIEnv *env, jobject thiz, jstring path,
-        jobjectArray keys, jobjectArray values) {
+        jobjectArray keys, jobjectArray values)
+{
     const char *c_path = NULL;
     IjkMediaPlayer *mp = get_media_player(env, thiz);
     JNI_CHECK_GOTO(path, env, "java/lang/IllegalArgumentException", "mpjni: setDataSource: null path", LABEL_RETURN);
