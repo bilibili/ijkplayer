@@ -591,14 +591,14 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         is->video_st = ic->streams[stream_index];
 
         packet_queue_start(&is->videoq);
-        is->video_tid = SDL_CreateThread(ijkff_video_thread, ffp);
+        is->video_tid = SDL_CreateThreadEx(&is->_video_tid, ijkff_video_thread, ffp);
         break;
     case AVMEDIA_TYPE_SUBTITLE:
         is->subtitle_stream = stream_index;
         is->subtitle_st = ic->streams[stream_index];
         packet_queue_start(&is->subtitleq);
 
-        is->subtitle_tid = SDL_CreateThread(ijkff_subtitle_thread, ffp);
+        is->subtitle_tid = SDL_CreateThreadEx(&is->_subtitle_tid, ijkff_subtitle_thread, ffp);
         break;
     default:
         break;

@@ -35,7 +35,6 @@ typedef struct SDL_Thread
     int retval;
 } SDL_Thread;
 
-SDL_Thread *SDL_CreateThread(int (*fn)(void *), void *data);
 SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data);
 void        SDL_WaitThread(SDL_Thread *thread, int *status);
 

@@ -115,7 +115,9 @@ enum {
 
 typedef struct VideoState {
     SDL_Thread *read_tid;
+    SDL_Thread _read_tid;
     SDL_Thread *video_tid;
+    SDL_Thread _video_tid;
     AVInputFormat *iformat;
     int no_background;
     int abort_request;
@@ -180,6 +182,7 @@ typedef struct VideoState {
     double last_vis_time;
 
     SDL_Thread *subtitle_tid;
+    SDL_Thread _subtitle_tid;
     int subtitle_stream;
     int subtitle_stream_changed;
     AVStream *subtitle_st;
