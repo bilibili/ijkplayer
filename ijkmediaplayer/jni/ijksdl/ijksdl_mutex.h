@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_thread.h
+ * ijksdl_mutex.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,21 +21,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_THREAD_H
-#define IJKSDL__IJKSDL_THREAD_H
+#ifndef IJKSDL__IJKSDL_MUTEX_H
+#define IJKSDL__IJKSDL_MUTEX_H
 
 #include <stdint.h>
 #include <pthread.h>
 
-typedef struct SDL_Thread
-{
-    pthread_t id;
-    int (*func)(void *);
-    void *data;
-    int retval;
-} SDL_Thread;
+#define SDL_MUTEX_TIMEDOUT  1
+#define SDL_MUTEX_MAXWAIT   (~(uint32_t)0)
 
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data);
-void SDL_WaitThread(SDL_Thread *thread, int *status);
+typedef struct SDL_mutex {
+    pthread_mutex_t id;
+} SDL_mutex;
+
+SDL_mutex  *SDL_CreateMutex(void);
+void        SDL_DestroyMutex(SDL_mutex *mutex);
+int         SDL_LockMutex(SDL_mutex *mutex);
+int         SDL_UnlockMutex(SDL_mutex *mutex);
+
+typedef struct SDL_cond {
+    pthread_cond_t id;
+} SDL_cond;
+
+SDL_cond   *SDL_CreateCond(void);
+void        SDL_DestroyCond(SDL_cond *cond);
+int         SDL_CondSignal(SDL_cond *cond);
+int         SDL_CondBroadcast(SDL_cond *cond);
+int         SDL_CondWaitTimeout(SDL_cond *cond, SDL_mutex *mutex, uint32_t ms);
+int         SDL_CondWait(SDL_cond *cond, SDL_mutex *mutex);
 
 #endif
+

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_thread.h
+ * ijksdl_endian.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,21 +21,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_THREAD_H
-#define IJKSDL__IJKSDL_THREAD_H
+#ifndef IJKSDL__IJKSDL_ENDIAN_H
+#define IJKSDL__IJKSDL_ENDIAN_H
 
-#include <stdint.h>
-#include <pthread.h>
+#define SDL_LIL_ENDIAN  1234
+#define SDL_BIG_ENDIAN  4321
 
-typedef struct SDL_Thread
-{
-    pthread_t id;
-    int (*func)(void *);
-    void *data;
-    int retval;
-} SDL_Thread;
-
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data);
-void SDL_WaitThread(SDL_Thread *thread, int *status);
+#ifndef SDL_BYTEORDER           /* Not defined in SDL_config.h? */
+#ifdef __linux__
+#include <endian.h>
+#define SDL_BYTEORDER  __BYTE_ORDER
+#else /* __linux __ */
+#if defined(__hppa__) || \
+    defined(__m68k__) || defined(mc68000) || defined(_M_M68K) || \
+    (defined(__MIPS__) && defined(__MISPEB__)) || \
+    defined(__ppc__) || defined(__POWERPC__) || defined(_M_PPC) || \
+    defined(__sparc__)
+#define SDL_BYTEORDER   SDL_BIG_ENDIAN
+#else
+#define SDL_BYTEORDER   SDL_LIL_ENDIAN
+#endif
+#endif /* __linux __ */
+#endif /* !SDL_BYTEORDER */
 
 #endif

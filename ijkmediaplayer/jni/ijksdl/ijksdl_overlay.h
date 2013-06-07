@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_thread.h
+ * ijksdl_overlay.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,21 +21,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_THREAD_H
-#define IJKSDL__IJKSDL_THREAD_H
+#ifndef IJKSDL__IJKSDL_OVERLAY_H
+#define IJKSDL__IJKSDL_OVERLAY_H
 
-#include <stdint.h>
-#include <pthread.h>
+#include "ijksdl_stdinc.h"
 
-typedef struct SDL_Thread
-{
-    pthread_t id;
-    int (*func)(void *);
-    void *data;
-    int retval;
-} SDL_Thread;
-
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data);
-void SDL_WaitThread(SDL_Thread *thread, int *status);
+typedef struct SDL_Overlay {
+    Uint32    format;
+    int       w, h;
+    int       planes;
+    Uint16   *pitches;
+    Uint8   **pixels;
+    Uint32    hw_overlay:1;
+} SDL_Overlay;
 
 #endif

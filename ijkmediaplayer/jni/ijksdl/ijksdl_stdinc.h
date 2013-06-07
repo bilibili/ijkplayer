@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_thread.h
+ * ijksdl_stdinc.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,21 +21,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_THREAD_H
-#define IJKSDL__IJKSDL_THREAD_H
+#ifndef IJKSDL__IJKSDL_STDINC_H
+#define IJKSDL__IJKSDL_STDINC_H
 
 #include <stdint.h>
-#include <pthread.h>
 
-typedef struct SDL_Thread
-{
-    pthread_t id;
-    int (*func)(void *);
-    void *data;
-    int retval;
-} SDL_Thread;
-
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data);
-void SDL_WaitThread(SDL_Thread *thread, int *status);
+typedef int8_t      Sint8;
+typedef uint8_t     Uint8;
+typedef int16_t     Sint16;
+typedef uint16_t    Uint16;
+typedef int32_t     Sint32;
+typedef uint32_t    Uint32;
+typedef int64_t     Sint64;
+typedef uint64_t    Uint64;
 
 #endif
