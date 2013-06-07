@@ -28,6 +28,7 @@ LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
 
 LOCAL_SRC_FILES += ffplay_pkt_queue.c
 LOCAL_SRC_FILES += ffplayer.c
+LOCAL_SRC_FILES += thread_demux.c
 LOCAL_SRC_FILES += ijkplayer.c
 LOCAL_SRC_FILES += ijkplayer_jni.c
 

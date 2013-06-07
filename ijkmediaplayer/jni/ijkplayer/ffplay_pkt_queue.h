@@ -54,6 +54,6 @@ void packet_queue_flush(PacketQueue *q);
 int packet_queue_put(PacketQueue *q, AVPacket *pkt);
 int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial);
 
-int packet_queue_put_flush_pkt(PacketQueue *q);
+AVPacket *packet_get_flush_pkt();
 
 #endif

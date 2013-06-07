@@ -40,7 +40,7 @@ typedef struct FFPlayer {
 
     /* ffplay options specified by the user */
     // AVInputFormat  *file_iformat;
-    // const char     *input_filename;
+    char           *input_filename;
     // const char     *window_title;
     // int             fs_screen_width;
     // int             fs_screen_height;
@@ -57,7 +57,7 @@ typedef struct FFPlayer {
     int             show_status;
     // int             av_sync_type = AV_SYNC_AUDIO_MASTER;
     int64_t         start_time;
-    // int64_t         duration = AV_NOPTS_VALUE;
+    int64_t         duration;
     // int             workaround_bugs = 1;
     // int             fast = 0;
     int             genpts;
@@ -68,10 +68,10 @@ typedef struct FFPlayer {
     // enum AVDiscard  skip_loop_filter = AVDISCARD_DEFAULT;
     // int             error_concealment = 3;
     // int             decoder_reorder_pts = -1;
-    // int             autoexit;
+    int             autoexit;
     // int             exit_on_keydown;
     // int             exit_on_mousedown;
-    // int             loop = 1;
+    int             loop;
     // int             framedrop = -1;
     int             infinite_buffer;
     enum ShowMode   show_mode;
@@ -98,6 +98,8 @@ inline static void ijkff_reset(FFPlayer *ffp)
     av_dict_free(&ffp->codec_opts);
 
     /* ffplay options specified by the user */
+    free(ffp->input_filename);
+    ffp->input_filename         = NULL;
     ffp->audio_disable          = 0;
     ffp->video_disable          = 0;
     ffp->subtitle_disable       = 0;
@@ -107,7 +109,10 @@ inline static void ijkff_reset(FFPlayer *ffp)
     ffp->seek_by_bytes          = -1;
     ffp->show_status            = 1;
     ffp->start_time             = AV_NOPTS_VALUE;
+    ffp->duration               = AV_NOPTS_VALUE;
     ffp->genpts                 = 0;
+    ffp->autoexit               = 0;
+    ffp->loop                   = 1;
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
 

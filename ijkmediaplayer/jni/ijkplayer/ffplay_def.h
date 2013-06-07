@@ -34,8 +34,8 @@
 #endif
 #define CONFIG_AVFILTER 0
 
-// #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
-// #define MIN_FRAMES 5
+#define MAX_QUEUE_SIZE (15 * 1024 * 1024)
+#define MIN_FRAMES 5
 
 /* SDL audio buffer size, in samples. Should be small to have precise
    A/V sync as SDL does not have hardware buffer fullness info. */
@@ -236,5 +236,7 @@ typedef struct VideoState {
 #define FF_QUIT_EVENT    (SDL_USEREVENT + 2)
 
 // static SDL_Surface *screen;
+
+void print_error(const char *filename, int err);
 
 #endif

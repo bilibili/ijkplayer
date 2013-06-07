@@ -164,7 +164,7 @@ int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial)
     return ret;
 }
 
-int packet_queue_put_flush_pkt(PacketQueue *q)
+AVPacket *packet_get_flush_pkt()
 {
-    return packet_queue_put(q, &flush_pkt);
+    return &flush_pkt;
 }

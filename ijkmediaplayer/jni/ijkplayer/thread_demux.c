@@ -25,11 +25,10 @@
 #include <string.h>
 #include "ffplayer.h"
 
-#if 0
-/* this thread gets the stream from the disk or the network */
 static int read_thread(void *arg)
 {
-    VideoState *is = arg;
+    FFPlayer *ffp = arg;
+    VideoState *is = &ffp->is;
     AVFormatContext *ic = NULL;
     int err, i, ret;
     int st_index[AVMEDIA_TYPE_NB];
@@ -47,25 +46,25 @@ static int read_thread(void *arg)
     is->last_subtitle_stream = is->subtitle_stream = -1;
 
     ic = avformat_alloc_context();
-    ic->interrupt_callback.callback = decode_interrupt_cb;
+    ic->interrupt_callback.callback = ffp->decode_interrupt_cb;
     ic->interrupt_callback.opaque = is;
-    err = avformat_open_input(&ic, is->filename, is->iformat, &format_opts);
+    err = avformat_open_input(&ic, is->filename, is->iformat, &ffp->format_opts);
     if (err < 0) {
         print_error(is->filename, err);
         ret = -1;
         goto fail;
     }
-    if ((t = av_dict_get(format_opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
+    if ((t = av_dict_get(ffp->format_opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
         av_log(NULL, AV_LOG_ERROR, "Option %s not found.\n", t->key);
         ret = AVERROR_OPTION_NOT_FOUND;
         goto fail;
     }
     is->ic = ic;
 
-    if (genpts)
+    if (ffp->genpts)
         ic->flags |= AVFMT_FLAG_GENPTS;
 
-    opts = setup_find_stream_info_opts(ic, codec_opts);
+    opts = setup_find_stream_info_opts(ic, ffp->codec_opts);
     orig_nb_streams = ic->nb_streams;
 
     err = avformat_find_stream_info(ic, opts);
@@ -81,23 +80,23 @@ static int read_thread(void *arg)
     if (ic->pb)
         ic->pb->eof_reached = 0; // FIXME hack, ffplay maybe should not use url_feof() to test for the end
 
-    if (seek_by_bytes < 0)
-        seek_by_bytes = !!(ic->iformat->flags & AVFMT_TS_DISCONT);
+    if (ffp->seek_by_bytes < 0)
+        ffp->seek_by_bytes = !!(ic->iformat->flags & AVFMT_TS_DISCONT);
 
     is->max_frame_duration = (ic->iformat->flags & AVFMT_TS_DISCONT) ? 10.0 : 3600.0;
 
     /* if seeking requested, we execute it */
-    if (start_time != AV_NOPTS_VALUE) {
+    if (ffp->start_time != AV_NOPTS_VALUE) {
         int64_t timestamp;
 
-        timestamp = start_time;
+        timestamp = ffp->start_time;
         /* add the stream start time */
         if (ic->start_time != AV_NOPTS_VALUE)
             timestamp += ic->start_time;
         ret = avformat_seek_file(ic, -1, INT64_MIN, timestamp, INT64_MAX, 0);
         if (ret < 0) {
             fprintf(stderr, "%s: could not seek to position %0.3f\n",
-                    is->filename, (double) timestamp / AV_TIME_BASE);
+                    is->filename, (double)timestamp / AV_TIME_BASE);
         }
     }
 
@@ -105,29 +104,29 @@ static int read_thread(void *arg)
 
     for (i = 0; i < ic->nb_streams; i++)
         ic->streams[i]->discard = AVDISCARD_ALL;
-    if (!video_disable)
+    if (!ffp->video_disable)
         st_index[AVMEDIA_TYPE_VIDEO] =
-                av_find_best_stream(ic, AVMEDIA_TYPE_VIDEO,
-                        wanted_stream[AVMEDIA_TYPE_VIDEO], -1, NULL, 0);
-    if (!audio_disable)
+            av_find_best_stream(ic, AVMEDIA_TYPE_VIDEO,
+                                ffp->wanted_stream[AVMEDIA_TYPE_VIDEO], -1, NULL, 0);
+    if (!ffp->audio_disable)
         st_index[AVMEDIA_TYPE_AUDIO] =
-                av_find_best_stream(ic, AVMEDIA_TYPE_AUDIO,
-                        wanted_stream[AVMEDIA_TYPE_AUDIO],
-                        st_index[AVMEDIA_TYPE_VIDEO],
-                        NULL, 0);
-    if (!video_disable && !subtitle_disable)
+            av_find_best_stream(ic, AVMEDIA_TYPE_AUDIO,
+                                ffp->wanted_stream[AVMEDIA_TYPE_AUDIO],
+                                st_index[AVMEDIA_TYPE_VIDEO],
+                                NULL, 0);
+    if (!ffp->video_disable && !ffp->subtitle_disable)
         st_index[AVMEDIA_TYPE_SUBTITLE] =
-                av_find_best_stream(ic, AVMEDIA_TYPE_SUBTITLE,
-                        wanted_stream[AVMEDIA_TYPE_SUBTITLE],
-                        (st_index[AVMEDIA_TYPE_AUDIO] >= 0 ?
-                                                             st_index[AVMEDIA_TYPE_AUDIO] :
-                                                             st_index[AVMEDIA_TYPE_VIDEO]),
-                        NULL, 0);
-    if (show_status) {
+            av_find_best_stream(ic, AVMEDIA_TYPE_SUBTITLE,
+                                ffp->wanted_stream[AVMEDIA_TYPE_SUBTITLE],
+                                (st_index[AVMEDIA_TYPE_AUDIO] >= 0 ?
+                                 st_index[AVMEDIA_TYPE_AUDIO] :
+                                 st_index[AVMEDIA_TYPE_VIDEO]),
+                                NULL, 0);
+    if (ffp->show_status) {
         av_dump_format(ic, 0, is->filename, 0);
     }
 
-    is->show_mode = show_mode;
+    is->show_mode = ffp->show_mode;
 
     /* open the streams */
     if (st_index[AVMEDIA_TYPE_AUDIO] >= 0) {
@@ -151,8 +150,8 @@ static int read_thread(void *arg)
         goto fail;
     }
 
-    if (infinite_buffer < 0 && is->realtime)
-        infinite_buffer = 1;
+    if (ffp->infinite_buffer < 0 && is->realtime)
+        ffp->infinite_buffer = 1;
 
     for (;;) {
         if (is->abort_request)
@@ -164,20 +163,20 @@ static int read_thread(void *arg)
             else
                 av_read_play(ic);
         }
-#if CONFIG_RTSP_DEMUXER || CONFIG_MMSH_PROTOCOL
+
         if (is->paused &&
                 (!strcmp(ic->iformat->name, "rtsp") ||
-                        (ic->pb && !strncmp(input_filename, "mmsh:", 5)))) {
+                 (ic->pb && !strncmp(ffp->input_filename, "mmsh:", 5)))) {
             /* wait 10 ms to avoid trying to get another packet */
             /* XXX: horrible */
             SDL_Delay(10);
             continue;
         }
-#endif
+
         if (is->seek_req) {
             int64_t seek_target = is->seek_pos;
-            int64_t seek_min = is->seek_rel > 0 ? seek_target - is->seek_rel + 2 : INT64_MIN;
-            int64_t seek_max = is->seek_rel < 0 ? seek_target - is->seek_rel - 2 : INT64_MAX;
+            int64_t seek_min    = is->seek_rel > 0 ? seek_target - is->seek_rel + 2: INT64_MIN;
+            int64_t seek_max    = is->seek_rel < 0 ? seek_target - is->seek_rel - 2: INT64_MAX;
 // FIXME the +-2 is due to rounding being not done in the correct direction in generation
 //      of the seek_pos/seek_rel variables
 
@@ -187,20 +186,20 @@ static int read_thread(void *arg)
             } else {
                 if (is->audio_stream >= 0) {
                     packet_queue_flush(&is->audioq);
-                    packet_queue_put(&is->audioq, &flush_pkt);
+                    packet_queue_put(&is->audioq, packet_get_flush_pkt());
                 }
                 if (is->subtitle_stream >= 0) {
                     packet_queue_flush(&is->subtitleq);
-                    packet_queue_put(&is->subtitleq, &flush_pkt);
+                    packet_queue_put(&is->subtitleq, packet_get_flush_pkt());
                 }
                 if (is->video_stream >= 0) {
                     packet_queue_flush(&is->videoq);
-                    packet_queue_put(&is->videoq, &flush_pkt);
+                    packet_queue_put(&is->videoq, packet_get_flush_pkt());
                 }
                 if (is->seek_flags & AVSEEK_FLAG_BYTE) {
-                    update_external_clock_pts(is, NAN);
+                   update_external_clock_pts(is, NAN);
                 } else {
-                    update_external_clock_pts(is, seek_target / (double) AV_TIME_BASE);
+                   update_external_clock_pts(is, seek_target / (double)AV_TIME_BASE);
                 }
             }
             is->seek_req = 0;
@@ -214,11 +213,11 @@ static int read_thread(void *arg)
         }
 
         /* if the queue are full, no need to read more */
-        if (infinite_buffer < 1 &&
-                (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
-                        || ((is->audioq.nb_packets > MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
-                                && (is->videoq.nb_packets > MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)
-                                && (is->subtitleq.nb_packets > MIN_FRAMES || is->subtitle_stream < 0 || is->subtitleq.abort_request)))) {
+        if (ffp->infinite_buffer<1 &&
+              (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
+            || (   (is->audioq   .nb_packets > MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
+                && (is->videoq   .nb_packets > MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)
+                && (is->subtitleq.nb_packets > MIN_FRAMES || is->subtitle_stream < 0 || is->subtitleq.abort_request)))) {
             /* wait 10 ms */
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
@@ -234,7 +233,7 @@ static int read_thread(void *arg)
                 packet_queue_put(&is->videoq, pkt);
             }
             if (is->audio_stream >= 0 &&
-                    is->audio_st->codec->codec->capabilities & CODEC_CAP_DELAY) {
+                (is->audio_st->codec->codec->capabilities & CODEC_CAP_DELAY)) {
                 av_init_packet(pkt);
                 pkt->data = NULL;
                 pkt->size = 0;
@@ -243,14 +242,14 @@ static int read_thread(void *arg)
             }
             SDL_Delay(10);
             if (is->audioq.size + is->videoq.size + is->subtitleq.size == 0) {
-                if (loop != 1 && (!loop || --loop)) {
-                    stream_seek(is, start_time != AV_NOPTS_VALUE ? start_time : 0, 0, 0);
-                } else if (autoexit) {
+                if (ffp->loop != 1 && (!ffp->loop || --ffp->loop)) {
+                    stream_seek(is, ffp->start_time != AV_NOPTS_VALUE ? ffp->start_time : 0, 0, 0);
+                } else if (ffp->autoexit) {
                     ret = AVERROR_EOF;
                     goto fail;
                 }
             }
-            eof = 0;
+            eof=0;
             continue;
         }
         ret = av_read_frame(ic, pkt);
@@ -265,11 +264,11 @@ static int read_thread(void *arg)
             continue;
         }
         /* check if packet is in play range specified by user, then queue, otherwise discard */
-        pkt_in_play_range = duration == AV_NOPTS_VALUE ||
+        pkt_in_play_range = ffp->duration == AV_NOPTS_VALUE ||
                 (pkt->pts - ic->streams[pkt->stream_index]->start_time) *
-                        av_q2d(ic->streams[pkt->stream_index]->time_base) -
-                        (double) (start_time != AV_NOPTS_VALUE ? start_time : 0) / 1000000
-                        <= ((double) duration / 1000000);
+                av_q2d(ic->streams[pkt->stream_index]->time_base) -
+                (double)(ffp->start_time != AV_NOPTS_VALUE ? ffp->start_time : 0) / 1000000
+                <= ((double)ffp->duration / 1000000);
         if (pkt->stream_index == is->audio_stream && pkt_in_play_range) {
             packet_queue_put(&is->audioq, pkt);
         } else if (pkt->stream_index == is->video_stream && pkt_in_play_range) {
@@ -286,7 +285,7 @@ static int read_thread(void *arg)
     }
 
     ret = 0;
-fail:
+ fail:
     /* close each stream */
     if (is->audio_stream >= 0)
         stream_component_close(is, is->audio_stream);
@@ -308,4 +307,3 @@ fail:
     SDL_DestroyMutex(wait_mutex);
     return 0;
 }
-#endif
