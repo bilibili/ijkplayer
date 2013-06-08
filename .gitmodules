@@ -1,3 +1,4 @@
 [submodule "ffmpeg-armv7a"]
 	path = ffmpeg-armv7a
-	url = git://source.ffmpeg.org/ffmpeg.git
+	url = git://github.com/bbcallen/FFmpeg.git
+	branch = scratch-1.2.1-20130608-001
