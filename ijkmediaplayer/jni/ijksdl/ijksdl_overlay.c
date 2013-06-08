@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_events.c
+ * ijksdl_overlay.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,18 +21,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijksdl_events.h"
+#include "ijksdl_overlay.h"
 
-int SDL_PeepEvents(SDL_Event * events, int numevents,
-        SDL_eventaction action,
-        Uint32 minType, Uint32 maxType)
+int  SDL_LockYUVOverlay(SDL_Overlay *overlay)
 {
     // FIXME: implement
     return 0;
 }
 
-int SDL_PushEvent(SDL_Event * event)
+void SDL_UnlockYUVOverlay(SDL_Overlay *overlay)
 {
     // FIXME: implement
-    return 0;
 }

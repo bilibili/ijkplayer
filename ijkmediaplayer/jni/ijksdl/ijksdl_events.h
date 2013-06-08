@@ -176,6 +176,12 @@ typedef enum
 } SDL_eventaction;
 /* SDL_events.h 543 */
 
+/* SDL_events.h 568 */
+int SDL_PeepEvents(SDL_Event * events, int numevents,
+                   SDL_eventaction action,
+                   Uint32 minType, Uint32 maxType);
+
+/* SDL_events.h 624 */
 int SDL_PushEvent(SDL_Event * event);
 
 #endif

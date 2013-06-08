@@ -35,4 +35,7 @@ typedef struct SDL_Overlay {
     Uint32    hw_overlay:1;
 } SDL_Overlay;
 
+int  SDL_LockYUVOverlay(SDL_Overlay *overlay);
+void SDL_UnlockYUVOverlay(SDL_Overlay *overlay);
+
 #endif
