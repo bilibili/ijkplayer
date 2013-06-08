@@ -59,9 +59,7 @@ typedef struct FFPlayer {
     int             subtitle_disable;
     int             wanted_stream[AVMEDIA_TYPE_NB];
     int             seek_by_bytes;
-#if 0
     int             display_disable;
-#endif
     int             show_status;
 #if 0
     int             av_sync_type = AV_SYNC_AUDIO_MASTER;
@@ -90,8 +88,8 @@ typedef struct FFPlayer {
     char           *audio_codec_name;
     char           *subtitle_codec_name;
     char           *video_codec_name;
+    double          rdftspeed;
 #if 0
-    double          rdftspeed = 0.02;
     int64_t         cursor_last_shown;
     int             cursor_hidden = 0;
 #endif
@@ -131,6 +129,7 @@ inline static void ijkff_reset(FFPlayer *ffp)
     ffp->wanted_stream[AVMEDIA_TYPE_VIDEO]      = -1;
     ffp->wanted_stream[AVMEDIA_TYPE_SUBTITLE]   = -1;
     ffp->seek_by_bytes          = -1;
+    ffp->display_disable        = 0;
     ffp->show_status            = 1;
     ffp->start_time             = AV_NOPTS_VALUE;
     ffp->duration               = AV_NOPTS_VALUE;
@@ -152,6 +151,7 @@ inline static void ijkff_reset(FFPlayer *ffp)
     IJKFF_SAFE_FREE(ffp->audio_codec_name);
     IJKFF_SAFE_FREE(ffp->subtitle_codec_name);
     IJKFF_SAFE_FREE(ffp->video_codec_name);
+    ffp->rdftspeed              = 0.02;
 #if CONFIG_AVFILTER
     ffp->vfilters               = NULL;
 #endif
