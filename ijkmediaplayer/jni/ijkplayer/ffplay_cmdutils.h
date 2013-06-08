@@ -25,7 +25,7 @@
 #ifndef IJKPLAYER__FFPLAY_CMDUTILS_H
 #define IJKPLAYER__FFPLAY_CMDUTILS_H
 
-#include <libavformat/avformat.h>
+#include "ffplay_def.h"
 
 void            print_error(const char *filename, int err);
 AVDictionary  **setup_find_stream_info_opts(AVFormatContext *s, AVDictionary *codec_opts);

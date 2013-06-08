@@ -25,15 +25,8 @@
 #ifndef IJKPLAYER__FFPLAY_DEF_H
 #define IJKPLAYER__FFPLAY_DEF_H
 
-#include <inttypes.h>
-
-#include "libavformat/avformat.h"
-#include "libavcodec/avfft.h"
-#include "libswresample/swresample.h"
-
-#include "ffplay_sdl.h"
+#include "ffplay_ffinc.h"
 #include "ffplay_pkt_queue.h"
-#include "ffplay_cmdutils.h"
 
 #ifdef CONFIG_AVFILTER
 #undef CONFIG_AVFILTER
@@ -72,8 +65,7 @@
 
 // #define CURSOR_HIDE_DELAY 1000000
 
-// static int64_t sws_flags = SWS_BICUBIC;
-
+/* PLACEHOLD: sws_flags has been moved to ffplayer.h */
 /* PLACEHOLD: MyAVPacketList has been moved to pkt_queue.* */
 /* PLACEHOLD: PacketQueue has been moved to pkt_queue.* */
 

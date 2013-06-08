@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ffplay.h
+ * ffplay_ffinc.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,10 +21,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__FFPLAY_H
-#define IJKPLAYER__FFPLAY_H
+#ifndef IJKPLAYER__FFPLAY_INC_H
+#define IJKPLAYER__FFPLAY_INC_H
 
-#include "ffplay_def.h"
-#include "ffplay_pkt_queue.h"
+#include "libavutil/colorspace.h"
+#include "libavformat/avformat.h"
+#include "libavcodec/avfft.h"
+#include "libswscale/swscale.h"
+#include "libavutil/opt.h"
+#include "libswresample/swresample.h"
+#include "ijksdl/ijksdl.h"
 
 #endif

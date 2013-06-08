@@ -25,8 +25,7 @@
 #ifndef IJKPLAYER__FFPLAY_PKT_QUEUE_H
 #define IJKPLAYER__FFPLAY_PKT_QUEUE_H
 
-#include <ijksdl/ijksdl_mutex.h>
-#include <libavformat/avformat.h>
+#include "ffplay_ffinc.h"
 
 typedef struct MyAVPacketList {
     AVPacket pkt;

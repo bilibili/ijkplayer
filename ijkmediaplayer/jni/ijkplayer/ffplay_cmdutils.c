@@ -23,7 +23,7 @@
  */
 
 #include "ffplay_cmdutils.h"
-#include <libavutil/opt.h>
+#include "ffplay_def.h"
 
 /* cmdutils.c 942 */
 void print_error(const char *filename, int err)

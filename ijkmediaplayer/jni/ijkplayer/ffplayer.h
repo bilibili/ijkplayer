@@ -24,8 +24,9 @@
 #ifndef IJKPLAYER__FFPLAYER_H
 #define IJKPLAYER__FFPLAYER_H
 
-#include <stdint.h>
-#include "ffplay.h"
+#include "ffplay_def.h"
+#include "ffplay_pkt_queue.h"
+#include "ffplay_clock.h"
 
 /*----------------------------------------
  *
@@ -37,6 +38,7 @@ typedef struct FFPlayer {
     /* format/codec options */
     AVDictionary   *format_opts;
     AVDictionary   *codec_opts;
+    AVDictionary   *sws_opts;
 
     /* ffplay options specified by the user */
 #if 0
@@ -75,18 +77,14 @@ typedef struct FFPlayer {
     enum AVDiscard  skip_idct;
     enum AVDiscard  skip_loop_filter;
     int             error_concealment;
-#if 0
-    int             decoder_reorder_pts = -1;
-#endif
+    int             decoder_reorder_pts;
     int             autoexit;
 #if 0
     int             exit_on_keydown;
     int             exit_on_mousedown;
 #endif
     int             loop;
-#if 0
-    int             framedrop = -1;
-#endif
+    int             framedrop;
     int             infinite_buffer;
     enum ShowMode   show_mode;
     char           *audio_codec_name;
@@ -100,6 +98,8 @@ typedef struct FFPlayer {
 #if CONFIG_AVFILTER
     char           *vfilters;
 #endif
+
+    int64_t         sws_flags;
 
     /* current context */
 #if 0
@@ -120,6 +120,7 @@ inline static void ijkff_reset(FFPlayer *ffp)
     /* format/codec options */
     av_dict_free(&ffp->format_opts);
     av_dict_free(&ffp->codec_opts);
+    av_dict_free(&ffp->sws_opts);
 
     /* ffplay options specified by the user */
     IJKFF_SAFE_FREE(ffp->input_filename);
@@ -142,8 +143,10 @@ inline static void ijkff_reset(FFPlayer *ffp)
     ffp->skip_idct              = AVDISCARD_DEFAULT;
     ffp->skip_loop_filter       = AVDISCARD_DEFAULT;
     ffp->error_concealment      = 3;
+    ffp->decoder_reorder_pts    = -1;
     ffp->autoexit               = 0;
     ffp->loop                   = 1;
+    ffp->framedrop              = -1;
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
     IJKFF_SAFE_FREE(ffp->audio_codec_name);
@@ -152,6 +155,8 @@ inline static void ijkff_reset(FFPlayer *ffp)
 #if CONFIG_AVFILTER
     ffp->vfilters               = NULL;
 #endif
+
+    ffp->sws_flags              = SWS_BICUBIC;
 
     /* current context */
     ffp->audio_callback_time    = 0;
