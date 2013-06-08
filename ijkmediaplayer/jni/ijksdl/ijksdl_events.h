@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_event.h
+ * ijksdl_events.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,11 +21,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_EVENT_H
-#define IJKSDL__IJKSDL_EVENT_H
+#ifndef IJKSDL__IJKSDL_EVENTS_H
+#define IJKSDL__IJKSDL_EVENTS_H
 
 #include "ijksdl_stdinc.h"
 
+/* SDL_events.h 55 */
 typedef enum
 {
     SDL_FIRSTEVENT     = 0,     /**< Unused (do not remove) */
@@ -118,8 +119,9 @@ typedef enum
      */
     SDL_LASTEVENT    = 0xFFFF
 } SDL_EventType;
+/* SDL_events.h 55 */
 
-/* event.user.* */
+/* SDL_events.h 463 */
 typedef struct SDL_UserEvent
 {
     Uint32 type;            /**< ::SDL_USEREVENT through ::SDL_NUMEVENTS-1 */
@@ -129,7 +131,9 @@ typedef struct SDL_UserEvent
     void    *data1;         /**< User defined data pointer */
     void    *data2;         /**< User defined data pointer */
 } SDL_UserEvent;
+/* SDL_events.h 463 */
 
+/* SDL_events.h 493 */
 typedef union SDL_Event
 {
     Uint32 type;                    /**< Event type, shared with all events */
@@ -161,6 +165,16 @@ typedef union SDL_Event
     SDL_DropEvent drop;             /**< Drag and drop event data */
 #endif
 } SDL_Event;
+/* SDL_events.h 493 */
+
+/* SDL_events.h 543 */
+typedef enum
+{
+    SDL_ADDEVENT,
+    SDL_PEEKEVENT,
+    SDL_GETEVENT
+} SDL_eventaction;
+/* SDL_events.h 543 */
 
 int SDL_PushEvent(SDL_Event * event);
 

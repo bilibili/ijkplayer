@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_event.c
+ * ijksdl_events.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijksdl_event.h"
+#include "ijksdl_events.h"
 
 int SDL_PushEvent(SDL_Event * event)
 {
