@@ -27,19 +27,47 @@
 #include <stdbool.h>
 
 static bool g_ffmpeg_global_inited = false;
-static pthread_mutex_t g_avcodec_mutex;
+
+static int lockmgr(void **mtx, enum AVLockOp op)
+{
+   switch(op) {
+      case AV_LOCK_CREATE:
+          *mtx = SDL_CreateMutex();
+          if(!*mtx)
+              return 1;
+          return 0;
+      case AV_LOCK_OBTAIN:
+          return !!SDL_LockMutex(*mtx);
+      case AV_LOCK_RELEASE:
+          return !!SDL_UnlockMutex(*mtx);
+      case AV_LOCK_DESTROY:
+          SDL_DestroyMutex(*mtx);
+          return 0;
+   }
+   return 1;
+}
 
 void ijkff_global_init()
 {
     if (g_ffmpeg_global_inited)
         return;
 
-    pthread_mutex_init(&g_avcodec_mutex, NULL);
-
-    av_register_all();
+    /* register all codecs, demux and protocols */
     avcodec_register_all();
-
+#if CONFIG_AVDEVICE
+    avdevice_register_all();
+#endif
+#if CONFIG_AVFILTER
+    avfilter_register_all();
+#endif
+    av_register_all();
     avformat_network_init();
+
+    av_lockmgr_register(lockmgr);
+
+    /* FIXME: SDL_Init() */
+
+    packet_queue_global_init();
 
     g_ffmpeg_global_inited = true;
 }
@@ -49,20 +77,14 @@ void ijkff_global_uninit()
     if (!g_ffmpeg_global_inited)
         return;
 
-    pthread_mutex_destroy(&g_avcodec_mutex);
+    av_lockmgr_register(NULL);
+
+#if CONFIG_AVFILTER
+    avfilter_uninit();
+    av_freep(&vfilters);
+#endif
+    avformat_network_deinit();
+    /* FIXME: SDL_Quit(); */
+
     g_ffmpeg_global_inited = false;
-}
-
-void ijkff_avcodec_lock()
-{
-    if (!g_ffmpeg_global_inited)
-        return;
-    pthread_mutex_lock(&g_avcodec_mutex);
-}
-
-void ijkff_avcodec_unlock()
-{
-    if (!g_ffmpeg_global_inited)
-        return;
-    pthread_mutex_unlock(&g_avcodec_mutex);
 }

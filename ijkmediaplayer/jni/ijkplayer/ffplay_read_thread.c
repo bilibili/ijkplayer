@@ -379,7 +379,7 @@ static int audio_decode_frame(VideoState *is)
         if ((new_packet = packet_queue_get(&is->audioq, pkt, 1, &is->audio_pkt_temp_serial)) < 0)
             return -1;
 
-        if (pkt->data == packet_get_flush_pkt()->data) {
+        if (pkt->data == flush_pkt.data) {
             avcodec_flush_buffers(dec);
             flush_complete = 0;
         }
@@ -874,15 +874,15 @@ int ijkff_read_thread(void *arg)
             } else {
                 if (is->audio_stream >= 0) {
                     packet_queue_flush(&is->audioq);
-                    packet_queue_put(&is->audioq, packet_get_flush_pkt());
+                    packet_queue_put(&is->audioq, &flush_pkt);
                 }
                 if (is->subtitle_stream >= 0) {
                     packet_queue_flush(&is->subtitleq);
-                    packet_queue_put(&is->subtitleq, packet_get_flush_pkt());
+                    packet_queue_put(&is->subtitleq, &flush_pkt);
                 }
                 if (is->video_stream >= 0) {
                     packet_queue_flush(&is->videoq);
-                    packet_queue_put(&is->videoq, packet_get_flush_pkt());
+                    packet_queue_put(&is->videoq, &flush_pkt);
                 }
                 if (is->seek_flags & AVSEEK_FLAG_BYTE) {
                    update_external_clock_pts(is, NAN);

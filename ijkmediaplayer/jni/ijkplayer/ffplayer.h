@@ -142,22 +142,5 @@ inline static void ijkff_reset(FFPlayer *ffp)
 void ijkff_global_init();
 void ijkff_global_uninit();
 
-/*
- * ffmpeg api listed below must be locked
- *
- *  av_set_cpu_flags_mask();
- *  av_register_all();
- *  avcodec_register_all();
- *
- *  avcodec_open
- *  avcodec_open2
- *  avcodec_close
- *
- *  avformat_find_stream_info
- *  av_find_stream_info
- */
-void ijkff_avcodec_lock();
-void ijkff_avcodec_unlock();
-
 #endif
 
