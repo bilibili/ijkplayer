@@ -34,5 +34,5 @@ LOCAL_SRC_FILES += ijkplayer_jni.c
 LOCAL_STATIC_LIBRARIES := ijksdl
 LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil
 
-LOCAL_MODULE := ijkplayer2
+LOCAL_MODULE := ijkplayer
 include $(BUILD_SHARED_LIBRARY)
