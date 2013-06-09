@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_vout.h
+ * ijksdl_video.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,32 +21,44 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_VOUT_H
-#define IJKSDL__IJKSDL_VOUT_H
+#include "ijksdl_video.h"
 
-#include "ijksdl_stdinc.h"
-
-typedef struct SDL_Picture {
-    Uint32    format;
-    int       w, h;
-    int       planes;
-    Uint16   *pitches;
-    Uint8   **pixels;
-} SDL_Picture;
-
-typedef struct SDL_Vout
+void SDL_FreeSurface(SDL_Surface *surface)
 {
-    int32_t width;
-    int32_t height;
-    int32_t format;
-} SDL_Vout;
+    // FIXME: implement
+}
 
-SDL_Vout *SDL_VoutCreate();
-void      SDL_VoutFree(SDL_Vout *vout);
-int       SDL_VoutSetBuffersGeometry(SDL_Vout *vout, int32_t width, int32_t height, int32_t format);
-int       SDL_VoutRender(SDL_Vout *vout, SDL_Picture *pic);
+SDL_Overlay *SDL_CreateYUVOverlay(int width, int height,
+        Uint32 format, SDL_Surface *display)
+{
+    // FIXME: implement
+    return NULL;
+}
 
-int       SDL_VoutLockYUVPicture(SDL_Picture *pic);
-int       SDL_VoutUnlockYUVPicture(SDL_Picture *pic);
+SDL_Surface *SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
+{
+    // FIXME: implement
+    return NULL;
+}
 
-#endif
+int SDL_LockYUVOverlay(SDL_Overlay *overlay)
+{
+    // FIXME: implement
+    return 0;
+}
+
+void SDL_UnlockYUVOverlay(SDL_Overlay *overlay)
+{
+    // FIXME: implement
+}
+
+int SDL_DisplayYUVOverlay(SDL_Overlay *overlay, SDL_Rect *dstrect)
+{
+    // FIXME: implement
+    return 0;
+}
+
+void SDL_FreeYUVOverlay(SDL_Overlay *overlay)
+{
+    // FIXME: implement
+}

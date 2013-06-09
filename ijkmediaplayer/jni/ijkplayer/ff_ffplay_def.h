@@ -88,11 +88,7 @@ typedef struct PacketQueue {
 typedef struct VideoPicture {
     double pts; // presentation timestamp for this picture
     int64_t pos; // byte position in file
-#ifdef IJK_FFPLAY_MERGE
     SDL_Overlay *bmp;
-#else
-    SDL_Picture *bmp;
-#endif
     int width, height; /* source height & width */
     AVRational sample_aspect_ratio;
     int allocated;
@@ -333,8 +329,10 @@ typedef struct FFPlayer {
     const char *window_title;
     int fs_screen_width;
     int fs_screen_height;
-    int default_width = 640;
-    int default_height = 480;
+#endif
+    int default_width;
+    int default_height;
+#ifdef IJK_FFPLAY_MERGE
     int screen_width = 0;
     int screen_height = 0;
 #endif
@@ -386,9 +384,11 @@ typedef struct FFPlayer {
     int is_full_screen;
 #endif
     int64_t audio_callback_time;
+    SDL_Surface *screen;
 
     /* extra fields */
-    SDL_Vout *vout;
+    int sar_num;
+    int sar_den;
 } FFPlayer;
 
 #define IJKFF_SAFE_FREE(p) do {free(p); p = NULL;} while(0)
@@ -404,6 +404,8 @@ inline static void ijkff_reset(FFPlayer *ffp)
 
     /* ffplay options specified by the user */
     IJKFF_SAFE_FREE(ffp->input_filename);
+    ffp->default_width          = 640;
+    ffp->default_height         = 480;
     ffp->audio_disable          = 0;
     ffp->video_disable          = 0;
     ffp->subtitle_disable       = 0;
@@ -443,10 +445,12 @@ inline static void ijkff_reset(FFPlayer *ffp)
 
     /* current context */
     ffp->audio_callback_time    = 0;
+    SDL_FreeSurface(ffp->screen);
+    ffp->screen                 = NULL;
 
     /* extra fields */
-    SDL_VoutFree(ffp->vout);
-    ffp->vout                   = NULL;
+    ffp->sar_num                = 0;
+    ffp->sar_den                = 0;
 }
 
 #endif

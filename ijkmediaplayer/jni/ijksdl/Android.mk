@@ -28,7 +28,7 @@ LOCAL_SRC_FILES += ijksdl_mutex.c
 LOCAL_SRC_FILES += ijksdl_stdinc.c
 LOCAL_SRC_FILES += ijksdl_thread.c
 LOCAL_SRC_FILES += ijksdl_timer.c
-LOCAL_SRC_FILES += ijksdl_vout.c
+LOCAL_SRC_FILES += ijksdl_video.c
 
 LOCAL_MODULE := ijksdl
 include $(BUILD_STATIC_LIBRARY)
