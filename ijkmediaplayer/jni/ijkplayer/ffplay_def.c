@@ -1,7 +1,8 @@
 /*****************************************************************************
- * ijksdl_overlay.h
+ * ffplay_def.c
  *****************************************************************************
  *
+ * copyright (c) 2001 Fabrice Bellard
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -21,21 +22,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_OVERLAY_H
-#define IJKSDL__IJKSDL_OVERLAY_H
+#include "ffplay_def.h"
 
-#include "ijksdl_stdinc.h"
-
-typedef struct SDL_Overlay {
-    Uint32    format;
-    int       w, h;
-    int       planes;
-    Uint16   *pitches;
-    Uint8   **pixels;
-    Uint32    hw_overlay:1;
-} SDL_Overlay;
-
-int  SDL_LockYUVOverlay(SDL_Overlay *overlay);
-void SDL_UnlockYUVOverlay(SDL_Overlay *overlay);
-
-#endif
+AVPacket flush_pkt;

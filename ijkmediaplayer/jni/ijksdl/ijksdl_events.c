@@ -23,6 +23,11 @@
 
 #include "ijksdl_events.h"
 
+void SDL_PumpEvents(void)
+{
+    // FIXME: implement
+}
+
 int SDL_PeepEvents(SDL_Event * events, int numevents,
         SDL_eventaction action,
         Uint32 minType, Uint32 maxType)

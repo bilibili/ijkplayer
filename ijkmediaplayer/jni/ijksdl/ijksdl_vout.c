@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_overlay.c
+ * ijksdl_vout.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,15 +21,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijksdl_overlay.h"
+#include "ijksdl_vout.h"
 
-int  SDL_LockYUVOverlay(SDL_Overlay *overlay)
+SDL_Vout *SDL_VoutCreate()
 {
-    // FIXME: implement
+    SDL_Vout *vout = malloc(sizeof(SDL_Vout));
+    memset(vout, 0, sizeof(SDL_Vout));
+
+    /* FIXME: implement */
+    return vout;
+}
+
+void SDL_VoutFree(SDL_Vout *vout)
+{
+    if (!vout)
+        return;
+
+    /* FIXME: implement */
+
+    free(vout);
+}
+
+int SDL_VoutSetBuffersGeometry(SDL_Vout *vout, int32_t width, int32_t height, int32_t format)
+{
+    /* FIXME: implement */
     return 0;
 }
 
-void SDL_UnlockYUVOverlay(SDL_Overlay *overlay)
+int SDL_VoutRender(SDL_Vout *vout, SDL_Picture *pic)
 {
-    // FIXME: implement
+    /* FIXME: implement */
+    return 0;
 }

@@ -25,10 +25,10 @@ LOCAL_SRC_FILES += ijksdl_audio.c
 LOCAL_SRC_FILES += ijksdl_error.c
 LOCAL_SRC_FILES += ijksdl_events.c
 LOCAL_SRC_FILES += ijksdl_mutex.c
-LOCAL_SRC_FILES += ijksdl_overlay.c
 LOCAL_SRC_FILES += ijksdl_stdinc.c
 LOCAL_SRC_FILES += ijksdl_thread.c
 LOCAL_SRC_FILES += ijksdl_timer.c
+LOCAL_SRC_FILES += ijksdl_vout.c
 
 LOCAL_MODULE := ijksdl
 include $(BUILD_STATIC_LIBRARY)

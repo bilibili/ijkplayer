@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ffplay_display_thread.c
+ * ffplay_output_video_thread.c
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -23,6 +23,128 @@
  */
 
 #include "ffplayer.h"
+#include "ijkutil/loghelp.h"
+
+static int video_open(FFPlayer *ffp, int force_set_video_mode, VideoPicture *vp)
+{
+    VideoState *is = &ffp->is;
+    SDL_Vout *vout = ffp->vout;
+    int w = 0;
+    int h = 0;
+    SDL_Rect rect;
+
+    if (!vp)
+        return 0;
+
+    if (vp && vp->width && vp->height) {
+        w = rect.w;
+        h = rect.h;
+    }
+
+    if (vout &&
+        is->width  == vout->width  && vout->width  == w &&
+        is->height == vout->height && vout->height == h &&
+        !force_set_video_mode)
+        return 0;
+
+    if (SDL_VoutSetBuffersGeometry(vout, w, h, 0))
+    {
+        ALOGE("SDL_SetBuffersGeometry(%d, %d, 0) failed");
+        return -1;
+    }
+
+    is->width  = vout->width;
+    is->height = vout->height;
+
+    return 0;
+}
+
+/* display the current picture, if any */
+static void video_display(FFPlayer *ffp)
+{
+    VideoState *is = &ffp->is;
+    VideoPicture *vp = NULL;
+
+    if (!is->video_st)
+        return;
+
+    vp = &is->pictq[is->pictq_rindex];
+    if (vp && video_open(ffp, 0, vp))
+        return;
+
+    if (ffp->vout && vp)
+        SDL_VoutRender(ffp->vout, vp->bmp);
+}
+
+static double compute_target_delay(double delay, VideoState *is)
+{
+    double sync_threshold, diff;
+
+    /* update delay to follow master synchronisation source */
+    if (get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER) {
+        /* if video is slave, we try to correct big delays by
+           duplicating or deleting a frame */
+        diff = get_video_clock(is) - get_master_clock(is);
+
+        /* skip or repeat frame. We take into account the
+           delay to compute the threshold. I still don't know
+           if it is the best guess */
+        sync_threshold = FFMAX(AV_SYNC_THRESHOLD, delay);
+        if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD) {
+            if (diff <= -sync_threshold)
+                delay = 0;
+            else if (diff >= sync_threshold)
+                delay = 2 * delay;
+        }
+    }
+
+    av_dlog(NULL, "video: delay=%0.3f A-V=%f\n",
+            delay, -diff);
+
+    return delay;
+}
+
+static void pictq_next_picture(VideoState *is) {
+    /* update queue size and signal for next picture */
+    if (++is->pictq_rindex == VIDEO_PICTURE_QUEUE_SIZE)
+        is->pictq_rindex = 0;
+
+    SDL_LockMutex(is->pictq_mutex);
+    is->pictq_size--;
+    SDL_CondSignal(is->pictq_cond);
+    SDL_UnlockMutex(is->pictq_mutex);
+}
+
+static int pictq_prev_picture(VideoState *is) {
+    VideoPicture *prevvp;
+    int ret = 0;
+    /* update queue size and signal for the previous picture */
+    prevvp = &is->pictq[(is->pictq_rindex + VIDEO_PICTURE_QUEUE_SIZE - 1) % VIDEO_PICTURE_QUEUE_SIZE];
+    if (prevvp->allocated && prevvp->serial == is->videoq.serial) {
+        SDL_LockMutex(is->pictq_mutex);
+        if (is->pictq_size < VIDEO_PICTURE_QUEUE_SIZE - 1) {
+            if (--is->pictq_rindex == -1)
+                is->pictq_rindex = VIDEO_PICTURE_QUEUE_SIZE - 1;
+            is->pictq_size++;
+            ret = 1;
+        }
+        SDL_CondSignal(is->pictq_cond);
+        SDL_UnlockMutex(is->pictq_mutex);
+    }
+    return ret;
+}
+
+static void update_video_pts(VideoState *is, double pts, int64_t pos, int serial) {
+    double time = av_gettime() / 1000000.0;
+    /* update current video pts */
+    is->video_current_pts = pts;
+    is->video_current_pts_drift = is->video_current_pts - time;
+    is->video_current_pos = pos;
+    is->frame_last_pts = pts;
+    is->video_clock_serial = serial;
+    if (is->videoq.serial == serial)
+        check_external_clock_sync(is, is->video_current_pts);
+}
 
 /* ffplay.c 1297 */
 /* called to display each frame */
@@ -33,7 +155,9 @@ static void video_refresh(void *opaque, double *remaining_time)
     VideoPicture *vp;
     double time;
 
+#if CONFIG_IJKF_SUBTITLE
     SubPicture *sp, *sp2;
+#endif
 
     if (!is->paused && get_master_sync_type(is) == AV_SYNC_EXTERNAL_CLOCK && is->realtime)
         check_external_clock_speed(is);
@@ -41,7 +165,7 @@ static void video_refresh(void *opaque, double *remaining_time)
     if (!ffp->display_disable && is->show_mode != SHOW_MODE_VIDEO && is->audio_st) {
         time = av_gettime() / 1000000.0;
         if (is->force_refresh || is->last_vis_time + ffp->rdftspeed < time) {
-            video_display(is);
+            video_display(ffp);
             is->last_vis_time = time;
         }
         *remaining_time = FFMIN(*remaining_time, is->last_vis_time + ffp->rdftspeed - time);
@@ -107,6 +231,7 @@ retry:
                 }
             }
 
+#if CONFIG_IJKF_SUBTITLE
             if (is->subtitle_st) {
                 if (is->subtitle_stream_changed) {
                     SDL_LockMutex(is->subpq_mutex);
@@ -150,11 +275,12 @@ retry:
                     }
                 }
             }
+#endif
 
 display:
             /* display picture */
             if (!ffp->display_disable && is->show_mode == SHOW_MODE_VIDEO)
-                video_display(is);
+                video_display(ffp);
 
             pictq_next_picture(is);
 
@@ -178,8 +304,10 @@ display:
                 aqsize = is->audioq.size;
             if (is->video_st)
                 vqsize = is->videoq.size;
+#if CONFIG_IJKF_SUBTITLE
             if (is->subtitle_st)
                 sqsize = is->subtitleq.size;
+#endif
             av_diff = 0;
             if (is->audio_st && is->video_st)
                 av_diff = get_audio_clock(is) - get_video_clock(is);
@@ -197,3 +325,25 @@ display:
         }
     }
 }
+/* ffplay.c 1297 */
+
+/* ffplay.c 2959 */
+static void refresh_loop_wait_event(VideoState *is, SDL_Event *event) {
+    double remaining_time = 0.0;
+    SDL_PumpEvents();
+    while (!SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT)) {
+#if 0
+        if (!cursor_hidden && av_gettime() - cursor_last_shown > CURSOR_HIDE_DELAY) {
+            SDL_ShowCursor(0);
+            cursor_hidden = 1;
+        }
+#endif
+        if (remaining_time > 0.0)
+            av_usleep((int64_t)(remaining_time * 1000000.0));
+        remaining_time = REFRESH_RATE;
+        if (is->show_mode != SHOW_MODE_NONE && (!is->paused || is->force_refresh))
+            video_refresh(is, &remaining_time);
+        SDL_PumpEvents();
+    }
+}
+/* ffplay.c 2959 */

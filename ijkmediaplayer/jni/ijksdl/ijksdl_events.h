@@ -26,7 +26,6 @@
 
 #include "ijksdl_stdinc.h"
 
-/* SDL_events.h 55 */
 typedef enum
 {
     SDL_FIRSTEVENT     = 0,     /**< Unused (do not remove) */
@@ -119,9 +118,7 @@ typedef enum
      */
     SDL_LASTEVENT    = 0xFFFF
 } SDL_EventType;
-/* SDL_events.h 55 */
 
-/* SDL_events.h 463 */
 typedef struct SDL_UserEvent
 {
     Uint32 type;            /**< ::SDL_USEREVENT through ::SDL_NUMEVENTS-1 */
@@ -131,9 +128,7 @@ typedef struct SDL_UserEvent
     void    *data1;         /**< User defined data pointer */
     void    *data2;         /**< User defined data pointer */
 } SDL_UserEvent;
-/* SDL_events.h 463 */
 
-/* SDL_events.h 493 */
 typedef union SDL_Event
 {
     Uint32 type;                    /**< Event type, shared with all events */
@@ -165,23 +160,18 @@ typedef union SDL_Event
     SDL_DropEvent drop;             /**< Drag and drop event data */
 #endif
 } SDL_Event;
-/* SDL_events.h 493 */
 
-/* SDL_events.h 543 */
 typedef enum
 {
     SDL_ADDEVENT,
     SDL_PEEKEVENT,
     SDL_GETEVENT
 } SDL_eventaction;
-/* SDL_events.h 543 */
 
-/* SDL_events.h 568 */
-int SDL_PeepEvents(SDL_Event * events, int numevents,
-                   SDL_eventaction action,
-                   Uint32 minType, Uint32 maxType);
-
-/* SDL_events.h 624 */
-int SDL_PushEvent(SDL_Event * event);
+void SDL_PumpEvents(void);
+int  SDL_PeepEvents(SDL_Event * events, int numevents,
+                    SDL_eventaction action,
+                    Uint32 minType, Uint32 maxType);
+int  SDL_PushEvent(SDL_Event * event);
 
 #endif

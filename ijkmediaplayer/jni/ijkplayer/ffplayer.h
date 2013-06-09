@@ -25,8 +25,6 @@
 #define IJKPLAYER__FFPLAYER_H
 
 #include "ffplay_def.h"
-#include "ffplay_pkt_queue.h"
-#include "ffplay_clock.h"
 
 /*----------------------------------------
  *
@@ -56,7 +54,9 @@ typedef struct FFPlayer {
 #endif
     int             audio_disable;
     int             video_disable;
+#if CONFIG_IJKF_SUBTITLE
     int             subtitle_disable;
+#endif
     int             wanted_stream[AVMEDIA_TYPE_NB];
     int             seek_by_bytes;
     int             display_disable;
@@ -86,7 +86,9 @@ typedef struct FFPlayer {
     int             infinite_buffer;
     enum ShowMode   show_mode;
     char           *audio_codec_name;
+#if CONFIG_IJKF_SUBTITLE
     char           *subtitle_codec_name;
+#endif
     char           *video_codec_name;
     double          rdftspeed;
 #if 0
@@ -104,6 +106,9 @@ typedef struct FFPlayer {
     int             is_full_screen;
 #endif
     int64_t         audio_callback_time;
+
+    /* extra fields */
+    SDL_Vout       *vout;
 
     /* callback */
     int           (*decode_interrupt_cb)(void *ctx);
@@ -124,7 +129,9 @@ inline static void ijkff_reset(FFPlayer *ffp)
     IJKFF_SAFE_FREE(ffp->input_filename);
     ffp->audio_disable          = 0;
     ffp->video_disable          = 0;
+#if CONFIG_IJKF_SUBTITLE
     ffp->subtitle_disable       = 0;
+#endif
     ffp->wanted_stream[AVMEDIA_TYPE_AUDIO]      = -1;
     ffp->wanted_stream[AVMEDIA_TYPE_VIDEO]      = -1;
     ffp->wanted_stream[AVMEDIA_TYPE_SUBTITLE]   = -1;
@@ -149,7 +156,9 @@ inline static void ijkff_reset(FFPlayer *ffp)
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
     IJKFF_SAFE_FREE(ffp->audio_codec_name);
+#if CONFIG_IJKF_SUBTITLE
     IJKFF_SAFE_FREE(ffp->subtitle_codec_name);
+#endif
     IJKFF_SAFE_FREE(ffp->video_codec_name);
     ffp->rdftspeed              = 0.02;
 #if CONFIG_AVFILTER
@@ -160,6 +169,10 @@ inline static void ijkff_reset(FFPlayer *ffp)
 
     /* current context */
     ffp->audio_callback_time    = 0;
+
+    /* extra fields */
+    SDL_VoutFree(ffp->vout);
+    ffp->vout                   = NULL;
 
     /* callback */
     ffp->decode_interrupt_cb    = NULL;

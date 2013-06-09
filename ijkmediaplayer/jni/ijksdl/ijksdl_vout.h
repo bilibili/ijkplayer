@@ -1,8 +1,7 @@
 /*****************************************************************************
- * pkt_queue.c
+ * ijksdl_vout.h
  *****************************************************************************
  *
- * copyright (c) 2001 Fabrice Bellard
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -22,6 +21,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ffplay_pkt_queue.h"
+#ifndef IJKSDL__IJKSDL_VOUT_H
+#define IJKSDL__IJKSDL_VOUT_H
 
-AVPacket flush_pkt;
+#include "ijksdl_stdinc.h"
+
+typedef struct SDL_Picture {
+    Uint32    format;
+    int       w, h;
+    int       planes;
+    Uint16   *pitches;
+    Uint8   **pixels;
+} SDL_Picture;
+
+typedef struct SDL_Vout
+{
+    int32_t width;
+    int32_t height;
+    int32_t format;
+} SDL_Vout;
+
+SDL_Vout *SDL_VoutCreate();
+void      SDL_VoutFreeVout(SDL_Vout *vout);
+int       SDL_VoutSetBuffersGeometry(SDL_Vout *vout, int32_t width, int32_t height, int32_t format);
+int       SDL_VoutRender(SDL_Vout *vout, SDL_Picture *pic);
+
+#endif

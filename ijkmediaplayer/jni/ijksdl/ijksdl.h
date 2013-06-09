@@ -28,9 +28,9 @@
 #include "ijksdl_events.h"
 #include "ijksdl_error.h"
 #include "ijksdl_mutex.h"
+#include "ijksdl_rect.h"
 #include "ijksdl_thread.h"
 #include "ijksdl_timer.h"
-#include "ijksdl_overlay.h"
-#include "ijksdl_rect.h"
+#include "ijksdl_vout.h"
 
 #endif

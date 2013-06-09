@@ -25,7 +25,7 @@
 #include "ffplayer.h"
 
 /* ffplay.c 1504 */
-static void duplicate_right_border_pixels(SDL_Overlay *bmp) {
+static void duplicate_right_border_pixels(SDL_Picture *bmp) {
     int i, width, height;
     Uint8 *p, *maxp;
     for (i = 0; i < 3; i++) {
@@ -234,7 +234,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, int64_t *pts, AVPacket
 }
 /* ffplay.c 1640 */
 
-int ijkff_video_thread(void *arg)
+int ijkff_decode_video_thread(void *arg)
 {
     FFPlayer *ffp = arg;
     AVPacket pkt = { 0 };
