@@ -1,9 +1,8 @@
-/*****************************************************************************
+/*
  * ff_ffinc.h
  *      ffmpeg headers
- *****************************************************************************
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -25,6 +24,7 @@
 #ifndef IJKPLAYER__FF_FFINC_H
 #define IJKPLAYER__FF_FFINC_H
 
+#include <stdbool.h>
 #include "libavutil/avstring.h"
 #include "libavutil/colorspace.h"
 #include "libavformat/avformat.h"

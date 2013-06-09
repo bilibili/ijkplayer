@@ -1,11 +1,8 @@
-/*****************************************************************************
+/*
  * ff_ffplaye_def.h
- *      type define
- *      global variable declaration
- *****************************************************************************
  *
- * copyright (c) 2001 Fabrice Bellard
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2003 Fabrice Bellard
+ * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -34,7 +31,7 @@
 #define MIN_FRAMES 5
 
 /* SDL audio buffer size, in samples. Should be small to have precise
- A/V sync as SDL does not have hardware buffer fullness info. */
+   A/V sync as SDL does not have hardware buffer fullness info. */
 #define SDL_AUDIO_BUFFER_SIZE 1024
 
 /* no AV sync correction is done if below the AV sync threshold */
@@ -86,8 +83,8 @@ typedef struct PacketQueue {
 #define SUBPICTURE_QUEUE_SIZE 4
 
 typedef struct VideoPicture {
-    double pts; // presentation timestamp for this picture
-    int64_t pos; // byte position in file
+    double pts;             // presentation timestamp for this picture
+    int64_t pos;            // byte position in file
     SDL_Overlay *bmp;
     int width, height; /* source height & width */
     AVRational sample_aspect_ratio;
@@ -141,10 +138,10 @@ typedef struct VideoState {
     int audio_stream;
 
     int av_sync_type;
-    double external_clock; ///< external clock base
-    double external_clock_drift; ///< external clock base - time (av_gettime) at which we updated external_clock
-    int64_t external_clock_time; ///< last reference time
-    double external_clock_speed; ///< speed of the external clock
+    double external_clock;                   ///< external clock base
+    double external_clock_drift;             ///< external clock base - time (av_gettime) at which we updated external_clock
+    int64_t external_clock_time;             ///< last reference time
+    double external_clock_speed;             ///< speed of the external clock
 
     double audio_clock;
     int audio_clock_serial;
@@ -206,10 +203,10 @@ typedef struct VideoState {
     int video_stream;
     AVStream *video_st;
     PacketQueue videoq;
-    double video_current_pts; // current displayed pts
+    double video_current_pts;       // current displayed pts
     double video_current_pts_drift; // video_current_pts - time (av_gettime) at which we updated video_current_pts - used to have running video pts
-    int64_t video_current_pos; // current displayed file pos
-    double max_frame_duration; // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
+    int64_t video_current_pos;      // current displayed file pos
+    double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
     int video_clock_serial;
     VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE];
     int pictq_size, pictq_rindex, pictq_windex;
@@ -224,9 +221,9 @@ typedef struct VideoState {
     int width, height, xleft, ytop;
     int step;
 
-#ifdef IJK_FFPLAY_MERGE_SUBTITLE
-    AVFilterContext *in_video_filter; // the first filter in the video chain
-    AVFilterContext *out_video_filter;// the last filter in the video chain
+#if CONFIG_AVFILTER
+    AVFilterContext *in_video_filter;   // the first filter in the video chain
+    AVFilterContext *out_video_filter;  // the last filter in the video chain
     int use_dr1;
     FrameBuffer *buffer_pool;
 #endif
@@ -293,10 +290,9 @@ static int is_full_screen;
 static int64_t audio_callback_time;
 
 static AVPacket flush_pkt;
-
-#else
-extern AVPacket flush_pkt;
 #endif
+
+extern AVPacket flush_pkt;
 
 #define FF_ALLOC_EVENT   (SDL_USEREVENT)
 #define FF_QUIT_EVENT    (SDL_USEREVENT + 2)

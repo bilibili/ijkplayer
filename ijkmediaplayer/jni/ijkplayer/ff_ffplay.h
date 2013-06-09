@@ -1,11 +1,8 @@
-/*****************************************************************************
+/*
  * ff_ffplay.h
- *      forward declaration
- *      inline implement
- *****************************************************************************
  *
- * copyright (c) 2001 Fabrice Bellard
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2003 Fabrice Bellard
+ * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
