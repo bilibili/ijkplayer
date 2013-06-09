@@ -1,7 +1,8 @@
 /*****************************************************************************
- * ffplay_ffinc.h
+ * ff_ffplaye_def.h
  *****************************************************************************
  *
+ * copyright (c) 2001 Fabrice Bellard
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -21,15 +22,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__FFPLAY_INC_H
-#define IJKPLAYER__FFPLAY_INC_H
+#ifndef IJKPLAYER__FF_FFPLAY_CONFIG_H
+#define IJKPLAYER__FF_FFPLAY_CONFIG_H
 
-#include "libavutil/colorspace.h"
-#include "libavformat/avformat.h"
-#include "libavcodec/avfft.h"
-#include "libswscale/swscale.h"
-#include "libavutil/opt.h"
-#include "libswresample/swresample.h"
-#include "ijksdl/ijksdl.h"
+#ifdef CONFIG_AVFILTER
+#undef CONFIG_AVFILTER
+#endif
+#define CONFIG_AVFILTER 0
+
+#ifdef CONFIG_IJK_SUBTITLE
+#undef CONFIG_IJK_SUBTITLE
+#endif
+#define CONFIG_IJK_SUBTITLE 0
+
+#ifdef IJK_FFPLAY_MERGE
+#undef IJK_FFPLAY_MERGE
+#endif
 
 #endif

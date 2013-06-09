@@ -1,5 +1,6 @@
 /*****************************************************************************
- * ijksdl_vout.h
+ * ff_ffinc.h
+ *      ffmpeg headers
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,32 +22,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_VOUT_H
-#define IJKSDL__IJKSDL_VOUT_H
+#ifndef IJKPLAYER__FF_FFINC_H
+#define IJKPLAYER__FF_FFINC_H
 
-#include "ijksdl_stdinc.h"
-
-typedef struct SDL_Picture {
-    Uint32    format;
-    int       w, h;
-    int       planes;
-    Uint16   *pitches;
-    Uint8   **pixels;
-} SDL_Picture;
-
-typedef struct SDL_Vout
-{
-    int32_t width;
-    int32_t height;
-    int32_t format;
-} SDL_Vout;
-
-SDL_Vout *SDL_VoutCreate();
-void      SDL_VoutFree(SDL_Vout *vout);
-int       SDL_VoutSetBuffersGeometry(SDL_Vout *vout, int32_t width, int32_t height, int32_t format);
-int       SDL_VoutRender(SDL_Vout *vout, SDL_Picture *pic);
-
-int       SDL_VoutLockYUVPicture(SDL_Picture *pic);
-int       SDL_VoutUnlockYUVPicture(SDL_Picture *pic);
+#include "libavutil/colorspace.h"
+#include "libavformat/avformat.h"
+#include "libavcodec/avfft.h"
+#include "libswscale/swscale.h"
+#include "libavutil/opt.h"
+#include "libswresample/swresample.h"
+#include "ijksdl/ijksdl.h"
 
 #endif

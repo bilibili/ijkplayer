@@ -22,6 +22,7 @@
  */
 
 #include "ijksdl_vout.h"
+#include <stdlib.h>
 
 SDL_Vout *SDL_VoutCreate()
 {
@@ -49,6 +50,18 @@ int SDL_VoutSetBuffersGeometry(SDL_Vout *vout, int32_t width, int32_t height, in
 }
 
 int SDL_VoutRender(SDL_Vout *vout, SDL_Picture *pic)
+{
+    /* FIXME: implement */
+    return 0;
+}
+
+int SDL_VoutLockYUVPicture(SDL_Picture *pic)
+{
+    /* FIXME: implement */
+    return 0;
+}
+
+int SDL_VoutUnlockYUVPicture(SDL_Picture *pic)
 {
     /* FIXME: implement */
     return 0;

@@ -1,5 +1,7 @@
 /*****************************************************************************
- * ffplay_def.c
+ * ff_ffplay.h
+ *      forward declaration
+ *      inline implement
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -22,6 +24,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ffplay_def.h"
+#ifndef IJKPLAYER__FF_FFPLAY_H
+#define IJKPLAYER__FF_FFPLAY_H
 
-AVPacket flush_pkt;
+#include "ff_ffplay_def.h"
+
+void ijkff_global_init();
+void ijkff_global_uninit();
+
+#endif

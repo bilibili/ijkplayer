@@ -25,13 +25,7 @@
 
 #include <assert.h>
 #include "ijkerror.h"
-#include "ffplayer.h"
-
-static int decode_interrupt_cb(void *ctx)
-{
-    VideoState *is = ctx;
-    return is->abort_request;
-}
+#include "ff_ffplay.h"
 
 void ijkmp_global_init()
 {
@@ -60,8 +54,6 @@ IjkMediaPlayer *ijkmp_create()
 
     FFPlayer *ffp = (FFPlayer *)&mp->ffplayer;
     ijkff_reset(ffp);
-
-    ffp->decode_interrupt_cb = decode_interrupt_cb;
 
     return mp;
 }

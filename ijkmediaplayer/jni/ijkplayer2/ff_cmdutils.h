@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ffplay_cmdutils.h
+ * ff_cmdutils.h
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -22,10 +22,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__FFPLAY_CMDUTILS_H
-#define IJKPLAYER__FFPLAY_CMDUTILS_H
+#ifndef IJKPLAYER__FF_CMDUTILS_H
+#define IJKPLAYER__FF_CMDUTILS_H
 
-#include "ffplay_def.h"
+#include "ff_ffinc.h"
 
 void            print_error(const char *filename, int err);
 AVDictionary  **setup_find_stream_info_opts(AVFormatContext *s, AVDictionary *codec_opts);

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ffplay_cmdutils.c
+ * ff_cmdutils.c
  *****************************************************************************
  *
  * copyright (c) 2001 Fabrice Bellard
@@ -22,8 +22,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ffplay_cmdutils.h"
-#include "ffplay_def.h"
+#include "ff_cmdutils.h"
 
 /* cmdutils.c 942 */
 void print_error(const char *filename, int err)
