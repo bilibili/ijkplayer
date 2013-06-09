@@ -285,12 +285,12 @@ static void check_external_clock_sync(VideoState *is, double pts) {
     }
 }
 
-#if IJK_FFPLAY_MERGE
 static void update_external_clock_speed(VideoState *is, double speed) {
     update_external_clock_pts(is, get_external_clock(is));
     is->external_clock_speed = speed;
 }
 
+#if IJK_FFPLAY_MERGE
 static void check_external_clock_speed(VideoState *is) {
    if ((is->video_stream >= 0 && is->videoq.nb_packets <= MIN_FRAMES / 2) ||
        (is->audio_stream >= 0 && is->audioq.nb_packets <= MIN_FRAMES / 2)) {
@@ -1597,15 +1597,51 @@ static int read_thread(void *arg)
     SDL_DestroyMutex(wait_mutex);
     return 0;
 }
-/* line 2831 near stream_open */
 
-/*****************************************************************************
- * end last line in ffplay.c
- ****************************************************************************/
+static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputFormat *iformat)
+{
+    VideoState *is = &ffp->is;
 
-AVPacket flush_pkt;
-static bool g_ffmpeg_global_inited = false;
+#ifdef IJK_FFPLAY_MERGE
+    is = av_mallocz(sizeof(VideoState));
+    if (!is)
+        return NULL;
+#endif
+    av_strlcpy(is->filename, filename, sizeof(is->filename));
+    is->iformat = iformat;
+    is->ytop    = 0;
+    is->xleft   = 0;
 
+    /* start video display */
+    is->pictq_mutex = SDL_CreateMutex();
+    is->pictq_cond  = SDL_CreateCond();
+
+    is->subpq_mutex = SDL_CreateMutex();
+    is->subpq_cond  = SDL_CreateCond();
+
+    packet_queue_init(&is->videoq);
+    packet_queue_init(&is->audioq);
+    packet_queue_init(&is->subtitleq);
+
+    is->continue_read_thread = SDL_CreateCond();
+
+    update_external_clock_pts(is, NAN);
+    update_external_clock_speed(is, 1.0);
+    is->audio_current_pts_drift = -av_gettime() / 1000000.0;
+    is->video_current_pts_drift = is->audio_current_pts_drift;
+    is->audio_clock_serial = -1;
+    is->video_clock_serial = -1;
+    is->av_sync_type = ffp->av_sync_type;
+    is->read_tid     = SDL_CreateThreadEx(&is->_read_tid, read_thread, is);
+    if (!is->read_tid) {
+        av_free(is);
+        return NULL;
+    }
+    return is;
+}
+/* line 2872 near stream_cycle_channel */
+
+/* line 3321 */
 static int lockmgr(void **mtx, enum AVLockOp op)
 {
    switch(op) {
@@ -1624,6 +1660,102 @@ static int lockmgr(void **mtx, enum AVLockOp op)
    }
    return 1;
 }
+
+#if IJK_FFPLAY_MERGE
+/* Called from the main */
+int main(int argc, char **argv)
+{
+    int flags;
+    VideoState *is;
+    char dummy_videodriver[] = "SDL_VIDEODRIVER=dummy";
+
+    av_log_set_flags(AV_LOG_SKIP_REPEATED);
+    parse_loglevel(argc, argv, options);
+
+    /* register all codecs, demux and protocols */
+    avcodec_register_all();
+#if CONFIG_AVDEVICE
+    avdevice_register_all();
+#endif
+#if CONFIG_AVFILTER
+    avfilter_register_all();
+#endif
+    av_register_all();
+    avformat_network_init();
+
+    init_opts();
+
+    signal(SIGINT , sigterm_handler); /* Interrupt (ANSI).    */
+    signal(SIGTERM, sigterm_handler); /* Termination (ANSI).  */
+
+    show_banner(argc, argv, options);
+
+    parse_options(NULL, argc, argv, options, opt_input_file);
+
+    if (!input_filename) {
+        show_usage();
+        fprintf(stderr, "An input file must be specified\n");
+        fprintf(stderr, "Use -h to get full help or, even better, run 'man %s'\n", program_name);
+        exit(1);
+    }
+
+    if (display_disable) {
+        video_disable = 1;
+    }
+    flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;
+    if (audio_disable)
+        flags &= ~SDL_INIT_AUDIO;
+    if (display_disable)
+        SDL_putenv(dummy_videodriver); /* For the event queue, we always need a video driver. */
+#if !defined(__MINGW32__) && !defined(__APPLE__)
+    flags |= SDL_INIT_EVENTTHREAD; /* Not supported on Windows or Mac OS X */
+#endif
+    if (SDL_Init (flags)) {
+        fprintf(stderr, "Could not initialize SDL - %s\n", SDL_GetError());
+        fprintf(stderr, "(Did you set the DISPLAY variable?)\n");
+        exit(1);
+    }
+
+    if (!display_disable) {
+#if HAVE_SDL_VIDEO_SIZE
+        const SDL_VideoInfo *vi = SDL_GetVideoInfo();
+        fs_screen_width = vi->current_w;
+        fs_screen_height = vi->current_h;
+#endif
+    }
+
+    SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
+    SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
+    SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
+
+    if (av_lockmgr_register(lockmgr)) {
+        fprintf(stderr, "Could not initialize lock manager!\n");
+        do_exit(NULL);
+    }
+
+    av_init_packet(&flush_pkt);
+    flush_pkt.data = (char *)(intptr_t)"FLUSH";
+
+    is = stream_open(input_filename, file_iformat);
+    if (!is) {
+        fprintf(stderr, "Failed to initialize VideoState!\n");
+        do_exit(NULL);
+    }
+
+    event_loop(is);
+
+    /* never returns */
+
+    return 0;
+}
+#endif
+
+/*****************************************************************************
+ * end last line in ffplay.c
+ ****************************************************************************/
+
+AVPacket flush_pkt;
+static bool g_ffmpeg_global_inited = false;
 
 void ijkff_global_init()
 {
@@ -1651,7 +1783,7 @@ void ijkff_global_init()
     g_ffmpeg_global_inited = true;
 
     /* test link */
-    read_thread(NULL);
+    stream_open(NULL, NULL, NULL);
 }
 
 void ijkff_global_uninit()

@@ -345,9 +345,7 @@ typedef struct FFPlayer {
     int seek_by_bytes;
     int display_disable;
     int show_status;
-#ifdef IJK_FFPLAY_MERGE
-    int av_sync_type = AV_SYNC_AUDIO_MASTER;
-#endif
+    int av_sync_type;
     int64_t start_time;
     int64_t duration;
     int workaround_bugs;
@@ -415,6 +413,7 @@ inline static void ijkff_reset(FFPlayer *ffp)
     ffp->seek_by_bytes          = -1;
     ffp->display_disable        = 0;
     ffp->show_status            = 1;
+    ffp->av_sync_type           = AV_SYNC_AUDIO_MASTER;
     ffp->start_time             = AV_NOPTS_VALUE;
     ffp->duration               = AV_NOPTS_VALUE;
     ffp->workaround_bugs        = 1;
