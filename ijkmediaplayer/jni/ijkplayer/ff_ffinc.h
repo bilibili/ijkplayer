@@ -33,5 +33,6 @@
 #include "libavutil/opt.h"
 #include "libswresample/swresample.h"
 #include "ijksdl/ijksdl.h"
+#include "ijkutil/loghelp.h"
 
 #endif
