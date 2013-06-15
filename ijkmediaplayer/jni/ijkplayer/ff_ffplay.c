@@ -2355,14 +2355,15 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
 // MERGE: options
 // MERGE: show_usage
 // MERGE: show_help_default
-static void video_refresh_thread(VideoState *is) {
+static void video_refresh_thread(FFPlayer *ffp) {
+    VideoState *is = &ffp->is;
     double remaining_time = 0.0;
     while (is->abort_request) {
         if (remaining_time > 0.0)
             av_usleep((int64_t)(remaining_time * 1000000.0));
         remaining_time = REFRESH_RATE;
         if (is->show_mode != SHOW_MODE_NONE && (!is->paused || is->force_refresh))
-            video_refresh(is, &remaining_time);
+            video_refresh(ffp, &remaining_time);
     }
 }
 
