@@ -53,12 +53,12 @@ void ijkmp_prepare_async(IjkMediaPlayer *mp);
 void ijkmp_start(IjkMediaPlayer *mp);
 void ijkmp_stop(IjkMediaPlayer *mp);
 void ijkmp_pause(IjkMediaPlayer *mp);
-int ijkmp_get_video_width(IjkMediaPlayer *mp);
-int ijkmp_get_video_height(IjkMediaPlayer *mp);
+int  ijkmp_get_video_width(IjkMediaPlayer *mp);
+int  ijkmp_get_video_height(IjkMediaPlayer *mp);
 void ijkmp_seek_to(IjkMediaPlayer *mp, int msec);
 bool ijkmp_is_playing(IjkMediaPlayer *mp);
-int ijkmp_get_current_position(IjkMediaPlayer *mp);
-int ijkmp_get_duration(IjkMediaPlayer *mp);
+int  ijkmp_get_current_position(IjkMediaPlayer *mp);
+int  ijkmp_get_duration(IjkMediaPlayer *mp);
 void ijkmp_reset(IjkMediaPlayer *mp);
 
 // android api
