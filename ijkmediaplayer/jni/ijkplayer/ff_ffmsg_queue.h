@@ -54,7 +54,7 @@ static int ijkmsg_queue_put_private(IjkMessageQueue *q, IjkMessage *msg)
     msg1 = malloc(sizeof(IjkMessage));
     if (!msg1)
         return -1;
-    msg1 = *msg;
+    *msg1 = *msg;
     msg1->next = NULL;
     if (msg == &flush_msg)
         q->serial++;
@@ -69,22 +69,9 @@ static int ijkmsg_queue_put_private(IjkMessageQueue *q, IjkMessage *msg)
     return 0;
 }
 
-static IjkMessage *ijk_dup_msg(IjkMessage *msg)
-{
-    IjkMessage *msg1 = malloc(sizeof(IjkMessage));
-    if (!msg1)
-        return NULL;
-
-    *msg1 = *msg;
-    return msg1;
-}
-
 static int ijkmsg_queue_put(IjkMessageQueue *q, IjkMessage *msg)
 {
     int ret;
-
-    if (msg != &flush_msg && (msg = ijk_dup_msg(msg)))
-        return -1;
 
     SDL_LockMutex(q->mutex);
     ret = ijkmsg_queue_put_private(q, msg);
