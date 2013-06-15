@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl.h
+ * ijksdl_vout.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,16 +21,44 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_H
-#define IJKSDL__IJKSDL_H
-
-#include "ijksdl_audio.h"
-#include "ijksdl_events.h"
-#include "ijksdl_error.h"
-#include "ijksdl_mutex.h"
-#include "ijksdl_thread.h"
-#include "ijksdl_timer.h"
-#include "ijksdl_video.h"
 #include "ijksdl_vout.h"
 
-#endif
+#include <assert.h>
+#include <android/native_window_jni.h>
+
+void SDL_VoutFree(SDL_Vout *vout)
+{
+    if (!vout)
+        return;
+
+    if (vout->free_l) {
+        vout->free_l(vout);
+    } else {
+        free(vout);
+    }
+}
+
+int SDL_VoutGetSurface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format)
+{
+    assert(ppsurface);
+    if (!ppsurface || !vout || !vout->get_surface)
+        return -1;
+
+    SDL_LockMutex(vout->mutex);
+    int retval = vout->get_surface(vout, ppsurface, w, h, format);
+    SDL_UnlockMutex(vout->mutex);
+
+    return retval;
+}
+
+void SDL_VoutSurface_Free(SDL_VoutSurface *surface)
+{
+    if (!surface)
+        return;
+
+    if (surface->free_l)
+        surface->free_l(surface);
+    else
+        free(surface);
+}
+

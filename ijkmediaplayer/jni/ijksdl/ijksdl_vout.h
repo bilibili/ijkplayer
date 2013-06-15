@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl.h
+ * ijksdl_vout.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,16 +21,41 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_H
-#define IJKSDL__IJKSDL_H
+#ifndef IJKSDL__IJKSDL_VOUT_H
+#define IJKSDL__IJKSDL_VOUT_H
 
-#include "ijksdl_audio.h"
-#include "ijksdl_events.h"
-#include "ijksdl_error.h"
+#include "ijksdl_stdinc.h"
 #include "ijksdl_mutex.h"
-#include "ijksdl_thread.h"
-#include "ijksdl_timer.h"
-#include "ijksdl_video.h"
-#include "ijksdl_vout.h"
+
+typedef struct SDL_VoutOverlay {
+    void *opaque;
+
+    int w;
+    int h;
+} SDL_VoutOverlay;
+
+typedef struct SDL_VoutSurface SDL_VoutSurface;
+typedef struct SDL_VoutSurface {
+    int w;
+    int h;
+    int format;
+
+    void *opaque;
+    void (*free_l)(SDL_VoutSurface *surface);
+} SDL_VoutSurface;
+
+typedef struct SDL_Vout SDL_Vout;
+typedef struct SDL_Vout {
+    SDL_mutex *mutex;
+
+    void *opaque;
+    void (*free_l)(SDL_Vout *vout);
+    int  (*get_surface)(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format);
+} SDL_Vout;
+
+void SDL_Vout_Free(SDL_Vout *vout);
+int  SDL_Vout_GetSurface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format);
+
+void SDL_VoutSurface_Free(SDL_VoutSurface *surface);
 
 #endif
