@@ -2355,6 +2355,16 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
 // MERGE: options
 // MERGE: show_usage
 // MERGE: show_help_default
+static void video_refresh_thread(VideoState *is) {
+    double remaining_time = 0.0;
+    while (is->abort_request) {
+        if (remaining_time > 0.0)
+            av_usleep((int64_t)(remaining_time * 1000000.0));
+        remaining_time = REFRESH_RATE;
+        if (is->show_mode != SHOW_MODE_NONE && (!is->paused || is->force_refresh))
+            video_refresh(is, &remaining_time);
+    }
+}
 
 static int lockmgr(void **mtx, enum AVLockOp op)
 {
@@ -2425,7 +2435,7 @@ void ijkff_global_init()
     FFPlayer *ffp = malloc(sizeof(FFPlayer));
     stream_open(ffp, NULL, NULL);
     stream_close(ffp);
-    video_refresh(ffp, NULL);
+    video_refresh_thread(ffp);
     alloc_picture(NULL);
     /* test link end */
 }

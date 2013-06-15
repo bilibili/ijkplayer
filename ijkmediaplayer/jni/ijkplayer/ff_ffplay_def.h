@@ -386,6 +386,9 @@ typedef struct FFPlayer {
     /* extra fields */
     int sar_num;
     int sar_den;
+
+    SDL_Thread *refresh_video_tid;
+    SDL_Thread _refresh_video_tid;
 } FFPlayer;
 
 #define IJKFF_SAFE_FREE(p) do {free(p); p = NULL;} while(0)
