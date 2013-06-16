@@ -43,6 +43,9 @@ typedef struct SDL_VoutOverlay {
 
     void *opaque;
     void (*free_l)(SDL_VoutOverlay *overlay);
+    int (*lock)(SDL_VoutOverlay *overlay);
+    int (*unlock)(SDL_VoutOverlay *overlay);
+    int (*display)(SDL_VoutOverlay *overlay);
 } SDL_VoutOverlay;
 
 typedef struct SDL_VoutSurface_Opaque SDL_VoutSurface_Opaque;
@@ -68,6 +71,9 @@ typedef struct SDL_Vout {
 void SDL_VoutFree(SDL_Vout *vout);
 SDL_VoutSurface *SDL_VoutSetVideoMode(SDL_Vout *vout, int w, int h, int bpp, Uint32 flags);
 
-void SDL_VouFreeOverlay(SDL_VoutOverlay *overlay);
+int SDL_VoutLockYUVOverlay(SDL_VoutOverlay *overlay);
+int SDL_VoutUnlockYUVOverlay(SDL_VoutOverlay *overlay);
+int SDL_VoutDisplayYUVOverlay(SDL_VoutOverlay *overlay);
+void SDL_VoutFreeYUVOverlay(SDL_VoutOverlay *overlay);
 
 #endif

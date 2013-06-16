@@ -406,7 +406,9 @@ static void video_image_display(FFPlayer *ffp)
     VideoPicture *vp;
     SubPicture *sp;
     AVPicture pict;
+#ifdef IJK_FFPLAY_MERGE
     SDL_Rect rect;
+#endif
     int i;
 
     vp = &is->pictq[is->pictq_rindex];
@@ -416,7 +418,7 @@ static void video_image_display(FFPlayer *ffp)
                 sp = &is->subpq[is->subpq_rindex];
 
                 if (vp->pts >= sp->pts + ((float) sp->sub.start_display_time / 1000)) {
-                    SDL_LockYUVOverlay (vp->bmp);
+                    SDL_VoutLockYUVOverlay (vp->bmp);
 
                     pict.data[0] = vp->bmp->pixels[0];
                     pict.data[1] = vp->bmp->pixels[2];
@@ -430,23 +432,23 @@ static void video_image_display(FFPlayer *ffp)
                         blend_subrect(&pict, sp->sub.rects[i],
                                       vp->bmp->w, vp->bmp->h);
 
-                    SDL_UnlockYUVOverlay (vp->bmp);
+                    SDL_VoutUnlockYUVOverlay (vp->bmp);
                 }
             }
         }
 
 #ifdef IJK_FFPLAY_MERGE
         calculate_display_rect(&rect, is->xleft, is->ytop, is->width, is->height, vp);
-#endif
 
         SDL_DisplayYUVOverlay(vp->bmp, &rect);
 
-#ifdef IJK_FFPLAY_MERGE
         if (rect.x != is->last_display_rect.x || rect.y != is->last_display_rect.y || rect.w != is->last_display_rect.w || rect.h != is->last_display_rect.h || is->force_refresh) {
             int bgcolor = SDL_MapRGB(screen->format, 0x00, 0x00, 0x00);
             fill_border(is->xleft, is->ytop, is->width, is->height, rect.x, rect.y, rect.w, rect.h, bgcolor, 1);
             is->last_display_rect = rect;
         }
+#else
+        SDL_VoutDisplayYUVOverlay(vp->bmp);
 #endif
     }
 }
@@ -928,7 +930,7 @@ static void alloc_picture(FFPlayer *ffp)
     vp = &is->pictq[is->pictq_windex];
 
     if (vp->bmp)
-        SDL_FreeYUVOverlay(vp->bmp);
+        SDL_VoutFreeYUVOverlay(vp->bmp);
 
 #if CONFIG_AVFILTER
     avfilter_unref_bufferp(&vp->picref);
@@ -948,7 +950,7 @@ static void alloc_picture(FFPlayer *ffp)
         // FIXME: deal with allocate failure
         if (vp->bmp)
         {
-            SDL_FreeYUVOverlay(vp->bmp);
+            SDL_VoutFreeYUVOverlay(vp->bmp);
             vp->bmp = NULL;
         }
     }
@@ -1051,7 +1053,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
 #endif
 
         /* get a pointer on the bitmap */
-        SDL_LockYUVOverlay (vp->bmp);
+        SDL_VoutLockYUVOverlay (vp->bmp);
 
         pict.data[0] = vp->bmp->pixels[0];
         pict.data[1] = vp->bmp->pixels[2];
@@ -1080,7 +1082,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
         /* workaround SDL PITCH_WORKAROUND */
         duplicate_right_border_pixels(vp->bmp);
         /* update the bitmap content */
-        SDL_UnlockYUVOverlay(vp->bmp);
+        SDL_VoutUnlockYUVOverlay(vp->bmp);
 
         vp->pts = pts;
         vp->pos = pos;

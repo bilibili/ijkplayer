@@ -25,9 +25,12 @@
 
 #include "libavcodec/avcodec.h"
 #include "libswscale/swscale.h"
+#include "ijksdl_mutex.h"
 #include "ijksdl_vout_internal.h"
 
 typedef struct SDL_VoutOverlay_Opaque {
+    SDL_mutex *mutex;
+
     uint8_t *frame_buf;
     AVFrame *frame;
 
@@ -70,6 +73,9 @@ static void overlay_free_l(SDL_VoutOverlay *overlay)
     if (opaque->frame_buf)
         av_free(opaque->frame_buf);
 
+    if (opaque->mutex)
+        SDL_DestroyMutex(opaque->mutex);
+
     SDL_VoutOverlay_FreeInternal(overlay);
 }
 
@@ -85,6 +91,18 @@ static void overlay_fill(SDL_VoutOverlay *overlay, AVFrame *frame, Uint32 format
         overlay->pixels[i] = pic->data[i];
         overlay->pitches[i] = pic->linesize[i];
     }
+}
+
+static int overlay_lock(SDL_VoutOverlay *overlay)
+{
+    SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
+    return SDL_LockMutex(opaque->mutex);
+}
+
+static int overlay_unlock(SDL_VoutOverlay *overlay)
+{
+    SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
+    return SDL_UnlockMutex(opaque->mutex);
 }
 
 SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_VoutSurface *display)
@@ -118,9 +136,13 @@ SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 fo
     }
 
     if (frame) {
+        opaque->mutex = SDL_CreateMutex();
+
         overlay->free_l = overlay_free_l;
+        overlay->lock = overlay_lock;
+        overlay->unlock = overlay_unlock;
     } else {
-        SDL_VoutOverlay_FreeInternal(overlay);
+        overlay_free_l(overlay);
         overlay = NULL;
     }
 
