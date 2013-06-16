@@ -448,7 +448,7 @@ static void video_image_display(FFPlayer *ffp)
             is->last_display_rect = rect;
         }
 #else
-        SDL_VoutDisplayYUVOverlay(vp->bmp);
+        SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
 #endif
     }
 }

@@ -44,6 +44,13 @@ SDL_VoutSurface *SDL_VoutSetVideoMode(SDL_Vout *vout, int w, int h, int bpp, Uin
     return vout->set_video_mode(vout, w, h, bpp, flags);
 }
 
+int SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
+{
+    if (vout && overlay && vout->display_overlay)
+        return vout->display_overlay(vout, overlay);
+
+    return -1;
+}
 int SDL_VoutLockYUVOverlay(SDL_VoutOverlay *overlay)
 {
     if (overlay && overlay->lock)
@@ -56,14 +63,6 @@ int SDL_VoutUnlockYUVOverlay(SDL_VoutOverlay *overlay)
 {
     if (overlay && overlay->unlock)
         return overlay->unlock(overlay);
-
-    return -1;
-}
-
-int SDL_VoutDisplayYUVOverlay(SDL_VoutOverlay *overlay)
-{
-    if (overlay && overlay->display)
-        return overlay->display(overlay);
 
     return -1;
 }

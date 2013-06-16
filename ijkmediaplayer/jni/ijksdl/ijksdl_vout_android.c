@@ -96,6 +96,12 @@ static SDL_VoutSurface *vout_set_video_mode(SDL_Vout *vout, int w, int h, int bp
     return surface;
 }
 
+static int voud_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
+{
+    // FIXME: implement
+    return -1;
+}
+
 SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
 {
     SDL_Vout *vout = SDL_Vout_CreateInternal();
@@ -117,6 +123,7 @@ SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
     vout->opaque = opaque;
     vout->free_l = vout_free;
     vout->set_video_mode = vout_set_video_mode;
+    vout->display_overlay = voud_display_overlay;
 
     return vout;
 }
