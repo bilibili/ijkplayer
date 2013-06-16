@@ -43,3 +43,15 @@ SDL_VoutSurface *SDL_VoutSetVideoMode(SDL_Vout *vout, int w, int h, int bpp, Uin
     assert(vout);
     return vout->set_video_mode(vout, w, h, bpp, flags);
 }
+
+void SDL_VouFreeOverlay(SDL_VoutOverlay *overlay)
+{
+    if (!overlay)
+        return;
+
+    if (overlay->free_l) {
+        overlay->free_l(overlay);
+    } else {
+        free(overlay);
+    }
+}

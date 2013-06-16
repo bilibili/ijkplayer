@@ -473,7 +473,7 @@ static void stream_close(FFPlayer *ffp)
         avfilter_unref_bufferp(&vp->picref);
 #endif
         if (vp->bmp) {
-            SDL_FreeYUVOverlay(vp->bmp);
+            SDL_VoutFreeYUVOverlay(vp->bmp);
             vp->bmp = NULL;
         }
     }
