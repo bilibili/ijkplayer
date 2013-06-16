@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_vout.c
+ * ijksdl_vout_ffmpeg.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,25 +21,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#ifndef IJKSDL__IJKSDL_VOUT_FFMPEG_H
+#define IJKSDL__IJKSDL_VOUT_FFMPEG_H
+
+#include "ijksdl_stdinc.h"
 #include "ijksdl_vout.h"
 
-#include <assert.h>
-#include <android/native_window_jni.h>
+SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_VoutSurface *display);
 
-void SDL_VoutFree(SDL_Vout *vout)
-{
-    if (!vout)
-        return;
-
-    if (vout->free_l) {
-        vout->free_l(vout);
-    } else {
-        free(vout);
-    }
-}
-
-SDL_VoutSurface *SDL_VoutSetVideoMode(SDL_Vout *vout, int w, int h, int bpp, Uint32 flags)
-{
-    assert(vout);
-    return vout->set_video_mode(vout, w, h, bpp, flags);
-}
+#endif

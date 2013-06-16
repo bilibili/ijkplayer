@@ -55,4 +55,32 @@ inline static void SDL_Vout_FreeInternal(SDL_Vout *vout)
     free(vout);
 }
 
+inline static SDL_VoutOverlay *SDL_VoutOverlay_CreateInternal(size_t opaque_size)
+{
+    SDL_VoutOverlay *overlay = (SDL_VoutOverlay*) malloc(sizeof(SDL_VoutOverlay));
+    if (!overlay)
+        return NULL;
+    memset(overlay, 0, sizeof(SDL_VoutOverlay));
+
+    overlay->opaque = malloc(opaque_size);
+    if (!overlay->opaque) {
+        free(overlay);
+        return NULL;
+    }
+    memset(overlay->opaque, 0, sizeof(overlay->opaque));
+    return overlay;
+}
+
+inline static void SDL_VoutOverlay_FreeInternal(SDL_VoutOverlay *overlay)
+{
+    if (!overlay)
+        return;
+
+    if (overlay->opaque)
+        free(overlay->opaque);
+
+    memset(overlay, 0, sizeof(SDL_VoutOverlay));
+    free(overlay);
+}
+
 #endif

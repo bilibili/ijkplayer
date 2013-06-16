@@ -256,7 +256,7 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
     SDL_Vout *vout = ijkmp_get_vout(mp);
     if (vout) {
         ijkmp_set_vout(mp, NULL);
-        SDL_Vout_Free(vout);
+        SDL_VoutFree(vout);
     }
 
     ijkmp_dec_ref(&mp);
@@ -303,7 +303,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 
     LABEL_RETURN:
     if (vout)
-        SDL_Vout_Free(vout);
+        SDL_VoutFree(vout);
     if (mp)
         ijkmp_dec_ref(&mp);
     return;

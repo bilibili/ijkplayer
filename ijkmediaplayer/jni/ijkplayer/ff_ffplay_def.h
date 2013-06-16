@@ -86,7 +86,7 @@ typedef struct PacketQueue {
 typedef struct VideoPicture {
     double pts;             // presentation timestamp for this picture
     int64_t pos;            // byte position in file
-    SDL_Overlay *bmp;
+    SDL_VoutOverlay *bmp;
     int width, height; /* source height & width */
     AVRational sample_aspect_ratio;
     int allocated;

@@ -32,9 +32,9 @@
 typedef struct ANativeWindow ANativeWindow;
 
 SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow();
-void      SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_window);
+void SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_window);
 
 SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface();
-void      SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, JNIEnv *env, jobject android_surface);
+void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, JNIEnv *env, jobject android_surface);
 
 #endif

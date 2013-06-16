@@ -26,12 +26,23 @@
 
 #include "ijksdl_stdinc.h"
 #include "ijksdl_mutex.h"
+#include "ijksdl_video.h"
 
+/* bpp=12, 8 bit Y plane followed by 8 bit 2x2 subsampled V and U planes.*/
+#define SDL_FOURCC_PIX__YV12        0x32315659
+
+typedef struct SDL_VoutOverlay_Opaque SDL_VoutOverlay_Opaque;
+typedef struct SDL_VoutOverlay SDL_VoutOverlay;
 typedef struct SDL_VoutOverlay {
-    void *opaque;
+    int w; /**< Read-only */
+    int h; /**< Read-only */
+    Uint32 format; /**< Read-only */
+    int planes; /**< Read-only */
+    Uint16 *pitches; /**< Read-only */
+    Uint8 **pixels; /**< Read-write */
 
-    int w;
-    int h;
+    void *opaque;
+    void (*free_l)(SDL_VoutOverlay *overlay);
 } SDL_VoutOverlay;
 
 typedef struct SDL_VoutSurface_Opaque SDL_VoutSurface_Opaque;
@@ -39,7 +50,7 @@ typedef struct SDL_VoutSurface SDL_VoutSurface;
 typedef struct SDL_VoutSurface {
     int w;
     int h;
-    int format;
+    Uint32 format; /* fourcc number */
 
     SDL_VoutSurface_Opaque *opaque;
 } SDL_VoutSurface;
@@ -49,12 +60,14 @@ typedef struct SDL_Vout SDL_Vout;
 typedef struct SDL_Vout {
     SDL_mutex *mutex;
 
-    SDL_Vout_Opaque   *opaque;
-    void             (*free_l)(SDL_Vout *vout);
-    SDL_VoutSurface *(*set_video_mode)(SDL_Vout *vout, int w, int h, int bpp, int flags);
+    SDL_Vout_Opaque *opaque;
+    void (*free_l)(SDL_Vout *vout);
+    SDL_VoutSurface *(*set_video_mode)(SDL_Vout *vout, int w, int h, int bpp, Uint32 flags);
 } SDL_Vout;
 
-void             SDL_Vout_Free(SDL_Vout *vout);
-SDL_VoutSurface *SDL_Vout_SetVideoMode(SDL_Vout *vout, int w, int h, int bpp, int flags);
+void SDL_VoutFree(SDL_Vout *vout);
+SDL_VoutSurface *SDL_VoutSetVideoMode(SDL_Vout *vout, int w, int h, int bpp, Uint32 flags);
+
+void SDL_VouFreeOverlay(SDL_VoutOverlay *overlay);
 
 #endif

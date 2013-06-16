@@ -19,8 +19,11 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-LOCAL_C_CFLAGS += -std=c99
+LOCAL_CFLAGS += -std=c99
 LOCAL_LDLIBS += -llog -landroid
+
+LOCAL_C_INCLUDES += $(LOCAL_PATH)
+LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 
 LOCAL_SRC_FILES += ijksdl_audio.c
 LOCAL_SRC_FILES += ijksdl_error.c
@@ -31,8 +34,11 @@ LOCAL_SRC_FILES += ijksdl_thread.c
 LOCAL_SRC_FILES += ijksdl_timer.c
 LOCAL_SRC_FILES += ijksdl_video.c
 LOCAL_SRC_FILES += ijksdl_vout.c
+LOCAL_SRC_FILES += ijksdl_vout_ffmpeg.c
 
 LOCAL_SRC_FILES += ijksdl_vout_android.c
+
+LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil
 
 LOCAL_MODULE := ijksdl
 include $(BUILD_STATIC_LIBRARY)

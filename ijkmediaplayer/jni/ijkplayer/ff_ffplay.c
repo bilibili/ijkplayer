@@ -512,7 +512,7 @@ static int video_open(FFPlayer *ffp, int force_set_video_mode, VideoPicture *vp)
         is->height == ffp->screen->h && ffp->screen->h == h &&
         !force_set_video_mode)
         return 0;
-    ffp->screen = SDL_Vout_SetVideoMode(ffp->vout, w, h, 0, flags);
+    ffp->screen = SDL_VoutSetVideoMode(ffp->vout, w, h, 0, flags);
     if (!ffp->screen) {
         fprintf(stderr, "SDL: could not set video mode - exiting\n");
         return -1;
@@ -936,7 +936,7 @@ static void alloc_picture(FFPlayer *ffp)
 
     video_open(ffp, 0, vp);
 
-    vp->bmp = SDL_CreateYUVOverlay(vp->width, vp->height,
+    vp->bmp = SDL_VoutCreateFFmpegYUVOverlay(vp->width, vp->height,
                                    SDL_YV12_OVERLAY,
                                    ffp->screen);
     if (!vp->bmp || vp->bmp->pitches[0] < vp->width) {
@@ -959,7 +959,7 @@ static void alloc_picture(FFPlayer *ffp)
     SDL_UnlockMutex(is->pictq_mutex);
 }
 
-static void duplicate_right_border_pixels(SDL_Overlay *bmp) {
+static void duplicate_right_border_pixels(SDL_VoutOverlay *bmp) {
     int i, width, height;
     Uint8 *p, *maxp;
     for (i = 0; i < 3; i++) {

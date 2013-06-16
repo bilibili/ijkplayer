@@ -23,7 +23,7 @@ LOCAL_PATH := $(call my-dir)
 # C files
 #--------------------
 include $(CLEAR_VARS)
-LOCAL_C_CFLAGS += -std=c99
+LOCAL_CFLAGS += -std=c99
 
 LOCAL_SRC_FILES += loghelp.c
 
