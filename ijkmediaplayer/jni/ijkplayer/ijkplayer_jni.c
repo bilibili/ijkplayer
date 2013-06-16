@@ -306,7 +306,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
     if (vout)
         SDL_Vout_Free(vout);
     if (mp)
-        ijkmp_dec_ref(mp);
+        ijkmp_dec_ref(&mp);
     return;
 }
 
