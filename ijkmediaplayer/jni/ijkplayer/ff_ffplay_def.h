@@ -381,9 +381,10 @@ typedef struct FFPlayer {
     int is_full_screen;
 #endif
     int64_t audio_callback_time;
-    SDL_Surface *screen;
+    SDL_VoutSurface *screen;
 
     /* extra fields */
+    SDL_Vout *vout;
     int sar_num;
     int sar_den;
 
@@ -445,10 +446,11 @@ inline static void ijkff_reset(FFPlayer *ffp)
 
     /* current context */
     ffp->audio_callback_time    = 0;
-    SDL_FreeSurface(ffp->screen);
+    SDL_Vout_FreeSurface(ffp->screen);
     ffp->screen                 = NULL;
 
     /* extra fields */
+    ffp->vout                   = NULL; /* reset outside */
     ffp->sar_num                = 0;
     ffp->sar_den                = 0;
 }

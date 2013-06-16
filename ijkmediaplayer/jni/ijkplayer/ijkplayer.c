@@ -44,16 +44,17 @@ IjkMediaPlayer *ijkmp_create()
     }
     memset(mp, 0, sizeof(IjkMediaPlayer));
 
-    mp->ffplayer = malloc(sizeof(FFPlayer));
+    mp->ffplayer = (FFPlayer*) malloc(sizeof(FFPlayer));
     if (!mp) {
         free(mp);
         return NULL;
     }
     memset(mp->ffplayer, 0, sizeof(FFPlayer));
 
-    FFPlayer *ffp = (FFPlayer *)&mp->ffplayer;
+    FFPlayer *ffp = &mp->ffplayer;
     ijkff_reset(ffp);
 
+    ijkmp_inc_ref(mp);
     return mp;
 }
 
@@ -160,4 +161,14 @@ int ijkmp_get_duration(IjkMediaPlayer *mp)
 void ijkmp_reset(IjkMediaPlayer *mp)
 {
     // FIXME: implement
+}
+
+void ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout)
+{
+    mp->ffplayer->vout = vout;
+}
+
+SDL_Vout *ijkmp_get_vout(IjkMediaPlayer *mp)
+{
+    return mp->ffplayer->vout;
 }

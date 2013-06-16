@@ -21,7 +21,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_C_CFLAGS += -std=c99
-LOCAL_LDLIBS += -llog
+LOCAL_LDLIBS += -llog -landroid
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)

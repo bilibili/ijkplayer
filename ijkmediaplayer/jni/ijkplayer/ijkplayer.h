@@ -26,13 +26,15 @@
 #include <stdbool.h>
 
 struct IjkMediaPlayer;
+typedef struct FFPlayer FFPlayer;
+typedef struct SDL_Vout SDL_Vout;
 
 typedef struct IjkMediaPlayer {
     volatile int ref_count;
-    void *ffplayer;
+    FFPlayer *ffplayer;
 } IjkMediaPlayer;
 
-// ref_count is 0 after open
+// ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create();
 
 void ijkmp_global_init();
@@ -61,7 +63,7 @@ int  ijkmp_get_current_position(IjkMediaPlayer *mp);
 int  ijkmp_get_duration(IjkMediaPlayer *mp);
 void ijkmp_reset(IjkMediaPlayer *mp);
 
-// android api
-void ijkmp_set_video_surface(IjkMediaPlayer *mp, void *surface);
+void      ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout);
+SDL_Vout *ijkmp_get_vout(IjkMediaPlayer *mp);
 
 #endif
