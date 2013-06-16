@@ -216,7 +216,9 @@ typedef struct VideoState {
 #if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;
 #endif
+#ifdef IJK_FFPLAY_MERGE
     SDL_Rect last_display_rect;
+#endif
 
     char filename[1024];
     int width, height, xleft, ytop;
