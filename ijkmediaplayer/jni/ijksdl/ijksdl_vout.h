@@ -34,14 +34,14 @@ typedef struct SDL_VoutOverlay {
     int h;
 } SDL_VoutOverlay;
 
+typedef struct SDL_VoutSurface_Opaque SDL_VoutSurface_Opaque;
 typedef struct SDL_VoutSurface SDL_VoutSurface;
 typedef struct SDL_VoutSurface {
     int w;
     int h;
     int format;
 
-    void *opaque;
-    void (*free_l)(SDL_VoutSurface *surface);
+    SDL_VoutSurface_Opaque *opaque;
 } SDL_VoutSurface;
 
 typedef struct SDL_Vout_Opaque SDL_Vout_Opaque;
@@ -49,14 +49,12 @@ typedef struct SDL_Vout SDL_Vout;
 typedef struct SDL_Vout {
     SDL_mutex *mutex;
 
-    SDL_Vout_Opaque *opaque;
-    void (*free_l)(SDL_Vout *vout);
-    int  (*get_surface)(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format);
+    SDL_Vout_Opaque   *opaque;
+    void             (*free_l)(SDL_Vout *vout);
+    SDL_VoutSurface *(*set_video_mode)(SDL_Vout *vout, int w, int h, int bpp, int flags);
 } SDL_Vout;
 
-void SDL_Vout_Free(SDL_Vout *vout);
-int  SDL_Vout_GetSurface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format);
-
-void SDL_Vout_FreeSurface(SDL_VoutSurface *surface);
+void             SDL_Vout_Free(SDL_Vout *vout);
+SDL_VoutSurface *SDL_Vout_SetVideoMode(SDL_Vout *vout, int w, int h, int bpp, int flags);
 
 #endif

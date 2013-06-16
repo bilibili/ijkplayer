@@ -29,51 +29,16 @@
 #include "ijksdl_vout.h"
 #include "ijksdl_vout_internal.h"
 
-typedef struct SDL_Vout_Opaque {
-    ANativeWindow *native_window;
-} SDL_Vout_Opaque;
-
 typedef struct SDL_VoutSurface_Opaque {
-    ANativeWindow *native_window;
+    SDL_Vout *vout;
+    ANativeWindow *weak_native_window; /* do not own ref-count */
 } SDL_VoutSurface_Opaque;
 
-static void surface_opaque_free(SDL_VoutSurface *surface)
-{
-    if (!surface)
-        return;
-
-    SDL_VoutSurface_Opaque *opaque = surface->opaque;
-    if (opaque) {
-        if (opaque->native_window) {
-            ANativeWindow_release(opaque->native_window);
-        }
-        free(opaque);
-        surface->opaque = NULL;
-    }
-
-    SDL_Vout_FreeSurfaceInternal(surface);
-}
-
-static SDL_VoutSurface *surface_create_l(ANativeWindow *native_window)
-{
-    SDL_VoutSurface *surface = SDL_Vout_CreateSurfaceInternal();
-    if (!surface)
-        return NULL;
-
-    SDL_VoutSurface_Opaque *opaque = (SDL_VoutSurface_Opaque*) malloc(sizeof(SDL_VoutSurface_Opaque));
-    if (!opaque) {
-        free(surface);
-        return NULL;
-    }
-    memset(opaque, 0, sizeof(opaque));
-
-    ANativeWindow_acquire(native_window);
-    opaque->native_window = native_window;
-
-    surface->opaque = opaque;
-    surface->free_l = surface_opaque_free;
-    return surface;
-}
+typedef struct SDL_Vout_Opaque {
+    ANativeWindow *native_window;
+    SDL_VoutSurface dummy_surface;
+    SDL_VoutSurface_Opaque dummy_surface_opaque;
+} SDL_Vout_Opaque;
 
 static void vout_opaque_free(SDL_Vout *vout)
 {
@@ -92,57 +57,46 @@ static void vout_opaque_free(SDL_Vout *vout)
     SDL_Vout_FreeInternal(vout);
 }
 
-static int vout_get_surface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format)
+static SDL_VoutSurface *set_video_mode_l(SDL_Vout *vout, int w, int h, int bpp, int flags)
 {
-    SDL_Vout_Opaque *vout_opaque = vout->opaque;
-    SDL_VoutSurface *surface = *ppsurface;
-    SDL_VoutSurface_Opaque *surface_opaque = NULL;
-    ANativeWindow *new_native_window = NULL;
+    SDL_Vout_Opaque *opaque = vout->opaque;
+    SDL_VoutSurface *surface = &opaque->dummy_surface;
+    ANativeWindow *native_window = opaque->native_window;
+    int curr_w = 0;
+    int curr_h = 0;
+    int curr_format = 0;
 
+    if (!native_window)
+        return NULL;
+
+    curr_w = ANativeWindow_getWidth(native_window);
+    curr_h = ANativeWindow_getHeight(native_window);
+    curr_format = ANativeWindow_getFormat(native_window);
+    if (curr_w == w && curr_h == h) {
+        surface->format = curr_format;
+        surface->opaque->weak_native_window = native_window;
+        return surface;
+    }
+
+    ANativeWindow_setBuffersGeometry(native_window, w, h, curr_format);
+    curr_w = ANativeWindow_getWidth(native_window);
+    curr_h = ANativeWindow_getHeight(native_window);
+    curr_format = ANativeWindow_getFormat(native_window);
+    if (curr_w == w && curr_h == h) {
+        surface->format = curr_format;
+        surface->opaque->weak_native_window = native_window;
+        return surface;
+    }
+
+    return NULL;
+}
+
+static SDL_VoutSurface *set_video_mode(SDL_Vout *vout, int w, int h, int bpp, int flags)
+{
     SDL_LockMutex(vout->mutex);
-    if (surface != NULL) {
-        surface_opaque = surface->opaque;
-
-        if (surface_opaque->native_window == vout_opaque->native_window &&
-            w == surface->w && h == surface->h && format == surface->format) {
-        } else {
-            SDL_Vout_FreeSurface(surface);
-            *ppsurface = NULL;
-            surface = NULL;
-        }
-    }
-
-    // aquire new native_window from vout */
-    if (surface == NULL) {
-        new_native_window = vout_opaque->native_window;
-        ANativeWindow_acquire(new_native_window);
-    }
-
+    SDL_VoutSurface *surface = set_video_mode_l(vout, w, h, bpp, flags);
     SDL_UnlockMutex(vout->mutex);
-
-    // setup surface without lock
-    if (surface == NULL) {
-        if (ANativeWindow_setBuffersGeometry(new_native_window, w, h, format) < 0) {
-            ANativeWindow_release(new_native_window);
-            new_native_window = NULL;
-        }
-
-        if (new_native_window) {
-            assert(surface);
-            surface = surface_create_l(new_native_window);
-            if (surface)
-                new_native_window = NULL;
-
-            ANativeWindow_release(vout_opaque->native_window);
-        }
-
-        if (new_native_window) {
-            ANativeWindow_release(new_native_window);
-            new_native_window = NULL;
-        }
-    }
-
-    return surface ? 0 : -1;
+    return surface;
 }
 
 SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
@@ -159,9 +113,13 @@ SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
     }
     memset(opaque, 0, sizeof(SDL_Vout_Opaque));
 
+    opaque->dummy_surface_opaque.vout = vout;
+
+    opaque->dummy_surface.opaque = &opaque->dummy_surface_opaque;
+
     vout->opaque = opaque;
     vout->free_l = vout_opaque_free;
-    vout->get_surface = vout_get_surface;
+    vout->set_video_mode = set_video_mode;
 
     return vout;
 }
@@ -176,7 +134,9 @@ static void SDL_VoutAndroid_SetNativeWindow_l(SDL_Vout *vout, ANativeWindow *nat
     if (opaque->native_window)
         ANativeWindow_release(opaque->native_window);
 
-    ANativeWindow_acquire(native_window);
+    if (native_window)
+        ANativeWindow_acquire(native_window);
+
     opaque->native_window = native_window;
 }
 

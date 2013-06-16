@@ -446,7 +446,6 @@ inline static void ijkff_reset(FFPlayer *ffp)
 
     /* current context */
     ffp->audio_callback_time    = 0;
-    SDL_Vout_FreeSurface(ffp->screen);
     ffp->screen                 = NULL;
 
     /* extra fields */

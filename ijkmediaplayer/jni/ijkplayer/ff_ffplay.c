@@ -512,7 +512,7 @@ static int video_open(FFPlayer *ffp, int force_set_video_mode, VideoPicture *vp)
         is->height == ffp->screen->h && ffp->screen->h == h &&
         !force_set_video_mode)
         return 0;
-    SDL_Vout_GetSurface(ffp->vout, &ffp->screen, w, h, 0);
+    ffp->screen = SDL_Vout_SetVideoMode(ffp->vout, w, h, 0, flags);
     if (!ffp->screen) {
         fprintf(stderr, "SDL: could not set video mode - exiting\n");
         return -1;

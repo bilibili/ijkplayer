@@ -38,27 +38,8 @@ void SDL_Vout_Free(SDL_Vout *vout)
     }
 }
 
-int SDL_Vout_GetSurface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format)
+SDL_VoutSurface *SDL_Vout_SetVideoMode(SDL_Vout *vout, int w, int h, int bpp, int flags)
 {
-    assert(ppsurface);
-    if (!ppsurface || !vout || !vout->get_surface)
-        return -1;
-
-    SDL_LockMutex(vout->mutex);
-    int retval = vout->get_surface(vout, ppsurface, w, h, format);
-    SDL_UnlockMutex(vout->mutex);
-
-    return retval;
+    assert(vout);
+    return vout->set_video_mode(vout, w, h, bpp, flags);
 }
-
-void SDL_Vout_FreeSurface(SDL_VoutSurface *surface)
-{
-    if (!surface)
-        return;
-
-    if (surface->free_l)
-        surface->free_l(surface);
-    else
-        free(surface);
-}
-

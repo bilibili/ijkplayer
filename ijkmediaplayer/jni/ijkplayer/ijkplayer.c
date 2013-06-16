@@ -51,7 +51,7 @@ IjkMediaPlayer *ijkmp_create()
     }
     memset(mp->ffplayer, 0, sizeof(FFPlayer));
 
-    FFPlayer *ffp = &mp->ffplayer;
+    FFPlayer *ffp = mp->ffplayer;
     ijkff_reset(ffp);
 
     ijkmp_inc_ref(mp);

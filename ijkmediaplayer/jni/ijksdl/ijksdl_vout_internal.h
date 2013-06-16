@@ -55,23 +55,4 @@ inline static void SDL_Vout_FreeInternal(SDL_Vout *vout)
     free(vout);
 }
 
-inline static SDL_VoutSurface *SDL_Vout_CreateSurfaceInternal()
-{
-    SDL_VoutSurface *surface = (SDL_VoutSurface*) malloc(sizeof(SDL_VoutSurface));
-    if (!surface)
-        return NULL;
-
-    memset(surface, 0, sizeof(SDL_VoutSurface));
-    return surface;
-}
-
-inline static void SDL_Vout_FreeSurfaceInternal(SDL_VoutSurface *surface)
-{
-    if (!surface)
-        return;
-
-    memset(surface, 0, sizeof(SDL_VoutSurface));
-    free(surface);
-}
-
 #endif
