@@ -97,12 +97,6 @@ void ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
     // FIXME: implement
 }
 
-// FIXME: android spec
-void ijkmp_set_video_surface(IjkMediaPlayer *mp, void *surface)
-{
-    // FIXME: implement
-}
-
 void ijkmp_prepare_async(IjkMediaPlayer *mp)
 {
     // FIXME: implement
