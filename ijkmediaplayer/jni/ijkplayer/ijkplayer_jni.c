@@ -259,7 +259,6 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
         SDL_Vout_Free(vout);
     }
 
-    LABEL_RETURN:
     ijkmp_dec_ref(&mp);
     ijkmp_dec_ref(&mp);
     jni_set_media_player(env, thiz, NULL);
