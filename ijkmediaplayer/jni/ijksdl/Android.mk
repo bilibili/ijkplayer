@@ -20,7 +20,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_C_CFLAGS += -std=c99
-LOCAL_LDLIBS += -llog
+LOCAL_LDLIBS += -llog -landroid
 
 LOCAL_SRC_FILES += ijksdl_audio.c
 LOCAL_SRC_FILES += ijksdl_error.c
@@ -31,6 +31,8 @@ LOCAL_SRC_FILES += ijksdl_thread.c
 LOCAL_SRC_FILES += ijksdl_timer.c
 LOCAL_SRC_FILES += ijksdl_video.c
 LOCAL_SRC_FILES += ijksdl_vout.c
+
+LOCAL_SRC_FILES += ijksdl_vout_android.c
 
 LOCAL_MODULE := ijksdl
 include $(BUILD_STATIC_LIBRARY)

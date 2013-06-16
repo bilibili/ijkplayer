@@ -175,6 +175,7 @@ typedef struct SDL_Overlay {
         /*@}*/
 } SDL_Overlay;
 
+/*-
 void         SDL_FreeSurface(SDL_Surface *surface);
 
 SDL_Overlay *SDL_CreateYUVOverlay(int width, int height,
@@ -184,5 +185,6 @@ int          SDL_LockYUVOverlay(SDL_Overlay *overlay);
 void         SDL_UnlockYUVOverlay(SDL_Overlay *overlay);
 int          SDL_DisplayYUVOverlay(SDL_Overlay *overlay, SDL_Rect *dstrect);
 void         SDL_FreeYUVOverlay(SDL_Overlay *overlay);
+*/
 
 #endif

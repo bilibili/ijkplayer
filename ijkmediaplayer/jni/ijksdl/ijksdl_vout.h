@@ -44,11 +44,12 @@ typedef struct SDL_VoutSurface {
     void (*free_l)(SDL_VoutSurface *surface);
 } SDL_VoutSurface;
 
+typedef struct SDL_Vout_Opaque SDL_Vout_Opaque;
 typedef struct SDL_Vout SDL_Vout;
 typedef struct SDL_Vout {
     SDL_mutex *mutex;
 
-    void *opaque;
+    SDL_Vout_Opaque *opaque;
     void (*free_l)(SDL_Vout *vout);
     int  (*get_surface)(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format);
 } SDL_Vout;
@@ -56,6 +57,6 @@ typedef struct SDL_Vout {
 void SDL_Vout_Free(SDL_Vout *vout);
 int  SDL_Vout_GetSurface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format);
 
-void SDL_VoutSurface_Free(SDL_VoutSurface *surface);
+void SDL_Vout_FreeSurface(SDL_VoutSurface *surface);
 
 #endif

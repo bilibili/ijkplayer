@@ -25,14 +25,16 @@
 #define IJKSDL__IJKSDL_VOUT_ANDROID_H
 
 #include <jni.h>
-#include <android/native_window.h>
 #include "ijksdl_stdinc.h"
 #include "ijksdl_mutex.h"
+#include "ijksdl_vout.h"
 
 typedef struct ANativeWindow ANativeWindow;
 
-SDL_Vout *SDL_VoutAndroid_Create_FromANativeWindow(ANativeWindow *native_window);
-SDL_Vout *SDL_VoutAndroid_Create_FromAndroidSurface(jobject android_surface);
+SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow();
+void      SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_window);
 
-void      SDL_VoutAndroid_SetNativeWindow(SDL_Vout vout, ANativeWindow *native_window);
-void      SDL_VoutAndroid_SetAndroidSurface(SDL_Vout vout, jobject android_surface);
+SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface();
+void      SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, JNIEnv *env, jobject android_surface);
+
+#endif

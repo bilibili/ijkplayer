@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <android/native_window_jni.h>
 
-void SDL_VoutFree(SDL_Vout *vout)
+void SDL_Vout_Free(SDL_Vout *vout)
 {
     if (!vout)
         return;
@@ -38,7 +38,7 @@ void SDL_VoutFree(SDL_Vout *vout)
     }
 }
 
-int SDL_VoutGetSurface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format)
+int SDL_Vout_GetSurface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h, int format)
 {
     assert(ppsurface);
     if (!ppsurface || !vout || !vout->get_surface)
@@ -51,7 +51,7 @@ int SDL_VoutGetSurface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, int h
     return retval;
 }
 
-void SDL_VoutSurface_Free(SDL_VoutSurface *surface)
+void SDL_Vout_FreeSurface(SDL_VoutSurface *surface)
 {
     if (!surface)
         return;

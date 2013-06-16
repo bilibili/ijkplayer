@@ -33,4 +33,6 @@
 #include "ijksdl_video.h"
 #include "ijksdl_vout.h"
 
+#include "ijksdl_vout_android.h"
+
 #endif

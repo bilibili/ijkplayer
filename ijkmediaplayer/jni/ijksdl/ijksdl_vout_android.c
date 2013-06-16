@@ -23,6 +23,8 @@
 
 #include "ijksdl_vout_android.h"
 
+#include <assert.h>
+#include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include "ijksdl_vout.h"
 #include "ijksdl_vout_internal.h"
@@ -49,19 +51,19 @@ static void surface_opaque_free(SDL_VoutSurface *surface)
         surface->opaque = NULL;
     }
 
-    SDL_VoutSurface_FreeInternal(surface);
+    SDL_Vout_FreeSurfaceInternal(surface);
 }
 
 static SDL_VoutSurface *surface_create_l(ANativeWindow *native_window)
 {
-    SDL_VoutSurface *surface = SDL_VoutSurface_CreateInternal();
+    SDL_VoutSurface *surface = SDL_Vout_CreateSurfaceInternal();
     if (!surface)
-        return -1;
+        return NULL;
 
     SDL_VoutSurface_Opaque *opaque = (SDL_VoutSurface_Opaque*) malloc(sizeof(SDL_VoutSurface_Opaque));
     if (!opaque) {
         free(surface);
-        return -1;
+        return NULL;
     }
     memset(opaque, 0, sizeof(opaque));
 
@@ -104,7 +106,7 @@ static int vout_get_surface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, 
         if (surface_opaque->native_window == vout_opaque->native_window &&
             w == surface->w && h == surface->h && format == surface->format) {
         } else {
-            SDL_VoutSurfaceFree(surface);
+            SDL_Vout_FreeSurface(surface);
             *ppsurface = NULL;
             surface = NULL;
         }
@@ -113,7 +115,7 @@ static int vout_get_surface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, 
     // aquire new native_window from vout */
     if (surface == NULL) {
         new_native_window = vout_opaque->native_window;
-        ANativeWindow_aquire(new_native_window);
+        ANativeWindow_acquire(new_native_window);
     }
 
     SDL_UnlockMutex(vout->mutex);
@@ -143,7 +145,7 @@ static int vout_get_surface(SDL_Vout *vout, SDL_VoutSurface** ppsurface, int w, 
     return surface ? 0 : -1;
 }
 
-SDL_Vout *SDL_VoutAndroid_CreateFromANativeWindow(ANativeWindow *native_window)
+SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
 {
     SDL_Vout *vout = SDL_Vout_CreateInternal();
     if (!vout)
@@ -152,16 +154,10 @@ SDL_Vout *SDL_VoutAndroid_CreateFromANativeWindow(ANativeWindow *native_window)
     SDL_Vout_Opaque *opaque = malloc(sizeof(SDL_Vout_Opaque));
     if (!opaque)
     {
-        SDL_Vout_Free(opaque);
+        SDL_Vout_Free(vout);
         return NULL;
     }
     memset(opaque, 0, sizeof(SDL_Vout_Opaque));
-
-    if (native_window) {
-        ANativeWindow_acquire(native_window);
-    }
-
-    opaque->native_window = native_window;
 
     vout->opaque = opaque;
     vout->free_l = vout_opaque_free;
@@ -170,22 +166,7 @@ SDL_Vout *SDL_VoutAndroid_CreateFromANativeWindow(ANativeWindow *native_window)
     return vout;
 }
 
-SDL_Vout *SDL_VoutAndroid_CreateFromAndroidSurface(jobject android_surface)
-{
-    if (!android_surface)
-        return NULL;
-
-    ANativeWindow *native_window = ANativeWindow_fromSurface(android_surface);
-    if (!native_window)
-        return NULL;
-
-    SDL_Vout *vout = SDL_Vout_Create_FromANativeWindow(native_window);
-    ANativeWindow_release(native_window);
-
-    return vout;
-}
-
-static void SDL_VoutAndroid_SetNativeWindow_l(SDL_Vout vout, ANativeWindow *native_window)
+static void SDL_VoutAndroid_SetNativeWindow_l(SDL_Vout *vout, ANativeWindow *native_window)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
 
@@ -199,22 +180,27 @@ static void SDL_VoutAndroid_SetNativeWindow_l(SDL_Vout vout, ANativeWindow *nati
     opaque->native_window = native_window;
 }
 
-void SDL_VoutAndroid_SetNativeWindow(SDL_Vout vout, ANativeWindow *native_window)
+void SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_window)
 {
     SDL_LockMutex(vout->mutex);
     SDL_VoutAndroid_SetNativeWindow_l(vout, native_window);
     SDL_UnlockMutex(vout->mutex);
 }
 
-void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout vout, jobject android_surface)
+SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface()
+{
+    return SDL_VoutAndroid_CreateForANativeWindow();
+}
+
+void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, JNIEnv *env, jobject android_surface)
 {
     if (!android_surface)
         return;
 
-    ANativeWindow *native_window = ANativeWindow_fromSurface(android_surface);
+    ANativeWindow *native_window = ANativeWindow_fromSurface(env, android_surface);
     if (!native_window)
         return;
 
-    SDL_VoutNativeWindow_SetNativeWindow(native_window);
+    SDL_VoutAndroid_SetNativeWindow(vout, native_window);
     ANativeWindow_release(native_window);
 }
