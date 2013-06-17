@@ -304,33 +304,46 @@ int ijkmp_stop(IjkMediaPlayer *mp)
     return retval;
 }
 
-int ijkmp_get_video_width(IjkMediaPlayer *mp)
+void ijkmp_seek_to(IjkMediaPlayer *mp, int msec)
+{
+// FIXME: implement
+}
+
+bool ijkmp_is_playing(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    if (mp->mp_state == MP_STATE_PREPARED ||
+        mp->mp_state == MP_STATE_STARTED) {
+        return true;
+    }
+
+    return false;
+}
+
+static int ijkmp_get_current_position_l(IjkMediaPlayer *mp)
 {
     // FIXME: implement
     return 0;
 }
 
-bool ijkmp_is_playing(IjkMediaPlayer *mp)
-{
-// FIXME: implement
-    return false;
-}
-
 int ijkmp_get_current_position(IjkMediaPlayer *mp)
 {
-// FIXME: implement
-    return 0;
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ijkmp_stop_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
 }
 
 int ijkmp_get_duration(IjkMediaPlayer *mp)
 {
-// FIXME: implement
+    // FIXME: implement
     return 0;
 }
 
 void ijkmp_reset(IjkMediaPlayer *mp)
 {
-// FIXME: implement
+    // FIXME: implement
 }
 
 void ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout)
