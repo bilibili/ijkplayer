@@ -149,11 +149,11 @@ void ijkmp_inc_ref(IjkMediaPlayer *mp);
 // NOTE: ijkmp_dec_ref may block thread
 void ijkmp_dec_ref(IjkMediaPlayer **pmp);
 
-int  ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
-int  ijkmp_prepare_async(IjkMediaPlayer *mp);
-int  ijkmp_start(IjkMediaPlayer *mp);
-int  ijkmp_pause(IjkMediaPlayer *mp);
-int  ijkmp_stop(IjkMediaPlayer *mp);
+int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
+int ijkmp_prepare_async(IjkMediaPlayer *mp);
+int ijkmp_start(IjkMediaPlayer *mp);
+int ijkmp_pause(IjkMediaPlayer *mp);
+int ijkmp_stop(IjkMediaPlayer *mp);
 int ijkmp_get_video_width(IjkMediaPlayer *mp);
 int ijkmp_get_video_height(IjkMediaPlayer *mp);
 void ijkmp_seek_to(IjkMediaPlayer *mp, int msec);

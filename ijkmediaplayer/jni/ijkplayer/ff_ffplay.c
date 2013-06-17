@@ -2479,7 +2479,7 @@ void ijkff_destroy_ffplayer(FFPlayer **pffp)
     *pffp = NULL;
 }
 
-int ijkff_stream_open(FFPlayer *ffp, const char *file_name)
+int ijkff_stream_open_l(FFPlayer *ffp, const char *file_name)
 {
     assert(ffp);
     assert(file_name);
@@ -2492,7 +2492,7 @@ int ijkff_stream_open(FFPlayer *ffp, const char *file_name)
     return 0;
 }
 
-int ijkff_start(FFPlayer *ffp)
+int ijkff_start_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = &ffp->is;
@@ -2508,7 +2508,7 @@ int ijkff_start(FFPlayer *ffp)
     return 0;
 }
 
-int ijkff_pause(FFPlayer *ffp)
+int ijkff_pause_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = &ffp->is;
@@ -2517,7 +2517,15 @@ int ijkff_pause(FFPlayer *ffp)
     return 0;
 }
 
-int ijkff_stop(FFPlayer *ffp)
+int ijkff_stop_l(FFPlayer *ffp)
+{
+    assert(ffp);
+    VideoState *is = &ffp->is;
+    is->abort_request = 1;
+    return 0;
+}
+
+int ijkff_wait_stop(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = &ffp->is;

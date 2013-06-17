@@ -31,9 +31,10 @@ void ijkff_global_uninit();
 
 void ijkff_destroy_ffplayer(FFPlayer **pffp);
 
-int ijkff_stream_open(FFPlayer *ffp, const char *file_name);
-int ijkff_start(FFPlayer *ffp);
-int ijkff_pause(FFPlayer *ffp);
-int ijkff_stop(FFPlayer *ffp);
+int ijkff_stream_open_l(FFPlayer *ffp, const char *file_name);
+int ijkff_start_l(FFPlayer *ffp);
+int ijkff_pause_l(FFPlayer *ffp);
+int ijkff_stop_l(FFPlayer *ffp);
+int ijkff_wait_stop(FFPlayer *ffp);
 
 #endif

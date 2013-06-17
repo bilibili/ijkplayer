@@ -36,6 +36,7 @@
 
 typedef struct IjkMediaPlayer {
     volatile int ref_count;
+    pthread_mutex_t mutex;
     FFPlayer *ffplayer;
 
     int mp_state;
@@ -50,6 +51,8 @@ inline static void destroy_mp(IjkMediaPlayer **pmp)
     IjkMediaPlayer *mp = *pmp;
     if (!mp)
         return;
+
+    pthread_mutex_destroy(&mp->mutex);
 
     ijkff_destroy_ffplayer(&mp->ffplayer);
     free(mp->data_source);
@@ -87,6 +90,8 @@ IjkMediaPlayer *ijkmp_create()
     FFPlayer *ffp = mp->ffplayer;
     ijkff_reset(ffp);
 
+    pthread_mutex_init(&mp->mutex, NULL);
+
     ijkmp_inc_ref(mp);
     return mp;
 }
@@ -116,7 +121,7 @@ void ijkmp_dec_ref(IjkMediaPlayer **pmp)
     *pmp = NULL;
 }
 
-int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
+static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
 {
     assert(mp);
     assert(url);
@@ -142,7 +147,17 @@ int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
     return 0;
 }
 
-int ijkmp_prepare_async(IjkMediaPlayer *mp)
+int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
+{
+    assert(mp);
+    assert(url);
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ijkmp_set_data_source_l(mp, url);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
+}
+
+static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
 {
     assert(mp);
     assert(url);
@@ -160,17 +175,26 @@ int ijkmp_prepare_async(IjkMediaPlayer *mp)
 
     assert(mp->data_source);
 
+    mp->mp_state = MP_STATE_ASYNC_PREPARING;
     int retval = ijkff_stream_open(mp->ffplayer, mp->data_source);
     if (retval < 0) {
         mp->mp_state = MP_STATE_ERROR;
         return retval;
     }
 
-    mp->mp_state = MP_STATE_ASYNC_PREPARING;
     return 0;
 }
 
-int ijkmp_start(IjkMediaPlayer *mp)
+int ijkmp_prepare_async(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ijkmp_prepare_async_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
+}
+
+static int ijkmp_start_l(IjkMediaPlayer *mp)
 {
     assert(mp);
 
@@ -185,24 +209,104 @@ int ijkmp_start(IjkMediaPlayer *mp)
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
 
-    assert(mp->data_source);
+    int retval = ijkff_start_l(mp->ffplayer);
+    if (retval < 0) {
+        return retval;
+    }
+
+    if (mp->mp_state == MP_STATE_COMPLETED)
+    {
+        // FIXME: handle start after completed
+    }
+
+    mp->mp_state = MP_STATE_STARTED;
+    return 0;
+}
+
+int ijkmp_start(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ijkmp_start_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
+}
+
+static int ijkmp_pause_l(IjkMediaPlayer *mp)
+{
+    assert(mp);
+
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PREPARED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STARTED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PAUSED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_COMPLETED);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STOPPED);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
+
+    int retval = ijkff_pause_l(mp->ffplayer);
+    if (retval < 0) {
+        return retval;
+    }
+
+    if (mp->mp_state == MP_STATE_STARTED)
+        mp->mp_state = MP_STATE_PAUSED;
 
     return 0;
 }
 
-void ijkmp_pause(IjkMediaPlayer *mp)
+int ijkmp_pause(IjkMediaPlayer *mp)
 {
-// FIXME: implement
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ijkmp_pause_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
 }
 
-void ijkmp_stop(IjkMediaPlayer *mp)
+static int ijkmp_stop_l(IjkMediaPlayer *mp)
 {
-// FIXME: implement
+    assert(mp);
+
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PREPARED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STARTED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PAUSED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_COMPLETED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STOPPED);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
+
+    int retval = ijkff_stop_l(mp->ffplayer);
+    if (retval < 0) {
+        return retval;
+    }
+
+    mp->mp_state = MP_STATE_STOPPED;
+    return 0;
+}
+
+int ijkmp_stop(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ijkmp_stop_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+
+    if (retval == 0)
+        ijkff_wait_stop(mp);
+
+    return retval;
 }
 
 int ijkmp_get_video_width(IjkMediaPlayer *mp)
 {
-// FIXME: implement
+    // FIXME: implement
     return 0;
 }
 

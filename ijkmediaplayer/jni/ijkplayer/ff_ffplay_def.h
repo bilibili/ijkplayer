@@ -392,7 +392,18 @@ typedef struct FFPlayer {
 
     SDL_Thread *refresh_video_tid;
     SDL_Thread _refresh_video_tid;
+
+    void  *opaque;
+    void (*msg_process)(void *opaque, int what);
 } FFPlayer;
+
+#define IJKFF_MSG_ERROR             0
+#define IJKFF_MSG_PREPARED          1
+#define IJKFF_MSG_COMPLETED         2
+#define IJKFF_MSG_BUFFERING_START   3
+#define IJKFF_MSG_BUFFERING_END     4
+#define IJKFF_MSG_BUFFERING_UPDATE  5
+#define IJKFF_MSG_SEEK_COMPLETED    6
 
 #define IJKFF_SAFE_FREE(p) do {free(p); p = NULL;} while(0)
 
