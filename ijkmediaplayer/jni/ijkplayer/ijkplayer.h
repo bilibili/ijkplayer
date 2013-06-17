@@ -154,8 +154,6 @@ int ijkmp_prepare_async(IjkMediaPlayer *mp);
 int ijkmp_start(IjkMediaPlayer *mp);
 int ijkmp_pause(IjkMediaPlayer *mp);
 int ijkmp_stop(IjkMediaPlayer *mp);
-int ijkmp_get_video_width(IjkMediaPlayer *mp);
-int ijkmp_get_video_height(IjkMediaPlayer *mp);
 void ijkmp_seek_to(IjkMediaPlayer *mp, int msec);
 bool ijkmp_is_playing(IjkMediaPlayer *mp);
 int ijkmp_get_current_position(IjkMediaPlayer *mp);

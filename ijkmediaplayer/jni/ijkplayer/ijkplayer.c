@@ -310,17 +310,6 @@ int ijkmp_get_video_width(IjkMediaPlayer *mp)
     return 0;
 }
 
-int ijkmp_get_video_height(IjkMediaPlayer *mp)
-{
-// FIXME: implement
-    return 0;
-}
-
-void ijkmp_seek_to(IjkMediaPlayer *mp, int msec)
-{
-// FIXME: implement
-}
-
 bool ijkmp_is_playing(IjkMediaPlayer *mp)
 {
 // FIXME: implement

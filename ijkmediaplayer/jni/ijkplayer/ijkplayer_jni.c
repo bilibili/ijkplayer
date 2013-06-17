@@ -173,34 +173,6 @@ IjkMediaPlayer_pause(JNIEnv *env, jobject thiz)
     ijkmp_dec_ref(&mp);
 }
 
-static int
-IjkMediaPlayer_getVideoWidth(JNIEnv *env, jobject thiz)
-{
-    int retval = 0;
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getVideoWidth: null mp", LABEL_RETURN);
-
-    retval = ijkmp_get_video_width(mp);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-    return retval;
-}
-
-static int
-IjkMediaPlayer_getVideoHeight(JNIEnv *env, jobject thiz)
-{
-    int retval = 0;
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getVideoHeight: null mp", LABEL_RETURN);
-
-    retval = ijkmp_get_video_height(mp);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-    return retval;
-}
-
 static void
 IjkMediaPlayer_seekTo(JNIEnv *env, jobject thiz, int msec)
 {
@@ -340,8 +312,6 @@ static JNINativeMethod g_methods[] = {
     { "prepareAsync", "()V", (void *) IjkMediaPlayer_prepareAsync },
     { "_start", "()V", (void *) IjkMediaPlayer_start },
     { "_stop", "()V", (void *) IjkMediaPlayer_stop },
-    { "getVideoWidth", "()I", (void *) IjkMediaPlayer_getVideoWidth },
-    { "getVideoHeight", "()I", (void *) IjkMediaPlayer_getVideoHeight },
     { "seekTo", "(I)V", (void *) IjkMediaPlayer_seekTo },
     { "_pause", "()V", (void *) IjkMediaPlayer_pause },
     { "isPlaying", "()Z", (void *) IjkMediaPlayer_isPlaying },

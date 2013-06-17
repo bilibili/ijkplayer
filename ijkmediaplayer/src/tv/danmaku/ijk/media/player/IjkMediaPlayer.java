@@ -256,10 +256,16 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
-    public native int getVideoWidth();
+    public int getVideoWidth() {
+        // FIXME: implement
+        return 0;
+    }
 
     @Override
-    public native int getVideoHeight();
+    public int getVideoHeight() {
+        // FIXME: implement
+        return 0;
+    }
 
     @Override
     public native boolean isPlaying();
