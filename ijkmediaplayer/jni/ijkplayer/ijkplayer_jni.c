@@ -27,9 +27,16 @@
 #include "ijksdl/ijksdl.h"
 #include "ijkutil/ijkutil.h"
 #include "ijkplayer.h"
+#include "ijkerror.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
+#define JNI_IJK_MEDIA_EXCEPTION "tv/danmaku/ijk/media/player/IjkMediaException"
+
+#define IJK_CHECK_MPRET_GOTO(retval, env, label) \
+    JNI_CHECK_GOTO((retval != EIJK_INVALID_STATE), env, "java/lang/IllegalStateException", NULL, LABEL_RETURN); \
+    JNI_CHECK_GOTO((retval != EIJK_OUT_OF_MEMORY), env, "java/lang/OutOfMemoryError", NULL, LABEL_RETURN); \
+    JNI_CHECK_GOTO((retval < 0), env, JNI_IJK_MEDIA_EXCEPTION, NULL, LABEL_RETURN);
 
 typedef struct player_fields_t {
     pthread_mutex_t mutex;
@@ -81,6 +88,7 @@ IjkMediaPlayer_setDataSourceAndHeaders(
     JNIEnv *env, jobject thiz, jstring path,
     jobjectArray keys, jobjectArray values)
 {
+    int retval = 0;
     const char *c_path = NULL;
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(path, env, "java/lang/IllegalArgumentException", "mpjni: setDataSource: null path", LABEL_RETURN);
@@ -90,8 +98,10 @@ IjkMediaPlayer_setDataSourceAndHeaders(
     JNI_CHECK_GOTO(c_path, env, "java/lang/OutOfMemoryError", "mpjni: setDataSource: path.string oom", LABEL_RETURN);
 
     ALOGV("setDataSource: path %s", c_path);
-    ijkmp_set_data_source(mp, c_path);
+    retval = ijkmp_set_data_source(mp, c_path);
     (*env)->ReleaseStringUTFChars(env, path, c_path);
+
+    IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
 
     LABEL_RETURN:
     ijkmp_dec_ref(&mp);
@@ -116,10 +126,12 @@ IjkMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
 static void
 IjkMediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
 {
+    int retval = 0;
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: prepareAsync: null mp", LABEL_RETURN);
 
-    ijkmp_prepare_async(mp);
+    retval = ijkmp_prepare_async(mp);
+    IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
 
     LABEL_RETURN:
     ijkmp_dec_ref(&mp);
@@ -280,7 +292,7 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 static void
 IjkMediaPlayer_native_init(JNIEnv *env)
 {
-// FIXME: implement
+    // FIXME: implement
 }
 
 static void

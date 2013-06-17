@@ -29,10 +29,109 @@ struct IjkMediaPlayer;
 typedef struct FFPlayer FFPlayer;
 typedef struct SDL_Vout SDL_Vout;
 
-typedef struct IjkMediaPlayer {
-    volatile int ref_count;
-    FFPlayer *ffplayer;
-} IjkMediaPlayer;
+/*-
+ MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
+ MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);
+ MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ASYNC_PREPARING);
+ MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PREPARED);
+ MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STARTED);
+ MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PAUSED);
+ MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_COMPLETED);
+ MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STOPPED);
+ MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
+ MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
+ */
+
+/*-
+ * ijkmp_set_data_source()  -> MP_STATE_INITIALIZED
+ *
+ * ijkmp_reset              -> self
+ * ijkmp_release            -> MP_STATE_END
+ */
+#define MP_STATE_IDLE               0
+
+/*-
+ * ijkmp_prepare_async()    -> MP_STATE_ASYNC_PREPARING
+ *
+ * ijkmp_reset              -> MP_STATE_IDLE
+ * ijkmp_release            -> MP_STATE_END
+ */
+#define MP_STATE_INITIALIZED        1
+
+/*-
+ *                   ...    -> MP_STATE_PREPARED
+ *                   ...    -> MP_STATE_ERROR
+ *
+ * ijkmp_reset              -> MP_STATE_IDLE
+ * ijkmp_release            -> MP_STATE_END
+ */
+#define MP_STATE_ASYNC_PREPARING    2
+
+/*-
+ * ijkmp_seek_to()          -> self
+ * ijkmp_start()            -> MP_STATE_STARTED
+ *
+ * ijkmp_reset              -> MP_STATE_IDLE
+ * ijkmp_release            -> MP_STATE_END
+ */
+#define MP_STATE_PREPARED           3
+
+/*-
+ * ijkmp_seek_to()          -> self
+ * ijkmp_start()            -> self
+ * ijkmp_pause()            -> MP_STATE_PAUSED
+ * ijkmp_stop()             -> MP_STATE_STOPPED
+ *                   ...    -> MP_STATE_COMPLETED
+ *                   ...    -> MP_STATE_ERROR
+ *
+ * ijkmp_reset              -> MP_STATE_IDLE
+ * ijkmp_release            -> MP_STATE_END
+ */
+#define MP_STATE_STARTED            4
+
+/*-
+ * ijkmp_seek_to()          -> self
+ * ijkmp_start()            -> MP_STATE_STARTED
+ * ijkmp_pause()            -> self
+ * ijkmp_stop()             -> MP_STATE_STOPPED
+ *
+ * ijkmp_reset              -> MP_STATE_IDLE
+ * ijkmp_release            -> MP_STATE_END
+ */
+#define MP_STATE_PAUSED             5
+
+/*-
+ * ijkmp_seek_to()          -> self
+ * ijkmp_start()            -> MP_STATE_STARTED (from beginning)
+ * ijkmp_pause()            -> self
+ * ijkmp_stop()             -> MP_STATE_STOPPED
+ *
+ * ijkmp_reset              -> MP_STATE_IDLE
+ * ijkmp_release            -> MP_STATE_END
+ */
+#define MP_STATE_COMPLETED          6
+
+/*-
+ * ijkmp_stop()             -> self
+ * ijkmp_prepare_async()    -> MP_STATE_ASYNC_PREPARING
+ *
+ * ijkmp_reset              -> MP_STATE_IDLE
+ * ijkmp_release            -> MP_STATE_END
+ */
+#define MP_STATE_STOPPED            7
+
+/*-
+ * ijkmp_reset              -> MP_STATE_IDLE
+ * ijkmp_release            -> MP_STATE_END
+ */
+#define MP_STATE_ERROR              8
+
+/*-
+ * ijkmp_release            -> self
+ */
+#define MP_STATE_END                9
+
+typedef struct IjkMediaPlayer IjkMediaPlayer;
 
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create();
@@ -50,20 +149,20 @@ void ijkmp_inc_ref(IjkMediaPlayer *mp);
 // NOTE: ijkmp_dec_ref may block thread
 void ijkmp_dec_ref(IjkMediaPlayer **pmp);
 
-void ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
-void ijkmp_prepare_async(IjkMediaPlayer *mp);
-void ijkmp_start(IjkMediaPlayer *mp);
-void ijkmp_stop(IjkMediaPlayer *mp);
-void ijkmp_pause(IjkMediaPlayer *mp);
-int  ijkmp_get_video_width(IjkMediaPlayer *mp);
-int  ijkmp_get_video_height(IjkMediaPlayer *mp);
+int  ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
+int  ijkmp_prepare_async(IjkMediaPlayer *mp);
+int  ijkmp_start(IjkMediaPlayer *mp);
+int  ijkmp_pause(IjkMediaPlayer *mp);
+int  ijkmp_stop(IjkMediaPlayer *mp);
+int ijkmp_get_video_width(IjkMediaPlayer *mp);
+int ijkmp_get_video_height(IjkMediaPlayer *mp);
 void ijkmp_seek_to(IjkMediaPlayer *mp, int msec);
 bool ijkmp_is_playing(IjkMediaPlayer *mp);
-int  ijkmp_get_current_position(IjkMediaPlayer *mp);
-int  ijkmp_get_duration(IjkMediaPlayer *mp);
+int ijkmp_get_current_position(IjkMediaPlayer *mp);
+int ijkmp_get_duration(IjkMediaPlayer *mp);
 void ijkmp_reset(IjkMediaPlayer *mp);
 
-void      ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout);
+void ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout);
 SDL_Vout *ijkmp_get_vout(IjkMediaPlayer *mp);
 
 #endif

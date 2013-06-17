@@ -24,8 +24,8 @@
 #ifndef IJKPLAYER__IJKERROR_H
 #define IJKPLAYER__IJKERROR_H
 
-#define EIJK_OK                 0
 #define EIJK_FAILED             -1
 #define EIJK_OUT_OF_MEMORY      -2
+#define EIJK_INVALID_STATE      -3
 
 #endif

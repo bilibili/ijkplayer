@@ -23,6 +23,7 @@
 
 #include "ff_ffplay.h"
 #include "ff_cmdutils.h"
+#include "ijkerror.h"
 
 static int packet_queue_put(PacketQueue *q, AVPacket *pkt);
 
@@ -2147,6 +2148,8 @@ static int read_thread(void *arg)
     if (ffp->infinite_buffer < 0 && is->realtime)
         ffp->infinite_buffer = 1;
 
+    // FIXME: post prepared event
+
     for (;;) {
         if (is->abort_request)
             break;
@@ -2463,4 +2466,53 @@ void ijkff_global_uninit()
     /* FIXME: SDL_Quit(); */
 
     g_ffmpeg_global_inited = false;
+}
+
+void ijkff_destroy_ffplayer(FFPlayer **pffp)
+{
+    if (!pffp || !*pffp)
+        return;
+
+    FFPlayer *ffp = *pffp;
+    ijkff_reset(ffp);
+    free(ffp);
+    *pffp = NULL;
+}
+
+int ijkff_stream_open(FFPlayer *ffp, const char *file_name)
+{
+    assert(ffp);
+    assert(file_name);
+    assert(!ffp->is.read_tid);
+
+    VideoState *is = stream_open(ffp, file_name, NULL);
+    if (!is)
+        return EIJK_OUT_OF_MEMORY;
+
+    return 0;
+}
+
+int ijkff_start(FFPlayer *ffp)
+{
+    assert(ffp);
+    VideoState *is = &ffp->is;
+    if (is->paused) {
+        is->frame_timer += av_gettime() / 1000000.0 + is->video_current_pts_drift - is->video_current_pts;
+        if (is->read_pause_return != AVERROR(ENOSYS)) {
+            is->video_current_pts = is->video_current_pts_drift + av_gettime() / 1000000.0;
+        }
+        is->video_current_pts_drift = is->video_current_pts - av_gettime() / 1000000.0;
+    }
+    update_external_clock_pts(is, get_external_clock(is));
+    is->paused = 0;
+    return 0;
+}
+
+int ijkff_pause(FFPlayer *ffp)
+{
+    assert(ffp);
+    VideoState *is = &ffp->is;
+    update_external_clock_pts(is, get_external_clock(is));
+    is->paused = 1;
+    return 0;
 }
