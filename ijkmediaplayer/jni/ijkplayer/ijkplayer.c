@@ -99,7 +99,20 @@ IjkMediaPlayer *ijkmp_create()
 void ijkmp_shutdown(IjkMediaPlayer *mp)
 {
     assert(mp);
-// FIXME: implement
+    // FIXME: implement
+}
+
+void ijkmp_reset(IjkMediaPlayer *mp)
+{
+    assert(mp);
+
+    ijkmp_stop(mp);
+
+    ijkff_reset(mp->ffplayer);
+
+    free(mp->data_source);
+    mp->data_source = NULL;
+    mp->mp_state = MP_STATE_IDLE;
 }
 
 void ijkmp_inc_ref(IjkMediaPlayer *mp)
@@ -304,12 +317,6 @@ int ijkmp_stop(IjkMediaPlayer *mp)
     return retval;
 }
 
-int ijkmp_seek_to(IjkMediaPlayer *mp, long msec)
-{
-    // FIXME: implement
-    return 0;
-}
-
 bool ijkmp_is_playing(IjkMediaPlayer *mp)
 {
     assert(mp);
@@ -319,6 +326,39 @@ bool ijkmp_is_playing(IjkMediaPlayer *mp)
     }
 
     return false;
+}
+
+int ijkmp_seek_to_l(IjkMediaPlayer *mp, long msec)
+{
+    assert(mp);
+
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PREPARED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STARTED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PAUSED);
+    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_COMPLETED);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STOPPED);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
+    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
+
+    int retval = ijkmp_seek_to_l(mp->ffplayer, msec);
+    if (retval < 0) {
+        return retval;
+    }
+
+    return 0;
+}
+
+int ijkmp_seek_to(IjkMediaPlayer *mp, long msec)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ijkmp_seek_to(mp, msec);
+    pthread_mutex_unlock(&mp->mutex);
+
+    return retval;
 }
 
 static long ijkmp_get_current_position_l(IjkMediaPlayer *mp)
@@ -347,11 +387,6 @@ long ijkmp_get_duration(IjkMediaPlayer *mp)
     int retval = ijkmp_get_duration_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     return retval;
-}
-
-void ijkmp_reset(IjkMediaPlayer *mp)
-{
-    // FIXME: implement
 }
 
 void ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout)

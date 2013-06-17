@@ -2550,6 +2550,21 @@ int ijkff_wait_stop(FFPlayer *ffp)
     return 0;
 }
 
+int ijkff_seek_to_l(FFPlayer *ffp, long msec)
+{
+    assert(ffp);
+    VideoState *is = ffp->is;
+    if (!is)
+        return EIJK_NULL_IS_PTR;
+
+    // FIXME: thread-safe
+    // FIXME: seek by bytes
+    // FIXME: seek out of range
+    // FIXME: seekable
+    stream_seek(ffp, milliseconds_to_fftime(msec), 0, 0);
+    return 0;
+}
+
 long ijkff_get_current_position_l(FFPlayer *ffp)
 {
     assert(ffp);

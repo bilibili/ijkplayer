@@ -406,7 +406,8 @@ typedef struct FFPlayer {
 #define IJKFF_MSG_SEEK_COMPLETED    6
 
 #define IJKFF_SAFE_FREE(p) do {free(p); p = NULL;} while(0)
-#define fftime_to_milliseconds(t) (t / (AV_TIME_BASE / 1000))
+#define fftime_to_milliseconds(ts) (ts / (AV_TIME_BASE / 1000))
+#define milliseconds_to_fftime(ms) (ms * (AV_TIME_BASE / 1000))
 
 inline static void ijkff_reset(FFPlayer *ffp)
 {

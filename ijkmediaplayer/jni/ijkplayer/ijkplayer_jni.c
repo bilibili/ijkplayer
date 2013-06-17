@@ -251,7 +251,6 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
 static void
 IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 {
-    // FIXME: consider create new MediaPlayer
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: reset: null mp", LABEL_RETURN);
 
