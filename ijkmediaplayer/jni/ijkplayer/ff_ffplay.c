@@ -2549,3 +2549,38 @@ int ijkff_wait_stop(FFPlayer *ffp)
     ffp->is = NULL;
     return 0;
 }
+
+long ijkff_get_current_position_l(FFPlayer *ffp)
+{
+    assert(ffp);
+    VideoState *is = ffp->is;
+    if (!is || !is->ic)
+        return 0;
+
+    int64_t start_time = is->ic->start_time;
+    double pos = get_master_clock(is);
+    if (isnan(pos))
+        pos = (double)is->seek_pos / AV_TIME_BASE;
+
+    if (pos < 0 || pos < start_time)
+        return 0;
+
+    int64_t adjust_post = pos - start_time;
+    return fftime_to_milliseconds(adjust_post);
+}
+
+long ijkff_get_duration_l(FFPlayer *ffp)
+{
+    assert(ffp);
+    VideoState *is = ffp->is;
+    if (!is || !is->ic)
+        return 0;
+
+    int64_t start_time = is->ic->start_time;
+    int64_t duration = is->ic->duration;
+    if (duration < 0 || duration < start_time)
+        return 0;
+
+    int64_t adjust_duration = duration - start_time;
+    return fftime_to_milliseconds(adjust_duration);
+}

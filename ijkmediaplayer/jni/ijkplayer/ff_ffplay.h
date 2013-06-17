@@ -37,4 +37,8 @@ int ijkff_pause_l(FFPlayer *ffp);
 int ijkff_stop_l(FFPlayer *ffp);
 int ijkff_wait_stop(FFPlayer *ffp);
 
+/* all in milliseconds */
+long ijkff_get_current_position_l(FFPlayer *ffp);
+long ijkff_get_duration_l(FFPlayer *ffp);
+
 #endif

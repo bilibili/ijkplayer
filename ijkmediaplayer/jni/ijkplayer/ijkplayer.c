@@ -323,23 +323,21 @@ bool ijkmp_is_playing(IjkMediaPlayer *mp)
 
 static long ijkmp_get_current_position_l(IjkMediaPlayer *mp)
 {
-    // FIXME: implement
-    return 0;
+    return ijkff_get_current_position_l(mp->ffplayer);
 }
 
 long ijkmp_get_current_position(IjkMediaPlayer *mp)
 {
     assert(mp);
     pthread_mutex_lock(&mp->mutex);
-    long retval = ijkmp_stop_l(mp);
+    long retval = ijkmp_get_current_position_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     return retval;
 }
 
 static long ijkmp_get_duration_l(IjkMediaPlayer *mp)
 {
-    // FIXME: implement
-    return 0;
+    return ijkff_get_duration_l(mp->ffplayer);
 }
 
 long ijkmp_get_duration(IjkMediaPlayer *mp)
