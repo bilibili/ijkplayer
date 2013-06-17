@@ -312,7 +312,7 @@ static SDL_Surface *screen;
 /* ffplayer */
 typedef struct FFPlayer {
     /* ffplay context */
-    VideoState is;
+    VideoState *is;
 
     /* format/codec options */
     AVDictionary *format_opts;
@@ -409,7 +409,7 @@ typedef struct FFPlayer {
 
 inline static void ijkff_reset(FFPlayer *ffp)
 {
-    /* FIXME: reset ffp->is */
+    /* ffp->is closed in stream_close() */
 
     /* format/codec options */
     av_dict_free(&ffp->format_opts);

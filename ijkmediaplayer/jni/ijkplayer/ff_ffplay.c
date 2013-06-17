@@ -403,7 +403,7 @@ static void free_subpicture(SubPicture *sp)
 
 static void video_image_display(FFPlayer *ffp)
 {
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     VideoPicture *vp;
     SubPicture *sp;
     AVPicture pict;
@@ -457,9 +457,8 @@ static void video_image_display(FFPlayer *ffp)
 // MERGE: compute_mod
 // MERGE: video_audio_display
 
-static void stream_close(FFPlayer *ffp)
+static void stream_close(VideoState *is)
 {
-    VideoState *is = &ffp->is;
     VideoPicture *vp;
     int i;
     /* XXX: use a special url_shutdown call to abort parse cleanly */
@@ -496,7 +495,7 @@ static void stream_close(FFPlayer *ffp)
 
 static int video_open(FFPlayer *ffp, int force_set_video_mode, VideoPicture *vp)
 {
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
     int w, h;
 
@@ -752,7 +751,7 @@ static void update_video_pts(VideoState *is, double pts, int64_t pos, int serial
 static void video_refresh(FFPlayer *opaque, double *remaining_time)
 {
     FFPlayer *ffp = opaque;
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     VideoPicture *vp;
     double time;
 
@@ -925,7 +924,7 @@ display:
    potential locking problems */
 static void alloc_picture(FFPlayer *ffp)
 {
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     VideoPicture *vp;
 
     vp = &is->pictq[is->pictq_windex];
@@ -982,7 +981,7 @@ static void duplicate_right_border_pixels(SDL_VoutOverlay *bmp) {
 
 static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t pos, int serial)
 {
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     VideoPicture *vp;
 
 #if defined(DEBUG_SYNC) && 0
@@ -1101,7 +1100,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
 
 static int get_video_frame(FFPlayer *ffp, AVFrame *frame, int64_t *pts, AVPacket *pkt, int *serial)
 {
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     int got_picture;
 
     if (packet_queue_get(&is->videoq, pkt, 1, serial) < 0)
@@ -1267,7 +1266,7 @@ static int video_thread(void *arg)
 {
     AVPacket pkt = { 0 };
     FFPlayer *ffp = arg;
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     AVFrame *frame = avcodec_alloc_frame();
     int64_t pts_int = AV_NOPTS_VALUE;
 #if CONFIG_AVFILTER
@@ -1711,7 +1710,7 @@ static int audio_decode_frame(VideoState *is)
 static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 {
     FFPlayer *ffp = opaque;
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     int audio_size, len1;
     int bytes_per_sec;
     int frame_size = av_samples_get_buffer_size(NULL, is->audio_tgt.channels, 1, is->audio_tgt.fmt, 1);
@@ -1806,7 +1805,7 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
 /* open a given stream. Return 0 if OK */
 static int stream_component_open(FFPlayer *ffp, int stream_index)
 {
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     AVFormatContext *ic = is->ic;
     AVCodecContext *avctx;
     AVCodec *codec;
@@ -2023,7 +2022,7 @@ static int is_realtime(AVFormatContext *s)
 static int read_thread(void *arg)
 {
     FFPlayer *ffp = arg;
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     AVFormatContext *ic = NULL;
     int err, i, ret;
     int st_index[AVMEDIA_TYPE_NB];
@@ -2305,8 +2304,10 @@ static int read_thread(void *arg)
 
 static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputFormat *iformat)
 {
-    VideoState *is = &ffp->is;
-
+    assert(!ffp->is);
+    VideoState *is = av_mallocz(sizeof(VideoState));
+    if (!is)
+        return NULL;
     av_strlcpy(is->filename, filename, sizeof(is->filename));
     is->iformat = iformat;
     is->ytop    = 0;
@@ -2361,7 +2362,7 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
 // MERGE: show_usage
 // MERGE: show_help_default
 static void video_refresh_thread(FFPlayer *ffp) {
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
     double remaining_time = 0.0;
     while (is->abort_request) {
         if (remaining_time > 0.0)
@@ -2440,7 +2441,6 @@ void ijkff_global_init()
     /* test link begin */
     FFPlayer *ffp = malloc(sizeof(FFPlayer));
     stream_open(ffp, NULL, NULL);
-    stream_close(ffp);
     video_refresh_thread(ffp);
     alloc_picture(NULL);
     /* test link end */
@@ -2450,11 +2450,6 @@ void ijkff_global_uninit()
 {
     if (!g_ffmpeg_global_inited)
         return;
-
-    /* test link begin */
-    FFPlayer *ffp = NULL;
-    stream_close(ffp);
-    /* test link end */
 
     av_lockmgr_register(NULL);
 
@@ -2474,6 +2469,12 @@ void ijkff_destroy_ffplayer(FFPlayer **pffp)
         return;
 
     FFPlayer *ffp = *pffp;
+    if (ffp && ffp->is) {
+        av_log(NULL, AV_LOG_WARNING, "ijkff_destroy_ffplayer: force stream_close()");
+        stream_close(ffp->is);
+        ffp->is = NULL;
+    }
+
     ijkff_reset(ffp);
     free(ffp);
     *pffp = NULL;
@@ -2482,20 +2483,26 @@ void ijkff_destroy_ffplayer(FFPlayer **pffp)
 int ijkff_stream_open_l(FFPlayer *ffp, const char *file_name)
 {
     assert(ffp);
+    assert(!ffp->is);
     assert(file_name);
-    assert(!ffp->is.read_tid);
 
     VideoState *is = stream_open(ffp, file_name, NULL);
-    if (!is)
+    if (!is) {
+        av_log(NULL, AV_LOG_WARNING, "ijkff_stream_open_l: stream_open failed OOM");
         return EIJK_OUT_OF_MEMORY;
+    }
 
+    ffp->is = is;
     return 0;
 }
 
 int ijkff_start_l(FFPlayer *ffp)
 {
     assert(ffp);
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
+    if (!is)
+        return EIJK_NULL_IS_PTR;
+
     if (is->paused) {
         is->frame_timer += av_gettime() / 1000000.0 + is->video_current_pts_drift - is->video_current_pts;
         if (is->read_pause_return != AVERROR(ENOSYS)) {
@@ -2511,7 +2518,10 @@ int ijkff_start_l(FFPlayer *ffp)
 int ijkff_pause_l(FFPlayer *ffp)
 {
     assert(ffp);
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
+    if (!is)
+        return EIJK_NULL_IS_PTR;
+
     update_external_clock_pts(is, get_external_clock(is));
     is->paused = 1;
     return 0;
@@ -2520,7 +2530,10 @@ int ijkff_pause_l(FFPlayer *ffp)
 int ijkff_stop_l(FFPlayer *ffp)
 {
     assert(ffp);
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
+    if (!is)
+        return EIJK_NULL_IS_PTR;
+
     is->abort_request = 1;
     return 0;
 }
@@ -2528,7 +2541,11 @@ int ijkff_stop_l(FFPlayer *ffp)
 int ijkff_wait_stop(FFPlayer *ffp)
 {
     assert(ffp);
-    VideoState *is = &ffp->is;
+    VideoState *is = ffp->is;
+    if (!is)
+        return EIJK_NULL_IS_PTR;
+
     stream_close(is);
+    ffp->is = NULL;
     return 0;
 }

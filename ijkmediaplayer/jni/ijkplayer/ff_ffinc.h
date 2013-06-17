@@ -25,6 +25,7 @@
 #define IJKPLAYER__FF_FFINC_H
 
 #include <stdbool.h>
+#include <assert.h>
 #include "libavutil/avstring.h"
 #include "libavutil/colorspace.h"
 #include "libavformat/avformat.h"

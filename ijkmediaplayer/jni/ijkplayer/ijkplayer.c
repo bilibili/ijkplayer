@@ -176,7 +176,7 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
     assert(mp->data_source);
 
     mp->mp_state = MP_STATE_ASYNC_PREPARING;
-    int retval = ijkff_stream_open(mp->ffplayer, mp->data_source);
+    int retval = ijkff_stream_open_l(mp->ffplayer, mp->data_source);
     if (retval < 0) {
         mp->mp_state = MP_STATE_ERROR;
         return retval;
@@ -299,7 +299,7 @@ int ijkmp_stop(IjkMediaPlayer *mp)
     pthread_mutex_unlock(&mp->mutex);
 
     if (retval == 0)
-        ijkff_wait_stop(mp);
+        ijkff_wait_stop(mp->ffplayer);
 
     return retval;
 }
