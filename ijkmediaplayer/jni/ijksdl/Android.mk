@@ -25,6 +25,7 @@ LOCAL_LDLIBS += -llog -landroid
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 
+LOCAL_SRC_FILES += ijksdl_aout.c
 LOCAL_SRC_FILES += ijksdl_audio.c
 LOCAL_SRC_FILES += ijksdl_error.c
 LOCAL_SRC_FILES += ijksdl_events.c
@@ -35,6 +36,7 @@ LOCAL_SRC_FILES += ijksdl_timer.c
 LOCAL_SRC_FILES += ijksdl_vout.c
 LOCAL_SRC_FILES += ijksdl_vout_ffmpeg.c
 
+LOCAL_SRC_FILES += ijksdl_aout_android.c
 LOCAL_SRC_FILES += ijksdl_vout_android.c
 
 LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil

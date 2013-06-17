@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl.h
+ * ijksdl_aout.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,21 +21,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_H
-#define IJKSDL__IJKSDL_H
+#ifndef IJKSDL__IJKSDL_AOUT_H
+#define IJKSDL__IJKSDL_AOUT_H
 
 #include "ijksdl_audio.h"
-#include "ijksdl_aout.h"
-#include "ijksdl_events.h"
-#include "ijksdl_error.h"
 #include "ijksdl_mutex.h"
-#include "ijksdl_thread.h"
-#include "ijksdl_timer.h"
-#include "ijksdl_video.h"
-#include "ijksdl_vout.h"
-#include "ijksdl_vout_ffmpeg.h"
 
-#include "ijksdl_aout_android.h"
-#include "ijksdl_vout_android.h"
+typedef struct SDL_Aout_Opaque SDL_Aout_Opaque;
+typedef struct SDL_Aout SDL_Aout;
+typedef struct SDL_Aout {
+    SDL_mutex *mutex;
+
+    SDL_Aout_Opaque *opaque;
+    void (*free_l)(SDL_Aout *vout);
+    int (*open_audio)(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained);
+    void (*play_audio)(SDL_Aout *aout);
+    void (*pause_audio)(SDL_Aout *aout);
+    void (*close_audio)(SDL_Aout *aout);
+} SDL_Aout;
+
+int SDL_AoutOpenAudio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained);
+void SDL_AoutPlayAudio(SDL_Aout *aout);
+void SDL_AoutPauseAudio(SDL_Aout *aout);
+void SDL_AoutCloseAudio(SDL_Aout *aout);
+void SDL_AoutFreeAudio(SDL_Aout *aout);
 
 #endif

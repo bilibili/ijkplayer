@@ -51,7 +51,7 @@ inline static void SDL_Vout_FreeInternal(SDL_Vout *vout)
         SDL_DestroyMutex(vout->mutex);
     }
 
-    memset(vout, 0, sizeof(SDL_VoutSurface));
+    memset(vout, 0, sizeof(SDL_Vout));
     free(vout);
 }
 

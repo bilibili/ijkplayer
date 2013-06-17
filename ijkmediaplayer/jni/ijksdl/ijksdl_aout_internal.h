@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl.h
+ * ijksdl_aout_internal.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,21 +21,39 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_H
-#define IJKSDL__IJKSDL_H
+#ifndef IJKSDL__IJKSDL_AOUT_INTERNAL_H
+#define IJKSDL__IJKSDL_AOUT_INTERNAL_H
 
-#include "ijksdl_audio.h"
-#include "ijksdl_aout.h"
-#include "ijksdl_events.h"
-#include "ijksdl_error.h"
 #include "ijksdl_mutex.h"
-#include "ijksdl_thread.h"
-#include "ijksdl_timer.h"
-#include "ijksdl_video.h"
-#include "ijksdl_vout.h"
-#include "ijksdl_vout_ffmpeg.h"
+#include "ijksdl_aout.h"
 
-#include "ijksdl_aout_android.h"
-#include "ijksdl_vout_android.h"
+inline static SDL_Aout *SDL_Aout_CreateInternal()
+{
+    SDL_Aout *aout = (SDL_Aout*) malloc(sizeof(SDL_Aout));
+    if (!aout)
+        return NULL;
+
+    memset(aout, 0, sizeof(SDL_Aout));
+    aout->mutex = SDL_CreateMutex();
+    if (aout->mutex == NULL) {
+        free(aout);
+        return NULL;
+    }
+
+    return aout;
+}
+
+inline static void SDL_Aout_FreeInternal(SDL_Aout *aout)
+{
+    if (!aout)
+        return;
+
+    if (aout->mutex) {
+        SDL_DestroyMutex(aout->mutex);
+    }
+
+    memset(aout, 0, sizeof(SDL_Aout));
+    free(aout);
+}
 
 #endif

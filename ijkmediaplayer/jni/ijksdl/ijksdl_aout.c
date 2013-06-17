@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl.h
+ * ijksdl_aout.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,21 +21,36 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_H
-#define IJKSDL__IJKSDL_H
-
-#include "ijksdl_audio.h"
 #include "ijksdl_aout.h"
-#include "ijksdl_events.h"
-#include "ijksdl_error.h"
-#include "ijksdl_mutex.h"
-#include "ijksdl_thread.h"
-#include "ijksdl_timer.h"
-#include "ijksdl_video.h"
-#include "ijksdl_vout.h"
-#include "ijksdl_vout_ffmpeg.h"
 
-#include "ijksdl_aout_android.h"
-#include "ijksdl_vout_android.h"
+int SDL_AoutOpenAudio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
+{
+    if (aout && desired && aout->open_audio)
+        return aout->open_audio(aout, desired, obtained);
 
-#endif
+    return -1;
+}
+
+void SDL_AoutPlayAudio(SDL_Aout *aout)
+{
+    if (aout && aout->play_audio)
+        return aout->play_audio(aout);
+}
+
+void SDL_AoutPauseAudio(SDL_Aout *aout)
+{
+    if (aout && aout->pause_audio)
+        return aout->pause_audio(aout);
+}
+
+void SDL_AoutCloseAudio(SDL_Aout *aout)
+{
+    if (aout && aout->close_audio)
+        return aout->close_audio(aout);
+}
+
+void SDL_AoutFreeAudio(SDL_Aout *aout)
+{
+    if (aout && aout->free_l)
+        return aout->free_l(aout);
+}
