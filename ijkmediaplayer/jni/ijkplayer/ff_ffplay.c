@@ -2516,3 +2516,11 @@ int ijkff_pause(FFPlayer *ffp)
     is->paused = 1;
     return 0;
 }
+
+int ijkff_stop(FFPlayer *ffp)
+{
+    assert(ffp);
+    VideoState *is = &ffp->is;
+    stream_close(is);
+    return 0;
+}
