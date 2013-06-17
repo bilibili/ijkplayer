@@ -31,14 +31,14 @@ void ijkff_global_uninit();
 
 void ijkff_destroy_ffplayer(FFPlayer **pffp);
 
-int ijkff_stream_open_l(FFPlayer *ffp, const char *file_name);
+int ijkff_prepare_async_l(FFPlayer *ffp, const char *file_name);
 int ijkff_start_l(FFPlayer *ffp);
 int ijkff_pause_l(FFPlayer *ffp);
 int ijkff_stop_l(FFPlayer *ffp);
-int ijkff_wait_stop(FFPlayer *ffp);
+int ijkff_wait_stop_l(FFPlayer *ffp);
 
 /* all in milliseconds */
-int ijkff_seek_to_l(IjkMediaPlayer *mp, long msec);
+int ijkff_seek_to_l(FFPlayer *ffp, long msec);
 long ijkff_get_current_position_l(FFPlayer *ffp);
 long ijkff_get_duration_l(FFPlayer *ffp);
 

@@ -106,13 +106,18 @@ void ijkmp_reset(IjkMediaPlayer *mp)
 {
     assert(mp);
 
-    ijkmp_stop(mp);
+    pthread_mutex_lock(&mp->mutex);
 
+    ijkff_stop_l(mp->ffplayer);
+    /* FIXME: try to avoid dead-lock */
+    ijkff_wait_stop_l(mp->ffplayer);
     ijkff_reset(mp->ffplayer);
 
     free(mp->data_source);
     mp->data_source = NULL;
     mp->mp_state = MP_STATE_IDLE;
+
+    pthread_mutex_unlock(&mp->mutex);
 }
 
 void ijkmp_inc_ref(IjkMediaPlayer *mp)
@@ -189,7 +194,7 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
     assert(mp->data_source);
 
     mp->mp_state = MP_STATE_ASYNC_PREPARING;
-    int retval = ijkff_stream_open_l(mp->ffplayer, mp->data_source);
+    int retval = ijkff_prepare_async_l(mp->ffplayer, mp->data_source);
     if (retval < 0) {
         mp->mp_state = MP_STATE_ERROR;
         return retval;
@@ -300,6 +305,7 @@ static int ijkmp_stop_l(IjkMediaPlayer *mp)
         return retval;
     }
 
+    // FIXME: change to MP_STATE_STOPPED in read_thread() */
     mp->mp_state = MP_STATE_STOPPED;
     return 0;
 }
@@ -310,10 +316,6 @@ int ijkmp_stop(IjkMediaPlayer *mp)
     pthread_mutex_lock(&mp->mutex);
     int retval = ijkmp_stop_l(mp);
     pthread_mutex_unlock(&mp->mutex);
-
-    if (retval == 0)
-        ijkff_wait_stop(mp->ffplayer);
-
     return retval;
 }
 
@@ -343,7 +345,7 @@ int ijkmp_seek_to_l(IjkMediaPlayer *mp, long msec)
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
 
-    int retval = ijkmp_seek_to_l(mp->ffplayer, msec);
+    int retval = ijkff_seek_to_l(mp->ffplayer, msec);
     if (retval < 0) {
         return retval;
     }

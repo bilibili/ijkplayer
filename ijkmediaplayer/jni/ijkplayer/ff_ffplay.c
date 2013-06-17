@@ -2480,7 +2480,7 @@ void ijkff_destroy_ffplayer(FFPlayer **pffp)
     *pffp = NULL;
 }
 
-int ijkff_stream_open_l(FFPlayer *ffp, const char *file_name)
+int ijkff_prepare_async_l(FFPlayer *ffp, const char *file_name)
 {
     assert(ffp);
     assert(!ffp->is);
@@ -2488,7 +2488,7 @@ int ijkff_stream_open_l(FFPlayer *ffp, const char *file_name)
 
     VideoState *is = stream_open(ffp, file_name, NULL);
     if (!is) {
-        av_log(NULL, AV_LOG_WARNING, "ijkff_stream_open_l: stream_open failed OOM");
+        av_log(NULL, AV_LOG_WARNING, "ijkff_prepare_async_l: stream_open failed OOM");
         return EIJK_OUT_OF_MEMORY;
     }
 
@@ -2538,7 +2538,7 @@ int ijkff_stop_l(FFPlayer *ffp)
     return 0;
 }
 
-int ijkff_wait_stop(FFPlayer *ffp)
+int ijkff_wait_stop_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = ffp->is;
@@ -2557,11 +2557,16 @@ int ijkff_seek_to_l(FFPlayer *ffp, long msec)
     if (!is)
         return EIJK_NULL_IS_PTR;
 
+    int64_t seek_pos = milliseconds_to_fftime(msec);
+    int64_t start_time = is->ic->start_time;
+    if (start_time > 0)
+        seek_pos += start_time;
+
     // FIXME: thread-safe
     // FIXME: seek by bytes
     // FIXME: seek out of range
     // FIXME: seekable
-    stream_seek(ffp, milliseconds_to_fftime(msec), 0, 0);
+    stream_seek(is, seek_pos, 0, 0);
     return 0;
 }
 
@@ -2580,7 +2585,7 @@ long ijkff_get_current_position_l(FFPlayer *ffp)
     if (pos < 0 || pos < start_time)
         return 0;
 
-    int64_t adjust_post = pos - start_time;
+    int64_t adjust_post = pos - start_time > 0 ? start_time : 0;
     return fftime_to_milliseconds(adjust_post);
 }
 
@@ -2596,6 +2601,6 @@ long ijkff_get_duration_l(FFPlayer *ffp)
     if (duration < 0 || duration < start_time)
         return 0;
 
-    int64_t adjust_duration = duration - start_time;
+    int64_t adjust_duration = duration - start_time > 0 ? start_time : 0;
     return fftime_to_milliseconds(adjust_duration);
 }
