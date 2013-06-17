@@ -154,10 +154,10 @@ int ijkmp_prepare_async(IjkMediaPlayer *mp);
 int ijkmp_start(IjkMediaPlayer *mp);
 int ijkmp_pause(IjkMediaPlayer *mp);
 int ijkmp_stop(IjkMediaPlayer *mp);
-void ijkmp_seek_to(IjkMediaPlayer *mp, int msec);
+int ijkmp_seek_to(IjkMediaPlayer *mp, long msec);
 bool ijkmp_is_playing(IjkMediaPlayer *mp);
-int ijkmp_get_current_position(IjkMediaPlayer *mp);
-int ijkmp_get_duration(IjkMediaPlayer *mp);
+long ijkmp_get_current_position(IjkMediaPlayer *mp);
+long ijkmp_get_duration(IjkMediaPlayer *mp);
 void ijkmp_reset(IjkMediaPlayer *mp);
 
 void ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout);

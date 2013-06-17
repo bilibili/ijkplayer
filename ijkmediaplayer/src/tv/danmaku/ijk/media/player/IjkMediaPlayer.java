@@ -271,13 +271,13 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public native boolean isPlaying();
 
     @Override
-    public native void seekTo(int msec) throws IllegalStateException;
+    public native void seekTo(long msec) throws IllegalStateException;
 
     @Override
-    public native int getCurrentPosition();
+    public native long getCurrentPosition();
 
     @Override
-    public native int getDuration();
+    public native long getDuration();
 
     /**
      * Releases resources associated with this IjkMediaPlayer object. It is

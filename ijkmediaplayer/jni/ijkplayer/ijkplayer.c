@@ -304,9 +304,10 @@ int ijkmp_stop(IjkMediaPlayer *mp)
     return retval;
 }
 
-void ijkmp_seek_to(IjkMediaPlayer *mp, int msec)
+int ijkmp_seek_to(IjkMediaPlayer *mp, long msec)
 {
-// FIXME: implement
+    // FIXME: implement
+    return 0;
 }
 
 bool ijkmp_is_playing(IjkMediaPlayer *mp)
@@ -320,25 +321,34 @@ bool ijkmp_is_playing(IjkMediaPlayer *mp)
     return false;
 }
 
-static int ijkmp_get_current_position_l(IjkMediaPlayer *mp)
+static long ijkmp_get_current_position_l(IjkMediaPlayer *mp)
 {
     // FIXME: implement
     return 0;
 }
 
-int ijkmp_get_current_position(IjkMediaPlayer *mp)
+long ijkmp_get_current_position(IjkMediaPlayer *mp)
 {
     assert(mp);
     pthread_mutex_lock(&mp->mutex);
-    int retval = ijkmp_stop_l(mp);
+    long retval = ijkmp_stop_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     return retval;
 }
 
-int ijkmp_get_duration(IjkMediaPlayer *mp)
+static long ijkmp_get_duration_l(IjkMediaPlayer *mp)
 {
     // FIXME: implement
     return 0;
+}
+
+long ijkmp_get_duration(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ijkmp_get_duration_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
 }
 
 void ijkmp_reset(IjkMediaPlayer *mp)

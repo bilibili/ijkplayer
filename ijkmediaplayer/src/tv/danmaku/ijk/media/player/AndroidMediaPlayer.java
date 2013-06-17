@@ -97,17 +97,17 @@ public final class AndroidMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
-    public void seekTo(int msec) throws IllegalStateException {
-        mInternalMediaPlayer.seekTo(msec);
+    public void seekTo(long msec) throws IllegalStateException {
+        mInternalMediaPlayer.seekTo((int) msec);
     }
 
     @Override
-    public int getCurrentPosition() {
+    public long getCurrentPosition() {
         return mInternalMediaPlayer.getCurrentPosition();
     }
 
     @Override
-    public int getDuration() {
+    public long getDuration() {
         return mInternalMediaPlayer.getDuration();
     }
 

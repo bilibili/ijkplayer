@@ -81,11 +81,11 @@ public abstract class AbstractMediaPlayer {
 
     public abstract boolean isPlaying();
 
-    public abstract void seekTo(int msec) throws IllegalStateException;
+    public abstract void seekTo(long msec) throws IllegalStateException;
 
-    public abstract int getCurrentPosition();
+    public abstract long getCurrentPosition();
 
-    public abstract int getDuration();
+    public abstract long getDuration();
 
     public abstract void release();
 
