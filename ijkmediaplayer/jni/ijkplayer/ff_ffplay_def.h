@@ -394,7 +394,7 @@ typedef struct FFPlayer {
     SDL_Thread _refresh_video_tid;
 
     void  *opaque;
-    void (*msg_process)(void *opaque, int what);
+    void (*msg_handler)(void *opaque, int what);
 } FFPlayer;
 
 #define IJKFF_MSG_ERROR             0
@@ -465,6 +465,9 @@ inline static void ijkff_reset(FFPlayer *ffp)
     ffp->vout                   = NULL; /* reset outside */
     ffp->sar_num                = 0;
     ffp->sar_den                = 0;
+
+    ffp->opaque                 = 0;
+    ffp->msg_handler            = NULL;
 }
 
 #endif
