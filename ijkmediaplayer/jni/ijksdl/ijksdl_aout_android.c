@@ -59,13 +59,13 @@ SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack(JNIEnv *env)
     if (!aout)
         return NULL;
 
-    SDL_Aout_Opaque *opaque = malloc(sizeof(SDL_Vout_Opaque));
+    SDL_Aout_Opaque *opaque = malloc(sizeof(SDL_Aout_Opaque));
     if (!opaque)
     {
         aout_free_l(aout);
         return NULL;
     }
-    memset(opaque, 0, sizeof(SDL_Vout_Opaque));
+    memset(opaque, 0, sizeof(SDL_Aout_Opaque));
 
     aout->opaque = opaque;
     aout->free_l = aout_free_l;
