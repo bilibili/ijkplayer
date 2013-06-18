@@ -38,6 +38,8 @@
     JNI_CHECK_GOTO((retval != EIJK_OUT_OF_MEMORY), env, "java/lang/OutOfMemoryError", NULL, LABEL_RETURN); \
     JNI_CHECK_GOTO((retval < 0), env, JNI_IJK_MEDIA_EXCEPTION, NULL, LABEL_RETURN);
 
+static JavaVM* g_jvm;
+
 typedef struct player_fields_t {
     pthread_mutex_t mutex;
     jclass clazz;
@@ -327,6 +329,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
     JNIEnv* env = NULL;
 
+    g_jvm = vm;
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) {
         return -1;
     }
