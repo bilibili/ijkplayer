@@ -31,16 +31,10 @@ int SDL_AoutOpenAudio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obt
     return -1;
 }
 
-void SDL_AoutPlayAudio(SDL_Aout *aout)
-{
-    if (aout && aout->play_audio)
-        return aout->play_audio(aout);
-}
-
-void SDL_AoutPauseAudio(SDL_Aout *aout)
+void SDL_AoutPauseAudio(SDL_Aout *aout, int pause_on)
 {
     if (aout && aout->pause_audio)
-        return aout->pause_audio(aout);
+        aout->pause_audio(aout, pause_on);
 }
 
 void SDL_AoutCloseAudio(SDL_Aout *aout)

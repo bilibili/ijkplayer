@@ -35,14 +35,12 @@ typedef struct SDL_Aout {
     SDL_Aout_Opaque *opaque;
     void (*free_l)(SDL_Aout *vout);
     int (*open_audio)(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained);
-    void (*play_audio)(SDL_Aout *aout);
-    void (*pause_audio)(SDL_Aout *aout);
+    void (*pause_audio)(SDL_Aout *aout, int pause_on);
     void (*close_audio)(SDL_Aout *aout);
 } SDL_Aout;
 
 int SDL_AoutOpenAudio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained);
-void SDL_AoutPlayAudio(SDL_Aout *aout);
-void SDL_AoutPauseAudio(SDL_Aout *aout);
+void SDL_AoutPauseAudio(SDL_Aout *aout, int pause_on);
 void SDL_AoutCloseAudio(SDL_Aout *aout);
 void SDL_AoutFreeAudio(SDL_Aout *aout);
 

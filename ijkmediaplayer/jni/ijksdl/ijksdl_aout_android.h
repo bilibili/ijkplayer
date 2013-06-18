@@ -27,6 +27,7 @@
 #include <jni.h>
 #include "ijksdl_aout.h"
 
-SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack(JNIEnv *env);
+void SDL_Init_AoutAndroid(JNIEnv *env);
+SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack(JavaVM* jvm);
 
 #endif

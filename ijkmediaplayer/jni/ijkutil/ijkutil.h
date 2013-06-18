@@ -27,4 +27,8 @@
 #include "loghelp.h"
 #include "jnihelp.h"
 
+#ifndef IJKMAX
+#define IJKMAX(a, b)    ((a) > (b) ? (a) : (b))
+#endif
+
 #endif
