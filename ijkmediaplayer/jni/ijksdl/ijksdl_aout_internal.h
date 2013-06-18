@@ -27,15 +27,23 @@
 #include "ijksdl_mutex.h"
 #include "ijksdl_aout.h"
 
-inline static SDL_Aout *SDL_Aout_CreateInternal()
+inline static SDL_Aout *SDL_Aout_CreateInternal(size_t opaque_size)
 {
     SDL_Aout *aout = (SDL_Aout*) malloc(sizeof(SDL_Aout));
     if (!aout)
         return NULL;
-
     memset(aout, 0, sizeof(SDL_Aout));
+
+    aout->opaque = malloc(opaque_size);
+    if (!aout->opaque) {
+        free(aout);
+        return NULL;
+    }
+    memset(aout->opaque, 0, sizeof(aout->opaque));
+
     aout->mutex = SDL_CreateMutex();
     if (aout->mutex == NULL) {
+        free(aout->opaque);
         free(aout);
         return NULL;
     }
@@ -52,6 +60,7 @@ inline static void SDL_Aout_FreeInternal(SDL_Aout *aout)
         SDL_DestroyMutex(aout->mutex);
     }
 
+    free(aout->opaque);
     memset(aout, 0, sizeof(SDL_Aout));
     free(aout);
 }

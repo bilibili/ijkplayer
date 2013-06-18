@@ -26,15 +26,23 @@
 
 #include "ijksdl_vout.h"
 
-inline static SDL_Vout *SDL_Vout_CreateInternal()
+inline static SDL_Vout *SDL_Vout_CreateInternal(size_t opaque_size)
 {
     SDL_Vout *vout = (SDL_Vout*) malloc(sizeof(SDL_Vout));
     if (!vout)
         return NULL;
-
     memset(vout, 0, sizeof(SDL_Vout));
+
+    vout->opaque = malloc(opaque_size);
+    if (!vout->opaque) {
+        free(vout);
+        return NULL;
+    }
+    memset(vout->opaque, 0, sizeof(vout->opaque));
+
     vout->mutex = SDL_CreateMutex();
     if (vout->mutex == NULL) {
+        free(vout->opaque);
         free(vout);
         return NULL;
     }
@@ -51,6 +59,7 @@ inline static void SDL_Vout_FreeInternal(SDL_Vout *vout)
         SDL_DestroyMutex(vout->mutex);
     }
 
+    free(vout->opaque);
     memset(vout, 0, sizeof(SDL_Vout));
     free(vout);
 }

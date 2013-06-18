@@ -55,19 +55,12 @@ void aout_close_audio(SDL_Aout *aout)
 
 SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack(JNIEnv *env)
 {
-    SDL_Aout *aout = SDL_Aout_CreateInternal();
+    SDL_Aout *aout = SDL_Aout_CreateInternal(sizeof(SDL_Aout_Opaque));
     if (!aout)
         return NULL;
 
-    SDL_Aout_Opaque *opaque = malloc(sizeof(SDL_Aout_Opaque));
-    if (!opaque)
-    {
-        aout_free_l(aout);
-        return NULL;
-    }
-    memset(opaque, 0, sizeof(SDL_Aout_Opaque));
+    SDL_Aout_Opaque *opaque = aout->opaque;
 
-    aout->opaque = opaque;
     aout->free_l = aout_free_l;
     aout->open_audio = aout_open_audio;
     aout->play_audio = aout_play_audio;

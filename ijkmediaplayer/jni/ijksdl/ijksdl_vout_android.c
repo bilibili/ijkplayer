@@ -49,8 +49,6 @@ static void vout_free_l(SDL_Vout *vout)
         if (opaque->native_window) {
             ANativeWindow_release(opaque->native_window);
         }
-        free(vout->opaque);
-        vout->opaque = NULL;
     }
 
     SDL_Vout_FreeInternal(vout);
@@ -104,23 +102,14 @@ static int voud_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 
 SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
 {
-    SDL_Vout *vout = SDL_Vout_CreateInternal();
+    SDL_Vout *vout = SDL_Vout_CreateInternal(sizeof(SDL_Vout_Opaque));
     if (!vout)
         return NULL;
 
-    SDL_Vout_Opaque *opaque = malloc(sizeof(SDL_Vout_Opaque));
-    if (!opaque)
-    {
-        vout_free_l(vout);
-        return NULL;
-    }
-    memset(opaque, 0, sizeof(SDL_Vout_Opaque));
-
+    SDL_Vout_Opaque *opaque = vout->opaque;
     opaque->dummy_surface_opaque.vout = vout;
-
     opaque->dummy_surface.opaque = &opaque->dummy_surface_opaque;
 
-    vout->opaque = opaque;
     vout->free_l = vout_free_l;
     vout->set_video_mode = vout_set_video_mode;
     vout->display_overlay = voud_display_overlay;
