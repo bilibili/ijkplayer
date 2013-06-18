@@ -102,12 +102,6 @@ void sdl_audiotrack_get_default_spec(SDL_AndroidAudioTrack_Spec *spec)
 SDL_AndroidAudioTrack *sdl_audiotrack_new(JNIEnv *env, SDL_AndroidAudioTrack_Spec *spec)
 {
     assert(spec);
-    SDL_AndroidAudioTrack *atrack = (SDL_AndroidAudioTrack*) malloc(sizeof(SDL_AndroidAudioTrack));
-    if (!atrack)
-        return NULL;
-    memset(atrack, 0, sizeof(SDL_AndroidAudioTrack));
-
-    atrack->spec = *spec;
 
     jobject thiz = (*env)->NewObject(env, g_clazz.clazz, g_clazz.constructor,
         spec->stream_type, spec->sample_rate_in_hz, spec->channel_config,
@@ -118,14 +112,23 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new(JNIEnv *env, SDL_AndroidAudioTrack_Spe
             (*env)->ExceptionDescribe(env);
             (*env)->ExceptionClear(env);
         }
-        free(atrack);
         return NULL;
     }
+
+    SDL_AndroidAudioTrack *atrack = (SDL_AndroidAudioTrack*) malloc(sizeof(SDL_AndroidAudioTrack));
+    if (!atrack) {
+        (*env)->CallVoidMethod(env, g_clazz.clazz, atrack->thiz, g_clazz.release);
+        (*env)->DeleteLocalRef(env, thiz);
+        return NULL;
+    }
+    memset(atrack, 0, sizeof(SDL_AndroidAudioTrack));
+
+    atrack->spec = *spec;
+    atrack->min_buffer_size = sdl_audiotrack_get_min_buffer_size(env, atrack);
 
     atrack->thiz = (*env)->NewGlobalRef(env, thiz);
     (*env)->DeleteLocalRef(env, thiz);
 
-    atrack->min_buffer_size = sdl_audiotrack_get_min_buffer_size(env, atrack);
     return atrack;
 }
 
