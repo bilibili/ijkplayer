@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl.h
+ * ijksdl_vout_android_surface.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,23 +21,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_H
-#define IJKSDL__IJKSDL_H
-
-#include "ijksdl_audio.h"
-#include "ijksdl_aout.h"
-#include "ijksdl_events.h"
-#include "ijksdl_error.h"
-#include "ijksdl_mutex.h"
-#include "ijksdl_thread.h"
-#include "ijksdl_timer.h"
-#include "ijksdl_video.h"
-#include "ijksdl_vout.h"
-#include "ijksdl_vout_ffmpeg.h"
-
-#include "ijksdl_aout_android_audiotrack.h"
-
-#include "ijksdl_vout_android_nativewindow.h"
 #include "ijksdl_vout_android_surface.h"
 
-#endif
+#include <android/native_window_jni.h>
+#include "ijksdl_vout_android_nativewindow.h"
+
+SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface()
+{
+    return SDL_VoutAndroid_CreateForANativeWindow();
+}
+
+void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, JNIEnv *env, jobject android_surface)
+{
+    if (!android_surface)
+        return;
+
+    ANativeWindow *native_window = ANativeWindow_fromSurface(env, android_surface);
+    if (!native_window)
+        return;
+
+    SDL_VoutAndroid_SetNativeWindow(vout, native_window);
+    ANativeWindow_release(native_window);
+}

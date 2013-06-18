@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_aout_android.c
+ * ijksdl_aout_android_audiotrack.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijksdl_aout_android.h"
+#include "ijksdl_aout_android_audiotrack.h"
 
 #include "ijksdl_thread.h"
 #include "ijksdl_aout_internal.h"

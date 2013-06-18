@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_vout_android.c
+ * ijksdl_vout_android_nativewindow.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,11 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijksdl_vout_android.h"
+#include "ijksdl_vout_android_nativewindow.h"
 
 #include <assert.h>
 #include <android/native_window.h>
-#include <android/native_window_jni.h>
 #include "ijksdl_vout.h"
 #include "ijksdl_vout_internal.h"
 
@@ -138,22 +137,4 @@ void SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_windo
     SDL_LockMutex(vout->mutex);
     SDL_VoutAndroid_SetNativeWindow_l(vout, native_window);
     SDL_UnlockMutex(vout->mutex);
-}
-
-SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface()
-{
-    return SDL_VoutAndroid_CreateForANativeWindow();
-}
-
-void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, JNIEnv *env, jobject android_surface)
-{
-    if (!android_surface)
-        return;
-
-    ANativeWindow *native_window = ANativeWindow_fromSurface(env, android_surface);
-    if (!native_window)
-        return;
-
-    SDL_VoutAndroid_SetNativeWindow(vout, native_window);
-    ANativeWindow_release(native_window);
 }

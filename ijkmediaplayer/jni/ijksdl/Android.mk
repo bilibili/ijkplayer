@@ -37,9 +37,11 @@ LOCAL_SRC_FILES += ijksdl_timer.c
 LOCAL_SRC_FILES += ijksdl_vout.c
 LOCAL_SRC_FILES += ijksdl_vout_ffmpeg.c
 
-LOCAL_SRC_FILES += ijksdl_aout_android.c
-LOCAL_SRC_FILES += ijksdl_vout_android.c
+LOCAL_SRC_FILES += ijksdl_aout_android_audiotrack.c
 LOCAL_SRC_FILES += android/android_audiotrack.c
+
+LOCAL_SRC_FILES += ijksdl_vout_android_nativewindow.c
+LOCAL_SRC_FILES += ijksdl_vout_android_surface.c
 
 LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil
 

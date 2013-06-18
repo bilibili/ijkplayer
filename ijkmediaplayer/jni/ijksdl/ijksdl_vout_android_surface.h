@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_vout_android.h
+ * ijksdl_vout_android_surface.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,18 +21,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_VOUT_ANDROID_H
-#define IJKSDL__IJKSDL_VOUT_ANDROID_H
+#ifndef IJKSDL__IJKSDL_VOUT_ANDROID_SURFACE_H
+#define IJKSDL__IJKSDL_VOUT_ANDROID_SURFACE_H
 
 #include <jni.h>
 #include "ijksdl_stdinc.h"
-#include "ijksdl_mutex.h"
 #include "ijksdl_vout.h"
-
-typedef struct ANativeWindow ANativeWindow;
-
-SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow();
-void SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_window);
 
 SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface();
 void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, JNIEnv *env, jobject android_surface);
