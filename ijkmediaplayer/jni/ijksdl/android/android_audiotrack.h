@@ -26,6 +26,8 @@
 
 #include <stdint.h>
 #include <jni.h>
+#include "ijksdl_audio.h"
+#include "ijksdl_aout.h"
 
 typedef struct SDL_AndroidAudioTrack_Spec {
     enum StreamType {
@@ -40,10 +42,11 @@ typedef struct SDL_AndroidAudioTrack_Spec {
     int sample_rate_in_hz;
 
     enum ChannelConfig {
+        CHANNEL_OUT_INVALID = 0x0,
         CHANNEL_OUT_DEFAULT = 0x1, /* f-l */
         CHANNEL_OUT_MONO = 0x4, /* f-l, f-r */
         CHANNEL_OUT_STEREO = 0xc, /* f-l, f-r, b-l, b-r */
-        CHANNEL_OUT_QUAD = 0xcc, /* f-l, f-r, b-l, b-r, f-c, low */
+        CHANNEL_OUT_QUAD = 0xcc, /* f-l, f-r, b-l, b-r */
         CHANNEL_OUT_SURROUND = 0x41c, /* f-l, f-r, f-c, b-c */
         CHANNEL_OUT_5POINT1 = 0xfc, /* f-l, f-r, b-l, b-r, f-c, low */
         CHANNEL_OUT_7POINT1 = 0x3fc, /* f-l, f-r, b-l, b-r, f-c, low, f-lc, f-rc */
@@ -62,8 +65,8 @@ typedef struct SDL_AndroidAudioTrack_Spec {
     enum AudioFormat {
         ENCODING_INVALID = 0,
         ENCODING_DEFAULT = 1,
-        ENCODING_PCM_16BIT = 2,
-        ENCODING_PCM_8BIT = 3,
+        ENCODING_PCM_16BIT = 2, // signed, guaranteed to be supported by devices.
+        ENCODING_PCM_8BIT = 3, // unsigned, not guaranteed to be supported by devices.
     } audio_format;
     int buffer_size_in_bytes;
 
@@ -71,16 +74,22 @@ typedef struct SDL_AndroidAudioTrack_Spec {
         MODE_STATIC = 0,
         MODE_STREAM = 1,
     } mode;
+
+    // extra field
+    int sdl_samples;
 } SDL_AndroidAudioTrack_Spec;
 
 typedef struct SDL_AndroidAudioTrack SDL_AndroidAudioTrack;
 
 int sdl_audiotrack_global_init(JNIEnv *env);
-void sdl_audiotrack_get_default_spec(SDL_AndroidAudioTrack_Spec *spec);
 
-SDL_AndroidAudioTrack *sdl_audiotrack_new(JNIEnv *env, SDL_AndroidAudioTrack_Spec *spec);
+SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudioTrack_Spec *spec);
+SDL_AndroidAudioTrack *sdl_audiotrack_new_from_sdl_spec(JNIEnv *env, SDL_AudioSpec *sdl_spec);
+void sdl_audiotrack_free(JNIEnv *env, SDL_AndroidAudioTrack* atrack);
 
-int sdl_audiotrack_get_min_buffer_size(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
+void sdl_audiotrack_get_target_spec(SDL_AndroidAudioTrack* atrack, SDL_AudioSpec *spec);
+int sdl_audiotrack_get_min_buffer_size(SDL_AndroidAudioTrack* atrack);
+
 void sdl_audiotrack_play(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
 void sdl_audiotrack_pause(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
 void sdl_audiotrack_flush(JNIEnv *env, SDL_AndroidAudioTrack *atrack);

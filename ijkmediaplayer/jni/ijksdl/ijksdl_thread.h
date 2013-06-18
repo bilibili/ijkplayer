@@ -27,6 +27,12 @@
 #include <stdint.h>
 #include <pthread.h>
 
+typedef enum {
+    SDL_THREAD_PRIORITY_LOW,
+    SDL_THREAD_PRIORITY_NORMAL,
+    SDL_THREAD_PRIORITY_HIGH
+} SDL_ThreadPriority;
+
 typedef struct SDL_Thread
 {
     pthread_t id;
@@ -36,6 +42,7 @@ typedef struct SDL_Thread
 } SDL_Thread;
 
 SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data);
+int         SDL_SetThreadPriority(SDL_ThreadPriority priority);
 void        SDL_WaitThread(SDL_Thread *thread, int *status);
 
 #endif

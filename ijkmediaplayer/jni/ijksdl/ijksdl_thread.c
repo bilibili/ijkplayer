@@ -23,6 +23,7 @@
 
 #include <errno.h>
 #include <assert.h>
+#include "ijkutil/ijkutil.h"
 #include "ijksdl_thread.h"
 
 static void *SDL_RunThread(void *data)
@@ -41,6 +42,32 @@ SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data
         return NULL;
 
     return thread;
+}
+
+int SDL_SetThreadPriority(SDL_ThreadPriority priority)
+{
+    struct sched_param sched;
+    int policy;
+    pthread_t thread = pthread_self();
+
+    if (pthread_getschedparam(thread, &policy, &sched) < 0) {
+        ALOGE("pthread_getschedparam() failed");
+        return -1;
+    }
+    if (priority == SDL_THREAD_PRIORITY_LOW) {
+        sched.sched_priority = sched_get_priority_min(policy);
+    } else if (priority == SDL_THREAD_PRIORITY_HIGH) {
+        sched.sched_priority = sched_get_priority_max(policy);
+    } else {
+        int min_priority = sched_get_priority_min(policy);
+        int max_priority = sched_get_priority_max(policy);
+        sched.sched_priority = (min_priority + (max_priority - min_priority) / 2);
+    }
+    if (pthread_setschedparam(thread, policy, &sched) < 0) {
+        ALOGE("pthread_setschedparam() failed");
+        return -1;
+    }
+    return 0;
 }
 
 void SDL_WaitThread(SDL_Thread *thread, int *status)
