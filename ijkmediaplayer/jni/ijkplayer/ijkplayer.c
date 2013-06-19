@@ -39,6 +39,8 @@ typedef struct IjkMediaPlayer {
     pthread_mutex_t mutex;
     FFPlayer *ffplayer;
 
+    IjkMessageQueue msg_queue;
+
     int mp_state;
     char *data_source;
 } IjkMediaPlayer;
@@ -51,6 +53,8 @@ inline static void destroy_mp(IjkMediaPlayer **pmp)
     IjkMediaPlayer *mp = *pmp;
     if (!mp)
         return;
+
+    ijkmsg_queue_destroy(&mp->msg_queue);
 
     pthread_mutex_destroy(&mp->mutex);
 
@@ -92,6 +96,9 @@ IjkMediaPlayer *ijkmp_create()
 
     pthread_mutex_init(&mp->mutex, NULL);
 
+    ijkmsg_queue_init(&mp->msg_queue);
+    ijkmsg_queue_start(&mp->msg_queue);
+
     ijkmp_inc_ref(mp);
     return mp;
 }
@@ -99,7 +106,13 @@ IjkMediaPlayer *ijkmp_create()
 void ijkmp_shutdown(IjkMediaPlayer *mp)
 {
     assert(mp);
-    // FIXME: implement
+
+    ijkmsg_queue_abort(&mp->msg_queue);
+
+    if (mp->ffplayer) {
+        ijkff_stop_l(mp->ffplayer);
+        ijkff_wait_stop_l(mp->ffplayer);
+    }
 }
 
 void ijkmp_reset(IjkMediaPlayer *mp)
