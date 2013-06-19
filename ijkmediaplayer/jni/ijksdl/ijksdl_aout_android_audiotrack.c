@@ -110,7 +110,7 @@ int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_A
     if (!opaque->atrack)
         return -1;
 
-    opaque->buffer_size = sdl_audiotrack_get_min_buffer_sizoe(opaque->atrack);
+    opaque->buffer_size = sdl_audiotrack_get_min_buffer_size(opaque->atrack);
     opaque->buffer = malloc(opaque->buffer_size);
     if (!opaque->buffer) {
         sdl_audiotrack_free(env, opaque->atrack);
@@ -151,7 +151,7 @@ void aout_pause_audio(SDL_Aout *aout, int pause_on)
     SDL_LockMutex(opaque->wakeup_mutex);
     opaque->pause_on = pause_on;
     if (!pause_on)
-        SDL_SignalCond(opaque->wakeup_cond);
+        SDL_CondSignal(opaque->wakeup_cond);
     SDL_UnlockMutex(opaque->wakeup_mutex);
 }
 
@@ -161,7 +161,7 @@ void aout_close_audio(SDL_Aout *aout)
 
     SDL_LockMutex(opaque->wakeup_mutex);
     opaque->abort_request = true;
-    SDL_SignalCond(opaque->wakeup_cond);
+    SDL_CondSignal(opaque->wakeup_cond);
     SDL_UnlockMutex(opaque->wakeup_mutex);
 
     SDL_WaitThread(opaque->audio_tid, NULL);

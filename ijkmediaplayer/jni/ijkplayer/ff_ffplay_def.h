@@ -236,6 +236,9 @@ typedef struct VideoState {
     int last_video_stream, last_audio_stream, last_subtitle_stream;
 
     SDL_cond *continue_read_thread;
+
+    SDL_Thread *video_refresh_tid;
+    SDL_Thread _video_refresh_tid;
 } VideoState;
 
 /* options specified by the user */
@@ -393,9 +396,6 @@ typedef struct FFPlayer {
     SDL_Vout *vout;
     int sar_num;
     int sar_den;
-
-    SDL_Thread *refresh_video_tid;
-    SDL_Thread _refresh_video_tid;
 
     void  *opaque;
     void (*msg_handler)(void *opaque, int what);

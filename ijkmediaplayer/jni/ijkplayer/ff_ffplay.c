@@ -646,8 +646,6 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
     if (!vp->bmp || vp->reallocate || !vp->allocated ||
         vp->width  != src_frame->width ||
         vp->height != src_frame->height) {
-        SDL_Event event;
-
         vp->allocated  = 0;
         vp->reallocate = 0;
         vp->width = src_frame->width;
@@ -655,22 +653,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
 
         /* the allocation must be done in the main thread to avoid
            locking problems. */
-        event.type = FF_ALLOC_EVENT;
-        event.user.data1 = is;
-        SDL_PushEvent(&event);
-
-        /* wait until the picture is allocated */
-        SDL_LockMutex(is->pictq_mutex);
-        while (!vp->allocated && !is->videoq.abort_request) {
-            SDL_CondWait(is->pictq_cond, is->pictq_mutex);
-        }
-        /* if the queue is aborted, we have to pop the pending ALLOC event or wait for the allocation to complete */
-        if (is->videoq.abort_request && SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_USEREVENT, SDL_LASTEVENT) != 1) {
-            while (!vp->allocated) {
-                SDL_CondWait(is->pictq_cond, is->pictq_mutex);
-            }
-        }
-        SDL_UnlockMutex(is->pictq_mutex);
+        alloc_picture(ffp);
 
         if (is->videoq.abort_request)
             return -1;
@@ -1460,7 +1443,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         is->video_st = ic->streams[stream_index];
 
         packet_queue_start(&is->videoq);
-        is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, is);
+        is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp);
         break;
     // MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:
@@ -1902,11 +1885,21 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->audio_clock_serial = -1;
     is->video_clock_serial = -1;
     is->av_sync_type = ffp->av_sync_type;
-    is->read_tid     = SDL_CreateThreadEx(&is->_read_tid, read_thread, is);
-    if (!is->read_tid) {
+
+    is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp);
+    if (!is->video_refresh_tid) {
         av_free(is);
         return NULL;
     }
+
+    is->read_tid     = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp);
+    if (!is->read_tid) {
+        is->abort_request = true;
+        SDL_WaitThread(is->video_refresh_tid);
+        av_free(is);
+        return NULL;
+    }
+
     return is;
 }
 
@@ -1930,7 +1923,9 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
 // MERGE: options
 // MERGE: show_usage
 // MERGE: show_help_default
-static void video_refresh_thread(FFPlayer *ffp) {
+static int video_refresh_thread(void *arg)
+{
+    FFPlayer *ffp = arg;
     VideoState *is = ffp->is;
     double remaining_time = 0.0;
     while (is->abort_request) {
@@ -1940,6 +1935,8 @@ static void video_refresh_thread(FFPlayer *ffp) {
         if (is->show_mode != SHOW_MODE_NONE && (!is->paused || is->force_refresh))
             video_refresh(ffp, &remaining_time);
     }
+
+    return 0;
 }
 
 static int lockmgr(void **mtx, enum AVLockOp op)
@@ -2009,9 +2006,7 @@ void ijkff_global_init()
 
     /* test link begin */
     FFPlayer *ffp = malloc(sizeof(FFPlayer));
-    stream_open(ffp, NULL, NULL);
     video_refresh_thread(ffp);
-    alloc_picture(NULL);
     /* test link end */
 }
 
