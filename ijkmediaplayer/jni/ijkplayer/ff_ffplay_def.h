@@ -397,17 +397,11 @@ typedef struct FFPlayer {
     int sar_num;
     int sar_den;
 
+    int last_error;
+
     void  *msg_opaque;
     void (*msg_handler)(void *opaque, int what);
 } FFPlayer;
-
-#define IJKFF_MSG_ERROR             0
-#define IJKFF_MSG_PREPARED          1
-#define IJKFF_MSG_COMPLETED         2
-#define IJKFF_MSG_BUFFERING_START   3
-#define IJKFF_MSG_BUFFERING_END     4
-#define IJKFF_MSG_BUFFERING_UPDATE  5
-#define IJKFF_MSG_SEEK_COMPLETED    6
 
 #define IJKFF_SAFE_FREE(p) do {free(p); p = NULL;} while(0)
 #define fftime_to_milliseconds(ts) (ts / (AV_TIME_BASE / 1000))
@@ -471,8 +465,24 @@ inline static void ijkff_reset(FFPlayer *ffp)
     ffp->sar_num                = 0;
     ffp->sar_den                = 0;
 
+    ffp->last_error             = 0;
+
     ffp->msg_opaque             = 0;
     ffp->msg_handler            = NULL;
+}
+
+#define IJKFF_MSG_ERROR                 0
+#define IJKFF_MSG_PREPARED              1
+#define IJKFF_MSG_COMPLETED             2
+#define IJKFF_MSG_VIDEO_SIZE_CHANGED    3
+#define IJKFF_MSG_BUFFERING_START       4
+#define IJKFF_MSG_BUFFERING_END         5
+#define IJKFF_MSG_BUFFERING_UPDATE      6
+#define IJKFF_MSG_SEEK_COMPLETED        7
+
+inline static void ijkff_notify_msg(FFPlayer *ffp, int what) {
+    if (ffp->msg_handler)
+        ffp->msg_handler(ffp->msg_opaque, what);
 }
 
 #endif

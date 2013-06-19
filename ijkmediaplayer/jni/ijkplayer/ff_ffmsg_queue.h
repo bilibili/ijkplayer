@@ -28,6 +28,14 @@
 #include "ff_ffinc.h"
 
 typedef struct IjkMessage {
+    int what;
+    int arg1;
+    int arg2;
+
+    // optional
+    void *data;
+    void (*free_data)(void *data);
+
     int serial;
     struct IjkMessage *next;
 } IjkMessage;
@@ -42,7 +50,31 @@ typedef struct IjkMessageQueue {
 
 extern IjkMessage flush_msg;
 
-static int ijkmsg_queue_put(IjkMessageQueue *q, IjkMessage *msg);
+static void ijkmsg_init_msg(IjkMessage *msg) {
+    memset(msg, 0, sizeof(IjkMessage));
+}
+
+static IjkMessage *ijkmsg_obtain_msg() {
+    IjkMessage *msg = (IjkMessage*) malloc(sizeof(IjkMessage));
+    if (!msg)
+        return NULL;
+
+    ijkmsg_init_msg(msg);
+    return msg;
+}
+
+static void ijkmsg_free_msg(IjkMessage **pmsg) {
+    if (!pmsg || *pmsg)
+        return;
+
+    IjkMessage *msg = *pmsg;
+    if (msg->free_data && msg->data) {
+        msg->free_data(msg->data);
+    }
+
+    free(msg);
+    *pmsg = NULL;
+}
 
 static int ijkmsg_queue_put_private(IjkMessageQueue *q, IjkMessage *msg)
 {

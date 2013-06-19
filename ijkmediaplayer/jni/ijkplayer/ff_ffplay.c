@@ -1557,6 +1557,8 @@ static int read_thread(void *arg)
     AVDictionary **opts;
     int orig_nb_streams;
     SDL_mutex *wait_mutex = SDL_CreateMutex();
+    bool prepared = false;
+    int last_error = 0;
 
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
@@ -1673,7 +1675,8 @@ static int read_thread(void *arg)
     if (ffp->infinite_buffer < 0 && is->realtime)
         ffp->infinite_buffer = 1;
 
-    // FIXME: post prepared event
+    prepared = true;
+    ijkff_notify_msg(ffp, IJKFF_MSG_PREPARED);
 
     for (;;) {
         if (is->abort_request)
@@ -1782,7 +1785,7 @@ static int read_thread(void *arg)
                     ret = AVERROR_EOF;
                     goto fail;
                 } else {
-                    // FIXME: 0 notify complete
+                    ijkff_notify_msg(ffp, IJKFF_MSG_COMPLETED);
                 }
             }
             eof=0;
@@ -1793,7 +1796,7 @@ static int read_thread(void *arg)
             if (ret == AVERROR_EOF || url_feof(ic->pb))
                 eof = 1;
             if (ic->pb && ic->pb->error) {
-                // FIXME: 0 notify error
+                last_error = ic->pb->error;
                 break;
             }
             SDL_LockMutex(wait_mutex);
@@ -1839,17 +1842,16 @@ static int read_thread(void *arg)
         avformat_close_input(&is->ic);
     }
 
-    if (ret != 0) {
-        SDL_Event event;
-
-        event.type = FF_QUIT_EVENT;
-        event.user.data1 = is;
-        SDL_PushEvent(&event);
+    if (!prepared || !is->abort_request) {
+        ffp->last_error = last_error;
+        ijkff_notify_msg(ffp, IJKFF_MSG_ERROR);
     }
+
     SDL_DestroyMutex(wait_mutex);
     return 0;
 }
 
+static int video_refresh_thread(void *arg);
 static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputFormat *iformat)
 {
     assert(!ffp->is);
@@ -1895,7 +1897,7 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->read_tid     = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp);
     if (!is->read_tid) {
         is->abort_request = true;
-        SDL_WaitThread(is->video_refresh_tid);
+        SDL_WaitThread(is->video_refresh_tid, NULL);
         av_free(is);
         return NULL;
     }
@@ -1965,6 +1967,7 @@ static int lockmgr(void **mtx, enum AVLockOp op)
  ****************************************************************************/
 
 AVPacket flush_pkt;
+IjkMessage flush_msg;
 static bool g_ffmpeg_global_inited = false;
 
 static void ijkff_log_callback_help(void *ptr, int level, const char *fmt, va_list vl)
@@ -2001,6 +2004,8 @@ void ijkff_global_init()
 
     av_init_packet(&flush_pkt);
     flush_pkt.data = (uint8_t *) &flush_pkt;
+
+    ijkmsg_init_msg(&flush_msg);
 
     g_ffmpeg_global_inited = true;
 
