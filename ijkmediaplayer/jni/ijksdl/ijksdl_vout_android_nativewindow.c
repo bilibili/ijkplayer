@@ -119,20 +119,20 @@ static void vout_copy_image_yv12(ANativeWindow_Buffer *out_buffer, const SDL_Vou
     int dst_y_size = dst_y_pitch * out_buffer->height;
     int dst_c_size = dst_c_pitch * out_buffer->height / 2;
 
-    uint8_t *dst_pixels[] = {
+    uint8_t *dst_pixels_array[] = {
         out_buffer->bits,
         out_buffer->bits + dst_y_size,
         out_buffer->bits + dst_y_size + dst_c_size
     };
-    uint8_t *dst_planes_size[] = { dst_y_size, dst_c_size, dst_c_size };
+    int dst_plane_size_array[] = { dst_y_size, dst_c_size, dst_c_size };
     int dst_pitches[] = { dst_y_pitch, dst_c_pitch, dst_c_pitch };
 
     for (int i = 0; i < 3; ++i) {
         int dst_pitch = dst_pitches[i];
         int src_pitch = overlay->pitches[i];
-        uint8_t *dst_pixels = dst_pixels[i];
+        uint8_t *dst_pixels = dst_pixels_array[i];
         const uint8_t *src_pixels = overlay->pixels[i];
-        int dst_plane_size = dst_planes_size[i];
+        int dst_plane_size = dst_plane_size_array[i];
 
         if (dst_pitch == src_pitch) {
             memcpy(dst_pixels, src_pixels, dst_plane_size);

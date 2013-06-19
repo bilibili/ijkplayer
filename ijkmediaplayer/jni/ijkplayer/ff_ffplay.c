@@ -165,6 +165,7 @@ static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *seria
 
 // MERGE: fill_rectangle
 // MERGE: fill_border
+#if CONFIG_IJK_SUBTITLE
 #define ALPHA_BLEND(a, oldp, newp, s)\
 ((((oldp << s) * (255 - (a))) + (newp * (a))) / (255 << s))
 
@@ -393,11 +394,14 @@ static void blend_subrect(AVPicture *dst, const AVSubtitleRect *rect, int imgw, 
         }
     }
 }
+#endif
 
+#if CONFIG_IJK_SUBTITLE
 static void free_subpicture(SubPicture *sp)
 {
     avsubtitle_free(&sp->sub);
 }
+#endif
 
 // MERGE: calculate_display_rect
 
@@ -405,15 +409,18 @@ static void video_image_display(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
     VideoPicture *vp;
+#if CONFIG_IJK_SUBTITLE
     SubPicture *sp;
     AVPicture pict;
 #ifdef IJK_FFPLAY_MERGE
     SDL_Rect rect;
 #endif
     int i;
+#endif
 
     vp = &is->pictq[is->pictq_rindex];
     if (vp->bmp) {
+#if CONFIG_IJK_SUBTITLE
         if (is->subtitle_st) {
             if (is->subpq_size > 0) {
                 sp = &is->subpq[is->subpq_rindex];
@@ -437,6 +444,7 @@ static void video_image_display(FFPlayer *ffp)
                 }
             }
         }
+#endif
 
 #ifdef IJK_FFPLAY_MERGE
         calculate_display_rect(&rect, is->xleft, is->ytop, is->width, is->height, vp);
@@ -466,7 +474,9 @@ static void stream_close(VideoState *is)
     SDL_WaitThread(is->read_tid, NULL);
     packet_queue_destroy(&is->videoq);
     packet_queue_destroy(&is->audioq);
+#if CONFIG_IJK_SUBTITLE
     packet_queue_destroy(&is->subtitleq);
+#endif
 
     /* free all pictures */
     for (i = 0; i < VIDEO_PICTURE_QUEUE_SIZE; i++) {
@@ -481,8 +491,10 @@ static void stream_close(VideoState *is)
     }
     SDL_DestroyMutex(is->pictq_mutex);
     SDL_DestroyCond(is->pictq_cond);
+#if CONFIG_IJK_SUBTITLE
     SDL_DestroyMutex(is->subpq_mutex);
     SDL_DestroyCond(is->subpq_cond);
+#endif
     SDL_DestroyCond(is->continue_read_thread);
 #if !CONFIG_AVFILTER
     sws_freeContext(is->img_convert_ctx);
@@ -755,7 +767,9 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
     VideoPicture *vp;
     double time;
 
+#if CONFIG_IJK_SUBTITLE
     SubPicture *sp, *sp2;
+#endif
 
     if (!is->paused && get_master_sync_type(is) == AV_SYNC_EXTERNAL_CLOCK && is->realtime)
         check_external_clock_speed(is);
@@ -829,6 +843,7 @@ retry:
                 }
             }
 
+#if CONFIG_IJK_SUBTITLE
             if (is->subtitle_st) {
                 if (is->subtitle_stream_changed) {
                     SDL_LockMutex(is->subpq_mutex);
@@ -872,6 +887,7 @@ retry:
                     }
                 }
             }
+#endif
 
 display:
             /* display picture */
@@ -885,6 +901,7 @@ display:
         }
     }
     is->force_refresh = 0;
+#ifdef IJK_FFPLAY_MERGE
     if (ffp->show_status) {
         static int64_t last_time;
         int64_t cur_time;
@@ -918,6 +935,7 @@ display:
             last_time = cur_time;
         }
     }
+#endif
 }
 
 /* allocate a picture (needs to do that in main thread to avoid
@@ -1411,6 +1429,7 @@ static int video_thread(void *arg)
     return 0;
 }
 
+#if CONFIG_IJK_SUBTITLE
 static int subtitle_thread(void *arg)
 {
     VideoState *is = arg;
@@ -1480,6 +1499,7 @@ static int subtitle_thread(void *arg)
     }
     return 0;
 }
+#endif
 
 /* copy samples for viewing in editor window */
 static void update_sample_display(VideoState *is, short *samples, int samples_size)
@@ -1898,6 +1918,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         packet_queue_start(&is->videoq);
         is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, is);
         break;
+#if CONFIG_IJK_SUBTITLE
     case AVMEDIA_TYPE_SUBTITLE:
         is->subtitle_stream = stream_index;
         is->subtitle_st = ic->streams[stream_index];
@@ -1905,6 +1926,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         is->subtitle_tid = SDL_CreateThreadEx(&is->_video_tid, subtitle_thread, is);
         break;
+#endif
     default:
         break;
     }
@@ -1954,6 +1976,7 @@ static void stream_component_close(VideoState *is, int stream_index)
 
         packet_queue_flush(&is->videoq);
         break;
+#if CONFIG_IJK_SUBTITLE
     case AVMEDIA_TYPE_SUBTITLE:
         packet_queue_abort(&is->subtitleq);
 
@@ -1969,6 +1992,7 @@ static void stream_component_close(VideoState *is, int stream_index)
 
         packet_queue_flush(&is->subtitleq);
         break;
+#endif
     default:
         break;
     }
@@ -1987,10 +2011,12 @@ static void stream_component_close(VideoState *is, int stream_index)
         is->video_st = NULL;
         is->video_stream = -1;
         break;
+#if CONFIG_IJK_SUBTITLE
     case AVMEDIA_TYPE_SUBTITLE:
         is->subtitle_st = NULL;
         is->subtitle_stream = -1;
         break;
+#endif
     default:
         break;
     }
@@ -2037,7 +2063,9 @@ static int read_thread(void *arg)
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
     is->last_audio_stream = is->audio_stream = -1;
+#if CONFIG_IJK_SUBTITLE
     is->last_subtitle_stream = is->subtitle_stream = -1;
+#endif
 
     ic = avformat_alloc_context();
     ic->interrupt_callback.callback = decode_interrupt_cb;
@@ -2182,10 +2210,12 @@ static int read_thread(void *arg)
                     packet_queue_flush(&is->audioq);
                     packet_queue_put(&is->audioq, &flush_pkt);
                 }
+#if CONFIG_IJK_SUBTITLE
                 if (is->subtitle_stream >= 0) {
                     packet_queue_flush(&is->subtitleq);
                     packet_queue_put(&is->subtitleq, &flush_pkt);
                 }
+#endif
                 if (is->video_stream >= 0) {
                     packet_queue_flush(&is->videoq);
                     packet_queue_put(&is->videoq, &flush_pkt);
@@ -2208,10 +2238,18 @@ static int read_thread(void *arg)
 
         /* if the queue are full, no need to read more */
         if (ffp->infinite_buffer<1 &&
+#if CONFIG_IJK_SUBTITLE
               (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
+#else
+              (is->audioq.size + is->videoq.size > MAX_QUEUE_SIZE
+#endif
             || (   (is->audioq   .nb_packets > MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
                 && (is->videoq   .nb_packets > MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)
+#if CONFIG_IJK_SUBTITLE
                 && (is->subtitleq.nb_packets > MIN_FRAMES || is->subtitle_stream < 0 || is->subtitleq.abort_request)))) {
+#else
+                ))) {
+#endif
             /* wait 10 ms */
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
@@ -2235,7 +2273,11 @@ static int read_thread(void *arg)
                 packet_queue_put(&is->audioq, pkt);
             }
             SDL_Delay(10);
+#if CONFIG_IJK_SUBTITLE
             if (is->audioq.size + is->videoq.size + is->subtitleq.size == 0) {
+#else
+            if (is->audioq.size + is->videoq.size == 0) {
+#endif
                 if (ffp->loop != 1 && (!ffp->loop || --ffp->loop)) {
                     stream_seek(is, ffp->start_time != AV_NOPTS_VALUE ? ffp->start_time : 0, 0, 0);
                 } else if (ffp->autoexit) {
@@ -2267,8 +2309,10 @@ static int read_thread(void *arg)
             packet_queue_put(&is->audioq, pkt);
         } else if (pkt->stream_index == is->video_stream && pkt_in_play_range) {
             packet_queue_put(&is->videoq, pkt);
+#if CONFIG_IJK_SUBTITLE
         } else if (pkt->stream_index == is->subtitle_stream && pkt_in_play_range) {
             packet_queue_put(&is->subtitleq, pkt);
+#endif
         } else {
             av_free_packet(pkt);
         }
@@ -2285,8 +2329,10 @@ static int read_thread(void *arg)
         stream_component_close(is, is->audio_stream);
     if (is->video_stream >= 0)
         stream_component_close(is, is->video_stream);
+#if CONFIG_IJK_SUBTITLE
     if (is->subtitle_stream >= 0)
         stream_component_close(is, is->subtitle_stream);
+#endif
     if (is->ic) {
         avformat_close_input(&is->ic);
     }
@@ -2317,12 +2363,16 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->pictq_mutex = SDL_CreateMutex();
     is->pictq_cond  = SDL_CreateCond();
 
+#if CONFIG_IJK_SUBTITLE
     is->subpq_mutex = SDL_CreateMutex();
     is->subpq_cond  = SDL_CreateCond();
+#endif
 
     packet_queue_init(&is->videoq);
     packet_queue_init(&is->audioq);
+#if CONFIG_IJK_SUBTITLE
     packet_queue_init(&is->subtitleq);
+#endif
 
     is->continue_read_thread = SDL_CreateCond();
 
