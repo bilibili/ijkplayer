@@ -26,42 +26,6 @@
 
 #include "ijksdl_stdinc.h"
 
-/** @name SDL_Surface Flags
- *  These are the currently supported flags for the SDL_surface
- */
-/*@{*/
-
-/** Available for SDL_CreateRGBSurface() or SDL_SetVideoMode() */
-/*@{*/
-#define SDL_SWSURFACE   0x00000000  /**< Surface is in system memory */
-#define SDL_HWSURFACE   0x00000001  /**< Surface is in video memory */
-#define SDL_ASYNCBLIT   0x00000004  /**< Use asynchronous blits if possible */
-/*@}*/
-
-/** Available for SDL_SetVideoMode() */
-/*@{*/
-#define SDL_ANYFORMAT   0x10000000  /**< Allow any video depth/pixel-format */
-#define SDL_HWPALETTE   0x20000000  /**< Surface has exclusive palette */
-#define SDL_DOUBLEBUF   0x40000000  /**< Set up double-buffered video mode */
-#define SDL_FULLSCREEN  0x80000000  /**< Surface is a full screen display */
-#define SDL_OPENGL      0x00000002      /**< Create an OpenGL rendering context */
-#define SDL_OPENGLBLIT  0x0000000A  /**< Create an OpenGL rendering context and use it for blitting */
-#define SDL_RESIZABLE   0x00000010  /**< This video mode may be resized */
-#define SDL_NOFRAME 0x00000020  /**< No window caption or edge frame */
-/*@}*/
-
-/** Used internally (read-only) */
-/*@{*/
-#define SDL_HWACCEL 0x00000100  /**< Blit uses hardware acceleration */
-#define SDL_SRCCOLORKEY 0x00001000  /**< Blit uses a source color key */
-#define SDL_RLEACCELOK  0x00002000  /**< Private flag */
-#define SDL_RLEACCEL    0x00004000  /**< Surface is RLE encoded */
-#define SDL_SRCALPHA    0x00010000  /**< Blit uses source alpha blending */
-#define SDL_PREALLOC    0x01000000  /**< Surface uses preallocated memory */
-/*@}*/
-
-/*@}*/
-
 /*-
  *  http://www.webartz.com/fourcc/indexyuv.htm
  *  http://www.neuro.sfc.keio.ac.jp/~aly/polygon/info/color-space-faq.html
