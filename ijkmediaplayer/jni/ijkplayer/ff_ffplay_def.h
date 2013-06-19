@@ -397,7 +397,7 @@ typedef struct FFPlayer {
     int sar_num;
     int sar_den;
 
-    void  *opaque;
+    void  *msg_opaque;
     void (*msg_handler)(void *opaque, int what);
 } FFPlayer;
 
@@ -471,7 +471,7 @@ inline static void ijkff_reset(FFPlayer *ffp)
     ffp->sar_num                = 0;
     ffp->sar_den                = 0;
 
-    ffp->opaque                 = 0;
+    ffp->msg_opaque             = 0;
     ffp->msg_handler            = NULL;
 }
 
