@@ -110,7 +110,7 @@ static int ijkmsg_queue_put(IjkMessageQueue *q, IjkMessage *msg)
     SDL_UnlockMutex(q->mutex);
 
     if (msg != &flush_msg && ret < 0)
-        ijkmsg_free_msg(msg);
+        ijkmsg_free_msg(&msg);
 
     return ret;
 }
@@ -130,7 +130,7 @@ static void ijkmsg_queue_flush(IjkMessageQueue *q)
     SDL_LockMutex(q->mutex);
     for (msg = q->first_msg; msg != NULL; msg = msg1) {
         msg1 = msg->next;
-        ijkmsg_free_msg(msg);
+        ijkmsg_free_msg(&msg);
     }
     q->last_msg = NULL;
     q->first_msg = NULL;
@@ -185,7 +185,7 @@ static int ijkmsg_queue_get(IjkMessageQueue *q, IjkMessage *msg, int block, int 
             *msg = *msg1;
             if (serial)
                 *serial = msg1->serial;
-            ijkmsg_free_msg(msg1);
+            ijkmsg_free_msg(&msg1);
             ret = 1;
             break;
         } else if (!block) {
