@@ -196,6 +196,10 @@ static void stream_close(VideoState *is)
     /* XXX: use a special url_shutdown call to abort parse cleanly */
     is->abort_request = 1;
     SDL_WaitThread(is->read_tid, NULL);
+    SDL_WaitThread(is->video_refresh_tid, NULL);
+
+    // FIXME: close SDL_Audio
+
     packet_queue_destroy(&is->videoq);
     packet_queue_destroy(&is->audioq);
 #ifdef IJK_FFPLAY_MERGE
