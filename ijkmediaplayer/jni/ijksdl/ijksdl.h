@@ -33,7 +33,7 @@
 #include "ijksdl_timer.h"
 #include "ijksdl_video.h"
 #include "ijksdl_vout.h"
-#include "ijksdl_vout_ffmpeg.h"
+#include "ijksdl_vout_overlay_ffmpeg.h"
 
 #include "ijksdl_aout_android_audiotrack.h"
 

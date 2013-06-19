@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_vout_ffmpeg.h
+ * ijksdl_vout_overlay_ffmpeg.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_VOUT_FFMPEG_H
-#define IJKSDL__IJKSDL_VOUT_FFMPEG_H
+#ifndef IJKSDL__IJKSDL_VOUT_OVERLAY_FFMPEG_H
+#define IJKSDL__IJKSDL_VOUT_OVERLAY_FFMPEG_H
 
 #include "ijksdl_stdinc.h"
 #include "ijksdl_vout.h"
