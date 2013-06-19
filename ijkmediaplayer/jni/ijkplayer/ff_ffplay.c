@@ -1798,6 +1798,8 @@ static int read_thread(void *arg)
                 } else if (ffp->autoexit) {
                     ret = AVERROR_EOF;
                     goto fail;
+                } else {
+                    // FIXME: 0 notify complete
                 }
             }
             eof=0;
@@ -1807,8 +1809,10 @@ static int read_thread(void *arg)
         if (ret < 0) {
             if (ret == AVERROR_EOF || url_feof(ic->pb))
                 eof = 1;
-            if (ic->pb && ic->pb->error)
+            if (ic->pb && ic->pb->error) {
+                // FIXME: 0 notify error
                 break;
+            }
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
             SDL_UnlockMutex(wait_mutex);
@@ -1999,7 +2003,7 @@ void ijkff_global_init()
     /* FIXME: SDL_Init() */
 
     av_init_packet(&flush_pkt);
-    flush_pkt.data = (uint8_t *) (intptr_t) "FLUSH";
+    flush_pkt.data = (uint8_t *) &flush_pkt;
 
     g_ffmpeg_global_inited = true;
 
