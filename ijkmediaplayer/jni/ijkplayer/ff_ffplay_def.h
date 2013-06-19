@@ -184,15 +184,13 @@ typedef struct VideoState {
     int xpos;
     double last_vis_time;
 
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
     SDL_Thread *subtitle_tid;
     int subtitle_stream;
     int subtitle_stream_changed;
     AVStream *subtitle_st;
     PacketQueue subtitleq;
-#endif
     SubPicture subpq[SUBPICTURE_QUEUE_SIZE];
-#if CONFIG_IJK_SUBTITLE
     int subpq_size, subpq_rindex, subpq_windex;
     SDL_mutex *subpq_mutex;
     SDL_cond *subpq_cond;

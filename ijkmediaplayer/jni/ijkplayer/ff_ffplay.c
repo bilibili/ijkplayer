@@ -165,300 +165,24 @@ static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *seria
 
 // MERGE: fill_rectangle
 // MERGE: fill_border
-#if CONFIG_IJK_SUBTITLE
-#define ALPHA_BLEND(a, oldp, newp, s)\
-((((oldp << s) * (255 - (a))) + (newp * (a))) / (255 << s))
-
-#define RGBA_IN(r, g, b, a, s)\
-{\
-    unsigned int v = ((const uint32_t *)(s))[0];\
-    a = (v >> 24) & 0xff;\
-    r = (v >> 16) & 0xff;\
-    g = (v >> 8) & 0xff;\
-    b = v & 0xff;\
-}
-
-#define YUVA_IN(y, u, v, a, s, pal)\
-{\
-    unsigned int val = ((const uint32_t *)(pal))[*(const uint8_t*)(s)];\
-    a = (val >> 24) & 0xff;\
-    y = (val >> 16) & 0xff;\
-    u = (val >> 8) & 0xff;\
-    v = val & 0xff;\
-}
-
-#define YUVA_OUT(d, y, u, v, a)\
-{\
-    ((uint32_t *)(d))[0] = (a << 24) | (y << 16) | (u << 8) | v;\
-}
-
-
-#define BPP 1
-
-static void blend_subrect(AVPicture *dst, const AVSubtitleRect *rect, int imgw, int imgh)
-{
-    int wrap, wrap3, width2, skip2;
-    int y, u, v, a, u1, v1, a1, w, h;
-    uint8_t *lum, *cb, *cr;
-    const uint8_t *p;
-    const uint32_t *pal;
-    int dstx, dsty, dstw, dsth;
-
-    dstw = av_clip(rect->w, 0, imgw);
-    dsth = av_clip(rect->h, 0, imgh);
-    dstx = av_clip(rect->x, 0, imgw - dstw);
-    dsty = av_clip(rect->y, 0, imgh - dsth);
-    lum = dst->data[0] + dsty * dst->linesize[0];
-    cb  = dst->data[1] + (dsty >> 1) * dst->linesize[1];
-    cr  = dst->data[2] + (dsty >> 1) * dst->linesize[2];
-
-    width2 = ((dstw + 1) >> 1) + (dstx & ~dstw & 1);
-    skip2 = dstx >> 1;
-    wrap = dst->linesize[0];
-    wrap3 = rect->pict.linesize[0];
-    p = rect->pict.data[0];
-    pal = (const uint32_t *)rect->pict.data[1];  /* Now in YCrCb! */
-
-    if (dsty & 1) {
-        lum += dstx;
-        cb += skip2;
-        cr += skip2;
-
-        if (dstx & 1) {
-            YUVA_IN(y, u, v, a, p, pal);
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-            cb[0] = ALPHA_BLEND(a >> 2, cb[0], u, 0);
-            cr[0] = ALPHA_BLEND(a >> 2, cr[0], v, 0);
-            cb++;
-            cr++;
-            lum++;
-            p += BPP;
-        }
-        for (w = dstw - (dstx & 1); w >= 2; w -= 2) {
-            YUVA_IN(y, u, v, a, p, pal);
-            u1 = u;
-            v1 = v;
-            a1 = a;
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-
-            YUVA_IN(y, u, v, a, p + BPP, pal);
-            u1 += u;
-            v1 += v;
-            a1 += a;
-            lum[1] = ALPHA_BLEND(a, lum[1], y, 0);
-            cb[0] = ALPHA_BLEND(a1 >> 2, cb[0], u1, 1);
-            cr[0] = ALPHA_BLEND(a1 >> 2, cr[0], v1, 1);
-            cb++;
-            cr++;
-            p += 2 * BPP;
-            lum += 2;
-        }
-        if (w) {
-            YUVA_IN(y, u, v, a, p, pal);
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-            cb[0] = ALPHA_BLEND(a >> 2, cb[0], u, 0);
-            cr[0] = ALPHA_BLEND(a >> 2, cr[0], v, 0);
-            p++;
-            lum++;
-        }
-        p += wrap3 - dstw * BPP;
-        lum += wrap - dstw - dstx;
-        cb += dst->linesize[1] - width2 - skip2;
-        cr += dst->linesize[2] - width2 - skip2;
-    }
-    for (h = dsth - (dsty & 1); h >= 2; h -= 2) {
-        lum += dstx;
-        cb += skip2;
-        cr += skip2;
-
-        if (dstx & 1) {
-            YUVA_IN(y, u, v, a, p, pal);
-            u1 = u;
-            v1 = v;
-            a1 = a;
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-            p += wrap3;
-            lum += wrap;
-            YUVA_IN(y, u, v, a, p, pal);
-            u1 += u;
-            v1 += v;
-            a1 += a;
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-            cb[0] = ALPHA_BLEND(a1 >> 2, cb[0], u1, 1);
-            cr[0] = ALPHA_BLEND(a1 >> 2, cr[0], v1, 1);
-            cb++;
-            cr++;
-            p += -wrap3 + BPP;
-            lum += -wrap + 1;
-        }
-        for (w = dstw - (dstx & 1); w >= 2; w -= 2) {
-            YUVA_IN(y, u, v, a, p, pal);
-            u1 = u;
-            v1 = v;
-            a1 = a;
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-
-            YUVA_IN(y, u, v, a, p + BPP, pal);
-            u1 += u;
-            v1 += v;
-            a1 += a;
-            lum[1] = ALPHA_BLEND(a, lum[1], y, 0);
-            p += wrap3;
-            lum += wrap;
-
-            YUVA_IN(y, u, v, a, p, pal);
-            u1 += u;
-            v1 += v;
-            a1 += a;
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-
-            YUVA_IN(y, u, v, a, p + BPP, pal);
-            u1 += u;
-            v1 += v;
-            a1 += a;
-            lum[1] = ALPHA_BLEND(a, lum[1], y, 0);
-
-            cb[0] = ALPHA_BLEND(a1 >> 2, cb[0], u1, 2);
-            cr[0] = ALPHA_BLEND(a1 >> 2, cr[0], v1, 2);
-
-            cb++;
-            cr++;
-            p += -wrap3 + 2 * BPP;
-            lum += -wrap + 2;
-        }
-        if (w) {
-            YUVA_IN(y, u, v, a, p, pal);
-            u1 = u;
-            v1 = v;
-            a1 = a;
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-            p += wrap3;
-            lum += wrap;
-            YUVA_IN(y, u, v, a, p, pal);
-            u1 += u;
-            v1 += v;
-            a1 += a;
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-            cb[0] = ALPHA_BLEND(a1 >> 2, cb[0], u1, 1);
-            cr[0] = ALPHA_BLEND(a1 >> 2, cr[0], v1, 1);
-            cb++;
-            cr++;
-            p += -wrap3 + BPP;
-            lum += -wrap + 1;
-        }
-        p += wrap3 + (wrap3 - dstw * BPP);
-        lum += wrap + (wrap - dstw - dstx);
-        cb += dst->linesize[1] - width2 - skip2;
-        cr += dst->linesize[2] - width2 - skip2;
-    }
-    /* handle odd height */
-    if (h) {
-        lum += dstx;
-        cb += skip2;
-        cr += skip2;
-
-        if (dstx & 1) {
-            YUVA_IN(y, u, v, a, p, pal);
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-            cb[0] = ALPHA_BLEND(a >> 2, cb[0], u, 0);
-            cr[0] = ALPHA_BLEND(a >> 2, cr[0], v, 0);
-            cb++;
-            cr++;
-            lum++;
-            p += BPP;
-        }
-        for (w = dstw - (dstx & 1); w >= 2; w -= 2) {
-            YUVA_IN(y, u, v, a, p, pal);
-            u1 = u;
-            v1 = v;
-            a1 = a;
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-
-            YUVA_IN(y, u, v, a, p + BPP, pal);
-            u1 += u;
-            v1 += v;
-            a1 += a;
-            lum[1] = ALPHA_BLEND(a, lum[1], y, 0);
-            cb[0] = ALPHA_BLEND(a1 >> 2, cb[0], u, 1);
-            cr[0] = ALPHA_BLEND(a1 >> 2, cr[0], v, 1);
-            cb++;
-            cr++;
-            p += 2 * BPP;
-            lum += 2;
-        }
-        if (w) {
-            YUVA_IN(y, u, v, a, p, pal);
-            lum[0] = ALPHA_BLEND(a, lum[0], y, 0);
-            cb[0] = ALPHA_BLEND(a >> 2, cb[0], u, 0);
-            cr[0] = ALPHA_BLEND(a >> 2, cr[0], v, 0);
-        }
-    }
-}
-#endif
-
-#if CONFIG_IJK_SUBTITLE
-static void free_subpicture(SubPicture *sp)
-{
-    avsubtitle_free(&sp->sub);
-}
-#endif
-
+// MERGE: ALPHA_BLEND
+// MERGE: RGBA_IN
+// MERGE: YUVA_IN
+// MERGE: YUVA_OUT
+// MERGE: BPP
+// MERGE: blend_subrect
+// MERGE: free_subpicture
 // MERGE: calculate_display_rect
+// MERGE: video_image_display
 
-static void video_image_display(FFPlayer *ffp)
+static void video_image_display2(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
     VideoPicture *vp;
-#if CONFIG_IJK_SUBTITLE
-    SubPicture *sp;
-    AVPicture pict;
-#ifdef IJK_FFPLAY_MERGE
-    SDL_Rect rect;
-#endif
-    int i;
-#endif
 
     vp = &is->pictq[is->pictq_rindex];
     if (vp->bmp) {
-#if CONFIG_IJK_SUBTITLE
-        if (is->subtitle_st) {
-            if (is->subpq_size > 0) {
-                sp = &is->subpq[is->subpq_rindex];
-
-                if (vp->pts >= sp->pts + ((float) sp->sub.start_display_time / 1000)) {
-                    SDL_VoutLockYUVOverlay (vp->bmp);
-
-                    pict.data[0] = vp->bmp->pixels[0];
-                    pict.data[1] = vp->bmp->pixels[2];
-                    pict.data[2] = vp->bmp->pixels[1];
-
-                    pict.linesize[0] = vp->bmp->pitches[0];
-                    pict.linesize[1] = vp->bmp->pitches[2];
-                    pict.linesize[2] = vp->bmp->pitches[1];
-
-                    for (i = 0; i < sp->sub.num_rects; i++)
-                        blend_subrect(&pict, sp->sub.rects[i],
-                                      vp->bmp->w, vp->bmp->h);
-
-                    SDL_VoutUnlockYUVOverlay (vp->bmp);
-                }
-            }
-        }
-#endif
-
-#ifdef IJK_FFPLAY_MERGE
-        calculate_display_rect(&rect, is->xleft, is->ytop, is->width, is->height, vp);
-
-        SDL_DisplayYUVOverlay(vp->bmp, &rect);
-
-        if (rect.x != is->last_display_rect.x || rect.y != is->last_display_rect.y || rect.w != is->last_display_rect.w || rect.h != is->last_display_rect.h || is->force_refresh) {
-            int bgcolor = SDL_MapRGB(screen->format, 0x00, 0x00, 0x00);
-            fill_border(is->xleft, is->ytop, is->width, is->height, rect.x, rect.y, rect.w, rect.h, bgcolor, 1);
-            is->last_display_rect = rect;
-        }
-#else
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
-#endif
     }
 }
 
@@ -474,7 +198,7 @@ static void stream_close(VideoState *is)
     SDL_WaitThread(is->read_tid, NULL);
     packet_queue_destroy(&is->videoq);
     packet_queue_destroy(&is->audioq);
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
     packet_queue_destroy(&is->subtitleq);
 #endif
 
@@ -491,7 +215,7 @@ static void stream_close(VideoState *is)
     }
     SDL_DestroyMutex(is->pictq_mutex);
     SDL_DestroyCond(is->pictq_cond);
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
     SDL_DestroyMutex(is->subpq_mutex);
     SDL_DestroyCond(is->subpq_cond);
 #endif
@@ -545,7 +269,7 @@ static void video_display(FFPlayer *ffp)
         video_open(ffp, 0, NULL);
 
     // FIXME: check ffp->screen setup
-    video_image_display(ffp);
+    video_image_display2(ffp);
 }
 
 /* get the current audio clock value */
@@ -767,7 +491,7 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
     VideoPicture *vp;
     double time;
 
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
     SubPicture *sp, *sp2;
 #endif
 
@@ -843,51 +567,7 @@ retry:
                 }
             }
 
-#if CONFIG_IJK_SUBTITLE
-            if (is->subtitle_st) {
-                if (is->subtitle_stream_changed) {
-                    SDL_LockMutex(is->subpq_mutex);
-
-                    while (is->subpq_size) {
-                        free_subpicture(&is->subpq[is->subpq_rindex]);
-
-                        /* update queue size and signal for next picture */
-                        if (++is->subpq_rindex == SUBPICTURE_QUEUE_SIZE)
-                            is->subpq_rindex = 0;
-
-                        is->subpq_size--;
-                    }
-                    is->subtitle_stream_changed = 0;
-
-                    SDL_CondSignal(is->subpq_cond);
-                    SDL_UnlockMutex(is->subpq_mutex);
-                } else {
-                    if (is->subpq_size > 0) {
-                        sp = &is->subpq[is->subpq_rindex];
-
-                        if (is->subpq_size > 1)
-                            sp2 = &is->subpq[(is->subpq_rindex + 1) % SUBPICTURE_QUEUE_SIZE];
-                        else
-                            sp2 = NULL;
-
-                        if ((is->video_current_pts > (sp->pts + ((float) sp->sub.end_display_time / 1000)))
-                                || (sp2 && is->video_current_pts > (sp2->pts + ((float) sp2->sub.start_display_time / 1000))))
-                        {
-                            free_subpicture(sp);
-
-                            /* update queue size and signal for next picture */
-                            if (++is->subpq_rindex == SUBPICTURE_QUEUE_SIZE)
-                                is->subpq_rindex = 0;
-
-                            SDL_LockMutex(is->subpq_mutex);
-                            is->subpq_size--;
-                            SDL_CondSignal(is->subpq_cond);
-                            SDL_UnlockMutex(is->subpq_mutex);
-                        }
-                    }
-                }
-            }
-#endif
+            // MERGE: if (is->subtitle_st) { {...}
 
 display:
             /* display picture */
@@ -901,41 +581,8 @@ display:
         }
     }
     is->force_refresh = 0;
-#ifdef IJK_FFPLAY_MERGE
-    if (ffp->show_status) {
-        static int64_t last_time;
-        int64_t cur_time;
-        int aqsize, vqsize, sqsize;
-        double av_diff;
 
-        cur_time = av_gettime();
-        if (!last_time || (cur_time - last_time) >= 30000) {
-            aqsize = 0;
-            vqsize = 0;
-            sqsize = 0;
-            if (is->audio_st)
-                aqsize = is->audioq.size;
-            if (is->video_st)
-                vqsize = is->videoq.size;
-            if (is->subtitle_st)
-                sqsize = is->subtitleq.size;
-            av_diff = 0;
-            if (is->audio_st && is->video_st)
-                av_diff = get_audio_clock(is) - get_video_clock(is);
-            printf("%7.2f A-V:%7.3f fd=%4d aq=%5dKB vq=%5dKB sq=%5dB f=%"PRId64"/%"PRId64"   \r",
-                   get_master_clock(is),
-                   av_diff,
-                   is->frame_drops_early + is->frame_drops_late,
-                   aqsize / 1024,
-                   vqsize / 1024,
-                   sqsize,
-                   is->video_st ? is->video_st->codec->pts_correction_num_faulty_dts : 0,
-                   is->video_st ? is->video_st->codec->pts_correction_num_faulty_pts : 0);
-            fflush(stdout);
-            last_time = cur_time;
-        }
-    }
-#endif
+    // MERGE: if (ffp->show_status) {...}
 }
 
 /* allocate a picture (needs to do that in main thread to avoid
@@ -1429,77 +1076,7 @@ static int video_thread(void *arg)
     return 0;
 }
 
-#if CONFIG_IJK_SUBTITLE
-static int subtitle_thread(void *arg)
-{
-    VideoState *is = arg;
-    SubPicture *sp;
-    AVPacket pkt1, *pkt = &pkt1;
-    int got_subtitle;
-    double pts;
-    int i, j;
-    int r, g, b, y, u, v, a;
-
-    for (;;) {
-        while (is->paused && !is->subtitleq.abort_request) {
-            SDL_Delay(10);
-        }
-        if (packet_queue_get(&is->subtitleq, pkt, 1, NULL) < 0)
-            break;
-
-        if (pkt->data == flush_pkt.data) {
-            avcodec_flush_buffers(is->subtitle_st->codec);
-            continue;
-        }
-        SDL_LockMutex(is->subpq_mutex);
-        while (is->subpq_size >= SUBPICTURE_QUEUE_SIZE &&
-               !is->subtitleq.abort_request) {
-            SDL_CondWait(is->subpq_cond, is->subpq_mutex);
-        }
-        SDL_UnlockMutex(is->subpq_mutex);
-
-        if (is->subtitleq.abort_request)
-            return 0;
-
-        sp = &is->subpq[is->subpq_windex];
-
-       /* NOTE: ipts is the PTS of the _first_ picture beginning in
-           this packet, if any */
-        pts = 0;
-        if (pkt->pts != AV_NOPTS_VALUE)
-            pts = av_q2d(is->subtitle_st->time_base) * pkt->pts;
-
-        avcodec_decode_subtitle2(is->subtitle_st->codec, &sp->sub,
-                                 &got_subtitle, pkt);
-        if (got_subtitle && sp->sub.format == 0) {
-            if (sp->sub.pts != AV_NOPTS_VALUE)
-                pts = sp->sub.pts / (double)AV_TIME_BASE;
-            sp->pts = pts;
-
-            for (i = 0; i < sp->sub.num_rects; i++)
-            {
-                for (j = 0; j < sp->sub.rects[i]->nb_colors; j++)
-                {
-                    RGBA_IN(r, g, b, a, (uint32_t*)sp->sub.rects[i]->pict.data[1] + j);
-                    y = RGB_TO_Y_CCIR(r, g, b);
-                    u = RGB_TO_U_CCIR(r, g, b, 0);
-                    v = RGB_TO_V_CCIR(r, g, b, 0);
-                    YUVA_OUT((uint32_t*)sp->sub.rects[i]->pict.data[1] + j, y, u, v, a);
-                }
-            }
-
-            /* now we can update the picture count */
-            if (++is->subpq_windex == SUBPICTURE_QUEUE_SIZE)
-                is->subpq_windex = 0;
-            SDL_LockMutex(is->subpq_mutex);
-            is->subpq_size++;
-            SDL_UnlockMutex(is->subpq_mutex);
-        }
-        av_free_packet(pkt);
-    }
-    return 0;
-}
-#endif
+// MERGE: subtitle_thread
 
 /* copy samples for viewing in editor window */
 static void update_sample_display(VideoState *is, short *samples, int samples_size)
@@ -1918,15 +1495,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         packet_queue_start(&is->videoq);
         is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, is);
         break;
-#if CONFIG_IJK_SUBTITLE
-    case AVMEDIA_TYPE_SUBTITLE:
-        is->subtitle_stream = stream_index;
-        is->subtitle_st = ic->streams[stream_index];
-        packet_queue_start(&is->subtitleq);
-
-        is->subtitle_tid = SDL_CreateThreadEx(&is->_video_tid, subtitle_thread, is);
-        break;
-#endif
+    // MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:
         break;
     }
@@ -1976,23 +1545,7 @@ static void stream_component_close(VideoState *is, int stream_index)
 
         packet_queue_flush(&is->videoq);
         break;
-#if CONFIG_IJK_SUBTITLE
-    case AVMEDIA_TYPE_SUBTITLE:
-        packet_queue_abort(&is->subtitleq);
-
-        /* note: we also signal this mutex to make sure we deblock the
-           video thread in all cases */
-        SDL_LockMutex(is->subpq_mutex);
-        is->subtitle_stream_changed = 1;
-
-        SDL_CondSignal(is->subpq_cond);
-        SDL_UnlockMutex(is->subpq_mutex);
-
-        SDL_WaitThread(is->subtitle_tid, NULL);
-
-        packet_queue_flush(&is->subtitleq);
-        break;
-#endif
+    // MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:
         break;
     }
@@ -2011,12 +1564,7 @@ static void stream_component_close(VideoState *is, int stream_index)
         is->video_st = NULL;
         is->video_stream = -1;
         break;
-#if CONFIG_IJK_SUBTITLE
-    case AVMEDIA_TYPE_SUBTITLE:
-        is->subtitle_st = NULL;
-        is->subtitle_stream = -1;
-        break;
-#endif
+    // MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:
         break;
     }
@@ -2063,7 +1611,7 @@ static int read_thread(void *arg)
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
     is->last_audio_stream = is->audio_stream = -1;
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
     is->last_subtitle_stream = is->subtitle_stream = -1;
 #endif
 
@@ -2210,7 +1758,7 @@ static int read_thread(void *arg)
                     packet_queue_flush(&is->audioq);
                     packet_queue_put(&is->audioq, &flush_pkt);
                 }
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
                 if (is->subtitle_stream >= 0) {
                     packet_queue_flush(&is->subtitleq);
                     packet_queue_put(&is->subtitleq, &flush_pkt);
@@ -2238,14 +1786,14 @@ static int read_thread(void *arg)
 
         /* if the queue are full, no need to read more */
         if (ffp->infinite_buffer<1 &&
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
               (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
 #else
               (is->audioq.size + is->videoq.size > MAX_QUEUE_SIZE
 #endif
             || (   (is->audioq   .nb_packets > MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
                 && (is->videoq   .nb_packets > MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
                 && (is->subtitleq.nb_packets > MIN_FRAMES || is->subtitle_stream < 0 || is->subtitleq.abort_request)))) {
 #else
                 ))) {
@@ -2273,7 +1821,7 @@ static int read_thread(void *arg)
                 packet_queue_put(&is->audioq, pkt);
             }
             SDL_Delay(10);
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
             if (is->audioq.size + is->videoq.size + is->subtitleq.size == 0) {
 #else
             if (is->audioq.size + is->videoq.size == 0) {
@@ -2309,7 +1857,7 @@ static int read_thread(void *arg)
             packet_queue_put(&is->audioq, pkt);
         } else if (pkt->stream_index == is->video_stream && pkt_in_play_range) {
             packet_queue_put(&is->videoq, pkt);
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
         } else if (pkt->stream_index == is->subtitle_stream && pkt_in_play_range) {
             packet_queue_put(&is->subtitleq, pkt);
 #endif
@@ -2329,7 +1877,7 @@ static int read_thread(void *arg)
         stream_component_close(is, is->audio_stream);
     if (is->video_stream >= 0)
         stream_component_close(is, is->video_stream);
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
     if (is->subtitle_stream >= 0)
         stream_component_close(is, is->subtitle_stream);
 #endif
@@ -2363,14 +1911,14 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->pictq_mutex = SDL_CreateMutex();
     is->pictq_cond  = SDL_CreateCond();
 
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
     is->subpq_mutex = SDL_CreateMutex();
     is->subpq_cond  = SDL_CreateCond();
 #endif
 
     packet_queue_init(&is->videoq);
     packet_queue_init(&is->audioq);
-#if CONFIG_IJK_SUBTITLE
+#ifdef IJK_FFPLAY_MERGE
     packet_queue_init(&is->subtitleq);
 #endif
 
