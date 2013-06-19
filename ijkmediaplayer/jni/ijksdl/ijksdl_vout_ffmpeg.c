@@ -106,7 +106,7 @@ static int overlay_unlock(SDL_VoutOverlay *overlay)
     return SDL_UnlockMutex(opaque->mutex);
 }
 
-SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_VoutSurface *display)
+SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_Vout *display)
 {
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
     if (!overlay)

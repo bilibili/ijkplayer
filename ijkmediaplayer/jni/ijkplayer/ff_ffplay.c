@@ -537,7 +537,7 @@ retry:
 display:
             /* display picture */
             if (!ffp->display_disable && is->show_mode == SHOW_MODE_VIDEO)
-                video_display(ffp);
+                video_display2(ffp);
 
             pictq_next_picture(is);
 
@@ -572,7 +572,7 @@ static void alloc_picture(FFPlayer *ffp)
 
     vp->bmp = SDL_VoutCreateFFmpegYUVOverlay(vp->width, vp->height,
                                    SDL_YV12_OVERLAY,
-                                   ffp->screen);
+                                   ffp->vout);
     if (!vp->bmp || vp->bmp->pitches[0] < vp->width) {
         /* SDL allocates a buffer smaller than requested if the video
          * overlay hardware is unable to support the requested size. */

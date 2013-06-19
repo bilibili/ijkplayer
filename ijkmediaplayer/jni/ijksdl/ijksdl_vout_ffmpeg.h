@@ -27,6 +27,6 @@
 #include "ijksdl_stdinc.h"
 #include "ijksdl_vout.h"
 
-SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_VoutSurface *display);
+SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_Vout *display);
 
 #endif

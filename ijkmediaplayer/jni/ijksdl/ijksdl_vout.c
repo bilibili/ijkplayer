@@ -38,12 +38,6 @@ void SDL_VoutFree(SDL_Vout *vout)
     }
 }
 
-SDL_VoutSurface *SDL_VoutSetVideoMode(SDL_Vout *vout, int w, int h, int bpp, Uint32 flags)
-{
-    assert(vout);
-    return vout->set_video_mode(vout, w, h, bpp, flags);
-}
-
 int SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     if (vout && overlay && vout->display_overlay)

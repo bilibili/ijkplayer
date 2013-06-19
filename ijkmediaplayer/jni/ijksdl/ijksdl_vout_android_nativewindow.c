@@ -36,8 +36,6 @@ typedef struct SDL_VoutSurface_Opaque {
 
 typedef struct SDL_Vout_Opaque {
     ANativeWindow *native_window;
-    SDL_VoutSurface dummy_surface;
-    SDL_VoutSurface_Opaque dummy_surface_opaque;
 } SDL_Vout_Opaque;
 
 static void vout_free_l(SDL_Vout *vout)
@@ -55,6 +53,7 @@ static void vout_free_l(SDL_Vout *vout)
     SDL_Vout_FreeInternal(vout);
 }
 
+#if 0
 static SDL_VoutSurface *vout_set_video_mode_l(SDL_Vout *vout, int w, int h, int bpp, int flags)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
@@ -107,6 +106,7 @@ static SDL_VoutSurface *vout_set_video_mode(SDL_Vout *vout, int w, int h, int bp
     SDL_UnlockMutex(vout->mutex);
     return surface;
 }
+#endif
 
 static void vout_copy_image_yv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
 {
@@ -233,11 +233,9 @@ SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
         return NULL;
 
     SDL_Vout_Opaque *opaque = vout->opaque;
-    opaque->dummy_surface_opaque.vout = vout;
-    opaque->dummy_surface.opaque = &opaque->dummy_surface_opaque;
+    opaque->native_window = NULL;
 
     vout->free_l = vout_free_l;
-    vout->set_video_mode = vout_set_video_mode;
     vout->display_overlay = voud_display_overlay;
 
     return vout;
