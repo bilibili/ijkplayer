@@ -228,47 +228,12 @@ static void stream_close(VideoState *is)
 
 // MERGE: do_exit
 // MERGE: sigterm_handler
-
-static int video_open(FFPlayer *ffp, int force_set_video_mode, VideoPicture *vp)
-{
-    VideoState *is = ffp->is;
-    int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
-    int w, h;
-
-    if (vp && vp->width && vp->height) {
-        ffp->sar_num = vp->sample_aspect_ratio.num;
-        ffp->sar_den = vp->sample_aspect_ratio.den;
-        ffp->default_width = vp->width;
-        ffp->default_height = vp->height;
-    }
-
-    w = ffp->default_width;
-    h = ffp->default_height;
-
-    if (ffp->screen &&
-        is->width == ffp->screen->w && ffp->screen->w == w &&
-        is->height == ffp->screen->h && ffp->screen->h == h &&
-        !force_set_video_mode)
-        return 0;
-    ffp->screen = SDL_VoutSetVideoMode(ffp->vout, w, h, 0, flags);
-    if (!ffp->screen) {
-        fprintf(stderr, "SDL: could not set video mode - exiting\n");
-        return -1;
-    }
-
-    is->width  = ffp->screen->w;
-    is->height = ffp->screen->h;
-
-    return 0;
-}
+// MERGE: video_open
+// MERGE: video_display
 
 /* display the current picture, if any */
-static void video_display(FFPlayer *ffp)
+static void video_display2(FFPlayer *ffp)
 {
-    if (!ffp->screen)
-        video_open(ffp, 0, NULL);
-
-    // FIXME: check ffp->screen setup
     video_image_display2(ffp);
 }
 
@@ -501,7 +466,7 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
     if (!ffp->display_disable && is->show_mode != SHOW_MODE_VIDEO && is->audio_st) {
         time = av_gettime() / 1000000.0;
         if (is->force_refresh || is->last_vis_time + ffp->rdftspeed < time) {
-            video_display(ffp);
+            video_display2(ffp);
             is->last_vis_time = time;
         }
         *remaining_time = FFMIN(*remaining_time, is->last_vis_time + ffp->rdftspeed - time);
@@ -601,7 +566,9 @@ static void alloc_picture(FFPlayer *ffp)
     avfilter_unref_bufferp(&vp->picref);
 #endif
 
+#ifdef IJK_FFPLAY_MERGE
     video_open(ffp, 0, vp);
+#endif
 
     vp->bmp = SDL_VoutCreateFFmpegYUVOverlay(vp->width, vp->height,
                                    SDL_YV12_OVERLAY,
