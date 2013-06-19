@@ -28,9 +28,6 @@
 #include "ijksdl_mutex.h"
 #include "ijksdl_video.h"
 
-/* bpp=12, 8 bit Y plane followed by 8 bit 2x2 subsampled V and U planes.*/
-#define SDL_FOURCC_PIX__YV12        0x32315659
-
 typedef struct SDL_VoutOverlay_Opaque SDL_VoutOverlay_Opaque;
 typedef struct SDL_VoutOverlay SDL_VoutOverlay;
 typedef struct SDL_VoutOverlay {
@@ -50,8 +47,8 @@ typedef struct SDL_VoutOverlay {
 typedef struct SDL_VoutSurface_Opaque SDL_VoutSurface_Opaque;
 typedef struct SDL_VoutSurface SDL_VoutSurface;
 typedef struct SDL_VoutSurface {
-    int w;
-    int h;
+    int w; /* width in pixels */
+    int h; /* height in pixels */
     Uint32 format; /* fourcc number */
 
     SDL_VoutSurface_Opaque *opaque;

@@ -23,8 +23,7 @@
 
 #include "ijksdl_vout_ffmpeg.h"
 
-#include "libavcodec/avcodec.h"
-#include "libswscale/swscale.h"
+#include "ijksdl_ffinc.h"
 #include "ijksdl_mutex.h"
 #include "ijksdl_vout_internal.h"
 
@@ -39,6 +38,7 @@ typedef struct SDL_VoutOverlay_Opaque {
 } SDL_VoutOverlay_Opaque;
 
 /* Always assume a linesize alignment of 1 here */
+// FIXME: alignment
 static AVFrame *alloc_avframe(SDL_VoutOverlay_Opaque* opaque, enum AVPixelFormat format, int width, int height)
 {
     int frame_bytes = avpicture_get_size(format, width, height);
@@ -52,8 +52,9 @@ static AVFrame *alloc_avframe(SDL_VoutOverlay_Opaque* opaque, enum AVPixelFormat
         return NULL;
     }
 
+    AVPicture *pic = (AVPicture *) frame;
     avcodec_get_frame_defaults(frame);
-    avpicture_fill((AVPicture *) frame, frame_buf, format, width, height);
+    avpicture_fill(pic, frame_buf, format, width, height);
     opaque->frame_buf = frame_buf;
     return frame;
 }
