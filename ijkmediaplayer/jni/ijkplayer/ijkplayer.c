@@ -76,6 +76,14 @@ void ijkmp_global_uninit()
     ijkff_global_uninit();
 }
 
+static void ijkmp_msg_handler(void *opaque, int what)
+{
+    IjkMediaPlayer *mp = (IjkMediaPlayer *) opaque;
+    FFPlayer *ffp = mp->ffplayer;
+
+    // FIXME: implement
+}
+
 IjkMediaPlayer *ijkmp_create()
 {
     IjkMediaPlayer *mp = (IjkMediaPlayer *) malloc(sizeof(IjkMediaPlayer));
@@ -93,6 +101,8 @@ IjkMediaPlayer *ijkmp_create()
 
     FFPlayer *ffp = mp->ffplayer;
     ijkff_reset(ffp);
+    ffp->msg_opaque = mp;
+    ffp->msg_handler = ijkmp_msg_handler;
 
     pthread_mutex_init(&mp->mutex, NULL);
 
