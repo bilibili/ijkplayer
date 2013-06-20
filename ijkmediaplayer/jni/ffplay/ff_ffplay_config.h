@@ -29,6 +29,16 @@
 #endif
 #define CONFIG_AVFILTER 0
 
+#ifdef CONFIG_RTSP_DEMUXER
+#undef CONFIG_RTSP_DEMUXER
+#endif
+#define CONFIG_RTSP_DEMUXER 1
+
+#ifdef CONFIG_MMSH_PROTOCOL
+#undef CONFIG_MMSH_PROTOCOL
+#endif
+#define CONFIG_MMSH_PROTOCOL 1
+
 #ifdef FFP_MERGE
 #undef FFP_MERGE
 #endif
