@@ -43,8 +43,13 @@ void SDL_AoutCloseAudio(SDL_Aout *aout)
         return aout->close_audio(aout);
 }
 
-void SDL_AoutFreeAudio(SDL_Aout *aout)
+void SDL_AoutFree(SDL_Aout *aout)
 {
-    if (aout && aout->free_l)
-        return aout->free_l(aout);
+    if (!aout)
+        return;
+
+    if (aout->free_l)
+        aout->free_l(aout);
+    else
+        free(aout);
 }

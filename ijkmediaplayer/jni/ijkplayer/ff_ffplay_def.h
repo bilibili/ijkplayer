@@ -393,6 +393,7 @@ typedef struct FFPlayer {
 #endif
 
     /* extra fields */
+    SDL_Aout *aout;
     SDL_Vout *vout;
     int sar_num;
     int sar_den;
@@ -461,6 +462,7 @@ inline static void ijkff_reset(FFPlayer *ffp)
     ffp->audio_callback_time    = 0;
 
     /* extra fields */
+    ffp->aout                   = NULL; /* reset outside */
     ffp->vout                   = NULL; /* reset outside */
     ffp->sar_num                = 0;
     ffp->sar_den                = 0;

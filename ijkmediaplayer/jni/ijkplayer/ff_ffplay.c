@@ -189,8 +189,9 @@ static void video_image_display2(FFPlayer *ffp)
 // MERGE: compute_mod
 // MERGE: video_audio_display
 
-static void stream_close(VideoState *is)
+static void stream_close(FFPlayer *ffp)
 {
+    VideoState *is = ffp->is;
     VideoPicture *vp;
     int i;
     /* XXX: use a special url_shutdown call to abort parse cleanly */
@@ -198,7 +199,7 @@ static void stream_close(VideoState *is)
     SDL_WaitThread(is->read_tid, NULL);
     SDL_WaitThread(is->video_refresh_tid, NULL);
 
-    // FIXME: close SDL_Audio
+    SDL_AoutCloseAudio(ffp->aout);
 
     packet_queue_destroy(&is->videoq);
     packet_queue_destroy(&is->audioq);
@@ -1301,6 +1302,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 
 static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wanted_nb_channels, int wanted_sample_rate, struct AudioParams *audio_hw_params)
 {
+    FFPlayer *ffp = opaque;
     SDL_AudioSpec wanted_spec, spec;
     const char *env;
     const int next_nb_channels[] = {0, 0, 1, 6, 2, 6, 4, 6};
@@ -1325,7 +1327,7 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
     wanted_spec.samples = SDL_AUDIO_BUFFER_SIZE;
     wanted_spec.callback = sdl_audio_callback;
     wanted_spec.userdata = opaque;
-    while (SDL_OpenAudio(&wanted_spec, &spec) < 0) {
+    while (SDL_AoutOpenAudio(ffp->aout, &wanted_spec, &spec) < 0) {
         fprintf(stderr, "SDL_OpenAudio (%d channels): %s\n", wanted_spec.channels, SDL_GetError());
         wanted_spec.channels = next_nb_channels[FFMIN(7, wanted_spec.channels)];
         if (!wanted_spec.channels) {
@@ -1440,7 +1442,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         memset(&is->audio_pkt, 0, sizeof(is->audio_pkt));
         memset(&is->audio_pkt_temp, 0, sizeof(is->audio_pkt_temp));
         packet_queue_start(&is->audioq);
-        SDL_PauseAudio(0);
+        SDL_AoutPauseAudio(ffp->aout, 0);
         break;
     case AVMEDIA_TYPE_VIDEO:
         is->video_stream = stream_index;
@@ -2044,7 +2046,7 @@ void ijkff_destroy_ffplayer(FFPlayer **pffp)
     FFPlayer *ffp = *pffp;
     if (ffp && ffp->is) {
         av_log(NULL, AV_LOG_WARNING, "ijkff_destroy_ffplayer: force stream_close()");
-        stream_close(ffp->is);
+        stream_close(ffp);
         ffp->is = NULL;
     }
 
@@ -2118,7 +2120,7 @@ int ijkff_wait_stop_l(FFPlayer *ffp)
     if (!is)
         return EIJK_NULL_IS_PTR;
 
-    stream_close(is);
+    stream_close(ffp);
     ffp->is = NULL;
     return 0;
 }

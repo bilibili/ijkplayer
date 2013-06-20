@@ -54,11 +54,16 @@ inline static void destroy_mp(IjkMediaPlayer **pmp)
     if (!mp)
         return;
 
-    ijkmsg_queue_destroy(&mp->msg_queue);
+    FFPlayer *ffp = mp->ffplayer;
+    if (ffp) {
+        SDL_AoutFree(ffp->aout);
+        SDL_VoutFree(ffp->vout);
+        ijkff_destroy_ffplayer(&mp->ffplayer);
+    }
 
+    ijkmsg_queue_destroy(&mp->msg_queue);
     pthread_mutex_destroy(&mp->mutex);
 
-    ijkff_destroy_ffplayer(&mp->ffplayer);
     free(mp->data_source);
 
     memset(mp, 0, sizeof(IjkMediaPlayer));
@@ -78,8 +83,8 @@ void ijkmp_global_uninit()
 
 static void ijkmp_msg_handler(void *opaque, int what)
 {
-    IjkMediaPlayer *mp = (IjkMediaPlayer *) opaque;
-    FFPlayer *ffp = mp->ffplayer;
+    // IjkMediaPlayer *mp = (IjkMediaPlayer *) opaque;
+    // FFPlayer *ffp = mp->ffplayer;
 
     // FIXME: implement
 }
