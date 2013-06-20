@@ -23,8 +23,8 @@
 #include "ijkplayer_android.h"
 
 #include <assert.h>
-#include "../ijkerror.h"
-#include "../ff_ffplay.h"
+#include "ffplay/ijkerror.h"
+#include "ffplay/ff_ffplay.h"
 
 #define MPST_CHECK_NOT_RET_INT(real, expected, errcode) \
     do { \

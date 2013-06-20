@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_aout_android_audiotrack.h
+ * ijksdl_android.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,13 +21,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_AOUT_ANDROID_AUDIOTRACK_H
-#define IJKSDL__IJKSDL_AOUT_ANDROID_AUDIOTRACK_H
+#ifndef IJKSDL__IJKSDL_ANDROID_H
+#define IJKSDL__IJKSDL_ANDROID_H
 
-#include <jni.h>
-#include "../ijksdl_aout.h"
+#include "ijksdl/ijksdl.h"
 
-void SDL_Init_AoutAndroid(JNIEnv *env);
-SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack(JavaVM* jvm);
+#include "ijksdl_aout_android_audiotrack.h"
+
+#include "ijksdl_vout_android_nativewindow.h"
+#include "ijksdl_vout_android_surface.h"
 
 #endif

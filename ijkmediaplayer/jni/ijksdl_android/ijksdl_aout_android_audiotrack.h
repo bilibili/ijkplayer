@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_vout_android_nativewindow.h
+ * ijksdl_aout_android_audiotrack.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,15 +21,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_VOUT_ANDROID_NATIVEWINDOW_H
-#define IJKSDL__IJKSDL_VOUT_ANDROID_NATIVEWINDOW_H
+#ifndef IJKSDL__IJKSDL_AOUT_ANDROID_AUDIOTRACK_H
+#define IJKSDL__IJKSDL_AOUT_ANDROID_AUDIOTRACK_H
 
-#include "../ijksdl_stdinc.h"
-#include "../ijksdl_vout.h"
+#include <jni.h>
+#include "ijksdl/ijksdl_aout.h"
 
-typedef struct ANativeWindow ANativeWindow;
-
-SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow();
-void SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_window);
+void SDL_Init_AoutAndroid(JNIEnv *env);
+SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack(JavaVM* jvm);
 
 #endif

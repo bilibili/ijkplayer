@@ -24,9 +24,9 @@
 #include <string.h>
 #include <pthread.h>
 #include <jni.h>
-#include "ijksdl/ijksdl.h"
+#include "ijksdl_android/ijksdl_android.h"
 #include "ijkutil/ijkutil.h"
-#include "../ijkerror.h"
+#include "ffplay/ijkerror.h"
 #include "ijkplayer_android.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"

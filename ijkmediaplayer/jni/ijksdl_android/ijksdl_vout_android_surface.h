@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl.h
+ * ijksdl_vout_android_surface.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,17 +21,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_H
-#define IJKSDL__IJKSDL_H
+#ifndef IJKSDL__IJKSDL_VOUT_ANDROID_SURFACE_H
+#define IJKSDL__IJKSDL_VOUT_ANDROID_SURFACE_H
 
-#include "ijksdl_audio.h"
-#include "ijksdl_aout.h"
-#include "ijksdl_error.h"
-#include "ijksdl_mutex.h"
-#include "ijksdl_thread.h"
-#include "ijksdl_timer.h"
-#include "ijksdl_video.h"
-#include "ijksdl_vout.h"
-#include "ijksdl_vout_overlay_ffmpeg.h"
+#include <jni.h>
+#include "ijksdl/ijksdl_stdinc.h"
+#include "ijksdl/ijksdl_vout.h"
+
+SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface();
+void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, JNIEnv *env, jobject android_surface);
 
 #endif
