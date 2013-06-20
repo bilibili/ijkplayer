@@ -23,7 +23,7 @@ org.eclipse.cdt.core.formatter.brace_position_for_namespace_declaration=end_of_l
 org.eclipse.cdt.core.formatter.brace_position_for_switch=end_of_line
 org.eclipse.cdt.core.formatter.brace_position_for_type_declaration=end_of_line
 org.eclipse.cdt.core.formatter.comment.min_distance_between_code_and_line_comment=1
-org.eclipse.cdt.core.formatter.comment.preserve_white_space_between_code_and_line_comments=false
+org.eclipse.cdt.core.formatter.comment.preserve_white_space_between_code_and_line_comments=true
 org.eclipse.cdt.core.formatter.compact_else_if=true
 org.eclipse.cdt.core.formatter.continuation_indentation=1
 org.eclipse.cdt.core.formatter.continuation_indentation_for_array_initializer=1
@@ -152,7 +152,7 @@ org.eclipse.cdt.core.formatter.insert_space_between_empty_parens_in_method_invoc
 org.eclipse.cdt.core.formatter.join_wrapped_lines=false
 org.eclipse.cdt.core.formatter.keep_else_statement_on_same_line=false
 org.eclipse.cdt.core.formatter.keep_empty_array_initializer_on_one_line=false
-org.eclipse.cdt.core.formatter.keep_imple_if_on_one_line=false
+org.eclipse.cdt.core.formatter.keep_imple_if_on_one_line=true
 org.eclipse.cdt.core.formatter.keep_then_statement_on_same_line=false
 org.eclipse.cdt.core.formatter.lineSplit=800
 org.eclipse.cdt.core.formatter.number_of_empty_lines_to_preserve=1
