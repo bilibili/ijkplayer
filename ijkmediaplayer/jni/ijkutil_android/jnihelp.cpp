@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "JNIHelp"
-
 #include "jnihelp.h"
-#include "loghelp.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+
+#define LOG_TAG "JNIHelp"
+#include "ijkutil/ijkutil.h"
 
 /**
  * Equivalent to ScopedLocalRef, but for C_JNIEnv instead. (And slightly more powerful.)

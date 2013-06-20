@@ -32,25 +32,12 @@ include $(BUILD_STATIC_LIBRARY)
 
 
 #--------------------
-# CPP files
-# to suppress ugly c99 warning
-#--------------------
-include $(CLEAR_VARS)
-LOCAL_SRC_FILES += jnihelp.cpp
-
-LOCAL_MODULE := ijkutil_cpp
-include $(BUILD_STATIC_LIBRARY)
-
-
-#--------------------
 # so
 #--------------------
 include $(CLEAR_VARS)
 LOCAL_LDLIBS += -llog
 
-LOCAL_SRC_FILES += jnihelp.cpp
+LOCAL_STATIC_LIBRARIES := ijkutil_c
 
 LOCAL_MODULE := ijkutil
-LOCAL_STATIC_LIBRARIES := ijkutil_c ijkutil_cpp
-LOCAL_SHARED_LIBRARIES := libstlport
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)

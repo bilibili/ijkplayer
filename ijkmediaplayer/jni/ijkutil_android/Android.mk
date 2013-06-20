@@ -18,22 +18,17 @@
 
 LOCAL_PATH := $(call my-dir)
 
+
+#--------------------
+# so
+#--------------------
 include $(CLEAR_VARS)
-LOCAL_CFLAGS += -std=c99
-LOCAL_LDLIBS += -llog -landroid
-
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
-LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
+LOCAL_LDLIBS += -llog
 
-LOCAL_SRC_FILES += ijksdl_aout_android_audiotrack.c
-LOCAL_SRC_FILES += android_audiotrack.c
+LOCAL_SRC_FILES += jnihelp.cpp
+LOCAL_STATIC_LIBRARIES := ijkutil
 
-LOCAL_SRC_FILES += ijksdl_vout_android_nativewindow.c
-LOCAL_SRC_FILES += ijksdl_vout_android_surface.c
-
-LOCAL_STATIC_LIBRARIES := ijksdl
-LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil_android
-
-LOCAL_MODULE := ijksdl_android
+LOCAL_MODULE := ijkutil_android
 include $(BUILD_SHARED_LIBRARY)

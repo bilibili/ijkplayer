@@ -20,8 +20,8 @@
  * This file may be included by C or C++ code, which is trouble because jni.h
  * uses different typedefs for JNIEnv in each language.
  */
-#ifndef IJKUTIL__JNIHELP_H
-#define IJKUTIL__JNIHELP_H
+#ifndef IJKUTIL_ANDROID__JNIHELP_H
+#define IJKUTIL_ANDROID__JNIHELP_H
 
 #include <jni.h>
 #include <android/log.h>
@@ -190,35 +190,5 @@ inline void jniLogException(JNIEnv* env, int priority, const char* tag, jthrowab
     } while (_rc == -1 && errno == EINTR); \
     _rc; })
 #endif
-
-#define JNI_CHECK_GOTO(condition__, env__, exception__, msg__, label__) \
-    do { \
-        if (!(condition__)) { \
-            if (exception__) { \
-                jniThrowException(env__, exception__, msg__); \
-            } \
-            goto label__; \
-        } \
-    }while(0)
-
-#define JNI_CHECK_RET_VOID(condition__, env__, exception__, msg__) \
-    do { \
-        if (!(condition__)) { \
-            if (exception__) { \
-                jniThrowException(env__, exception__, msg__); \
-            } \
-            return; \
-        } \
-    }while(0)
-
-#define JNI_CHECK_RET(condition__, env__, exception__, msg__, ret__) \
-    do { \
-        if (!(condition__)) { \
-            if (exception__) { \
-                jniThrowException(env__, exception__, msg__); \
-            } \
-            return ret__; \
-        } \
-    }while(0)
 
 #endif  /* HELPERS__JNIHELP_H */

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_android.h
+ * ijkutil_android.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,14 +21,40 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL_ANDROID__IJKSDL_ANDROID_H
-#define IJKSDL_ANDROID__IJKSDL_ANDROID_H
+#ifndef IJKUTIL_ANDROID__IJKUTIL_ANDROID_H
+#define IJKUTIL_ANDROID__IJKUTIL_ANDROID_H
 
-#include "ijksdl/ijksdl.h"
+#include "ijkutil/ijkutil.h"
+#include "jnihelp.h"
 
-#include "ijksdl_aout_android_audiotrack.h"
+#define JNI_CHECK_GOTO(condition__, env__, exception__, msg__, label__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                jniThrowException(env__, exception__, msg__); \
+            } \
+            goto label__; \
+        } \
+    }while(0)
 
-#include "ijksdl_vout_android_nativewindow.h"
-#include "ijksdl_vout_android_surface.h"
+#define JNI_CHECK_RET_VOID(condition__, env__, exception__, msg__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                jniThrowException(env__, exception__, msg__); \
+            } \
+            return; \
+        } \
+    }while(0)
+
+#define JNI_CHECK_RET(condition__, env__, exception__, msg__, ret__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                jniThrowException(env__, exception__, msg__); \
+            } \
+            return ret__; \
+        } \
+    }while(0)
 
 #endif

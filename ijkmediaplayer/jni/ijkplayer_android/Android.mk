@@ -30,8 +30,8 @@ LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
 LOCAL_SRC_FILES += ijkplayer_jni.c
 LOCAL_SRC_FILES += ijkplayer_android.c
 
-LOCAL_STATIC_LIBRARIES := ijksdl ijksdl_android ffplay
-LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil
+LOCAL_STATIC_LIBRARIES := ffplay
+LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil_android ijksdl_android
 
-LOCAL_MODULE := ijkplayer
+LOCAL_MODULE := ijkplayer_android
 include $(BUILD_SHARED_LIBRARY)

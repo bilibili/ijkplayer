@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_VOUT_ANDROID_NATIVEWINDOW_H
-#define IJKSDL__IJKSDL_VOUT_ANDROID_NATIVEWINDOW_H
+#ifndef IJKSDL_ANDROID__IJKSDL_VOUT_ANDROID_NATIVEWINDOW_H
+#define IJKSDL_ANDROID__IJKSDL_VOUT_ANDROID_NATIVEWINDOW_H
 
 #include "ijksdl/ijksdl_stdinc.h"
 #include "ijksdl/ijksdl_vout.h"

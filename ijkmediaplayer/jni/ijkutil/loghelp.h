@@ -26,6 +26,10 @@
 
 #include <android/log.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef IJK_LOG_TAG
 #define IJK_LOG_TAG "IJKMEDIA"
 #endif
@@ -56,5 +60,8 @@
 #define ALOGE(...)  ALOG(IJK_LOG_ERROR,     IJK_LOG_TAG, __VA_ARGS__)
 #define LOG_ALWAYS_FATAL(...)   do { ALOGE(__VA_ARGS__); exit(1); } while (0)
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif
