@@ -26,7 +26,7 @@
 #include <jni.h>
 #include "ijksdl_android/ijksdl_android.h"
 #include "ijkutil/ijkutil.h"
-#include "ffplay/ijkerror.h"
+#include "ffplay/ff_ffplay.h"
 #include "ijkplayer_android.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
@@ -344,14 +344,14 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
     (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
 
-    ijkmp_global_init();
+    ijkff_global_init();
 
     return JNI_VERSION_1_4;
 }
 
 void JNI_OnUnload(JavaVM *jvm, void *reserved)
 {
-    ijkmp_global_uninit();
+    ijkff_global_uninit();
 
     pthread_mutex_destroy(&g_clazz.mutex);
 }

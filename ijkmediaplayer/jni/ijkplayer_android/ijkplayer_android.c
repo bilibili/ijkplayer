@@ -89,6 +89,14 @@ static void ijkmp_msg_handler(void *opaque, int what, int arg1, int arg2, void* 
     // FIXME: implement
 }
 
+void ijkmp_setup_internal(IjkMediaPlayer *mp) {
+    FFPlayer *ffp = mp->ffplayer;
+
+    ffp->msg_opaque = mp;
+    ffp->msg_handler = ijkmp_msg_handler;
+    ijkmsg_queue_start(&mp->msg_queue);
+}
+
 IjkMediaPlayer *ijkmp_create()
 {
     IjkMediaPlayer *mp = (IjkMediaPlayer *) malloc(sizeof(IjkMediaPlayer));
@@ -97,28 +105,24 @@ IjkMediaPlayer *ijkmp_create()
     }
     memset(mp, 0, sizeof(IjkMediaPlayer));
 
-    mp->ffplayer = (FFPlayer*) malloc(sizeof(FFPlayer));
+    FFPlayer *ffp = ijkff_create_ffplayer();
     if (!mp) {
         free(mp);
         return NULL;
     }
-    memset(mp->ffplayer, 0, sizeof(FFPlayer));
-
-    FFPlayer *ffp = mp->ffplayer;
-    ijkff_reset(ffp);
-    ffp->msg_opaque = mp;
-    ffp->msg_handler = ijkmp_msg_handler;
 
     pthread_mutex_init(&mp->mutex, NULL);
-
     ijkmsg_queue_init(&mp->msg_queue);
-    ijkmsg_queue_start(&mp->msg_queue);
 
     ijkmp_inc_ref(mp);
+
+    mp->ffplayer = ffp;
+    ijkmp_setup_internal(mp);
+
     return mp;
 }
 
-void ijkmp_shutdown(IjkMediaPlayer *mp)
+void ijkmp_shutdown_l(IjkMediaPlayer *mp)
 {
     assert(mp);
 
@@ -130,21 +134,31 @@ void ijkmp_shutdown(IjkMediaPlayer *mp)
     }
 }
 
-void ijkmp_reset(IjkMediaPlayer *mp)
+void ijkmp_shutdown(IjkMediaPlayer *mp)
+{
+    return ijkmp_shutdown_l(mp);
+}
+
+void ijkmp_reset_l(IjkMediaPlayer *mp)
 {
     assert(mp);
 
-    pthread_mutex_lock(&mp->mutex);
-
-    ijkff_stop_l(mp->ffplayer);
-    /* FIXME: try to avoid dead-lock */
-    ijkff_wait_stop_l(mp->ffplayer);
+    ijkmp_shutdown_l(mp);
     ijkff_reset(mp->ffplayer);
 
     free(mp->data_source);
     mp->data_source = NULL;
     mp->mp_state = MP_STATE_IDLE;
 
+    ijkmp_setup_internal(mp);
+}
+
+void ijkmp_reset(IjkMediaPlayer *mp)
+{
+    assert(mp);
+
+    pthread_mutex_lock(&mp->mutex);
+    ijkmp_reset_l(mp);
     pthread_mutex_unlock(&mp->mutex);
 }
 

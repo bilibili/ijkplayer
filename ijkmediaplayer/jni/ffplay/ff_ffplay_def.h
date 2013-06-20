@@ -408,7 +408,7 @@ typedef struct FFPlayer {
 #define fftime_to_milliseconds(ts) (ts / (AV_TIME_BASE / 1000))
 #define milliseconds_to_fftime(ms) (ms * (AV_TIME_BASE / 1000))
 
-inline static void ijkff_reset(FFPlayer *ffp)
+inline static void ijkff_reset_internal(FFPlayer *ffp)
 {
     /* ffp->is closed in stream_close() */
 

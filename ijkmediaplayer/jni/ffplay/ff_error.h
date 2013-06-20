@@ -1,5 +1,5 @@
 /*
- * ijkerror.h
+ * ff_error.h
  *
  * Copyright (c) 2003 Fabrice Bellard
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__IJKERROR_H
-#define IJKPLAYER__IJKERROR_H
+#ifndef IJKPLAYER__FF_ERROR_H
+#define IJKPLAYER__FF_ERROR_H
 
 #define EIJK_FAILED             -1
 #define EIJK_OUT_OF_MEMORY      -2

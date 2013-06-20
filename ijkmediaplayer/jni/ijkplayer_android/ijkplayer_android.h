@@ -136,31 +136,28 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create();
 
-void ijkmp_global_init();
-void ijkmp_global_uninit();
-
 // preferred to be called explicity, can be called multiple times
 // NOTE: ijkmp_shutdown may block thread
-void ijkmp_shutdown(IjkMediaPlayer *mp);
+void            ijkmp_shutdown(IjkMediaPlayer *mp);
 
-void ijkmp_inc_ref(IjkMediaPlayer *mp);
+void            ijkmp_inc_ref(IjkMediaPlayer *mp);
 
 // call close at last release, also free memory
 // NOTE: ijkmp_dec_ref may block thread
-void ijkmp_dec_ref(IjkMediaPlayer **pmp);
+void            ijkmp_dec_ref(IjkMediaPlayer **pmp);
 
-int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
-int ijkmp_prepare_async(IjkMediaPlayer *mp);
-int ijkmp_start(IjkMediaPlayer *mp);
-int ijkmp_pause(IjkMediaPlayer *mp);
-int ijkmp_stop(IjkMediaPlayer *mp);
-int ijkmp_seek_to(IjkMediaPlayer *mp, long msec);
-bool ijkmp_is_playing(IjkMediaPlayer *mp);
-long ijkmp_get_current_position(IjkMediaPlayer *mp);
-long ijkmp_get_duration(IjkMediaPlayer *mp);
-void ijkmp_reset(IjkMediaPlayer *mp);
+int             ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
+int             ijkmp_prepare_async(IjkMediaPlayer *mp);
+int             ijkmp_start(IjkMediaPlayer *mp);
+int             ijkmp_pause(IjkMediaPlayer *mp);
+int             ijkmp_stop(IjkMediaPlayer *mp);
+int             ijkmp_seek_to(IjkMediaPlayer *mp, long msec);
+bool            ijkmp_is_playing(IjkMediaPlayer *mp);
+long            ijkmp_get_current_position(IjkMediaPlayer *mp);
+long            ijkmp_get_duration(IjkMediaPlayer *mp);
+void            ijkmp_reset(IjkMediaPlayer *mp);
 
-void ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout);
-SDL_Vout *ijkmp_get_vout(IjkMediaPlayer *mp);
+void            ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout);
+SDL_Vout       *ijkmp_get_vout(IjkMediaPlayer *mp);
 
 #endif
