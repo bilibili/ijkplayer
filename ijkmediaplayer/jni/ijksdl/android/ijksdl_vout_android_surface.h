@@ -25,8 +25,8 @@
 #define IJKSDL_ANDROID__IJKSDL_VOUT_ANDROID_SURFACE_H
 
 #include <jni.h>
-#include "ijksdl/ijksdl_stdinc.h"
-#include "ijksdl/ijksdl_vout.h"
+#include "../ijksdl_stdinc.h"
+#include "../ijksdl_vout.h"
 
 SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface();
 void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, JNIEnv *env, jobject android_surface);

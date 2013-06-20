@@ -32,12 +32,23 @@ include $(BUILD_STATIC_LIBRARY)
 
 
 #--------------------
+# CPP files: android
+#--------------------
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES += android/jnihelp.cpp
+
+LOCAL_MODULE := ijkutil_android_cpp
+include $(BUILD_STATIC_LIBRARY)
+
+
+#--------------------
 # so
 #--------------------
 include $(CLEAR_VARS)
 LOCAL_LDLIBS += -llog
 
 LOCAL_STATIC_LIBRARIES := ijkutil_c
+LOCAL_WHOLE_STATIC_LIBRARIES := ijkutil_android_cpp
 
 LOCAL_MODULE := ijkutil
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)

@@ -26,9 +26,9 @@
 #include <assert.h>
 #include <android/native_window.h>
 #include "ijkutil/ijkutil.h"
-#include "ijksdl/ijksdl_ffinc.h"
-#include "ijksdl/ijksdl_vout.h"
-#include "ijksdl/ijksdl_vout_internal.h"
+#include "../ijksdl_ffinc.h"
+#include "../ijksdl_vout.h"
+#include "../ijksdl_vout_internal.h"
 
 typedef struct SDL_VoutSurface_Opaque {
     SDL_Vout *vout;

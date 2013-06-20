@@ -26,8 +26,8 @@
 
 #include <stdint.h>
 #include <jni.h>
-#include "ijksdl/ijksdl_audio.h"
-#include "ijksdl/ijksdl_aout.h"
+#include "../ijksdl_audio.h"
+#include "../ijksdl_aout.h"
 
 typedef struct SDL_AndroidAudioTrack_Spec {
     enum StreamType {

@@ -25,7 +25,7 @@
 #define IJKSDL_ANDROID__IJKSDL_AOUT_ANDROID_AUDIOTRACK_H
 
 #include <jni.h>
-#include "ijksdl/ijksdl_aout.h"
+#include "../ijksdl_aout.h"
 
 void SDL_Init_AoutAndroid(JNIEnv *env);
 SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack(JavaVM* jvm);

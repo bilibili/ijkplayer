@@ -22,7 +22,7 @@
 #include <assert.h>
 
 #define LOG_TAG "JNIHelp"
-#include "ijkutil/ijkutil.h"
+#include "../loghelp.h"
 
 /**
  * Equivalent to ScopedLocalRef, but for C_JNIEnv instead. (And slightly more powerful.)
