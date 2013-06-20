@@ -165,17 +165,17 @@ static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *seria
     return ret;
 }
 
-// MERGE: fill_rectangle
-// MERGE: fill_border
-// MERGE: ALPHA_BLEND
-// MERGE: RGBA_IN
-// MERGE: YUVA_IN
-// MERGE: YUVA_OUT
-// MERGE: BPP
-// MERGE: blend_subrect
-// MERGE: free_subpicture
-// MERGE: calculate_display_rect
-// MERGE: video_image_display
+// FFP_MERGE: fill_rectangle
+// FFP_MERGE: fill_border
+// FFP_MERGE: ALPHA_BLEND
+// FFP_MERGE: RGBA_IN
+// FFP_MERGE: YUVA_IN
+// FFP_MERGE: YUVA_OUT
+// FFP_MERGE: BPP
+// FFP_MERGE: blend_subrect
+// FFP_MERGE: free_subpicture
+// FFP_MERGE: calculate_display_rect
+// FFP_MERGE: video_image_display
 
 static void video_image_display2(FFPlayer *ffp)
 {
@@ -188,8 +188,8 @@ static void video_image_display2(FFPlayer *ffp)
     }
 }
 
-// MERGE: compute_mod
-// MERGE: video_audio_display
+// FFP_MERGE: compute_mod
+// FFP_MERGE: video_audio_display
 
 static void stream_close(FFPlayer *ffp)
 {
@@ -203,7 +203,7 @@ static void stream_close(FFPlayer *ffp)
 
     packet_queue_destroy(&is->videoq);
     packet_queue_destroy(&is->audioq);
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     packet_queue_destroy(&is->subtitleq);
 #endif
 
@@ -220,7 +220,7 @@ static void stream_close(FFPlayer *ffp)
     }
     SDL_DestroyMutex(is->pictq_mutex);
     SDL_DestroyCond(is->pictq_cond);
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     SDL_DestroyMutex(is->subpq_mutex);
     SDL_DestroyCond(is->subpq_cond);
 #endif
@@ -231,10 +231,10 @@ static void stream_close(FFPlayer *ffp)
     av_free(is);
 }
 
-// MERGE: do_exit
-// MERGE: sigterm_handler
-// MERGE: video_open
-// MERGE: video_display
+// FFP_MERGE: do_exit
+// FFP_MERGE: sigterm_handler
+// FFP_MERGE: video_open
+// FFP_MERGE: video_display
 
 /* display the current picture, if any */
 static void video_display2(FFPlayer *ffp)
@@ -377,7 +377,7 @@ static void stream_toggle_pause(VideoState *is)
     is->paused = !is->paused;
 }
 
-// MERGE: toggle_pause
+// FFP_MERGE: toggle_pause
 
 static void step_to_next_frame(VideoState *is)
 {
@@ -468,7 +468,7 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
     VideoPicture *vp;
     double time;
 
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     SubPicture *sp, *sp2;
 #endif
 
@@ -544,7 +544,7 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
                 }
             }
 
-            // MERGE: if (is->subtitle_st) { {...}
+            // FFP_MERGE: if (is->subtitle_st) { {...}
 
             display:
             /* display picture */
@@ -559,7 +559,7 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
     }
     is->force_refresh = 0;
 
-    // MERGE: if (ffp->show_status) {...}
+    // FFP_MERGE: if (ffp->show_status) {...}
 }
 
 /* allocate a picture (needs to do that in main thread to avoid
@@ -578,7 +578,7 @@ static void alloc_picture(FFPlayer *ffp)
     avfilter_unref_bufferp(&vp->picref);
 #endif
 
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     video_open(ffp, 0, vp);
 #endif
 
@@ -1039,7 +1039,7 @@ static int video_thread(void *arg)
     return 0;
 }
 
-// MERGE: subtitle_thread
+// FFP_MERGE: subtitle_thread
 
 /* copy samples for viewing in editor window */
 static void update_sample_display(VideoState *is, short *samples, int samples_size)
@@ -1474,7 +1474,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         packet_queue_start(&is->videoq);
         is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp);
         break;
-        // MERGE: case AVMEDIA_TYPE_SUBTITLE:
+        // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:
         break;
     }
@@ -1525,7 +1525,7 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
 
         packet_queue_flush(&is->videoq);
         break;
-        // MERGE: case AVMEDIA_TYPE_SUBTITLE:
+        // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:
         break;
     }
@@ -1544,7 +1544,7 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
         is->video_st = NULL;
         is->video_stream = -1;
         break;
-        // MERGE: case AVMEDIA_TYPE_SUBTITLE:
+        // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:
         break;
     }
@@ -1593,7 +1593,7 @@ static int read_thread(void *arg)
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
     is->last_audio_stream = is->audio_stream = -1;
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     is->last_subtitle_stream = is->subtitle_stream = -1;
 #endif
 
@@ -1706,7 +1706,7 @@ static int read_thread(void *arg)
         ffp->infinite_buffer = 1;
 
     prepared = true;
-    ijkff_notify_msg(ffp, IJKFF_MSG_PREPARED, 0, 0, NULL);
+    ffp_notify_msg(ffp, FFP_MSG_PREPARED, 0, 0, NULL);
 
     for (;;) {
         if (is->abort_request)
@@ -1741,7 +1741,7 @@ static int read_thread(void *arg)
                     packet_queue_flush(&is->audioq);
                     packet_queue_put(&is->audioq, &flush_pkt);
                 }
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
                 if (is->subtitle_stream >= 0) {
                     packet_queue_flush(&is->subtitleq);
                     packet_queue_put(&is->subtitleq, &flush_pkt);
@@ -1769,14 +1769,14 @@ static int read_thread(void *arg)
 
         /* if the queue are full, no need to read more */
         if (ffp->infinite_buffer < 1 &&
-            #ifdef IJK_FFPLAY_MERGE
+            #ifdef FFP_MERGE
             (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
 #else
             (is->audioq.size + is->videoq.size > MAX_QUEUE_SIZE
                 #endif
                 || ((is->audioq.nb_packets > MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
                     && (is->videoq.nb_packets > MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
                 && (is->subtitleq.nb_packets > MIN_FRAMES || is->subtitle_stream < 0 || is->subtitleq.abort_request)))) {
 #else
                 ))) {
@@ -1804,7 +1804,7 @@ static int read_thread(void *arg)
                 packet_queue_put(&is->audioq, pkt);
             }
             SDL_Delay(10);
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
             if (is->audioq.size + is->videoq.size + is->subtitleq.size == 0) {
 #else
             if (is->audioq.size + is->videoq.size == 0) {
@@ -1815,7 +1815,7 @@ static int read_thread(void *arg)
                     ret = AVERROR_EOF;
                     goto fail;
                 } else {
-                    ijkff_notify_msg(ffp, IJKFF_MSG_COMPLETED, 0, 0, NULL);
+                    ffp_notify_msg(ffp, FFP_MSG_COMPLETED, 0, 0, NULL);
                 }
             }
             eof = 0;
@@ -1844,7 +1844,7 @@ static int read_thread(void *arg)
             packet_queue_put(&is->audioq, pkt);
         } else if (pkt->stream_index == is->video_stream && pkt_in_play_range) {
             packet_queue_put(&is->videoq, pkt);
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
         } else if (pkt->stream_index == is->subtitle_stream && pkt_in_play_range) {
             packet_queue_put(&is->subtitleq, pkt);
 #endif
@@ -1864,7 +1864,7 @@ static int read_thread(void *arg)
         stream_component_close(ffp, is->audio_stream);
     if (is->video_stream >= 0)
         stream_component_close(ffp, is->video_stream);
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     if (is->subtitle_stream >= 0)
     stream_component_close(ffp, is->subtitle_stream);
 #endif
@@ -1874,7 +1874,7 @@ static int read_thread(void *arg)
 
     if (!prepared || !is->abort_request) {
         ffp->last_error = last_error;
-        ijkff_notify_msg(ffp, IJKFF_MSG_ERROR, last_error, 0, NULL);
+        ffp_notify_msg(ffp, FFP_MSG_ERROR, last_error, 0, NULL);
     }
 
     SDL_DestroyMutex(wait_mutex);
@@ -1897,14 +1897,14 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->pictq_mutex = SDL_CreateMutex();
     is->pictq_cond = SDL_CreateCond();
 
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     is->subpq_mutex = SDL_CreateMutex();
     is->subpq_cond = SDL_CreateCond();
 #endif
 
     packet_queue_init(&is->videoq);
     packet_queue_init(&is->audioq);
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     packet_queue_init(&is->subtitleq);
 #endif
 
@@ -1935,26 +1935,26 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     return is;
 }
 
-// MERGE: stream_cycle_channel
-// MERGE: toggle_full_screen
-// MERGE: toggle_audio_display
-// MERGE: refresh_loop_wait_event
-// MERGE: event_loop
-// MERGE: opt_frame_size
-// MERGE: opt_width
-// MERGE: opt_height
-// MERGE: opt_format
-// MERGE: opt_frame_pix_fmt
-// MERGE: opt_sync
-// MERGE: opt_seek
-// MERGE: opt_duration
-// MERGE: opt_show_mode
-// MERGE: opt_input_file
-// MERGE: opt_codec
-// MERGE: dummy
-// MERGE: options
-// MERGE: show_usage
-// MERGE: show_help_default
+// FFP_MERGE: stream_cycle_channel
+// FFP_MERGE: toggle_full_screen
+// FFP_MERGE: toggle_audio_display
+// FFP_MERGE: refresh_loop_wait_event
+// FFP_MERGE: event_loop
+// FFP_MERGE: opt_frame_size
+// FFP_MERGE: opt_width
+// FFP_MERGE: opt_height
+// FFP_MERGE: opt_format
+// FFP_MERGE: opt_frame_pix_fmt
+// FFP_MERGE: opt_sync
+// FFP_MERGE: opt_seek
+// FFP_MERGE: opt_duration
+// FFP_MERGE: opt_show_mode
+// FFP_MERGE: opt_input_file
+// FFP_MERGE: opt_codec
+// FFP_MERGE: dummy
+// FFP_MERGE: options
+// FFP_MERGE: show_usage
+// FFP_MERGE: show_help_default
 static int video_refresh_thread(void *arg)
 {
     FFPlayer *ffp = arg;
@@ -1990,7 +1990,7 @@ static int lockmgr(void **mtx, enum AVLockOp op)
     return 1;
 }
 
-// MERGE: main
+// FFP_MERGE: main
 
 /*****************************************************************************
  * end last line in ffplay.c
@@ -1998,23 +1998,23 @@ static int lockmgr(void **mtx, enum AVLockOp op)
 
 static bool g_ffmpeg_global_inited = false;
 
-static void ijkff_log_callback_help(void *ptr, int level, const char *fmt, va_list vl)
+static void ffp_log_callback_help(void *ptr, int level, const char *fmt, va_list vl)
 {
-    int ijklv = IJK_LOG_VERBOSE;
+    int ffplv = IJK_LOG_VERBOSE;
     if (level <= AV_LOG_ERROR)
-        ijklv = IJK_LOG_ERROR;
+        ffplv = IJK_LOG_ERROR;
     else if (level <= AV_LOG_WARNING)
-        ijklv = IJK_LOG_WARN;
+        ffplv = IJK_LOG_WARN;
     else if (level <= AV_LOG_INFO)
-        ijklv = IJK_LOG_INFO;
+        ffplv = IJK_LOG_INFO;
     else if (level <= AV_LOG_VERBOSE)
-        ijklv = IJK_LOG_VERBOSE;
+        ffplv = IJK_LOG_VERBOSE;
     else
-        ijklv = IJK_LOG_DEBUG;
-    VLOG(ijklv, IJK_LOG_TAG, fmt, vl);
+        ffplv = IJK_LOG_DEBUG;
+    VLOG(ffplv, IJK_LOG_TAG, fmt, vl);
 }
 
-void ijkff_global_init()
+void ffp_global_init()
 {
     if (g_ffmpeg_global_inited)
         return;
@@ -2031,7 +2031,7 @@ void ijkff_global_init()
     avformat_network_init();
 
     av_lockmgr_register(lockmgr);
-    av_log_set_callback(ijkff_log_callback_help);
+    av_log_set_callback(ffp_log_callback_help);
 
     /* FIXME: SDL_Init() */
 
@@ -2046,7 +2046,7 @@ void ijkff_global_init()
     /* test link end */
 }
 
-void ijkff_global_uninit()
+void ffp_global_uninit()
 {
     if (!g_ffmpeg_global_inited)
         return;
@@ -2063,40 +2063,40 @@ void ijkff_global_uninit()
     g_ffmpeg_global_inited = false;
 }
 
-FFPlayer *ijkff_create_ffplayer()
+FFPlayer *ffp_create_ffplayer()
 {
     FFPlayer* ffp = (FFPlayer*) malloc(sizeof(ffp));
     if (!ffp)
         return NULL;
 
     memset(ffp, 0, sizeof(FFPlayer));
-    ijkff_reset_internal(ffp);
+    ffp_reset_internal(ffp);
     return ffp;
 }
 
-void ijkff_destroy_ffplayer(FFPlayer **pffp)
+void ffp_destroy_ffplayer(FFPlayer **pffp)
 {
     if (!pffp || !*pffp)
         return;
 
     FFPlayer *ffp = *pffp;
     if (ffp && ffp->is) {
-        av_log(NULL, AV_LOG_WARNING, "ijkff_destroy_ffplayer: force stream_close()");
+        av_log(NULL, AV_LOG_WARNING, "ffp_destroy_ffplayer: force stream_close()");
         stream_close(ffp);
         ffp->is = NULL;
     }
 
-    ijkff_reset_internal(ffp);
+    ffp_reset_internal(ffp);
     free(ffp);
     *pffp = NULL;
 }
 
-void ijkff_reset(FFPlayer *ffp)
+void ffp_reset(FFPlayer *ffp)
 {
-    ijkff_reset_internal(ffp);
+    ffp_reset_internal(ffp);
 }
 
-int ijkff_prepare_async_l(FFPlayer *ffp, const char *file_name)
+int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
 {
     assert(ffp);
     assert(!ffp->is);
@@ -2104,7 +2104,7 @@ int ijkff_prepare_async_l(FFPlayer *ffp, const char *file_name)
 
     VideoState *is = stream_open(ffp, file_name, NULL);
     if (!is) {
-        av_log(NULL, AV_LOG_WARNING, "ijkff_prepare_async_l: stream_open failed OOM");
+        av_log(NULL, AV_LOG_WARNING, "ffp_prepare_async_l: stream_open failed OOM");
         return EIJK_OUT_OF_MEMORY;
     }
 
@@ -2112,7 +2112,7 @@ int ijkff_prepare_async_l(FFPlayer *ffp, const char *file_name)
     return 0;
 }
 
-int ijkff_start_l(FFPlayer *ffp)
+int ffp_start_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = ffp->is;
@@ -2131,7 +2131,7 @@ int ijkff_start_l(FFPlayer *ffp)
     return 0;
 }
 
-int ijkff_pause_l(FFPlayer *ffp)
+int ffp_pause_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = ffp->is;
@@ -2143,7 +2143,7 @@ int ijkff_pause_l(FFPlayer *ffp)
     return 0;
 }
 
-int ijkff_stop_l(FFPlayer *ffp)
+int ffp_stop_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = ffp->is;
@@ -2154,7 +2154,7 @@ int ijkff_stop_l(FFPlayer *ffp)
     return 0;
 }
 
-int ijkff_wait_stop_l(FFPlayer *ffp)
+int ffp_wait_stop_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = ffp->is;
@@ -2166,7 +2166,7 @@ int ijkff_wait_stop_l(FFPlayer *ffp)
     return 0;
 }
 
-int ijkff_seek_to_l(FFPlayer *ffp, long msec)
+int ffp_seek_to_l(FFPlayer *ffp, long msec)
 {
     assert(ffp);
     VideoState *is = ffp->is;
@@ -2186,7 +2186,7 @@ int ijkff_seek_to_l(FFPlayer *ffp, long msec)
     return 0;
 }
 
-long ijkff_get_current_position_l(FFPlayer *ffp)
+long ffp_get_current_position_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = ffp->is;
@@ -2205,7 +2205,7 @@ long ijkff_get_current_position_l(FFPlayer *ffp)
     return fftime_to_milliseconds(adjust_post);
 }
 
-long ijkff_get_duration_l(FFPlayer *ffp)
+long ffp_get_duration_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = ffp->is;

@@ -344,14 +344,14 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
     (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
 
-    ijkff_global_init();
+    ijkmp_global_init();
 
     return JNI_VERSION_1_4;
 }
 
 void JNI_OnUnload(JavaVM *jvm, void *reserved)
 {
-    ijkff_global_uninit();
+    ijkmp_global_uninit();
 
     pthread_mutex_destroy(&g_clazz.mutex);
 }

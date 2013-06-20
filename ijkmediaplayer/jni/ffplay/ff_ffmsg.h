@@ -21,18 +21,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__FF_FFMSG_H
-#define IJKPLAYER__FF_FFMSG_H
+#ifndef FFPLAY__FF_FFMSG_H
+#define FFPLAY__FF_FFMSG_H
 
-#define IJKFF_MSG_FLUSH                 0
-#define IJKFF_MSG_ERROR                 100     /* arg1 = error */
-#define IJKFF_MSG_PREPARED              200
-#define IJKFF_MSG_COMPLETED             300
-#define IJKFF_MSG_VIDEO_SIZE_CHANGED    400     /* arg1 = width, arg2 = height */
-#define IJKFF_MSG_SAR_CHANGED           401     /* arg1 = sar.num, arg2 = sar.den */
-#define IJKFF_MSG_BUFFERING_START       500
-#define IJKFF_MSG_BUFFERING_END         501
-#define IJKFF_MSG_BUFFERING_FORWARD     502     /* arg1 = cached duration */
-#define IJKFF_MSG_SEEK_COMPLETED        600
+#define FFP_MSG_FLUSH                   0
+#define FFP_MSG_ERROR                   100     /* arg1 = error */
+#define FFP_MSG_PREPARED                200
+#define FFP_MSG_COMPLETED               300
+#define FFP_MSG_VIDEO_SIZE_CHANGED      400     /* arg1 = width, arg2 = height */
+#define FFP_MSG_SAR_CHANGED             401     /* arg1 = sar.num, arg2 = sar.den */
+#define FFP_MSG_BUFFERING_START         500
+#define FFP_MSG_BUFFERING_END           501
+#define FFP_MSG_BUFFERING_FORWARD       502     /* arg1 = cached duration */
+#define FFP_MSG_SEEK_COMPLETED          600
 
 #endif

@@ -133,6 +133,9 @@ typedef struct SDL_Vout SDL_Vout;
 
 typedef struct IjkMediaPlayer IjkMediaPlayer;
 
+ void           ijkmp_global_init();
+ void           ijkmp_global_uninit();
+
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create();
 

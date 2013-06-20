@@ -21,21 +21,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__FF_FFPLAY_CONFIG_H
-#define IJKPLAYER__FF_FFPLAY_CONFIG_H
+#ifndef FFPLAY__FF_FFPLAY_CONFIG_H
+#define FFPLAY__FF_FFPLAY_CONFIG_H
 
 #ifdef CONFIG_AVFILTER
 #undef CONFIG_AVFILTER
 #endif
 #define CONFIG_AVFILTER 0
 
-#ifdef CONFIG_IJK_SUBTITLE
-#undef CONFIG_IJK_SUBTITLE
-#endif
-#define CONFIG_IJK_SUBTITLE 0
-
-#ifdef IJK_FFPLAY_MERGE
-#undef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
+#undef FFP_MERGE
 #endif
 
 #endif

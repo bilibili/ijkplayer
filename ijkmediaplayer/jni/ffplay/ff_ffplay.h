@@ -21,29 +21,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__FF_FFPLAY_H
-#define IJKPLAYER__FF_FFPLAY_H
+#ifndef FFPLAY__FF_FFPLAY_H
+#define FFPLAY__FF_FFPLAY_H
 
 #include "ff_ffplay_def.h"
 #include "ff_fferror.h"
 #include "ff_ffmsg.h"
 
-void      ijkff_global_init();
-void      ijkff_global_uninit();
+void      ffp_global_init();
+void      ffp_global_uninit();
 
-FFPlayer *ijkff_create_ffplayer();
-void      ijkff_destroy_ffplayer(FFPlayer **pffp);
-void      ijkff_reset(FFPlayer *ffp);
+FFPlayer *ffp_create_ffplayer();
+void      ffp_destroy_ffplayer(FFPlayer **pffp);
+void      ffp_reset(FFPlayer *ffp);
 
-int       ijkff_prepare_async_l(FFPlayer *ffp, const char *file_name);
-int       ijkff_start_l(FFPlayer *ffp);
-int       ijkff_pause_l(FFPlayer *ffp);
-int       ijkff_stop_l(FFPlayer *ffp);
-int       ijkff_wait_stop_l(FFPlayer *ffp);
+int       ffp_prepare_async_l(FFPlayer *ffp, const char *file_name);
+int       ffp_start_l(FFPlayer *ffp);
+int       ffp_pause_l(FFPlayer *ffp);
+int       ffp_stop_l(FFPlayer *ffp);
+int       ffp_wait_stop_l(FFPlayer *ffp);
 
 /* all in milliseconds */
-int       ijkff_seek_to_l(FFPlayer *ffp, long msec);
-long      ijkff_get_current_position_l(FFPlayer *ffp);
-long      ijkff_get_duration_l(FFPlayer *ffp);
+int       ffp_seek_to_l(FFPlayer *ffp, long msec);
+long      ffp_get_current_position_l(FFPlayer *ffp);
+long      ffp_get_duration_l(FFPlayer *ffp);
 
 #endif

@@ -58,27 +58,26 @@ inline static void destroy_mp(IjkMediaPlayer **pmp)
     if (ffp) {
         SDL_AoutFree(ffp->aout);
         SDL_VoutFree(ffp->vout);
-        ijkff_destroy_ffplayer(&mp->ffplayer);
+        ffp_destroy_ffplayer(&mp->ffplayer);
     }
 
     // FIXME: ijkmsg_queue_destroy(&mp->msg_queue);
     pthread_mutex_destroy(&mp->mutex);
 
-    free(mp->data_source);
-
+    FFP_SAFE_FREE(mp->data_source);
     memset(mp, 0, sizeof(IjkMediaPlayer));
-    free(mp);
+    FFP_SAFE_FREE(mp);
     *pmp = NULL;
 }
 
 void ijkmp_global_init()
 {
-    ijkff_global_init();
+    ffp_global_init();
 }
 
 void ijkmp_global_uninit()
 {
-    ijkff_global_uninit();
+    ffp_global_uninit();
 }
 
 static void ijkmp_msg_handler(void *opaque, int what, int arg1, int arg2, void* data)
@@ -106,10 +105,9 @@ IjkMediaPlayer *ijkmp_create()
     }
     memset(mp, 0, sizeof(IjkMediaPlayer));
 
-    FFPlayer *ffp = ijkff_create_ffplayer();
+    FFPlayer *ffp = ffp_create_ffplayer();
     if (!mp) {
-        free(mp);
-        return NULL;
+        FFP_SAFE_FREE(mp);
     }
 
     pthread_mutex_init(&mp->mutex, NULL);
@@ -130,8 +128,8 @@ void ijkmp_shutdown_l(IjkMediaPlayer *mp)
     // FIXME: ijkmsg_queue_abort(&mp->msg_queue);
 
     if (mp->ffplayer) {
-        ijkff_stop_l(mp->ffplayer);
-        ijkff_wait_stop_l(mp->ffplayer);
+        ffp_stop_l(mp->ffplayer);
+        ffp_wait_stop_l(mp->ffplayer);
     }
 }
 
@@ -145,10 +143,9 @@ void ijkmp_reset_l(IjkMediaPlayer *mp)
     assert(mp);
 
     ijkmp_shutdown_l(mp);
-    ijkff_reset(mp->ffplayer);
+    ffp_reset(mp->ffplayer);
 
-    free(mp->data_source);
-    mp->data_source = NULL;
+    FFP_SAFE_FREE(mp->data_source);
     mp->mp_state = MP_STATE_IDLE;
 
     ijkmp_setup_internal(mp);
@@ -202,8 +199,7 @@ static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
     if (!dup_url)
         return EIJK_OUT_OF_MEMORY;
 
-    free(mp->data_source);
-    mp->data_source = dup_url;
+    FFP_SAFE_FREE(mp->data_source);
     mp->mp_state = MP_STATE_INITIALIZED;
     return 0;
 }
@@ -237,7 +233,7 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
     assert(mp->data_source);
 
     mp->mp_state = MP_STATE_ASYNC_PREPARING;
-    int retval = ijkff_prepare_async_l(mp->ffplayer, mp->data_source);
+    int retval = ffp_prepare_async_l(mp->ffplayer, mp->data_source);
     if (retval < 0) {
         mp->mp_state = MP_STATE_ERROR;
         return retval;
@@ -270,7 +266,7 @@ static int ijkmp_start_l(IjkMediaPlayer *mp)
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
 
-    int retval = ijkff_start_l(mp->ffplayer);
+    int retval = ffp_start_l(mp->ffplayer);
     if (retval < 0) {
         return retval;
     }
@@ -308,7 +304,7 @@ static int ijkmp_pause_l(IjkMediaPlayer *mp)
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
 
-    int retval = ijkff_pause_l(mp->ffplayer);
+    int retval = ffp_pause_l(mp->ffplayer);
     if (retval < 0) {
         return retval;
     }
@@ -343,7 +339,7 @@ static int ijkmp_stop_l(IjkMediaPlayer *mp)
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
 
-    int retval = ijkff_stop_l(mp->ffplayer);
+    int retval = ffp_stop_l(mp->ffplayer);
     if (retval < 0) {
         return retval;
     }
@@ -388,7 +384,7 @@ int ijkmp_seek_to_l(IjkMediaPlayer *mp, long msec)
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
 
-    int retval = ijkff_seek_to_l(mp->ffplayer, msec);
+    int retval = ffp_seek_to_l(mp->ffplayer, msec);
     if (retval < 0) {
         return retval;
     }
@@ -408,7 +404,7 @@ int ijkmp_seek_to(IjkMediaPlayer *mp, long msec)
 
 static long ijkmp_get_current_position_l(IjkMediaPlayer *mp)
 {
-    return ijkff_get_current_position_l(mp->ffplayer);
+    return ffp_get_current_position_l(mp->ffplayer);
 }
 
 long ijkmp_get_current_position(IjkMediaPlayer *mp)
@@ -422,7 +418,7 @@ long ijkmp_get_current_position(IjkMediaPlayer *mp)
 
 static long ijkmp_get_duration_l(IjkMediaPlayer *mp)
 {
-    return ijkff_get_duration_l(mp->ffplayer);
+    return ffp_get_duration_l(mp->ffplayer);
 }
 
 long ijkmp_get_duration(IjkMediaPlayer *mp)

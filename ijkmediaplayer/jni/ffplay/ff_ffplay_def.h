@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__FF_FFPLAY_DEF_H
-#define IJKPLAYER__FF_FFPLAY_DEF_H
+#ifndef FFPLAY__FF_FFPLAY_DEF_H
+#define FFPLAY__FF_FFPLAY_DEF_H
 
 #include "ff_ffinc.h"
 #include "ff_ffplay_config.h"
@@ -57,7 +57,7 @@
 /* TODO: We assume that a decoded and resampled frame fits into this buffer */
 #define SAMPLE_ARRAY_SIZE (8 * 65536)
 
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
 #define CURSOR_HIDE_DELAY 1000000
 
 static int64_t sws_flags = SWS_BICUBIC;
@@ -183,7 +183,7 @@ typedef struct VideoState {
     int xpos;
     double last_vis_time;
 
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     SDL_Thread *subtitle_tid;
     int subtitle_stream;
     int subtitle_stream_changed;
@@ -217,7 +217,7 @@ typedef struct VideoState {
 #if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;
 #endif
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     SDL_Rect last_display_rect;
 #endif
 
@@ -241,7 +241,7 @@ typedef struct VideoState {
 } VideoState;
 
 /* options specified by the user */
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
 static AVInputFormat *file_iformat;
 static const char *input_filename;
 static const char *window_title;
@@ -320,18 +320,18 @@ typedef struct FFPlayer {
     AVDictionary *sws_opts;
 
     /* ffplay options specified by the user */
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     AVInputFormat *file_iformat;
 #endif
     char *input_filename;
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     const char *window_title;
     int fs_screen_width;
     int fs_screen_height;
 #endif
     int default_width;
     int default_height;
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     int screen_width = 0;
     int screen_height = 0;
 #endif
@@ -356,7 +356,7 @@ typedef struct FFPlayer {
     int error_concealment;
     int decoder_reorder_pts;
     int autoexit;
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     int exit_on_keydown;
     int exit_on_mousedown;
 #endif
@@ -368,7 +368,7 @@ typedef struct FFPlayer {
     char *subtitle_codec_name;
     char *video_codec_name;
     double rdftspeed;
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     int64_t cursor_last_shown;
     int cursor_hidden = 0;
 #endif
@@ -379,11 +379,11 @@ typedef struct FFPlayer {
     int64_t sws_flags;
 
     /* current context */
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     int is_full_screen;
 #endif
     int64_t audio_callback_time;
-#ifdef IJK_FFPLAY_MERGE
+#ifdef FFP_MERGE
     SDL_Surface *screen;
 #endif
 
@@ -399,11 +399,11 @@ typedef struct FFPlayer {
     void (*msg_handler)(void *opaque, int what, int arg1, int arg2, void *data);
 } FFPlayer;
 
-#define IJKFF_SAFE_FREE(p) do {free(p); p = NULL;} while(0)
+#define FFP_SAFE_FREE(p) do {free(p); p = NULL;} while(0)
 #define fftime_to_milliseconds(ts) (ts / (AV_TIME_BASE / 1000))
 #define milliseconds_to_fftime(ms) (ms * (AV_TIME_BASE / 1000))
 
-inline static void ijkff_reset_internal(FFPlayer *ffp)
+inline static void ffp_reset_internal(FFPlayer *ffp)
 {
     /* ffp->is closed in stream_close() */
 
@@ -413,7 +413,7 @@ inline static void ijkff_reset_internal(FFPlayer *ffp)
     av_dict_free(&ffp->sws_opts);
 
     /* ffplay options specified by the user */
-    IJKFF_SAFE_FREE(ffp->input_filename);
+    FFP_SAFE_FREE(ffp->input_filename);
     ffp->default_width          = 640;
     ffp->default_height         = 480;
     ffp->audio_disable          = 0;
@@ -443,9 +443,9 @@ inline static void ijkff_reset_internal(FFPlayer *ffp)
     ffp->framedrop              = -1;
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
-    IJKFF_SAFE_FREE(ffp->audio_codec_name);
-    IJKFF_SAFE_FREE(ffp->subtitle_codec_name);
-    IJKFF_SAFE_FREE(ffp->video_codec_name);
+    FFP_SAFE_FREE(ffp->audio_codec_name);
+    FFP_SAFE_FREE(ffp->subtitle_codec_name);
+    FFP_SAFE_FREE(ffp->video_codec_name);
     ffp->rdftspeed              = 0.02;
 #if CONFIG_AVFILTER
     ffp->vfilters               = NULL;
@@ -468,7 +468,7 @@ inline static void ijkff_reset_internal(FFPlayer *ffp)
     ffp->msg_handler            = NULL;
 }
 
-inline static void ijkff_notify_msg(FFPlayer *ffp, int what, int arg1, int arg2, void* data) {
+inline static void ffp_notify_msg(FFPlayer *ffp, int what, int arg1, int arg2, void* data) {
     if (ffp->msg_handler)
         ffp->msg_handler(ffp->msg_opaque, what, arg1, arg2, data);
 }

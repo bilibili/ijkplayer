@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__FF_FFINC_H
-#define IJKPLAYER__FF_FFINC_H
+#ifndef FFPLAY__FF_FFINC_H
+#define FFPLAY__FF_FFINC_H
 
 #include <stdbool.h>
 #include <assert.h>
