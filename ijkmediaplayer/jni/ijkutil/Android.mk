@@ -25,7 +25,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_CFLAGS += -std=c99
 
-LOCAL_SRC_FILES += loghelp.c
+LOCAL_SRC_FILES += $(notdir $(wildcard *.c))
 
 LOCAL_MODULE := ijkutil_c
 include $(BUILD_STATIC_LIBRARY)
@@ -35,7 +35,7 @@ include $(BUILD_STATIC_LIBRARY)
 # CPP files: android
 #--------------------
 include $(CLEAR_VARS)
-LOCAL_SRC_FILES += android/jnihelp.cpp
+LOCAL_SRC_FILES += $(notdir $(wildcard android/*.cpp))
 
 LOCAL_MODULE := ijkutil_android_cpp
 include $(BUILD_STATIC_LIBRARY)

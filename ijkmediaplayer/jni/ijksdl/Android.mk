@@ -26,20 +26,8 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
 
-LOCAL_SRC_FILES += ijksdl_aout.c
-LOCAL_SRC_FILES += ijksdl_error.c
-LOCAL_SRC_FILES += ijksdl_mutex.c
-LOCAL_SRC_FILES += ijksdl_stdinc.c
-LOCAL_SRC_FILES += ijksdl_thread.c
-LOCAL_SRC_FILES += ijksdl_timer.c
-LOCAL_SRC_FILES += ijksdl_vout.c
-LOCAL_SRC_FILES += ijksdl_vout_overlay_ffmpeg.c
-
-LOCAL_SRC_FILES += android/ijksdl_aout_android_audiotrack.c
-LOCAL_SRC_FILES += android/android_audiotrack.c
-
-LOCAL_SRC_FILES += android/ijksdl_vout_android_nativewindow.c
-LOCAL_SRC_FILES += android/ijksdl_vout_android_surface.c
+LOCAL_SRC_FILES += $(notdir $(wildcard *.c))
+LOCAL_SRC_FILES += $(notdir $(wildcard android/*.c))
 
 LOCAL_MODULE := ijksdl
 include $(BUILD_STATIC_LIBRARY)
