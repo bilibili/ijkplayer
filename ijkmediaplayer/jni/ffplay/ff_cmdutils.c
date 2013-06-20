@@ -24,7 +24,48 @@
 
 #include "ff_cmdutils.h"
 
-/* cmdutils.c 942 */
+// MERGE: sws_opts
+// MERGE: swr_opts
+// MERGE: format_opts, codec_opts, resample_opts
+// MERGE: this_year
+// MERGE: report_file;
+// MERGE: init_opts
+// MERGE: uninit_opts
+// MERGE: log_callback_help
+// MERGE: log_callback_report(void *ptr, int level, const char *fmt, va_list vl)
+// MERGE: parse_number_or_die
+// MERGE: parse_time_or_die
+// MERGE: show_help_options
+// MERGE: show_help_children
+// MERGE: find_option
+// MERGE: #include <windows.h>
+// MERGE: #include <shellapi.h>
+// MERGE: win32_argv_utf8
+// MERGE: win32_argc
+// MERGE: prepare_app_arguments
+// MERGE: write_option
+// MERGE: parse_option
+// MERGE: parse_options
+// MERGE: parse_optgroup
+// MERGE: locate_option
+// MERGE: dump_argument
+// MERGE: parse_loglevel
+// MERGE: #define FLAGS
+// MERGE: opt_default
+// MERGE: match_group_separator
+// MERGE: finish_group
+// MERGE: add_opt
+// MERGE: init_parse_context
+// MERGE: uninit_parse_context
+// MERGE: split_commandline
+// MERGE: opt_loglevel
+// MERGE: expand_filename_template
+// MERGE: init_report
+// MERGE: opt_report
+// MERGE: opt_max_alloc
+// MERGE: opt_cpuflags
+// MERGE: opt_timelimit
+
 void print_error(const char *filename, int err)
 {
     char errbuf[128];
@@ -34,9 +75,44 @@ void print_error(const char *filename, int err)
         errbuf_ptr = strerror(AVUNERROR(err));
     av_log(NULL, AV_LOG_ERROR, "%s: %s\n", filename, errbuf_ptr);
 }
-/* cmdutils.c 942 */
 
-/* cmdutils.c 1731 */
+// MERGE: warned_cfg
+// MERGE: INDENT
+// MERGE: SHOW_VERSION
+// MERGE: SHOW_CONFIG
+// MERGE: SHOW_COPYRIGHT
+// MERGE: PRINT_LIB_INFO
+// MERGE: print_all_libs_info
+// MERGE: print_program_info
+// MERGE: show_banner
+// MERGE: show_version
+// MERGE: show_license
+// MERGE: show_formats
+// MERGE: PRINT_CODEC_SUPPORTED
+// MERGE: print_codec
+// MERGE: get_media_type_char
+// MERGE: next_codec_for_id
+// MERGE: compare_codec_desc
+// MERGE: get_codecs_sorted
+// MERGE: print_codecs_for_id
+// MERGE: show_codecs
+// MERGE: print_codecs
+// MERGE: show_decoders
+// MERGE: show_encoders
+// MERGE: show_bsfs
+// MERGE: show_protocols
+// MERGE: show_filters
+// MERGE: show_pix_fmts
+// MERGE: show_layouts
+// MERGE: show_sample_fmts
+// MERGE: show_help_codec
+// MERGE: show_help_demuxer
+// MERGE: show_help_muxer
+// MERGE: show_help
+// MERGE: read_yesno
+// MERGE: cmdutils_read_file
+// MERGE: get_preset_file
+
 static int check_stream_specifier(AVFormatContext *s, AVStream *st, const char *spec)
 {
     int ret = avformat_match_stream_specifier(s, st, spec);
@@ -44,9 +120,7 @@ static int check_stream_specifier(AVFormatContext *s, AVStream *st, const char *
         av_log(s, AV_LOG_ERROR, "Invalid stream specifier: %s.\n", spec);
     return ret;
 }
-/* cmdutils.c 1731 */
 
-/* cmdutils.c 1739 */
 AVDictionary *filter_codec_opts(AVDictionary *opts, enum AVCodecID codec_id,
                                 AVFormatContext *s, AVStream *st, AVCodec *codec)
 {
@@ -104,9 +178,7 @@ AVDictionary *filter_codec_opts(AVDictionary *opts, enum AVCodecID codec_id,
     }
     return ret;
 }
-/* cmdutils.c 1739 */
 
-/* cmdutils.c 1795 */
 AVDictionary **setup_find_stream_info_opts(AVFormatContext *s,
                                            AVDictionary *codec_opts)
 {
@@ -126,4 +198,10 @@ AVDictionary **setup_find_stream_info_opts(AVFormatContext *s,
                                     s, s->streams[i], NULL);
     return opts;
 }
-/* cmdutils.c 1795 */
+
+// MERGE: grow_array
+// MERGE: alloc_buffer
+// MERGE: codec_get_buffer
+// MERGE: unref_buffer
+// MERGE: codec_release_buffer
+// MERGE: filter_release_buffer
