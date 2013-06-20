@@ -328,16 +328,16 @@ typedef struct FFPlayer {
     const char *window_title;
     int fs_screen_width;
     int fs_screen_height;
-#endif
     int default_width;
     int default_height;
-#ifdef FFP_MERGE
     int screen_width = 0;
     int screen_height = 0;
 #endif
     int audio_disable;
     int video_disable;
+#ifdef FFP_MERGE
     int subtitle_disable;
+#endif
     int wanted_stream[AVMEDIA_TYPE_NB];
     int seek_by_bytes;
     int display_disable;
@@ -365,7 +365,9 @@ typedef struct FFPlayer {
     int infinite_buffer;
     enum ShowMode show_mode;
     char *audio_codec_name;
+#ifdef FFP_MERGE
     char *subtitle_codec_name;
+#endif
     char *video_codec_name;
     double rdftspeed;
 #ifdef FFP_MERGE
@@ -414,11 +416,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     /* ffplay options specified by the user */
     FFP_SAFE_FREE(ffp->input_filename);
-    ffp->default_width          = 640;
-    ffp->default_height         = 480;
     ffp->audio_disable          = 0;
     ffp->video_disable          = 0;
-    ffp->subtitle_disable       = 0;
     ffp->wanted_stream[AVMEDIA_TYPE_AUDIO]      = -1;
     ffp->wanted_stream[AVMEDIA_TYPE_VIDEO]      = -1;
     ffp->wanted_stream[AVMEDIA_TYPE_SUBTITLE]   = -1;
@@ -444,7 +443,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
     FFP_SAFE_FREE(ffp->audio_codec_name);
-    FFP_SAFE_FREE(ffp->subtitle_codec_name);
     FFP_SAFE_FREE(ffp->video_codec_name);
     ffp->rdftspeed              = 0.02;
 #if CONFIG_AVFILTER

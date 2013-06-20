@@ -1386,10 +1386,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         is->last_audio_stream = stream_index;
         forced_codec_name = ffp->audio_codec_name;
         break;
-    case AVMEDIA_TYPE_SUBTITLE:
-        is->last_subtitle_stream = stream_index;
-        forced_codec_name = ffp->subtitle_codec_name;
-        break;
+    // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
     case AVMEDIA_TYPE_VIDEO:
         is->last_video_stream = stream_index;
         forced_codec_name = ffp->video_codec_name;
@@ -1474,7 +1471,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         packet_queue_start(&is->videoq);
         is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp);
         break;
-        // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
+    // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:
         break;
     }
@@ -1525,7 +1522,7 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
 
         packet_queue_flush(&is->videoq);
         break;
-        // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
+    // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:
         break;
     }
@@ -1544,7 +1541,7 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
         is->video_st = NULL;
         is->video_stream = -1;
         break;
-        // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
+    // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:
         break;
     }
@@ -1659,21 +1656,23 @@ static int read_thread(void *arg)
     if (!ffp->video_disable)
         st_index[AVMEDIA_TYPE_VIDEO] =
             av_find_best_stream(ic, AVMEDIA_TYPE_VIDEO,
-                ffp->wanted_stream[AVMEDIA_TYPE_VIDEO], -1, NULL, 0);
+                                ffp->wanted_stream[AVMEDIA_TYPE_VIDEO], -1, NULL, 0);
     if (!ffp->audio_disable)
         st_index[AVMEDIA_TYPE_AUDIO] =
             av_find_best_stream(ic, AVMEDIA_TYPE_AUDIO,
-                ffp->wanted_stream[AVMEDIA_TYPE_AUDIO],
-                st_index[AVMEDIA_TYPE_VIDEO],
-                NULL, 0);
+                                ffp->wanted_stream[AVMEDIA_TYPE_AUDIO],
+                                st_index[AVMEDIA_TYPE_VIDEO],
+                                NULL, 0);
+#ifdef FFP_MERGE
     if (!ffp->video_disable && !ffp->subtitle_disable)
         st_index[AVMEDIA_TYPE_SUBTITLE] =
             av_find_best_stream(ic, AVMEDIA_TYPE_SUBTITLE,
-                ffp->wanted_stream[AVMEDIA_TYPE_SUBTITLE],
-                (st_index[AVMEDIA_TYPE_AUDIO] >= 0 ?
-                                                     st_index[AVMEDIA_TYPE_AUDIO] :
-                                                     st_index[AVMEDIA_TYPE_VIDEO]),
-                NULL, 0);
+                                ffp->wanted_stream[AVMEDIA_TYPE_SUBTITLE],
+                                (st_index[AVMEDIA_TYPE_AUDIO] >= 0 ?
+                                 st_index[AVMEDIA_TYPE_AUDIO] :
+                                 st_index[AVMEDIA_TYPE_VIDEO]),
+                                 NULL, 0);
+#endif
     if (ffp->show_status) {
         av_dump_format(ic, 0, is->filename, 0);
     }
@@ -1692,9 +1691,11 @@ static int read_thread(void *arg)
     if (is->show_mode == SHOW_MODE_NONE)
         is->show_mode = ret >= 0 ? SHOW_MODE_VIDEO : SHOW_MODE_RDFT;
 
+#ifdef FFP_MERGE
     if (st_index[AVMEDIA_TYPE_SUBTITLE] >= 0) {
         stream_component_open(ffp, st_index[AVMEDIA_TYPE_SUBTITLE]);
     }
+#endif
 
     if (is->video_stream < 0 && is->audio_stream < 0) {
         fprintf(stderr, "%s: could not open codecs\n", is->filename);
