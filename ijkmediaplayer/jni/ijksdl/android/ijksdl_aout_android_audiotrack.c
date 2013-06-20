@@ -26,9 +26,9 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "ijkutil/ijkutil.h"
-#include "ijksdl_thread.h"
-#include "ijksdl_aout_internal.h"
-#include "android/android_audiotrack.h"
+#include "../ijksdl_thread.h"
+#include "../ijksdl_aout_internal.h"
+#include "android_audiotrack.h"
 
 typedef struct SDL_Aout_Opaque {
     JavaVM *jvm;

@@ -24,8 +24,8 @@
 #ifndef IJKSDL__IJKSDL_VOUT_ANDROID_NATIVEWINDOW_H
 #define IJKSDL__IJKSDL_VOUT_ANDROID_NATIVEWINDOW_H
 
-#include "ijksdl_stdinc.h"
-#include "ijksdl_vout.h"
+#include "../ijksdl_stdinc.h"
+#include "../ijksdl_vout.h"
 
 typedef struct ANativeWindow ANativeWindow;
 

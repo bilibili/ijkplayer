@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_vout_android_surface.h
+ * ijksdl_aout_android_audiotrack.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,14 +21,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_VOUT_ANDROID_SURFACE_H
-#define IJKSDL__IJKSDL_VOUT_ANDROID_SURFACE_H
+#ifndef IJKSDL__IJKSDL_AOUT_ANDROID_AUDIOTRACK_H
+#define IJKSDL__IJKSDL_AOUT_ANDROID_AUDIOTRACK_H
 
 #include <jni.h>
-#include "ijksdl_stdinc.h"
-#include "ijksdl_vout.h"
+#include "../ijksdl_aout.h"
 
-SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface();
-void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, JNIEnv *env, jobject android_surface);
+void SDL_Init_AoutAndroid(JNIEnv *env);
+SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack(JavaVM* jvm);
 
 #endif
