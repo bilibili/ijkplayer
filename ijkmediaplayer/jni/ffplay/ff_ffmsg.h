@@ -1,7 +1,7 @@
 /*
- * ff_error.h
+ * ff_ffmsg.h
+ *      based on PacketQueue in ffplay.c
  *
- * Copyright (c) 2003 Fabrice Bellard
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -21,12 +21,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__FF_ERROR_H
-#define IJKPLAYER__FF_ERROR_H
+#ifndef IJKPLAYER__FF_FFMSG_H
+#define IJKPLAYER__FF_FFMSG_H
 
-#define EIJK_FAILED             -1
-#define EIJK_OUT_OF_MEMORY      -2
-#define EIJK_INVALID_STATE      -3
-#define EIJK_NULL_IS_PTR        -4
+#define IJKFF_MSG_FLUSH                 0
+#define IJKFF_MSG_ERROR                 100     /* arg1 = error */
+#define IJKFF_MSG_PREPARED              200
+#define IJKFF_MSG_COMPLETED             300
+#define IJKFF_MSG_VIDEO_SIZE_CHANGED    400     /* arg1 = width, arg2 = height */
+#define IJKFF_MSG_SAR_CHANGED           401     /* arg1 = sar.num, arg2 = sar.den */
+#define IJKFF_MSG_BUFFERING_START       500
+#define IJKFF_MSG_BUFFERING_END         501
+#define IJKFF_MSG_BUFFERING_FORWARD     502     /* arg1 = cached duration */
+#define IJKFF_MSG_SEEK_COMPLETED        600
 
 #endif

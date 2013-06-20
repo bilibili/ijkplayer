@@ -23,7 +23,7 @@
 #include "ijkplayer_android.h"
 
 #include <assert.h>
-#include "ffplay/ijkerror.h"
+#include "ffplay/ff_fferror.h"
 #include "ffplay/ff_ffplay.h"
 
 #define MPST_CHECK_NOT_RET_INT(real, expected, errcode) \
@@ -39,7 +39,7 @@ typedef struct IjkMediaPlayer {
     pthread_mutex_t mutex;
     FFPlayer *ffplayer;
 
-    IjkMessageQueue msg_queue;
+    // FIXME: IjkMessageQueue msg_queue;
 
     int mp_state;
     char *data_source;
@@ -61,7 +61,7 @@ inline static void destroy_mp(IjkMediaPlayer **pmp)
         ijkff_destroy_ffplayer(&mp->ffplayer);
     }
 
-    ijkmsg_queue_destroy(&mp->msg_queue);
+    // FIXME: ijkmsg_queue_destroy(&mp->msg_queue);
     pthread_mutex_destroy(&mp->mutex);
 
     free(mp->data_source);
@@ -94,7 +94,8 @@ void ijkmp_setup_internal(IjkMediaPlayer *mp) {
 
     ffp->msg_opaque = mp;
     ffp->msg_handler = ijkmp_msg_handler;
-    ijkmsg_queue_start(&mp->msg_queue);
+    // FIXME: ijkmsg_queue_flush(&mp->msg_queue);
+    // FIXME: ijkmsg_queue_start(&mp->msg_queue);
 }
 
 IjkMediaPlayer *ijkmp_create()
@@ -112,7 +113,7 @@ IjkMediaPlayer *ijkmp_create()
     }
 
     pthread_mutex_init(&mp->mutex, NULL);
-    ijkmsg_queue_init(&mp->msg_queue);
+    // FIXME: ijkmsg_queue_init(&mp->msg_queue);
 
     ijkmp_inc_ref(mp);
 
@@ -126,7 +127,7 @@ void ijkmp_shutdown_l(IjkMediaPlayer *mp)
 {
     assert(mp);
 
-    ijkmsg_queue_abort(&mp->msg_queue);
+    // FIXME: ijkmsg_queue_abort(&mp->msg_queue);
 
     if (mp->ffplayer) {
         ijkff_stop_l(mp->ffplayer);

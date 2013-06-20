@@ -23,7 +23,7 @@
 
 #include "ff_ffplay.h"
 #include "ff_cmdutils.h"
-#include "ijkerror.h"
+#include "ff_fferror.h"
 
 static int packet_queue_put(PacketQueue *q, AVPacket *pkt);
 
@@ -1995,7 +1995,6 @@ static int lockmgr(void **mtx, enum AVLockOp op)
  ****************************************************************************/
 
 AVPacket flush_pkt;
-IjkMessage flush_msg;
 static bool g_ffmpeg_global_inited = false;
 
 static void ijkff_log_callback_help(void *ptr, int level, const char *fmt, va_list vl)
@@ -2037,8 +2036,6 @@ void ijkff_global_init()
 
     av_init_packet(&flush_pkt);
     flush_pkt.data = (uint8_t *) &flush_pkt;
-
-    ijkmsg_init_msg(&flush_msg);
 
     g_ffmpeg_global_inited = true;
 
