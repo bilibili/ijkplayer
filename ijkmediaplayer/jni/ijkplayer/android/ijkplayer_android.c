@@ -108,6 +108,7 @@ IjkMediaPlayer *ijkmp_create()
     FFPlayer *ffp = ffp_create_ffplayer();
     if (!mp) {
         FFP_SAFE_FREE(mp);
+        return NULL;
     }
 
     pthread_mutex_init(&mp->mutex, NULL);
