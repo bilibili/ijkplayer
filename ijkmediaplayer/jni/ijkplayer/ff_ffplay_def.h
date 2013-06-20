@@ -302,10 +302,10 @@ static AVPacket flush_pkt;
 
 extern AVPacket flush_pkt;
 
+#ifdef IJK_FFPLAY_MERGE
 #define FF_ALLOC_EVENT   (SDL_USEREVENT)
 #define FF_QUIT_EVENT    (SDL_USEREVENT + 2)
 
-#ifdef IJK_FFPLAY_MERGE
 static SDL_Surface *screen;
 #endif
 

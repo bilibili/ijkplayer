@@ -199,8 +199,6 @@ static void stream_close(FFPlayer *ffp)
     SDL_WaitThread(is->read_tid, NULL);
     SDL_WaitThread(is->video_refresh_tid, NULL);
 
-    SDL_AoutCloseAudio(ffp->aout);
-
     packet_queue_destroy(&is->videoq);
     packet_queue_destroy(&is->audioq);
 #ifdef IJK_FFPLAY_MERGE
@@ -1458,8 +1456,9 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     return 0;
 }
 
-static void stream_component_close(VideoState *is, int stream_index)
+static void stream_component_close(FFPlayer *ffp, int stream_index)
 {
+    VideoState *is = ffp->is;
     AVFormatContext *ic = is->ic;
     AVCodecContext *avctx;
 
@@ -1471,7 +1470,7 @@ static void stream_component_close(VideoState *is, int stream_index)
     case AVMEDIA_TYPE_AUDIO:
         packet_queue_abort(&is->audioq);
 
-        SDL_CloseAudio();
+        SDL_AoutCloseAudio(ffp->aout);
 
         packet_queue_flush(&is->audioq);
         av_free_packet(&is->audio_pkt);
@@ -1837,12 +1836,12 @@ static int read_thread(void *arg)
  fail:
     /* close each stream */
     if (is->audio_stream >= 0)
-        stream_component_close(is, is->audio_stream);
+        stream_component_close(ffp, is->audio_stream);
     if (is->video_stream >= 0)
-        stream_component_close(is, is->video_stream);
+        stream_component_close(ffp, is->video_stream);
 #ifdef IJK_FFPLAY_MERGE
     if (is->subtitle_stream >= 0)
-        stream_component_close(is, is->subtitle_stream);
+        stream_component_close(ffp, is->subtitle_stream);
 #endif
     if (is->ic) {
         avformat_close_input(&is->ic);

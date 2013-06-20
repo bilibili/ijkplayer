@@ -28,7 +28,6 @@ LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
 
 LOCAL_SRC_FILES += ijksdl_aout.c
 LOCAL_SRC_FILES += ijksdl_error.c
-LOCAL_SRC_FILES += ijksdl_events.c
 LOCAL_SRC_FILES += ijksdl_mutex.c
 LOCAL_SRC_FILES += ijksdl_stdinc.c
 LOCAL_SRC_FILES += ijksdl_thread.c

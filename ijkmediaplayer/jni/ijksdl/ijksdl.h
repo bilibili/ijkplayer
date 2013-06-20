@@ -26,7 +26,6 @@
 
 #include "ijksdl_audio.h"
 #include "ijksdl_aout.h"
-#include "ijksdl_events.h"
 #include "ijksdl_error.h"
 #include "ijksdl_mutex.h"
 #include "ijksdl_thread.h"
