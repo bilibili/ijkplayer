@@ -25,6 +25,8 @@
 #include "ff_cmdutils.h"
 #include "ff_fferror.h"
 
+static AVPacket flush_pkt;
+
 static int packet_queue_put(PacketQueue *q, AVPacket *pkt);
 
 static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
@@ -1994,7 +1996,6 @@ static int lockmgr(void **mtx, enum AVLockOp op)
  * end last line in ffplay.c
  ****************************************************************************/
 
-AVPacket flush_pkt;
 static bool g_ffmpeg_global_inited = false;
 
 static void ijkff_log_callback_help(void *ptr, int level, const char *fmt, va_list vl)
