@@ -1,5 +1,5 @@
 /*
- * ijkplayer.h
+ * ijkplayer_android.h
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -20,8 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__IJKPLAYER_H
-#define IJKPLAYER__IJKPLAYER_H
+#ifndef IJKPLAYER__IJKPLAYER_ANDROID_H
+#define IJKPLAYER__IJKPLAYER_ANDROID_H
 
 #include <stdbool.h>
 

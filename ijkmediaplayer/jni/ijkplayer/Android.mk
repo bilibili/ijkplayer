@@ -29,8 +29,8 @@ LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
 
 LOCAL_SRC_FILES += ff_cmdutils.c
 LOCAL_SRC_FILES += ff_ffplay.c
-LOCAL_SRC_FILES += ijkplayer.c
-LOCAL_SRC_FILES += ijkplayer_jni.c
+LOCAL_SRC_FILES += android/ijkplayer.c
+LOCAL_SRC_FILES += android/ijkplayer_jni.c
 
 LOCAL_STATIC_LIBRARIES := ijksdl
 LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil

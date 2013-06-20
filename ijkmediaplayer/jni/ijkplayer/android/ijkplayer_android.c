@@ -1,5 +1,5 @@
 /*
- * ijkplayer.c
+ * ijkplayer_android.c
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -20,11 +20,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijkplayer.h"
+#include "ijkplayer_android.h"
 
 #include <assert.h>
-#include "ijkerror.h"
-#include "ff_ffplay.h"
+#include "../ijkerror.h"
+#include "../ff_ffplay.h"
 
 #define MPST_CHECK_NOT_RET_INT(real, expected, errcode) \
     do { \

@@ -26,8 +26,8 @@
 #include <jni.h>
 #include "ijksdl/ijksdl.h"
 #include "ijkutil/ijkutil.h"
-#include "ijkplayer.h"
-#include "ijkerror.h"
+#include "../ijkerror.h"
+#include "ijkplayer_android.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
