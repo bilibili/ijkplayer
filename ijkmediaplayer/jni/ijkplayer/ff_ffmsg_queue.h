@@ -54,15 +54,6 @@ static void ijkmsg_init_msg(IjkMessage *msg) {
     memset(msg, 0, sizeof(IjkMessage));
 }
 
-static IjkMessage *ijkmsg_obtain_msg() {
-    IjkMessage *msg = (IjkMessage*) malloc(sizeof(IjkMessage));
-    if (!msg)
-        return NULL;
-
-    ijkmsg_init_msg(msg);
-    return msg;
-}
-
 static void ijkmsg_free_msg(IjkMessage **pmsg) {
     if (!pmsg || *pmsg)
         return;
