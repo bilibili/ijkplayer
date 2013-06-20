@@ -1681,7 +1681,7 @@ static int read_thread(void *arg)
         ffp->infinite_buffer = 1;
 
     prepared = true;
-    ijkff_notify_msg(ffp, IJKFF_MSG_PREPARED);
+    ijkff_notify_msg(ffp, IJKFF_MSG_PREPARED, 0, 0, NULL);
 
     for (;;) {
         if (is->abort_request)
@@ -1790,7 +1790,7 @@ static int read_thread(void *arg)
                     ret = AVERROR_EOF;
                     goto fail;
                 } else {
-                    ijkff_notify_msg(ffp, IJKFF_MSG_COMPLETED);
+                    ijkff_notify_msg(ffp, IJKFF_MSG_COMPLETED, 0, 0, NULL);
                 }
             }
             eof=0;
@@ -1849,7 +1849,7 @@ static int read_thread(void *arg)
 
     if (!prepared || !is->abort_request) {
         ffp->last_error = last_error;
-        ijkff_notify_msg(ffp, IJKFF_MSG_ERROR);
+        ijkff_notify_msg(ffp, IJKFF_MSG_ERROR, last_error, 0, NULL);
     }
 
     SDL_DestroyMutex(wait_mutex);

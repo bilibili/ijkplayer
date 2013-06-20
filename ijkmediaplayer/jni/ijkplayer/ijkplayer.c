@@ -81,7 +81,7 @@ void ijkmp_global_uninit()
     ijkff_global_uninit();
 }
 
-static void ijkmp_msg_handler(void *opaque, int what)
+static void ijkmp_msg_handler(void *opaque, int what, int arg1, int arg2, void* data)
 {
     // IjkMediaPlayer *mp = (IjkMediaPlayer *) opaque;
     // FFPlayer *ffp = mp->ffplayer;
