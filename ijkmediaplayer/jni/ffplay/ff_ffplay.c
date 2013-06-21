@@ -1689,7 +1689,7 @@ static int read_thread(void *arg)
         ffp->infinite_buffer = 1;
 
     prepared = true;
-    ffp_notify_msg(ffp, FFP_MSG_PREPARED, 0, 0, NULL);
+    ffp_notify_msg(ffp, FFP_MSG_PREPARED, 0, 0);
 
     for (;;) {
         if (is->abort_request)
@@ -1800,7 +1800,7 @@ static int read_thread(void *arg)
                     ret = AVERROR_EOF;
                     goto fail;
                 } else {
-                    ffp_notify_msg(ffp, FFP_MSG_COMPLETED, 0, 0, NULL);
+                    ffp_notify_msg(ffp, FFP_MSG_COMPLETED, 0, 0);
                 }
             }
             eof=0;
@@ -1859,7 +1859,7 @@ fail:
 
     if (!prepared || !is->abort_request) {
         ffp->last_error = last_error;
-        ffp_notify_msg(ffp, FFP_MSG_ERROR, last_error, 0, NULL);
+        ffp_notify_msg(ffp, FFP_MSG_ERROR, last_error, 0);
     }
 
     SDL_DestroyMutex(wait_mutex);
@@ -2053,6 +2053,8 @@ FFPlayer *ffp_create_ffplayer()
     if (!ffp)
         return NULL;
 
+    msg_queue_init(&ffp->msg_queue);
+
     memset(ffp, 0, sizeof(FFPlayer));
     ffp_reset_internal(ffp);
     return ffp;
@@ -2071,6 +2073,8 @@ void ffp_destroy_ffplayer(FFPlayer **pffp)
     }
 
     ffp_reset_internal(ffp);
+
+    msg_queue_destroy(&ffp->msg_queue);
     free(ffp);
     *pffp = NULL;
 }
@@ -2134,6 +2138,7 @@ int ffp_stop_l(FFPlayer *ffp)
     if (!is)
         return EIJK_NULL_IS_PTR;
 
+    msg_queue_abort(&ffp->msg_queue);
     is->abort_request = 1;
     return 0;
 }
@@ -2141,10 +2146,8 @@ int ffp_stop_l(FFPlayer *ffp)
 int ffp_wait_stop_l(FFPlayer *ffp)
 {
     assert(ffp);
-    VideoState *is = ffp->is;
-    if (!is)
-        return EIJK_NULL_IS_PTR;
 
+    ffp_stop_l(ffp);
     stream_close(ffp);
     ffp->is = NULL;
     return 0;

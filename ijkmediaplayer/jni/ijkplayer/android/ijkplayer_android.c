@@ -39,8 +39,6 @@ typedef struct IjkMediaPlayer {
     pthread_mutex_t mutex;
     FFPlayer *ffplayer;
 
-    // FIXME: IjkMessageQueue msg_queue;
-
     int mp_state;
     char *data_source;
 } IjkMediaPlayer;
@@ -61,7 +59,6 @@ inline static void destroy_mp(IjkMediaPlayer **pmp)
         ffp_destroy_ffplayer(&mp->ffplayer);
     }
 
-    // FIXME: ijkmsg_queue_destroy(&mp->msg_queue);
     pthread_mutex_destroy(&mp->mutex);
 
     FFP_SAFE_FREE(mp->data_source);
@@ -80,23 +77,6 @@ void ijkmp_global_uninit()
     ffp_global_uninit();
 }
 
-static void ijkmp_msg_handler(void *opaque, int what, int arg1, int arg2, void* data)
-{
-    // IjkMediaPlayer *mp = (IjkMediaPlayer *) opaque;
-    // FFPlayer *ffp = mp->ffplayer;
-
-    // FIXME: implement
-}
-
-void ijkmp_setup_internal(IjkMediaPlayer *mp) {
-    FFPlayer *ffp = mp->ffplayer;
-
-    ffp->msg_opaque = mp;
-    ffp->msg_handler = ijkmp_msg_handler;
-    // FIXME: ijkmsg_queue_flush(&mp->msg_queue);
-    // FIXME: ijkmsg_queue_start(&mp->msg_queue);
-}
-
 IjkMediaPlayer *ijkmp_create()
 {
     IjkMediaPlayer *mp = (IjkMediaPlayer *) malloc(sizeof(IjkMediaPlayer));
@@ -112,12 +92,10 @@ IjkMediaPlayer *ijkmp_create()
     }
 
     pthread_mutex_init(&mp->mutex, NULL);
-    // FIXME: ijkmsg_queue_init(&mp->msg_queue);
 
     ijkmp_inc_ref(mp);
 
     mp->ffplayer = ffp;
-    ijkmp_setup_internal(mp);
 
     return mp;
 }
@@ -125,8 +103,6 @@ IjkMediaPlayer *ijkmp_create()
 void ijkmp_shutdown_l(IjkMediaPlayer *mp)
 {
     assert(mp);
-
-    // FIXME: ijkmsg_queue_abort(&mp->msg_queue);
 
     if (mp->ffplayer) {
         ffp_stop_l(mp->ffplayer);
@@ -148,8 +124,6 @@ void ijkmp_reset_l(IjkMediaPlayer *mp)
 
     FFP_SAFE_FREE(mp->data_source);
     mp->mp_state = MP_STATE_IDLE;
-
-    ijkmp_setup_internal(mp);
 }
 
 void ijkmp_reset(IjkMediaPlayer *mp)
@@ -234,6 +208,7 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
     assert(mp->data_source);
 
     mp->mp_state = MP_STATE_ASYNC_PREPARING;
+    msg_queue_start(&mp->ffplayer->msg_queue);
     int retval = ffp_prepare_async_l(mp->ffplayer, mp->data_source);
     if (retval < 0) {
         mp->mp_state = MP_STATE_ERROR;

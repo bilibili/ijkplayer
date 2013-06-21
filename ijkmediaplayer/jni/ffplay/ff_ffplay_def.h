@@ -26,6 +26,7 @@
 
 #include "ff_ffinc.h"
 #include "ff_ffplay_config.h"
+#include "ff_ffmsg_queue.h"
 
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 5
@@ -397,8 +398,7 @@ typedef struct FFPlayer {
 
     int last_error;
 
-    void  *msg_opaque;
-    void (*msg_handler)(void *opaque, int what, int arg1, int arg2, void *data);
+    MessageQueue msg_queue;
 } FFPlayer;
 
 #define FFP_SAFE_FREE(p) do {free(p); p = NULL;} while(0)
@@ -462,13 +462,11 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->last_error             = 0;
 
-    ffp->msg_opaque             = 0;
-    ffp->msg_handler            = NULL;
+    msg_queue_flush(&ffp->msg_queue);
 }
 
-inline static void ffp_notify_msg(FFPlayer *ffp, int what, int arg1, int arg2, void* data) {
-    if (ffp->msg_handler)
-        ffp->msg_handler(ffp->msg_opaque, what, arg1, arg2, data);
+inline static void ffp_notify_msg(FFPlayer *ffp, int what, int arg1, int arg2) {
+    msg_queue_put_simple3(&ffp->msg_queue, what, arg1, arg2);
 }
 
 #endif
