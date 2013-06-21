@@ -146,16 +146,24 @@ void ijkmp_inc_ref(IjkMediaPlayer *mp)
     __sync_fetch_and_add(&mp->ref_count, 1);
 }
 
-void ijkmp_dec_ref(IjkMediaPlayer **pmp)
+void ijkmp_dec_ref(IjkMediaPlayer *mp)
 {
-    assert(pmp);
-    assert(*pmp);
-    IjkMediaPlayer *mp = *pmp;
+    if (!mp)
+        return;
+
     int ref_count = __sync_fetch_and_sub(&mp->ref_count, 1);
     if (ref_count == 0) {
         ijkmp_shutdown(mp);
         destroy_mp(&mp);
     }
+}
+
+void ijkmp_dec_ref_p(IjkMediaPlayer **pmp)
+{
+    if (!pmp)
+        return;
+
+    ijkmp_dec_ref(*pmp);
     *pmp = NULL;
 }
 

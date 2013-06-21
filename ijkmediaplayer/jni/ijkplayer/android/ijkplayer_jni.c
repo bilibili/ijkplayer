@@ -232,11 +232,10 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
     if (!mp)
         return;
 
-    // explicit shutdown mp
+    // explicit shutdown mp, in case it is not the last mp-ref here
     ijkmp_shutdown(mp);
     jni_set_media_player(env, thiz, NULL);
 
-    ijkmp_dec_ref(&mp);
     ijkmp_dec_ref(&mp);
 }
 
@@ -270,17 +269,12 @@ static void
 IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
     IjkMediaPlayer *mp = ijkmp_create();
-    JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", FAIL_RETURN);
+    JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", LABEL_RETURN);
 
     jni_set_media_player(env, thiz, mp);
 
-    // FIXME: implement
-    return;
-
-    FAIL_RETURN:
-    if (mp)
-        ijkmp_dec_ref(&mp);
-    return;
+    LABEL_RETURN:
+    ijkmp_dec_ref(&mp);
 }
 
 static void
