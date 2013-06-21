@@ -315,7 +315,7 @@ static struct CachedFields {
 
 jint JNI_OnLoad(JavaVM* vm, void*) {
     JNIEnv* env;
-    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_4) != JNI_OK) {
         ALOGE("JavaVM::GetEnv() failed");
         abort();
     }
@@ -338,7 +338,7 @@ jint JNI_OnLoad(JavaVM* vm, void*) {
         abort();
     }
 
-    return JNI_VERSION_1_6;
+    return JNI_VERSION_1_4;
 }
 
 jobject jniCreateFileDescriptor(C_JNIEnv* env, int fd) {
