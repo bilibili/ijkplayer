@@ -24,7 +24,6 @@
 #include <string.h>
 #include <pthread.h>
 #include <jni.h>
-#include "ijksdl/ijksdl_android.h"
 #include "ijkutil/ijkutil_android.h"
 #include "ffplay/ff_ffplay.h"
 #include "ijkplayer_android.h"
@@ -115,10 +114,7 @@ IjkMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setVideoSurface: null mp", LABEL_RETURN);
 
-    SDL_Vout *vout = ijkmp_get_vout(mp);
-    assert(vout);
-
-    SDL_VoutAndroid_SetAndroidSurface(vout, env, jsurface);
+    ijkmp_set_android_surface(mp, jsurface);
 
     LABEL_RETURN:
     ijkmp_dec_ref(&mp);
@@ -265,7 +261,15 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 static void
 IjkMediaPlayer_native_init(JNIEnv *env)
 {
-    // FIXME: implement
+    pthread_mutex_init(&g_clazz.mutex, NULL);
+
+    (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
+
+    g_clazz.clazz = (*env)->FindClass(env, JNI_CLASS_IJKPLAYER);
+    JNI_CHECK_RET_VOID(g_clazz.clazz, env, NULL, NULL);
+
+    g_clazz.mNativeMediaPlayer = (*env)->GetFieldID(env, g_clazz.clazz, "mNativeMediaPlayer", "J");
+    JNI_CHECK_RET_VOID(g_clazz.mNativeMediaPlayer, env, NULL, NULL);
 }
 
 static void
@@ -273,22 +277,14 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
     SDL_Vout *vout = NULL;
     IjkMediaPlayer *mp = ijkmp_create();
-    JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", LABEL_RETURN);
+    JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", FAIL_RETURN);
 
-    vout = SDL_VoutAndroid_CreateForAndroidSurface();
-    JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: SDL_VoutAndroid_CreateAndroidSurface() failed", LABEL_RETURN);
-
-    ijkmp_set_vout(mp, vout);
     jni_set_media_player(env, thiz, mp);
 
     // FIXME: implement
+    return;
 
-    mp = NULL;
-    vout = NULL;
-
-    LABEL_RETURN:
-    if (vout)
-        SDL_VoutFree(vout);
+    FAIL_RETURN:
     if (mp)
         ijkmp_dec_ref(&mp);
     return;
@@ -334,15 +330,6 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
         return -1;
     }
     assert(env != NULL);
-
-    pthread_mutex_init(&g_clazz.mutex, NULL);
-    g_clazz.clazz = (*env)->FindClass(env, JNI_CLASS_IJKPLAYER);
-    JNI_CHECK_RET(g_clazz.clazz, env, NULL, NULL, -1);
-
-    g_clazz.mNativeMediaPlayer = (*env)->GetFieldID(env, g_clazz.clazz, "mNativeMediaPlayer", "J");
-    JNI_CHECK_RET(g_clazz.mNativeMediaPlayer, env, NULL, NULL, -1);
-
-    (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
 
     ijkmp_global_init();
 

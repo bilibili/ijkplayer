@@ -160,7 +160,6 @@ long            ijkmp_get_current_position(IjkMediaPlayer *mp);
 long            ijkmp_get_duration(IjkMediaPlayer *mp);
 void            ijkmp_reset(IjkMediaPlayer *mp);
 
-void            ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout);
-SDL_Vout       *ijkmp_get_vout(IjkMediaPlayer *mp);
+void            ijkmp_set_android_surface(IjkMediaPlayer *mp, jobject android_surface);
 
 #endif

@@ -411,12 +411,19 @@ long ijkmp_get_duration(IjkMediaPlayer *mp)
     return retval;
 }
 
-void ijkmp_set_vout(IjkMediaPlayer *mp, SDL_Vout *vout)
+void ijkmp_set_android_surface_l(IjkMediaPlayer *mp, jobject android_surface)
 {
-    mp->ffplayer->vout = vout;
+    assert(mp);
+    assert(mp->ffplayer);
+    assert(mp->ffplayer->vout);
+
+    SDL_VoutAndroid_SetAndroidSurface(mp->ffplayer->vout, android_surface);
 }
 
-SDL_Vout *ijkmp_get_vout(IjkMediaPlayer *mp)
+void ijkmp_set_android_surface(IjkMediaPlayer *mp, jobject android_surface)
 {
-    return mp->ffplayer->vout;
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    ijkmp_set_android_surface_l(mp, android_surface);
+    pthread_mutex_unlock(&mp->mutex);
 }
