@@ -25,14 +25,13 @@
 
 #include <stdbool.h>
 #include <assert.h>
+#include <jni.h>
 #include "ijkutil/ijkutil.h"
 #include "../ijksdl_thread.h"
 #include "../ijksdl_aout_internal.h"
 #include "android_audiotrack.h"
 
 typedef struct SDL_Aout_Opaque {
-    JavaVM *jvm;
-
     SDL_cond *wakeup_cond;
     SDL_mutex *wakeup_mutex;
 
@@ -86,17 +85,16 @@ int aout_thread(void *arg)
 {
     SDL_Aout *aout = arg;
     SDL_Aout_Opaque *opaque = aout->opaque;
-    JavaVM *jvm = opaque->jvm;
     JNIEnv *env = NULL;
 
-    if (!(*jvm)->AttachCurrentThread(jvm, &env, NULL)) {
+    if (!SDL_AndroidJni_AttachCurrentThread(&env, NULL)) {
         ALOGE("aout_thread: AttachCurrentThread: failed");
         return -1;
     }
 
     int retval = aout_thread_n(env, aout);
 
-    (*jvm)->DetachCurrentThread(jvm);
+    SDL_AndroidJni_DetachCurrentThread();
     return retval;
 }
 
@@ -131,16 +129,15 @@ int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_A
 int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
-    JavaVM *jvm = opaque->jvm;
     JNIEnv *env = NULL;
-    if ((*jvm)->AttachCurrentThread(jvm, &env, NULL) != 0) {
+    if (!SDL_AndroidJni_AttachCurrentThread(&env, NULL)) {
         ALOGE("aout_open_audio: AttachCurrentThread: failed");
         return -1;
     }
 
     int retval = aout_open_audio_n(env, aout, desired, obtained);
 
-    (*jvm)->DetachCurrentThread(jvm);
+    SDL_AndroidJni_DetachCurrentThread();
     return retval;
 }
 
@@ -189,14 +186,13 @@ void aout_free_l(SDL_Aout *aout)
     SDL_Aout_FreeInternal(aout);
 }
 
-SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack(JavaVM* jvm)
+SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack()
 {
     SDL_Aout *aout = SDL_Aout_CreateInternal(sizeof(SDL_Aout_Opaque));
     if (!aout)
         return NULL;
 
     SDL_Aout_Opaque *opaque = aout->opaque;
-    opaque->jvm = jvm;
     opaque->wakeup_cond = SDL_CreateCond();
     opaque->wakeup_mutex = SDL_CreateMutex();
 

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_aout_android_audiotrack.h
+ * ijksdl_android.c
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,11 +21,51 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL_ANDROID__IJKSDL_AOUT_ANDROID_AUDIOTRACK_H
-#define IJKSDL_ANDROID__IJKSDL_AOUT_ANDROID_AUDIOTRACK_H
+#include "ijksdl_android_jni.h"
 
-#include "../ijksdl_aout.h"
+#include "../ijksdl_stdinc.h"
 
-SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack();
+JavaVM *g_jvm;
 
-#endif
+JavaVM *SDL_AndroidJni_GetJvm()
+{
+    return g_jvm;
+}
+
+jint SDL_AndroidJni_AttachCurrentThread(JNIEnv **p_env, void *thr_args)
+{
+    JavaVM *jvm = g_jvm;
+    if (!jvm) {
+        ALOGE("SDL_AndroidJni_GetJvm: AttachCurrentThread: NULL jvm");
+        return -1;
+    }
+
+    return (*jvm)->AttachCurrentThread(jvm, p_env, thr_args);
+}
+
+jint SDL_AndroidJni_DetachCurrentThread()
+{
+    JavaVM *jvm = g_jvm;
+    if (!jvm) {
+        ALOGE("SDL_AndroidJni_GetJvm: AttachCurrentThread: NULL jvm");
+        return -1;
+    }
+
+    return (*jvm)->DetachCurrentThread(jvm);
+}
+
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+    JNIEnv* env = NULL;
+
+    g_jvm = vm;
+    if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) {
+        return -1;
+    }
+
+    return JNI_VERSION_1_4;
+}
+
+void JNI_OnUnload(JavaVM *jvm, void *reserved)
+{
+}
