@@ -232,18 +232,12 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
     if (!mp)
         return;
 
-    // explicit close mp
+    // explicit shutdown mp
     ijkmp_shutdown(mp);
-
-    SDL_Vout *vout = ijkmp_get_vout(mp);
-    if (vout) {
-        ijkmp_set_vout(mp, NULL);
-        SDL_VoutFree(vout);
-    }
-
-    ijkmp_dec_ref(&mp);
-    ijkmp_dec_ref(&mp);
     jni_set_media_player(env, thiz, NULL);
+
+    ijkmp_dec_ref(&mp);
+    ijkmp_dec_ref(&mp);
 }
 
 static void
@@ -275,7 +269,6 @@ IjkMediaPlayer_native_init(JNIEnv *env)
 static void
 IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
-    SDL_Vout *vout = NULL;
     IjkMediaPlayer *mp = ijkmp_create();
     JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", FAIL_RETURN);
 
