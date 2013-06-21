@@ -23,8 +23,8 @@
 #include "ijkplayer_android.h"
 
 #include <assert.h>
-#include "ffplay/ff_fferror.h"
-#include "ffplay/ff_ffplay.h"
+#include "../ff_fferror.h"
+#include "../ff_ffplay.h"
 
 #define MPST_CHECK_NOT_RET_INT(real, expected, errcode) \
     do { \
@@ -204,7 +204,6 @@ int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
 static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
 {
     assert(mp);
-    assert(url);
 
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
     // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);

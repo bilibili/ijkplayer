@@ -27,6 +27,7 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
 
+LOCAL_SRC_FILES += $(notdir $(wildcard *.c))
 LOCAL_SRC_FILES += $(notdir $(wildcard android/*.c))
 
 LOCAL_STATIC_LIBRARIES := ffplay
