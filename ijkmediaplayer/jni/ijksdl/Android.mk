@@ -30,4 +30,4 @@ LOCAL_SRC_FILES += $(notdir $(wildcard *.c))
 LOCAL_SRC_FILES += $(notdir $(wildcard android/*.c))
 
 LOCAL_MODULE := ijksdl
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
