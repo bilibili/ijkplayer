@@ -27,6 +27,7 @@
 #include "ijkutil/ijkutil_android.h"
 #include "../ff_ffplay.h"
 #include "ijkplayer_android.h"
+#include "ijkplayer_android_def.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
@@ -47,7 +48,7 @@ typedef struct player_fields_t {
 
     jfieldID surface_texture;
 
-    jmethodID post_event;
+    jmethodID postEventFromNative;
 } player_fields_t;
 static player_fields_t g_clazz;
 
@@ -263,6 +264,9 @@ IjkMediaPlayer_native_init(JNIEnv *env)
 
     g_clazz.mNativeMediaPlayer = (*env)->GetFieldID(env, g_clazz.clazz, "mNativeMediaPlayer", "J");
     JNI_CHECK_RET_VOID(g_clazz.mNativeMediaPlayer, env, NULL, NULL);
+
+    g_clazz.postEventFromNative = (*env)->GetStaticMethodID(env, g_clazz.clazz, "postEventFromNative", "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    JNI_CHECK_RET_VOID(g_clazz.postEventFromNative, env, NULL, NULL);
 }
 
 static void
@@ -282,6 +286,68 @@ IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 {
     // FIXME: implement
     IjkMediaPlayer_release(env, thiz);
+}
+
+inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2)
+{
+    (*env)->CallStaticVoidMethod(env, g_clazz.postEventFromNative, weak_this, what, arg1, arg2, NULL);
+}
+
+static void
+IjkMediaPlayer_native_message_loop(JNIEnv *env, jobject thiz, jobject weak_this)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null mp", LABEL_RETURN);
+
+    while (true) {
+        AVMessage msg;
+
+        int retval = ijkmp_get_msg(mp, &msg, 1);
+        if (retval < 0)
+            break;
+
+        // block-get should never return 0
+        assert(retval > 0);
+
+        switch (msg.what) {
+        case FFP_MSG_FLUSH:
+            post_event(env, weak_this, MEDIA_NOP, 0, 0);
+            break;
+        case FFP_MSG_ERROR:
+            post_event(env, weak_this, MEDIA_ERROR, MEDIA_ERROR_IJK_PLAYER, msg.arg1);
+            break;
+        case FFP_MSG_PREPARED:
+            post_event(env, weak_this, MEDIA_PREPARED, 0, 0);
+            break;
+        case FFP_MSG_COMPLETED:
+            post_event(env, weak_this, MEDIA_PLAYBACK_COMPLETE, 0, 0);
+            break;
+        case FFP_MSG_VIDEO_SIZE_CHANGED:
+            post_event(env, weak_this, MEDIA_SET_VIDEO_SIZE, msg.arg1, msg.arg2);
+            break;
+        case FFP_MSG_SAR_CHANGED:
+            post_event(env, weak_this, MEDIA_SET_VIDEO_SAR, msg.arg1, msg.arg2);
+            break;
+        case FFP_MSG_BUFFERING_START:
+            post_event(env, weak_this, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
+            break;
+        case FFP_MSG_BUFFERING_END:
+            post_event(env, weak_this, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, 0);
+            break;
+        case FFP_MSG_BUFFERING_UPDATE:
+            post_event(env, weak_this, MEDIA_BUFFERING_UPDATE, msg.arg1, msg.arg2);
+            break;
+        case FFP_MSG_SEEK_COMPLETE:
+            post_event(env, weak_this, MEDIA_SEEK_COMPLETE, 0, 0);
+            break;
+        default:
+            ALOGE("unknown FFP_MSG_xxx(%d)", msg.what);
+            break;
+        }
+    }
+
+    LABEL_RETURN:
+    ijkmp_dec_ref(&mp);
 }
 
 // ----------------------------------------------------------------------------
@@ -306,6 +372,7 @@ static JNINativeMethod g_methods[] = {
     { "native_init", "()V", (void *) IjkMediaPlayer_native_init },
     { "native_setup", "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_setup },
     { "native_finalize", "()V", (void *) IjkMediaPlayer_native_finalize },
+    { "native_message_loop", "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_message_loop },
 };
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved)

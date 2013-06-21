@@ -326,6 +326,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private native final void native_finalize();
 
+    private native final void native_message_loop(Object IjkMediaPlayer_this);
+
     protected void finalize() {
         native_finalize();
     }

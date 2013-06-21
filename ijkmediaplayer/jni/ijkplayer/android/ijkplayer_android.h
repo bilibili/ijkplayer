@@ -163,4 +163,7 @@ void            ijkmp_reset(IjkMediaPlayer *mp);
 
 void            ijkmp_set_android_surface(IjkMediaPlayer *mp, jobject android_surface);
 
+/* return < 0 if aborted, 0 if no packet and > 0 if packet.  */
+int             ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block);
+
 #endif
