@@ -2023,11 +2023,6 @@ void ffp_global_init()
     flush_pkt.data = (uint8_t *) &flush_pkt;
 
     g_ffmpeg_global_inited = true;
-
-    /* test link begin */
-    FFPlayer *ffp = malloc(sizeof(FFPlayer));
-    video_refresh_thread(ffp);
-    /* test link end */
 }
 
 void ffp_global_uninit()
@@ -2049,14 +2044,12 @@ void ffp_global_uninit()
 
 FFPlayer *ffp_create()
 {
-    FFPlayer* ffp = (FFPlayer*) malloc(sizeof(ffp));
+    FFPlayer* ffp = (FFPlayer*) av_mallocz(sizeof(FFPlayer));
     if (!ffp)
         return NULL;
 
-    msg_queue_init(&ffp->msg_queue);
-
-    memset(ffp, 0, sizeof(FFPlayer));
     ffp_reset_internal(ffp);
+    msg_queue_init(&ffp->msg_queue);
     return ffp;
 }
 
@@ -2078,7 +2071,7 @@ void ffp_destroy(FFPlayer *ffp)
     SDL_VoutFreeP(&ffp->vout);
     SDL_AoutFreeP(&ffp->aout);
 
-    free(ffp);
+    av_free(ffp);
 }
 
 void ffp_destroy_p(FFPlayer **pffp)

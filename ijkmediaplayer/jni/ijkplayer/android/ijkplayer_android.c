@@ -52,9 +52,9 @@ inline static void ijkmp_destroy(IjkMediaPlayer *mp)
 
     pthread_mutex_destroy(&mp->mutex);
 
-    FFP_SAFE_FREE(mp->data_source);
+    av_freep(&mp->data_source);
     memset(mp, 0, sizeof(IjkMediaPlayer));
-    FFP_SAFE_FREE(mp);
+    av_freep(&mp);
 }
 
 inline static void ijkmp_destroy_p(IjkMediaPlayer **pmp)
@@ -79,10 +79,9 @@ void ijkmp_global_uninit()
 IjkMediaPlayer *ijkmp_create()
 {
     FFPlayer *ffp;
-    IjkMediaPlayer *mp = (IjkMediaPlayer *) malloc(sizeof(IjkMediaPlayer));
+    IjkMediaPlayer *mp = (IjkMediaPlayer *) av_mallocz(sizeof(IjkMediaPlayer));
     if (!mp)
         goto fail;
-    memset(mp, 0, sizeof(IjkMediaPlayer));
 
     mp->ffplayer = ffp_create();
     if (!mp)
@@ -127,7 +126,7 @@ void ijkmp_reset_l(IjkMediaPlayer *mp)
     ijkmp_shutdown_l(mp);
     ffp_reset(mp->ffplayer);
 
-    FFP_SAFE_FREE(mp->data_source);
+    av_freep(&mp->data_source);
     mp->mp_state = MP_STATE_IDLE;
 }
 
@@ -187,7 +186,7 @@ static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
     if (!dup_url)
         return EIJK_OUT_OF_MEMORY;
 
-    FFP_SAFE_FREE(mp->data_source);
+    av_freep(mp->data_source);
     mp->mp_state = MP_STATE_INITIALIZED;
     return 0;
 }

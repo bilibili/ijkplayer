@@ -55,7 +55,7 @@ typedef struct SDL_Vout {
 } SDL_Vout;
 
 void SDL_VoutFree(SDL_Vout *vout);
-void SDL_VoutFreeP(SDL_Vout **pvout)
+void SDL_VoutFreeP(SDL_Vout **pvout);
 int SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay);
 
 int SDL_VoutLockYUVOverlay(SDL_VoutOverlay *overlay);

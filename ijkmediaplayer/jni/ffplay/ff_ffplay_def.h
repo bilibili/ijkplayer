@@ -401,7 +401,6 @@ typedef struct FFPlayer {
     MessageQueue msg_queue;
 } FFPlayer;
 
-#define FFP_SAFE_FREE(p) do {free(p); p = NULL;} while(0)
 #define fftime_to_milliseconds(ts) (ts / (AV_TIME_BASE / 1000))
 #define milliseconds_to_fftime(ms) (ms * (AV_TIME_BASE / 1000))
 
