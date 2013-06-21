@@ -38,7 +38,7 @@ typedef struct SDL_VoutOverlay_Opaque {
 } SDL_VoutOverlay_Opaque;
 
 /* Always assume a linesize alignment of 1 here */
-// FIXME: alignment
+// TODO: alignment to speed up memcpy when display
 static AVFrame *alloc_avframe(SDL_VoutOverlay_Opaque* opaque, enum AVPixelFormat format, int width, int height)
 {
     int frame_bytes = avpicture_get_size(format, width, height);
