@@ -2047,7 +2047,7 @@ void ffp_global_uninit()
     g_ffmpeg_global_inited = false;
 }
 
-FFPlayer *ffp_create_ffplayer()
+FFPlayer *ffp_create()
 {
     FFPlayer* ffp = (FFPlayer*) malloc(sizeof(ffp));
     if (!ffp)
@@ -2060,12 +2060,11 @@ FFPlayer *ffp_create_ffplayer()
     return ffp;
 }
 
-void ffp_destroy_ffplayer(FFPlayer **pffp)
+void ffp_destroy(FFPlayer *ffp)
 {
-    if (!pffp || !*pffp)
+    if (!ffp)
         return;
 
-    FFPlayer *ffp = *pffp;
     if (ffp && ffp->is) {
         av_log(NULL, AV_LOG_WARNING, "ffp_destroy_ffplayer: force stream_close()");
         stream_close(ffp);
@@ -2075,13 +2074,20 @@ void ffp_destroy_ffplayer(FFPlayer **pffp)
     ffp_reset_internal(ffp);
 
     msg_queue_destroy(&ffp->msg_queue);
+
+    SDL_VoutFreeP(&ffp->vout);
+    SDL_AoutFreeP(&ffp->aout);
+
     free(ffp);
-    *pffp = NULL;
 }
 
-void ffp_reset(FFPlayer *ffp)
+void ffp_destroy_p(FFPlayer **pffp)
 {
-    ffp_reset_internal(ffp);
+    if (!pffp)
+        return;
+
+    ffp_destroy(*pffp);
+    *pffp = NULL;
 }
 
 int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)

@@ -43,27 +43,26 @@ typedef struct IjkMediaPlayer {
     char *data_source;
 } IjkMediaPlayer;
 
-inline static void destroy_mp(IjkMediaPlayer **pmp)
+inline static void ijkmp_destroy(IjkMediaPlayer *mp)
 {
-    if (!pmp)
-        return;
-
-    IjkMediaPlayer *mp = *pmp;
     if (!mp)
         return;
 
-    FFPlayer *ffp = mp->ffplayer;
-    if (ffp) {
-        SDL_AoutFree(ffp->aout);
-        SDL_VoutFree(ffp->vout);
-        ffp_destroy_ffplayer(&mp->ffplayer);
-    }
+    ffp_destroy_p(&mp->ffplayer);
 
     pthread_mutex_destroy(&mp->mutex);
 
     FFP_SAFE_FREE(mp->data_source);
     memset(mp, 0, sizeof(IjkMediaPlayer));
     FFP_SAFE_FREE(mp);
+}
+
+inline static void ijkmp_destroy_p(IjkMediaPlayer **pmp)
+{
+    if (!pmp)
+        return;
+
+    ijkmp_destroy(*pmp);
     *pmp = NULL;
 }
 
@@ -79,25 +78,31 @@ void ijkmp_global_uninit()
 
 IjkMediaPlayer *ijkmp_create()
 {
+    FFPlayer *ffp;
     IjkMediaPlayer *mp = (IjkMediaPlayer *) malloc(sizeof(IjkMediaPlayer));
-    if (!mp) {
-        return NULL;
-    }
+    if (!mp)
+        goto fail;
     memset(mp, 0, sizeof(IjkMediaPlayer));
 
-    FFPlayer *ffp = ffp_create_ffplayer();
-    if (!mp) {
-        FFP_SAFE_FREE(mp);
-        return NULL;
-    }
+    mp->ffplayer = ffp_create();
+    if (!mp)
+        goto fail;
+
+    mp->ffplayer->vout = SDL_VoutAndroid_CreateForAndroidSurface();
+    if (!mp->ffplayer->vout)
+        goto fail;
+
+    mp->ffplayer->aout = SDL_AoutAndroid_CreateForAudioTrack();
+    if (!mp->ffplayer->vout)
+        goto fail;
 
     pthread_mutex_init(&mp->mutex, NULL);
-
     ijkmp_inc_ref(mp);
-
-    mp->ffplayer = ffp;
-
     return mp;
+
+    fail:
+    ijkmp_destroy_p(&mp);
+    return NULL;
 }
 
 void ijkmp_shutdown_l(IjkMediaPlayer *mp)

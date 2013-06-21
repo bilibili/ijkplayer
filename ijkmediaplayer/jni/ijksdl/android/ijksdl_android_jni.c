@@ -32,7 +32,7 @@ JavaVM *SDL_AndroidJni_GetJvm()
     return g_jvm;
 }
 
-jint SDL_AndroidJni_AttachCurrentThread(JNIEnv **p_env, void *thr_args)
+jint SDL_AndroidJni_AttachCurrentThread(JNIEnv **p_env)
 {
     JavaVM *jvm = g_jvm;
     if (!jvm) {
@@ -40,7 +40,7 @@ jint SDL_AndroidJni_AttachCurrentThread(JNIEnv **p_env, void *thr_args)
         return -1;
     }
 
-    return (*jvm)->AttachCurrentThread(jvm, p_env, thr_args);
+    return (*jvm)->AttachCurrentThread(jvm, p_env, NULL);
 }
 
 jint SDL_AndroidJni_DetachCurrentThread()

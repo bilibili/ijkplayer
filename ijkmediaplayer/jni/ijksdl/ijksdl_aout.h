@@ -43,5 +43,6 @@ int SDL_AoutOpenAudio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obt
 void SDL_AoutPauseAudio(SDL_Aout *aout, int pause_on);
 void SDL_AoutCloseAudio(SDL_Aout *aout);
 void SDL_AoutFree(SDL_Aout *aout);
+void SDL_AoutFreeP(SDL_Aout **paout);
 
 #endif

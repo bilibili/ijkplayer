@@ -53,3 +53,12 @@ void SDL_AoutFree(SDL_Aout *aout)
     else
         free(aout);
 }
+
+void SDL_AoutFreeP(SDL_Aout **paout)
+{
+    if (!paout)
+        return;
+
+    SDL_AoutFree(*paout);
+    *paout = NULL;
+}

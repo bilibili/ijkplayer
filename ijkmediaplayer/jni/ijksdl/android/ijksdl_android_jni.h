@@ -28,6 +28,8 @@
 
 JavaVM *SDL_AndroidJni_GetJvm();
 
-jint SDL_AndroidJni_AttachCurrentThread(JNIEnv **p_env, void *thr_args);
+jint SDL_AndroidJni_AttachCurrentThread(JNIEnv **p_env);
+
+jint SDL_AndroidJni_DetachCurrentThread();
 
 #endif

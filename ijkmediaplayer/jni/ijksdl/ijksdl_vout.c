@@ -38,6 +38,15 @@ void SDL_VoutFree(SDL_Vout *vout)
     }
 }
 
+void SDL_VoutFreeP(SDL_Vout **pvout)
+{
+    if (!pvout)
+        return;
+
+    SDL_VoutFree(*pvout);
+    *pvout = NULL;
+}
+
 int SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     if (vout && overlay && vout->display_overlay)

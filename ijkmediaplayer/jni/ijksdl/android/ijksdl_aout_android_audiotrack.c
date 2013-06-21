@@ -87,7 +87,7 @@ int aout_thread(void *arg)
     SDL_Aout_Opaque *opaque = aout->opaque;
     JNIEnv *env = NULL;
 
-    if (!SDL_AndroidJni_AttachCurrentThread(&env, NULL)) {
+    if (JNI_OK != SDL_AndroidJni_AttachCurrentThread(&env, NULL)) {
         ALOGE("aout_thread: AttachCurrentThread: failed");
         return -1;
     }
@@ -130,7 +130,7 @@ int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtai
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
     JNIEnv *env = NULL;
-    if (!SDL_AndroidJni_AttachCurrentThread(&env, NULL)) {
+    if (JNI_OK != SDL_AndroidJni_AttachCurrentThread(&env, NULL)) {
         ALOGE("aout_open_audio: AttachCurrentThread: failed");
         return -1;
     }
