@@ -57,6 +57,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
 
+    private int mVideoWidth;
+    private int mVideoHeight;
+
     /**
      * Default constructor. Consider using one of the create() methods for
      * synchronously instantiating a IjkMediaPlayer from a Uri or resource.
@@ -257,14 +260,12 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public int getVideoWidth() {
-        // FIXME: implement
-        return 0;
+        return mVideoWidth;
     }
 
     @Override
     public int getVideoHeight() {
-        // FIXME: implement
-        return 0;
+        return mVideoHeight;
     }
 
     @Override
@@ -311,6 +312,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         _reset();
         // make sure none of the listeners get called anymore
         mEventHandler.removeCallbacksAndMessages(null);
+
+        mVideoWidth = 0;
+        mVideoHeight = 0;
     }
 
     private native void _reset();
@@ -366,6 +370,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 return;
 
             case MEDIA_SET_VIDEO_SIZE:
+                mIjkMediaPlayer.mVideoWidth = msg.arg1;
+                mIjkMediaPlayer.mVideoHeight = msg.arg2;
                 notifyOnVideoSizeChanged(mIjkMediaPlayer, msg.arg1, msg.arg2);
                 return;
 
