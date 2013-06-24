@@ -38,8 +38,10 @@
 typedef struct IjkMediaPlayer {
     volatile int ref_count;
     pthread_mutex_t mutex;
-    pthread_t msg_thread;
     FFPlayer *ffplayer;
+
+    void *(*msg_loop)(void*);
+    pthread_t msg_thread;
 
     int mp_state;
     char *data_source;
@@ -97,11 +99,10 @@ IjkMediaPlayer *ijkmp_create(void *(*msg_loop)(void*))
     if (!mp->ffplayer->vout)
         goto fail;
 
-    ijkmp_inc_ref(mp);
-    pthread_mutex_init(&mp->mutex, NULL);
+    mp->msg_loop = msg_loop;
 
     ijkmp_inc_ref(mp);
-    pthread_create(&mp->msg_thread, NULL, msg_loop, mp);
+    pthread_mutex_init(&mp->mutex, NULL);
 
     return mp;
 
@@ -228,7 +229,11 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
     assert(mp->data_source);
 
     mp->mp_state = MP_STATE_ASYNC_PREPARING;
+
     msg_queue_start(&mp->ffplayer->msg_queue);
+    ijkmp_inc_ref(mp);
+    pthread_create(&mp->msg_thread, NULL, mp->msg_loop, mp);
+
     int retval = ffp_prepare_async_l(mp->ffplayer, mp->data_source);
     if (retval < 0) {
         mp->mp_state = MP_STATE_ERROR;
