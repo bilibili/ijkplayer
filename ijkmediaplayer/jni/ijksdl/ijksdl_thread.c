@@ -37,7 +37,7 @@ SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data
 {
     thread->func = fn;
     thread->data = data;
-    int retval = pthread_create(&thread->id, NULL, SDL_RunThread, data);
+    int retval = pthread_create(&thread->id, NULL, SDL_RunThread, thread);
     if (retval)
         return NULL;
 
