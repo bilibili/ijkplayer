@@ -187,6 +187,7 @@ static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
         return EIJK_OUT_OF_MEMORY;
 
     av_freep(mp->data_source);
+    mp->data_source = av_strdup(url);
     mp->mp_state = MP_STATE_INITIALIZED;
     return 0;
 }
@@ -432,4 +433,10 @@ void ijkmp_set_android_surface(IjkMediaPlayer *mp, jobject android_surface)
     pthread_mutex_lock(&mp->mutex);
     ijkmp_set_android_surface_l(mp, android_surface);
     pthread_mutex_unlock(&mp->mutex);
+}
+
+int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
+{
+    assert(mp);
+    return msg_queue_get(&mp->ffplayer->msg_queue, msg, block);
 }

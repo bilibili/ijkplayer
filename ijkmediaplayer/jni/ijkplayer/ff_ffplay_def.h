@@ -414,7 +414,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     av_dict_free(&ffp->sws_opts);
 
     /* ffplay options specified by the user */
-    FFP_SAFE_FREE(ffp->input_filename);
+    av_freep(&ffp->input_filename);
     ffp->audio_disable          = 0;
     ffp->video_disable          = 0;
     ffp->wanted_stream[AVMEDIA_TYPE_AUDIO]      = -1;
@@ -441,8 +441,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->framedrop              = -1;
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
-    FFP_SAFE_FREE(ffp->audio_codec_name);
-    FFP_SAFE_FREE(ffp->video_codec_name);
+    av_freep(&ffp->audio_codec_name);
+    av_freep(&ffp->video_codec_name);
     ffp->rdftspeed              = 0.02;
 #if CONFIG_AVFILTER
     ffp->vfilters               = NULL;

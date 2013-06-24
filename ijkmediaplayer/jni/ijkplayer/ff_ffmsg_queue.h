@@ -71,10 +71,42 @@ inline static int msg_queue_put(MessageQueue *q, AVMessage *msg)
     int ret;
 
     SDL_LockMutex(q->mutex);
-    ret = packet_queue_put_private(q, msg);
+    ret = msg_queue_put_private(q, msg);
     SDL_UnlockMutex(q->mutex);
 
     return ret;
+}
+
+inline static void msg_init_msg(AVMessage *msg)
+{
+    memset(msg, 0, sizeof(AVMessage));
+}
+
+inline static void msg_queue_put_simple1(MessageQueue *q, int what)
+{
+    AVMessage msg;
+    msg_init_msg(&msg);
+    msg.what = what;
+    msg_queue_put(q, msg);
+}
+
+inline static void msg_queue_put_simple2(MessageQueue *q, int what, int arg1)
+{
+    AVMessage msg;
+    msg_init_msg(&msg);
+    msg.what = what;
+    msg.arg1 = arg1;
+    msg_queue_put(q, &msg);
+}
+
+inline static void msg_queue_put_simple3(MessageQueue *q, int what, int arg1, int arg2)
+{
+    AVMessage msg;
+    msg_init_msg(&msg);
+    msg.what = what;
+    msg.arg1 = arg1;
+    msg.arg2 = arg2;
+    msg_queue_put(q, &msg);
 }
 
 inline static void msg_queue_init(MessageQueue *q)
@@ -126,7 +158,7 @@ inline static void msg_queue_start(MessageQueue *q)
     SDL_UnlockMutex(q->mutex);
 }
 
-/* return < 0 if aborted, 0 if no packet and > 0 if packet.  */
+/* return < 0 if aborted, 0 if no msg and > 0 if msg.  */
 static int msg_queue_get(MessageQueue *q, AVMessage *msg, int block)
 {
     AVMessage *msg1;
@@ -159,38 +191,6 @@ static int msg_queue_get(MessageQueue *q, AVMessage *msg, int block)
     }
     SDL_UnlockMutex(q->mutex);
     return ret;
-}
-
-inline static void msg_init_msg(AVMessage *msg)
-{
-    memset(msg, 0, sizeof(AVMessage));
-}
-
-inline static void msg_queue_put_simple1(MessageQueue *q, int what)
-{
-    AVMessage msg;
-    msg_init_msg(&msg);
-    msg.what = what;
-    msg_queue_put(msg);
-}
-
-inline static void msg_queue_put_simple2(MessageQueue *q, int what, int arg1)
-{
-    AVMessage msg;
-    msg_init_msg(&msg);
-    msg.what = what;
-    msg.arg1 = arg1;
-    msg_queue_put(q, &msg);
-}
-
-inline static void msg_queue_put_simple3(MessageQueue *q, int what, int arg1, int arg2)
-{
-    AVMessage msg;
-    msg_init_msg(&msg);
-    msg.what = what;
-    msg.arg1 = arg1;
-    msg.arg2 = arg2;
-    msg_queue_put(q, &msg);
 }
 
 #endif
