@@ -27,6 +27,13 @@
 #include <jni.h>
 #include "ff_ffmsg_queue.h"
 
+#define IJK_LOG_TAG "IJKPLAYER"
+#include "ijkutil/ijkutil_android.h"
+
+#ifndef MPTRACE
+#define MPTRACE ALOGW
+#endif
+
 struct IjkMediaPlayer;
 typedef struct FFPlayer FFPlayer;
 typedef struct SDL_Vout SDL_Vout;

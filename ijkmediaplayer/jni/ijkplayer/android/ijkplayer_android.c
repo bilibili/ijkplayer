@@ -27,8 +27,6 @@
 #include "../ff_fferror.h"
 #include "../ff_ffplay.h"
 
-#define MPTRACE ALOGW
-
 #define MPST_CHECK_NOT_RET_INT(real, expected, errcode) \
     do { \
         if (real == expected) return errcode; \

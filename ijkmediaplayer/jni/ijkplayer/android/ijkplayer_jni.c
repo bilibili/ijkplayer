@@ -26,8 +26,8 @@
 #include <jni.h>
 #include "ijkutil/ijkutil_android.h"
 #include "../ff_ffplay.h"
-#include "ijkplayer_android.h"
 #include "ijkplayer_android_def.h"
+#include "ijkplayer_android.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
@@ -300,33 +300,43 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
 
         switch (msg.what) {
         case FFP_MSG_FLUSH:
+            MPTRACE("FFP_MSG_FLUSH:");
             post_event(env, weak_thiz, MEDIA_NOP, 0, 0);
             break;
         case FFP_MSG_ERROR:
+            MPTRACE("FFP_MSG_ERROR: %d", MEDIA_ERROR_IJK_PLAYER, msg.arg1);
             post_event(env, weak_thiz, MEDIA_ERROR, MEDIA_ERROR_IJK_PLAYER, msg.arg1);
             break;
         case FFP_MSG_PREPARED:
+            MPTRACE("FFP_MSG_PREPARED:", MEDIA_ERROR_IJK_PLAYER);
             post_event(env, weak_thiz, MEDIA_PREPARED, 0, 0);
             break;
         case FFP_MSG_COMPLETED:
+            MPTRACE("FFP_MSG_COMPLETED:", MEDIA_ERROR_IJK_PLAYER);
             post_event(env, weak_thiz, MEDIA_PLAYBACK_COMPLETE, 0, 0);
             break;
         case FFP_MSG_VIDEO_SIZE_CHANGED:
+            MPTRACE("FFP_MSG_VIDEO_SIZE_CHANGED: %d, %d", msg.arg1, msg.arg2);
             post_event(env, weak_thiz, MEDIA_SET_VIDEO_SIZE, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_SAR_CHANGED:
+            MPTRACE("FFP_MSG_SAR_CHANGED: %d, %d", msg.arg1, msg.arg2);
             post_event(env, weak_thiz, MEDIA_SET_VIDEO_SAR, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_BUFFERING_START:
+            MPTRACE("FFP_MSG_BUFFERING_START:");
             post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
             break;
         case FFP_MSG_BUFFERING_END:
+            MPTRACE("FFP_MSG_BUFFERING_END:");
             post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, 0);
             break;
         case FFP_MSG_BUFFERING_UPDATE:
+            MPTRACE("FFP_MSG_BUFFERING_UPDATE: %d, %d", msg.arg1, msg.arg2);
             post_event(env, weak_thiz, MEDIA_BUFFERING_UPDATE, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_SEEK_COMPLETE:
+            MPTRACE("FFP_MSG_SEEK_COMPLETE:");
             post_event(env, weak_thiz, MEDIA_SEEK_COMPLETE, 0, 0);
             break;
         default:
