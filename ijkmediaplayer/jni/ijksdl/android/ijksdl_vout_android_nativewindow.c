@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <android/native_window.h>
 #include "ijkutil/ijkutil.h"
-#include "../ijksdl_ffinc.h"
+#include "../ijksdl_inc_ffmpeg.h"
 #include "../ijksdl_vout.h"
 #include "../ijksdl_vout_internal.h"
 

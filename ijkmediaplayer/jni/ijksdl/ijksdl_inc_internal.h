@@ -1,6 +1,5 @@
 /*
- * ijksdl_ffinc.h
- *      ffmpeg headers
+ * ijksdl_inc_internal.h
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -21,11 +20,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__IJKSDL_FFINC_H
-#define IJKPLAYER__IJKSDL_FFINC_H
+#ifndef IJKPLAYER__IJKSDL_INC_INTERNAL_H
+#define IJKPLAYER__IJKSDL_INC_INTERNAL_H
 
-#include "libavutil/imgutils.h"
-#include "libavcodec/avcodec.h"
-#include "libswscale/swscale.h"
+#include <stdint.h>
+
+#define IJK_LOG_TAG "IJKSDL"
+#include "ijkutil/ijkutil.h"
+
+#include "ijksdl_stdinc.h"
 
 #endif

@@ -24,6 +24,8 @@
 #include "ijksdl_vout_android_surface.h"
 
 #include <android/native_window_jni.h>
+#include "../ijksdl_inc_internal.h"
+#include "ijksdl_android_jni.h"
 #include "ijksdl_vout_android_nativewindow.h"
 
 SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface()
@@ -50,7 +52,7 @@ void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, jobject android_surface)
         return;
 
     JNIEnv *env = NULL;
-    if (JNI_OK != SDL_AndroidJni_AttachCurrentThread(&env, NULL)) {
+    if (JNI_OK != SDL_AndroidJni_AttachCurrentThread(&env)) {
         ALOGE("SDL_VoutAndroid_SetAndroidSurface: AttachCurrentThread: failed");
         return;
     }

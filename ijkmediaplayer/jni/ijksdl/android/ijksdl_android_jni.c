@@ -23,7 +23,7 @@
 
 #include "ijksdl_android_jni.h"
 
-#include "../ijksdl_stdinc.h"
+#include "../ijksdl_inc_internal.h"
 
 JavaVM *g_jvm;
 
@@ -54,7 +54,7 @@ jint SDL_AndroidJni_DetachCurrentThread()
     return (*jvm)->DetachCurrentThread(jvm);
 }
 
-jint JNI_OnLoad(JavaVM *vm, void *reserved)
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 {
     JNIEnv* env = NULL;
 
@@ -66,6 +66,6 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
     return JNI_VERSION_1_4;
 }
 
-void JNI_OnUnload(JavaVM *jvm, void *reserved)
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *jvm, void *reserved)
 {
 }

@@ -23,7 +23,7 @@
 
 #include <errno.h>
 #include <assert.h>
-#include "ijkutil/ijkutil.h"
+#include "ijksdl_inc_internal.h"
 #include "ijksdl_thread.h"
 
 static void *SDL_RunThread(void *data)

@@ -26,9 +26,10 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <jni.h>
-#include "ijkutil/ijkutil.h"
+#include "../ijksdl_inc_internal.h"
 #include "../ijksdl_thread.h"
 #include "../ijksdl_aout_internal.h"
+#include "ijksdl_android_jni.h"
 #include "android_audiotrack.h"
 
 typedef struct SDL_Aout_Opaque {
@@ -84,10 +85,10 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
 int aout_thread(void *arg)
 {
     SDL_Aout *aout = arg;
-    SDL_Aout_Opaque *opaque = aout->opaque;
+    // SDL_Aout_Opaque *opaque = aout->opaque;
     JNIEnv *env = NULL;
 
-    if (JNI_OK != SDL_AndroidJni_AttachCurrentThread(&env, NULL)) {
+    if (JNI_OK != SDL_AndroidJni_AttachCurrentThread(&env)) {
         ALOGE("aout_thread: AttachCurrentThread: failed");
         return -1;
     }
@@ -128,9 +129,9 @@ int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_A
 
 int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
-    SDL_Aout_Opaque *opaque = aout->opaque;
+    // SDL_Aout_Opaque *opaque = aout->opaque;
     JNIEnv *env = NULL;
-    if (JNI_OK != SDL_AndroidJni_AttachCurrentThread(&env, NULL)) {
+    if (JNI_OK != SDL_AndroidJni_AttachCurrentThread(&env)) {
         ALOGE("aout_open_audio: AttachCurrentThread: failed");
         return -1;
     }
