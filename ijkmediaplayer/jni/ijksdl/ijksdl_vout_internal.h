@@ -38,7 +38,7 @@ inline static SDL_Vout *SDL_Vout_CreateInternal(size_t opaque_size)
         free(vout);
         return NULL;
     }
-    memset(vout->opaque, 0, sizeof(vout->opaque));
+    memset(vout->opaque, 0, opaque_size);
 
     vout->mutex = SDL_CreateMutex();
     if (vout->mutex == NULL) {
@@ -76,7 +76,7 @@ inline static SDL_VoutOverlay *SDL_VoutOverlay_CreateInternal(size_t opaque_size
         free(overlay);
         return NULL;
     }
-    memset(overlay->opaque, 0, sizeof(overlay->opaque));
+    memset(overlay->opaque, 0, opaque_size);
     return overlay;
 }
 
@@ -91,5 +91,7 @@ inline static void SDL_VoutOverlay_FreeInternal(SDL_VoutOverlay *overlay)
     memset(overlay, 0, sizeof(SDL_VoutOverlay));
     free(overlay);
 }
+
+#define SDLTRACE ALOGW
 
 #endif

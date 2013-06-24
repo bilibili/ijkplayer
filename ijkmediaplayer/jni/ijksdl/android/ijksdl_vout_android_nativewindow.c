@@ -110,6 +110,7 @@ static SDL_VoutSurface *vout_set_video_mode(SDL_Vout *vout, int w, int h, int bp
 
 static void vout_copy_image_yv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
 {
+    SDLTRACE("SDL_VoutAndroid: vout_copy_image_yv12(%p)", overlay);
     assert(overlay->format == SDL_YV12_OVERLAY);
     assert(overlay->planes == 3);
 
@@ -145,6 +146,7 @@ static void vout_copy_image_yv12(ANativeWindow_Buffer *out_buffer, const SDL_Vou
 
 static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
+    SDLTRACE("SDL_VoutAndroid: display(%p)", overlay);
     SDL_Vout_Opaque *opaque = vout->opaque;
     ANativeWindow *native_window = opaque->native_window;
     int curr_w, curr_h, curr_format;

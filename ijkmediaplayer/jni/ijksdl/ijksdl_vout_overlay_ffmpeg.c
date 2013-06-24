@@ -62,6 +62,7 @@ static AVFrame *alloc_avframe(SDL_VoutOverlay_Opaque* opaque, enum AVPixelFormat
 
 static void overlay_free_l(SDL_VoutOverlay *overlay)
 {
+    ALOGE("SDL_Overlay(ffmpeg): overlay_free_l(%p)", overlay);
     if (!overlay)
         return;
 
@@ -109,9 +110,13 @@ static int overlay_unlock(SDL_VoutOverlay *overlay)
 
 SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_Vout *display)
 {
+    SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(w=%d, h=%d, fmt=%.4s(0x%x, dp=%p)",
+        width, height, (const char*) &format, format, display);
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
-    if (!overlay)
+    if (!overlay) {
+        ALOGE("SDL_VoutCreateFFmpegYUVOverlay(...)=NULL");
         return NULL;
+    }
 
     overlay->format = format;
 
@@ -123,17 +128,21 @@ SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 fo
     AVPicture *pic = NULL;
     switch (format) {
     case SDL_YV12_OVERLAY:
+        SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(...): SDL_YV12_OVERLAY (swap UV)");
         frame = alloc_avframe(opaque, AV_PIX_FMT_YUV420P, width, height);
-        overlay_fill(overlay, frame, format, 3);
-        /* swap U,V */
-        pic = (AVPicture *) frame;
-        overlay->pixels[2] = pic->data[1];
-        overlay->pixels[1] = pic->data[2];
+        if (frame) {
+            overlay_fill(overlay, frame, format, 3);
+            /* swap U,V */
+            pic = (AVPicture *) frame;
+            overlay->pixels[2] = pic->data[1];
+            overlay->pixels[1] = pic->data[2];
 
-        overlay->pitches[2] = pic->linesize[1];
-        overlay->pitches[1] = pic->linesize[2];
+            overlay->pitches[2] = pic->linesize[1];
+            overlay->pitches[1] = pic->linesize[2];
+        }
         break;
     default:
+        ALOGE("SDL_VoutCreateFFmpegYUVOverlay(...): unknown format");
         break;
     }
 
@@ -148,5 +157,6 @@ SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 fo
         overlay = NULL;
     }
 
+    SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(...)=%p", overlay);
     return overlay;
 }
