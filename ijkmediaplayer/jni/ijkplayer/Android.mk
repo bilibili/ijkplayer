@@ -30,7 +30,6 @@ LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
 LOCAL_SRC_FILES += $(notdir $(wildcard *.c))
 LOCAL_SRC_FILES += $(notdir $(wildcard android/*.c))
 
-LOCAL_STATIC_LIBRARIES := ffplay
 LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil ijksdl
 
 LOCAL_MODULE := ijkplayer
