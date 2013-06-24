@@ -154,7 +154,11 @@ inline static void msg_queue_start(MessageQueue *q)
 {
     SDL_LockMutex(q->mutex);
     q->abort_request = 0;
-    msg_queue_put_simple1(q, FFP_MSG_FLUSH);
+
+    AVMessage msg;
+    msg_init_msg(&msg);
+    msg.what = FFP_MSG_FLUSH;
+    msg_queue_put_private(q, &msg);
     SDL_UnlockMutex(q->mutex);
 }
 
