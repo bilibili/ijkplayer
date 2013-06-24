@@ -79,10 +79,208 @@ static IjkMediaPlayer *jni_set_media_player(JNIEnv* env, jobject thiz, IjkMediaP
 
     // NOTE: ijkmp_dec_ref may block thread
     if (old != NULL) {
-        ijkmp_dec_ref(&old);
+        ijkmp_dec_ref_p(&old);
     }
 
     return old;
+}
+
+static void *message_loop(void *arg);
+
+static void
+IjkMediaPlayer_setDataSourceAndHeaders(
+    JNIEnv *env, jobject thiz, jstring path,
+    jobjectArray keys, jobjectArray values)
+{
+    int retval = 0;
+    const char *c_path = NULL;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(path, env, "java/lang/IllegalArgumentException", "mpjni: setDataSource: null path", LABEL_RETURN);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setDataSource: null mp", LABEL_RETURN);
+
+    c_path = (*env)->GetStringUTFChars(env, path, NULL);
+    JNI_CHECK_GOTO(c_path, env, "java/lang/OutOfMemoryError", "mpjni: setDataSource: path.string oom", LABEL_RETURN);
+
+    ALOGV("setDataSource: path %s", c_path);
+    retval = ijkmp_set_data_source(mp, c_path);
+    (*env)->ReleaseStringUTFChars(env, path, c_path);
+
+    IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setVideoSurface: null mp", LABEL_RETURN);
+
+    ijkmp_set_android_surface(mp, jsurface);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return;
+}
+
+static void
+IjkMediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
+{
+    int retval = 0;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: prepareAsync: null mp", LABEL_RETURN);
+
+    retval = ijkmp_prepare_async(mp);
+    IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_start(JNIEnv *env, jobject thiz)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: start: null mp", LABEL_RETURN);
+
+    ijkmp_start(mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_stop(JNIEnv *env, jobject thiz)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: stop: null mp", LABEL_RETURN);
+
+    ijkmp_stop(mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_pause(JNIEnv *env, jobject thiz)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: pause: null mp", LABEL_RETURN);
+
+    ijkmp_pause(mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_seekTo(JNIEnv *env, jobject thiz, int msec)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: seekTo: null mp", LABEL_RETURN);
+
+    ijkmp_seek_to(mp, msec);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static jboolean
+IjkMediaPlayer_isPlaying(JNIEnv *env, jobject thiz)
+{
+    jboolean retval = JNI_FALSE;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: isPlaying: null mp", LABEL_RETURN);
+
+    retval = ijkmp_is_playing(mp) ? JNI_TRUE : JNI_FALSE;
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return retval;
+}
+
+static int
+IjkMediaPlayer_getCurrentPosition(JNIEnv *env, jobject thiz)
+{
+    int retval = 0;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getCurrentPosition: null mp", LABEL_RETURN);
+
+    retval = ijkmp_get_current_position(mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return retval;
+}
+
+static int
+IjkMediaPlayer_getDuration(JNIEnv *env, jobject thiz)
+{
+    int retval = 0;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getDuration: null mp", LABEL_RETURN);
+
+    retval = ijkmp_get_duration(mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return retval;
+}
+
+static void
+IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    if (!mp)
+        return;
+
+    // explicit shutdown mp, in case it is not the last mp-ref here
+    ijkmp_shutdown(mp);
+    jni_set_media_player(env, thiz, NULL);
+
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: reset: null mp", LABEL_RETURN);
+
+    ijkmp_reset(mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_native_init(JNIEnv *env)
+{
+}
+
+static void
+IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
+{
+    IjkMediaPlayer *mp = ijkmp_create(message_loop);
+    JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", LABEL_RETURN);
+
+    jni_set_media_player(env, thiz, mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
+{
+    // FIXME: 9 implement
+    IjkMediaPlayer_release(env, thiz);
+}
+
+inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2)
+{
+    (*env)->CallStaticVoidMethod(env, g_clazz.postEventFromNative, weak_this, what, arg1, arg2, NULL);
 }
 
 static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
@@ -141,10 +339,10 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
     (*env)->DeleteGlobalRef(env, weak_thiz);
 }
 
-static void message_loop(void *arg)
+static void *message_loop(void *arg)
 {
     JNIEnv *env = NULL;
-    (*g_jvm)->AttachCurrentThread(g_jvm, env, NULL);
+    (*g_jvm)->AttachCurrentThread(g_jvm, &env, NULL);
 
     IjkMediaPlayer *mp = (IjkMediaPlayer*) arg;
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null mp", LABEL_RETURN);
@@ -152,216 +350,10 @@ static void message_loop(void *arg)
     message_loop_n(env, mp);
 
     LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
+    ijkmp_dec_ref_p(&mp);
     (*g_jvm)->DetachCurrentThread(g_jvm);
-}
 
-static void
-IjkMediaPlayer_setDataSourceAndHeaders(
-    JNIEnv *env, jobject thiz, jstring path,
-    jobjectArray keys, jobjectArray values)
-{
-    int retval = 0;
-    const char *c_path = NULL;
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(path, env, "java/lang/IllegalArgumentException", "mpjni: setDataSource: null path", LABEL_RETURN);
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setDataSource: null mp", LABEL_RETURN);
-
-    c_path = (*env)->GetStringUTFChars(env, path, NULL);
-    JNI_CHECK_GOTO(c_path, env, "java/lang/OutOfMemoryError", "mpjni: setDataSource: path.string oom", LABEL_RETURN);
-
-    ALOGV("setDataSource: path %s", c_path);
-    retval = ijkmp_set_data_source(mp, c_path);
-    (*env)->ReleaseStringUTFChars(env, path, c_path);
-
-    IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-}
-
-static void
-IjkMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
-{
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setVideoSurface: null mp", LABEL_RETURN);
-
-    ijkmp_set_android_surface(mp, jsurface);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-    return;
-}
-
-static void
-IjkMediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
-{
-    int retval = 0;
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: prepareAsync: null mp", LABEL_RETURN);
-
-    retval = ijkmp_prepare_async(mp);
-    IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-}
-
-static void
-IjkMediaPlayer_start(JNIEnv *env, jobject thiz)
-{
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: start: null mp", LABEL_RETURN);
-
-    ijkmp_start(mp);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-}
-
-static void
-IjkMediaPlayer_stop(JNIEnv *env, jobject thiz)
-{
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: stop: null mp", LABEL_RETURN);
-
-    ijkmp_stop(mp);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-}
-
-static void
-IjkMediaPlayer_pause(JNIEnv *env, jobject thiz)
-{
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: pause: null mp", LABEL_RETURN);
-
-    ijkmp_pause(mp);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-}
-
-static void
-IjkMediaPlayer_seekTo(JNIEnv *env, jobject thiz, int msec)
-{
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: seekTo: null mp", LABEL_RETURN);
-
-    ijkmp_seek_to(mp, msec);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-}
-
-static jboolean
-IjkMediaPlayer_isPlaying(JNIEnv *env, jobject thiz)
-{
-    jboolean retval = JNI_FALSE;
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: isPlaying: null mp", LABEL_RETURN);
-
-    retval = ijkmp_is_playing(mp) ? JNI_TRUE : JNI_FALSE;
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-    return retval;
-}
-
-static int
-IjkMediaPlayer_getCurrentPosition(JNIEnv *env, jobject thiz)
-{
-    int retval = 0;
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getCurrentPosition: null mp", LABEL_RETURN);
-
-    retval = ijkmp_get_current_position(mp);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-    return retval;
-}
-
-static int
-IjkMediaPlayer_getDuration(JNIEnv *env, jobject thiz)
-{
-    int retval = 0;
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getDuration: null mp", LABEL_RETURN);
-
-    retval = ijkmp_get_duration(mp);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-    return retval;
-}
-
-static void
-IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
-{
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    if (!mp)
-        return;
-
-    // explicit shutdown mp, in case it is not the last mp-ref here
-    ijkmp_shutdown(mp);
-    jni_set_media_player(env, thiz, NULL);
-
-    ijkmp_dec_ref(&mp);
-}
-
-static void
-IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
-{
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: reset: null mp", LABEL_RETURN);
-
-    ijkmp_reset(mp);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-}
-
-static void
-IjkMediaPlayer_native_init(JNIEnv *env)
-{
-    pthread_mutex_init(&g_clazz.mutex, NULL);
-
-    (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
-
-    g_clazz.clazz = (*env)->FindClass(env, JNI_CLASS_IJKPLAYER);
-    JNI_CHECK_RET_VOID(g_clazz.clazz, env, NULL, NULL);
-
-    g_clazz.mNativeMediaPlayer = (*env)->GetFieldID(env, g_clazz.clazz, "mNativeMediaPlayer", "J");
-    JNI_CHECK_RET_VOID(g_clazz.mNativeMediaPlayer, env, NULL, NULL);
-
-    g_clazz.postEventFromNative = (*env)->GetStaticMethodID(env, g_clazz.clazz, "postEventFromNative", "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    JNI_CHECK_RET_VOID(g_clazz.postEventFromNative, env, NULL, NULL);
-}
-
-static void
-IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
-{
-    IjkMediaPlayer *mp = ijkmp_create(message_loop);
-    JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", LABEL_RETURN);
-
-    jni_set_media_player(env, thiz, mp);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-}
-
-static void
-IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
-{
-    // FIXME: 9 implement
-    IjkMediaPlayer_release(env, thiz);
-}
-
-inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2)
-{
-    (*env)->CallStaticVoidMethod(env, g_clazz.postEventFromNative, weak_this, what, arg1, arg2, NULL);
+    return NULL;
 }
 
 // ----------------------------------------------------------------------------
@@ -388,7 +380,7 @@ static JNINativeMethod g_methods[] = {
     { "native_finalize", "()V", (void *) IjkMediaPlayer_native_finalize },
 };
 
-jint JNI_OnLoad(JavaVM *vm, void *reserved)
+JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
     JNIEnv* env = NULL;
 
@@ -398,12 +390,25 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
     }
     assert(env != NULL);
 
+    pthread_mutex_init(&g_clazz.mutex, NULL);
+
+    (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
+
+    g_clazz.clazz = (*env)->FindClass(env, JNI_CLASS_IJKPLAYER);
+    JNI_CHECK_RET(g_clazz.clazz, env, NULL, NULL, -1);
+
+    g_clazz.mNativeMediaPlayer = (*env)->GetFieldID(env, g_clazz.clazz, "mNativeMediaPlayer", "J");
+    JNI_CHECK_RET(g_clazz.mNativeMediaPlayer, env, NULL, NULL, -1);
+
+    g_clazz.postEventFromNative = (*env)->GetStaticMethodID(env, g_clazz.clazz, "postEventFromNative", "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    JNI_CHECK_RET(g_clazz.postEventFromNative, env, NULL, NULL, -1);
+
     ijkmp_global_init();
 
     return JNI_VERSION_1_4;
 }
 
-void JNI_OnUnload(JavaVM *jvm, void *reserved)
+JNIEXPORT void JNI_OnUnload(JavaVM *jvm, void *reserved)
 {
     ijkmp_global_uninit();
 

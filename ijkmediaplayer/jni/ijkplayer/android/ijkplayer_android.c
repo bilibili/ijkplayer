@@ -23,6 +23,7 @@
 #include "ijkplayer_android.h"
 
 #include <assert.h>
+#include "ijksdl/ijksdl_android.h"
 #include "../ff_fferror.h"
 #include "../ff_ffplay.h"
 
@@ -78,9 +79,8 @@ void ijkmp_global_uninit()
     ffp_global_uninit();
 }
 
-IjkMediaPlayer *ijkmp_create(void (*msg_loop)(void*))
+IjkMediaPlayer *ijkmp_create(void *(*msg_loop)(void*))
 {
-    FFPlayer *ffp;
     IjkMediaPlayer *mp = (IjkMediaPlayer *) av_mallocz(sizeof(IjkMediaPlayer));
     if (!mp)
         goto fail;
@@ -130,7 +130,7 @@ void ijkmp_reset_l(IjkMediaPlayer *mp)
     assert(mp);
 
     ijkmp_shutdown_l(mp);
-    ffp_reset(mp->ffplayer);
+    ffp_reset_internal(mp->ffplayer);
 
     av_freep(&mp->data_source);
     mp->mp_state = MP_STATE_IDLE;
@@ -159,7 +159,7 @@ void ijkmp_dec_ref(IjkMediaPlayer *mp)
     int ref_count = __sync_fetch_and_sub(&mp->ref_count, 1);
     if (ref_count == 0) {
         ijkmp_shutdown(mp);
-        destroy_mp(&mp);
+        ijkmp_destroy_p(&mp);
     }
 }
 
@@ -441,7 +441,7 @@ void ijkmp_set_android_surface(IjkMediaPlayer *mp, jobject android_surface)
     pthread_mutex_unlock(&mp->mutex);
 }
 
-void *ijkmp_set_weak_thiz(JNIEnv *env, IjkMediaPlayer *mp, void *weak_thiz)
+void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
 {
     void *prev_weak_thiz = mp->weak_thiz;
 

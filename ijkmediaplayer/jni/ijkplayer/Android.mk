@@ -28,8 +28,11 @@ LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH_ALTER)
 LOCAL_C_INCLUDES += $(MY_APP_JNI_ROOT)
 
-LOCAL_SRC_FILES += $(notdir $(wildcard *.c))
-LOCAL_SRC_FILES += $(notdir $(wildcard android/*.c))
+LOCAL_SRC_FILES += ff_cmdutils.c
+LOCAL_SRC_FILES += ff_ffplay.c
+
+LOCAL_SRC_FILES += android/ijkplayer_android.c
+LOCAL_SRC_FILES += android/ijkplayer_jni.c
 
 LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil ijksdl
 

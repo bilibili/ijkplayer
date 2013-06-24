@@ -24,6 +24,8 @@
 #define IJKPLAYER_ANDROID__IJKPLAYER_ANDROID_H
 
 #include <stdbool.h>
+#include <jni.h>
+#include "ff_ffmsg_queue.h"
 
 struct IjkMediaPlayer;
 typedef struct FFPlayer FFPlayer;
@@ -137,7 +139,7 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
  void           ijkmp_global_uninit();
 
 // ref_count is 1 after open
-IjkMediaPlayer *ijkmp_create(void (*msg_loop)(void*));
+IjkMediaPlayer *ijkmp_create(void *(*msg_loop)(void*));
 
 // preferred to be called explicity, can be called multiple times
 // NOTE: ijkmp_shutdown may block thread

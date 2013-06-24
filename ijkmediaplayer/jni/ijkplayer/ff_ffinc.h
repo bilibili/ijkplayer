@@ -34,6 +34,8 @@
 #include "libavutil/opt.h"
 #include "libswresample/swresample.h"
 #include "ijksdl/ijksdl.h"
-#include "ijkutil/loghelp.h"
+
+#define IJK_LOG_TAG "IJKPLAYER"
+#include "ijkutil/ijkutil.h"
 
 #endif

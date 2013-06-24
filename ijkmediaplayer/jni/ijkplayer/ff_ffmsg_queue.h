@@ -87,7 +87,7 @@ inline static void msg_queue_put_simple1(MessageQueue *q, int what)
     AVMessage msg;
     msg_init_msg(&msg);
     msg.what = what;
-    msg_queue_put(q, msg);
+    msg_queue_put(q, &msg);
 }
 
 inline static void msg_queue_put_simple2(MessageQueue *q, int what, int arg1)
@@ -159,7 +159,7 @@ inline static void msg_queue_start(MessageQueue *q)
 }
 
 /* return < 0 if aborted, 0 if no msg and > 0 if msg.  */
-static int msg_queue_get(MessageQueue *q, AVMessage *msg, int block)
+inline static int msg_queue_get(MessageQueue *q, AVMessage *msg, int block)
 {
     AVMessage *msg1;
     int ret;

@@ -38,6 +38,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     static {
         System.loadLibrary("ffmpeg");
+        System.loadLibrary("ijkutil");
+        System.loadLibrary("ijksdl");
         System.loadLibrary("ijkplayer");
         native_init();
     }

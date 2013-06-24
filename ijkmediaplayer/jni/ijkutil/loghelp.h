@@ -30,9 +30,9 @@
 extern "C" {
 #endif
 
-#ifndef IJK_LOG_TAG
-#define IJK_LOG_TAG "IJKMEDIA"
-#endif
+// #ifndef IJK_LOG_TAG
+// #define IJK_LOG_TAG "IJKMEDIA"
+// #endif
 
 #define IJK_LOG_UNKNOWN     ANDROID_LOG_UNKNOWN;
 #define IJK_LOG_DEFAULT     ANDROID_LOG_DEFAULT;

@@ -21,7 +21,7 @@
 #include <string.h>
 #include <assert.h>
 
-#define LOG_TAG "JNIHelp"
+#define IJK_LOG_TAG "JNIHelp"
 #include "../loghelp.h"
 
 /**

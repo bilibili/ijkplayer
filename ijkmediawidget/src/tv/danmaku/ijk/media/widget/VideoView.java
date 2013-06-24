@@ -30,6 +30,7 @@ import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnPreparedListener;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnSeekCompleteListener;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnVideoSizeChangedListener;
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
+import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -56,6 +57,7 @@ import android.view.ViewGroup.LayoutParams;
  * {@link io.vov.vitamio.MediaPlayer}, such as {@link #getVideoWidth()},
  * {@link #setSubShown(boolean)}
  */
+@SuppressWarnings("unused")
 public class VideoView extends SurfaceView implements
         MediaController.MediaPlayerControl {
     private static final String TAG = VideoView.class.getName();
@@ -227,7 +229,8 @@ public class VideoView extends SurfaceView implements
         try {
             mDuration = -1;
             mCurrentBufferPercentage = 0;
-            mMediaPlayer = new AndroidMediaPlayer();
+            // mMediaPlayer = new AndroidMediaPlayer();
+            mMediaPlayer = new IjkMediaPlayer();
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
