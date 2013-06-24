@@ -37,10 +37,12 @@
 typedef struct IjkMediaPlayer {
     volatile int ref_count;
     pthread_mutex_t mutex;
+    pthread_t msg_thread;
     FFPlayer *ffplayer;
 
     int mp_state;
     char *data_source;
+    void *weak_thiz;
 } IjkMediaPlayer;
 
 inline static void ijkmp_destroy(IjkMediaPlayer *mp)
@@ -76,7 +78,7 @@ void ijkmp_global_uninit()
     ffp_global_uninit();
 }
 
-IjkMediaPlayer *ijkmp_create()
+IjkMediaPlayer *ijkmp_create(void (*msg_loop)(void*))
 {
     FFPlayer *ffp;
     IjkMediaPlayer *mp = (IjkMediaPlayer *) av_mallocz(sizeof(IjkMediaPlayer));
@@ -95,8 +97,12 @@ IjkMediaPlayer *ijkmp_create()
     if (!mp->ffplayer->vout)
         goto fail;
 
-    pthread_mutex_init(&mp->mutex, NULL);
     ijkmp_inc_ref(mp);
+    pthread_mutex_init(&mp->mutex, NULL);
+
+    ijkmp_inc_ref(mp);
+    pthread_create(&mp->msg_thread, NULL, msg_loop, mp);
+
     return mp;
 
     fail:
@@ -433,6 +439,15 @@ void ijkmp_set_android_surface(IjkMediaPlayer *mp, jobject android_surface)
     pthread_mutex_lock(&mp->mutex);
     ijkmp_set_android_surface_l(mp, android_surface);
     pthread_mutex_unlock(&mp->mutex);
+}
+
+void *ijkmp_set_weak_thiz(JNIEnv *env, IjkMediaPlayer *mp, void *weak_thiz)
+{
+    void *prev_weak_thiz = mp->weak_thiz;
+
+    mp->weak_thiz = weak_thiz;
+
+    return prev_weak_thiz;
 }
 
 int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)

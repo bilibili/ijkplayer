@@ -137,7 +137,7 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
  void           ijkmp_global_uninit();
 
 // ref_count is 1 after open
-IjkMediaPlayer *ijkmp_create();
+IjkMediaPlayer *ijkmp_create(void (*msg_loop)(void*));
 
 // preferred to be called explicity, can be called multiple times
 // NOTE: ijkmp_shutdown may block thread
@@ -162,6 +162,8 @@ long            ijkmp_get_duration(IjkMediaPlayer *mp);
 void            ijkmp_reset(IjkMediaPlayer *mp);
 
 void            ijkmp_set_android_surface(IjkMediaPlayer *mp, jobject android_surface);
+
+void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 
 /* return < 0 if aborted, 0 if no packet and > 0 if packet.  */
 int             ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block);

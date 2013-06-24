@@ -293,11 +293,10 @@ inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1
     (*env)->CallStaticVoidMethod(env, g_clazz.postEventFromNative, weak_this, what, arg1, arg2, NULL);
 }
 
-static void
-IjkMediaPlayer_native_message_loop(JNIEnv *env, jobject thiz, jobject weak_this)
+static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
 {
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null mp", LABEL_RETURN);
+    jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null weak_thiz", LABEL_RETURN);
 
     while (true) {
         AVMessage msg;
@@ -311,34 +310,34 @@ IjkMediaPlayer_native_message_loop(JNIEnv *env, jobject thiz, jobject weak_this)
 
         switch (msg.what) {
         case FFP_MSG_FLUSH:
-            post_event(env, weak_this, MEDIA_NOP, 0, 0);
+            post_event(env, weak_thiz, MEDIA_NOP, 0, 0);
             break;
         case FFP_MSG_ERROR:
-            post_event(env, weak_this, MEDIA_ERROR, MEDIA_ERROR_IJK_PLAYER, msg.arg1);
+            post_event(env, weak_thiz, MEDIA_ERROR, MEDIA_ERROR_IJK_PLAYER, msg.arg1);
             break;
         case FFP_MSG_PREPARED:
-            post_event(env, weak_this, MEDIA_PREPARED, 0, 0);
+            post_event(env, weak_thiz, MEDIA_PREPARED, 0, 0);
             break;
         case FFP_MSG_COMPLETED:
-            post_event(env, weak_this, MEDIA_PLAYBACK_COMPLETE, 0, 0);
+            post_event(env, weak_thiz, MEDIA_PLAYBACK_COMPLETE, 0, 0);
             break;
         case FFP_MSG_VIDEO_SIZE_CHANGED:
-            post_event(env, weak_this, MEDIA_SET_VIDEO_SIZE, msg.arg1, msg.arg2);
+            post_event(env, weak_thiz, MEDIA_SET_VIDEO_SIZE, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_SAR_CHANGED:
-            post_event(env, weak_this, MEDIA_SET_VIDEO_SAR, msg.arg1, msg.arg2);
+            post_event(env, weak_thiz, MEDIA_SET_VIDEO_SAR, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_BUFFERING_START:
-            post_event(env, weak_this, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
             break;
         case FFP_MSG_BUFFERING_END:
-            post_event(env, weak_this, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, 0);
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, 0);
             break;
         case FFP_MSG_BUFFERING_UPDATE:
-            post_event(env, weak_this, MEDIA_BUFFERING_UPDATE, msg.arg1, msg.arg2);
+            post_event(env, weak_thiz, MEDIA_BUFFERING_UPDATE, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_SEEK_COMPLETE:
-            post_event(env, weak_this, MEDIA_SEEK_COMPLETE, 0, 0);
+            post_event(env, weak_thiz, MEDIA_SEEK_COMPLETE, 0, 0);
             break;
         default:
             ALOGE("unknown FFP_MSG_xxx(%d)", msg.what);
@@ -347,7 +346,22 @@ IjkMediaPlayer_native_message_loop(JNIEnv *env, jobject thiz, jobject weak_this)
     }
 
     LABEL_RETURN:
+    (*env)->DeleteGlobalRef(env, weak_thiz);
+}
+
+static void message_loop(void *arg)
+{
+    JNIEnv *env = NULL;
+    (*g_jvm)->AttachCurrentThread(g_jvm, env, NULL);
+
+    IjkMediaPlayer *mp = (IjkMediaPlayer*) arg;
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null mp", LABEL_RETURN);
+
+    message_loop_n(env, mp);
+
+    LABEL_RETURN:
     ijkmp_dec_ref(&mp);
+    (*g_jvm)->DetachCurrentThread(g_jvm);
 }
 
 // ----------------------------------------------------------------------------
@@ -372,7 +386,6 @@ static JNINativeMethod g_methods[] = {
     { "native_init", "()V", (void *) IjkMediaPlayer_native_init },
     { "native_setup", "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_setup },
     { "native_finalize", "()V", (void *) IjkMediaPlayer_native_finalize },
-    { "native_message_loop", "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_message_loop },
 };
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved)
