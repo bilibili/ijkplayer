@@ -163,7 +163,7 @@ long            ijkmp_get_current_position(IjkMediaPlayer *mp);
 long            ijkmp_get_duration(IjkMediaPlayer *mp);
 void            ijkmp_reset(IjkMediaPlayer *mp);
 
-void            ijkmp_set_android_surface(IjkMediaPlayer *mp, jobject android_surface);
+void            ijkmp_set_android_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface);
 
 void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 

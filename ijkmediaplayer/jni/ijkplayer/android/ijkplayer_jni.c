@@ -117,7 +117,7 @@ IjkMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setVideoSurface: null mp", LABEL_RETURN);
 
-    ijkmp_set_android_surface(mp, jsurface);
+    ijkmp_set_android_surface(env, mp, jsurface);
 
     LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);

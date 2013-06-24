@@ -428,21 +428,23 @@ long ijkmp_get_duration(IjkMediaPlayer *mp)
     return retval;
 }
 
-void ijkmp_set_android_surface_l(IjkMediaPlayer *mp, jobject android_surface)
+void ijkmp_set_android_surface_l(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
 {
     assert(mp);
     assert(mp->ffplayer);
     assert(mp->ffplayer->vout);
 
-    SDL_VoutAndroid_SetAndroidSurface(mp->ffplayer->vout, android_surface);
+    SDL_VoutAndroid_SetAndroidSurface(env, mp->ffplayer->vout, android_surface);
 }
 
-void ijkmp_set_android_surface(IjkMediaPlayer *mp, jobject android_surface)
+void ijkmp_set_android_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
 {
     assert(mp);
+    MPTRACE("ijkmp_set_android_surface(%p)", (void*)android_surface);
     pthread_mutex_lock(&mp->mutex);
-    ijkmp_set_android_surface_l(mp, android_surface);
+    ijkmp_set_android_surface_l(env, mp, android_surface);
     pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_set_android_surface(%p)=void", (void*)android_surface);
 }
 
 void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)

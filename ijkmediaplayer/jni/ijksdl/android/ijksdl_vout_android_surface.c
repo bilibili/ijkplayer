@@ -33,7 +33,7 @@ SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface()
     return SDL_VoutAndroid_CreateForANativeWindow();
 }
 
-static void SDL_VoutAndroid_SetAndroidSurface_n(JNIEnv *env, SDL_Vout *vout, jobject android_surface)
+void SDL_VoutAndroid_SetAndroidSurface(JNIEnv *env, SDL_Vout *vout, jobject android_surface)
 {
     if (!android_surface)
         return;
@@ -44,20 +44,4 @@ static void SDL_VoutAndroid_SetAndroidSurface_n(JNIEnv *env, SDL_Vout *vout, job
 
     SDL_VoutAndroid_SetNativeWindow(vout, native_window);
     ANativeWindow_release(native_window);
-}
-
-void SDL_VoutAndroid_SetAndroidSurface(SDL_Vout *vout, jobject android_surface)
-{
-    if (!android_surface)
-        return;
-
-    JNIEnv *env = NULL;
-    if (JNI_OK != SDL_AndroidJni_AttachCurrentThread(&env)) {
-        ALOGE("SDL_VoutAndroid_SetAndroidSurface: AttachCurrentThread: failed");
-        return;
-    }
-
-    SDL_VoutAndroid_SetAndroidSurface_n(env, vout, android_surface);
-
-    SDL_AndroidJni_DetachCurrentThread();
 }
