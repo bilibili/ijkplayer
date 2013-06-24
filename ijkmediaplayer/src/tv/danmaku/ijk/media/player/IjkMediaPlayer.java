@@ -414,11 +414,13 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      * that the native code is safe from the object disappearing from underneath
      * it. (This is the cookie passed to native_setup().)
      */
-    private static void postEventFromNative(Object IjkMediaPlayer_ref,
-            int what, int arg1, int arg2, Object obj) {
+    private static void postEventFromNative(Object weakThiz, int what,
+            int arg1, int arg2, Object obj) {
+        if (weakThiz == null)
+            return;
+
         @SuppressWarnings("rawtypes")
-        IjkMediaPlayer mp = (IjkMediaPlayer) ((WeakReference) IjkMediaPlayer_ref)
-                .get();
+        IjkMediaPlayer mp = (IjkMediaPlayer) ((WeakReference) weakThiz).get();
         if (mp == null) {
             return;
         }
