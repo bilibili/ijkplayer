@@ -42,7 +42,7 @@ typedef struct MessageQueue {
     SDL_cond *cond;
 } MessageQueue;
 
-// TODO: msg pool
+// TODO: 9 msg pool
 inline static int msg_queue_put_private(MessageQueue *q, AVMessage *msg)
 {
     AVMessage *msg1;

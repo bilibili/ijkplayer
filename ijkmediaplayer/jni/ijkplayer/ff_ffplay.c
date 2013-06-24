@@ -2016,7 +2016,7 @@ void ffp_global_init()
     av_lockmgr_register(lockmgr);
     av_log_set_callback(ffp_log_callback_help);
 
-    /* FIXME: SDL_Init() */
+    /* FIXME: 9 SDL_Init() */
 
     av_init_packet(&flush_pkt);
     flush_pkt.data = (uint8_t *) &flush_pkt;
@@ -2036,7 +2036,7 @@ void ffp_global_uninit()
     av_freep(&vfilters);
 #endif
     avformat_network_deinit();
-    /* FIXME: SDL_Quit(); */
+    /* FIXME: 9 SDL_Quit(); */
 
     g_ffmpeg_global_inited = false;
 }
@@ -2163,10 +2163,10 @@ int ffp_seek_to_l(FFPlayer *ffp, long msec)
     if (start_time > 0)
         seek_pos += start_time;
 
-    // FIXME: thread-safe
-    // FIXME: seek by bytes
-    // FIXME: seek out of range
-    // FIXME: seekable
+    // FIXME: 9 thread-safe
+    // FIXME: 9 seek by bytes
+    // FIXME: 9 seek out of range
+    // FIXME: 9 seekable
     stream_seek(is, seek_pos, 0, 0);
     return 0;
 }

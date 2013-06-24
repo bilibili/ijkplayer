@@ -85,6 +85,77 @@ static IjkMediaPlayer *jni_set_media_player(JNIEnv* env, jobject thiz, IjkMediaP
     return old;
 }
 
+static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
+{
+    jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null weak_thiz", LABEL_RETURN);
+
+    while (true) {
+        AVMessage msg;
+
+        int retval = ijkmp_get_msg(mp, &msg, 1);
+        if (retval < 0)
+            break;
+
+        // block-get should never return 0
+        assert(retval > 0);
+
+        switch (msg.what) {
+        case FFP_MSG_FLUSH:
+            post_event(env, weak_thiz, MEDIA_NOP, 0, 0);
+            break;
+        case FFP_MSG_ERROR:
+            post_event(env, weak_thiz, MEDIA_ERROR, MEDIA_ERROR_IJK_PLAYER, msg.arg1);
+            break;
+        case FFP_MSG_PREPARED:
+            post_event(env, weak_thiz, MEDIA_PREPARED, 0, 0);
+            break;
+        case FFP_MSG_COMPLETED:
+            post_event(env, weak_thiz, MEDIA_PLAYBACK_COMPLETE, 0, 0);
+            break;
+        case FFP_MSG_VIDEO_SIZE_CHANGED:
+            post_event(env, weak_thiz, MEDIA_SET_VIDEO_SIZE, msg.arg1, msg.arg2);
+            break;
+        case FFP_MSG_SAR_CHANGED:
+            post_event(env, weak_thiz, MEDIA_SET_VIDEO_SAR, msg.arg1, msg.arg2);
+            break;
+        case FFP_MSG_BUFFERING_START:
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
+            break;
+        case FFP_MSG_BUFFERING_END:
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, 0);
+            break;
+        case FFP_MSG_BUFFERING_UPDATE:
+            post_event(env, weak_thiz, MEDIA_BUFFERING_UPDATE, msg.arg1, msg.arg2);
+            break;
+        case FFP_MSG_SEEK_COMPLETE:
+            post_event(env, weak_thiz, MEDIA_SEEK_COMPLETE, 0, 0);
+            break;
+        default:
+            ALOGE("unknown FFP_MSG_xxx(%d)", msg.what);
+            break;
+        }
+    }
+
+    LABEL_RETURN:
+    (*env)->DeleteGlobalRef(env, weak_thiz);
+}
+
+static void message_loop(void *arg)
+{
+    JNIEnv *env = NULL;
+    (*g_jvm)->AttachCurrentThread(g_jvm, env, NULL);
+
+    IjkMediaPlayer *mp = (IjkMediaPlayer*) arg;
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null mp", LABEL_RETURN);
+
+    message_loop_n(env, mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref(&mp);
+    (*g_jvm)->DetachCurrentThread(g_jvm);
+}
+
 static void
 IjkMediaPlayer_setDataSourceAndHeaders(
     JNIEnv *env, jobject thiz, jstring path,
@@ -272,7 +343,7 @@ IjkMediaPlayer_native_init(JNIEnv *env)
 static void
 IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
-    IjkMediaPlayer *mp = ijkmp_create();
+    IjkMediaPlayer *mp = ijkmp_create(message_loop);
     JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", LABEL_RETURN);
 
     jni_set_media_player(env, thiz, mp);
@@ -284,84 +355,13 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 static void
 IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 {
-    // FIXME: implement
+    // FIXME: 9 implement
     IjkMediaPlayer_release(env, thiz);
 }
 
 inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2)
 {
     (*env)->CallStaticVoidMethod(env, g_clazz.postEventFromNative, weak_this, what, arg1, arg2, NULL);
-}
-
-static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
-{
-    jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null weak_thiz", LABEL_RETURN);
-
-    while (true) {
-        AVMessage msg;
-
-        int retval = ijkmp_get_msg(mp, &msg, 1);
-        if (retval < 0)
-            break;
-
-        // block-get should never return 0
-        assert(retval > 0);
-
-        switch (msg.what) {
-        case FFP_MSG_FLUSH:
-            post_event(env, weak_thiz, MEDIA_NOP, 0, 0);
-            break;
-        case FFP_MSG_ERROR:
-            post_event(env, weak_thiz, MEDIA_ERROR, MEDIA_ERROR_IJK_PLAYER, msg.arg1);
-            break;
-        case FFP_MSG_PREPARED:
-            post_event(env, weak_thiz, MEDIA_PREPARED, 0, 0);
-            break;
-        case FFP_MSG_COMPLETED:
-            post_event(env, weak_thiz, MEDIA_PLAYBACK_COMPLETE, 0, 0);
-            break;
-        case FFP_MSG_VIDEO_SIZE_CHANGED:
-            post_event(env, weak_thiz, MEDIA_SET_VIDEO_SIZE, msg.arg1, msg.arg2);
-            break;
-        case FFP_MSG_SAR_CHANGED:
-            post_event(env, weak_thiz, MEDIA_SET_VIDEO_SAR, msg.arg1, msg.arg2);
-            break;
-        case FFP_MSG_BUFFERING_START:
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
-            break;
-        case FFP_MSG_BUFFERING_END:
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, 0);
-            break;
-        case FFP_MSG_BUFFERING_UPDATE:
-            post_event(env, weak_thiz, MEDIA_BUFFERING_UPDATE, msg.arg1, msg.arg2);
-            break;
-        case FFP_MSG_SEEK_COMPLETE:
-            post_event(env, weak_thiz, MEDIA_SEEK_COMPLETE, 0, 0);
-            break;
-        default:
-            ALOGE("unknown FFP_MSG_xxx(%d)", msg.what);
-            break;
-        }
-    }
-
-    LABEL_RETURN:
-    (*env)->DeleteGlobalRef(env, weak_thiz);
-}
-
-static void message_loop(void *arg)
-{
-    JNIEnv *env = NULL;
-    (*g_jvm)->AttachCurrentThread(g_jvm, env, NULL);
-
-    IjkMediaPlayer *mp = (IjkMediaPlayer*) arg;
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null mp", LABEL_RETURN);
-
-    message_loop_n(env, mp);
-
-    LABEL_RETURN:
-    ijkmp_dec_ref(&mp);
-    (*g_jvm)->DetachCurrentThread(g_jvm);
 }
 
 // ----------------------------------------------------------------------------

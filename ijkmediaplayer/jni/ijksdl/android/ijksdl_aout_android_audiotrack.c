@@ -74,7 +74,7 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
         }
         sdl_audiotrack_write_byte(env, atrack, buffer, buffer_size);
 
-        // FIXME: if callback return -1 or 0
+        // FIXME: 9 if callback return -1 or 0
     }
 
     sdl_audiotrack_free(env, atrack);

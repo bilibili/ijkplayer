@@ -267,7 +267,7 @@ static int ijkmp_start_l(IjkMediaPlayer *mp)
 
     if (mp->mp_state == MP_STATE_COMPLETED)
     {
-        // FIXME: handle start after completed
+        // FIXME: 0 handle start after completed
     }
 
     mp->mp_state = MP_STATE_STARTED;
@@ -338,7 +338,7 @@ static int ijkmp_stop_l(IjkMediaPlayer *mp)
         return retval;
     }
 
-    // FIXME: change to MP_STATE_STOPPED in read_thread() */
+    // FIXME: 9 change to MP_STATE_STOPPED in read_thread() */
     mp->mp_state = MP_STATE_STOPPED;
     return 0;
 }
