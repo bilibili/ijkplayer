@@ -586,7 +586,6 @@ static void alloc_picture(FFPlayer *ffp)
         fprintf(stderr, "Error: the video system does not support an image\n"
                         "size of %dx%d pixels. Try using -lowres or -vf \"scale=w:h\"\n"
                         "to reduce the image size.\n", vp->width, vp->height );
-        // FIXME: deal with allocate failure
         if (vp->bmp)
         {
             SDL_VoutFreeYUVOverlay(vp->bmp);
