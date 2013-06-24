@@ -204,11 +204,11 @@ int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
 {
     assert(mp);
     assert(url);
-    MPTRACE("ijkmp_set_data_source(%s)", url);
+    MPTRACE("ijkmp_set_data_source(url=\"%s\")", url);
     pthread_mutex_lock(&mp->mutex);
     int retval = ijkmp_set_data_source_l(mp, url);
     pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_data_source(%s)=%d", url, retval);
+    MPTRACE("ijkmp_set_data_source(url=\"%s\")=%d", url, retval);
     return retval;
 }
 
@@ -243,9 +243,11 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
 int ijkmp_prepare_async(IjkMediaPlayer *mp)
 {
     assert(mp);
+    MPTRACE("ijkmp_prepare_async()");
     pthread_mutex_lock(&mp->mutex);
     int retval = ijkmp_prepare_async_l(mp);
     pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_prepare_async()=%d", retval);
     return retval;
 }
 
@@ -281,9 +283,11 @@ static int ijkmp_start_l(IjkMediaPlayer *mp)
 int ijkmp_start(IjkMediaPlayer *mp)
 {
     assert(mp);
+    MPTRACE("ijkmp_start()");
     pthread_mutex_lock(&mp->mutex);
     int retval = ijkmp_start_l(mp);
     pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_start()=%d", retval);
     return retval;
 }
 
@@ -316,9 +320,11 @@ static int ijkmp_pause_l(IjkMediaPlayer *mp)
 int ijkmp_pause(IjkMediaPlayer *mp)
 {
     assert(mp);
+    MPTRACE("ijkmp_pause()");
     pthread_mutex_lock(&mp->mutex);
     int retval = ijkmp_pause_l(mp);
     pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_pause()=%d", retval);
     return retval;
 }
 
@@ -350,9 +356,11 @@ static int ijkmp_stop_l(IjkMediaPlayer *mp)
 int ijkmp_stop(IjkMediaPlayer *mp)
 {
     assert(mp);
+    MPTRACE("ijkmp_stop()");
     pthread_mutex_lock(&mp->mutex);
     int retval = ijkmp_stop_l(mp);
     pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_stop()=%d", retval);
     return retval;
 }
 
@@ -393,9 +401,11 @@ int ijkmp_seek_to_l(IjkMediaPlayer *mp, long msec)
 int ijkmp_seek_to(IjkMediaPlayer *mp, long msec)
 {
     assert(mp);
+    MPTRACE("ijkmp_seek_to(%ld)", msec);
     pthread_mutex_lock(&mp->mutex);
     int retval = ijkmp_seek_to(mp, msec);
     pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_seek_to(%ld)=%d", msec, retval);
 
     return retval;
 }
@@ -440,11 +450,11 @@ void ijkmp_set_android_surface_l(JNIEnv *env, IjkMediaPlayer *mp, jobject androi
 void ijkmp_set_android_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
 {
     assert(mp);
-    MPTRACE("ijkmp_set_android_surface(%p)", (void*)android_surface);
+    MPTRACE("ijkmp_set_android_surface(surface=%p)", (void*)android_surface);
     pthread_mutex_lock(&mp->mutex);
     ijkmp_set_android_surface_l(env, mp, android_surface);
     pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_android_surface(%p)=void", (void*)android_surface);
+    MPTRACE("ijkmp_set_android_surface(surface=%p)=void", (void*)android_surface);
 }
 
 void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
