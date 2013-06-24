@@ -280,7 +280,7 @@ IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 
 inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2)
 {
-    (*env)->CallStaticVoidMethod(env, g_clazz.postEventFromNative, weak_this, what, arg1, arg2, NULL);
+    (*env)->CallStaticVoidMethod(env, g_clazz.clazz, g_clazz.postEventFromNative, weak_this, what, arg1, arg2, NULL);
 }
 
 static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
@@ -393,6 +393,7 @@ static JNINativeMethod g_methods[] = {
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
     JNIEnv* env = NULL;
+    jclass clazz;
 
     g_jvm = vm;
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) {
@@ -402,16 +403,20 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
     pthread_mutex_init(&g_clazz.mutex, NULL);
 
-    g_clazz.clazz = (*env)->FindClass(env, JNI_CLASS_IJKPLAYER);
-    JNI_CHECK_RET(g_clazz.clazz, env, NULL, NULL, -1);
+    clazz = (*env)->FindClass(env, JNI_CLASS_IJKPLAYER);
+    IJK_CHECK_RET(clazz, -1, "missing %s", JNI_CLASS_IJKPLAYER);
+
+    // FindClass returns LocalReference
+    g_clazz.clazz = (*env)->NewGlobalRef(env, clazz);
+    IJK_CHECK_RET(clazz, -1, "%s NewGlobalRef failed", JNI_CLASS_IJKPLAYER);
 
     (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
 
     g_clazz.mNativeMediaPlayer = (*env)->GetFieldID(env, g_clazz.clazz, "mNativeMediaPlayer", "J");
-    JNI_CHECK_RET(g_clazz.mNativeMediaPlayer, env, NULL, NULL, -1);
+    IJK_CHECK_RET(g_clazz.mNativeMediaPlayer, -1, "missing mNativeMediaPlayer");
 
     g_clazz.postEventFromNative = (*env)->GetStaticMethodID(env, g_clazz.clazz, "postEventFromNative", "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    JNI_CHECK_RET(g_clazz.postEventFromNative, env, NULL, NULL, -1);
+    IJK_CHECK_RET(g_clazz.postEventFromNative, -1, "missing postEventFromNative");
 
     ijkmp_global_init();
 

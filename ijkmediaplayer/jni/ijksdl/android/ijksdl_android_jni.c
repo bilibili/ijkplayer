@@ -23,7 +23,8 @@
 
 #include "ijksdl_android_jni.h"
 
-#include "../ijksdl_inc_internal.h"
+#include "ijksdl_inc_internal_android.h"
+#include "android_audiotrack.h"
 
 JavaVM *g_jvm;
 
@@ -56,12 +57,16 @@ jint SDL_AndroidJni_DetachCurrentThread()
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 {
+    int retval;
     JNIEnv* env = NULL;
 
     g_jvm = vm;
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) {
         return -1;
     }
+
+    retval = sdl_audiotrack_global_init(env);
+    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
 
     return JNI_VERSION_1_4;
 }

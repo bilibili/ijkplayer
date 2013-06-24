@@ -1,8 +1,7 @@
-/*****************************************************************************
- * ijkutil.h
- *****************************************************************************
+/*
+ * ijksdl_inc_internal_android.h
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,27 +20,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKUTIL__IJKUTIL_H
-#define IJKUTIL__IJKUTIL_H
+#ifndef IJKPLAYER__IJKSDL_INC_INTERNAL_ANDROID_H
+#define IJKPLAYER__IJKSDL_INC_INTERNAL_ANDROID_H
 
-#include "loghelp.h"
+#include <stdint.h>
 
-#ifndef IJKMAX
-#define IJKMAX(a, b)    ((a) > (b) ? (a) : (b))
-#endif
-
-#ifndef IJKMIN
-#define IJKMIN(a, b)    ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef IJKALIGN
-#define IJKALIGN(x, align) ((( x ) + (align) - 1) / (align) * (align))
-#endif
-
-#define IJK_CHECK_RET(condition__, retval__, ...) \
-    if (!(condition__)) { \
-        ALOGE(__VA_ARGS__); \
-        return (retval__); \
-    }
+#include "../ijksdl_inc_internal.h"
+#include "ijkutil/ijkutil_android.h"
 
 #endif

@@ -110,40 +110,40 @@ typedef struct audio_track_fields_t {
 } audio_track_fields_t;
 static audio_track_fields_t g_clazz;
 
-#define AT_CHECK_RET(condition__, retval__, ...) \
-    if (!(condition__)) { \
-        ALOGE(__VA_ARGS__); \
-        return (retval__); \
-    }
-
 int sdl_audiotrack_global_init(JNIEnv *env)
 {
-    g_clazz.clazz = (*env)->FindClass(env, "android.media.AudioTrack");
-    AT_CHECK_RET(g_clazz.clazz, -1, "missing AudioTrack");
+    jclass clazz;
+
+    clazz = (*env)->FindClass(env, "android/media/AudioTrack");
+    IJK_CHECK_RET(clazz, -1, "missing AudioTrack");
+
+    // FindClass returns LocalReference
+    g_clazz.clazz = (*env)->NewGlobalRef(env, clazz);
+    IJK_CHECK_RET(clazz, -1, "AudioTrack NewGlobalRef failed");
 
     g_clazz.constructor = (*env)->GetMethodID(env, g_clazz.clazz, "<init>", "(IIIIII)V");
-    AT_CHECK_RET(g_clazz.constructor, -1, "missing AudioTrack.<init>");
+    IJK_CHECK_RET(g_clazz.constructor, -1, "missing AudioTrack.<init>");
 
-    g_clazz.getMinBufferSize = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getMinBufferSize", "(III)V");
-    AT_CHECK_RET(g_clazz.getMinBufferSize, -1, "missing AudioTrack.getMinBufferSize");
+    g_clazz.getMinBufferSize = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getMinBufferSize", "(III)I");
+    IJK_CHECK_RET(g_clazz.getMinBufferSize, -1, "missing AudioTrack.getMinBufferSize");
 
-    g_clazz.play = (*env)->GetMethodID(env, g_clazz.clazz, "play", "(V)V");
-    AT_CHECK_RET(g_clazz.play, -1, "missing AudioTrack.play");
+    g_clazz.play = (*env)->GetMethodID(env, g_clazz.clazz, "play", "()V");
+    IJK_CHECK_RET(g_clazz.play, -1, "missing AudioTrack.play");
 
-    g_clazz.pause = (*env)->GetMethodID(env, g_clazz.clazz, "pause", "(V)V");
-    AT_CHECK_RET(g_clazz.pause, -1, "missing AudioTrack.pause");
+    g_clazz.pause = (*env)->GetMethodID(env, g_clazz.clazz, "pause", "()V");
+    IJK_CHECK_RET(g_clazz.pause, -1, "missing AudioTrack.pause");
 
-    g_clazz.flush = (*env)->GetMethodID(env, g_clazz.clazz, "flush", "(V)V");
-    JNI_CHECK_RET(g_clazz.flush, env, NULL, NULL, -1);
+    g_clazz.flush = (*env)->GetMethodID(env, g_clazz.clazz, "flush", "()V");
+    IJK_CHECK_RET(g_clazz.pause, -1, "missing AudioTrack.flush");
 
-    g_clazz.stop = (*env)->GetMethodID(env, g_clazz.clazz, "stop", "(V)V");
-    JNI_CHECK_RET(g_clazz.stop, env, NULL, NULL, -1);
+    g_clazz.stop = (*env)->GetMethodID(env, g_clazz.clazz, "stop", "()V");
+    IJK_CHECK_RET(g_clazz.pause, -1, "missing AudioTrack.stop");
 
-    g_clazz.release = (*env)->GetMethodID(env, g_clazz.clazz, "release", "(V)V");
-    JNI_CHECK_RET(g_clazz.release, env, NULL, NULL, -1);
+    g_clazz.release = (*env)->GetMethodID(env, g_clazz.clazz, "release", "()V");
+    IJK_CHECK_RET(g_clazz.pause, -1, "missing AudioTrack.release");
 
-    g_clazz.write_byte = (*env)->GetMethodID(env, g_clazz.clazz, "write", "([BII)V");
-    JNI_CHECK_RET(g_clazz.write_byte, env, NULL, NULL, -1);
+    g_clazz.write_byte = (*env)->GetMethodID(env, g_clazz.clazz, "write", "([BII)I");
+    IJK_CHECK_RET(g_clazz.pause, -1, "missing AudioTrack.write");
 
     return 0;
 }
@@ -205,8 +205,8 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudi
     }
 
     jobject thiz = (*env)->NewObject(env, g_clazz.clazz, g_clazz.constructor,
-        spec->stream_type, spec->sample_rate_in_hz, spec->channel_config,
-        spec->audio_format, min_buffer_size, spec->mode);
+        (int) spec->stream_type, (int) spec->sample_rate_in_hz, (int) spec->channel_config,
+        (int) spec->audio_format, (int) min_buffer_size, (int) spec->mode);
     if (!thiz || (*env)->ExceptionCheck(env)) {
         ALOGE("sdl_audiotrack_new: NewObject: Exception:");
         if ((*env)->ExceptionCheck(env)) {
