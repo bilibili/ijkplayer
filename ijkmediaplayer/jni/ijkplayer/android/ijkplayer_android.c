@@ -27,6 +27,8 @@
 #include "../ff_fferror.h"
 #include "../ff_ffplay.h"
 
+#define MPTRACE ALOGW
+
 #define MPST_CHECK_NOT_RET_INT(real, expected, errcode) \
     do { \
         if (real == expected) return errcode; \
@@ -192,7 +194,7 @@ static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
     if (!dup_url)
         return EIJK_OUT_OF_MEMORY;
 
-    av_freep(mp->data_source);
+    av_freep(&mp->data_source);
     mp->data_source = av_strdup(url);
     mp->mp_state = MP_STATE_INITIALIZED;
     return 0;
@@ -202,9 +204,11 @@ int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
 {
     assert(mp);
     assert(url);
+    MPTRACE("ijkmp_set_data_source(%s)", url);
     pthread_mutex_lock(&mp->mutex);
     int retval = ijkmp_set_data_source_l(mp, url);
     pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_set_data_source(%s)=%d", url, retval);
     return retval;
 }
 
