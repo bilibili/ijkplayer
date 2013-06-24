@@ -36,7 +36,7 @@
 #define IJK_CHECK_MPRET_GOTO(retval, env, label) \
     JNI_CHECK_GOTO((retval != EIJK_INVALID_STATE), env, "java/lang/IllegalStateException", NULL, LABEL_RETURN); \
     JNI_CHECK_GOTO((retval != EIJK_OUT_OF_MEMORY), env, "java/lang/OutOfMemoryError", NULL, LABEL_RETURN); \
-    JNI_CHECK_GOTO((retval < 0), env, JNI_IJK_MEDIA_EXCEPTION, NULL, LABEL_RETURN);
+    JNI_CHECK_GOTO((retval == 0), env, JNI_IJK_MEDIA_EXCEPTION, NULL, LABEL_RETURN);
 
 static JavaVM* g_jvm;
 
@@ -392,10 +392,10 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
     pthread_mutex_init(&g_clazz.mutex, NULL);
 
-    (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
-
     g_clazz.clazz = (*env)->FindClass(env, JNI_CLASS_IJKPLAYER);
     JNI_CHECK_RET(g_clazz.clazz, env, NULL, NULL, -1);
+
+    (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
 
     g_clazz.mNativeMediaPlayer = (*env)->GetFieldID(env, g_clazz.clazz, "mNativeMediaPlayer", "J");
     JNI_CHECK_RET(g_clazz.mNativeMediaPlayer, env, NULL, NULL, -1);
