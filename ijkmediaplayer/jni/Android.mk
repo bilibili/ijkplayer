@@ -24,6 +24,7 @@ MY_APP_REPO_ROOT := $(realpath $(MY_APP_PRJ_ROOT)/..)
 
 # armeabi-v7a
 MY_APP_FFMPEG_OUTPUT_PATH := $(realpath $(MY_APP_REPO_ROOT)/build/ffmpeg-armv7a/output)
-MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_FFMPEG_OUTPUT_PATH)/include)
+# MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_FFMPEG_OUTPUT_PATH)/include)
+MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_REPO_ROOT)/ffmpeg/include)
 
 include $(call all-subdir-makefiles)
