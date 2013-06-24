@@ -304,15 +304,15 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             post_event(env, weak_thiz, MEDIA_NOP, 0, 0);
             break;
         case FFP_MSG_ERROR:
-            MPTRACE("FFP_MSG_ERROR: %d", MEDIA_ERROR_IJK_PLAYER, msg.arg1);
+            MPTRACE("FFP_MSG_ERROR: %d", msg.arg1);
             post_event(env, weak_thiz, MEDIA_ERROR, MEDIA_ERROR_IJK_PLAYER, msg.arg1);
             break;
         case FFP_MSG_PREPARED:
-            MPTRACE("FFP_MSG_PREPARED:", MEDIA_ERROR_IJK_PLAYER);
+            MPTRACE("FFP_MSG_PREPARED:");
             post_event(env, weak_thiz, MEDIA_PREPARED, 0, 0);
             break;
         case FFP_MSG_COMPLETED:
-            MPTRACE("FFP_MSG_COMPLETED:", MEDIA_ERROR_IJK_PLAYER);
+            MPTRACE("FFP_MSG_COMPLETED:");
             post_event(env, weak_thiz, MEDIA_PLAYBACK_COMPLETE, 0, 0);
             break;
         case FFP_MSG_VIDEO_SIZE_CHANGED:
