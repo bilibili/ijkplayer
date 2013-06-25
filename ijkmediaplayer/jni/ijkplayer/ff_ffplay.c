@@ -2133,11 +2133,11 @@ int ffp_stop_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = ffp->is;
-    if (!is)
-        return EIJK_NULL_IS_PTR;
-
     msg_queue_abort(&ffp->msg_queue);
-    is->abort_request = 1;
+
+    if (is)
+        is->abort_request = 1;
+
     return 0;
 }
 
@@ -2145,9 +2145,11 @@ int ffp_wait_stop_l(FFPlayer *ffp)
 {
     assert(ffp);
 
-    ffp_stop_l(ffp);
-    stream_close(ffp);
-    ffp->is = NULL;
+    if (ffp->is) {
+        ffp_stop_l(ffp);
+        stream_close(ffp);
+        ffp->is = NULL;
+    }
     return 0;
 }
 
