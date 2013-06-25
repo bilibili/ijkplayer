@@ -20,19 +20,11 @@ import java.util.Locale;
 import android.util.Log;
 
 public class DebugLog {
-    public static boolean ENABLE_ERROR = false;
-    public static boolean ENABLE_INFO = false;
-    public static boolean ENABLE_WARN = false;
-    public static boolean ENABLE_DEBUG = false;
-    public static boolean ENABLE_VERBOSE = false;
-
-    public static void setDebug(boolean debug) {
-        ENABLE_ERROR = debug;
-        ENABLE_INFO = debug;
-        ENABLE_WARN = debug;
-        ENABLE_DEBUG = debug;
-        ENABLE_VERBOSE = debug;
-    }
+    public static final boolean ENABLE_ERROR = Pragma.ENABLE_VERBOSE;
+    public static final boolean ENABLE_INFO = Pragma.ENABLE_VERBOSE;
+    public static final boolean ENABLE_WARN = Pragma.ENABLE_VERBOSE;
+    public static final boolean ENABLE_DEBUG = Pragma.ENABLE_VERBOSE;
+    public static final boolean ENABLE_VERBOSE = Pragma.ENABLE_VERBOSE;
 
     public static int e(String tag, String msg) {
         if (ENABLE_ERROR) {

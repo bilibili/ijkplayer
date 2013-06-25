@@ -19,7 +19,5 @@ package tv.danmaku.ijk.media.player;
  * configurated by app project
  */
 public class Pragma {
-    public static void setDebug(boolean debug) {
-        DebugLog.setDebug(debug);
-    }
+    public static final boolean ENABLE_VERBOSE = true;
 }
