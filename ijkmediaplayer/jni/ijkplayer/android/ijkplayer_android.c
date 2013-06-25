@@ -115,10 +115,12 @@ void ijkmp_shutdown_l(IjkMediaPlayer *mp)
 {
     assert(mp);
 
+    MPTRACE("ijkmp_shutdown_l()");
     if (mp->ffplayer) {
         ffp_stop_l(mp->ffplayer);
         ffp_wait_stop_l(mp->ffplayer);
     }
+    MPTRACE("ijkmp_shutdown_l()=void");
 }
 
 void ijkmp_shutdown(IjkMediaPlayer *mp)
@@ -141,9 +143,11 @@ void ijkmp_reset(IjkMediaPlayer *mp)
 {
     assert(mp);
 
+    MPTRACE("ijkmp_reset()");
     pthread_mutex_lock(&mp->mutex);
     ijkmp_reset_l(mp);
     pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_reset()=void");
 }
 
 void ijkmp_inc_ref(IjkMediaPlayer *mp)
@@ -159,6 +163,7 @@ void ijkmp_dec_ref(IjkMediaPlayer *mp)
 
     int ref_count = __sync_fetch_and_sub(&mp->ref_count, 1);
     if (ref_count == 0) {
+        MPTRACE("ijkmp_dec_ref(): ref=0");
         ijkmp_shutdown(mp);
         ijkmp_destroy_p(&mp);
     }

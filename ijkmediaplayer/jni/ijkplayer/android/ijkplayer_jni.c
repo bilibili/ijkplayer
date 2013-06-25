@@ -92,6 +92,7 @@ IjkMediaPlayer_setDataSourceAndHeaders(
     JNIEnv *env, jobject thiz, jstring path,
     jobjectArray keys, jobjectArray values)
 {
+    MPTRACE("IjkMediaPlayer_setDataSourceAndHeaders");
     int retval = 0;
     const char *c_path = NULL;
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
@@ -114,6 +115,7 @@ IjkMediaPlayer_setDataSourceAndHeaders(
 static void
 IjkMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
 {
+    MPTRACE("IjkMediaPlayer_setVideoSurface");
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setVideoSurface: null mp", LABEL_RETURN);
 
@@ -127,6 +129,7 @@ IjkMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
 static void
 IjkMediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
 {
+    MPTRACE("IjkMediaPlayer_prepareAsync");
     int retval = 0;
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: prepareAsync: null mp", LABEL_RETURN);
@@ -141,6 +144,7 @@ IjkMediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
 static void
 IjkMediaPlayer_start(JNIEnv *env, jobject thiz)
 {
+    MPTRACE("IjkMediaPlayer_start");
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: start: null mp", LABEL_RETURN);
 
@@ -177,6 +181,7 @@ IjkMediaPlayer_pause(JNIEnv *env, jobject thiz)
 static void
 IjkMediaPlayer_seekTo(JNIEnv *env, jobject thiz, int msec)
 {
+    MPTRACE("IjkMediaPlayer_seekTo");
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: seekTo: null mp", LABEL_RETURN);
 
@@ -231,6 +236,7 @@ IjkMediaPlayer_getDuration(JNIEnv *env, jobject thiz)
 static void
 IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
 {
+    MPTRACE("IjkMediaPlayer_release");
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     if (!mp)
         return;
@@ -245,6 +251,7 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
 static void
 IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 {
+    MPTRACE("IjkMediaPlayer_reset");
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: reset: null mp", LABEL_RETURN);
 
@@ -257,11 +264,13 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 static void
 IjkMediaPlayer_native_init(JNIEnv *env)
 {
+    MPTRACE("IjkMediaPlayer_native_init");
 }
 
 static void
 IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
+    MPTRACE("IjkMediaPlayer_native_setup");
     IjkMediaPlayer *mp = ijkmp_create(message_loop);
     JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", LABEL_RETURN);
 
@@ -274,6 +283,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 static void
 IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 {
+    MPTRACE("IjkMediaPlayer_native_finalize");
     // FIXME: 9 implement
     IjkMediaPlayer_release(env, thiz);
 }
