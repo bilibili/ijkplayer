@@ -119,7 +119,8 @@ int sdl_audiotrack_global_init(JNIEnv *env)
 
     // FindClass returns LocalReference
     g_clazz.clazz = (*env)->NewGlobalRef(env, clazz);
-    IJK_CHECK_RET(clazz, -1, "AudioTrack NewGlobalRef failed");
+    IJK_CHECK_RET(g_clazz.clazz, -1, "AudioTrack NewGlobalRef failed");
+    (*env)->DeleteLocalRef(env, clazz);
 
     g_clazz.constructor = (*env)->GetMethodID(env, g_clazz.clazz, "<init>", "(IIIIII)V");
     IJK_CHECK_RET(g_clazz.constructor, -1, "missing AudioTrack.<init>");
