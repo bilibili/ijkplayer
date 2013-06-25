@@ -341,7 +341,7 @@ int sdl_audiotrack_reserve_buffer(JNIEnv *env, SDL_AndroidAudioTrack *atrack, in
         return len;
 
     if (atrack->buffer) {
-        (*env)->DeleteLocalRef(env, atrack->buffer);
+        (*env)->DeleteGlobalRef(env, atrack->buffer);
         atrack->buffer = NULL;
         atrack->buffer_capacity = 0;
     }
