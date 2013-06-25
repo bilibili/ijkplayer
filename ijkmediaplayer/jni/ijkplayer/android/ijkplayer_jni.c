@@ -275,6 +275,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
     JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", LABEL_RETURN);
 
     jni_set_media_player(env, thiz, mp);
+    ijkmp_set_weak_thiz(mp, (*env)->NewGlobalRef(env, weak_this));
 
     LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
@@ -290,7 +291,9 @@ IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 
 inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2)
 {
+    MPTRACE("post_event(%p, %p, %d, %d, %d)", (void*)env, (void*) weak_this, what, arg1, arg2);
     (*env)->CallStaticVoidMethod(env, g_clazz.clazz, g_clazz.postEventFromNative, weak_this, what, arg1, arg2, NULL);
+    MPTRACE("post_event()=void");
 }
 
 static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
@@ -361,6 +364,8 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
 
 static void *message_loop(void *arg)
 {
+    MPTRACE("message_loop");
+
     JNIEnv *env = NULL;
     (*g_jvm)->AttachCurrentThread(g_jvm, &env, NULL);
 
@@ -373,6 +378,7 @@ static void *message_loop(void *arg)
     ijkmp_dec_ref_p(&mp);
     (*g_jvm)->DetachCurrentThread(g_jvm);
 
+    MPTRACE("message_loop exit");
     return NULL;
 }
 
@@ -418,7 +424,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
     // FindClass returns LocalReference
     g_clazz.clazz = (*env)->NewGlobalRef(env, clazz);
-    IJK_CHECK_RET(clazz, -1, "%s NewGlobalRef failed", JNI_CLASS_IJKPLAYER);
+    IJK_CHECK_RET(g_clazz.clazz, -1, "%s NewGlobalRef failed", JNI_CLASS_IJKPLAYER);
+    (*env)->DeleteLocalRef(env, clazz);
 
     (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
 
