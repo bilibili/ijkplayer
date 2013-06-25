@@ -478,5 +478,24 @@ void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
 int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 {
     assert(mp);
-    return msg_queue_get(&mp->ffplayer->msg_queue, msg, block);
+    int retval = msg_queue_get(&mp->ffplayer->msg_queue, msg, block);
+    if (retval <= 0)
+        return retval;
+
+    switch (msg->what) {
+    case FFP_MSG_PREPARED:
+        pthread_mutex_lock(&mp->mutex);
+        MPTRACE("ijkmp_get_msg: FFP_MSG_PREPARED");
+        if (mp->mp_state == MP_STATE_ASYNC_PREPARING) {
+            MPTRACE("ijkmp_get_msg: FFP_MSG_PREPARED");
+            mp->mp_state = MP_STATE_PREPARED;
+        } else {
+            // FIXME: 1: onError() ?
+            ALOGE("FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING");
+        }
+        pthread_mutex_unlock(&mp->mutex);
+        break;
+    }
+
+    return retval;
 }
