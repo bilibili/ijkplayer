@@ -67,7 +67,7 @@ static SDL_VoutSurface *vout_set_video_mode_l(SDL_Vout *vout, int w, int h, int 
 
     assert(bpp == 0);
     if (!native_window)
-        return NULL;
+    return NULL;
 
     curr_w = ANativeWindow_getWidth(native_window);
     curr_h = ANativeWindow_getHeight(native_window);
@@ -110,43 +110,51 @@ static SDL_VoutSurface *vout_set_video_mode(SDL_Vout *vout, int w, int h, int bp
 
 static void vout_copy_image_yv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
 {
-    SDLTRACE("SDL_VoutAndroid: vout_copy_image_yv12(%p)", overlay);
+    // SDLTRACE("SDL_VoutAndroid: vout_copy_image_yv12(%p)", overlay);
     assert(overlay->format == SDL_YV12_OVERLAY);
     assert(overlay->planes == 3);
 
     int min_height = IJKMIN(out_buffer->height, overlay->h);
-    int dst_y_pitch = out_buffer->stride;
-    int dst_c_pitch = IJKALIGN(out_buffer->stride / 2, 16);
-    int dst_y_size = dst_y_pitch * out_buffer->height;
-    int dst_c_size = dst_c_pitch * out_buffer->height / 2;
+    int dst_y_stride = out_buffer->stride;
+    int dst_c_stride = IJKALIGN(out_buffer->stride / 2, 16);
+    int dst_y_size = dst_y_stride * out_buffer->height;
+    int dst_c_size = dst_c_stride * out_buffer->height / 2;
+
+
+    // ALOGE("stride:%d/%d, size:%d/%d", dst_y_stride, dst_c_stride, dst_y_size, dst_c_size);
 
     uint8_t *dst_pixels_array[] = {
         out_buffer->bits,
         out_buffer->bits + dst_y_size,
-        out_buffer->bits + dst_y_size + dst_c_size
+        out_buffer->bits + dst_y_size + dst_c_size,
     };
     int dst_plane_size_array[] = { dst_y_size, dst_c_size, dst_c_size };
-    int dst_pitches[] = { dst_y_pitch, dst_c_pitch, dst_c_pitch };
+    int dst_line_height[] = { min_height, min_height / 2, min_height / 2 };
+    int dst_line_size_array[] = { dst_y_stride, dst_c_stride, dst_c_stride };
 
     for (int i = 0; i < 3; ++i) {
-        int dst_pitch = dst_pitches[i];
-        int src_pitch = overlay->pitches[i];
+        int dst_line_size = dst_line_size_array[i];
+        int src_line_size = overlay->pitches[i];
+        int line_height = dst_line_height[i];
         uint8_t *dst_pixels = dst_pixels_array[i];
         const uint8_t *src_pixels = overlay->pixels[i];
         int dst_plane_size = dst_plane_size_array[i];
 
-        if (dst_pitch == src_pitch) {
+        if (dst_line_size == src_line_size) {
+            // ALOGE("sdl_image_copy_plane %p %p %d", dst_pixels, src_pixels, dst_plane_size);
             memcpy(dst_pixels, src_pixels, dst_plane_size);
         } else {
-            int bytewidth = IJKMIN(dst_pitch, src_pitch);
-            av_image_copy_plane(dst_pixels, dst_pitch, src_pixels, src_pitch, bytewidth, min_height);
+            // TODO: padding
+            int bytewidth = IJKMIN(dst_line_size, src_line_size);
+
+            // ALOGE("av_image_copy_plane %p %d %p %d %d %d", dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
+            av_image_copy_plane(dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, line_height);
         }
     }
 }
 
 static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
-    SDLTRACE("SDL_VoutAndroid: display(%p)", overlay);
     SDL_Vout_Opaque *opaque = vout->opaque;
     ANativeWindow *native_window = opaque->native_window;
     int curr_w, curr_h, curr_format;
@@ -167,8 +175,8 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         return -1;
     }
 
-    int buf_w = (overlay->w + 1) & ~1;
-    int buf_h = (overlay->h + 1) & ~1;
+    int buf_w = overlay->w;
+    int buf_h = IJKALIGN(overlay->h, 2);
 
     curr_w = ANativeWindow_getWidth(native_window);
     curr_h = ANativeWindow_getHeight(native_window);
@@ -219,7 +227,6 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     int copy_ret = 0;
     switch (out_buffer.format) {
     case SDL_YV12_OVERLAY:
-        ALOGE("voud_display_overlay_l: vout_copy_image_yv12");
         vout_copy_image_yv12(&out_buffer, overlay);
         break;
     default:

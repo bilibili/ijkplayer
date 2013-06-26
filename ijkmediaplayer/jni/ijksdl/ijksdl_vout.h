@@ -35,7 +35,7 @@ typedef struct SDL_VoutOverlay {
     int h; /**< Read-only */
     Uint32 format; /**< Read-only */
     int planes; /**< Read-only */
-    Uint16 *pitches; /**< Read-only */
+    Uint16 *pitches; /**< in bytes, Read-only */
     Uint8 **pixels; /**< Read-write */
 
     void *opaque;

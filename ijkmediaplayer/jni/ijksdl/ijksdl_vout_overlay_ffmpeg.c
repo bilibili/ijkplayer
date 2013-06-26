@@ -140,10 +140,14 @@ SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 fo
             overlay->pitches[2] = pic->linesize[1];
             overlay->pitches[1] = pic->linesize[2];
         }
-        SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(...): overlay(w=%d, h=%d, fmt=0x%x, planes=%d)",
+        SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(...): overlay(w=%d, h=%d, fmt=0x%x, planes=%d, pitches=%d,%d,%d)",
             overlay->w,
             overlay->h,
-            overlay->format);
+            overlay->format,
+            overlay->planes,
+            overlay->pitches[0],
+            overlay->pitches[1],
+            overlay->pitches[2]);
         break;
     default:
         ALOGE("SDL_VoutCreateFFmpegYUVOverlay(...): unknown format");
