@@ -1809,7 +1809,6 @@ static int read_thread(void *arg)
             continue;
         }
         ret = av_read_frame(ic, pkt);
-        FFTRACE("av_read_frame()=%d", ret);
         if (ret < 0) {
             if (ret == AVERROR_EOF || url_feof(ic->pb))
                 eof = 1;
