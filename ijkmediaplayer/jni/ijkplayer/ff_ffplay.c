@@ -655,6 +655,10 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
     if (!vp->bmp || vp->reallocate || !vp->allocated ||
         vp->width  != src_frame->width ||
         vp->height != src_frame->height) {
+
+        if (vp->width != src_frame->width || vp->height != src_frame->height)
+            ffp_notify_msg(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, src_frame->width, src_frame->height);
+
         vp->allocated  = 0;
         vp->reallocate = 0;
         vp->width = src_frame->width;
@@ -1451,6 +1455,12 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     case AVMEDIA_TYPE_VIDEO:
         is->video_stream = stream_index;
         is->video_st = ic->streams[stream_index];
+
+        // TODO: also find best format
+        if (avctx->width > 0 && avctx->height > 0) {
+            ffp_notify_msg(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
+            ffp_notify_msg(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
+        }
 
         packet_queue_start(&is->videoq);
         is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp);
