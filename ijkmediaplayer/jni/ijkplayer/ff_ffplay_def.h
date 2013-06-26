@@ -468,4 +468,6 @@ inline static void ffp_notify_msg(FFPlayer *ffp, int what, int arg1, int arg2) {
     msg_queue_put_simple3(&ffp->msg_queue, what, arg1, arg2);
 }
 
+#define FFTRACE ALOGW
+
 #endif
