@@ -30,6 +30,7 @@
 
 #ifdef SDLTRACE
 #undef SDLTRACE
+#define SDLTRACE
 #endif
 
 typedef struct AudioChannelMapEntry {
