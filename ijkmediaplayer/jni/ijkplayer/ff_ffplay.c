@@ -748,6 +748,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, int64_t *pts, AVPacket
     if(avcodec_decode_video2(is->video_st->codec, frame, &got_picture, pkt) < 0)
         return 0;
 
+    FFTRACE("avcodec_decode_video2()>=0");
     if (got_picture) {
         int ret = 1;
 
@@ -1135,6 +1136,7 @@ static int audio_decode_frame(VideoState *is)
                 break;
             new_packet = 0;
             len1 = avcodec_decode_audio4(dec, is->frame, &got_frame, pkt_temp);
+            FFTRACE("avcodec_decode_audio4()=%d", len1);
             if (len1 < 0) {
                 /* if error, we skip the frame */
                 pkt_temp->size = 0;
@@ -1806,6 +1808,7 @@ static int read_thread(void *arg)
             continue;
         }
         ret = av_read_frame(ic, pkt);
+        FFTRACE("av_read_frame()=%d", ret);
         if (ret < 0) {
             if (ret == AVERROR_EOF || url_feof(ic->pb))
                 eof = 1;
@@ -1902,9 +1905,11 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->video_clock_serial = -1;
     is->av_sync_type = ffp->av_sync_type;
 
+    ffp->is = is;
+
     is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp);
     if (!is->video_refresh_tid) {
-        av_free(is);
+        av_freep(&ffp->is);
         return NULL;
     }
 
@@ -1912,7 +1917,7 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     if (!is->read_tid) {
         is->abort_request = true;
         SDL_WaitThread(is->video_refresh_tid, NULL);
-        av_free(is);
+        av_free(&ffp->is);
         return NULL;
     }
     return is;
@@ -2114,6 +2119,7 @@ int ffp_start_l(FFPlayer *ffp)
     }
     update_external_clock_pts(is, get_external_clock(is));
     is->paused = 0;
+    SDL_AoutPauseAudio(ffp->aout, is->paused);
     return 0;
 }
 
