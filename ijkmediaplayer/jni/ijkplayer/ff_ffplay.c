@@ -25,6 +25,9 @@
 #include "ff_cmdutils.h"
 #include "ff_fferror.h"
 
+#define fprintf(in__, ...) ALOGE(__VA_ARGS__)
+#define printf(...) ALOGD(__VA_ARGS__)
+
 static AVPacket flush_pkt;
 
 static int packet_queue_put(PacketQueue *q, AVPacket *pkt);
