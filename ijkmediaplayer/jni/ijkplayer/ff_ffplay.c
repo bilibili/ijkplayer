@@ -751,7 +751,6 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, int64_t *pts, AVPacket
     if(avcodec_decode_video2(is->video_st->codec, frame, &got_picture, pkt) < 0)
         return 0;
 
-    FFTRACE("avcodec_decode_video2()>=0");
     if (got_picture) {
         int ret = 1;
 
@@ -1139,7 +1138,6 @@ static int audio_decode_frame(VideoState *is)
                 break;
             new_packet = 0;
             len1 = avcodec_decode_audio4(dec, is->frame, &got_frame, pkt_temp);
-            FFTRACE("avcodec_decode_audio4()=%d", len1);
             if (len1 < 0) {
                 /* if error, we skip the frame */
                 pkt_temp->size = 0;
