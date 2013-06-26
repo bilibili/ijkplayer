@@ -179,8 +179,8 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 
         // correct w, h, format
         ALOGI("vout_set_video_mode_l (w:%d, h:%d, fmt:'%.4s'0x%x) => (w:%d, h:%d, fmt:'%.4s'0x%x)",
-            curr_w, curr_h, &curr_format, curr_format,
-            buf_w, buf_h, &overlay->format, overlay->format);
+            curr_w, curr_h, (char*)&curr_format, curr_format,
+            buf_w, buf_h, (char*)&overlay->format, overlay->format);
         retval = ANativeWindow_setBuffersGeometry(native_window, buf_w, buf_h, overlay->format);
         if (retval) {
             ALOGE("ANativeWindow_setBuffersGeometry failed %d", retval);
@@ -194,8 +194,8 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
             curr_h != buf_h ||
             curr_format != overlay->format) {
             ALOGE("unexpected native window (w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
-                curr_w, curr_h, &curr_format, curr_format,
-                buf_w, buf_h, &overlay->format, overlay->format);
+                curr_w, curr_h, (char*)&curr_format, curr_format,
+                buf_w, buf_h, (char*)&overlay->format, overlay->format);
             return -1;
         }
     }
@@ -207,10 +207,12 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         return retval;
     }
 
-    if (out_buffer.width != buf_w || out_buffer.height != buf_w) {
-        ALOGE("unexpected native window buffer (w:%d, h:%d, fmt:%d), expecting (w:%d, h:%d, fmt:%d)",
-            out_buffer.width, out_buffer.height, out_buffer.format,
-            buf_w, buf_h, overlay->format);
+    if (out_buffer.width != buf_w || out_buffer.height != buf_h) {
+        ALOGE("unexpected native window buffer (w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
+            out_buffer.width, out_buffer.height, (char*)&out_buffer.format, out_buffer.format,
+            buf_w, buf_h, (char*)&overlay->format, overlay->format);
+        // FIXME: 9 set all black
+        ANativeWindow_unlockAndPost(native_window);
         return -1;
     }
 
