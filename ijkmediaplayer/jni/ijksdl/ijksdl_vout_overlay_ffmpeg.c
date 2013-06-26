@@ -85,9 +85,6 @@ static void overlay_free_l(SDL_VoutOverlay *overlay)
 static void overlay_fill(SDL_VoutOverlay *overlay, AVFrame *frame, Uint32 format, int planes)
 {
     AVPicture *pic = (AVPicture *) frame;
-    overlay->format = format;
-    overlay->w = frame->width;
-    overlay->h = frame->height;
     overlay->planes = planes;
 
     for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i) {
@@ -121,8 +118,11 @@ SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 fo
     overlay->format = format;
 
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
+    overlay->format = format;
     overlay->pitches = opaque->pitches;
     overlay->pixels = opaque->pixels;
+    overlay->w = width;
+    overlay->h = height;
 
     AVFrame *frame = NULL;
     AVPicture *pic = NULL;
@@ -140,6 +140,10 @@ SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 fo
             overlay->pitches[2] = pic->linesize[1];
             overlay->pitches[1] = pic->linesize[2];
         }
+        SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(...): overlay(w=%d, h=%d, fmt=0x%x, planes=%d)",
+            overlay->w,
+            overlay->h,
+            overlay->format);
         break;
     default:
         ALOGE("SDL_VoutCreateFFmpegYUVOverlay(...): unknown format");

@@ -152,11 +152,20 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     int curr_w, curr_h, curr_format;
     int retval;
 
-    if (!native_window)
+    if (!native_window) {
+        ALOGE("voud_display_overlay_l: NULL native_window");
         return -1;
+    }
 
-    if (!overlay || overlay->w <= 0 || overlay->h <= 0)
+    if (!overlay) {
+        ALOGE("voud_display_overlay_l: NULL overlay");
         return -1;
+    }
+
+    if (overlay->w <= 0 || overlay->h <= 0) {
+        ALOGE("voud_display_overlay_l: invalid overlay dimensions(%d, %d)", overlay->w, overlay->h);
+        return -1;
+    }
 
     int buf_w = (overlay->w + 1) & ~1;
     int buf_h = (overlay->h + 1) & ~1;
@@ -169,10 +178,14 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         curr_format != overlay->format) {
 
         // correct w, h, format
-        ALOGI("vout_set_video_mode_l (w:%d, h:%d, fmt:%d) => (w:%d, h:%d, fmt:%d)",
-            curr_w, curr_h, curr_format,
-            buf_w, buf_h, overlay->format);
-        ANativeWindow_setBuffersGeometry(native_window, buf_w, buf_h, overlay->format);
+        ALOGI("vout_set_video_mode_l (w:%d, h:%d, fmt:'%.4s'0x%x) => (w:%d, h:%d, fmt:'%.4s'0x%x)",
+            curr_w, curr_h, &curr_format, curr_format,
+            buf_w, buf_h, &overlay->format, overlay->format);
+        retval = ANativeWindow_setBuffersGeometry(native_window, buf_w, buf_h, overlay->format);
+        if (retval) {
+            ALOGE("ANativeWindow_setBuffersGeometry failed %d", retval);
+        }
+
         curr_w = ANativeWindow_getWidth(native_window);
         curr_h = ANativeWindow_getHeight(native_window);
         curr_format = ANativeWindow_getFormat(native_window);
@@ -180,9 +193,9 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         if (curr_w != buf_w ||
             curr_h != buf_h ||
             curr_format != overlay->format) {
-            ALOGE("unexpected native window (w:%d, h:%d, fmt:%d), expecting (w:%d, h:%d, fmt:%d)",
-                curr_w, curr_h, curr_format,
-                buf_w, buf_h, overlay->format);
+            ALOGE("unexpected native window (w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
+                curr_w, curr_h, &curr_format, curr_format,
+                buf_w, buf_h, &overlay->format, overlay->format);
             return -1;
         }
     }
@@ -204,6 +217,7 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     int copy_ret = 0;
     switch (out_buffer.format) {
     case SDL_YV12_OVERLAY:
+        ALOGE("voud_display_overlay_l: vout_copy_image_yv12");
         vout_copy_image_yv12(&out_buffer, overlay);
         break;
     default:
