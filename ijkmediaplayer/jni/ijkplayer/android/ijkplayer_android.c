@@ -487,7 +487,6 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
         pthread_mutex_lock(&mp->mutex);
         MPTRACE("ijkmp_get_msg: FFP_MSG_PREPARED");
         if (mp->mp_state == MP_STATE_ASYNC_PREPARING) {
-            MPTRACE("ijkmp_get_msg: FFP_MSG_PREPARED");
             mp->mp_state = MP_STATE_PREPARED;
         } else {
             // FIXME: 1: onError() ?
