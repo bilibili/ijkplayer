@@ -28,6 +28,10 @@
 #include "../ijksdl_inc_internal.h"
 #include "../ijksdl_audio.h"
 
+#ifdef SDLTRACE
+#undef SDLTRACE
+#endif
+
 typedef struct AudioChannelMapEntry {
     Uint8 sdl_channel;
     int android_channel;
