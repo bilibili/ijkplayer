@@ -65,8 +65,12 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
 
     while (!opaque->abort_request) {
         SDL_LockMutex(opaque->wakeup_mutex);
+        if (!opaque->abort_request && opaque->pause_on)
+            sdl_audiotrack_pause(env, atrack);
         while (!opaque->abort_request && opaque->pause_on)
             SDL_CondWaitTimeout(opaque->wakeup_cond, opaque->wakeup_mutex, 1000);
+        if (!opaque->abort_request && !opaque->pause_on)
+            sdl_audiotrack_play(env, atrack);
         SDL_UnlockMutex(opaque->wakeup_mutex);
 
         audio_cblk(userdata, buffer, buffer_size);
