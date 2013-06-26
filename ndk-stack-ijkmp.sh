@@ -1,3 +1,3 @@
 #! /bin/sh
 
-adb logcat | ndk-stack -sym ijkplayer/ijkmediaplayer/obj/local/armeabi-v7a
+adb logcat | ndk-stack -sym ijkmediaplayer/obj/local/armeabi-v7a
