@@ -1948,7 +1948,7 @@ static int video_refresh_thread(void *arg)
     FFPlayer *ffp = arg;
     VideoState *is = ffp->is;
     double remaining_time = 0.0;
-    while (is->abort_request) {
+    while (!is->abort_request) {
         if (remaining_time > 0.0)
             av_usleep((int64_t)(remaining_time * 1000000.0));
         remaining_time = REFRESH_RATE;
