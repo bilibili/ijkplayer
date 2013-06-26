@@ -31,19 +31,23 @@
 typedef struct AudioChannelMapEntry {
     Uint8 sdl_channel;
     int android_channel;
+    const char *sdl_name;
+    const char *android_name;
 } AudioChannelMapEntry;
 static AudioChannelMapEntry g_audio_channel_map[] = {
-    { 2, CHANNEL_OUT_STEREO },
-    { 1, CHANNEL_OUT_MONO },
+    { 2, CHANNEL_OUT_STEREO, "2-chan", "CHANNEL_OUT_STEREO" },
+    { 1, CHANNEL_OUT_MONO, "1-chan", "CHANNEL_OUT_MONO" },
 };
 
 typedef struct AudioFormatMapEntry {
     SDL_AudioFormat sdl_format;
     int android_format;
+    const char *sdl_name;
+    const char *android_name;
 } AudioFormatMapEntry;
 static AudioFormatMapEntry g_audio_format_map[] = {
-    { AUDIO_S16, ENCODING_PCM_16BIT },
-    { AUDIO_U8, ENCODING_PCM_8BIT },
+    { AUDIO_S16SYS, ENCODING_PCM_16BIT, "AUDIO_S16SYS", "ENCODING_PCM_16BIT" },
+    { AUDIO_U8, ENCODING_PCM_8BIT, "AUDIO_U8", "ENCODING_PCM_8BIT" },
 };
 
 static Uint8 find_sdl_channel(int android_channel)
@@ -66,14 +70,14 @@ static int find_android_channel(int sdl_channel)
     return CHANNEL_OUT_INVALID;
 }
 
-static Uint8 find_sdl_format(int android_format)
+static SDL_AudioFormat find_sdl_format(int android_format)
 {
     for (int i = 0; i < NELEM(g_audio_format_map); ++i) {
         AudioFormatMapEntry *entry = &g_audio_format_map[i];
         if (entry->android_format == android_format)
             return entry->sdl_format;
     }
-    return 0;
+    return AUDIO_INVALID;
 }
 
 static int find_android_format(int sdl_format)
@@ -181,8 +185,10 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudi
 
     switch (spec->channel_config) {
     case CHANNEL_OUT_MONO:
+        ALOGI("SDL_AndroidAudioTrack: %s", "CHANNEL_OUT_MONO");
         break;
     case CHANNEL_OUT_STEREO:
+        ALOGI("SDL_AndroidAudioTrack: %s", "CHANNEL_OUT_STEREO");
         break;
     default:
         ALOGE("sdl_audiotrack_new_from_spec: invalid channel %d", spec->channel_config);
@@ -191,8 +197,10 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudi
 
     switch (spec->audio_format) {
     case ENCODING_PCM_16BIT:
+        ALOGI("SDL_AndroidAudioTrack: %s", "ENCODING_PCM_16BIT");
         break;
     case ENCODING_PCM_8BIT:
+        ALOGI("SDL_AndroidAudioTrack: %s", "ENCODING_PCM_8BIT");
         break;
     default:
         ALOGE("sdl_audiotrack_new_from_spec: invalid format %d", spec->audio_format);

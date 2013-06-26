@@ -117,11 +117,18 @@ int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_A
         return -1;
     }
 
+    if (obtained) {
+        sdl_audiotrack_get_target_spec(opaque->atrack, obtained);
+        SDLTRACE("audio target format fmt:0x%x, channel:0x%x", (int)obtained->format, (int)obtained->channels);
+    }
+
     opaque->pause_on = 1;
     opaque->abort_request = 0;
     opaque->audio_tid = SDL_CreateThreadEx(&opaque->_audio_tid, aout_thread, aout);
     if (!opaque->audio_tid) {
         sdl_audiotrack_free(env, opaque->atrack);
+        opaque->atrack = NULL;
+        return -1;
     }
 
     return 0;
@@ -138,6 +145,7 @@ int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtai
 
     int retval = aout_open_audio_n(env, aout, desired, obtained);
 
+    // FIXME: 1 SDL_AndroidJni_DetachCurrentThread() ?
     SDL_AndroidJni_DetachCurrentThread();
     return retval;
 }
@@ -147,6 +155,7 @@ void aout_pause_audio(SDL_Aout *aout, int pause_on)
     SDL_Aout_Opaque *opaque = aout->opaque;
 
     SDL_LockMutex(opaque->wakeup_mutex);
+    SDLTRACE("aout_pause_audio(%d)", pause_on);
     opaque->pause_on = pause_on;
     if (!pause_on)
         SDL_CondSignal(opaque->wakeup_cond);

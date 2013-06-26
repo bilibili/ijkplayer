@@ -30,4 +30,6 @@
 
 #include "ijksdl_stdinc.h"
 
+#define SDLTRACE ALOGW
+
 #endif
