@@ -36,6 +36,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.ImageFormat;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.util.AttributeSet;
@@ -167,6 +168,7 @@ public class VideoView extends SurfaceView implements
             }
             setLayoutParams(lp);
             getHolder().setFixedSize(mSurfaceWidth, mSurfaceHeight);
+            getHolder().setFormat(ImageFormat.YV12);
             DebugLog.dfmt(
                     TAG,
                     "VIDEO: %dx%dx%f, Surface: %dx%d, LP: %dx%d, Window: %dx%dx%f",
