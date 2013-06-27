@@ -23,9 +23,11 @@
 
 #include "ijksdl_vout_overlay_ffmpeg.h"
 
+#include <assert.h>
 #include "../ijksdl_stdinc.h"
 #include "../ijksdl_mutex.h"
 #include "../ijksdl_vout_internal.h"
+#include "../ijksdl_video.h"
 #include "ijksdl_inc_ffmpeg.h"
 
 typedef struct SDL_VoutOverlay_Opaque {
@@ -158,4 +160,36 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     }
 
     return overlay;
+}
+
+int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, enum AVPixelFormat ff_format)
+{
+    assert(overlay);
+    assert(pic);
+
+    int retval = -1;
+    switch (ff_format) {
+    case AV_PIX_FMT_YUV420P: {
+        switch (overlay->format) {
+        case SDL_FCC_YV12: {
+            for (int i = 0; i < overlay->planes; ++i) {
+                pic->data[i] = overlay->pixels[i];
+                pic->linesize[i] = overlay->pitches[i];
+            }
+            retval = 0;
+            break;
+        }
+        }
+        break;
+    }
+    default: {
+        break;
+    }
+    }
+
+    if (retval) {
+        ALOGE("SDL_VoutFFmpeg_SetupPicture: unexpected %d, 0x%x", ff_format, overlay->format);
+    }
+
+    return retval;
 }

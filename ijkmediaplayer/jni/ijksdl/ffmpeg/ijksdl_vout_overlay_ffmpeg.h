@@ -31,4 +31,6 @@
 // TODO: 9 setup overlay stride to speed up memcpy
 SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *display);
 
+int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, enum AVPixelFormat ff_format);
+
 #endif
