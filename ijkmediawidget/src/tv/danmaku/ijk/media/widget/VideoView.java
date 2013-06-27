@@ -174,7 +174,8 @@ public class VideoView extends SurfaceView implements
             }
             setLayoutParams(lp);
             getHolder().setFixedSize(mSurfaceWidth, mSurfaceHeight);
-            getHolder().setFormat(ImageFormat.YV12);
+            // getHolder().setFormat(ImageFormat.YV12);
+            getHolder().setFormat(ImageFormat.RGB_565);
             DebugLog.dfmt(
                     TAG,
                     "VIDEO: %dx%dx%f[SAR:%d:%d], Surface: %dx%d, LP: %dx%d, Window: %dx%dx%f",

@@ -462,8 +462,11 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->sar_num                = 0;
     ffp->sar_den                = 0;
 
-    ffp->overlay_format         = SDL_FCC_YV12;
-    ffp->pic_format             = AV_PIX_FMT_YUV420P;
+    // ffp->overlay_format         = SDL_FCC_YV12;
+    // ffp->pic_format             = AV_PIX_FMT_YUV420P;
+
+    ffp->overlay_format         = SDL_FCC_RGBP;
+    ffp->pic_format             = AV_PIX_FMT_RGB565;
 
     ffp->last_error             = 0;
 

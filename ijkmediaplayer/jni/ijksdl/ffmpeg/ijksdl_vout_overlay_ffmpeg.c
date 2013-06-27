@@ -182,6 +182,22 @@ int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, 
         }
         break;
     }
+    case AV_PIX_FMT_BGR565LE:
+    case AV_PIX_FMT_BGR565BE:
+    case AV_PIX_FMT_RGB565BE:
+    case AV_PIX_FMT_RGB565LE: {
+        switch (overlay->format) {
+        case SDL_FCC_RGBP: {
+            for (int i = 0; i < overlay->planes; ++i) {
+                pic->data[i] = overlay->pixels[i];
+                pic->linesize[i] = overlay->pitches[i];
+            }
+            retval = 0;
+            break;
+        }
+        }
+        break;
+    }
     default: {
         break;
     }
