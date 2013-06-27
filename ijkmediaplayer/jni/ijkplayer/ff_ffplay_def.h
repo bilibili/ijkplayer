@@ -396,6 +396,9 @@ typedef struct FFPlayer {
     int sar_num;
     int sar_den;
 
+    Uint32 overlay_format;
+    enum AVPixelFormat pic_format;
+
     int last_error;
 
     MessageQueue msg_queue;
@@ -458,6 +461,9 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->vout                   = NULL; /* reset outside */
     ffp->sar_num                = 0;
     ffp->sar_den                = 0;
+
+    ffp->overlay_format         = SDL_FCC_YV12;
+    ffp->pic_format             = AV_PIX_FMT_YUV420P;
 
     ffp->last_error             = 0;
 
