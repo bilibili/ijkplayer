@@ -1449,13 +1449,6 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     case AVMEDIA_TYPE_VIDEO:
         is->video_stream = stream_index;
         is->video_st = ic->streams[stream_index];
-
-        // TODO: also find best format
-        if (avctx->width > 0 && avctx->height > 0) {
-            ffp_notify_msg(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
-            ffp_notify_msg(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
-        }
-
         packet_queue_start(&is->videoq);
         is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp);
         break;
@@ -1696,6 +1689,11 @@ static int read_thread(void *arg)
 
     prepared = true;
     ffp_notify_msg(ffp, FFP_MSG_PREPARED, 0, 0);
+    if (is->video_st && is->video_st->codec) {
+        AVCodecContext *avctx = is->video_st->codec;
+        ffp_notify_msg(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
+        ffp_notify_msg(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
+    }
 
     for (;;) {
         if (is->abort_request)
