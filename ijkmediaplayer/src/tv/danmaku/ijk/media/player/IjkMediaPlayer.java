@@ -62,6 +62,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private int mVideoWidth;
     private int mVideoHeight;
+    private int mVideoSarNum;
+    private int mVideoSarDen;
 
     /**
      * Default constructor. Consider using one of the create() methods for
@@ -375,7 +377,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             case MEDIA_SET_VIDEO_SIZE:
                 mIjkMediaPlayer.mVideoWidth = msg.arg1;
                 mIjkMediaPlayer.mVideoHeight = msg.arg2;
-                notifyOnVideoSizeChanged(mIjkMediaPlayer, msg.arg1, msg.arg2);
+                notifyOnVideoSizeChanged(mIjkMediaPlayer, msg.arg1, msg.arg2,
+                        mIjkMediaPlayer.mVideoSarNum,
+                        mIjkMediaPlayer.mVideoSarDen);
                 return;
 
             case MEDIA_ERROR:
@@ -398,6 +402,14 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 break;
 
             case MEDIA_NOP: // interface test message - ignore
+                break;
+
+            case MEDIA_SET_VIDEO_SAR:
+                mIjkMediaPlayer.mVideoSarNum = msg.arg1;
+                mIjkMediaPlayer.mVideoSarDen = msg.arg2;
+                notifyOnVideoSizeChanged(mIjkMediaPlayer, msg.arg1, msg.arg2,
+                        mIjkMediaPlayer.mVideoSarNum,
+                        mIjkMediaPlayer.mVideoSarDen);
                 break;
 
             default:

@@ -172,7 +172,8 @@ public final class AndroidMediaPlayer extends AbstractMediaPlayer {
 
         @Override
         public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-            notifyOnVideoSizeChanged(mWeakMediaPlayer.get(), width, height);
+            notifyOnVideoSizeChanged(mWeakMediaPlayer.get(), width, height, 1,
+                    1);
         }
 
         @Override

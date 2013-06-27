@@ -37,6 +37,8 @@ public abstract class AbstractMediaPlayer {
     protected static final int MEDIA_ERROR = 100;
     protected static final int MEDIA_INFO = 200;
 
+    protected static final int MEDIA_SET_VIDEO_SAR = 10001;
+
     public static final int MEDIA_INFO_UNKNOWN = 1;
     public static final int MEDIA_INFO_STARTED_AS_NEXT = 2;
     public static final int MEDIA_INFO_VIDEO_RENDERING_START = 3;
@@ -114,7 +116,7 @@ public abstract class AbstractMediaPlayer {
 
     public interface OnVideoSizeChangedListener {
         public void onVideoSizeChanged(AbstractMediaPlayer mp, int width,
-                int height);
+                int height, int sar_num, int sar_den);
     }
 
     public interface OnErrorListener {
@@ -195,10 +197,11 @@ public abstract class AbstractMediaPlayer {
     }
 
     protected static final void notifyOnVideoSizeChanged(
-            AbstractMediaPlayer mp, int width, int height) {
+            AbstractMediaPlayer mp, int width, int height, int sarNum,
+            int sarDen) {
         if (mp != null && mp.mOnVideoSizeChangedListener != null)
-            mp.mOnVideoSizeChangedListener
-                    .onVideoSizeChanged(mp, width, height);
+            mp.mOnVideoSizeChangedListener.onVideoSizeChanged(mp, width,
+                    height, sarNum, sarDen);
     }
 
     protected static final boolean notifyOnError(AbstractMediaPlayer mp,

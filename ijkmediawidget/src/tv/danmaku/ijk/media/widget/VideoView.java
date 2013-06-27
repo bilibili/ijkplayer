@@ -90,6 +90,8 @@ public class VideoView extends SurfaceView implements
     private AbstractMediaPlayer mMediaPlayer = null;
     private int mVideoWidth;
     private int mVideoHeight;
+    private int mVideoSarNum;
+    private int mVideoSarDen;
     private int mSurfaceWidth;
     private int mSurfaceHeight;
     private MediaController mMediaController;
@@ -145,8 +147,12 @@ public class VideoView extends SurfaceView implements
         DisplayMetrics disp = mContext.getResources().getDisplayMetrics();
         int windowWidth = disp.widthPixels, windowHeight = disp.heightPixels;
         float windowRatio = windowWidth / (float) windowHeight;
+        int sarNum = mVideoSarNum;
+        int sarDen = mVideoSarDen;
         if (mVideoHeight > 0 && mVideoWidth > 0) {
             float videoRatio = ((float) (mVideoWidth)) / mVideoHeight;
+            if (sarNum > 0 && sarDen > 0)
+                videoRatio = videoRatio * sarNum / sarDen;
             mSurfaceHeight = mVideoHeight;
             mSurfaceWidth = mVideoWidth;
 
@@ -171,10 +177,10 @@ public class VideoView extends SurfaceView implements
             // getHolder().setFormat(ImageFormat.YV12);
             DebugLog.dfmt(
                     TAG,
-                    "VIDEO: %dx%dx%f, Surface: %dx%d, LP: %dx%d, Window: %dx%dx%f",
-                    mVideoWidth, mVideoHeight, videoRatio, mSurfaceWidth,
-                    mSurfaceHeight, lp.width, lp.height, windowWidth,
-                    windowHeight, windowRatio);
+                    "VIDEO: %dx%dx%f[SAR:%d:%d], Surface: %dx%d, LP: %dx%d, Window: %dx%dx%f",
+                    mVideoWidth, mVideoHeight, videoRatio, mVideoSarNum,
+                    mVideoSarDen, mSurfaceWidth, mSurfaceHeight, lp.width,
+                    lp.height, windowWidth, windowHeight, windowRatio);
             mVideoLayout = layout;
         }
     }
@@ -183,6 +189,8 @@ public class VideoView extends SurfaceView implements
         mContext = ctx;
         mVideoWidth = 0;
         mVideoHeight = 0;
+        mVideoSarNum = 0;
+        mVideoSarDen = 0;
         getHolder().addCallback(mSHCallback);
         setFocusable(true);
         setFocusableInTouchMode(true);
@@ -289,10 +297,12 @@ public class VideoView extends SurfaceView implements
 
     OnVideoSizeChangedListener mSizeChangedListener = new OnVideoSizeChangedListener() {
         public void onVideoSizeChanged(AbstractMediaPlayer mp, int width,
-                int height) {
+                int height, int sarNum, int sarDen) {
             DebugLog.dfmt(TAG, "onVideoSizeChanged: (%dx%d)", width, height);
             mVideoWidth = mp.getVideoWidth();
             mVideoHeight = mp.getVideoHeight();
+            mVideoSarNum = sarNum;
+            mVideoSarDen = sarDen;
             if (mVideoWidth != 0 && mVideoHeight != 0)
                 setVideoLayout(mVideoLayout);
         }
