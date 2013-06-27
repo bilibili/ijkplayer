@@ -31,10 +31,10 @@
 #include "../ffmpeg/ijksdl_inc_ffmpeg.h"
 #include "ijksdl_inc_internal_android.h"
 
-static int sdl_copy_image_yv12_to_halyv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
+static int android_render_yv12_on_yv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
 {
     // SDLTRACE("SDL_VoutAndroid: vout_copy_image_yv12(%p)", overlay);
-    assert(overlay->format == SDL_YV12_OVERLAY);
+    assert(overlay->format == SDL_FCC_YV12);
     assert(overlay->planes == 3);
 
     int min_height = IJKMIN(out_buffer->height, overlay->h);
@@ -77,54 +77,6 @@ static int sdl_copy_image_yv12_to_halyv12(ANativeWindow_Buffer *out_buffer, cons
     return 0;
 }
 
-static int sdl_native_window_display_on_yv12_l(ANativeWindow *native_window, SDL_VoutOverlay *overlay)
-{
-    int retval;
-    int buf_w = overlay->w;
-    int buf_h = IJKALIGN(overlay->h, 2);
-
-    if (!native_window) {
-        ALOGE("sdl_native_window_display_on_yv12_l: NULL native_window");
-        return -1;
-    }
-
-    if (!overlay) {
-        ALOGE("sdl_native_window_display_on_yv12_l: NULL overlay");
-        return -1;
-    }
-
-    if (overlay->w <= 0 || overlay->h <= 0) {
-        ALOGE("sdl_native_window_display_on_yv12_l: invalid overlay dimensions(%d, %d)", overlay->w, overlay->h);
-        return -1;
-    }
-
-    ANativeWindow_Buffer out_buffer;
-    retval = ANativeWindow_lock(native_window, &out_buffer, NULL);
-    if (retval < 0) {
-        ALOGE("sdl_native_window_display_on_yv12_l: ANativeWindow_lock: failed %d", retval);
-        return retval;
-    }
-
-    if (out_buffer.width != buf_w || out_buffer.height != buf_h || out_buffer.format != HAL_PIXEL_FORMAT_YV12) {
-        ALOGE("unexpected native window buffer (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
-            native_window,
-            out_buffer.width, out_buffer.height, (char*)&out_buffer.format, out_buffer.format,
-            buf_w, buf_h, (char*)&overlay->format, overlay->format);
-        // FIXME: 9 set all black
-        ANativeWindow_unlockAndPost(native_window);
-        return -1;
-    }
-
-    int copy_ret = sdl_copy_image_yv12_to_halyv12(&out_buffer, overlay);
-
-    retval = ANativeWindow_unlockAndPost(native_window);
-    if (retval < 0) {
-        ALOGE("sdl_native_window_display_on_yv12_l: ANativeWindow_unlockAndPost: failed %d", retval);
-        return retval;
-    }
-    return copy_ret;
-}
-
 int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *overlay)
 {
     int retval;
@@ -144,16 +96,53 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
         return -1;
     }
 
+    int (*fn_cp_image)(ANativeWindow_Buffer *native_buffer, SDL_VoutOverlay *overlay) = NULL;
     int curr_format = ANativeWindow_getFormat(native_window);
     switch (curr_format) {
     case HAL_PIXEL_FORMAT_YV12:
-        retval = sdl_native_window_display_on_yv12_l(native_window, overlay);
+        fn_cp_image = android_render_yv12_on_yv12;
+        break;
+    case HAL_PIXEL_FORMAT_RGB_565:
+        // fn_cp_image = sdl_native_window_display_on_rgb565_l;
         break;
     default:
         ALOGE("sdl_native_window_display_l: unexpected buffer format: %d", curr_format);
-        retval = -1;
         break;
     }
 
-    return retval;
+    if (!fn_cp_image)
+        return -1;
+
+    int buf_w = overlay->w;
+    int buf_h = IJKALIGN(overlay->h, 2);
+
+    ANativeWindow_Buffer out_buffer;
+    retval = ANativeWindow_lock(native_window, &out_buffer, NULL);
+    if (retval < 0) {
+        ALOGE("sdl_native_window_display_on_rgb565_l: ANativeWindow_lock: failed %d", retval);
+        return retval;
+    }
+
+    if (out_buffer.width != buf_w || out_buffer.height != buf_h) {
+        ALOGE("unexpected native window buffer (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
+            native_window,
+            out_buffer.width, out_buffer.height, (char*)&out_buffer.format, out_buffer.format,
+            buf_w, buf_h, (char*)&overlay->format, overlay->format);
+        // FIXME: 9 set all black
+        ANativeWindow_unlockAndPost(native_window);
+        return -1;
+    }
+
+    int copy_ret = fn_cp_image(&out_buffer, overlay);
+    if (copy_ret < 0) {
+        // FIXME: 9 set all black
+    }
+
+    retval = ANativeWindow_unlockAndPost(native_window);
+    if (retval < 0) {
+        ALOGE("sdl_native_window_display_on_rgb565_l: ANativeWindow_unlockAndPost: failed %d", retval);
+        return retval;
+    }
+
+    return copy_ret;
 }

@@ -130,12 +130,13 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
             FFSWAP(Uint8*, overlay->pixels[1], overlay->pixels[2]);
             FFSWAP(Uint16, overlay->pitches[1], overlay->pitches[2]);
         }
-        overlay->format = SDL_FCC_YV12;
         break;
     }
     case SDL_FCC_RGBP: {
-        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...): unknown format");
-        overlay->format = SDL_FCC_UNDF;
+        opaque->frame = alloc_avframe(opaque, AV_PIX_FMT_RGB565LE, width, height);
+        if (opaque->frame) {
+            overlay_fill(overlay, opaque->frame, format, 1);
+        }
         break;
     }
     default:
