@@ -27,7 +27,6 @@
 #include <jni.h>
 #include "ff_ffmsg_queue.h"
 
-#define IJK_LOG_TAG "IJKPLAYER"
 #include "ijkutil/ijkutil_android.h"
 
 #ifndef MPTRACE

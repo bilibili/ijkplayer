@@ -580,7 +580,7 @@ static void alloc_picture(FFPlayer *ffp)
     video_open(ffp, 0, vp);
 #endif
 
-    vp->bmp = SDL_VoutCreateFFmpegYUVOverlay(vp->width, vp->height,
+    vp->bmp = SDL_VoutFFmpeg_CreateOverlay(vp->width, vp->height,
                                    SDL_FCC_YV12,
                                    ffp->vout);
     if (!vp->bmp || vp->bmp->pitches[0] < vp->width) {
