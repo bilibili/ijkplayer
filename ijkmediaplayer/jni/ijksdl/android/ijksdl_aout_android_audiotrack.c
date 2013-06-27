@@ -143,8 +143,7 @@ int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_A
         return -1;
     }
 
-    SDLTRACE("aout_open_audio_n()=%d", opaque->buffer_size);
-    return opaque->buffer_size;
+    return 0;
 }
 
 int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
