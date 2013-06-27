@@ -400,6 +400,8 @@ typedef struct FFPlayer {
     enum AVPixelFormat pic_format;
 
     int last_error;
+    int prepared;
+    int start_on_prepared;
 
     MessageQueue msg_queue;
 } FFPlayer;
@@ -472,6 +474,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->pic_format             = AV_PIX_FMT_BGR32;
 
     ffp->last_error             = 0;
+    ffp->prepared               = 0;
+    ffp->start_on_prepared      = 0;
 
     msg_queue_flush(&ffp->msg_queue);
 }

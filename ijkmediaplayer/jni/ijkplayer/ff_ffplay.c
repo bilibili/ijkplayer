@@ -1565,7 +1565,6 @@ static int read_thread(void *arg)
     AVDictionary **opts;
     int orig_nb_streams;
     SDL_mutex *wait_mutex = SDL_CreateMutex();
-    bool prepared = false;
     int last_error = 0;
 
     memset(st_index, -1, sizeof(st_index));
@@ -1687,12 +1686,15 @@ static int read_thread(void *arg)
     if (ffp->infinite_buffer < 0 && is->realtime)
         ffp->infinite_buffer = 1;
 
-    prepared = true;
+    ffp->prepared = true;
     ffp_notify_msg(ffp, FFP_MSG_PREPARED, 0, 0);
     if (is->video_st && is->video_st->codec) {
         AVCodecContext *avctx = is->video_st->codec;
         ffp_notify_msg(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
         ffp_notify_msg(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
+    }
+    if (ffp->start_on_prepared) {
+        ffp_start_l(ffp);
     }
 
     for (;;) {
@@ -1861,7 +1863,7 @@ fail:
         avformat_close_input(&is->ic);
     }
 
-    if (!prepared || !is->abort_request) {
+    if (!ffp->prepared || !is->abort_request) {
         ffp->last_error = last_error;
         ffp_notify_msg(ffp, FFP_MSG_ERROR, last_error, 0);
     }
@@ -2112,16 +2114,20 @@ int ffp_start_l(FFPlayer *ffp)
     if (!is)
         return EIJK_NULL_IS_PTR;
 
-    if (is->paused) {
-        is->frame_timer += av_gettime() / 1000000.0 + is->video_current_pts_drift - is->video_current_pts;
-        if (is->read_pause_return != AVERROR(ENOSYS)) {
-            is->video_current_pts = is->video_current_pts_drift + av_gettime() / 1000000.0;
+    ffp->start_on_prepared = true;
+    if (ffp->prepared) {
+        if (is->paused) {
+            is->frame_timer += av_gettime() / 1000000.0 + is->video_current_pts_drift - is->video_current_pts;
+            if (is->read_pause_return != AVERROR(ENOSYS)) {
+                is->video_current_pts = is->video_current_pts_drift + av_gettime() / 1000000.0;
+            }
+            is->video_current_pts_drift = is->video_current_pts - av_gettime() / 1000000.0;
         }
-        is->video_current_pts_drift = is->video_current_pts - av_gettime() / 1000000.0;
+        update_external_clock_pts(is, get_external_clock(is));
+        is->paused = 0;
+        SDL_AoutPauseAudio(ffp->aout, is->paused);
     }
-    update_external_clock_pts(is, get_external_clock(is));
-    is->paused = 0;
-    SDL_AoutPauseAudio(ffp->aout, is->paused);
+
     return 0;
 }
 
@@ -2134,6 +2140,8 @@ int ffp_pause_l(FFPlayer *ffp)
 
     update_external_clock_pts(is, get_external_clock(is));
     is->paused = 1;
+    SDL_AoutPauseAudio(ffp->aout, is->paused);
+    ffp->start_on_prepared = false;
     return 0;
 }
 
