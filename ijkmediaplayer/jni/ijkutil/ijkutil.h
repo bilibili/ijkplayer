@@ -44,4 +44,22 @@
         return (retval__); \
     }
 
+inline void *mallocz(size_t size)
+{
+    void *mem = malloc(size);
+    if (!mem)
+        return mem;
+
+    memset(mem, 0, size);
+    return mem;
+}
+
+inline void freep(void **mem)
+{
+    if (mem && *mem) {
+        free(*mem);
+        *mem = NULL;
+    }
+}
+
 #endif

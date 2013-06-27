@@ -231,13 +231,12 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudi
         return NULL;
     }
 
-    SDL_AndroidAudioTrack *atrack = (SDL_AndroidAudioTrack*) malloc(sizeof(SDL_AndroidAudioTrack));
+    SDL_AndroidAudioTrack *atrack = (SDL_AndroidAudioTrack*) mallocz(sizeof(SDL_AndroidAudioTrack));
     if (!atrack) {
         (*env)->CallVoidMethod(env, g_clazz.clazz, atrack->thiz, g_clazz.release);
         (*env)->DeleteLocalRef(env, thiz);
         return NULL;
     }
-    memset(atrack, 0, sizeof(SDL_AndroidAudioTrack));
 
     atrack->spec = *spec;
     atrack->min_buffer_size = min_buffer_size;

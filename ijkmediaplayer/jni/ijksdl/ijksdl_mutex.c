@@ -24,11 +24,12 @@
 #include "ijksdl_mutex.h"
 #include <errno.h>
 #include <assert.h>
+#include "ijksdl_inc_internal.h"
 
 SDL_mutex *SDL_CreateMutex(void)
 {
     SDL_mutex *mutex;
-    mutex = (SDL_mutex *) malloc(sizeof(SDL_mutex));
+    mutex = (SDL_mutex *) mallocz(sizeof(SDL_mutex));
     if (!mutex)
         return NULL;
 
@@ -68,7 +69,7 @@ int SDL_UnlockMutex(SDL_mutex *mutex)
 SDL_cond *SDL_CreateCond(void)
 {
     SDL_cond *cond;
-    cond = (SDL_cond *) malloc(sizeof(SDL_cond));
+    cond = (SDL_cond *) mallocz(sizeof(SDL_cond));
     if (!cond)
         return NULL;
 

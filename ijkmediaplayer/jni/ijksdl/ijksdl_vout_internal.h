@@ -28,17 +28,15 @@
 
 inline static SDL_Vout *SDL_Vout_CreateInternal(size_t opaque_size)
 {
-    SDL_Vout *vout = (SDL_Vout*) malloc(sizeof(SDL_Vout));
+    SDL_Vout *vout = (SDL_Vout*) mallocz(sizeof(SDL_Vout));
     if (!vout)
         return NULL;
-    memset(vout, 0, sizeof(SDL_Vout));
 
-    vout->opaque = malloc(opaque_size);
+    vout->opaque = mallocz(opaque_size);
     if (!vout->opaque) {
         free(vout);
         return NULL;
     }
-    memset(vout->opaque, 0, opaque_size);
 
     vout->mutex = SDL_CreateMutex();
     if (vout->mutex == NULL) {
@@ -66,17 +64,15 @@ inline static void SDL_Vout_FreeInternal(SDL_Vout *vout)
 
 inline static SDL_VoutOverlay *SDL_VoutOverlay_CreateInternal(size_t opaque_size)
 {
-    SDL_VoutOverlay *overlay = (SDL_VoutOverlay*) malloc(sizeof(SDL_VoutOverlay));
+    SDL_VoutOverlay *overlay = (SDL_VoutOverlay*) mallocz(sizeof(SDL_VoutOverlay));
     if (!overlay)
         return NULL;
-    memset(overlay, 0, sizeof(SDL_VoutOverlay));
 
-    overlay->opaque = malloc(opaque_size);
+    overlay->opaque = mallocz(opaque_size);
     if (!overlay->opaque) {
         free(overlay);
         return NULL;
     }
-    memset(overlay->opaque, 0, opaque_size);
     return overlay;
 }
 
