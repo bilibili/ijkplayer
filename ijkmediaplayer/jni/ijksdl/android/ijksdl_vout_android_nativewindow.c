@@ -29,6 +29,7 @@
 #include "../ijksdl_inc_ffmpeg.h"
 #include "../ijksdl_vout.h"
 #include "../ijksdl_vout_internal.h"
+#include "android_nativewindow.h"
 
 typedef struct SDL_VoutSurface_Opaque {
     SDL_Vout *vout;
@@ -53,56 +54,10 @@ static void vout_free_l(SDL_Vout *vout)
     SDL_Vout_FreeInternal(vout);
 }
 
-static void vout_copy_image_yv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
-{
-    // SDLTRACE("SDL_VoutAndroid: vout_copy_image_yv12(%p)", overlay);
-    assert(overlay->format == SDL_YV12_OVERLAY);
-    assert(overlay->planes == 3);
-
-    int min_height = IJKMIN(out_buffer->height, overlay->h);
-    int dst_y_stride = out_buffer->stride;
-    int dst_c_stride = IJKALIGN(out_buffer->stride / 2, 16);
-    int dst_y_size = dst_y_stride * out_buffer->height;
-    int dst_c_size = dst_c_stride * out_buffer->height / 2;
-
-    // ALOGE("stride:%d/%d, size:%d/%d", dst_y_stride, dst_c_stride, dst_y_size, dst_c_size);
-
-    uint8_t *dst_pixels_array[] = {
-        out_buffer->bits,
-        out_buffer->bits + dst_y_size,
-        out_buffer->bits + dst_y_size + dst_c_size,
-    };
-    int dst_plane_size_array[] = { dst_y_size, dst_c_size, dst_c_size };
-    int dst_line_height[] = { min_height, min_height / 2, min_height / 2 };
-    int dst_line_size_array[] = { dst_y_stride, dst_c_stride, dst_c_stride };
-
-    for (int i = 0; i < 3; ++i) {
-        int dst_line_size = dst_line_size_array[i];
-        int src_line_size = overlay->pitches[i];
-        int line_height = dst_line_height[i];
-        uint8_t *dst_pixels = dst_pixels_array[i];
-        const uint8_t *src_pixels = overlay->pixels[i];
-        int dst_plane_size = dst_plane_size_array[i];
-
-        if (dst_line_size == src_line_size) {
-            // ALOGE("sdl_image_copy_plane %p %p %d", dst_pixels, src_pixels, dst_plane_size);
-            memcpy(dst_pixels, src_pixels, dst_plane_size);
-        } else {
-            // TODO: padding
-            int bytewidth = IJKMIN(dst_line_size, src_line_size);
-
-            // ALOGE("av_image_copy_plane %p %d %p %d %d %d", dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
-            av_image_copy_plane(dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, line_height);
-        }
-    }
-}
-
 static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
     ANativeWindow *native_window = opaque->native_window;
-    int curr_w, curr_h, curr_format;
-    int retval;
 
     if (!native_window) {
         ALOGE("voud_display_overlay_l: NULL native_window");
@@ -119,98 +74,7 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         return -1;
     }
 
-    int buf_w = overlay->w;
-    int buf_h = IJKALIGN(overlay->h, 2);
-
-#if 0
-    curr_w = ANativeWindow_getWidth(native_window);
-    curr_h = ANativeWindow_getHeight(native_window);
-    curr_format = ANativeWindow_getFormat(native_window);
-    if (curr_w != buf_w ||
-        curr_h != buf_h ||
-        curr_format != overlay->format) {
-
-        // correct w, h, format
-        ALOGI("vout_set_video_mode_l (%p)(w:%d, h:%d, fmt:'%.4s'0x%x) => (w:%d, h:%d, fmt:'%.4s'0x%x)",
-            native_window,
-            curr_w, curr_h, (char*)&curr_format, curr_format,
-            buf_w, buf_h, (char*)&overlay->format, overlay->format);
-        retval = ANativeWindow_setBuffersGeometry(native_window, buf_w, buf_h, overlay->format);
-        if (retval) {
-            ALOGE("ANativeWindow_setBuffersGeometry failed %d", retval);
-        }
-
-        curr_w = ANativeWindow_getWidth(native_window);
-        curr_h = ANativeWindow_getHeight(native_window);
-        curr_format = ANativeWindow_getFormat(native_window);
-
-        if (curr_w != buf_w ||
-            curr_h != buf_h ||
-            curr_format != overlay->format) {
-            ALOGE("unexpected native window (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
-                native_window,
-                curr_w, curr_h, (char*)&curr_format, curr_format,
-                buf_w, buf_h, (char*)&overlay->format, overlay->format);
-            return -1;
-        }
-    }
-#else
-    curr_format = ANativeWindow_getFormat(native_window);
-    if (curr_format != overlay->format) {
-        ALOGI("vout_set_video_mode_l (%p)(w:%d, h:%d, fmt:'%.4s'0x%x) => (w:%d, h:%d, fmt:'%.4s'0x%x)",
-            native_window,
-            curr_w, curr_h, (char*)&curr_format, curr_format,
-            buf_w, buf_h, (char*)&overlay->format, overlay->format);
-        retval = ANativeWindow_setBuffersGeometry(native_window, buf_w, buf_h, overlay->format);
-        if (retval) {
-            ALOGE("ANativeWindow_setBuffersGeometry failed %d", retval);
-        }
-
-        curr_format = ANativeWindow_getFormat(native_window);
-        if (curr_format != overlay->format) {
-            ALOGE("unable to set native window (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
-                native_window,
-                curr_w, curr_h, (char*)&curr_format, curr_format,
-                buf_w, buf_h, (char*)&overlay->format, overlay->format);
-            return -1;
-        }
-    }
-#endif
-
-    ANativeWindow_Buffer out_buffer;
-    retval = ANativeWindow_lock(native_window, &out_buffer, NULL);
-    if (retval < 0) {
-        ALOGE("voud_display_overlay_l: ANativeWindow_lock: failed %d", retval);
-        return retval;
-    }
-
-    if (out_buffer.width != buf_w || out_buffer.height != buf_h) {
-        ALOGE("unexpected native window buffer (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
-            native_window,
-            out_buffer.width, out_buffer.height, (char*)&out_buffer.format, out_buffer.format,
-            buf_w, buf_h, (char*)&overlay->format, overlay->format);
-        // FIXME: 9 set all black
-        ANativeWindow_unlockAndPost(native_window);
-        return -1;
-    }
-
-    int copy_ret = 0;
-    switch (out_buffer.format) {
-    case SDL_YV12_OVERLAY:
-        vout_copy_image_yv12(&out_buffer, overlay);
-        break;
-    default:
-        ALOGE("voud_display_overlay_l: unexpected buffer format: %d", out_buffer.format);
-        copy_ret = -1;
-        break;
-    }
-
-    retval = ANativeWindow_unlockAndPost(native_window);
-    if (retval < 0) {
-        ALOGE("voud_display_overlay_l: ANativeWindow_unlockAndPost: failed %d", retval);
-        return retval;
-    }
-    return copy_ret;
+    return sdl_native_window_display_l(native_window, overlay);
 }
 
 static int voud_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
