@@ -53,61 +53,6 @@ static void vout_free_l(SDL_Vout *vout)
     SDL_Vout_FreeInternal(vout);
 }
 
-#if 0
-static SDL_VoutSurface *vout_set_video_mode_l(SDL_Vout *vout, int w, int h, int bpp, int flags)
-{
-    SDL_Vout_Opaque *opaque = vout->opaque;
-    SDL_VoutSurface *surface = &opaque->dummy_surface;
-    ANativeWindow *native_window = opaque->native_window;
-    int curr_w = 0;
-    int curr_h = 0;
-    int curr_format = 0;
-    int buf_w = (w + 1) & ~1;
-    int buf_h = (h + 1) & ~1;
-
-    assert(bpp == 0);
-    if (!native_window)
-    return NULL;
-
-    curr_w = ANativeWindow_getWidth(native_window);
-    curr_h = ANativeWindow_getHeight(native_window);
-    curr_format = ANativeWindow_getFormat(native_window);
-    if (curr_w == buf_w && curr_h == buf_h) {
-        surface->w = w;
-        surface->h = h;
-        surface->format = curr_format;
-        return surface;
-    }
-
-    ALOGI("vout_set_video_mode_l (w:%d, h:%d, fmt:%d) => (w:%d, h:%d, fmt:%d)",
-        curr_w, curr_h, curr_format,
-        buf_w, buf_h, curr_format);
-    ANativeWindow_setBuffersGeometry(native_window, buf_w, buf_h, curr_format);
-    curr_w = ANativeWindow_getWidth(native_window);
-    curr_h = ANativeWindow_getHeight(native_window);
-    curr_format = ANativeWindow_getFormat(native_window);
-    if (curr_w == buf_w && curr_h == buf_h) {
-        surface->w = w;
-        surface->h = h;
-        surface->format = curr_format;
-        return surface;
-    }
-
-    ALOGE("vout_set_video_mode_l (w:%d, h:%d, fmt:%d) => (w:%d, h:%d, fmt:%d)",
-        curr_w, curr_h, curr_format,
-        buf_w, buf_h, curr_format);
-    return NULL;
-}
-
-static SDL_VoutSurface *vout_set_video_mode(SDL_Vout *vout, int w, int h, int bpp, Uint32 flags)
-{
-    SDL_LockMutex(vout->mutex);
-    SDL_VoutSurface *surface = vout_set_video_mode_l(vout, w, h, bpp, flags);
-    SDL_UnlockMutex(vout->mutex);
-    return surface;
-}
-#endif
-
 static void vout_copy_image_yv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
 {
     // SDLTRACE("SDL_VoutAndroid: vout_copy_image_yv12(%p)", overlay);
@@ -119,7 +64,6 @@ static void vout_copy_image_yv12(ANativeWindow_Buffer *out_buffer, const SDL_Vou
     int dst_c_stride = IJKALIGN(out_buffer->stride / 2, 16);
     int dst_y_size = dst_y_stride * out_buffer->height;
     int dst_c_size = dst_c_stride * out_buffer->height / 2;
-
 
     // ALOGE("stride:%d/%d, size:%d/%d", dst_y_stride, dst_c_stride, dst_y_size, dst_c_size);
 
@@ -178,6 +122,7 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     int buf_w = overlay->w;
     int buf_h = IJKALIGN(overlay->h, 2);
 
+#if 0
     curr_w = ANativeWindow_getWidth(native_window);
     curr_h = ANativeWindow_getHeight(native_window);
     curr_format = ANativeWindow_getFormat(native_window);
@@ -186,7 +131,8 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         curr_format != overlay->format) {
 
         // correct w, h, format
-        ALOGI("vout_set_video_mode_l (w:%d, h:%d, fmt:'%.4s'0x%x) => (w:%d, h:%d, fmt:'%.4s'0x%x)",
+        ALOGI("vout_set_video_mode_l (%p)(w:%d, h:%d, fmt:'%.4s'0x%x) => (w:%d, h:%d, fmt:'%.4s'0x%x)",
+            native_window,
             curr_w, curr_h, (char*)&curr_format, curr_format,
             buf_w, buf_h, (char*)&overlay->format, overlay->format);
         retval = ANativeWindow_setBuffersGeometry(native_window, buf_w, buf_h, overlay->format);
@@ -201,12 +147,35 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         if (curr_w != buf_w ||
             curr_h != buf_h ||
             curr_format != overlay->format) {
-            ALOGE("unexpected native window (w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
+            ALOGE("unexpected native window (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
+                native_window,
                 curr_w, curr_h, (char*)&curr_format, curr_format,
                 buf_w, buf_h, (char*)&overlay->format, overlay->format);
             return -1;
         }
     }
+#else
+    curr_format = ANativeWindow_getFormat(native_window);
+    if (curr_format != overlay->format) {
+        ALOGI("vout_set_video_mode_l (%p)(w:%d, h:%d, fmt:'%.4s'0x%x) => (w:%d, h:%d, fmt:'%.4s'0x%x)",
+            native_window,
+            curr_w, curr_h, (char*)&curr_format, curr_format,
+            buf_w, buf_h, (char*)&overlay->format, overlay->format);
+        retval = ANativeWindow_setBuffersGeometry(native_window, buf_w, buf_h, overlay->format);
+        if (retval) {
+            ALOGE("ANativeWindow_setBuffersGeometry failed %d", retval);
+        }
+
+        curr_format = ANativeWindow_getFormat(native_window);
+        if (curr_format != overlay->format) {
+            ALOGE("unable to set native window (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
+                native_window,
+                curr_w, curr_h, (char*)&curr_format, curr_format,
+                buf_w, buf_h, (char*)&overlay->format, overlay->format);
+            return -1;
+        }
+    }
+#endif
 
     ANativeWindow_Buffer out_buffer;
     retval = ANativeWindow_lock(native_window, &out_buffer, NULL);
@@ -216,7 +185,8 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     }
 
     if (out_buffer.width != buf_w || out_buffer.height != buf_h) {
-        ALOGE("unexpected native window buffer (w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
+        ALOGE("unexpected native window buffer (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
+            native_window,
             out_buffer.width, out_buffer.height, (char*)&out_buffer.format, out_buffer.format,
             buf_w, buf_h, (char*)&overlay->format, overlay->format);
         // FIXME: 9 set all black
