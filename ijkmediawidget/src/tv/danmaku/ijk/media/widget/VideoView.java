@@ -168,7 +168,8 @@ public class VideoView extends SurfaceView implements
             }
             setLayoutParams(lp);
             getHolder().setFixedSize(mSurfaceWidth, mSurfaceHeight);
-            getHolder().setFormat(ImageFormat.YV12);
+            // getHolder().setFormat(ImageFormat.YV12);
+            // getHolder().setFormat(ImageFormat.NV16);
             DebugLog.dfmt(
                     TAG,
                     "VIDEO: %dx%dx%f, Surface: %dx%d, LP: %dx%d, Window: %dx%dx%f",
@@ -445,6 +446,11 @@ public class VideoView extends SurfaceView implements
     SurfaceHolder.Callback mSHCallback = new SurfaceHolder.Callback() {
         public void surfaceChanged(SurfaceHolder holder, int format, int w,
                 int h) {
+            mSurfaceHolder = holder;
+            if (mMediaPlayer != null) {
+                mMediaPlayer.setDisplay(mSurfaceHolder);
+            }
+
             mSurfaceWidth = w;
             mSurfaceHeight = h;
             boolean isValidState = (mTargetState == STATE_PLAYING);
