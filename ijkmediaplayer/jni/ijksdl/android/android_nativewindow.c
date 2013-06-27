@@ -29,8 +29,9 @@
 #include "../ijksdl_inc_ffmpeg.h"
 #include "../ijksdl_vout.h"
 #include "../ijksdl_vout_internal.h"
+#include "ijksdl_inc_internal_android.h"
 
-static void sdl_copy_image_yv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
+static int sdl_copy_image_yv12_to_halyv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
 {
     // SDLTRACE("SDL_VoutAndroid: vout_copy_image_yv12(%p)", overlay);
     assert(overlay->format == SDL_YV12_OVERLAY);
@@ -72,11 +73,60 @@ static void sdl_copy_image_yv12(ANativeWindow_Buffer *out_buffer, const SDL_Vout
             av_image_copy_plane(dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, line_height);
         }
     }
+
+    return 0;
+}
+
+static int sdl_native_window_display_on_yv12_l(ANativeWindow *native_window, SDL_VoutOverlay *overlay)
+{
+    int retval;
+    int buf_w = overlay->w;
+    int buf_h = IJKALIGN(overlay->h, 2);
+
+    if (!native_window) {
+        ALOGE("sdl_native_window_display_on_yv12_l: NULL native_window");
+        return -1;
+    }
+
+    if (!overlay) {
+        ALOGE("sdl_native_window_display_on_yv12_l: NULL overlay");
+        return -1;
+    }
+
+    if (overlay->w <= 0 || overlay->h <= 0) {
+        ALOGE("sdl_native_window_display_on_yv12_l: invalid overlay dimensions(%d, %d)", overlay->w, overlay->h);
+        return -1;
+    }
+
+    ANativeWindow_Buffer out_buffer;
+    retval = ANativeWindow_lock(native_window, &out_buffer, NULL);
+    if (retval < 0) {
+        ALOGE("sdl_native_window_display_on_yv12_l: ANativeWindow_lock: failed %d", retval);
+        return retval;
+    }
+
+    if (out_buffer.width != buf_w || out_buffer.height != buf_h || out_buffer.format != HAL_PIXEL_FORMAT_YV12) {
+        ALOGE("unexpected native window buffer (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
+            native_window,
+            out_buffer.width, out_buffer.height, (char*)&out_buffer.format, out_buffer.format,
+            buf_w, buf_h, (char*)&overlay->format, overlay->format);
+        // FIXME: 9 set all black
+        ANativeWindow_unlockAndPost(native_window);
+        return -1;
+    }
+
+    int copy_ret = sdl_copy_image_yv12_to_halyv12(&out_buffer, overlay);
+
+    retval = ANativeWindow_unlockAndPost(native_window);
+    if (retval < 0) {
+        ALOGE("sdl_native_window_display_on_yv12_l: ANativeWindow_unlockAndPost: failed %d", retval);
+        return retval;
+    }
+    return copy_ret;
 }
 
 int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *overlay)
 {
-    int curr_w, curr_h, curr_format;
     int retval;
 
     if (!native_window) {
@@ -94,62 +144,16 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
         return -1;
     }
 
-    int buf_w = overlay->w;
-    int buf_h = IJKALIGN(overlay->h, 2);
-
-    curr_format = ANativeWindow_getFormat(native_window);
-    if (curr_format != overlay->format) {
-        ALOGI("ANativeWindow_setBuffersGeometry (%p)(w:%d, h:%d, fmt:'%.4s'0x%x) => (w:%d, h:%d, fmt:'%.4s'0x%x)",
-            native_window,
-            curr_w, curr_h, (char*)&curr_format, curr_format,
-            buf_w, buf_h, (char*)&overlay->format, overlay->format);
-        retval = ANativeWindow_setBuffersGeometry(native_window, buf_w, buf_h, overlay->format);
-        if (retval) {
-            ALOGE("ANativeWindow_setBuffersGeometry failed %d", retval);
-        }
-
-        curr_format = ANativeWindow_getFormat(native_window);
-        if (curr_format != overlay->format) {
-            ALOGE("unable to set native window (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
-                native_window,
-                curr_w, curr_h, (char*)&curr_format, curr_format,
-                buf_w, buf_h, (char*)&overlay->format, overlay->format);
-            return -1;
-        }
-    }
-
-    ANativeWindow_Buffer out_buffer;
-    retval = ANativeWindow_lock(native_window, &out_buffer, NULL);
-    if (retval < 0) {
-        ALOGE("sdl_native_window_display_l: ANativeWindow_lock: failed %d", retval);
-        return retval;
-    }
-
-    if (out_buffer.width != buf_w || out_buffer.height != buf_h) {
-        ALOGE("unexpected native window buffer (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
-            native_window,
-            out_buffer.width, out_buffer.height, (char*)&out_buffer.format, out_buffer.format,
-            buf_w, buf_h, (char*)&overlay->format, overlay->format);
-        // FIXME: 9 set all black
-        ANativeWindow_unlockAndPost(native_window);
-        return -1;
-    }
-
-    int copy_ret = 0;
-    switch (out_buffer.format) {
-    case SDL_YV12_OVERLAY:
-        sdl_copy_image_yv12(&out_buffer, overlay);
+    int curr_format = ANativeWindow_getFormat(native_window);
+    switch (curr_format) {
+    case HAL_PIXEL_FORMAT_YV12:
+        retval = sdl_native_window_display_on_yv12_l(native_window, overlay);
         break;
     default:
-        ALOGE("sdl_native_window_display_l: unexpected buffer format: %d", out_buffer.format);
-        copy_ret = -1;
+        ALOGE("sdl_native_window_display_l: unexpected buffer format: %d", curr_format);
+        retval = -1;
         break;
     }
 
-    retval = ANativeWindow_unlockAndPost(native_window);
-    if (retval < 0) {
-        ALOGE("sdl_native_window_display_l: ANativeWindow_unlockAndPost: failed %d", retval);
-        return retval;
-    }
-    return copy_ret;
+    return retval;
 }
