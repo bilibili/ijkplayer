@@ -32,6 +32,7 @@
 #include "ijksdl_timer.h"
 #include "ijksdl_video.h"
 #include "ijksdl_vout.h"
-#include "ijksdl_vout_overlay_ffmpeg.h"
+
+#include "ffmpeg/ijksdl_vout_overlay_ffmpeg.h"
 
 #endif

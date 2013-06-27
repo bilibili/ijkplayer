@@ -26,9 +26,9 @@
 #include <assert.h>
 #include <android/native_window.h>
 #include "ijkutil/ijkutil.h"
-#include "../ijksdl_inc_ffmpeg.h"
 #include "../ijksdl_vout.h"
 #include "../ijksdl_vout_internal.h"
+#include "../ffmpeg/ijksdl_inc_ffmpeg.h"
 #include "ijksdl_inc_internal_android.h"
 
 static int sdl_copy_image_yv12_to_halyv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)

@@ -32,8 +32,9 @@ LOCAL_SRC_FILES += ijksdl_mutex.c
 LOCAL_SRC_FILES += ijksdl_stdinc.c
 LOCAL_SRC_FILES += ijksdl_thread.c
 LOCAL_SRC_FILES += ijksdl_timer.c
-LOCAL_SRC_FILES += ijksdl_vout_overlay_ffmpeg.c
 LOCAL_SRC_FILES += ijksdl_vout.c
+
+LOCAL_SRC_FILES += ffmpeg/ijksdl_vout_overlay_ffmpeg.c
 
 LOCAL_SRC_FILES += android/android_audiotrack.c
 LOCAL_SRC_FILES += android/android_nativewindow.c

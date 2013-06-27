@@ -23,10 +23,10 @@
 
 #include "ijksdl_vout_overlay_ffmpeg.h"
 
-#include "ijksdl_stdinc.h"
+#include "../ijksdl_stdinc.h"
+#include "../ijksdl_mutex.h"
+#include "../ijksdl_vout_internal.h"
 #include "ijksdl_inc_ffmpeg.h"
-#include "ijksdl_mutex.h"
-#include "ijksdl_vout_internal.h"
 
 typedef struct SDL_VoutOverlay_Opaque {
     SDL_mutex *mutex;

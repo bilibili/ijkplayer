@@ -1,8 +1,8 @@
-/*
- * ijksdl_ffinc.h
- *      ffmpeg headers
+/*****************************************************************************
+ * ijksdl_vout_overlay_ffmpeg.h
+ *****************************************************************************
  *
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,13 +21,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER__IJKSDL_FFINC_H
-#define IJKPLAYER__IJKSDL_FFINC_H
+#ifndef IJKSDL__IJKSDL_VOUT_OVERLAY_FFMPEG_H
+#define IJKSDL__IJKSDL_VOUT_OVERLAY_FFMPEG_H
 
-#include "libavutil/imgutils.h"
-#include "libavcodec/avcodec.h"
-#include "libswscale/swscale.h"
+#include "../ijksdl_stdinc.h"
+#include "../ijksdl_vout.h"
 
-#include "ijksdl_inc_internal.h"
+// TODO: 9 setup overlay stride to speed up memcpy
+SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_Vout *display);
+
+SDL_VoutOverlay *SDL_VoutCreateBestFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_Vout *display);
 
 #endif
