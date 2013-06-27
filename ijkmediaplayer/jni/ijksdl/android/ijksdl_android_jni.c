@@ -26,25 +26,31 @@
 #include "ijksdl_inc_internal_android.h"
 #include "android_audiotrack.h"
 
-JavaVM *g_jvm;
+static JavaVM *g_jvm;
+
+static pthread_key_t g_thread_key;
+static pthread_once_t g_key_once = PTHREAD_ONCE_INIT;
 
 JavaVM *SDL_AndroidJni_GetJvm()
 {
     return g_jvm;
 }
 
-jint SDL_AndroidJni_AttachCurrentThread(JNIEnv **p_env)
+static void SDL_AndroidJni_ThreadDestroyed(void* value)
 {
-    JavaVM *jvm = g_jvm;
-    if (!jvm) {
-        ALOGE("SDL_AndroidJni_GetJvm: AttachCurrentThread: NULL jvm");
-        return -1;
+    JNIEnv *env = (JNIEnv*) value;
+    if (env != NULL) {
+        (*g_jvm)->DetachCurrentThread(g_jvm);
+        pthread_setspecific(g_thread_key, NULL);
     }
-
-    return (*jvm)->AttachCurrentThread(jvm, p_env, NULL);
 }
 
-jint SDL_AndroidJni_DetachCurrentThread()
+static void make_thread_key()
+{
+    pthread_key_create(&g_thread_key, SDL_AndroidJni_ThreadDestroyed);
+}
+
+jint SDL_AndroidJni_SetupThreadEnv(JNIEnv **p_env)
 {
     JavaVM *jvm = g_jvm;
     if (!jvm) {
@@ -52,7 +58,18 @@ jint SDL_AndroidJni_DetachCurrentThread()
         return -1;
     }
 
-    return (*jvm)->DetachCurrentThread(jvm);
+    pthread_once(&g_key_once, make_thread_key);
+
+    JNIEnv *env = (JNIEnv*) pthread_getspecific(g_thread_key);
+    if (!env) {
+        if ((*jvm)->AttachCurrentThread(jvm, &env, NULL) == JNI_OK) {
+            pthread_setspecific(g_thread_key, env);
+            *p_env = env;
+            return 0;
+        }
+    }
+
+    return -1;
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
