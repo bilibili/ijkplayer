@@ -135,14 +135,21 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         break;
     }
     case SDL_FCC_RGBP: {
-        opaque->frame = alloc_avframe(opaque, AV_PIX_FMT_RGB565LE, width, height);
+        opaque->frame = alloc_avframe(opaque, AV_PIX_FMT_RGB565, width, height);
+        if (opaque->frame) {
+            overlay_fill(overlay, opaque->frame, format, 1);
+        }
+        break;
+    }
+    case SDL_FCC_RGB4: {
+        opaque->frame = alloc_avframe(opaque, AV_PIX_FMT_RGB32, width, height);
         if (opaque->frame) {
             overlay_fill(overlay, opaque->frame, format, 1);
         }
         break;
     }
     default:
-        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...): unknown format");
+        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...): unknown format %.4s(0x%x)", (char*)&format, format);
         overlay->format = SDL_FCC_UNDF;
         break;
     }
@@ -182,10 +189,22 @@ int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, 
         }
         break;
     }
-    case AV_PIX_FMT_BGR565LE:
-    case AV_PIX_FMT_BGR565BE:
-    case AV_PIX_FMT_RGB565BE:
-    case AV_PIX_FMT_RGB565LE: {
+    case AV_PIX_FMT_RGB32:
+        case AV_PIX_FMT_BGR32: {
+        switch (overlay->format) {
+        case SDL_FCC_RGB4: {
+            for (int i = 0; i < overlay->planes; ++i) {
+                pic->data[i] = overlay->pixels[i];
+                pic->linesize[i] = overlay->pitches[i];
+            }
+            retval = 0;
+            break;
+        }
+        }
+        break;
+    }
+    case AV_PIX_FMT_BGR565:
+        case AV_PIX_FMT_RGB565: {
         switch (overlay->format) {
         case SDL_FCC_RGBP: {
             for (int i = 0; i < overlay->planes; ++i) {
@@ -204,7 +223,9 @@ int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, 
     }
 
     if (retval) {
-        ALOGE("SDL_VoutFFmpeg_SetupPicture: unexpected %d, 0x%x", ff_format, overlay->format);
+        ALOGE("SDL_VoutFFmpeg_SetupPicture: unexpected %s(%d), %.4s(0x%x)",
+            av_get_pix_fmt_name(ff_format), ff_format,
+            (char*)&overlay->format, overlay->format);
     }
 
     return retval;

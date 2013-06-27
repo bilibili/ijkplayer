@@ -50,7 +50,6 @@ static int android_render_yv12_on_yv12(ANativeWindow_Buffer *out_buffer, const S
         out_buffer->bits + dst_y_size,
         out_buffer->bits + dst_y_size + dst_c_size,
     };
-    int dst_plane_size_array[] = { dst_y_size, dst_c_size, dst_c_size };
     int dst_line_height[] = { min_height, min_height / 2, min_height / 2 };
     int dst_line_size_array[] = { dst_y_stride, dst_c_stride, dst_c_stride };
 
@@ -60,11 +59,12 @@ static int android_render_yv12_on_yv12(ANativeWindow_Buffer *out_buffer, const S
         int line_height = dst_line_height[i];
         uint8_t *dst_pixels = dst_pixels_array[i];
         const uint8_t *src_pixels = overlay->pixels[i];
-        int dst_plane_size = dst_plane_size_array[i];
 
         if (dst_line_size == src_line_size) {
+            int plane_size = src_line_size * min_height;
+
             // ALOGE("sdl_image_copy_plane %p %p %d", dst_pixels, src_pixels, dst_plane_size);
-            memcpy(dst_pixels, src_pixels, src_line_size * min_height);
+            memcpy(dst_pixels, src_pixels, plane_size);
         } else {
             // TODO: padding
             int bytewidth = IJKMIN(dst_line_size, src_line_size);
@@ -91,33 +91,38 @@ static int android_render_on_yv12(ANativeWindow_Buffer *out_buffer, const SDL_Vo
     return -1;
 }
 
-static int android_render_rgb565_on_rgb565(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
+static int android_render_rgb_on_rgb(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay, int bpp)
 {
-    // SDLTRACE("SDL_VoutAndroid: android_render_rgb565_on_rgb565(%p)", overlay);
+    // SDLTRACE("SDL_VoutAndroid: android_render_rgb_on_rgb(%p)", overlay);
     assert(overlay->format == SDL_FCC_RGBP);
     assert(overlay->planes == 1);
 
     int min_height = IJKMIN(out_buffer->height, overlay->h);
     int dst_stride = out_buffer->stride;
     int src_line_size = overlay->pitches[0];
-    int dst_line_size = dst_stride * 2;
+    int dst_line_size = dst_stride * bpp / 8;
 
     uint8_t *dst_pixels = out_buffer->bits;
     const uint8_t *src_pixels = overlay->pixels[0];
 
     if (dst_line_size == src_line_size) {
         int plane_size = src_line_size * min_height;
-        // ALOGE("sdl_image_copy_plane %p %p %d", dst_pixels, src_pixels, plane_size);
+        // ALOGE("android_render_rgb_on_rgb %p %p %d", dst_pixels, src_pixels, plane_size);
         memcpy(dst_pixels, src_pixels, plane_size);
     } else {
         // TODO: padding
         int bytewidth = IJKMIN(dst_line_size, src_line_size);
 
-        // ALOGE("av_image_copy_plane %p %d %p %d %d %d", dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
+        // ALOGE("android_render_rgb_on_rgb %p %d %p %d %d %d", dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
         av_image_copy_plane(dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
     }
 
     return 0;
+}
+
+static int android_render_rgb565_on_rgb565(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
+{
+    return android_render_rgb_on_rgb(out_buffer, overlay, 16);
 }
 
 static int android_render_on_rgb565(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
@@ -128,6 +133,25 @@ static int android_render_on_rgb565(ANativeWindow_Buffer *out_buffer, const SDL_
     switch (overlay->format) {
     case SDL_FCC_RGBP: {
         return android_render_rgb565_on_rgb565(out_buffer, overlay);
+    }
+    }
+
+    return -1;
+}
+
+static int android_render_rgb32_on_rgb8888(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
+{
+    return android_render_rgb_on_rgb(out_buffer, overlay, 32);
+}
+
+static int android_render_on_rgb8888(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
+{
+    assert(out_buffer);
+    assert(overlay);
+
+    switch (overlay->format) {
+    case SDL_FCC_RGB4: {
+        return android_render_rgb32_on_rgb8888(out_buffer, overlay);
     }
     }
 
@@ -153,7 +177,7 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
         return -1;
     }
 
-    int (*fn_cp_image)(ANativeWindow_Buffer *native_buffer, SDL_VoutOverlay *overlay) = NULL;
+    int (*fn_cp_image)(ANativeWindow_Buffer *native_buffer, const SDL_VoutOverlay *overlay) = NULL;
     int curr_format = ANativeWindow_getFormat(native_window);
     switch (curr_format) {
     case HAL_PIXEL_FORMAT_YV12:
@@ -161,7 +185,15 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
         break;
     case HAL_PIXEL_FORMAT_RGB_565:
         case SDL_FCC_RGBP:
+        case SDL_FCC_BGRP:
         fn_cp_image = android_render_on_rgb565;
+        break;
+    case HAL_PIXEL_FORMAT_RGBA_8888:
+        case HAL_PIXEL_FORMAT_RGBX_8888:
+        case HAL_PIXEL_FORMAT_BGRA_8888:
+        case SDL_FCC_RGB4:
+        case SDL_FCC_BGR4:
+        fn_cp_image = android_render_on_rgb8888;
         break;
     default:
         ALOGE("sdl_native_window_display_l: unexpected buffer format: %d", curr_format);

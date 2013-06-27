@@ -67,7 +67,10 @@
 #define SDL_FCC_YVYU    SDL_FOURCC('Y', 'V', 'Y', 'U')  /**< bpp=16, Packed mode: Y0+V0+Y1+U0 (1 plane) */
 
 // RGB formats
-#define SDL_FCC_RGBP    SDL_FOURCC('R', 'G', 'B', 'P')    /**< RGB565, AV_PIX_FMT_RGB565LE */
+#define SDL_FCC_RGBP    SDL_FOURCC('R', 'G', 'B', 'P')    /**< RGB565, AV_PIX_FMT_RGB565 */
+#define SDL_FCC_BGRP    SDL_FOURCC('B', 'G', 'R', 'P')    /**< RGB565, AV_PIX_FMT_BGR565 */
+#define SDL_FCC_RGB4    SDL_FOURCC('R', 'G', 'B', '4')    /**< RGB8888, AV_PIX_FMT_RGB32 */
+#define SDL_FCC_BGR4    SDL_FOURCC('B', 'G', 'R', '4')    /**< RGB8888, AV_PIX_FMT_BGR32 */
 
 // undefine
 #define SDL_FCC_UNDF    SDL_FOURCC('U', 'N', 'D', 'F')    /**< undefined */
