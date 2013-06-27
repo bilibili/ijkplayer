@@ -26,10 +26,11 @@
 
 #include "../ijksdl_stdinc.h"
 #include "../ijksdl_vout.h"
+#include "ijksdl_inc_ffmpeg.h"
+
+SDL_VoutOverlay *SDL_VoutCreateFFmpegOverlay(int width, int height, enum AVPixelFormat format, SDL_Vout *display);
 
 // TODO: 9 setup overlay stride to speed up memcpy
 SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_Vout *display);
-
-SDL_VoutOverlay *SDL_VoutCreateBestFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_Vout *display);
 
 #endif

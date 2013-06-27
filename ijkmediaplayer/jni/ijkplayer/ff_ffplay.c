@@ -581,7 +581,7 @@ static void alloc_picture(FFPlayer *ffp)
 #endif
 
     vp->bmp = SDL_VoutCreateFFmpegYUVOverlay(vp->width, vp->height,
-                                   SDL_YV12_OVERLAY,
+                                   SDL_FCC_YV12,
                                    ffp->vout);
     if (!vp->bmp || vp->bmp->pitches[0] < vp->width) {
         /* SDL allocates a buffer smaller than requested if the video

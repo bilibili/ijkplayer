@@ -25,18 +25,6 @@
 #define IJKSDL__IJKSDL_VIDEO_H
 
 #include "ijksdl_stdinc.h"
-
-/*-
- *  http://www.webartz.com/fourcc/indexyuv.htm
- *  http://www.neuro.sfc.keio.ac.jp/~aly/polygon/info/color-space-faq.html
- *  http://www.fourcc.org/yuv.php
- */
-// bpp=12
-#define SDL_YV12_OVERLAY  0x32315659    /**< Planar mode: Y + V + U  (3 planes) */
-#define SDL_IYUV_OVERLAY  0x56555949    /**< Planar mode: Y + U + V  (3 planes) */
-// bpp=16
-#define SDL_YUY2_OVERLAY  0x32595559    /**< Packed mode: Y0+U0+Y1+V0 (1 plane) */
-#define SDL_UYVY_OVERLAY  0x59565955    /**< Packed mode: U0+Y0+V0+Y1 (1 plane) */
-#define SDL_YVYU_OVERLAY  0x55595659    /**< Packed mode: Y0+V0+Y1+U0 (1 plane) */
+#include "ijksdl_fourcc.h"
 
 #endif

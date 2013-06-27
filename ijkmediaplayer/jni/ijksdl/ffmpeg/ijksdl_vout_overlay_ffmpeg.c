@@ -105,17 +105,15 @@ static int overlay_unlock(SDL_VoutOverlay *overlay)
     return SDL_UnlockMutex(opaque->mutex);
 }
 
-SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_Vout *display)
+SDL_VoutOverlay *SDL_VoutCreateFFmpegOverlay(int width, int height, enum AVPixelFormat format, SDL_Vout *display)
 {
-    SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(w=%d, h=%d, fmt=%.4s(0x%x, dp=%p)",
-        width, height, (const char*) &format, format, display);
+    SDLTRACE("SDL_VoutCreateFFmpegOverlay(w=%d, h=%d, fmt=%s(0x%x), dp=%p)",
+        width, height, av_get_pix_fmt_name(format), (int)format, display);
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
     if (!overlay) {
-        ALOGE("SDL_VoutCreateFFmpegYUVOverlay(...)=NULL");
+        ALOGE("SDL_VoutCreateFFmpegOverlay(...)=NULL");
         return NULL;
     }
-
-    overlay->format = format;
 
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     overlay->format = format;
@@ -124,47 +122,75 @@ SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 fo
     overlay->w = width;
     overlay->h = height;
 
-    AVFrame *frame = NULL;
-    AVPicture *pic = NULL;
     switch (format) {
-    case SDL_YV12_OVERLAY:
-        SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(...): SDL_YV12_OVERLAY (swap UV)");
-        frame = alloc_avframe(opaque, AV_PIX_FMT_YUV420P, width, height);
-        if (frame) {
-            overlay_fill(overlay, frame, format, 3);
-            /* swap U,V */
-            pic = (AVPicture *) frame;
-            overlay->pixels[2] = pic->data[1];
-            overlay->pixels[1] = pic->data[2];
-
-            overlay->pitches[2] = pic->linesize[1];
-            overlay->pitches[1] = pic->linesize[2];
+    case AV_PIX_FMT_YUV420P:
+        opaque->frame = alloc_avframe(opaque, AV_PIX_FMT_YUV420P, width, height);
+        if (opaque->frame) {
+            overlay_fill(overlay, opaque->frame, format, 3);
         }
-        SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(...): overlay(w=%d, h=%d, fmt=0x%x, planes=%d, pitches=%d,%d,%d)",
+        overlay->format = SDL_FCC_I420;
+        break;
+    default:
+        ALOGE("SDL_VoutCreateFFmpegOverlay(...): unknown format");
+        overlay->format = SDL_FCC_UNDF;
+        break;
+    }
+
+    if (overlay) {
+        SDLTRACE("SDL_VoutCreateFFmpegOverlay(...): overlay(w=%d, h=%d, fmt=%.4s(0x%x), planes=%d, pitches=%d,%d,%d)",
             overlay->w,
             overlay->h,
+            (char*)&overlay->format,
             overlay->format,
             overlay->planes,
             overlay->pitches[0],
             overlay->pitches[1],
             overlay->pitches[2]);
+
+        if (opaque->frame) {
+            opaque->mutex = SDL_CreateMutex();
+
+            overlay->free_l = overlay_free_l;
+            overlay->lock = overlay_lock;
+            overlay->unlock = overlay_unlock;
+        } else {
+            overlay_free_l(overlay);
+            overlay = NULL;
+        }
+    }
+
+    SDLTRACE("SDL_VoutCreateFFmpegOverlay(...)=%p", overlay);
+    return overlay;
+}
+
+SDL_VoutOverlay *SDL_VoutCreateFFmpegYUVOverlay(int width, int height, Uint32 format, SDL_Vout *display)
+{
+    SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(w=%d, h=%d, fmt=%.4s(0x%x, dp=%p)",
+        width, height, (const char*) &format, format, display);
+
+    SDL_VoutOverlay *overlay = NULL;
+    switch (format) {
+    case SDL_FCC_YV12: {
+        overlay = SDL_VoutCreateFFmpegOverlay(width, height, AV_PIX_FMT_YUV420P, display);
+        if (overlay) {
+            /* swap U,V */
+            FFSWAP(Uint8*, overlay->pixels[1], overlay->pixels[2]);
+            FFSWAP(Uint16, overlay->pitches[1], overlay->pitches[2]);
+            overlay->format = SDL_FCC_YV12;
+        }
         break;
+    }
+    case SDL_FCC_RGBP: {
+        break;
+    }
     default:
         ALOGE("SDL_VoutCreateFFmpegYUVOverlay(...): unknown format");
         break;
     }
 
-    if (frame) {
-        opaque->mutex = SDL_CreateMutex();
-
-        overlay->free_l = overlay_free_l;
-        overlay->lock = overlay_lock;
-        overlay->unlock = overlay_unlock;
-    } else {
-        overlay_free_l(overlay);
-        overlay = NULL;
+    if (!overlay) {
+        ALOGE("SDL_VoutCreateFFmpegYUVOverlay(...)=NULL");
     }
 
-    SDLTRACE("SDL_VoutCreateFFmpegYUVOverlay(...)=%p", overlay);
     return overlay;
 }

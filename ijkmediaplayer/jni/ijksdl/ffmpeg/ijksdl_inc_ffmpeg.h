@@ -25,6 +25,7 @@
 #define IJKPLAYER__IJKSDL_FFINC_H
 
 #include "libavutil/imgutils.h"
+#include "libavutil/pixfmt.h"
 #include "libavcodec/avcodec.h"
 #include "libswscale/swscale.h"
 
