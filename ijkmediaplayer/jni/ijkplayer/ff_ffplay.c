@@ -2201,16 +2201,18 @@ long ffp_get_current_position_l(FFPlayer *ffp)
     if (!is || !is->ic)
         return 0;
 
-    int64_t start_time = is->ic->start_time;
-    double pos = get_master_clock(is);
+    int64_t start_time = fftime_to_milliseconds(is->ic->start_time);
+    int64_t pos = get_master_clock(is) * 1000;
+    // ALOGE("clock=%ld, start_time=%ld", (long)pos, (long)start_time);
     if (isnan(pos))
-        pos = (double) is->seek_pos / AV_TIME_BASE;
+        pos = fftime_to_milliseconds(is->seek_pos);
 
     if (pos < 0 || pos < start_time)
         return 0;
 
-    int64_t adjust_post = pos - start_time > 0 ? start_time : 0;
-    return fftime_to_milliseconds(adjust_post);
+    int64_t adjust_pos = pos - (start_time > 0 ? start_time : 0);
+    // ALOGE("pos=%ld", (long)adjust_pos);
+    return (long)adjust_pos;
 }
 
 long ffp_get_duration_l(FFPlayer *ffp)
@@ -2220,11 +2222,12 @@ long ffp_get_duration_l(FFPlayer *ffp)
     if (!is || !is->ic)
         return 0;
 
-    int64_t start_time = is->ic->start_time;
-    int64_t duration = is->ic->duration;
+    int64_t start_time = fftime_to_milliseconds(is->ic->start_time);
+    int64_t duration = fftime_to_milliseconds(is->ic->duration);
     if (duration < 0 || duration < start_time)
         return 0;
 
-    int64_t adjust_duration = duration - start_time > 0 ? start_time : 0;
-    return fftime_to_milliseconds(adjust_duration);
+    int64_t adjust_duration = duration - (start_time > 0 ? start_time : 0);
+    // ALOGE("dur=%ld", (long)adjust_duration);
+    return (long)adjust_duration;
 }
