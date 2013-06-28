@@ -169,6 +169,20 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     return overlay;
 }
 
+enum AVPixelFormat SDL_VoutFFmpeg_GetBestAVPixelFormat(Uint32 format)
+{
+    switch (format) {
+    case SDL_FCC_YV12:
+        return AV_PIX_FMT_YUV420P;
+    case SDL_FCC_RGB4:
+        return AV_PIX_FMT_0BGR32;
+    case SDL_FCC_RGBP:
+        return AV_PIX_FMT_RGB565;
+    default:
+        return AV_PIX_FMT_NONE;
+    }
+}
+
 int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, enum AVPixelFormat ff_format)
 {
     assert(overlay);
@@ -190,7 +204,10 @@ int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, 
         break;
     }
     case AV_PIX_FMT_RGB32:
-        case AV_PIX_FMT_BGR32: {
+        case AV_PIX_FMT_BGR32:
+        case AV_PIX_FMT_0BGR32:
+        case AV_PIX_FMT_0RGB32:
+        {
         switch (overlay->format) {
         case SDL_FCC_RGB4: {
             for (int i = 0; i < overlay->planes; ++i) {

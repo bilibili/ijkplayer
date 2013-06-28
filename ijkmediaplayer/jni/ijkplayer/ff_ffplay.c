@@ -683,7 +683,8 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
         /* get a pointer on the bitmap */
         SDL_VoutLockYUVOverlay(vp->bmp);
 
-        SDL_VoutFFmpeg_SetupPicture(vp->bmp, &pict, ffp->pic_format);
+        enum AVPixelFormat pixforamt = SDL_VoutFFmpeg_GetBestAVPixelFormat(ffp->overlay_format);
+        SDL_VoutFFmpeg_SetupPicture(vp->bmp, &pict, pixforamt);
 
 #if CONFIG_AVFILTER
         // FIXME use direct rendering
@@ -693,7 +694,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
         av_opt_get_int(ffp->sws_opts, "sws_flags", 0, &ffp->sws_flags);
         is->img_convert_ctx = sws_getCachedContext(is->img_convert_ctx,
             vp->width, vp->height, src_frame->format, vp->width, vp->height,
-            ffp->pic_format, ffp->sws_flags, NULL, NULL, NULL);
+            pixforamt, ffp->sws_flags, NULL, NULL, NULL);
         if (is->img_convert_ctx == NULL) {
             fprintf(stderr, "Cannot initialize the conversion context\n");
             exit(1);

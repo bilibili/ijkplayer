@@ -397,7 +397,6 @@ typedef struct FFPlayer {
     int sar_den;
 
     Uint32 overlay_format;
-    enum AVPixelFormat pic_format;
 
     int last_error;
     int prepared;
@@ -465,13 +464,10 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->sar_den                = 0;
 
     // ffp->overlay_format         = SDL_FCC_YV12;
-    // ffp->pic_format             = AV_PIX_FMT_YUV420P;
 
     // ffp->overlay_format         = SDL_FCC_RGBP;
-    // ffp->pic_format             = AV_PIX_FMT_RGB565;
 
     ffp->overlay_format         = SDL_FCC_RGB4;
-    ffp->pic_format             = AV_PIX_FMT_BGR32;
 
     ffp->last_error             = 0;
     ffp->prepared               = 0;
