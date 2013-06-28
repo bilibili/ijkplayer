@@ -30,7 +30,7 @@
 
 #ifdef SDLTRACE
 #undef SDLTRACE
-#define SDLTRACE
+#define SDLTRACE(...)
 #endif
 
 typedef struct AudioChannelMapEntry {
@@ -240,6 +240,7 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudi
 
     atrack->spec = *spec;
     atrack->min_buffer_size = min_buffer_size;
+    atrack->spec.buffer_size_in_bytes = min_buffer_size;
 
     atrack->thiz = (*env)->NewGlobalRef(env, thiz);
     (*env)->DeleteLocalRef(env, thiz);
