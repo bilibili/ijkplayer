@@ -134,14 +134,14 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         }
         break;
     }
-    case SDL_FCC_RGBP: {
+    case SDL_FCC_RV16: {
         opaque->frame = alloc_avframe(opaque, AV_PIX_FMT_RGB565, width, height);
         if (opaque->frame) {
             overlay_fill(overlay, opaque->frame, format, 1);
         }
         break;
     }
-    case SDL_FCC_RGB4: {
+    case SDL_FCC_RV32: {
         opaque->frame = alloc_avframe(opaque, AV_PIX_FMT_RGB32, width, height);
         if (opaque->frame) {
             overlay_fill(overlay, opaque->frame, format, 1);
@@ -174,9 +174,9 @@ enum AVPixelFormat SDL_VoutFFmpeg_GetBestAVPixelFormat(Uint32 format)
     switch (format) {
     case SDL_FCC_YV12:
         return AV_PIX_FMT_YUV420P;
-    case SDL_FCC_RGB4:
+    case SDL_FCC_RV32:
         return AV_PIX_FMT_0BGR32;
-    case SDL_FCC_RGBP:
+    case SDL_FCC_RV16:
         return AV_PIX_FMT_RGB565;
     default:
         return AV_PIX_FMT_NONE;
@@ -209,7 +209,7 @@ int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, 
         case AV_PIX_FMT_0RGB32:
         {
         switch (overlay->format) {
-        case SDL_FCC_RGB4: {
+        case SDL_FCC_RV32: {
             for (int i = 0; i < overlay->planes; ++i) {
                 pic->data[i] = overlay->pixels[i];
                 pic->linesize[i] = overlay->pitches[i];
@@ -223,7 +223,7 @@ int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, 
     case AV_PIX_FMT_BGR565:
         case AV_PIX_FMT_RGB565: {
         switch (overlay->format) {
-        case SDL_FCC_RGBP: {
+        case SDL_FCC_RV16: {
             for (int i = 0; i < overlay->planes; ++i) {
                 pic->data[i] = overlay->pixels[i];
                 pic->linesize[i] = overlay->pitches[i];

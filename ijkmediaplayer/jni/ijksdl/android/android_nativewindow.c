@@ -94,7 +94,7 @@ static int android_render_on_yv12(ANativeWindow_Buffer *out_buffer, const SDL_Vo
 static int android_render_rgb_on_rgb(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay, int bpp)
 {
     // SDLTRACE("SDL_VoutAndroid: android_render_rgb_on_rgb(%p)", overlay);
-    assert(overlay->format == SDL_FCC_RGBP);
+    assert(overlay->format == SDL_FCC_RV16);
     assert(overlay->planes == 1);
 
     int min_height = IJKMIN(out_buffer->height, overlay->h);
@@ -131,7 +131,7 @@ static int android_render_on_rgb565(ANativeWindow_Buffer *out_buffer, const SDL_
     assert(overlay);
 
     switch (overlay->format) {
-    case SDL_FCC_RGBP: {
+    case SDL_FCC_RV16: {
         return android_render_rgb565_on_rgb565(out_buffer, overlay);
     }
     }
@@ -150,7 +150,7 @@ static int android_render_on_rgb8888(ANativeWindow_Buffer *out_buffer, const SDL
     assert(overlay);
 
     switch (overlay->format) {
-    case SDL_FCC_RGB4: {
+    case SDL_FCC_RV32: {
         return android_render_rgb32_on_rgb8888(out_buffer, overlay);
     }
     }
@@ -174,15 +174,13 @@ static AndroidHalFourccDescriptor g_hal_fcc_map[] = {
 
     // RGB565
     { HAL_PIXEL_FORMAT_RGB_565, "HAL_RGB_565", HAL_PIXEL_FORMAT_RGB_565, android_render_on_rgb565 },
-    { SDL_FCC_RGBP, "RGBP", HAL_PIXEL_FORMAT_RGB_565, android_render_on_rgb565 },
-    { SDL_FCC_BGRP, "BGRP", HAL_PIXEL_FORMAT_RGB_565, android_render_on_rgb565 },
+    { SDL_FCC_RV16, "RV16", HAL_PIXEL_FORMAT_RGB_565, android_render_on_rgb565 },
 
     // RGB8888
     { HAL_PIXEL_FORMAT_RGBX_8888, "HAL_RGBX_8888", HAL_PIXEL_FORMAT_RGBX_8888, android_render_on_rgb8888 },
     { HAL_PIXEL_FORMAT_RGBA_8888, "HAL_RGBA_8888", HAL_PIXEL_FORMAT_RGBA_8888, android_render_on_rgb8888 },
     { HAL_PIXEL_FORMAT_BGRA_8888, "HAL_BGRA_8888", HAL_PIXEL_FORMAT_BGRA_8888, android_render_on_rgb8888 },
-    { SDL_FCC_RGB4, "RGB4", HAL_PIXEL_FORMAT_RGBX_8888, android_render_on_rgb8888 },
-    { SDL_FCC_BGR4, "BGR4", HAL_PIXEL_FORMAT_RGBX_8888, android_render_on_rgb8888 },
+    { SDL_FCC_RV32, "RV32", HAL_PIXEL_FORMAT_RGBX_8888, android_render_on_rgb8888 },
 };
 
 AndroidHalFourccDescriptor *native_window_get_desc(int fourcc_or_hal)
