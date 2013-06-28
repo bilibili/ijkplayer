@@ -602,6 +602,7 @@ static void alloc_picture(FFPlayer *ffp)
     SDL_UnlockMutex(is->pictq_mutex);
 }
 
+#ifdef FFP_MERGE
 static void duplicate_right_border_pixels(SDL_VoutOverlay *bmp) {
     int i, width, height;
     Uint8 *p, *maxp;
@@ -619,6 +620,7 @@ static void duplicate_right_border_pixels(SDL_VoutOverlay *bmp) {
         }
     }
 }
+#endif
 
 static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t pos, int serial)
 {
