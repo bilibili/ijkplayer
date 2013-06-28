@@ -42,8 +42,8 @@ inline static SDL_Aout *SDL_Aout_CreateInternal(size_t opaque_size)
 
     aout->mutex = SDL_CreateMutex();
     if (aout->mutex == NULL) {
-        freep(aout->opaque);
-        freep(aout);
+        free(aout->opaque);
+        free(aout);
         return NULL;
     }
 
