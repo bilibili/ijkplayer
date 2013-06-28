@@ -244,9 +244,6 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
         }
     }
 
-    int buf_w = overlay->w;
-    int buf_h = IJKALIGN(overlay->h, 2);
-
     ANativeWindow_Buffer out_buffer;
     retval = ANativeWindow_lock(native_window, &out_buffer, NULL);
     if (retval < 0) {
@@ -254,11 +251,11 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
         return retval;
     }
 
-    if (out_buffer.width != buf_w || out_buffer.height != buf_h) {
+    if (out_buffer.width != buff_w || out_buffer.height != buff_h) {
         ALOGE("unexpected native window buffer (%p)(w:%d, h:%d, fmt:'%.4s'0x%x), expecting (w:%d, h:%d, fmt:'%.4s'0x%x)",
             native_window,
             out_buffer.width, out_buffer.height, (char*)&out_buffer.format, out_buffer.format,
-            buf_w, buf_h, (char*)&overlay->format, overlay->format);
+            buff_w, buff_h, (char*)&overlay->format, overlay->format);
         // FIXME: 9 set all black
         ANativeWindow_unlockAndPost(native_window);
         return -1;
