@@ -703,7 +703,9 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
                   0, vp->height, pict.data, pict.linesize);
 #endif
         /* workaround SDL PITCH_WORKAROUND */
+#ifdef FFP_MERGE
         duplicate_right_border_pixels(vp->bmp);
+#endif
         /* update the bitmap content */
         SDL_VoutUnlockYUVOverlay(vp->bmp);
 
