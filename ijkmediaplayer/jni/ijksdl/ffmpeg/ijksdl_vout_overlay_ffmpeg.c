@@ -175,8 +175,10 @@ enum AVPixelFormat SDL_VoutFFmpeg_GetBestAVPixelFormat(Uint32 format)
     case SDL_FCC_YV12:
         return AV_PIX_FMT_YUV420P;
     case SDL_FCC_RV32:
+        // FIXME: android only
         return AV_PIX_FMT_0BGR32;
     case SDL_FCC_RV16:
+        // FIXME: android only
         return AV_PIX_FMT_RGB565;
     default:
         return AV_PIX_FMT_NONE;
