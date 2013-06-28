@@ -158,6 +158,44 @@ static int android_render_on_rgb8888(ANativeWindow_Buffer *out_buffer, const SDL
     return -1;
 }
 
+typedef struct AndroidHalFourccDescriptor {
+    Uint32 fcc_or_hal;
+    const char* name;
+
+    int hal_format;
+
+    int (*render)(ANativeWindow_Buffer *native_buffer, const SDL_VoutOverlay *overlay);
+} AndroidHalFourccDescriptor;
+
+static AndroidHalFourccDescriptor g_hal_fcc_map[] = {
+    // YV12
+    { HAL_PIXEL_FORMAT_YV12, "HAL_YV12", HAL_PIXEL_FORMAT_YV12, android_render_on_yv12 },
+    { SDL_FCC_YV12, "YV12", HAL_PIXEL_FORMAT_YV12, android_render_on_yv12 },
+
+    // RGB565
+    { HAL_PIXEL_FORMAT_RGB_565, "HAL_RGB_565", HAL_PIXEL_FORMAT_RGB_565, android_render_on_rgb565 },
+    { SDL_FCC_RGBP, "RGBP", HAL_PIXEL_FORMAT_RGB_565, android_render_on_rgb565 },
+    { SDL_FCC_BGRP, "BGRP", HAL_PIXEL_FORMAT_RGB_565, android_render_on_rgb565 },
+
+    // RGB8888
+    { HAL_PIXEL_FORMAT_RGBX_8888, "HAL_RGBX_8888", HAL_PIXEL_FORMAT_RGBX_8888, android_render_on_rgb8888 },
+    { HAL_PIXEL_FORMAT_RGBA_8888, "HAL_RGBA_8888", HAL_PIXEL_FORMAT_RGBA_8888, android_render_on_rgb8888 },
+    { HAL_PIXEL_FORMAT_BGRA_8888, "HAL_BGRA_8888", HAL_PIXEL_FORMAT_BGRA_8888, android_render_on_rgb8888 },
+    { SDL_FCC_RGB4, "RGB4", HAL_PIXEL_FORMAT_RGBX_8888, android_render_on_rgb8888 },
+    { SDL_FCC_BGR4, "BGR4", HAL_PIXEL_FORMAT_RGBX_8888, android_render_on_rgb8888 },
+};
+
+AndroidHalFourccDescriptor *native_window_get_desc(int fourcc_or_hal)
+{
+    for (int i = 0; i < NELEM(g_hal_fcc_map); ++i) {
+        AndroidHalFourccDescriptor *desc = &g_hal_fcc_map[i];
+        if (desc->fcc_or_hal == fourcc_or_hal)
+            return desc;
+    }
+
+    return NULL;
+}
+
 int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *overlay)
 {
     int retval;
@@ -177,31 +215,34 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
         return -1;
     }
 
-    int (*fn_cp_image)(ANativeWindow_Buffer *native_buffer, const SDL_VoutOverlay *overlay) = NULL;
+    int curr_w = ANativeWindow_getWidth(native_window);
+    int curr_h = ANativeWindow_getHeight(native_window);
     int curr_format = ANativeWindow_getFormat(native_window);
-    switch (curr_format) {
-    case HAL_PIXEL_FORMAT_YV12:
-        fn_cp_image = android_render_on_yv12;
-        break;
-    case HAL_PIXEL_FORMAT_RGB_565:
-        case SDL_FCC_RGBP:
-        case SDL_FCC_BGRP:
-        fn_cp_image = android_render_on_rgb565;
-        break;
-    case HAL_PIXEL_FORMAT_RGBA_8888:
-        case HAL_PIXEL_FORMAT_RGBX_8888:
-        case HAL_PIXEL_FORMAT_BGRA_8888:
-        case SDL_FCC_RGB4:
-        case SDL_FCC_BGR4:
-        fn_cp_image = android_render_on_rgb8888;
-        break;
-    default:
-        ALOGE("sdl_native_window_display_l: unexpected buffer format: %d", curr_format);
-        break;
+    int buff_w = IJKALIGN(overlay->w, 2);
+    int buff_h = IJKALIGN(overlay->h, 2);
+
+    AndroidHalFourccDescriptor *voutDesc = native_window_get_desc(curr_format);
+    if (!voutDesc) {
+        ALOGE("sdl_native_window_display_l: unknown hal format: %d", curr_format);
+        return -1;
     }
 
-    if (!fn_cp_image)
+    AndroidHalFourccDescriptor *overlayDesc = native_window_get_desc(overlay->format);
+    if (!overlayDesc) {
+        ALOGE("sdl_native_window_display_l: unknown overlay format: %d", overlay->format);
         return -1;
+    }
+
+    if (voutDesc->hal_format != overlayDesc->hal_format) {
+        SDLTRACE("ANativeWindow_setBuffersGeometry: w=%d, h=%d, f=%.4s(0x%x) => w=%d, h=%d, f=%.4s(0x%x)",
+            curr_w, curr_h, (char*) &curr_format, curr_format,
+            buff_w, buff_h, (char*) &overlay->format, overlay->format);
+        retval = ANativeWindow_setBuffersGeometry(native_window, buff_w, buff_h, overlayDesc->hal_format);
+        if (retval < 0) {
+            ALOGE("sdl_native_window_display_l: ANativeWindow_setBuffersGeometry: failed %d", retval);
+            return retval;
+        }
+    }
 
     int buf_w = overlay->w;
     int buf_h = IJKALIGN(overlay->h, 2);
@@ -209,7 +250,7 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
     ANativeWindow_Buffer out_buffer;
     retval = ANativeWindow_lock(native_window, &out_buffer, NULL);
     if (retval < 0) {
-        ALOGE("sdl_native_window_display_on_rgb565_l: ANativeWindow_lock: failed %d", retval);
+        ALOGE("sdl_native_window_display_l: ANativeWindow_lock: failed %d", retval);
         return retval;
     }
 
@@ -223,16 +264,17 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
         return -1;
     }
 
-    int copy_ret = fn_cp_image(&out_buffer, overlay);
-    if (copy_ret < 0) {
+    int render_ret = voutDesc->render(&out_buffer, overlay);
+    if (render_ret < 0) {
         // FIXME: 9 set all black
+        // return after unlock image;
     }
 
     retval = ANativeWindow_unlockAndPost(native_window);
     if (retval < 0) {
-        ALOGE("sdl_native_window_display_on_rgb565_l: ANativeWindow_unlockAndPost: failed %d", retval);
+        ALOGE("sdl_native_window_display_l: ANativeWindow_unlockAndPost: failed %d", retval);
         return retval;
     }
 
-    return copy_ret;
+    return render_ret;
 }
