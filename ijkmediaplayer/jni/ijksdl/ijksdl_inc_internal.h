@@ -25,7 +25,6 @@
 
 #include <stdint.h>
 
-#define IJK_LOG_TAG "IJKSDL"
 #include "ijkutil/ijkutil.h"
 
 #include "ijksdl_stdinc.h"

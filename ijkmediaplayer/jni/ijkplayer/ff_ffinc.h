@@ -35,9 +35,6 @@
 #include "libswresample/swresample.h"
 #include "ijksdl/ijksdl.h"
 
-#ifndef IJK_LOG_TAG
-#define IJK_LOG_TAG "IJKPLAYER"
-#endif
 #include "ijkutil/ijkutil.h"
 
 #endif
