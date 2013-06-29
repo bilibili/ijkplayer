@@ -83,7 +83,7 @@ public class MediaController extends FrameLayout {
     private TextView mFileName;
     private OutlineTextView mInfoView;
     private String mTitle;
-    private long mDuration;
+    private int mDuration;
     private boolean mShowing;
     private boolean mDragging;
     private boolean mInstantSeeking = true;
@@ -364,8 +364,8 @@ public class MediaController extends FrameLayout {
         if (mPlayer == null || mDragging)
             return 0;
 
-        long position = mPlayer.getCurrentPosition();
-        long duration = mPlayer.getDuration();
+        int position = mPlayer.getCurrentPosition();
+        int duration = mPlayer.getDuration();
         if (mProgress != null) {
             if (duration > 0) {
                 long pos = 1000L * position / duration;
@@ -385,12 +385,12 @@ public class MediaController extends FrameLayout {
         return position;
     }
 
-    private static String generateTime(long position) {
-        long totalSeconds = position / 1000;
+    private static String generateTime(int position) {
+        int totalSeconds = position / 1000;
 
-        long seconds = totalSeconds % 60;
-        long minutes = (totalSeconds / 60) % 60;
-        long hours = totalSeconds / 3600;
+        int seconds = totalSeconds % 60;
+        int minutes = (totalSeconds / 60) % 60;
+        int hours = totalSeconds / 3600;
 
         if (hours > 0) {
             return String.format(Locale.US, "%02d:%02d:%02d", hours, minutes,
@@ -485,7 +485,7 @@ public class MediaController extends FrameLayout {
             if (!fromuser)
                 return;
 
-            long newposition = (mDuration * progress) / 1000;
+            int newposition = (mDuration * progress) / 1000;
             String time = generateTime(newposition);
             if (mInstantSeeking)
                 mPlayer.seekTo(newposition);
@@ -525,9 +525,9 @@ public class MediaController extends FrameLayout {
 
         void pause();
 
-        long getDuration();
+        int getDuration();
 
-        long getCurrentPosition();
+        int getCurrentPosition();
 
         void seekTo(long pos);
 

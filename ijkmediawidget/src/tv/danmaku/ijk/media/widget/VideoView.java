@@ -594,21 +594,25 @@ public class VideoView extends SurfaceView implements
     }
 
     @Override
-    public long getDuration() {
+    public int getDuration() {
         if (isInPlaybackState()) {
             if (mDuration > 0)
-                return mDuration;
+                return (int) mDuration;
             mDuration = mMediaPlayer.getDuration();
-            return mDuration;
+            DebugLog.efmt(TAG, "duration:%d", (int)mDuration);
+            return (int) mDuration;
         }
         mDuration = -1;
-        return mDuration;
+        return (int) mDuration;
     }
 
     @Override
-    public long getCurrentPosition() {
-        if (isInPlaybackState())
-            return mMediaPlayer.getCurrentPosition();
+    public int getCurrentPosition() {
+        if (isInPlaybackState()) {
+            long position = mMediaPlayer.getCurrentPosition();
+            DebugLog.efmt(TAG, "position:%d", (int)position);
+            return (int) position;
+        }
         return 0;
     }
 
