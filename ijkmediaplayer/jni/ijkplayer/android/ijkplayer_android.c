@@ -412,7 +412,7 @@ int ijkmp_seek_to(IjkMediaPlayer *mp, long msec)
     assert(mp);
     MPTRACE("ijkmp_seek_to(%ld)", msec);
     pthread_mutex_lock(&mp->mutex);
-    int retval = ijkmp_seek_to(mp, msec);
+    int retval = ijkmp_seek_to_l(mp, msec);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_seek_to(%ld)=%d", msec, retval);
 
