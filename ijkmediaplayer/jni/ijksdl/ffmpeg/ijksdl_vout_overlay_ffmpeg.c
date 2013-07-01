@@ -120,8 +120,6 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         return NULL;
     }
 
-    width = IJKALIGN(width, 32);
-
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     overlay->format = format;
     overlay->pitches = opaque->pitches;
@@ -131,21 +129,24 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
 
     enum AVPixelFormat ff_format = AV_PIX_FMT_NONE;
     int planes = 0;
-    int buf_width = width;
+    int buf_width = width;  // must be aligned to 16 bytes pitch for arm-neon image-convert
     int buf_height = height;
     switch (format) {
     case SDL_FCC_YV12: {
         ff_format = AV_PIX_FMT_YUV420P;
+        buf_width = IJKALIGN(width, 16); // 1 bytes per pixel for Y-plane
         planes = 3;
         break;
     }
     case SDL_FCC_RV16: {
         ff_format = AV_PIX_FMT_RGB565;
+        buf_width = IJKALIGN(width, 8); // 2 bytes per pixel
         planes = 1;
         break;
     }
     case SDL_FCC_RV32: {
         ff_format = AV_PIX_FMT_0BGR32;
+        buf_width = IJKALIGN(width, 4); // 4 bytes per pixel
         planes = 1;
         break;
     }

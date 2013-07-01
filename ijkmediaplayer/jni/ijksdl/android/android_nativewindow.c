@@ -112,13 +112,13 @@ static int android_render_rgb_on_rgb(ANativeWindow_Buffer *out_buffer, const SDL
 
     if (dst_line_size == src_line_size) {
         int plane_size = src_line_size * min_height;
-        // ALOGE("android_render_rgb_on_rgb %p %p %d", dst_pixels, src_pixels, plane_size);
+        // ALOGE("android_render_rgb_on_rgb (pix-match) %p %p %d", dst_pixels, src_pixels, plane_size);
         memcpy(dst_pixels, src_pixels, plane_size);
     } else {
         // TODO: padding
         int bytewidth = IJKMIN(dst_line_size, src_line_size);
 
-        // ALOGE("android_render_rgb_on_rgb %p %d %p %d %d %d", dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
+        // ALOGE("android_render_rgb_on_rgb (pix-mismatch) %p %d %p %d %d %d", dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
         av_image_copy_plane(dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
     }
 
