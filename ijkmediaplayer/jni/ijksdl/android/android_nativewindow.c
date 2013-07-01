@@ -31,6 +31,11 @@
 #include "../ffmpeg/ijksdl_inc_ffmpeg.h"
 #include "ijksdl_inc_internal_android.h"
 
+#ifdef SDLTRACE
+#undef SDLTRACE
+#define SDLTRACE(...)
+#endif
+
 static int android_render_yv12_on_yv12(ANativeWindow_Buffer *out_buffer, const SDL_VoutOverlay *overlay)
 {
     // SDLTRACE("SDL_VoutAndroid: android_render_yv12_on_yv12(%p)", overlay);

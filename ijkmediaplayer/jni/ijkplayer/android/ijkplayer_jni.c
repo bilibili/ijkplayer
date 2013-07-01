@@ -291,9 +291,9 @@ IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 
 inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2)
 {
-    MPTRACE("post_event(%p, %p, %d, %d, %d)", (void*)env, (void*) weak_this, what, arg1, arg2);
+    // MPTRACE("post_event(%p, %p, %d, %d, %d)", (void*)env, (void*) weak_this, what, arg1, arg2);
     (*env)->CallStaticVoidMethod(env, g_clazz.clazz, g_clazz.postEventFromNative, weak_this, what, arg1, arg2, NULL);
-    MPTRACE("post_event()=void");
+    // MPTRACE("post_event()=void");
 }
 
 static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)

@@ -32,6 +32,11 @@
 #include "ijksdl_android_jni.h"
 #include "android_audiotrack.h"
 
+#ifdef SDLTRACE
+#undef SDLTRACE
+#define SDLTRACE(...)
+#endif
+
 typedef struct SDL_Aout_Opaque {
     SDL_cond *wakeup_cond;
     SDL_mutex *wakeup_mutex;
