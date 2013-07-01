@@ -28,4 +28,6 @@
 
 void SDL_Delay(Uint32 ms);
 
+Uint64 SDL_GetTickHR(void);
+
 #endif
