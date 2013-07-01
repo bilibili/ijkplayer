@@ -113,7 +113,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         width, height, (const char*) &format, format, display);
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
     if (!overlay) {
-        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...)=NULL");
+        ALOGE("overlay allocation failed");
         return NULL;
     }
 
@@ -124,130 +124,48 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     overlay->w = width;
     overlay->h = height;
 
+    enum AVPixelFormat ff_format = AV_PIX_FMT_NONE;
+    int planes = 0;
+    int buf_width = width;
+    int buf_height = height;
     switch (format) {
     case SDL_FCC_YV12: {
-        opaque->frame = alloc_avframe(opaque, AV_PIX_FMT_YUV420P, width, height);
-        if (opaque->frame) {
-            overlay_fill(overlay, opaque->frame, format, 3);
-            FFSWAP(Uint8*, overlay->pixels[1], overlay->pixels[2]);
-            FFSWAP(Uint16, overlay->pitches[1], overlay->pitches[2]);
-        }
+        ff_format = AV_PIX_FMT_YUV420P;
+        planes = 3;
         break;
     }
     case SDL_FCC_RV16: {
-        opaque->frame = alloc_avframe(opaque, AV_PIX_FMT_RGB565, width, height);
-        if (opaque->frame) {
-            overlay_fill(overlay, opaque->frame, format, 1);
-        }
+        ff_format = AV_PIX_FMT_RGB565;
+        planes = 1;
         break;
     }
     case SDL_FCC_RV32: {
-        opaque->frame = alloc_avframe(opaque, AV_PIX_FMT_RGB32, width, height);
-        if (opaque->frame) {
-            overlay_fill(overlay, opaque->frame, format, 1);
-        }
+        ff_format = AV_PIX_FMT_RGB32;
+        planes = 1;
         break;
     }
     default:
         ALOGE("SDL_VoutFFmpeg_CreateOverlay(...): unknown format %.4s(0x%x)", (char*)&format, format);
-        overlay->format = SDL_FCC_UNDF;
-        break;
+        goto fail;
     }
 
-    if (opaque->frame) {
-        opaque->mutex = SDL_CreateMutex();
-
-        overlay->free_l = overlay_free_l;
-        overlay->lock = overlay_lock;
-        overlay->unlock = overlay_unlock;
-    } else {
-        overlay_free_l(overlay);
-        overlay = NULL;
-        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...)=NULL");
+    opaque->frame = alloc_avframe(opaque, ff_format, buf_width, buf_height);
+    if (!opaque->frame) {
+        ALOGE("overlay->opaque->frame allocation failed");
+        goto fail;
     }
+    opaque->mutex = SDL_CreateMutex();
+    overlay_fill(overlay, opaque->frame, format, planes);
+
+    overlay->free_l = overlay_free_l;
+    overlay->lock = overlay_lock;
+    overlay->unlock = overlay_unlock;
 
     return overlay;
-}
 
-enum AVPixelFormat SDL_VoutFFmpeg_GetBestAVPixelFormat(Uint32 format)
-{
-    switch (format) {
-    case SDL_FCC_YV12:
-        return AV_PIX_FMT_YUV420P;
-    case SDL_FCC_RV32:
-        // FIXME: android only
-        return AV_PIX_FMT_0BGR32;
-    case SDL_FCC_RV16:
-        // FIXME: android only
-        return AV_PIX_FMT_RGB565;
-    default:
-        return AV_PIX_FMT_NONE;
-    }
-}
-
-int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, enum AVPixelFormat ff_format)
-{
-    assert(overlay);
-    assert(pic);
-
-    int retval = -1;
-    switch (ff_format) {
-    case AV_PIX_FMT_YUV420P: {
-        switch (overlay->format) {
-        case SDL_FCC_YV12: {
-            for (int i = 0; i < overlay->planes; ++i) {
-                pic->data[i] = overlay->pixels[i];
-                pic->linesize[i] = overlay->pitches[i];
-            }
-            retval = 0;
-            break;
-        }
-        }
-        break;
-    }
-    case AV_PIX_FMT_RGB32:
-        case AV_PIX_FMT_BGR32:
-        case AV_PIX_FMT_0BGR32:
-        case AV_PIX_FMT_0RGB32:
-        {
-        switch (overlay->format) {
-        case SDL_FCC_RV32: {
-            for (int i = 0; i < overlay->planes; ++i) {
-                pic->data[i] = overlay->pixels[i];
-                pic->linesize[i] = overlay->pitches[i];
-            }
-            retval = 0;
-            break;
-        }
-        }
-        break;
-    }
-    case AV_PIX_FMT_BGR565:
-        case AV_PIX_FMT_RGB565: {
-        switch (overlay->format) {
-        case SDL_FCC_RV16: {
-            for (int i = 0; i < overlay->planes; ++i) {
-                pic->data[i] = overlay->pixels[i];
-                pic->linesize[i] = overlay->pitches[i];
-            }
-            retval = 0;
-            break;
-        }
-        }
-        break;
-    }
-    default: {
-        break;
-    }
-    }
-
-    if (retval) {
-        ALOGE("SDL_VoutFFmpeg_SetupPicture: unexpected %s(%d), %.4s(0x%x)",
-            av_get_pix_fmt_name(ff_format), ff_format,
-            (char*)&overlay->format, overlay->format);
-    }
-
-    return retval;
+    fail:
+    overlay_free_l(overlay);
+    return NULL;
 }
 
 int SDL_VoutFFmpeg_ConvertPicture(
@@ -259,12 +177,33 @@ int SDL_VoutFFmpeg_ConvertPicture(
     assert(p_sws_ctx);
     AVPicture dest_pic = { { 0 } };
 
-    enum AVPixelFormat pixformat = SDL_VoutFFmpeg_GetBestAVPixelFormat(overlay->format);
-    SDL_VoutFFmpeg_SetupPicture(overlay, &dest_pic, pixformat);
+    enum AVPixelFormat dst_format = AV_PIX_FMT_NONE;
+    switch (overlay->format) {
+    case SDL_FCC_YV12:
+        dst_format = AV_PIX_FMT_YUV420P;
+        break;
+    case SDL_FCC_RV32:
+        // FIXME: android only
+        dst_format = AV_PIX_FMT_0BGR32;
+        break;
+    case SDL_FCC_RV16:
+        // FIXME: android only
+        dst_format = AV_PIX_FMT_RGB565;
+        break;
+    default:
+        ALOGE("SDL_VoutFFmpeg_ConvertPicture: unexpected overlay format %s(%d)",
+            (char*)&overlay->format, overlay->format);
+        return -1;
+    }
+
+    for (int i = 0; i < overlay->planes; ++i) {
+        dest_pic.data[i] = overlay->pixels[i];
+        dest_pic.linesize[i] = overlay->pitches[i];
+    }
 
     *p_sws_ctx = sws_getCachedContext(*p_sws_ctx,
         width, height, src_format, width, height,
-        pixformat, sws_flags, NULL, NULL, NULL);
+        dst_format, sws_flags, NULL, NULL, NULL);
     if (*p_sws_ctx == NULL) {
         ALOGE("sws_getCachedContext failed");
         return -1;
