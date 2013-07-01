@@ -29,6 +29,7 @@
 #include "../ijksdl_vout_internal.h"
 #include "../ijksdl_video.h"
 #include "ijksdl_inc_ffmpeg.h"
+#include "ijksdl_image_convert.h"
 
 typedef struct SDL_VoutOverlay_Opaque {
     SDL_mutex *mutex;
@@ -38,6 +39,8 @@ typedef struct SDL_VoutOverlay_Opaque {
 
     Uint16 pitches[AV_NUM_DATA_POINTERS];
     Uint8 *pixels[AV_NUM_DATA_POINTERS];
+
+    int no_neon_warned;
 } SDL_VoutOverlay_Opaque;
 
 /* Always assume a linesize alignment of 1 here */
@@ -117,6 +120,8 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         return NULL;
     }
 
+    width = IJKALIGN(width, 32);
+
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     overlay->format = format;
     overlay->pitches = opaque->pitches;
@@ -140,7 +145,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         break;
     }
     case SDL_FCC_RV32: {
-        ff_format = AV_PIX_FMT_RGB32;
+        ff_format = AV_PIX_FMT_0BGR32;
         planes = 1;
         break;
     }
@@ -170,11 +175,13 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
 
 int SDL_VoutFFmpeg_ConvertPicture(
     const SDL_VoutOverlay *overlay,
-    int width, int height, enum AVPixelFormat src_format, uint8_t **src_data, int *src_linesize,
+    int width, int height,
+    enum AVPixelFormat src_format, const uint8_t **src_data, int *src_linesize,
     struct SwsContext **p_sws_ctx, int sws_flags)
 {
     assert(overlay);
     assert(p_sws_ctx);
+    SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     AVPicture dest_pic = { { 0 } };
 
     enum AVPixelFormat dst_format = AV_PIX_FMT_NONE;
@@ -201,18 +208,27 @@ int SDL_VoutFFmpeg_ConvertPicture(
         dest_pic.linesize[i] = overlay->pitches[i];
     }
 
-    *p_sws_ctx = sws_getCachedContext(*p_sws_ctx,
-        width, height, src_format, width, height,
-        dst_format, sws_flags, NULL, NULL, NULL);
-    if (*p_sws_ctx == NULL) {
-        ALOGE("sws_getCachedContext failed");
-        return -1;
+    if (ijk_image_convert(width, height,
+        dst_format, dest_pic.data, dest_pic.linesize,
+        src_format, src_data, src_linesize)) {
+        *p_sws_ctx = sws_getCachedContext(*p_sws_ctx,
+            width, height, src_format, width, height,
+            dst_format, sws_flags, NULL, NULL, NULL);
+        if (*p_sws_ctx == NULL) {
+            ALOGE("sws_getCachedContext failed");
+            return -1;
+        }
+
+        sws_scale(*p_sws_ctx, (const uint8_t **) src_data, src_linesize,
+            0, height, dest_pic.data, dest_pic.linesize);
+
+        if (!opaque->no_neon_warned) {
+            opaque->no_neon_warned = 1;
+            ALOGE("non-neon image convert %s -> %s", av_get_pix_fmt_name(src_format), av_get_pix_fmt_name(dst_format));
+        }
     }
 
-    sws_scale(*p_sws_ctx, (const uint8_t **) src_data, src_linesize,
-        0, height, dest_pic.data, dest_pic.linesize);
-
-    // FIXME:
-    // duplicate_right_border_pixels(vp->bmp);
+// FIXME:
+// duplicate_right_border_pixels(vp->bmp);
     return 0;
 }

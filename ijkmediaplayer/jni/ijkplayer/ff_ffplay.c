@@ -682,7 +682,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
         SDL_VoutLockYUVOverlay(vp->bmp);
 
         if (SDL_VoutFFmpeg_ConvertPicture(vp->bmp, vp->width, vp->height,
-            src_frame->format, src_frame->data, src_frame->linesize,
+            src_frame->format, (const uint8_t**)src_frame->data, src_frame->linesize,
             &is->img_convert_ctx, ffp->sws_flags) < 0) {
             fprintf(stderr, "Cannot initialize the conversion context\n");
             exit(1);

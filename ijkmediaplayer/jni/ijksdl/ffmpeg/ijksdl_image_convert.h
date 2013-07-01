@@ -21,14 +21,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__FFMPEG__IJKSDL_FFINC_H
-#define IJKSDL__FFMPEG__IJKSDL_FFINC_H
+#ifndef IJKSDL__FFMPEG__IJKSDL_IMAGE_CONVERT_H
+#define IJKSDL__FFMPEG__IJKSDL_IMAGE_CONVERT_H
 
-#include "libavutil/imgutils.h"
-#include "libavutil/pixfmt.h"
-#include "libavcodec/avcodec.h"
-#include "libswscale/swscale.h"
+#include <stdint.h>
+#include "ijksdl_inc_ffmpeg.h"
 
-#include "../ijksdl_inc_internal.h"
+int ijk_image_convert(int width, int height,
+    enum AVPixelFormat dst_format, uint8_t **dst_data, int *dst_linesize,
+    enum AVPixelFormat src_format, const uint8_t **src_data, int *src_linesize);
 
 #endif

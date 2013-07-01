@@ -237,7 +237,7 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
     }
 
     if (voutDesc->hal_format != overlayDesc->hal_format) {
-        SDLTRACE("ANativeWindow_setBuffersGeometry: w=%d, h=%d, f=%.4s(0x%x) => w=%d, h=%d, f=%.4s(0x%x)",
+        ALOGD("ANativeWindow_setBuffersGeometry: w=%d, h=%d, f=%.4s(0x%x) => w=%d, h=%d, f=%.4s(0x%x)",
             curr_w, curr_h, (char*) &curr_format, curr_format,
             buff_w, buff_h, (char*) &overlay->format, overlay->format);
         retval = ANativeWindow_setBuffersGeometry(native_window, buff_w, buff_h, overlayDesc->hal_format);

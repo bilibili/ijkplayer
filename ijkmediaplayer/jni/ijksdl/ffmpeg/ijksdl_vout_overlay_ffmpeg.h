@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_VOUT_OVERLAY_FFMPEG_H
-#define IJKSDL__IJKSDL_VOUT_OVERLAY_FFMPEG_H
+#ifndef IJKSDL__FFMPEG__IJKSDL_VOUT_OVERLAY_FFMPEG_H
+#define IJKSDL__FFMPEG__IJKSDL_VOUT_OVERLAY_FFMPEG_H
 
 #include "../ijksdl_stdinc.h"
 #include "../ijksdl_vout.h"
@@ -33,7 +33,8 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
 
 int SDL_VoutFFmpeg_ConvertPicture(
     const SDL_VoutOverlay *overlay,
-    int width, int height, enum AVPixelFormat src_format, uint8_t **src_data, int *src_linesize,
+    int width, int height,
+    enum AVPixelFormat src_format, const uint8_t **src_data, int *src_linesize,
     struct SwsContext **p_sws_ctx, int sws_flags);
 
 #endif

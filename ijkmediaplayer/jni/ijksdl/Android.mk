@@ -36,6 +36,15 @@ LOCAL_SRC_FILES += ijksdl_vout.c
 
 LOCAL_SRC_FILES += ffmpeg/ijksdl_vout_overlay_ffmpeg.c
 
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+LOCAL_CFLAGS += -DHAVE_NEON=1
+LOCAL_SRC_FILES += ffmpeg/abi_armv7a_neon/image_convert.c
+LOCAL_SRC_FILES += ffmpeg/abi_armv7a_neon/i420_rgb.S.arm.neon
+LOCAL_SRC_FILES += ffmpeg/abi_armv7a_neon/i420_rv16.S.arm.neon
+else
+LOCAL_SRC_FILES += ffmpeg/abi_all/image_convert.c
+endif
+
 LOCAL_SRC_FILES += android/android_audiotrack.c
 LOCAL_SRC_FILES += android/android_nativewindow.c
 LOCAL_SRC_FILES += android/ijksdl_android_jni.c
@@ -44,6 +53,9 @@ LOCAL_SRC_FILES += android/ijksdl_vout_android_nativewindow.c
 LOCAL_SRC_FILES += android/ijksdl_vout_android_surface.c
 
 LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil
+LOCAL_STATIC_LIBRARIES := cpufeatures
 
 LOCAL_MODULE := ijksdl
 include $(BUILD_SHARED_LIBRARY)
+
+$(call import-module,android/cpufeatures)

@@ -30,7 +30,7 @@ APP_CFLAGS := -O3 -Wall -pipe \
     -Wno-psabi -Wa,--noexecstack \
     -DANDROID -DNDEBUG
 
-# -D__ARM_ARCH_5__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5TE__
+# APP_CFLAGS += -D__ARM_ARCH_5__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5TE__
 
 # armeabi-v7a
 APP_CFLAGS += -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=softfp
