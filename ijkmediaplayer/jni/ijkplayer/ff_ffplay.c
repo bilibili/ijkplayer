@@ -1791,6 +1791,7 @@ static int read_thread(void *arg)
                     ret = AVERROR_EOF;
                     goto fail;
                 } else {
+                    // FIXME: infinity loop complete
                     ffp_notify_msg(ffp, FFP_MSG_COMPLETED, 0, 0);
                 }
             }
