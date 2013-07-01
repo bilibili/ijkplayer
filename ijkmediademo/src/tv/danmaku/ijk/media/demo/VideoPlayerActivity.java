@@ -21,8 +21,10 @@ import java.io.File;
 import tv.danmaku.ijk.media.widget.MediaController;
 import tv.danmaku.ijk.media.widget.VideoView;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.TextUtils;
 
 public class VideoPlayerActivity extends Activity {
     private VideoView mVideoView;
@@ -36,21 +38,30 @@ public class VideoPlayerActivity extends Activity {
     // private String mVideoPath =
     // "http://v.iask.com/v_play_ipad.php?vid=99979978";
 
+    /*-
+    mVideoPath = "http://gslb.bestvcdn.com/gslb/url/Bestv/live/live/kknews/workflow1.m3u8";
+    mVideoPath = "http://iosvideo.kankanews.com/2012/07/20/h264_450k_mp4_SHYiShu201207…67640_aac.ssm/h264_450k_mp4_SHYiShu20120720210930854798181167640_aac.m3u8";
+    mVideoPath = "http://video1.kksmg.com/rendition/201302/88000/39/104342962523078658/104342967891787778/r104342967891787778.m3u8";
+    mVideoPath = "http://video1.kksmg.com/rendition/201305/88000/a2/110409765426823170/110409776432677378/r110409776432677378.m3u8";
+    mVideoPath = "http://gslb.coop.letv.com/movie/A51456D18B8BB6865ADBA0EE972B0B7F-situoke.mp4?tag=ios";
+     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mVideoPath = new File(Environment.getExternalStorageDirectory(),
-                "download/test.mp4").getAbsolutePath();
+        Intent intent = getIntent();
+        String intentAction = intent.getAction();
+        if (!TextUtils.isEmpty(intentAction)
+                && intentAction.equals(Intent.ACTION_VIEW)) {
+            mVideoPath = intent.getDataString();
+        }
 
-        /*-
-        mVideoPath = "http://gslb.bestvcdn.com/gslb/url/Bestv/live/live/kknews/workflow1.m3u8";
-        mVideoPath = "http://iosvideo.kankanews.com/2012/07/20/h264_450k_mp4_SHYiShu201207…67640_aac.ssm/h264_450k_mp4_SHYiShu20120720210930854798181167640_aac.m3u8";
-        mVideoPath = "http://video1.kksmg.com/rendition/201302/88000/39/104342962523078658/104342967891787778/r104342967891787778.m3u8";
-        mVideoPath = "http://video1.kksmg.com/rendition/201305/88000/a2/110409765426823170/110409776432677378/r110409776432677378.m3u8";
-        mVideoPath = "http://gslb.coop.letv.com/movie/A51456D18B8BB6865ADBA0EE972B0B7F-situoke.mp4?tag=ios";
-         */
+        if (TextUtils.isEmpty(mVideoPath)) {
+            mVideoPath = new File(Environment.getExternalStorageDirectory(),
+                    "download/test.mp4").getAbsolutePath();
+        }
 
         mMediaController = new MediaController(this);
 
