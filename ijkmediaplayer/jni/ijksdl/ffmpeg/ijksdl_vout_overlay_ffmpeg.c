@@ -249,3 +249,31 @@ int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, 
 
     return retval;
 }
+
+int SDL_VoutFFmpeg_ConvertPicture(
+    const SDL_VoutOverlay *overlay,
+    int width, int height, enum AVPixelFormat src_format, uint8_t **src_data, int *src_linesize,
+    struct SwsContext **p_sws_ctx, int sws_flags)
+{
+    assert(overlay);
+    assert(p_sws_ctx);
+    AVPicture dest_pic = { { 0 } };
+
+    enum AVPixelFormat pixformat = SDL_VoutFFmpeg_GetBestAVPixelFormat(overlay->format);
+    SDL_VoutFFmpeg_SetupPicture(overlay, &dest_pic, pixformat);
+
+    *p_sws_ctx = sws_getCachedContext(*p_sws_ctx,
+        width, height, src_format, width, height,
+        pixformat, sws_flags, NULL, NULL, NULL);
+    if (*p_sws_ctx == NULL) {
+        ALOGE("sws_getCachedContext failed");
+        return -1;
+    }
+
+    sws_scale(*p_sws_ctx, (const uint8_t **) src_data, src_linesize,
+        0, height, dest_pic.data, dest_pic.linesize);
+
+    // FIXME:
+    // duplicate_right_border_pixels(vp->bmp);
+    return 0;
+}

@@ -676,38 +676,18 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
 
     /* if the frame is not skipped, then display it */
     if (vp->bmp) {
-        AVPicture pict = { { 0 } };
-#if CONFIG_AVFILTER
-        avfilter_unref_bufferp(&vp->picref);
-        vp->picref = src_frame->opaque;
-#endif
+        av_opt_get_int(ffp->sws_opts, "sws_flags", 0, &ffp->sws_flags);
 
         /* get a pointer on the bitmap */
         SDL_VoutLockYUVOverlay(vp->bmp);
 
-        enum AVPixelFormat pixforamt = SDL_VoutFFmpeg_GetBestAVPixelFormat(ffp->overlay_format);
-        SDL_VoutFFmpeg_SetupPicture(vp->bmp, &pict, pixforamt);
-
-#if CONFIG_AVFILTER
-        // FIXME use direct rendering
-        av_picture_copy(&pict, (AVPicture *)src_frame,
-                        src_frame->format, vp->width, vp->height);
-#else
-        av_opt_get_int(ffp->sws_opts, "sws_flags", 0, &ffp->sws_flags);
-        is->img_convert_ctx = sws_getCachedContext(is->img_convert_ctx,
-            vp->width, vp->height, src_frame->format, vp->width, vp->height,
-            pixforamt, ffp->sws_flags, NULL, NULL, NULL);
-        if (is->img_convert_ctx == NULL) {
+        if (SDL_VoutFFmpeg_ConvertPicture(vp->bmp, vp->width, vp->height,
+            src_frame->format, src_frame->data, src_frame->linesize,
+            &is->img_convert_ctx, ffp->sws_flags) < 0) {
             fprintf(stderr, "Cannot initialize the conversion context\n");
             exit(1);
         }
-        sws_scale(is->img_convert_ctx, (const uint8_t **) src_frame->data, src_frame->linesize,
-                  0, vp->height, pict.data, pict.linesize);
-#endif
-        /* workaround SDL PITCH_WORKAROUND */
-#ifdef FFP_MERGE
-        duplicate_right_border_pixels(vp->bmp);
-#endif
+
         /* update the bitmap content */
         SDL_VoutUnlockYUVOverlay(vp->bmp);
 

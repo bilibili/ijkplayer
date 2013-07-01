@@ -34,4 +34,9 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
 enum AVPixelFormat SDL_VoutFFmpeg_GetBestAVPixelFormat(Uint32 format);
 int SDL_VoutFFmpeg_SetupPicture(const SDL_VoutOverlay *overlay, AVPicture *pic, enum AVPixelFormat ff_format);
 
+int SDL_VoutFFmpeg_ConvertPicture(
+    const SDL_VoutOverlay *overlay,
+    int width, int height, enum AVPixelFormat src_format, uint8_t **src_data, int *src_linesize,
+    struct SwsContext **p_sws_ctx, int sws_flags);
+
 #endif
