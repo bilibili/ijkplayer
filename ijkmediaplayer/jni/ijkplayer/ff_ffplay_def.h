@@ -437,7 +437,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->idct                   = FF_IDCT_AUTO;
     ffp->skip_frame             = AVDISCARD_DEFAULT;
     ffp->skip_idct              = AVDISCARD_DEFAULT;
-    ffp->skip_loop_filter       = AVDISCARD_DEFAULT;
+    // ffp->skip_loop_filter       = AVDISCARD_DEFAULT;
+    ffp->skip_loop_filter       = AVDISCARD_ALL;
     ffp->error_concealment      = 3;
     ffp->decoder_reorder_pts    = -1;
     ffp->autoexit               = 0;
@@ -452,7 +453,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->vfilters               = NULL;
 #endif
 
-    ffp->sws_flags              = SWS_BICUBIC;
+    // ffp->sws_flags              = SWS_BICUBIC;
+    ffp->sws_flags              = SWS_FAST_BILINEAR;
 
     /* current context */
     ffp->audio_callback_time    = 0;
