@@ -2173,7 +2173,7 @@ int ffp_seek_to_l(FFPlayer *ffp, long msec)
 
     int64_t seek_pos = milliseconds_to_fftime(msec);
     int64_t start_time = is->ic->start_time;
-    if (start_time > 0)
+    if (start_time > 0 && start_time != AV_NOPTS_VALUE)
         seek_pos += start_time;
 
     // FIXME: 9 seek by bytes
@@ -2190,9 +2190,10 @@ long ffp_get_current_position_l(FFPlayer *ffp)
     if (!is || !is->ic)
         return 0;
 
-    int64_t start_diff = fftime_to_milliseconds(is->ic->start_time);
-    if (start_diff <= 0)
-        start_diff = 0;
+    int64_t start_time = is->ic->start_time;
+    int64_t start_diff = 0;
+    if (start_time > 0 && start_time != AV_NOPTS_VALUE)
+        start_diff = fftime_to_milliseconds(is->ic->start_time);
 
     int64_t pos = 0;
     float pos_clock = get_master_clock(is);
@@ -2220,12 +2221,16 @@ long ffp_get_duration_l(FFPlayer *ffp)
     if (!is || !is->ic)
         return 0;
 
-    int64_t start_time = fftime_to_milliseconds(is->ic->start_time);
+    int64_t start_time = is->ic->start_time;
+    int64_t start_diff = 0;
+    if (start_time > 0 && start_time != AV_NOPTS_VALUE)
+        start_diff = fftime_to_milliseconds(is->ic->start_time);
+
     int64_t duration = fftime_to_milliseconds(is->ic->duration);
-    if (duration < 0 || duration < start_time)
+    if (duration < 0 || duration < start_diff)
         return 0;
 
-    int64_t adjust_duration = duration - (start_time > 0 ? start_time : 0);
+    int64_t adjust_duration = duration - start_diff;
     // ALOGE("dur=%ld", (long)adjust_duration);
     return (long)adjust_duration;
 }
