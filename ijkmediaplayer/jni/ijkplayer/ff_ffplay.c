@@ -562,7 +562,7 @@ display:
 
 /* allocate a picture (needs to do that in main thread to avoid
    potential locking problems */
-// FIXME: 0 set video format in msg_loop
+// TODO: 9 alloc_picture in video_refresh_thread if overlay referenced by vout
 static void alloc_picture(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
