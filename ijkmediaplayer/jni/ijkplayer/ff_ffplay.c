@@ -2192,16 +2192,25 @@ long ffp_get_current_position_l(FFPlayer *ffp)
     if (!is || !is->ic)
         return 0;
 
-    int64_t start_time = fftime_to_milliseconds(is->ic->start_time);
-    int64_t pos = get_master_clock(is) * 1000;
-    // ALOGE("clock=%ld, start_time=%ld", (long)pos, (long)start_time);
-    if (isnan(pos))
-        pos = fftime_to_milliseconds(is->seek_pos);
+    int64_t start_diff = fftime_to_milliseconds(is->ic->start_time);
+    if (start_diff <= 0)
+        start_diff = 0;
 
-    if (pos < 0 || pos < start_time)
+    int64_t pos = 0;
+    float pos_clock = get_master_clock(is);
+    // ALOGE("pos = %f", pos_clock);
+    if (isnanf(pos_clock)) {
+        // ALOGE("pos = seek_pos");
+        pos = fftime_to_milliseconds(is->seek_pos);
+    } else {
+        // ALOGE("pos = pos_clock");
+        pos = pos_clock * 1000;
+    }
+
+    if (pos < 0 || pos < start_diff)
         return 0;
 
-    int64_t adjust_pos = pos - (start_time > 0 ? start_time : 0);
+    int64_t adjust_pos = pos - start_diff;
     // ALOGE("pos=%ld", (long)adjust_pos);
     return (long)adjust_pos;
 }
