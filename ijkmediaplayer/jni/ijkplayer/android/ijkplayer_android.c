@@ -368,7 +368,6 @@ static int ijkmp_stop_l(IjkMediaPlayer *mp)
         return retval;
     }
 
-    // FIXME: 9 change to MP_STATE_STOPPED in read_thread() */
     mp->mp_state = MP_STATE_STOPPED;
     return 0;
 }

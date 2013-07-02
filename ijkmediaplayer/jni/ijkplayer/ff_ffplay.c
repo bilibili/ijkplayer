@@ -2176,7 +2176,6 @@ int ffp_seek_to_l(FFPlayer *ffp, long msec)
     if (start_time > 0)
         seek_pos += start_time;
 
-    // FIXME: 9 thread-safe
     // FIXME: 9 seek by bytes
     // FIXME: 9 seek out of range
     // FIXME: 9 seekable
