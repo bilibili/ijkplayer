@@ -275,14 +275,13 @@ static int ijkmp_start_l(IjkMediaPlayer *mp)
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
     MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
 
+    // FIXME: 8 check seekable
+    if (mp->mp_state == MP_STATE_COMPLETED)
+        ffp_seek_to_l(mp->ffplayer, 0);
+
     int retval = ffp_start_l(mp->ffplayer);
     if (retval < 0) {
         return retval;
-    }
-
-    if (mp->mp_state == MP_STATE_COMPLETED)
-    {
-        // FIXME: 0 handle start after completed
     }
 
     mp->mp_state = MP_STATE_STARTED;
