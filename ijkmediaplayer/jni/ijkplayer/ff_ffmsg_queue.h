@@ -197,4 +197,36 @@ inline static int msg_queue_get(MessageQueue *q, AVMessage *msg, int block)
     return ret;
 }
 
+inline void msg_queue_remove(MessageQueue *q, int what)
+{
+    AVMessage **p_msg, *msg, *last_msg = q->first_msg;
+    SDL_LockMutex(q->mutex);
+
+    if (!q->abort_request && q->first_msg) {
+        p_msg = &q->first_msg;
+        while (*p_msg) {
+            msg = *p_msg;
+
+            if (msg->what == what) {
+                // ALOGE("remove msg %d", msg->what);
+                *p_msg = msg->next;
+                p_msg = &msg->next;
+                av_free(msg);
+            } else {
+                // ALOGE("retain msg %d", msg->what);
+                last_msg = msg;
+                p_msg = &msg->next;
+            }
+        }
+
+        if (q->first_msg) {
+            q->last_msg = last_msg;
+        } else {
+            q->last_msg = NULL;
+        }
+    }
+
+    SDL_UnlockMutex(q->mutex);
+}
+
 #endif

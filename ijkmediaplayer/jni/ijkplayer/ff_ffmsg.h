@@ -35,4 +35,7 @@
 #define FFP_MSG_BUFFERING_UPDATE        502     /* arg1 = cached percentage, arg2 = cached duration */
 #define FFP_MSG_SEEK_COMPLETE           600
 
+#define FFP_REQ_START                   20001
+#define FFP_REQ_PAUSE                   20002
+
 #endif

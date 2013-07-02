@@ -27,13 +27,19 @@
 #include "../ff_fferror.h"
 #include "../ff_ffplay.h"
 
-#define MPST_CHECK_NOT_RET_INT(real, expected, errcode) \
+#define MP_RET_IF_FAILED(ret) \
     do { \
-        if (real == expected) return errcode; \
+        int retval = ret; \
+        if (retval != 0) return (retval); \
     } while(0)
 
-#define MPST_CHECK_NOT_RET(real, expected) \
-    MPST_CHECK_NOT_RET_INT(real, expected, EIJK_INVALID_STATE)
+#define MPST_RET_IF_EQ_INT(real, expected, errcode) \
+    do { \
+        if ((real) == (expected)) return (errcode); \
+    } while(0)
+
+#define MPST_RET_IF_EQ(real, expected) \
+    MPST_RET_IF_EQ_INT(real, expected, EIJK_INVALID_STATE)
 
 typedef struct IjkMediaPlayer {
     volatile int ref_count;
@@ -183,16 +189,16 @@ static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
     assert(mp);
     assert(url);
 
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ASYNC_PREPARING);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PREPARED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STARTED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PAUSED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_COMPLETED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STOPPED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_IDLE);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_INITIALIZED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_ASYNC_PREPARING);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_PREPARED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_STARTED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_PAUSED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_COMPLETED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_STOPPED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_ERROR);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_END);
 
     char *dup_url = strdup(url);
     if (!dup_url)
@@ -220,16 +226,16 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
 {
     assert(mp);
 
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ASYNC_PREPARING);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PREPARED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STARTED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PAUSED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_COMPLETED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STOPPED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_IDLE);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_INITIALIZED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_ASYNC_PREPARING);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_PREPARED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_STARTED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_PAUSED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_COMPLETED);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_STOPPED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_ERROR);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_END);
 
     assert(mp->data_source);
 
@@ -260,31 +266,32 @@ int ijkmp_prepare_async(IjkMediaPlayer *mp)
     return retval;
 }
 
+static int ikjmp_chkst_start_l(int mp_state)
+{
+    MPST_RET_IF_EQ(mp_state, MP_STATE_IDLE);
+    MPST_RET_IF_EQ(mp_state, MP_STATE_INITIALIZED);
+    MPST_RET_IF_EQ(mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_PREPARED);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_STARTED);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_PAUSED);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_COMPLETED);
+    MPST_RET_IF_EQ(mp_state, MP_STATE_STOPPED);
+    MPST_RET_IF_EQ(mp_state, MP_STATE_ERROR);
+    MPST_RET_IF_EQ(mp_state, MP_STATE_END);
+
+    return 0;
+}
+
 static int ijkmp_start_l(IjkMediaPlayer *mp)
 {
     assert(mp);
 
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ASYNC_PREPARING);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PREPARED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STARTED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PAUSED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_COMPLETED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STOPPED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
+    MP_RET_IF_FAILED(ikjmp_chkst_start_l(mp->mp_state));
 
-    // FIXME: 8 check seekable
-    if (mp->mp_state == MP_STATE_COMPLETED)
-        ffp_seek_to_l(mp->ffplayer, 0);
+    ffp_remove_msg(mp->ffplayer, FFP_REQ_START);
+    ffp_remove_msg(mp->ffplayer, FFP_REQ_PAUSE);
+    ffp_notify_msg(mp->ffplayer, FFP_REQ_START, 0, 0);
 
-    int retval = ffp_start_l(mp->ffplayer);
-    if (retval < 0) {
-        return retval;
-    }
-
-    mp->mp_state = MP_STATE_STARTED;
     return 0;
 }
 
@@ -299,28 +306,31 @@ int ijkmp_start(IjkMediaPlayer *mp)
     return retval;
 }
 
+static int ikjmp_chkst_pause_l(int mp_state)
+{
+    MPST_RET_IF_EQ(mp_state, MP_STATE_IDLE);
+    MPST_RET_IF_EQ(mp_state, MP_STATE_INITIALIZED);
+    MPST_RET_IF_EQ(mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_PREPARED);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_STARTED);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_PAUSED);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_COMPLETED);
+    MPST_RET_IF_EQ(mp_state, MP_STATE_STOPPED);
+    MPST_RET_IF_EQ(mp_state, MP_STATE_ERROR);
+    MPST_RET_IF_EQ(mp_state, MP_STATE_END);
+
+    return 0;
+}
+
 static int ijkmp_pause_l(IjkMediaPlayer *mp)
 {
     assert(mp);
 
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ASYNC_PREPARING);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PREPARED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STARTED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PAUSED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_COMPLETED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STOPPED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
+    MP_RET_IF_FAILED(ikjmp_chkst_pause_l(mp->mp_state));
 
-    int retval = ffp_pause_l(mp->ffplayer);
-    if (retval < 0) {
-        return retval;
-    }
-
-    if (mp->mp_state == MP_STATE_STARTED)
-        mp->mp_state = MP_STATE_PAUSED;
+    ffp_remove_msg(mp->ffplayer, FFP_REQ_START);
+    ffp_remove_msg(mp->ffplayer, FFP_REQ_PAUSE);
+    ffp_notify_msg(mp->ffplayer, FFP_REQ_PAUSE, 0, 0);
 
     return 0;
 }
@@ -340,16 +350,16 @@ static int ijkmp_stop_l(IjkMediaPlayer *mp)
 {
     assert(mp);
 
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ASYNC_PREPARING);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PREPARED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STARTED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PAUSED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_COMPLETED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STOPPED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_IDLE);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_INITIALIZED);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_PREPARED);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_STARTED);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_PAUSED);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_COMPLETED);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_STOPPED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_ERROR);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_END);
 
     int retval = ffp_stop_l(mp->ffplayer);
     if (retval < 0) {
@@ -387,16 +397,16 @@ int ijkmp_seek_to_l(IjkMediaPlayer *mp, long msec)
 {
     assert(mp);
 
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_INITIALIZED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ASYNC_PREPARING);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PREPARED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STARTED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_PAUSED);
-    // MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_COMPLETED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_STOPPED);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_ERROR);
-    MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_END);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_IDLE);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_INITIALIZED);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_PREPARED);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_STARTED);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_PAUSED);
+    // MPST_RET_IF_EQ(mp->mp_state, MP_STATE_COMPLETED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_STOPPED);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_ERROR);
+    MPST_RET_IF_EQ(mp->mp_state, MP_STATE_END);
 
     int retval = ffp_seek_to_l(mp->ffplayer, msec);
     if (retval < 0) {
@@ -477,30 +487,68 @@ void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
 int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 {
     assert(mp);
-    int retval = msg_queue_get(&mp->ffplayer->msg_queue, msg, block);
-    if (retval <= 0)
-        return retval;
+    while (1) {
+        int continue_wait_next_msg = 0;
+        int retval = msg_queue_get(&mp->ffplayer->msg_queue, msg, block);
+        if (retval <= 0)
+            return retval;
 
-    switch (msg->what) {
-    case FFP_MSG_PREPARED:
-        pthread_mutex_lock(&mp->mutex);
-        MPTRACE("ijkmp_get_msg: FFP_MSG_PREPARED");
-        if (mp->mp_state == MP_STATE_ASYNC_PREPARING) {
-            mp->mp_state = MP_STATE_PREPARED;
-        } else {
-            // FIXME: 1: onError() ?
-            ALOGE("FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING");
+        switch (msg->what) {
+        case FFP_MSG_PREPARED:
+            MPTRACE("ijkmp_get_msg: FFP_MSG_PREPARED");
+            pthread_mutex_lock(&mp->mutex);
+            if (mp->mp_state == MP_STATE_ASYNC_PREPARING) {
+                mp->mp_state = MP_STATE_PREPARED;
+            } else {
+                // FIXME: 1: onError() ?
+                ALOGE("FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING");
+            }
+            pthread_mutex_unlock(&mp->mutex);
+            break;
+
+        case FFP_MSG_COMPLETED:
+            MPTRACE("ijkmp_get_msg: FFP_MSG_COMPLETED");
+            pthread_mutex_lock(&mp->mutex);
+            ffp_pause_l(mp->ffplayer);
+            mp->mp_state = MP_STATE_COMPLETED;
+            pthread_mutex_unlock(&mp->mutex);
+            break;
+
+        case FFP_REQ_START:
+            MPTRACE("ijkmp_get_msg: FFP_REQ_START");
+            continue_wait_next_msg = 1;
+            pthread_mutex_lock(&mp->mutex);
+            if (0 == ikjmp_chkst_start_l(mp->mp_state)) {
+                // FIXME: 8 check seekable
+                if (mp->mp_state == MP_STATE_COMPLETED)
+                    ffp_seek_to_l(mp->ffplayer, 0);
+
+                int retval = ffp_start_l(mp->ffplayer);
+                if (retval == 0) {
+                    mp->mp_state = MP_STATE_STARTED;
+                }
+            }
+            pthread_mutex_unlock(&mp->mutex);
+            break;
+
+        case FFP_REQ_PAUSE:
+            MPTRACE("ijkmp_get_msg: FFP_REQ_PAUSE");
+            continue_wait_next_msg = 1;
+            pthread_mutex_lock(&mp->mutex);
+            if (0 == ikjmp_chkst_pause_l(mp->mp_state)) {
+                int retval = ffp_pause_l(mp->ffplayer);
+                if (retval == 0)
+                    mp->mp_state = MP_STATE_PAUSED;
+            }
+            pthread_mutex_unlock(&mp->mutex);
+            break;
         }
-        pthread_mutex_unlock(&mp->mutex);
-        break;
-    case FFP_MSG_COMPLETED:
-        MPTRACE("ijkmp_get_msg: FFP_MSG_COMPLETED");
-        pthread_mutex_lock(&mp->mutex);
-        ffp_pause_l(mp->ffplayer);
-        mp->mp_state = MP_STATE_COMPLETED;
-        pthread_mutex_unlock(&mp->mutex);
-        break;
+
+        if (continue_wait_next_msg)
+            continue;
+
+        return retval;
     }
 
-    return retval;
+    return -1;
 }

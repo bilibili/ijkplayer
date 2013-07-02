@@ -1680,7 +1680,7 @@ static int read_thread(void *arg)
         ffp_notify_msg(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
     }
     if (ffp->start_on_prepared)
-        ffp_start_l(ffp);
+        ffp_notify_msg(ffp, FFP_REQ_START, 0, 0);
 
     for (;;) {
         if (is->abort_request)
@@ -1738,7 +1738,7 @@ static int read_thread(void *arg)
             is->seek_req = 0;
             eof = 0;
             if (ffp->start_on_prepared)
-                ffp_start_l(ffp);
+                ffp_notify_msg(ffp, FFP_REQ_START, 0, 0);
             if (is->paused)
                 step_to_next_frame(is);
         }

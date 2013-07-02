@@ -480,6 +480,10 @@ inline static void ffp_notify_msg(FFPlayer *ffp, int what, int arg1, int arg2) {
     msg_queue_put_simple3(&ffp->msg_queue, what, arg1, arg2);
 }
 
+inline static void ffp_remove_msg(FFPlayer *ffp, int what) {
+    msg_queue_remove(&ffp->msg_queue, what);
+}
+
 #define FFTRACE ALOGW
 
 #endif
