@@ -238,7 +238,7 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
     msg_queue_start(&mp->ffplayer->msg_queue);
     ijkmp_inc_ref(mp);
     pthread_create(&mp->msg_thread, NULL, mp->msg_loop, mp);
-    // TODO: 9 release weak_thiz if pthread_create() failed;
+    // FIXME: 0 release weak_thiz if pthread_create() failed;
 
     int retval = ffp_prepare_async_l(mp->ffplayer, mp->data_source);
     if (retval < 0) {

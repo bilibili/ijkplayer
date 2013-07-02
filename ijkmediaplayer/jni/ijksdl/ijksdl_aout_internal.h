@@ -29,7 +29,6 @@
 
 inline static SDL_Aout *SDL_Aout_CreateInternal(size_t opaque_size)
 {
-    // FIXME: mallocz;
     SDL_Aout *aout = (SDL_Aout*) mallocz(sizeof(SDL_Aout));
     if (!aout)
         return NULL;

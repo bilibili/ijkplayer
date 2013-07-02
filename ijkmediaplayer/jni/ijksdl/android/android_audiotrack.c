@@ -258,7 +258,6 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new_from_sdl_spec(JNIEnv *env, SDL_AudioSp
     atrack_spec.audio_format = find_android_format(sdl_spec->format);
     atrack_spec.buffer_size_in_bytes = sdl_spec->size;
 
-    // TODO: 9 consider spec.sample
     return sdl_audiotrack_new_from_spec(env, &atrack_spec);
 }
 

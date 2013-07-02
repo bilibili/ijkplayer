@@ -71,7 +71,7 @@ static int android_render_yv12_on_yv12(ANativeWindow_Buffer *out_buffer, const S
             // ALOGE("sdl_image_copy_plane %p %p %d", dst_pixels, src_pixels, dst_plane_size);
             memcpy(dst_pixels, src_pixels, plane_size);
         } else {
-            // TODO: padding
+            // TODO: 9 padding
             int bytewidth = IJKMIN(dst_line_size, src_line_size);
 
             // ALOGE("av_image_copy_plane %p %d %p %d %d %d", dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
@@ -115,7 +115,7 @@ static int android_render_rgb_on_rgb(ANativeWindow_Buffer *out_buffer, const SDL
         // ALOGE("android_render_rgb_on_rgb (pix-match) %p %p %d", dst_pixels, src_pixels, plane_size);
         memcpy(dst_pixels, src_pixels, plane_size);
     } else {
-        // TODO: padding
+        // TODO: 9 padding
         int bytewidth = IJKMIN(dst_line_size, src_line_size);
 
         // ALOGE("android_render_rgb_on_rgb (pix-mismatch) %p %d %p %d %d %d", dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
@@ -259,14 +259,14 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
             native_window,
             out_buffer.width, out_buffer.height, (char*)&out_buffer.format, out_buffer.format,
             buff_w, buff_h, (char*)&overlay->format, overlay->format);
-        // FIXME: 9 set all black
+        // TODO: 8 set all black
         ANativeWindow_unlockAndPost(native_window);
         return -1;
     }
 
     int render_ret = voutDesc->render(&out_buffer, overlay);
     if (render_ret < 0) {
-        // FIXME: 9 set all black
+        // TODO: 8 set all black
         // return after unlock image;
     }
 

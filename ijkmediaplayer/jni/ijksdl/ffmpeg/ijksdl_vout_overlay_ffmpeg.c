@@ -191,11 +191,11 @@ int SDL_VoutFFmpeg_ConvertPicture(
         dst_format = AV_PIX_FMT_YUV420P;
         break;
     case SDL_FCC_RV32:
-        // FIXME: android only
+        // TODO: 9 android only
         dst_format = AV_PIX_FMT_0BGR32;
         break;
     case SDL_FCC_RV16:
-        // FIXME: android only
+        // TODO: 9 android only
         dst_format = AV_PIX_FMT_RGB565;
         break;
     default:
@@ -229,7 +229,6 @@ int SDL_VoutFFmpeg_ConvertPicture(
         }
     }
 
-// FIXME:
-// duplicate_right_border_pixels(vp->bmp);
+    // TODO: 9 draw black if overlay is larger than screen
     return 0;
 }
