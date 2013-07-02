@@ -2022,8 +2022,6 @@ void ffp_global_init()
     av_lockmgr_register(lockmgr);
     av_log_set_callback(ffp_log_callback_help);
 
-    /* FIXME: 2 SDL_Init() */
-
     av_init_packet(&flush_pkt);
     flush_pkt.data = (uint8_t *) &flush_pkt;
 
@@ -2042,7 +2040,6 @@ void ffp_global_uninit()
     av_freep(&vfilters);
 #endif
     avformat_network_deinit();
-    /* FIXME: 2 SDL_Quit(); */
 
     g_ffmpeg_global_inited = false;
 }
