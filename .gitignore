@@ -1,5 +1,6 @@
 # -----
 build/
+ffmpeg-temp/
 .DS_Store
 
 # built application files
