@@ -1545,6 +1545,7 @@ static int read_thread(void *arg)
     int st_index[AVMEDIA_TYPE_NB];
     AVPacket pkt1, *pkt = &pkt1;
     int eof = 0;
+    int completed = 0;
     int pkt_in_play_range = 0;
     AVDictionaryEntry *t;
     AVDictionary **opts;
@@ -1703,6 +1704,8 @@ static int read_thread(void *arg)
         }
 #endif
         if (is->seek_req) {
+            completed = 0;
+
             int64_t seek_target = is->seek_pos;
             int64_t seek_min    = is->seek_rel > 0 ? seek_target - is->seek_rel + 2: INT64_MIN;
             int64_t seek_max    = is->seek_rel < 0 ? seek_target - is->seek_rel - 2: INT64_MAX;
@@ -1791,8 +1794,14 @@ static int read_thread(void *arg)
                     ret = AVERROR_EOF;
                     goto fail;
                 } else {
-                    // FIXME: infinity loop complete
-                    ffp_notify_msg(ffp, FFP_MSG_COMPLETED, 0, 0);
+                    if (completed) {
+                        SDL_LockMutex(wait_mutex);
+                        SDL_CondWait(is->continue_read_thread, wait_mutex);
+                        SDL_UnlockMutex(wait_mutex);
+                    } else {
+                        completed = 1;
+                        ffp_notify_msg(ffp, FFP_MSG_COMPLETED, 0, 0);
+                    }
                 }
             }
             eof=0;
