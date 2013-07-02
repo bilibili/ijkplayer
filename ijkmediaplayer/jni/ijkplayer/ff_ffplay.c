@@ -1800,7 +1800,7 @@ static int read_thread(void *arg)
                         SDL_CondWait(is->continue_read_thread, wait_mutex);
                         SDL_UnlockMutex(wait_mutex);
                     } else {
-                        // FIXME: 0 notify a bit early
+                        // TODO: 0 it's a bit early to notify complete here
                         completed = 1;
                         ffp_notify_msg(ffp, FFP_MSG_COMPLETED, 0, 0);
                     }
