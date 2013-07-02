@@ -37,5 +37,6 @@
 
 #define FFP_REQ_START                   20001
 #define FFP_REQ_PAUSE                   20002
+#define FFP_REQ_SEEK                    20003
 
 #endif
