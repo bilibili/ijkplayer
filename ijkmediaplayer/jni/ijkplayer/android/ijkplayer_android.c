@@ -494,6 +494,13 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
         }
         pthread_mutex_unlock(&mp->mutex);
         break;
+    case FFP_MSG_COMPLETED:
+        MPTRACE("ijkmp_get_msg: FFP_MSG_COMPLETED");
+        pthread_mutex_lock(&mp->mutex);
+        ffp_pause_l(mp->ffplayer);
+        mp->mp_state = MP_STATE_COMPLETED;
+        pthread_mutex_unlock(&mp->mutex);
+        break;
     }
 
     return retval;
