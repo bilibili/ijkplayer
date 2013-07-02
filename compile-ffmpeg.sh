@@ -113,6 +113,7 @@ export AR=${FF_CROSS_PREFIX}-ar
 export STRIP=${FF_CROSS_PREFIX}-strip
 
 FF_CFLAGS="-O3 -Wall -pipe \
+    -std=c99 \
     -ffast-math \
     -fstrict-aliasing -Werror=strict-aliasing \
     -fmodulo-sched -fmodulo-sched-allow-regmoves \
