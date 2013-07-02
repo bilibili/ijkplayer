@@ -494,6 +494,9 @@ void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
 int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 {
     assert(mp);
+
+    int restart_from_beginning;
+
     while (1) {
         int continue_wait_next_msg = 0;
         int retval = msg_queue_get(&mp->ffplayer->msg_queue, msg, block);
@@ -515,6 +518,8 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 
         case FFP_MSG_COMPLETED:
             MPTRACE("ijkmp_get_msg: FFP_MSG_COMPLETED");
+            restart_from_beginning = 1;
+
             pthread_mutex_lock(&mp->mutex);
             ffp_pause_l(mp->ffplayer);
             mp->mp_state = MP_STATE_COMPLETED;
@@ -527,8 +532,15 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             pthread_mutex_lock(&mp->mutex);
             if (0 == ikjmp_chkst_start_l(mp->mp_state)) {
                 // FIXME: 8 check seekable
-                if (mp->mp_state == MP_STATE_COMPLETED)
-                    ffp_seek_to_l(mp->ffplayer, 0);
+                if (mp->mp_state == MP_STATE_COMPLETED) {
+                    if (restart_from_beginning) {
+                        ALOGD("ijkmp_get_msg: FFP_REQ_START: restart from beginning");
+                        if (0 == ffp_seek_to_l(mp->ffplayer, 0))
+                            restart_from_beginning = 0;
+                    } else {
+                        ALOGD("ijkmp_get_msg: FFP_REQ_START: restart from seek pos");
+                    }
+                }
 
                 int retval = ffp_start_l(mp->ffplayer);
                 if (retval == 0) {
@@ -553,9 +565,13 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
         case FFP_REQ_SEEK:
             MPTRACE("ijkmp_get_msg: FFP_REQ_SEEK");
             continue_wait_next_msg = 1;
+
             pthread_mutex_lock(&mp->mutex);
             if (0 == ikjmp_chkst_seek_l(mp->mp_state)) {
-                ffp_seek_to_l(mp->ffplayer, msg->arg1);
+                if (0 == ffp_seek_to_l(mp->ffplayer, msg->arg1)) {
+                    ALOGD("ijkmp_get_msg: FFP_REQ_SEEK: will restart from seek pos");
+                    restart_from_beginning = 0;
+                }
             }
             pthread_mutex_unlock(&mp->mutex);
             break;
