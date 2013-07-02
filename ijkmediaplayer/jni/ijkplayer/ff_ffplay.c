@@ -365,26 +365,39 @@ static void stream_seek(VideoState *is, int64_t pos, int64_t rel, int seek_by_by
 }
 
 /* pause or resume the video */
-static void stream_toggle_pause(VideoState *is)
+static void stream_toggle_pause(FFPlayer *ffp, int pause_on)
 {
-    if (is->paused) {
+    VideoState *is = ffp->is;
+
+    ffp->start_on_prepared = !pause_on;
+
+    if (!pause_on && is->paused) {
         is->frame_timer += av_gettime() / 1000000.0 + is->video_current_pts_drift - is->video_current_pts;
         if (is->read_pause_return != AVERROR(ENOSYS)) {
             is->video_current_pts = is->video_current_pts_drift + av_gettime() / 1000000.0;
         }
         is->video_current_pts_drift = is->video_current_pts - av_gettime() / 1000000.0;
     }
+
     update_external_clock_pts(is, get_external_clock(is));
-    is->paused = !is->paused;
+    is->paused = pause_on;
+
+    SDL_AoutPauseAudio(ffp->aout, pause_on);
 }
 
-// FFP_MERGE: toggle_pause
-
-static void step_to_next_frame(VideoState *is)
+static void toggle_pause(FFPlayer *ffp, int pause_on)
 {
+    VideoState *is = ffp->is;
+    stream_toggle_pause(ffp, pause_on);
+    is->step = 0;
+}
+
+static void step_to_next_frame(FFPlayer *ffp)
+{
+    VideoState *is = ffp->is;
     /* if the stream is paused unpause it, then step */
     if (is->paused)
-        stream_toggle_pause(is);
+        stream_toggle_pause(ffp, 0);
     is->step = 1;
 }
 
@@ -552,7 +565,7 @@ display:
             pictq_next_picture(is);
 
             if (is->step && !is->paused)
-                stream_toggle_pause(is);
+                stream_toggle_pause(ffp, 1);
         }
     }
     is->force_refresh = 0;
@@ -1741,7 +1754,7 @@ static int read_thread(void *arg)
             if (ffp->start_on_prepared)
                 ffp_notify_msg(ffp, FFP_REQ_START, 0, 0);
             if (is->paused)
-                step_to_next_frame(is);
+                step_to_next_frame(ffp);
         }
         if (is->queue_attachments_req) {
             avformat_queue_attached_pictures(ic);
@@ -2109,20 +2122,7 @@ int ffp_start_l(FFPlayer *ffp)
     if (!is)
         return EIJK_NULL_IS_PTR;
 
-    ffp->start_on_prepared = true;
-    if (ffp->prepared) {
-        if (is->paused) {
-            is->frame_timer += av_gettime() / 1000000.0 + is->video_current_pts_drift - is->video_current_pts;
-            if (is->read_pause_return != AVERROR(ENOSYS)) {
-                is->video_current_pts = is->video_current_pts_drift + av_gettime() / 1000000.0;
-            }
-            is->video_current_pts_drift = is->video_current_pts - av_gettime() / 1000000.0;
-        }
-        update_external_clock_pts(is, get_external_clock(is));
-        is->paused = 0;
-        SDL_AoutPauseAudio(ffp->aout, is->paused);
-    }
-
+    toggle_pause(ffp, 0);
     return 0;
 }
 
@@ -2133,10 +2133,7 @@ int ffp_pause_l(FFPlayer *ffp)
     if (!is)
         return EIJK_NULL_IS_PTR;
 
-    update_external_clock_pts(is, get_external_clock(is));
-    is->paused = 1;
-    SDL_AoutPauseAudio(ffp->aout, is->paused);
-    ffp->start_on_prepared = false;
+    toggle_pause(ffp, 1);
     return 0;
 }
 
