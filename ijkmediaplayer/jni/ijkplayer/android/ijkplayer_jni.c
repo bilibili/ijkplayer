@@ -285,7 +285,7 @@ static void
 IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 {
     MPTRACE("IjkMediaPlayer_native_finalize");
-    // FIXME: 1 implement
+    // TODO: 9 is there any thing not released ?
     IjkMediaPlayer_release(env, thiz);
 }
 
