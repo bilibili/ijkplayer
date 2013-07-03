@@ -369,8 +369,6 @@ static void stream_toggle_pause(FFPlayer *ffp, int pause_on)
 {
     VideoState *is = ffp->is;
 
-    ffp->start_on_prepared = !pause_on;
-
     if (!pause_on && is->paused) {
         is->frame_timer += av_gettime() / 1000000.0 + is->video_current_pts_drift - is->video_current_pts;
         if (is->read_pause_return != AVERROR(ENOSYS)) {
@@ -388,6 +386,7 @@ static void stream_toggle_pause(FFPlayer *ffp, int pause_on)
 static void toggle_pause(FFPlayer *ffp, int pause_on)
 {
     VideoState *is = ffp->is;
+    ffp->start_on_prepared = !pause_on;
     stream_toggle_pause(ffp, pause_on);
     is->step = 0;
 }
@@ -1816,6 +1815,7 @@ static int read_thread(void *arg)
                     } else {
                         // TODO: 0 it's a bit early to notify complete here
                         completed = 1;
+                        ffp->start_on_prepared = 0;
                         ffp_notify_msg(ffp, FFP_MSG_COMPLETED, 0, 0);
                     }
                 }
