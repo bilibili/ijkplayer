@@ -22,8 +22,17 @@
  */
 
 #include "ff_ffplay.h"
+
+#include <math.h>
 #include "ff_cmdutils.h"
 #include "ff_fferror.h"
+
+// FIXME: 9 work around NDKr9e or gcc4.7 bug
+// isnan() may not recognize some double NAN, so we test both double and float
+#ifdef isnan
+#undef isnan
+#endif
+#define isnan(x) (isnan((double)(x)) || isnanf((float)(x)))
 
 #define fprintf(in__, ...) ALOGE(__VA_ARGS__)
 #define printf(...) ALOGD(__VA_ARGS__)
@@ -2193,13 +2202,12 @@ long ffp_get_current_position_l(FFPlayer *ffp)
         start_diff = fftime_to_milliseconds(is->ic->start_time);
 
     int64_t pos = 0;
-    float pos_clock = get_master_clock(is);
-    // ALOGE("pos = %f", pos_clock);
-    if (isnanf(pos_clock)) {
-        // ALOGE("pos = seek_pos");
+    double pos_clock = get_master_clock(is);
+    if (isnan(pos_clock)) {
+        // ALOGE("pos = seek_pos: %d", (int)is->seek_pos);
         pos = fftime_to_milliseconds(is->seek_pos);
     } else {
-        // ALOGE("pos = pos_clock");
+        // ALOGE("pos = pos_clock: %f", pos_clock);
         pos = pos_clock * 1000;
     }
 
