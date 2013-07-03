@@ -178,10 +178,12 @@ typedef struct VideoState {
     int16_t sample_array[SAMPLE_ARRAY_SIZE];
     int sample_array_index;
     int last_i_start;
+#ifdef FFP_MERGE
     RDFTContext *rdft;
     int rdft_bits;
     FFTSample *rdft_data;
     int xpos;
+#endif
     double last_vis_time;
 
 #ifdef FFP_MERGE

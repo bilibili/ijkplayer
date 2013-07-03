@@ -1490,12 +1490,14 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
         is->audio_buf = NULL;
         avcodec_free_frame(&is->frame);
 
+#ifdef FFP_MERGE
         if (is->rdft) {
             av_rdft_end(is->rdft);
             av_freep(&is->rdft_data);
             is->rdft = NULL;
             is->rdft_bits = 0;
         }
+#endif
         break;
     case AVMEDIA_TYPE_VIDEO:
         packet_queue_abort(&is->videoq);
