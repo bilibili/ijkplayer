@@ -237,6 +237,7 @@ static void stream_close(FFPlayer *ffp)
     SDL_DestroyCond(is->subpq_cond);
 #endif
     SDL_DestroyCond(is->continue_read_thread);
+    SDL_DestroyMutex(is->play_mutex);
 #if !CONFIG_AVFILTER
     sws_freeContext(is->img_convert_ctx);
 #endif
@@ -374,7 +375,7 @@ static void stream_seek(VideoState *is, int64_t pos, int64_t rel, int seek_by_by
 }
 
 /* pause or resume the video */
-static void stream_toggle_pause(FFPlayer *ffp, int pause_on)
+static void stream_toggle_pause_l(FFPlayer *ffp, int pause_on)
 {
     VideoState *is = ffp->is;
 
@@ -392,21 +393,37 @@ static void stream_toggle_pause(FFPlayer *ffp, int pause_on)
     SDL_AoutPauseAudio(ffp->aout, pause_on);
 }
 
-static void toggle_pause(FFPlayer *ffp, int pause_on)
+static void stream_toggle_pause(FFPlayer *ffp, int pause_on)
+{
+    SDL_LockMutex(ffp->is->play_mutex);
+    stream_toggle_pause_l(ffp, pause_on);
+    SDL_UnlockMutex(ffp->is->play_mutex);
+}
+
+static void toggle_pause_l(FFPlayer *ffp, int pause_on)
 {
     VideoState *is = ffp->is;
     ffp->start_on_prepared = !pause_on;
-    stream_toggle_pause(ffp, pause_on);
+    stream_toggle_pause_l(ffp, pause_on);
     is->step = 0;
+}
+
+static void toggle_pause(FFPlayer *ffp, int pause_on)
+{
+    SDL_LockMutex(ffp->is->play_mutex);
+    toggle_pause_l(ffp, pause_on);
+    SDL_UnlockMutex(ffp->is->play_mutex);
 }
 
 static void step_to_next_frame(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
     /* if the stream is paused unpause it, then step */
+    SDL_LockMutex(is->play_mutex);
     if (is->paused)
-        stream_toggle_pause(ffp, 0);
+        stream_toggle_pause_l(ffp, 0);
     is->step = 1;
+    SDL_UnlockMutex(is->play_mutex);
 }
 
 static double compute_target_delay(double delay, VideoState *is)
@@ -572,8 +589,10 @@ display:
 
             pictq_next_picture(is);
 
+            SDL_LockMutex(ffp->is->play_mutex);
             if (is->step && !is->paused)
-                stream_toggle_pause(ffp, 1);
+                stream_toggle_pause_l(ffp, 1);
+            SDL_UnlockMutex(ffp->is->play_mutex);
         }
     }
     is->force_refresh = 0;
@@ -1932,6 +1951,7 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->video_clock_serial = -1;
     is->av_sync_type = ffp->av_sync_type;
 
+    is->play_mutex = SDL_CreateMutex();
     ffp->is = is;
 
     is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp);
@@ -2241,4 +2261,26 @@ long ffp_get_duration_l(FFPlayer *ffp)
     int64_t adjust_duration = duration - start_diff;
     // ALOGE("dur=%ld", (long)adjust_duration);
     return (long)adjust_duration;
+}
+
+void ffp_toggle_buffering_l(FFPlayer *ffp, int start_buffering)
+{
+    VideoState *is = ffp->is;
+    if (start_buffering && !is->buffering_started) {
+        is->buffering_started = 1;
+        stream_toggle_pause(ffp, 1);
+        ffp_notify_msg(ffp, FFP_MSG_BUFFERING_START, 0, 0);
+    } else if (!start_buffering && is->buffering_started){
+        is->buffering_started = 0;
+        if (is->paused)
+            stream_toggle_pause(ffp, 0);
+        ffp_notify_msg(ffp, FFP_MSG_BUFFERING_END, 0, 0);
+    }
+}
+
+void ffp_toggle_buffering(FFPlayer *ffp, int start_buffering)
+{
+    SDL_LockMutex(ffp->is->play_mutex);
+    ffp_toggle_buffering_l(ffp, start_buffering);
+    SDL_UnlockMutex(ffp->is->play_mutex);
 }

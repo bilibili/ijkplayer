@@ -47,4 +47,8 @@ int       ffp_seek_to_l(FFPlayer *ffp, long msec);
 long      ffp_get_current_position_l(FFPlayer *ffp);
 long      ffp_get_duration_l(FFPlayer *ffp);
 
+/* for internal usage */
+void      ffp_toggle_buffering_l(FFPlayer *ffp, int start_buffering);
+void      ffp_toggle_buffering(FFPlayer *ffp, int start_buffering);
+
 #endif

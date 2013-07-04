@@ -239,8 +239,11 @@ typedef struct VideoState {
 
     SDL_cond *continue_read_thread;
 
+    /* extra fields */
+    SDL_mutex  *play_mutex; // only guard state, do not block any long operation
     SDL_Thread *video_refresh_tid;
     SDL_Thread _video_refresh_tid;
+    int buffering_started;
 } VideoState;
 
 /* options specified by the user */
