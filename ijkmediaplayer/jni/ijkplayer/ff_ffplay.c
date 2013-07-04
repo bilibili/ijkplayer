@@ -385,19 +385,18 @@ static void stream_toggle_pause_l(FFPlayer *ffp, int pause_on)
             is->video_current_pts = is->video_current_pts_drift + av_gettime() / 1000000.0;
         }
         is->video_current_pts_drift = is->video_current_pts - av_gettime() / 1000000.0;
+
+        /* buffering can be ended by start() */
+        if (is->buffering_started) {
+            is->buffering_started = 0;
+            ffp_notify_msg(ffp, FFP_MSG_BUFFERING_END, 0, 0);
+        }
     }
 
     update_external_clock_pts(is, get_external_clock(is));
     is->paused = pause_on;
 
     SDL_AoutPauseAudio(ffp->aout, pause_on);
-}
-
-static void stream_toggle_pause(FFPlayer *ffp, int pause_on)
-{
-    SDL_LockMutex(ffp->is->play_mutex);
-    stream_toggle_pause_l(ffp, pause_on);
-    SDL_UnlockMutex(ffp->is->play_mutex);
 }
 
 static void toggle_pause_l(FFPlayer *ffp, int pause_on)
@@ -750,9 +749,15 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, int64_t *pts, AVPacket
 {
     VideoState *is = ffp->is;
     int got_picture;
+    int new_packet;
 
-    if (packet_queue_get(&is->videoq, pkt, 1, serial) < 0)
-        return -1;
+    if ((new_packet = packet_queue_get(&is->videoq, pkt, 0, serial)) <= 0) {
+        if (new_packet == 0) {
+            ffp_toggle_buffering(ffp, 1);
+            if (packet_queue_get(&is->videoq, pkt, 1, serial) < 0)
+                return -1;
+        }
+    }
 
     if (pkt->data == flush_pkt.data) {
         avcodec_flush_buffers(is->video_st->codec);
@@ -1130,8 +1135,9 @@ static int synchronize_audio(VideoState *is, int nb_samples)
  * stored in is->audio_buf, with size in bytes given by the return
  * value.
  */
-static int audio_decode_frame(VideoState *is)
+static int audio_decode_frame(FFPlayer *ffp)
 {
+    VideoState *is = ffp->is;
     AVPacket *pkt_temp = &is->audio_pkt_temp;
     AVPacket *pkt = &is->audio_pkt;
     AVCodecContext *dec = is->audio_st->codec;
@@ -1267,8 +1273,13 @@ static int audio_decode_frame(VideoState *is)
             SDL_CondSignal(is->continue_read_thread);
 
         /* read next packet */
-        if ((new_packet = packet_queue_get(&is->audioq, pkt, 1, &is->audio_pkt_temp_serial)) < 0)
-            return -1;
+        if ((new_packet = packet_queue_get(&is->audioq, pkt, 0, &is->audio_pkt_temp_serial)) <= 0) {
+            if (new_packet == 0) {
+                ffp_toggle_buffering(ffp, 1);
+                if ((new_packet = packet_queue_get(&is->audioq, pkt, 1, &is->audio_pkt_temp_serial)) < 0)
+                    return -1;
+            }
+        }
 
         if (pkt->data == flush_pkt.data) {
             avcodec_flush_buffers(dec);
@@ -1299,7 +1310,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 
     while (len > 0) {
         if (is->audio_buf_index >= is->audio_buf_size) {
-           audio_size = audio_decode_frame(is);
+           audio_size = audio_decode_frame(ffp);
            if (audio_size < 0) {
                 /* if error, just output silence */
                is->audio_buf      = is->silence_buf;
@@ -1729,6 +1740,7 @@ static int read_thread(void *arg)
     for (;;) {
         if (is->abort_request)
             break;
+#ifdef FFP_MERGE
         if (is->paused != is->last_paused) {
             is->last_paused = is->paused;
             if (is->paused)
@@ -1736,6 +1748,7 @@ static int read_thread(void *arg)
             else
                 av_read_play(ic);
         }
+#endif
 #if CONFIG_RTSP_DEMUXER || CONFIG_MMSH_PROTOCOL
         if (is->paused &&
                 (!strcmp(ic->iformat->name, "rtsp") ||
@@ -1796,7 +1809,7 @@ static int read_thread(void *arg)
 #ifdef FFP_MERGE
               (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
 #else
-              (is->audioq.size + is->videoq.size > MAX_QUEUE_SIZE
+              (is->audioq.size + is->videoq.size > ffp->max_buffer_size
 #endif
             || (   (is->audioq   .nb_packets > MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
                 && (is->videoq   .nb_packets > MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)
@@ -1805,6 +1818,8 @@ static int read_thread(void *arg)
 #else
                 ))) {
 #endif
+            if (!eof)
+                ffp_toggle_buffering(ffp, 0);
             /* wait 10 ms */
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
@@ -1856,8 +1871,10 @@ static int read_thread(void *arg)
         }
         ret = av_read_frame(ic, pkt);
         if (ret < 0) {
-            if (ret == AVERROR_EOF || url_feof(ic->pb))
+            if (ret == AVERROR_EOF || url_feof(ic->pb)) {
                 eof = 1;
+                ffp_toggle_buffering(ffp, 0);
+            }
             if (ic->pb && ic->pb->error) {
                 last_error = ic->pb->error;
                 break;
@@ -1884,6 +1901,17 @@ static int read_thread(void *arg)
         } else {
             av_free_packet(pkt);
         }
+
+        int queue_size = is->audioq.size + is->videoq.size;
+        int buf_percent = queue_size * 1005 / ffp->high_water_mark / 10;
+        ALOGE("av_read_frame() %%%d = %d/%d",
+            buf_percent,
+            is->audioq.size + is->videoq.size,
+            ffp->high_water_mark);
+        if (is->audioq.size + is->videoq.size > ffp->high_water_mark)
+            ffp_toggle_buffering(ffp, 0);
+
+        // FIXME: 0 notify progress
     }
     /* wait until the end */
     while (!is->abort_request) {
@@ -2267,14 +2295,13 @@ void ffp_toggle_buffering_l(FFPlayer *ffp, int start_buffering)
 {
     VideoState *is = ffp->is;
     if (start_buffering && !is->buffering_started) {
+        ALOGD("ffp_toggle_buffering_l: start");
         is->buffering_started = 1;
-        stream_toggle_pause(ffp, 1);
+        stream_toggle_pause_l(ffp, 1);
         ffp_notify_msg(ffp, FFP_MSG_BUFFERING_START, 0, 0);
     } else if (!start_buffering && is->buffering_started){
-        is->buffering_started = 0;
-        if (is->paused)
-            stream_toggle_pause(ffp, 0);
-        ffp_notify_msg(ffp, FFP_MSG_BUFFERING_END, 0, 0);
+        ALOGD("ffp_toggle_buffering_l: end");
+        stream_toggle_pause_l(ffp, 0);
     }
 }
 

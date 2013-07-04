@@ -28,8 +28,10 @@
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
 
+#define DEFAULT_LOW_WATER_MARK  (16 * 1024)
+#define DEFAULT_HIGH_WATER_MARK (256 * 1024)
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
-#define MIN_FRAMES 5
+#define MIN_FRAMES 50000
 
 /* SDL audio buffer size, in samples. Should be small to have precise
    A/V sync as SDL does not have hardware buffer fullness info. */
@@ -408,6 +410,10 @@ typedef struct FFPlayer {
     int start_on_prepared;
 
     MessageQueue msg_queue;
+
+    int low_water_mark;
+    int high_water_mark;
+    int max_buffer_size;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (ts / (AV_TIME_BASE / 1000))
@@ -477,6 +483,10 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->last_error             = 0;
     ffp->prepared               = 0;
     ffp->start_on_prepared      = 0;
+
+    ffp->low_water_mark  = DEFAULT_LOW_WATER_MARK;
+    ffp->high_water_mark = DEFAULT_HIGH_WATER_MARK;
+    ffp->max_buffer_size = MAX_QUEUE_SIZE;
 
     msg_queue_flush(&ffp->msg_queue);
 }

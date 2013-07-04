@@ -25,9 +25,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.view.View;
 
 public class VideoPlayerActivity extends Activity {
     private VideoView mVideoView;
+    private View mBufferingIndicator;
     private MediaController mMediaController;
 
     private String mVideoPath;
@@ -51,6 +53,8 @@ public class VideoPlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
+        mVideoPath = "http://gslb.bestvcdn.com/gslb/url/Bestv/live/live/kknews/workflow1.m3u8";
+
         Intent intent = getIntent();
         String intentAction = intent.getAction();
         if (!TextUtils.isEmpty(intentAction)
@@ -63,10 +67,12 @@ public class VideoPlayerActivity extends Activity {
                     "download/test.mp4").getAbsolutePath();
         }
 
+        mBufferingIndicator = findViewById(R.id.buffering_indicator);
         mMediaController = new MediaController(this);
 
         mVideoView = (VideoView) findViewById(R.id.video_view);
         mVideoView.setMediaController(mMediaController);
+        mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
         mVideoView.setVideoPath(mVideoPath);
         mVideoView.requestFocus();
         mVideoView.start();

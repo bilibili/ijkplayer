@@ -96,6 +96,7 @@ public class VideoView extends SurfaceView implements
     private int mSurfaceWidth;
     private int mSurfaceHeight;
     private MediaController mMediaController;
+    private View mMediaBufferingIndicator;
     private OnCompletionListener mOnCompletionListener;
     private OnPreparedListener mOnPreparedListener;
     private OnErrorListener mOnErrorListener;
@@ -281,6 +282,12 @@ public class VideoView extends SurfaceView implements
         attachMediaController();
     }
 
+    public void setMediaBufferingIndicator(View mediaBufferingIndicator) {
+        if (mMediaBufferingIndicator != null)
+            mMediaBufferingIndicator.setVisibility(View.GONE);
+        mMediaBufferingIndicator = mediaBufferingIndicator;
+    }
+
     private void attachMediaController() {
         if (mMediaPlayer != null && mMediaController != null) {
             mMediaController.setMediaPlayer(this);
@@ -412,10 +419,15 @@ public class VideoView extends SurfaceView implements
             if (mOnInfoListener != null) {
                 mOnInfoListener.onInfo(mp, what, extra);
             } else if (mMediaPlayer != null) {
-                if (what == AbstractMediaPlayer.MEDIA_INFO_BUFFERING_START)
-                    mMediaPlayer.pause();
-                else if (what == AbstractMediaPlayer.MEDIA_INFO_BUFFERING_END)
-                    mMediaPlayer.start();
+                if (what == AbstractMediaPlayer.MEDIA_INFO_BUFFERING_START) {
+                    DebugLog.dfmt(TAG, "onInfo: (MEDIA_INFO_BUFFERING_START)");
+                    if (mMediaBufferingIndicator != null)
+                        mMediaBufferingIndicator.setVisibility(View.VISIBLE);
+                } else if (what == AbstractMediaPlayer.MEDIA_INFO_BUFFERING_END) {
+                    DebugLog.dfmt(TAG, "onInfo: (MEDIA_INFO_BUFFERING_END)");
+                    if (mMediaBufferingIndicator != null)
+                        mMediaBufferingIndicator.setVisibility(View.GONE);
+                }
             }
 
             return true;
