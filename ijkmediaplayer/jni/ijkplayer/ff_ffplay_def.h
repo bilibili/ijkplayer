@@ -28,8 +28,8 @@
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
 
-#define DEFAULT_LOW_WATER_MARK  (16 * 1024)
-#define DEFAULT_HIGH_WATER_MARK (256 * 1024)
+#define DEFAULT_HIGH_WATER_MARK_IN_MS    (2 * 1000)
+#define DEFAULT_HIGH_WATER_MARK_IN_BYTES (64 * 1024)
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 50000
 
@@ -76,6 +76,7 @@ typedef struct PacketQueue {
     MyAVPacketList *first_pkt, *last_pkt;
     int nb_packets;
     int size;
+    int64_t duration;
     int abort_request;
     int serial;
     SDL_mutex *mutex;
@@ -411,8 +412,8 @@ typedef struct FFPlayer {
 
     MessageQueue msg_queue;
 
-    int low_water_mark;
-    int high_water_mark;
+    int high_water_mark_in_ms;
+    int high_water_mark_in_bytes;
     int max_buffer_size;
 } FFPlayer;
 
@@ -484,8 +485,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->prepared               = 0;
     ffp->start_on_prepared      = 0;
 
-    ffp->low_water_mark  = DEFAULT_LOW_WATER_MARK;
-    ffp->high_water_mark = DEFAULT_HIGH_WATER_MARK;
+    ffp->high_water_mark_in_ms    = DEFAULT_HIGH_WATER_MARK_IN_MS;
+    ffp->high_water_mark_in_bytes = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
     ffp->max_buffer_size = MAX_QUEUE_SIZE;
 
     msg_queue_flush(&ffp->msg_queue);

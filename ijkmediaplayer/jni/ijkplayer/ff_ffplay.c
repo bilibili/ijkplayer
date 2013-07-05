@@ -64,6 +64,8 @@ static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
     q->last_pkt = pkt1;
     q->nb_packets++;
     q->size += pkt1->pkt.size + sizeof(*pkt1);
+    if (pkt1->pkt.duration > 0)
+        q->duration += pkt1->pkt.duration;
     /* XXX: should duplicate packet data in DV case */
     SDL_CondSignal(q->cond);
     return 0;
@@ -110,6 +112,7 @@ static void packet_queue_flush(PacketQueue *q)
     q->first_pkt = NULL;
     q->nb_packets = 0;
     q->size = 0;
+    q->duration = 0;
     SDL_UnlockMutex(q->mutex);
 }
 
@@ -160,6 +163,8 @@ static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *seria
                 q->last_pkt = NULL;
             q->nb_packets--;
             q->size -= pkt1->pkt.size + sizeof(*pkt1);
+            if (pkt1->pkt.duration > 0)
+                q->duration -= pkt1->pkt.duration;
             *pkt = pkt1->pkt;
             if (serial)
                 *serial = pkt1->serial;
@@ -1607,6 +1612,8 @@ static int read_thread(void *arg)
     int orig_nb_streams;
     SDL_mutex *wait_mutex = SDL_CreateMutex();
     int last_error = 0;
+    int last_buffered_time_percentage = -1;
+    int last_buffered_size_percentage = -1;
 
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
@@ -1884,6 +1891,7 @@ static int read_thread(void *arg)
             SDL_UnlockMutex(wait_mutex);
             continue;
         }
+        // ALOGE("av_read_frame()=(duration=%d, size=%d)", pkt->duration, pkt->size);
         /* check if packet is in play range specified by user, then queue, otherwise discard */
         pkt_in_play_range = ffp->duration == AV_NOPTS_VALUE ||
                 (pkt->pts - ic->streams[pkt->stream_index]->start_time) *
@@ -1902,14 +1910,48 @@ static int read_thread(void *arg)
             av_free_packet(pkt);
         }
 
-        int queue_size = is->audioq.size + is->videoq.size;
-        int buf_percent = queue_size * 1005 / ffp->high_water_mark / 10;
-        ALOGE("av_read_frame() %%%d = %d/%d",
-            buf_percent,
-            is->audioq.size + is->videoq.size,
-            ffp->high_water_mark);
-        if (is->audioq.size + is->videoq.size > ffp->high_water_mark)
-            ffp_toggle_buffering(ffp, 0);
+        do {
+            int     buf_percent      = INT_MAX;
+            int     buf_size_percent = INT_MAX;
+            int     buf_time_percent = INT_MAX;
+            int     hwm_in_bytes     = ffp->high_water_mark_in_bytes;
+            int     hwm_in_ms        = ffp->high_water_mark_in_ms;
+            if (hwm_in_ms > 0) {
+                int     cached_duration_in_ms = INT_MAX;
+                int64_t audio_cached_duration = INT_MAX;
+                int64_t video_cached_duration = INT_MAX;
+
+                if (is->audio_st && is->audio_st->time_base.den > 0 && is->audio_st->time_base.num > 0)
+                    audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
+
+                if (is->video_st && is->video_st->time_base.den > 0 && is->video_st->time_base.num > 0)
+                    video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
+
+                cached_duration_in_ms = IJKMIN(video_cached_duration, audio_cached_duration);
+                if (cached_duration_in_ms < INT_MAX) {
+                    buf_time_percent = av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
+                    if (last_buffered_time_percentage != buf_time_percent) {
+                        // ALOGE("time cache=%%%d (%d/%d)", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
+                        last_buffered_time_percentage = buf_time_percent;
+                        ffp_notify_msg(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_duration_in_ms, hwm_in_ms);
+                    }
+                }
+            }
+
+            int cached_size = is->audioq.size + is->videoq.size;
+            if (hwm_in_bytes > 0) {
+                buf_size_percent = av_rescale(cached_size, 1005, hwm_in_bytes * 10);
+                if (last_buffered_size_percentage != buf_size_percent) {
+                    // ALOGE("size cache=%%%d (%d/%d)",buf_size_percent, cached_size, hwm_in_bytes);
+                    last_buffered_size_percentage = buf_size_percent;
+                    ffp_notify_msg(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_size, hwm_in_bytes);
+                }
+            }
+
+            buf_percent = IJKMIN(buf_size_percent, buf_time_percent);
+            if (buf_percent >= 100)
+                ffp_toggle_buffering(ffp, 0);
+        } while(0);
 
         // FIXME: 0 notify progress
     }

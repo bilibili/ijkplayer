@@ -32,7 +32,9 @@
 #define FFP_MSG_SAR_CHANGED             401     /* arg1 = sar.num, arg2 = sar.den */
 #define FFP_MSG_BUFFERING_START         500
 #define FFP_MSG_BUFFERING_END           501
-#define FFP_MSG_BUFFERING_UPDATE        502     /* arg1 = cached percentage, arg2 = cached duration */
+#define FFP_MSG_BUFFERING_UPDATE        502     /* arg1 = buffering head position in time */
+#define FFP_MSG_BUFFERING_BYTES_UPDATE  503     /* arg1 = cached data in bytes,            arg2 = high water mark */
+#define FFP_MSG_BUFFERING_TIME_UPDATE   504     /* arg1 = cached duration in milliseconds, arg2 = high water mark */
 #define FFP_MSG_SEEK_COMPLETE           600
 
 #define FFP_REQ_START                   20001
