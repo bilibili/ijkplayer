@@ -13,6 +13,7 @@ Android MediaPlayer-like video player based on [ffplay](http://ffmpeg.org)
 ### Build
 	git clone https://github.com/bbcallen/ijkplayer.git ijkplayer
 	cd ijkplayer
+	git checkout -B stable n0.0.1
 	git submodule init
 	git submodule update
 	sh compile-ffmpeg.sh
