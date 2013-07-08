@@ -44,12 +44,15 @@ public class VideoPlayerActivity extends Activity {
     mVideoPath = "http://gslb.coop.letv.com/movie/A51456D18B8BB6865ADBA0EE972B0B7F-situoke.mp4?tag=ios";
     mVideoPath = "http://gslb.bestvcdn.com/gslb/url/Bestv/live/live/kknews/workflow1.m3u8";        
     mVideoPath = "http://gslb.tv.sohu.com/live?cid=12&type=hls";
+    mVideoPath = "http://meta.video.qiyi.com/380/56070c92f215c514e17fd04b07e22e27.m3u8";
      */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+
+        mVideoPath = "http://meta.video.qiyi.com/380/56070c92f215c514e17fd04b07e22e27.m3u8";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
