@@ -61,7 +61,7 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
     SDL_AudioCallback audio_cblk = opaque->spec.callback;
     void *userdata = opaque->spec.userdata;
     uint8_t *buffer = opaque->buffer;
-    int buffer_size = sdl_audiotrack_get_min_buffer_size(atrack);
+    int copy_size = 256;
 
     assert(atrack);
     assert(buffer);
@@ -78,11 +78,11 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
             sdl_audiotrack_play(env, atrack);
         SDL_UnlockMutex(opaque->wakeup_mutex);
 
-        audio_cblk(userdata, buffer, buffer_size);
+        audio_cblk(userdata, buffer, copy_size);
         if (opaque->need_flush) {
             sdl_audiotrack_flush(env, atrack);
         }
-        sdl_audiotrack_write_byte(env, atrack, buffer, buffer_size);
+        sdl_audiotrack_write_byte(env, atrack, buffer, copy_size);
 
         // TODO: 1 if callback return -1 or 0
     }
