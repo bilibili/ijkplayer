@@ -81,6 +81,7 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
         audio_cblk(userdata, buffer, copy_size);
         if (opaque->need_flush) {
             sdl_audiotrack_flush(env, atrack);
+            opaque->need_flush = false;
         }
         sdl_audiotrack_write_byte(env, atrack, buffer, copy_size);
 
