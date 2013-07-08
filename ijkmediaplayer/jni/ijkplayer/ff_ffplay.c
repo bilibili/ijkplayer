@@ -2116,7 +2116,9 @@ static void ffp_log_callback_help(void *ptr, int level, const char *fmt, va_list
         ffplv = IJK_LOG_VERBOSE;
     else
         ffplv = IJK_LOG_DEBUG;
-    VLOG(ffplv, IJK_LOG_TAG, fmt, vl);
+
+    if (level <= AV_LOG_INFO)
+        VLOG(ffplv, IJK_LOG_TAG, fmt, vl);
 }
 
 void ffp_global_init()
