@@ -65,6 +65,7 @@ int ijk_image_convert(int width, int height,
 
     switch (src_format) {
     case AV_PIX_FMT_YUV420P:
+    case AV_PIX_FMT_YUVJ420P: // FIXME: 9 not equal to AV_PIX_FMT_YUV420P, but a workaround
         switch (dst_format) {
         case AV_PIX_FMT_RGB565:
             ijk_i420_rgb16_neon(width, height, dst_data, dst_linesize, src_data, src_linesize);
