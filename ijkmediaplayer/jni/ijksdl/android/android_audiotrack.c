@@ -312,7 +312,7 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudi
     init_volume = IJKMIN(init_volume, atrack->max_volume);
     init_volume = IJKMAX(init_volume, atrack->min_volume);
     ALOGI("sdl_audiotrack_new: init volume as %f/(%f,%f)", init_volume, atrack->min_volume, atrack->max_volume);
-    int retval = audiotrack_set_stereo_volume(env, atrack, init_volume, init_volume);
+    audiotrack_set_stereo_volume(env, atrack, init_volume, init_volume);
 
     return atrack;
 }
