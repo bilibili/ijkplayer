@@ -103,6 +103,8 @@ typedef struct SDL_AndroidAudioTrack {
     jbyteArray buffer;
     int buffer_capacity;
     int min_buffer_size;
+    float max_volume;
+    float min_volume;
 } SDL_AndroidAudioTrack;
 
 typedef struct audio_track_fields_t {
@@ -110,12 +112,16 @@ typedef struct audio_track_fields_t {
 
     jmethodID constructor;
     jmethodID getMinBufferSize;
+    jmethodID getMaxVolume;
+    jmethodID getMinVolume;
+
     jmethodID play;
     jmethodID pause;
     jmethodID flush;
     jmethodID stop;
     jmethodID release;
     jmethodID write_byte;
+    jmethodID setStereoVolume;
 } audio_track_fields_t;
 static audio_track_fields_t g_clazz;
 
@@ -137,6 +143,12 @@ int sdl_audiotrack_global_init(JNIEnv *env)
     g_clazz.getMinBufferSize = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getMinBufferSize", "(III)I");
     IJK_CHECK_RET(g_clazz.getMinBufferSize, -1, "missing AudioTrack.getMinBufferSize");
 
+    g_clazz.getMaxVolume = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getMaxVolume", "()F");
+    IJK_CHECK_RET(g_clazz.getMaxVolume, -1, "missing AudioTrack.getMaxVolume");
+
+    g_clazz.getMinVolume = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getMinVolume", "()F");
+    IJK_CHECK_RET(g_clazz.getMinVolume, -1, "missing AudioTrack.getMinVolume");
+
     g_clazz.play = (*env)->GetMethodID(env, g_clazz.clazz, "play", "()V");
     IJK_CHECK_RET(g_clazz.play, -1, "missing AudioTrack.play");
 
@@ -154,6 +166,9 @@ int sdl_audiotrack_global_init(JNIEnv *env)
 
     g_clazz.write_byte = (*env)->GetMethodID(env, g_clazz.clazz, "write", "([BII)I");
     IJK_CHECK_RET(g_clazz.write_byte, -1, "missing AudioTrack.write");
+
+    g_clazz.setStereoVolume = (*env)->GetMethodID(env, g_clazz.clazz, "setStereoVolume", "(FF)I");
+    IJK_CHECK_RET(g_clazz.setStereoVolume, -1, "missing AudioTrack.setStereoVolume");
 
     return 0;
 }
@@ -177,7 +192,7 @@ static int audiotrack_get_min_buffer_size(JNIEnv *env, SDL_AndroidAudioTrack_Spe
         (int) spec->channel_config,
         (int) spec->audio_format);
     if ((*env)->ExceptionCheck(env)) {
-        ALOGE("sdl_audiotrack_get_min_buffer_size: getMinBufferSize: Exception:");
+        ALOGE("audiotrack_get_min_buffer_size: getMinBufferSize: Exception:");
         (*env)->ExceptionDescribe(env);
         (*env)->ExceptionClear(env);
         return -1;
@@ -185,6 +200,50 @@ static int audiotrack_get_min_buffer_size(JNIEnv *env, SDL_AndroidAudioTrack_Spe
 
     return retval;
 }
+
+static float audiotrack_get_max_volume(JNIEnv *env)
+{
+    SDLTRACE("audiotrack_get_max_volume");
+    float retval = (*env)->CallStaticFloatMethod(env, g_clazz.clazz, g_clazz.getMaxVolume);
+    if ((*env)->ExceptionCheck(env)) {
+        ALOGE("audiotrack_get_max_volume: getMaxVolume: Exception:");
+        (*env)->ExceptionDescribe(env);
+        (*env)->ExceptionClear(env);
+        return -1;
+    }
+
+    return retval;
+}
+
+static float audiotrack_get_min_volume(JNIEnv *env)
+{
+    SDLTRACE("audiotrack_get_min_volume");
+    float retval = (*env)->CallStaticFloatMethod(env, g_clazz.clazz, g_clazz.getMinVolume);
+    if ((*env)->ExceptionCheck(env)) {
+        ALOGE("audiotrack_get_min_volume: getMinVolume: Exception:");
+        (*env)->ExceptionDescribe(env);
+        (*env)->ExceptionClear(env);
+        return -1;
+    }
+
+    return retval;
+}
+
+static int audiotrack_set_stereo_volume(JNIEnv *env, SDL_AndroidAudioTrack *atrack, float left, float right)
+{
+    int retval = (*env)->CallIntMethod(env, atrack->thiz, g_clazz.setStereoVolume, left, right);
+    if ((*env)->ExceptionCheck(env)) {
+        ALOGE("audiotrack_set_stereo_volume: write_byte: Exception:");
+        if ((*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionDescribe(env);
+            (*env)->ExceptionClear(env);
+        }
+        return -1;
+    }
+
+    return retval;
+}
+
 SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudioTrack_Spec *spec)
 {
     assert(spec);
@@ -238,12 +297,22 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudi
         return NULL;
     }
 
+
     atrack->spec = *spec;
     atrack->min_buffer_size = min_buffer_size;
     atrack->spec.buffer_size_in_bytes = min_buffer_size;
+    atrack->max_volume = audiotrack_get_max_volume(env);
+    atrack->min_volume = audiotrack_get_min_volume(env);
 
     atrack->thiz = (*env)->NewGlobalRef(env, thiz);
     (*env)->DeleteLocalRef(env, thiz);
+
+    // extra init
+    float init_volume = 1.0f;
+    init_volume = IJKMIN(init_volume, atrack->max_volume);
+    init_volume = IJKMAX(init_volume, atrack->min_volume);
+    ALOGI("sdl_audiotrack_new: init volume as %f/(%f,%f)", init_volume, atrack->min_volume, atrack->max_volume);
+    int retval = audiotrack_set_stereo_volume(env, atrack, init_volume, init_volume);
 
     return atrack;
 }
