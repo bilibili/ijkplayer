@@ -1520,6 +1520,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         return -1;
     }
 
+    avctx->skip_loop_filter  = AVDISCARD_ALL;
+
     avctx->codec_id = codec->id;
     avctx->workaround_bugs   = ffp->workaround_bugs;
     avctx->lowres            = ffp->lowres;
