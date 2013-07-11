@@ -323,6 +323,7 @@ rm libavcodec/log2_tab.o
 rm libavutil/log2_tab.o
 rm libswresample/log2_tab.o
 $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack $FF_EXTRA_LDFLAGS \
+    compat/*.o \
     libavutil/*.o \
     libavutil/arm/*.o \
     libavcodec/*.o \
