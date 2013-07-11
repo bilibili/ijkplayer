@@ -27,6 +27,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "libavutil/avstring.h"
+#include "libavutil/time.h"
 #include "libavformat/avformat.h"
 #include "libavcodec/avfft.h"
 #include "libswscale/swscale.h"

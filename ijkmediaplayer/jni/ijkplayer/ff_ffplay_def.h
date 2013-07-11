@@ -37,8 +37,12 @@
    A/V sync as SDL does not have hardware buffer fullness info. */
 #define SDL_AUDIO_BUFFER_SIZE 1024
 
-/* no AV sync correction is done if below the AV sync threshold */
-#define AV_SYNC_THRESHOLD 0.01
+/* no AV sync correction is done if below the minimum AV sync threshold */
+#define AV_SYNC_THRESHOLD_MIN 0.01
+/* AV sync correction is done if above the maximum AV sync threshold */
+#define AV_SYNC_THRESHOLD_MAX 0.1
+/* If a frame duration is longer than this, it will not be duplicated to compensate AV sync */
+#define AV_SYNC_FRAMEDUP_THRESHOLD 0.1
 /* no AV correction is done if too big error */
 #define AV_NOSYNC_THRESHOLD 10.0
 
@@ -83,7 +87,7 @@ typedef struct PacketQueue {
     SDL_cond *cond;
 } PacketQueue;
 
-#define VIDEO_PICTURE_QUEUE_SIZE 4
+#define VIDEO_PICTURE_QUEUE_SIZE 3
 #define SUBPICTURE_QUEUE_SIZE 4
 
 typedef struct VideoPicture {
@@ -91,19 +95,17 @@ typedef struct VideoPicture {
     int64_t pos;            // byte position in file
     SDL_VoutOverlay *bmp;
     int width, height; /* source height & width */
-    AVRational sample_aspect_ratio;
     int allocated;
     int reallocate;
     int serial;
 
-#if CONFIG_AVFILTER
-    AVFilterBufferRef *picref;
-#endif
+    AVRational sar;
 } VideoPicture;
 
 typedef struct SubPicture {
     double pts; /* presentation time stamp for this picture */
     AVSubtitle sub;
+    int serial;
 } SubPicture;
 
 typedef struct AudioParams {
@@ -112,6 +114,16 @@ typedef struct AudioParams {
     int64_t channel_layout;
     enum AVSampleFormat fmt;
 } AudioParams;
+
+typedef struct Clock {
+    double pts;           /* clock base */
+    double pts_drift;     /* clock base minus time at which we updated the clock */
+    double last_updated;
+    double speed;
+    int serial;           /* clock is based on a packet with this serial */
+    int paused;
+    int *queue_serial;    /* pointer to the current packet queue serial, used for obsolete clock detection */
+} Clock;
 
 enum {
     AV_SYNC_AUDIO_MASTER, /* default choice */
@@ -139,13 +151,13 @@ typedef struct VideoState {
     AVFormatContext *ic;
     int realtime;
 
+    Clock audclk;
+    Clock vidclk;
+    Clock extclk;
+
     int audio_stream;
 
     int av_sync_type;
-    double external_clock;                   ///< external clock base
-    double external_clock_drift;             ///< external clock base - time (av_gettime) at which we updated external_clock
-    int64_t external_clock_time;             ///< last reference time
-    double external_clock_speed;             ///< speed of the external clock
 
     double audio_clock;
     int audio_clock_serial;
@@ -163,14 +175,17 @@ typedef struct VideoState {
     unsigned int audio_buf1_size;
     int audio_buf_index; /* in bytes */
     int audio_write_buf_size;
+    int audio_buf_frames_pending;
     AVPacket audio_pkt_temp;
     AVPacket audio_pkt;
     int audio_pkt_temp_serial;
+    int audio_last_serial;
     struct AudioParams audio_src;
+#if CONFIG_AVFILTER
+    struct AudioParams audio_filter_src;
+#endif
     struct AudioParams audio_tgt;
     struct SwrContext *swr_ctx;
-    double audio_current_pts;
-    double audio_current_pts_drift;
     int frame_drops_early;
     int frame_drops_late;
     AVFrame *frame;
@@ -192,7 +207,6 @@ typedef struct VideoState {
 #ifdef FFP_MERGE
     SDL_Thread *subtitle_tid;
     int subtitle_stream;
-    int subtitle_stream_changed;
     AVStream *subtitle_st;
     PacketQueue subtitleq;
     SubPicture subpq[SUBPICTURE_QUEUE_SIZE];
@@ -208,14 +222,12 @@ typedef struct VideoState {
     double frame_last_returned_time;
     double frame_last_filter_delay;
     int64_t frame_last_dropped_pos;
+    int frame_last_dropped_serial;
     int video_stream;
     AVStream *video_st;
     PacketQueue videoq;
-    double video_current_pts;       // current displayed pts
-    double video_current_pts_drift; // video_current_pts - time (av_gettime) at which we updated video_current_pts - used to have running video pts
     int64_t video_current_pos;      // current displayed file pos
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
-    int video_clock_serial;
     VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE];
     int pictq_size, pictq_rindex, pictq_windex;
     SDL_mutex *pictq_mutex;
@@ -234,8 +246,9 @@ typedef struct VideoState {
 #if CONFIG_AVFILTER
     AVFilterContext *in_video_filter;   // the first filter in the video chain
     AVFilterContext *out_video_filter;  // the last filter in the video chain
-    int use_dr1;
-    FrameBuffer *buffer_pool;
+    AVFilterContext *in_audio_filter;   // the first filter in the audio chain
+    AVFilterContext *out_audio_filter;  // the last filter in the audio chain
+    AVFilterGraph *agraph;              // audio filter graph
 #endif
 
     int last_video_stream, last_audio_stream, last_subtitle_stream;
@@ -279,9 +292,6 @@ static int fast = 0;
 static int genpts = 0;
 static int lowres = 0;
 static int idct = FF_IDCT_AUTO;
-static enum AVDiscard skip_frame       = AVDISCARD_DEFAULT;
-static enum AVDiscard skip_idct        = AVDISCARD_DEFAULT;
-static enum AVDiscard skip_loop_filter = AVDISCARD_DEFAULT;
 static int error_concealment = 3;
 static int decoder_reorder_pts = -1;
 static int autoexit;
@@ -299,6 +309,7 @@ static int64_t cursor_last_shown;
 static int cursor_hidden = 0;
 #if CONFIG_AVFILTER
 static char *vfilters = NULL;
+static char *afilters = NULL;
 #endif
 
 /* current context */
@@ -359,9 +370,6 @@ typedef struct FFPlayer {
     int genpts;
     int lowres;
     int idct;
-    enum AVDiscard skip_frame;
-    enum AVDiscard skip_idct;
-    enum AVDiscard skip_loop_filter;
     int error_concealment;
     int decoder_reorder_pts;
     int autoexit;
@@ -385,6 +393,7 @@ typedef struct FFPlayer {
 #endif
 #if CONFIG_AVFILTER
     char *vfilters;
+    char *afilters;
 #endif
 
     int64_t sws_flags;
@@ -447,10 +456,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->genpts                 = 0;
     ffp->lowres                 = 0;
     ffp->idct                   = FF_IDCT_AUTO;
-    ffp->skip_frame             = AVDISCARD_DEFAULT;
-    ffp->skip_idct              = AVDISCARD_DEFAULT;
-    // ffp->skip_loop_filter       = AVDISCARD_DEFAULT;
-    ffp->skip_loop_filter       = AVDISCARD_ALL;
     ffp->error_concealment      = 3;
     ffp->decoder_reorder_pts    = -1;
     ffp->autoexit               = 0;
@@ -463,6 +468,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->rdftspeed              = 0.02;
 #if CONFIG_AVFILTER
     ffp->vfilters               = NULL;
+    ffp->afilters               = NULL;
 #endif
 
     // ffp->sws_flags              = SWS_BICUBIC;
