@@ -390,7 +390,7 @@ void sdl_audiotrack_pause(JNIEnv *env, SDL_AndroidAudioTrack *atrack)
 void sdl_audiotrack_flush(JNIEnv *env, SDL_AndroidAudioTrack *atrack)
 {
     SDLTRACE("sdl_audiotrack_flush");
-    (*env)->CallVoidMethod(env, atrack->thiz, g_clazz.play);
+    (*env)->CallVoidMethod(env, atrack->thiz, g_clazz.flush);
     SDLTRACE("sdl_audiotrack_flush()=void");
     if ((*env)->ExceptionCheck(env)) {
         ALOGE("sdl_audiotrack_flush: flush: Exception:");

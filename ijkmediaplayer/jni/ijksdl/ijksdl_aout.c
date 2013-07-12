@@ -37,6 +37,12 @@ void SDL_AoutPauseAudio(SDL_Aout *aout, int pause_on)
         aout->pause_audio(aout, pause_on);
 }
 
+void SDL_AoutFlushAudio(SDL_Aout *aout)
+{
+    if (aout && aout->flush_audio)
+        aout->flush_audio(aout);
+}
+
 void SDL_AoutCloseAudio(SDL_Aout *aout)
 {
     if (aout && aout->close_audio)

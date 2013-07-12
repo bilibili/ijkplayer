@@ -72,8 +72,13 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
         SDL_LockMutex(opaque->wakeup_mutex);
         if (!opaque->abort_request && opaque->pause_on)
             sdl_audiotrack_pause(env, atrack);
-        while (!opaque->abort_request && opaque->pause_on)
+        while (!opaque->abort_request && opaque->pause_on) {
             SDL_CondWaitTimeout(opaque->wakeup_cond, opaque->wakeup_mutex, 1000);
+            if (opaque->need_flush) {
+                opaque->need_flush = 0;
+                sdl_audiotrack_flush(env, atrack);
+            }
+        }
         if (!opaque->abort_request && !opaque->pause_on)
             sdl_audiotrack_play(env, atrack);
         SDL_UnlockMutex(opaque->wakeup_mutex);
@@ -83,7 +88,13 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
             sdl_audiotrack_flush(env, atrack);
             opaque->need_flush = false;
         }
-        sdl_audiotrack_write_byte(env, atrack, buffer, copy_size);
+
+        if (opaque->need_flush) {
+            opaque->need_flush = 0;
+            sdl_audiotrack_flush(env, atrack);
+        } else {
+            sdl_audiotrack_write_byte(env, atrack, buffer, copy_size);
+        }
 
         // TODO: 1 if callback return -1 or 0
     }
@@ -176,6 +187,16 @@ void aout_pause_audio(SDL_Aout *aout, int pause_on)
     SDL_UnlockMutex(opaque->wakeup_mutex);
 }
 
+void aout_flush_audio(SDL_Aout *aout)
+{
+    SDL_Aout_Opaque *opaque = aout->opaque;
+    SDL_LockMutex(opaque->wakeup_mutex);
+    SDLTRACE("aout_flush_audio()");
+    opaque->need_flush = 1;
+    SDL_CondSignal(opaque->wakeup_cond);
+    SDL_UnlockMutex(opaque->wakeup_mutex);
+}
+
 void aout_close_audio(SDL_Aout *aout)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
@@ -223,6 +244,7 @@ SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack()
     aout->free_l = aout_free_l;
     aout->open_audio = aout_open_audio;
     aout->pause_audio = aout_pause_audio;
+    aout->flush_audio = aout_flush_audio;
     aout->close_audio = aout_close_audio;
 
     return aout;
