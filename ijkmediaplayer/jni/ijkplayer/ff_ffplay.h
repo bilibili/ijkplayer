@@ -37,6 +37,7 @@ void      ffp_destroy_p(FFPlayer **pffp);
 void      ffp_reset(FFPlayer *ffp);
 
 int       ffp_prepare_async_l(FFPlayer *ffp, const char *file_name);
+int       ffp_start_from_l(FFPlayer *ffp, long msec);
 int       ffp_start_l(FFPlayer *ffp);
 int       ffp_pause_l(FFPlayer *ffp);
 int       ffp_stop_l(FFPlayer *ffp);

@@ -52,6 +52,8 @@ typedef struct IjkMediaPlayer {
     int mp_state;
     char *data_source;
     void *weak_thiz;
+
+    int restart_from_beginning;
 } IjkMediaPlayer;
 
 inline static void ijkmp_destroy(IjkMediaPlayer *mp)
@@ -494,9 +496,6 @@ void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
 int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 {
     assert(mp);
-
-    int restart_from_beginning;
-
     while (1) {
         int continue_wait_next_msg = 0;
         int retval = msg_queue_get(&mp->ffplayer->msg_queue, msg, block);
@@ -518,10 +517,9 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 
         case FFP_MSG_COMPLETED:
             MPTRACE("ijkmp_get_msg: FFP_MSG_COMPLETED");
-            restart_from_beginning = 1;
 
             pthread_mutex_lock(&mp->mutex);
-            ffp_pause_l(mp->ffplayer);
+            mp->restart_from_beginning = 1;
             mp->mp_state = MP_STATE_COMPLETED;
             pthread_mutex_unlock(&mp->mutex);
             break;
@@ -533,18 +531,23 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             if (0 == ikjmp_chkst_start_l(mp->mp_state)) {
                 // FIXME: 8 check seekable
                 if (mp->mp_state == MP_STATE_COMPLETED) {
-                    if (restart_from_beginning) {
+                    if (mp->restart_from_beginning) {
                         ALOGD("ijkmp_get_msg: FFP_REQ_START: restart from beginning");
-                        if (0 == ffp_seek_to_l(mp->ffplayer, 0))
-                            restart_from_beginning = 0;
+                        retval = ffp_start_from_l(mp->ffplayer, 0);
+                        if (retval == 0)
+                            mp->mp_state = MP_STATE_STARTED;
                     } else {
                         ALOGD("ijkmp_get_msg: FFP_REQ_START: restart from seek pos");
+                        retval = ffp_start_l(mp->ffplayer);
+                        if (retval == 0)
+                            mp->mp_state = MP_STATE_STARTED;
                     }
-                }
-
-                int retval = ffp_start_l(mp->ffplayer);
-                if (retval == 0) {
-                    mp->mp_state = MP_STATE_STARTED;
+                    mp->restart_from_beginning = 0;
+                } else {
+                    ALOGD("ijkmp_get_msg: FFP_REQ_START: start on fly");
+                    retval = ffp_start_l(mp->ffplayer);
+                    if (retval == 0)
+                        mp->mp_state = MP_STATE_STARTED;
                 }
             }
             pthread_mutex_unlock(&mp->mutex);
@@ -569,8 +572,8 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             pthread_mutex_lock(&mp->mutex);
             if (0 == ikjmp_chkst_seek_l(mp->mp_state)) {
                 if (0 == ffp_seek_to_l(mp->ffplayer, msg->arg1)) {
-                    ALOGD("ijkmp_get_msg: FFP_REQ_SEEK: will restart from seek pos");
-                    restart_from_beginning = 0;
+                    ALOGD("ijkmp_get_msg: FFP_REQ_SEEK: seek to %d", (int)msg->arg1);
+                    mp->restart_from_beginning = 0;
                 }
             }
             pthread_mutex_unlock(&mp->mutex);
