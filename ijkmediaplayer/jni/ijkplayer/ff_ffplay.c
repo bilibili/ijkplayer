@@ -652,6 +652,7 @@ display:
         }
     }
     is->force_refresh = 0;
+#ifdef FFP_MERGE
     if (ffp->show_status) {
         static int64_t last_time;
         int64_t cur_time;
@@ -695,6 +696,7 @@ display:
             last_time = cur_time;
         }
     }
+#endif
 }
 
 // TODO: 9 alloc_picture in video_refresh_thread if overlay referenced by vout
