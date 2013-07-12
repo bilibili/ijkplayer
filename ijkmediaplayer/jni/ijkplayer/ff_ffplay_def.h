@@ -147,7 +147,9 @@ typedef struct VideoState {
     int seek_flags;
     int64_t seek_pos;
     int64_t seek_rel;
+#ifdef FFP_MERGE
     int read_pause_return;
+#endif
     AVFormatContext *ic;
     int realtime;
 
@@ -259,7 +261,9 @@ typedef struct VideoState {
     SDL_mutex  *play_mutex; // only guard state, do not block any long operation
     SDL_Thread *video_refresh_tid;
     SDL_Thread _video_refresh_tid;
-    int buffering_started;
+
+    int buffering_on;
+    int pause_req;
 } VideoState;
 
 /* options specified by the user */
@@ -317,6 +321,7 @@ static int is_full_screen;
 static int64_t audio_callback_time;
 
 static AVPacket flush_pkt;
+static AVPacket eof_pkt;
 
 #define FF_ALLOC_EVENT   (SDL_USEREVENT)
 #define FF_QUIT_EVENT    (SDL_USEREVENT + 2)
@@ -417,7 +422,7 @@ typedef struct FFPlayer {
 
     int last_error;
     int prepared;
-    int start_on_prepared;
+    int auto_start;
 
     MessageQueue msg_queue;
 
@@ -489,11 +494,11 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->last_error             = 0;
     ffp->prepared               = 0;
-    ffp->start_on_prepared      = 0;
+    ffp->auto_start             = 0;
 
     ffp->high_water_mark_in_ms    = DEFAULT_HIGH_WATER_MARK_IN_MS;
     ffp->high_water_mark_in_bytes = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
-    ffp->max_buffer_size = MAX_QUEUE_SIZE;
+    ffp->max_buffer_size          = MAX_QUEUE_SIZE;
 
     msg_queue_flush(&ffp->msg_queue);
 }
