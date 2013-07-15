@@ -629,7 +629,7 @@ public class VideoView extends SurfaceView implements
     @Override
     public void seekTo(long msec) {
         if (isInPlaybackState()) {
-            mMediaPlayer.seekTo((int) msec);
+            mMediaPlayer.seekTo(msec);
             mSeekWhenPrepared = 0;
         } else {
             mSeekWhenPrepared = msec;

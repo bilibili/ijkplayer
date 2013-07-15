@@ -83,7 +83,7 @@ public class MediaController extends FrameLayout {
     private TextView mFileName;
     private OutlineTextView mInfoView;
     private String mTitle;
-    private int mDuration;
+    private long mDuration;
     private boolean mShowing;
     private boolean mDragging;
     private boolean mInstantSeeking = true;
@@ -385,8 +385,8 @@ public class MediaController extends FrameLayout {
         return position;
     }
 
-    private static String generateTime(int position) {
-        int totalSeconds = position / 1000;
+    private static String generateTime(long position) {
+        int totalSeconds = (int) (position / 1000);
 
         int seconds = totalSeconds % 60;
         int minutes = (totalSeconds / 60) % 60;
@@ -485,7 +485,7 @@ public class MediaController extends FrameLayout {
             if (!fromuser)
                 return;
 
-            int newposition = (mDuration * progress) / 1000;
+            long newposition = (mDuration * progress) / 1000;
             String time = generateTime(newposition);
             if (mInstantSeeking)
                 mPlayer.seekTo(newposition);
