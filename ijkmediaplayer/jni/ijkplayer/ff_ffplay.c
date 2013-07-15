@@ -2558,7 +2558,7 @@ long ffp_get_current_position_l(FFPlayer *ffp)
     int64_t start_time = is->ic->start_time;
     int64_t start_diff = 0;
     if (start_time > 0 && start_time != AV_NOPTS_VALUE)
-        start_diff = fftime_to_milliseconds(is->ic->start_time);
+        start_diff = fftime_to_milliseconds(start_time);
 
     int64_t pos = 0;
     double pos_clock = get_master_clock(is);
