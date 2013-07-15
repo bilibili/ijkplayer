@@ -2543,6 +2543,7 @@ int ffp_seek_to_l(FFPlayer *ffp, long msec)
     // FIXME: 9 seek by bytes
     // FIXME: 9 seek out of range
     // FIXME: 9 seekable
+    // ALOGE("stream_seek %"PRId64"(%d) + %"PRId64", ", seek_pos, (int)msec, start_time);
     stream_seek(is, seek_pos, 0, 0);
     return 0;
 }
@@ -2587,7 +2588,7 @@ long ffp_get_duration_l(FFPlayer *ffp)
     int64_t start_time = is->ic->start_time;
     int64_t start_diff = 0;
     if (start_time > 0 && start_time != AV_NOPTS_VALUE)
-        start_diff = fftime_to_milliseconds(is->ic->start_time);
+        start_diff = fftime_to_milliseconds(start_time);
 
     int64_t duration = fftime_to_milliseconds(is->ic->duration);
     if (duration < 0 || duration < start_diff)

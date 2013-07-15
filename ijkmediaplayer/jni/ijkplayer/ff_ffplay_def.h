@@ -431,8 +431,8 @@ typedef struct FFPlayer {
     int max_buffer_size;
 } FFPlayer;
 
-#define fftime_to_milliseconds(ts) (ts / (AV_TIME_BASE / 1000))
-#define milliseconds_to_fftime(ms) (ms * (AV_TIME_BASE / 1000))
+#define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
+#define milliseconds_to_fftime(ms) (av_rescale(ms, AV_TIME_BASE, 1000));
 
 inline static void ffp_reset_internal(FFPlayer *ffp)
 {
