@@ -605,6 +605,8 @@ retry:
                 delay = compute_target_delay(is->frame_last_duration, is);
 
             time= av_gettime()/1000000.0;
+            if (isnan(is->frame_timer) || time < is->frame_timer)
+                is->frame_timer = time;
             if (time < is->frame_timer + delay && !redisplay) {
                 *remaining_time = FFMIN(is->frame_timer + delay - time, *remaining_time);
                 return;
