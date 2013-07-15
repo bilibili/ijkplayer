@@ -54,6 +54,8 @@ typedef struct IjkMediaPlayer {
     void *weak_thiz;
 
     int restart_from_beginning;
+    int seek_req;
+    long seek_msec;
 } IjkMediaPlayer;
 
 inline static void ijkmp_destroy(IjkMediaPlayer *mp)
@@ -292,7 +294,7 @@ static int ijkmp_start_l(IjkMediaPlayer *mp)
 
     ffp_remove_msg(mp->ffplayer, FFP_REQ_START);
     ffp_remove_msg(mp->ffplayer, FFP_REQ_PAUSE);
-    ffp_notify_msg(mp->ffplayer, FFP_REQ_START, 0, 0);
+    ffp_notify_msg1(mp->ffplayer, FFP_REQ_START);
 
     return 0;
 }
@@ -332,7 +334,7 @@ static int ijkmp_pause_l(IjkMediaPlayer *mp)
 
     ffp_remove_msg(mp->ffplayer, FFP_REQ_START);
     ffp_remove_msg(mp->ffplayer, FFP_REQ_PAUSE);
-    ffp_notify_msg(mp->ffplayer, FFP_REQ_PAUSE, 0, 0);
+    ffp_notify_msg1(mp->ffplayer, FFP_REQ_PAUSE);
 
     return 0;
 }
@@ -418,8 +420,10 @@ int ijkmp_seek_to_l(IjkMediaPlayer *mp, long msec)
 
     MP_RET_IF_FAILED(ikjmp_chkst_seek_l(mp->mp_state));
 
+    mp->seek_req = 1;
+    mp->seek_msec = msec;
     ffp_remove_msg(mp->ffplayer, FFP_REQ_SEEK);
-    ffp_notify_msg(mp->ffplayer, FFP_REQ_SEEK, msec, 0);
+    ffp_notify_msg2(mp->ffplayer, FFP_REQ_SEEK, msec);
     // TODO: 9 64-bit long?
 
     return 0;
@@ -446,7 +450,11 @@ long ijkmp_get_current_position(IjkMediaPlayer *mp)
 {
     assert(mp);
     pthread_mutex_lock(&mp->mutex);
-    long retval = ijkmp_get_current_position_l(mp);
+    long retval;
+    if (mp->seek_req)
+        retval = mp->seek_msec;
+    else
+        retval = ijkmp_get_current_position_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     return retval;
 }
@@ -521,6 +529,15 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             pthread_mutex_lock(&mp->mutex);
             mp->restart_from_beginning = 1;
             mp->mp_state = MP_STATE_COMPLETED;
+            pthread_mutex_unlock(&mp->mutex);
+            break;
+
+        case FFP_MSG_SEEK_COMPLETE:
+            MPTRACE("ijkmp_get_msg: FFP_MSG_SEEK_COMPLETE");
+
+            pthread_mutex_lock(&mp->mutex);
+            mp->seek_req = 0;
+            mp->seek_msec = 0;
             pthread_mutex_unlock(&mp->mutex);
             break;
 

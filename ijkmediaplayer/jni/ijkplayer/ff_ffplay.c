@@ -794,7 +794,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
         vp->height != src_frame->height) {
 
         if (vp->width != src_frame->width || vp->height != src_frame->height)
-            ffp_notify_msg(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, src_frame->width, src_frame->height);
+            ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, src_frame->width, src_frame->height);
 
         vp->allocated  = 0;
         vp->reallocate = 0;
@@ -1950,14 +1950,14 @@ static int read_thread(void *arg)
         ffp->infinite_buffer = 1;
 
     ffp->prepared = true;
-    ffp_notify_msg(ffp, FFP_MSG_PREPARED, 0, 0);
+    ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
     if (is->video_st && is->video_st->codec) {
         AVCodecContext *avctx = is->video_st->codec;
-        ffp_notify_msg(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
-        ffp_notify_msg(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
+        ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
+        ffp_notify_msg3(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
     }
     if (ffp->auto_start) {
-        ffp_notify_msg(ffp, FFP_REQ_START, 0, 0);
+        ffp_notify_msg1(ffp, FFP_REQ_START);
         ffp->auto_start = 0;
     }
 
@@ -2031,6 +2031,7 @@ static int read_thread(void *arg)
             if (is->pause_req)
                 step_to_next_frame(ffp);
             SDL_UnlockMutex(ffp->is->play_mutex);
+            ffp_notify_msg1(ffp, FFP_MSG_SEEK_COMPLETE);
         }
         if (is->queue_attachments_req) {
             if (is->video_st && (is->video_st->disposition & AV_DISPOSITION_ATTACHED_PIC)) {
@@ -2106,7 +2107,7 @@ static int read_thread(void *arg)
                         // ALOGE("ffp_toggle_buffering: eof");
                         ffp_toggle_buffering(ffp, 0);
                         toggle_pause(ffp, 1);
-                        ffp_notify_msg(ffp, FFP_MSG_COMPLETED, 0, 0);
+                        ffp_notify_msg1(ffp, FFP_MSG_COMPLETED);
                     }
                 }
             }
@@ -2181,7 +2182,7 @@ static int read_thread(void *arg)
                     if (last_buffered_time_percentage != buf_time_percent) {
                         // ALOGE("time cache=%%%d (%d/%d)", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
                         last_buffered_time_percentage = buf_time_percent;
-                        ffp_notify_msg(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_duration_in_ms, hwm_in_ms);
+                        ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_duration_in_ms, hwm_in_ms);
                     }
                 }
             }
@@ -2192,7 +2193,7 @@ static int read_thread(void *arg)
                 if (last_buffered_size_percentage != buf_size_percent) {
                     // ALOGE("size cache=%%%d (%d/%d)",buf_size_percent, cached_size, hwm_in_bytes);
                     last_buffered_size_percentage = buf_size_percent;
-                    ffp_notify_msg(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_size, hwm_in_bytes);
+                    ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_size, hwm_in_bytes);
                 }
             }
 
@@ -2225,7 +2226,7 @@ static int read_thread(void *arg)
 
     if (!ffp->prepared || !is->abort_request) {
         ffp->last_error = last_error;
-        ffp_notify_msg(ffp, FFP_MSG_ERROR, last_error, 0);
+        ffp_notify_msg2(ffp, FFP_MSG_ERROR, last_error);
     }
 
     SDL_DestroyMutex(wait_mutex);
@@ -2606,12 +2607,12 @@ void ffp_toggle_buffering_l(FFPlayer *ffp, int buffering_on)
         ALOGD("ffp_toggle_buffering_l: start");
         is->buffering_on = 1;
         stream_update_pause_l(ffp);
-        ffp_notify_msg(ffp, FFP_MSG_BUFFERING_START, 0, 0);
+        ffp_notify_msg1(ffp, FFP_MSG_BUFFERING_START);
     } else if (!buffering_on && is->buffering_on){
         ALOGD("ffp_toggle_buffering_l: end");
         is->buffering_on = 0;
         stream_update_pause_l(ffp);
-        ffp_notify_msg(ffp, FFP_MSG_BUFFERING_END, 0, 0);
+        ffp_notify_msg1(ffp, FFP_MSG_BUFFERING_END);
     }
 }
 
