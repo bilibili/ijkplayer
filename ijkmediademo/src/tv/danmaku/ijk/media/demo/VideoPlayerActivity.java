@@ -44,7 +44,19 @@ public class VideoPlayerActivity extends Activity {
     mVideoPath = "http://gslb.coop.letv.com/movie/A51456D18B8BB6865ADBA0EE972B0B7F-situoke.mp4?tag=ios";
     mVideoPath = "http://gslb.bestvcdn.com/gslb/url/Bestv/live/live/kknews/workflow1.m3u8";        
     mVideoPath = "http://gslb.tv.sohu.com/live?cid=12&type=hls";
+
+    // buffering immediately after prepared
     mVideoPath = "http://meta.video.qiyi.com/380/56070c92f215c514e17fd04b07e22e27.m3u8";
+
+    // 3gp seek around
+    mVideoPath = "http://v.cctv.com/flash/mp4video28/TMS/2013/05/06/265114d5f2e641278098503f1676d017_h264418000nero_aac32-1.mp4";
+
+    // slow vod
+    mVideoPath = "http://wtv.v.iask.com/player/index_vod_ios.meta?record_id=201304295369";
+    mVideoPath = "http://mtv.v.iask.com/manifest/201304295369_450.m3u8"
+
+    // youku insane discontinuity time
+    mVideoPath = "http://v.youku.com/player/getM3U8/vid/XNTc4NjA0MzIw/type/flv/ts/useKeyFrame/0/v.m3u8";
      */
 
     @Override
