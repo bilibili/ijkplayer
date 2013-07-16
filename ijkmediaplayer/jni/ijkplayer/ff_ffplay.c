@@ -2131,7 +2131,9 @@ static int read_thread(void *arg)
                 ffp_toggle_buffering(ffp, 0);
             }
             if (ic->pb && ic->pb->error) {
+                // TODO: 9 notify error until a/v finished
                 last_error = ic->pb->error;
+                ffp_notify_msg2(ffp, FFP_MSG_ERROR, last_error);
                 break;
             }
             SDL_LockMutex(wait_mutex);
