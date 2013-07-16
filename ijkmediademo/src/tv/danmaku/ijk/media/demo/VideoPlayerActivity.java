@@ -57,6 +57,9 @@ public class VideoPlayerActivity extends Activity {
 
     // youku insane discontinuity time
     mVideoPath = "http://v.youku.com/player/getM3U8/vid/XNTc4NjA0MzIw/type/flv/ts/useKeyFrame/0/v.m3u8";
+
+    // gzip
+    mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/07/12/h264_450k_mp4_fc398b217ff9f93ef8fb0ea939c86766_ncd.mp4.m3u8";
      */
 
     @Override
@@ -64,7 +67,7 @@ public class VideoPlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mVideoPath = "http://meta.video.qiyi.com/380/56070c92f215c514e17fd04b07e22e27.m3u8";
+        mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/07/12/h264_450k_mp4_fc398b217ff9f93ef8fb0ea939c86766_ncd.mp4.m3u8";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
