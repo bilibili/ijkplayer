@@ -1832,6 +1832,9 @@ static int read_thread(void *arg)
     is->last_subtitle_stream = is->subtitle_stream = -1;
 #endif
 
+    // TODO: 8 set options from java side
+    av_dict_set(&ffp->format_opts, "timeout", "10000", 0);
+
     ic = avformat_alloc_context();
     ic->interrupt_callback.callback = decode_interrupt_cb;
     ic->interrupt_callback.opaque = is;
@@ -1872,6 +1875,7 @@ static int read_thread(void *arg)
         ffp->seek_by_bytes = !!(ic->iformat->flags & AVFMT_TS_DISCONT) && strcmp("ogg", ic->iformat->name);
 
     is->max_frame_duration = (ic->iformat->flags & AVFMT_TS_DISCONT) ? 10.0 : 3600.0;
+    ALOGI("max_frame_duration: %.3f", is->max_frame_duration);
 
 #ifdef FFP_MERGE
     if (!window_title && (t = av_dict_get(ic->metadata, "title", NULL, 0)))
@@ -2129,10 +2133,10 @@ static int read_thread(void *arg)
                     packet_queue_put(&is->videoq, &eof_pkt);
 
                 ffp_toggle_buffering(ffp, 0);
-            }
-            if (ic->pb && ic->pb->error) {
+            } else if (ic->pb && ic->pb->error) {
                 // TODO: 9 notify error until a/v finished
                 last_error = ic->pb->error;
+                ALOGE("av_read_frame error: %d", ic->pb->error);
                 ffp_notify_msg2(ffp, FFP_MSG_ERROR, last_error);
                 break;
             }
