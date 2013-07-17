@@ -60,6 +60,9 @@ public class VideoPlayerActivity extends Activity {
 
     // gzip
     mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/07/12/h264_450k_mp4_fc398b217ff9f93ef8fb0ea939c86766_ncd.mp4.m3u8";
+
+    // invalid variant
+    mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/06/30/f969bb5169365989b2e9bace44353a2b.m3u8";
      */
 
     @Override
@@ -67,7 +70,7 @@ public class VideoPlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/07/12/h264_450k_mp4_fc398b217ff9f93ef8fb0ea939c86766_ncd.mp4.m3u8";
+        mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/06/30/f969bb5169365989b2e9bace44353a2b.m3u8";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
