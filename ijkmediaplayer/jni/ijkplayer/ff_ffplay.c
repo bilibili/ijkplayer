@@ -1833,7 +1833,7 @@ static int read_thread(void *arg)
 #endif
 
     // TODO: 8 set options from java side
-    av_dict_set(&ffp->format_opts, "timeout", "10000", 0);
+    av_dict_set(&ffp->format_opts, "timeout", "10000000", 0);
 
     ic = avformat_alloc_context();
     ic->interrupt_callback.callback = decode_interrupt_cb;
