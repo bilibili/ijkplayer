@@ -26,6 +26,8 @@
 
 #include "libavutil/imgutils.h"
 #include "libavutil/pixfmt.h"
+#include "libavutil/frame.h"
+#include "libavutil/common.h"
 #include "libavcodec/avcodec.h"
 #include "libswscale/swscale.h"
 

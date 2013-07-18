@@ -452,7 +452,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->wanted_stream[AVMEDIA_TYPE_SUBTITLE]   = -1;
     ffp->seek_by_bytes          = -1;
     ffp->display_disable        = 0;
-    ffp->show_status            = 1;
+    ffp->show_status            = 0;
     ffp->av_sync_type           = AV_SYNC_AUDIO_MASTER;
     ffp->start_time             = AV_NOPTS_VALUE;
     ffp->duration               = AV_NOPTS_VALUE;
@@ -489,8 +489,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->sar_den                = 0;
 
     // ffp->overlay_format         = SDL_FCC_YV12;
-    // ffp->overlay_format         = SDL_FCC_RV16;
-    ffp->overlay_format         = SDL_FCC_RV32;
+    // ffp->overlay_format         = SDL_FCC_RV32;
+    ffp->overlay_format         = SDL_FCC_RV16;
 
     ffp->last_error             = 0;
     ffp->prepared               = 0;

@@ -34,8 +34,11 @@
 typedef struct SDL_VoutOverlay_Opaque {
     SDL_mutex *mutex;
 
-    AVBufferRef *frame_buffer;
     AVFrame *frame;
+    AVBufferRef *frame_buffer;
+    int planes;
+
+    AVFrame *linked_frame;
 
     Uint16 pitches[AV_NUM_DATA_POINTERS];
     Uint8 *pixels[AV_NUM_DATA_POINTERS];
@@ -58,10 +61,18 @@ static AVFrame *alloc_avframe(SDL_VoutOverlay_Opaque* opaque, enum AVPixelFormat
         return NULL;
     }
 
+    AVFrame *linked_frame = av_frame_alloc();
+    if (!frame) {
+        av_frame_free(&frame);
+        av_buffer_unref(&frame_buffer_ref);
+        return NULL;
+    }
+
     AVPicture *pic = (AVPicture *) frame;
     avcodec_get_frame_defaults(frame);
     avpicture_fill(pic, frame_buffer_ref->data, format, width, height);
     opaque->frame_buffer = frame_buffer_ref;
+    opaque->linked_frame = linked_frame;
     return frame;
 }
 
@@ -78,6 +89,11 @@ static void overlay_free_l(SDL_VoutOverlay *overlay)
     if (opaque->frame)
         av_frame_free(&opaque->frame);
 
+    if (opaque->linked_frame) {
+        av_frame_unref(opaque->linked_frame);
+        av_frame_free(&opaque->linked_frame);
+    }
+
     if (opaque->frame_buffer)
         av_buffer_unref(&opaque->frame_buffer);
 
@@ -87,7 +103,7 @@ static void overlay_free_l(SDL_VoutOverlay *overlay)
     SDL_VoutOverlay_FreeInternal(overlay);
 }
 
-static void overlay_fill(SDL_VoutOverlay *overlay, AVFrame *frame, Uint32 format, int planes)
+static void overlay_fill(SDL_VoutOverlay *overlay, AVFrame *frame, int planes)
 {
     AVPicture *pic = (AVPicture *) frame;
     overlay->planes = planes;
@@ -128,26 +144,25 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     overlay->h = height;
 
     enum AVPixelFormat ff_format = AV_PIX_FMT_NONE;
-    int planes = 0;
     int buf_width = width;  // must be aligned to 16 bytes pitch for arm-neon image-convert
     int buf_height = height;
     switch (format) {
     case SDL_FCC_YV12: {
         ff_format = AV_PIX_FMT_YUV420P;
         buf_width = IJKALIGN(width, 16); // 1 bytes per pixel for Y-plane
-        planes = 3;
+        opaque->planes = 3;
         break;
     }
     case SDL_FCC_RV16: {
         ff_format = AV_PIX_FMT_RGB565;
         buf_width = IJKALIGN(width, 8); // 2 bytes per pixel
-        planes = 1;
+        opaque->planes = 1;
         break;
     }
     case SDL_FCC_RV32: {
         ff_format = AV_PIX_FMT_0BGR32;
         buf_width = IJKALIGN(width, 4); // 4 bytes per pixel
-        planes = 1;
+        opaque->planes = 1;
         break;
     }
     default:
@@ -161,7 +176,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         goto fail;
     }
     opaque->mutex = SDL_CreateMutex();
-    overlay_fill(overlay, opaque->frame, format, planes);
+    overlay_fill(overlay, opaque->frame, opaque->planes);
 
     overlay->free_l = overlay_free_l;
     overlay->lock = overlay_lock;
@@ -174,10 +189,8 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     return NULL;
 }
 
-int SDL_VoutFFmpeg_ConvertPicture(
-    const SDL_VoutOverlay *overlay,
-    int width, int height,
-    enum AVPixelFormat src_format, const uint8_t **src_data, int *src_linesize,
+int SDL_VoutFFmpeg_ConvertFrame(
+    SDL_VoutOverlay *overlay, AVFrame *frame,
     struct SwsContext **p_sws_ctx, int sws_flags)
 {
     assert(overlay);
@@ -190,19 +203,33 @@ int SDL_VoutFFmpeg_ConvertPicture(
         dest_pic.linesize[i] = overlay->pitches[i];
     }
 
+    av_frame_unref(opaque->linked_frame);
+
+    int use_linked_frame = 0;
     enum AVPixelFormat dst_format = AV_PIX_FMT_NONE;
     switch (overlay->format) {
     case SDL_FCC_YV12:
-        dst_format = AV_PIX_FMT_YUV420P;
-        dest_pic.data[2] = overlay->pixels[1];
-        dest_pic.data[1] = overlay->pixels[2];
+        if (frame->format == AV_PIX_FMT_YUV420P || frame->format == AV_PIX_FMT_YUVJ420P) {
+            // ALOGE("direct draw frame");
+            use_linked_frame = 1;
+            av_frame_ref(opaque->linked_frame, frame);
+            overlay_fill(overlay, opaque->linked_frame, opaque->planes);
+            FFSWAP(Uint8*, overlay->pixels[1], overlay->pixels[2]);
+        } else {
+            // ALOGE("copy draw frame");
+            overlay_fill(overlay, opaque->frame, opaque->planes);
+            dest_pic.data[2] = overlay->pixels[1];
+            dest_pic.data[1] = overlay->pixels[2];
+        }
         break;
     case SDL_FCC_RV32:
         // TODO: 9 android only
+        overlay_fill(overlay, opaque->frame, opaque->planes);
         dst_format = AV_PIX_FMT_0BGR32;
         break;
     case SDL_FCC_RV16:
         // TODO: 9 android only
+        overlay_fill(overlay, opaque->frame, opaque->planes);
         dst_format = AV_PIX_FMT_RGB565;
         break;
     default:
@@ -211,23 +238,25 @@ int SDL_VoutFFmpeg_ConvertPicture(
         return -1;
     }
 
-    if (ijk_image_convert(width, height,
+    if (use_linked_frame) {
+        // do nothing
+    } else if (ijk_image_convert(frame->width, frame->height,
         dst_format, dest_pic.data, dest_pic.linesize,
-        src_format, src_data, src_linesize)) {
+        frame->format, (const uint8_t**) frame->data, frame->linesize)) {
         *p_sws_ctx = sws_getCachedContext(*p_sws_ctx,
-            width, height, src_format, width, height,
+            frame->width, frame->height, frame->format, frame->width, frame->height,
             dst_format, sws_flags, NULL, NULL, NULL);
         if (*p_sws_ctx == NULL) {
             ALOGE("sws_getCachedContext failed");
             return -1;
         }
 
-        sws_scale(*p_sws_ctx, (const uint8_t **) src_data, src_linesize,
-            0, height, dest_pic.data, dest_pic.linesize);
+        sws_scale(*p_sws_ctx, (const uint8_t**) frame->data, frame->linesize,
+            0, frame->height, dest_pic.data, dest_pic.linesize);
 
         if (!opaque->no_neon_warned) {
             opaque->no_neon_warned = 1;
-            ALOGE("non-neon image convert %s -> %s", av_get_pix_fmt_name(src_format), av_get_pix_fmt_name(dst_format));
+            ALOGE("non-neon image convert %s -> %s", av_get_pix_fmt_name(frame->format), av_get_pix_fmt_name(dst_format));
         }
     }
 

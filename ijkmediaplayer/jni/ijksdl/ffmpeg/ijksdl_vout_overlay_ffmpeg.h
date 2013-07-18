@@ -31,10 +31,8 @@
 // TODO: 9 alignment to speed up memcpy when display
 SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *display);
 
-int SDL_VoutFFmpeg_ConvertPicture(
-    const SDL_VoutOverlay *overlay,
-    int width, int height,
-    enum AVPixelFormat src_format, const uint8_t **src_data, int *src_linesize,
+int SDL_VoutFFmpeg_ConvertFrame(
+    SDL_VoutOverlay *overlay, AVFrame *frame,
     struct SwsContext **p_sws_ctx, int sws_flags);
 
 #endif

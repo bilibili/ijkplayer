@@ -652,7 +652,6 @@ display:
         }
     }
     is->force_refresh = 0;
-#ifdef FFP_MERGE
     if (ffp->show_status) {
         static int64_t last_time;
         int64_t cur_time;
@@ -696,7 +695,6 @@ display:
             last_time = cur_time;
         }
     }
-#endif
 }
 
 // TODO: 9 alloc_picture in video_refresh_thread if overlay referenced by vout
@@ -814,8 +812,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
         /* get a pointer on the bitmap */
         SDL_VoutLockYUVOverlay(vp->bmp);
 
-        if (SDL_VoutFFmpeg_ConvertPicture(vp->bmp, vp->width, vp->height,
-            src_frame->format, (const uint8_t**)src_frame->data, src_frame->linesize,
+        if (SDL_VoutFFmpeg_ConvertFrame(vp->bmp, src_frame,
             &is->img_convert_ctx, ffp->sws_flags) < 0) {
             av_log(NULL, AV_LOG_FATAL, "Cannot initialize the conversion context\n");
             exit(1);
@@ -1833,7 +1830,7 @@ static int read_thread(void *arg)
 #endif
 
     // TODO: 8 set options from java side
-    av_dict_set(&ffp->format_opts, "timeout", "10000000", 0);
+    // av_dict_set(&ffp->format_opts, "timeout", "10000000", 0);
 
     ic = avformat_alloc_context();
     ic->interrupt_callback.callback = decode_interrupt_cb;
@@ -1920,9 +1917,7 @@ static int read_thread(void *arg)
                                  st_index[AVMEDIA_TYPE_VIDEO]),
                                 NULL, 0);
 #endif
-    if (ffp->show_status) {
-        av_dump_format(ic, 0, is->filename, 0);
-    }
+    av_dump_format(ic, 0, is->filename, 0);
 
     is->show_mode = ffp->show_mode;
 
