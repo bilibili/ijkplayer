@@ -36,6 +36,9 @@
 
 #define printf(...) ALOGD(__VA_ARGS__)
 
+// #define FFP_SHOW_FPS
+// #define FFP_SHOW_VDPS
+
 static AVPacket flush_pkt;
 static AVPacket eof_pkt;
 
@@ -223,6 +226,10 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
 // FFP_MERGE: calculate_display_rect
 // FFP_MERGE: video_image_display
 
+#ifdef FFP_SHOW_FPS
+static int g_fps_counter = 0;
+static int64_t g_fps_total_time = 0;
+#endif
 static void video_image_display2(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
@@ -230,7 +237,19 @@ static void video_image_display2(FFPlayer *ffp)
 
     vp = &is->pictq[is->pictq_rindex];
     if (vp->bmp) {
+#ifdef FFP_SHOW_FPS
+        int64_t start = SDL_GetTickHR();
+#endif
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
+#ifdef FFP_SHOW_FPS
+        int64_t dur = SDL_GetTickHR() - start;
+        g_fps_total_time += dur;
+        g_fps_counter++;
+        int64_t avg_frame_time = g_fps_total_time / g_fps_counter;
+        double fps = 1.0f / avg_frame_time * 1000;
+        ALOGE("fps:  [%f][%d] %"PRId64" ms/frame, fps=%f, +%"PRId64,
+            vp->pts, g_fps_counter, (int64_t)avg_frame_time, fps, dur);
+#endif
     }
 }
 
@@ -834,6 +853,10 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
     return 0;
 }
 
+#ifdef FFP_SHOW_VDPS
+static int g_vdps_counter = 0;
+static int64_t g_vdps_total_time = 0;
+#endif
 static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *serial)
 {
     VideoState *is = ffp->is;
@@ -859,8 +882,20 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         return 0;
     }
 
+#ifdef FFP_SHOW_VDPS
+        int64_t start = SDL_GetTickHR();
+#endif
     if(avcodec_decode_video2(is->video_st->codec, frame, &got_picture, pkt) < 0)
         return 0;
+#ifdef FFP_SHOW_VDPS
+        int64_t dur = SDL_GetTickHR() - start;
+        g_vdps_total_time += dur;
+        g_vdps_counter++;
+        int64_t avg_frame_time = g_vdps_total_time / g_vdps_counter;
+        double fps = 1.0f / avg_frame_time * 1000;
+        ALOGE("vdps: [%f][%d] %"PRId64" ms/frame, vdps=%f, +%"PRId64,
+            frame->pts, g_vdps_counter, (int64_t)avg_frame_time, fps, dur);
+#endif
 
     if (got_picture) {
         int ret = 1;
