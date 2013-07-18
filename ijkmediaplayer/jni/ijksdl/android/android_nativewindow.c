@@ -66,7 +66,7 @@ static int android_render_yv12_on_yv12(ANativeWindow_Buffer *out_buffer, const S
         const uint8_t *src_pixels = overlay->pixels[i];
 
         if (dst_line_size == src_line_size) {
-            int plane_size = src_line_size * min_height;
+            int plane_size = src_line_size * line_height;
 
             // ALOGE("sdl_image_copy_plane %p %p %d", dst_pixels, src_pixels, dst_plane_size);
             memcpy(dst_pixels, src_pixels, plane_size);
@@ -74,7 +74,7 @@ static int android_render_yv12_on_yv12(ANativeWindow_Buffer *out_buffer, const S
             // TODO: 9 padding
             int bytewidth = IJKMIN(dst_line_size, src_line_size);
 
-            // ALOGE("av_image_copy_plane %p %d %p %d %d %d", dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, min_height);
+            // ALOGE("av_image_copy_plane %p %d %p %d %d %d", dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, line_height);
             av_image_copy_plane(dst_pixels, dst_line_size, src_pixels, src_line_size, bytewidth, line_height);
         }
     }
