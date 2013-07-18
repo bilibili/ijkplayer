@@ -45,6 +45,6 @@ Uint64 SDL_GetTickHR(void)
     Uint64 clock;
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC_HR, &now);
-    clock = now.tv_sec * 1000 + now.tv_nsec * 1000000;
+    clock = now.tv_sec * 1000 + now.tv_nsec / 1000000;
     return (clock);
 }
