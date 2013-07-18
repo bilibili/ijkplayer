@@ -52,7 +52,7 @@ static AVFrame *alloc_avframe(SDL_VoutOverlay_Opaque* opaque, enum AVPixelFormat
     if (!frame_buf)
         return NULL;
 
-    AVFrame *frame = avcodec_alloc_frame();
+    AVFrame *frame = av_frame_alloc();
     if (!frame) {
         av_free(frame_buf);
         return NULL;
@@ -76,7 +76,7 @@ static void overlay_free_l(SDL_VoutOverlay *overlay)
         return;
 
     if (opaque->frame)
-        avcodec_free_frame(&opaque->frame);
+        av_frame_free(&opaque->frame);
 
     if (opaque->frame_buf)
         av_free(opaque->frame_buf);
