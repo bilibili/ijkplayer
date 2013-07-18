@@ -185,10 +185,17 @@ int SDL_VoutFFmpeg_ConvertPicture(
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     AVPicture dest_pic = { { 0 } };
 
+    for (int i = 0; i < overlay->planes; ++i) {
+        dest_pic.data[i] = overlay->pixels[i];
+        dest_pic.linesize[i] = overlay->pitches[i];
+    }
+
     enum AVPixelFormat dst_format = AV_PIX_FMT_NONE;
     switch (overlay->format) {
     case SDL_FCC_YV12:
         dst_format = AV_PIX_FMT_YUV420P;
+        dest_pic.data[2] = overlay->pixels[1];
+        dest_pic.data[1] = overlay->pixels[2];
         break;
     case SDL_FCC_RV32:
         // TODO: 9 android only
@@ -202,11 +209,6 @@ int SDL_VoutFFmpeg_ConvertPicture(
         ALOGE("SDL_VoutFFmpeg_ConvertPicture: unexpected overlay format %s(%d)",
             (char*)&overlay->format, overlay->format);
         return -1;
-    }
-
-    for (int i = 0; i < overlay->planes; ++i) {
-        dest_pic.data[i] = overlay->pixels[i];
-        dest_pic.linesize[i] = overlay->pitches[i];
     }
 
     if (ijk_image_convert(width, height,
