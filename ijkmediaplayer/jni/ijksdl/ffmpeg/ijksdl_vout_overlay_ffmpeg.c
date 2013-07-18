@@ -34,7 +34,7 @@
 typedef struct SDL_VoutOverlay_Opaque {
     SDL_mutex *mutex;
 
-    uint8_t *frame_buf;
+    AVBufferRef *frame_buffer;
     AVFrame *frame;
 
     Uint16 pitches[AV_NUM_DATA_POINTERS];
@@ -48,20 +48,20 @@ typedef struct SDL_VoutOverlay_Opaque {
 static AVFrame *alloc_avframe(SDL_VoutOverlay_Opaque* opaque, enum AVPixelFormat format, int width, int height)
 {
     int frame_bytes = avpicture_get_size(format, width, height);
-    uint8_t* frame_buf = (uint8_t*) av_malloc(frame_bytes);
-    if (!frame_buf)
+    AVBufferRef *frame_buffer_ref = av_buffer_alloc(frame_bytes);
+    if (!frame_buffer_ref)
         return NULL;
 
     AVFrame *frame = av_frame_alloc();
     if (!frame) {
-        av_free(frame_buf);
+        av_buffer_unref(&frame_buffer_ref);
         return NULL;
     }
 
     AVPicture *pic = (AVPicture *) frame;
     avcodec_get_frame_defaults(frame);
-    avpicture_fill(pic, frame_buf, format, width, height);
-    opaque->frame_buf = frame_buf;
+    avpicture_fill(pic, frame_buffer_ref->data, format, width, height);
+    opaque->frame_buffer = frame_buffer_ref;
     return frame;
 }
 
@@ -78,8 +78,8 @@ static void overlay_free_l(SDL_VoutOverlay *overlay)
     if (opaque->frame)
         av_frame_free(&opaque->frame);
 
-    if (opaque->frame_buf)
-        av_free(opaque->frame_buf);
+    if (opaque->frame_buffer)
+        av_buffer_unref(&opaque->frame_buffer);
 
     if (opaque->mutex)
         SDL_DestroyMutex(opaque->mutex);
