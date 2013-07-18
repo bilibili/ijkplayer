@@ -63,6 +63,12 @@ public class VideoPlayerActivity extends Activity {
 
     // invalid variant
     mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/06/30/f969bb5169365989b2e9bace44353a2b.m3u8";
+
+    // 720p sina
+    mVideoPath = "http://edge.v.iask.com/101692214.hlv?KID=sina,viask&Expires=1374249600&ssig=8dvnUJ%2Fb2n"
+
+    // 1080p sina
+    mVideoPath = "http://edge.v.iask.com/44897225.hlv?KID=sina,viask&Expires=1374249600&ssig=QRllIFSYp0"
      */
 
     @Override
@@ -70,7 +76,7 @@ public class VideoPlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/06/30/f969bb5169365989b2e9bace44353a2b.m3u8";
+        mVideoPath = "http://edge.v.iask.com/44897225.hlv?KID=sina,viask&Expires=1374249600&ssig=QRllIFSYp0";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
