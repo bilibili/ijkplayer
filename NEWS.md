@@ -13,6 +13,4 @@ Changes between 0.0.3 and 0.0.1:
 - player: fix A/V sync
 - yuv2rgb: treat YUVJ420P as YUV420P
 - yuv2rgb: support zero copy of YUV420P frame output to YV12 surface
-- ijksdl: fix SDL_GetTickHR() returns wrong time
-
-- 
+- ijksdl: fix SDL_GetTickHR() returns wrong time 
