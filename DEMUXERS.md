@@ -1,5 +1,5 @@
 + aac                   raw ADTS AAC (Advanced Audio Coding)
-- ac3                   raw AC-3
++ ac3                   raw AC-3
 - act
 - adf
 - adp

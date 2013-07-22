@@ -1,7 +1,7 @@
 + aac                   Advanced Audio Coding
 + aac_latm              Advanced Audio Coding Low Overhead Audio Transport Multiplex
 - aasc                  Autodesk Animator Studio Codec
-- ac3                   ATSC A/52A (AC-3)
++ ac3                   ATSC A/52A (AC-3)
 - adpcm_                Adaptive differential pulse-code modulation
     4xm                 4X Movie
     adx                 SEGA CRI ADX ADPCM
