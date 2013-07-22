@@ -36,7 +36,6 @@ public class VideoPlayerActivity extends Activity {
 
     /*-
     mVideoPath = "http://v.iask.com/v_play_ipad.php?vid=99979978";
-    mVideoPath = "httplive://v.youku.com/player/getM3U8/vid/XNTY1ODE5NjMy/type//v.m3u8"
     mVideoPath = "http://gslb.bestvcdn.com/gslb/url/Bestv/live/live/kknews/workflow1.m3u8";
     mVideoPath = "http://iosvideo.kankanews.com/2012/07/20/h264_450k_mp4_SHYiShu201207…67640_aac.ssm/h264_450k_mp4_SHYiShu20120720210930854798181167640_aac.m3u8";
     mVideoPath = "http://video1.kksmg.com/rendition/201302/88000/39/104342962523078658/104342967891787778/r104342967891787778.m3u8";
@@ -44,6 +43,9 @@ public class VideoPlayerActivity extends Activity {
     mVideoPath = "http://gslb.coop.letv.com/movie/A51456D18B8BB6865ADBA0EE972B0B7F-situoke.mp4?tag=ios";
     mVideoPath = "http://gslb.bestvcdn.com/gslb/url/Bestv/live/live/kknews/workflow1.m3u8";        
     mVideoPath = "http://gslb.tv.sohu.com/live?cid=12&type=hls";
+
+    // EXTINF floating-point
+    mVideoPath = "http://v.youku.com/player/getM3U8/vid/XNTY1ODE5NjMy/type//v.m3u8";
 
     // buffering immediately after prepared
     mVideoPath = "http://meta.video.qiyi.com/380/56070c92f215c514e17fd04b07e22e27.m3u8";
@@ -76,7 +78,7 @@ public class VideoPlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mVideoPath = "http://edge.v.iask.com/44897225.hlv?KID=sina,viask&Expires=1374249600&ssig=QRllIFSYp0";
+        mVideoPath = "http://v.youku.com/player/getM3U8/vid/XNTY1ODE5NjMy/type//v.m3u8";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
