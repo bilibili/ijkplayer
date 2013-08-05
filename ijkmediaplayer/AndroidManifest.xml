@@ -1,12 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tv.danmaku.ijk.media.lib"
-    android:versionCode="3"
-    android:versionName="0.0.3-git" >
+    android:versionCode="4"
+    android:versionName="0.0.4-git" >
 
     <uses-sdk
         android:minSdkVersion="9"
-        android:targetSdkVersion="17" />
-
-    <application android:allowBackup="true" />
+        android:targetSdkVersion="18" />
 
 </manifest>
