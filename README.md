@@ -4,8 +4,8 @@ Android MediaPlayer-like video player based on [ffplay](http://ffmpeg.org)
 
 ### My Build Enviroment
 - Mac OS X 10.8.4
-- ADT v22.0.0-675183
-- NDK r8e
+- ADT v22.0.4-741630
+- NDK r9
 
 ### Dependent Tools
 - TODO
@@ -13,7 +13,7 @@ Android MediaPlayer-like video player based on [ffplay](http://ffmpeg.org)
 ### Build
 	git clone https://github.com/bbcallen/ijkplayer.git ijkplayer
 	cd ijkplayer
-	git checkout -B stable n0.0.3
+	git checkout -B stable n0.0.4
 	git submodule init
 	git submodule update
 	sh compile-ffmpeg.sh
