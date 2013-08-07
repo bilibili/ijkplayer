@@ -474,16 +474,14 @@ static void toggle_pause(FFPlayer *ffp, int pause_on)
     SDL_UnlockMutex(ffp->is->play_mutex);
 }
 
-static void step_to_next_frame(FFPlayer *ffp)
+static void step_to_next_frame_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
     /* if the stream is paused unpause it, then step */
-    SDL_LockMutex(is->play_mutex);
     // ALOGE("step_to_next_frame");
     if (is->paused)
         stream_toggle_pause_l(ffp, 0);
     is->step = 1;
-    SDL_UnlockMutex(is->play_mutex);
 }
 
 static double compute_target_delay(double delay, VideoState *is)
@@ -2063,7 +2061,7 @@ static int read_thread(void *arg)
                 stream_update_pause_l(ffp);
             }
             if (is->pause_req)
-                step_to_next_frame(ffp);
+                step_to_next_frame_l(ffp);
             SDL_UnlockMutex(ffp->is->play_mutex);
             ffp_notify_msg1(ffp, FFP_MSG_SEEK_COMPLETE);
         }
