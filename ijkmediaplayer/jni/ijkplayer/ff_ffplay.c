@@ -263,7 +263,9 @@ static void stream_close(FFPlayer *ffp)
     int i;
     /* XXX: use a special url_shutdown call to abort parse cleanly */
     is->abort_request = 1;
+    ALOGW("wait for read_tid");
     SDL_WaitThread(is->read_tid, NULL);
+    ALOGW("wait for video_refresh_tid");
     SDL_WaitThread(is->video_refresh_tid, NULL);
 
     packet_queue_destroy(&is->videoq);
@@ -2129,7 +2131,9 @@ static int read_thread(void *arg)
                 } else {
                     if (completed) {
                         SDL_LockMutex(wait_mutex);
-                        SDL_CondWait(is->continue_read_thread, wait_mutex);
+                        // infinite wait may block shutdown
+                        while(!is->abort_request)
+                            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
                         SDL_UnlockMutex(wait_mutex);
                     } else {
                         completed = 1;
