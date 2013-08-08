@@ -7,8 +7,10 @@ Android MediaPlayer-like video player based on [ffplay](http://ffmpeg.org)
 - ADT v22.0.4-741630
 - NDK r9
 
-### Dependent Tools
-- TODO
+### Dependent Tools (Mac OS X)
+- MacPorts http://www.macports.org/install.php
+ - sudo port -vd install git-core
+ - sudo port -vd install ccache
 
 ### Build
 	git clone https://github.com/bbcallen/ijkplayer.git ijkplayer
