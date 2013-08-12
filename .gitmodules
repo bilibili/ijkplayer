@@ -1,3 +1,0 @@
-[submodule "ffmpeg-armv7a"]
-	path = ffmpeg-armv7a
-	url = git://github.com/bbcallen/FFmpeg.git

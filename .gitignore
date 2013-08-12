@@ -1,6 +1,7 @@
 # -----
 build/
 ffmpeg-temp/
+android/ffmpeg-armv7a
 .DS_Store
 
 # built application files
