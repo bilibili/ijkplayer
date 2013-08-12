@@ -1,4 +1,5 @@
-# copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+#
+# Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
 #
 # This file is part of ijkPlayer.
 #
@@ -18,13 +19,21 @@
 
 LOCAL_PATH := $(call my-dir)
 
-MY_APP_JNI_ROOT := $(realpath $(LOCAL_PATH))
-MY_APP_PRJ_ROOT := $(realpath $(MY_APP_JNI_ROOT)/..)
-MY_APP_REPO_ROOT := $(realpath $(MY_APP_PRJ_ROOT)/..)
+include $(CLEAR_VARS)
+LOCAL_CFLAGS += -std=c99
+LOCAL_LDLIBS += -llog -landroid
 
-# armeabi-v7a
-MY_APP_FFMPEG_OUTPUT_PATH := $(realpath $(MY_APP_REPO_ROOT)/build/ffmpeg-armv7a/output)
-MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_FFMPEG_OUTPUT_PATH)/include)
-MY_APP_FFMPEG_INCLUDE_PATH_ALTER := $(realpath $(MY_APP_REPO_ROOT)/ffmpeg/include)
+LOCAL_C_INCLUDES += $(LOCAL_PATH)
+LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
+LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 
-include $(call all-subdir-makefiles)
+LOCAL_SRC_FILES += ff_cmdutils.c
+LOCAL_SRC_FILES += ff_ffplay.c
+
+LOCAL_SRC_FILES += android/ijkplayer_android.c
+LOCAL_SRC_FILES += android/ijkplayer_jni.c
+
+LOCAL_SHARED_LIBRARIES := ffmpeg ijkutil ijksdl
+
+LOCAL_MODULE := ijkplayer
+include $(BUILD_SHARED_LIBRARY)
