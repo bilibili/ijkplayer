@@ -25,7 +25,7 @@ import android.media.MediaPlayer;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-public final class AndroidMediaPlayer extends AbstractMediaPlayer {
+public final class AndroidMediaPlayer extends SimpleMediaPlayer {
     private MediaPlayer mInternalMediaPlayer;
     private MediaPlayerListenerAdapter mInternalListenerAdapter;
 

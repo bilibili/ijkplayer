@@ -33,7 +33,7 @@ import android.os.PowerManager;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-public final class IjkMediaPlayer extends AbstractMediaPlayer {
+public final class IjkMediaPlayer extends SimpleMediaPlayer {
     private final static String TAG = IjkMediaPlayer.class.getName();
 
     static {
