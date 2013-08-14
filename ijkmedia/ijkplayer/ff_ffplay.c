@@ -737,8 +737,13 @@ static void alloc_picture(FFPlayer *ffp)
     vp->bmp = SDL_VoutFFmpeg_CreateOverlay(vp->width, vp->height,
                                    ffp->overlay_format,
                                    ffp->vout);
+#ifdef FFP_MERGE
     bufferdiff = vp->bmp ? FFMAX(vp->bmp->pixels[0], vp->bmp->pixels[1]) - FFMIN(vp->bmp->pixels[0], vp->bmp->pixels[1]) : 0;
     if (!vp->bmp || vp->bmp->pitches[0] < vp->width || bufferdiff < (int64_t)vp->height * vp->bmp->pitches[0]) {
+#else
+    /* RV16, RV32 contains only one plane */
+    if (!vp->bmp || vp->bmp->pitches[0] < vp->width) {
+#endif
         /* SDL allocates a buffer smaller than requested if the video
          * overlay hardware is unable to support the requested size. */
         av_log(NULL, AV_LOG_FATAL,
