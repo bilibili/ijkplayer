@@ -723,7 +723,9 @@ static void alloc_picture(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
     VideoPicture *vp;
+#ifdef FFP_MERGE
     int64_t bufferdiff;
+#endif
 
     vp = &is->pictq[is->pictq_windex];
 
