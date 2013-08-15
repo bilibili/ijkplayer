@@ -148,14 +148,18 @@ public abstract class AbstractMediaListPlayer extends SimpleMediaPlayer {
 
     @Override
     public void release() {
-        mItemPlayer.release();
-        mNextPlayer.release();
+        if (mItemPlayer != null)
+            mItemPlayer.release();
+        if (mNextPlayer != null)
+            mNextPlayer.release();
     }
 
     @Override
     public void reset() {
-        mItemPlayer.reset();
-        mNextPlayer.reset();
+        if (mItemPlayer != null)
+            mItemPlayer.reset();
+        if (mNextPlayer != null)
+            mNextPlayer.reset();
     }
 
     @Override
