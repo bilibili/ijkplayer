@@ -15,9 +15,9 @@ git pull
 git merge ffmpeg
 git checkout -
 
-git push origin --all
-git push gitcafe --all
-git push oschina --all
-git push csdn --all
+git push origin --all --follow-tags
+git push gitcafe --all --follow-tags
+git push oschina --all --follow-tags
+git push csdn --all --follow-tags
 
 cd -
