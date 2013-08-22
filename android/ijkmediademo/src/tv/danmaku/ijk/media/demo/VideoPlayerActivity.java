@@ -66,6 +66,9 @@ public class VideoPlayerActivity extends Activity {
     // invalid variant
     mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/06/30/f969bb5169365989b2e9bace44353a2b.m3u8";
 
+    // segment 404
+    mVideoPath = "http://live.gslb.letv.com/gslb?stream_id=btv6_800&tag=live&ext=m3u8"
+
     // 720p sina
     mVideoPath = "http://edge.v.iask.com/101692214.hlv?KID=sina,viask&Expires=1374249600&ssig=8dvnUJ%2Fb2n"
 
@@ -78,7 +81,7 @@ public class VideoPlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mVideoPath = "http://v.youku.com/player/getM3U8/vid/XNTY1ODE5NjMy/type//v.m3u8";
+        mVideoPath = "http://live.gslb.letv.com/gslb?stream_id=btv6_800&tag=live&ext=m3u8";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();

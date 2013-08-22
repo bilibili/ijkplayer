@@ -160,6 +160,17 @@ void ijkmp_reset(IjkMediaPlayer *mp)
     MPTRACE("ijkmp_reset()=void");
 }
 
+void ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value)
+{
+    assert(mp);
+
+    MPTRACE("ijkmp_reset()");
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_format_option(mp->ffplayer, name, value);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_reset()=void");
+}
+
 void ijkmp_inc_ref(IjkMediaPlayer *mp)
 {
     assert(mp);

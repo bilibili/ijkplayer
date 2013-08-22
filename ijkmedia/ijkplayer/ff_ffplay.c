@@ -1871,9 +1871,6 @@ static int read_thread(void *arg)
     is->last_subtitle_stream = is->subtitle_stream = -1;
 #endif
 
-    // TODO: 8 set options from java side
-    // av_dict_set(&ffp->format_opts, "timeout", "10000000", 0);
-
     ic = avformat_alloc_context();
     ic->interrupt_callback.callback = decode_interrupt_cb;
     ic->interrupt_callback.opaque = is;
@@ -2494,6 +2491,14 @@ void ffp_destroy_p(FFPlayer **pffp)
 
     ffp_destroy(*pffp);
     *pffp = NULL;
+}
+
+void ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value)
+{
+    if (!ffp)
+        return;
+
+    av_dict_set(&ffp->format_opts, name, value, 0);
 }
 
 int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)

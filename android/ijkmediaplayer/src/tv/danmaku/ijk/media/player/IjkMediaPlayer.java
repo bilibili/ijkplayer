@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
-
+import tv.danmaku.ijk.media.player.option.AvFormatOption;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
@@ -323,6 +323,16 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     }
 
     private native void _reset();
+    
+    public void setAvOption(AvFormatOption option) {
+        setAvFormatOption(option.getName(), option.getValue());
+    }
+
+    public void setAvFormatOption(String name, String value) {
+        _setAvFormatOption(name, value);
+    }
+    
+    private native void _setAvFormatOption(String name, String value);
 
     @Override
     public void setAudioStreamType(int streamtype) {

@@ -262,6 +262,31 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 }
 
 static void
+IjkMediaPlayer_setAvFormatOption(JNIEnv *env, jobject thiz, jobject name, jobject value)
+{
+    MPTRACE("IjkMediaPlayer_setAvFormatOption");
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    const char *c_name = NULL;
+    const char *c_value = NULL;
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setAvFormatOption: null mp", LABEL_RETURN);
+
+    c_name = (*env)->GetStringUTFChars(env, name, NULL);
+    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setAvFormatOption: name.string oom", LABEL_RETURN);
+
+    c_value = (*env)->GetStringUTFChars(env, value, NULL);
+    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setAvFormatOption: name.string oom", LABEL_RETURN);
+
+    ijkmp_set_format_option(mp, c_name, c_value);
+
+    LABEL_RETURN:
+    if (c_name)
+        (*env)->ReleaseStringUTFChars(env, name, c_name);
+    if (c_value)
+        (*env)->ReleaseStringUTFChars(env, value, c_value);
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
 IjkMediaPlayer_native_init(JNIEnv *env)
 {
     MPTRACE("IjkMediaPlayer_native_init");
@@ -282,10 +307,9 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 }
 
 static void
-IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
+IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz, jobject name, jobject value)
 {
     MPTRACE("IjkMediaPlayer_native_finalize");
-    // TODO: 9 is there any thing not released ?
     IjkMediaPlayer_release(env, thiz);
 }
 
@@ -408,6 +432,8 @@ static JNINativeMethod g_methods[] = {
     { "native_init", "()V", (void *) IjkMediaPlayer_native_init },
     { "native_setup", "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_setup },
     { "native_finalize", "()V", (void *) IjkMediaPlayer_native_finalize },
+
+    { "_setAvFormatOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvFormatOption },
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)

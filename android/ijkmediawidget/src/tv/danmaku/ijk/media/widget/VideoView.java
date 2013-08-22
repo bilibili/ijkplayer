@@ -31,6 +31,7 @@ import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnSeekCompleteListener;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnVideoSizeChangedListener;
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+import tv.danmaku.ijk.media.player.option.format.AvFormatOption_HttpDetectRangeSupport;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -244,7 +245,10 @@ public class VideoView extends SurfaceView implements
             mDuration = -1;
             mCurrentBufferPercentage = 0;
             // mMediaPlayer = new AndroidMediaPlayer();
-            mMediaPlayer = new IjkMediaPlayer();
+            IjkMediaPlayer ijkMediaPlayer = new IjkMediaPlayer();
+            ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
+
+            mMediaPlayer = ijkMediaPlayer;
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
@@ -255,6 +259,7 @@ public class VideoView extends SurfaceView implements
             mMediaPlayer.setDataSource(mUri.toString());
             mMediaPlayer.setDisplay(mSurfaceHolder);
             mMediaPlayer.setScreenOnWhilePlaying(true);
+
             mMediaPlayer.prepareAsync();
             mCurrentState = STATE_PREPARING;
             attachMediaController();
