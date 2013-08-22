@@ -1684,7 +1684,9 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         return -1;
     if ((t = av_dict_get(opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
         av_log(NULL, AV_LOG_ERROR, "Option %s not found.\n", t->key);
+#ifdef FFP_MERGE
         return AVERROR_OPTION_NOT_FOUND;
+#endif
     }
 
     ic->streams[stream_index]->discard = AVDISCARD_DEFAULT;
@@ -1882,8 +1884,10 @@ static int read_thread(void *arg)
     }
     if ((t = av_dict_get(ffp->format_opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
         av_log(NULL, AV_LOG_ERROR, "Option %s not found.\n", t->key);
+#ifdef FFP_MERGE
         ret = AVERROR_OPTION_NOT_FOUND;
         goto fail;
+#endif
     }
     is->ic = ic;
 
