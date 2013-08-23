@@ -74,6 +74,9 @@ public class VideoPlayerActivity extends Activity {
 
     // 1080p sina
     mVideoPath = "http://edge.v.iask.com/44897225.hlv?KID=sina,viask&Expires=1374249600&ssig=QRllIFSYp0"
+    
+    // progress
+    mVideoPath = "http://113.142.44.44/e0012jy0ana.m3u8?type=m3u8&srctype=mp4&srcname=e0012jy0ana.mp4&fc=0&sha=82e0d6adb6e697d1821abbbacb766373afa26ff4&vkey=OAz_lwrlhx0tqBefQmHnxKTm8PqvrJCl5iJtLhVtSj6hla57btxiuw"
      */
 
     @Override
@@ -81,7 +84,7 @@ public class VideoPlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mVideoPath = "http://live.gslb.letv.com/gslb?stream_id=btv6_800&tag=live&ext=m3u8";
+        mVideoPath = "http://113.142.44.44/e0012jy0ana.m3u8?type=m3u8&srctype=mp4&srcname=e0012jy0ana.mp4&fc=0&sha=82e0d6adb6e697d1821abbbacb766373afa26ff4&vkey=OAz_lwrlhx0tqBefQmHnxKTm8PqvrJCl5iJtLhVtSj6hla57btxiuw";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
