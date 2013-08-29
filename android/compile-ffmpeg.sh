@@ -237,6 +237,7 @@ FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-decoder=wmv3"
 
 FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-hwaccels"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-muxers"
+FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-muxer=mpegts"
 
 FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-demuxers"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-demuxer=aac"
