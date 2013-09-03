@@ -142,6 +142,8 @@ echo "--------------------"
 FF_CFG_FLAGS="$FF_CFG_FLAGS          $COMMON_FF_CFG_FLAGS"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --prefix=$FF_PREFIX"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --target-os=$FF_TAGET_OS"
+FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-static"
+FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-shared"
 
 
 #--------------------
