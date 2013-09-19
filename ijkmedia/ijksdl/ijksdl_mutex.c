@@ -24,6 +24,7 @@
 #include "ijksdl_mutex.h"
 #include <errno.h>
 #include <assert.h>
+#include <sys/time.h>
 #include "ijksdl_inc_internal.h"
 
 SDL_mutex *SDL_CreateMutex(void)

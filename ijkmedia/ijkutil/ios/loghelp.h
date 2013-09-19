@@ -24,6 +24,8 @@
 #ifndef IJKUTIL_IOS__LOGHELP_H
 #define IJKUTIL_IOS__LOGHELP_H
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

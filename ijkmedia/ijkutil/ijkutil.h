@@ -25,6 +25,7 @@
 #define IJKUTIL__IJKUTIL_H
 
 #include <stdlib.h>
+#include <memory.h>
 #include "ijklog.h"
 
 #ifndef IJKMAX

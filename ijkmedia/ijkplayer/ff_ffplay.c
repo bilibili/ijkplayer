@@ -34,7 +34,9 @@
 #endif
 #define isnan(x) (isnan((double)(x)) || isnanf((float)(x)))
 
+#if defined(__ANDROID__)
 #define printf(...) ALOGD(__VA_ARGS__)
+#endif
 
 // #define FFP_SHOW_FPS
 // #define FFP_SHOW_VDPS
