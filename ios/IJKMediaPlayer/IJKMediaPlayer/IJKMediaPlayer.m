@@ -7,6 +7,7 @@
 //
 
 #import "IJKMediaPlayer.h"
+#import "avcodec.h"
 
 @implementation IJKMediaPlayer
 
