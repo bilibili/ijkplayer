@@ -14,7 +14,7 @@ do_lipo () {
         -arch armv7 $UNI_BUILD_ROOT/build/ffmpeg-armv7/output/lib/$LIB_FILE \
         -arch armv7 $UNI_BUILD_ROOT/build/ffmpeg-armv7s/output/lib/$LIB_FILE \
         -arch i386 $UNI_BUILD_ROOT/build/ffmpeg-i386/output/lib/$LIB_FILE \
-        -output $UNI_BUILD_ROOT/build/universal/$LIB_FILE
+        -output $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
 }
 
 
@@ -25,12 +25,14 @@ elif [ $FF_TARGET == "all" ]; then
     sh tools/do-compile-ffmpeg.sh armv7s
     sh tools/do-compile-ffmpeg.sh i386
 
-    mkdir -p $UNI_BUILD_ROOT/build/universal
+    mkdir -p $UNI_BUILD_ROOT/build/universal/lib
     do_lipo libavcodec.a
     do_lipo libavformat.a
     do_lipo libavutil.a
     do_lipo libswresample.a
     do_lipo libswscale.a
+
+    cp -R $UNI_BUILD_ROOT/build/ffmpeg-armv7/output/include $UNI_BUILD_ROOT/build/universal/
 
 elif [ $FF_TARGET == "clean" ]; then
     cd ffmpeg-armv7 && git clean -xdf && cd -
