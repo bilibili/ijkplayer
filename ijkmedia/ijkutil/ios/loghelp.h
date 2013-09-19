@@ -30,31 +30,31 @@ extern "C" {
 
 #define IJK_LOG_TAG "IJKMEDIA"
 
-#define IJK_LOG_UNKNOWN 0
-#define IJK_LOG_DEFAULT 0
+#define IJK_LOG_UNKNOWN     0
+#define IJK_LOG_DEFAULT     1
 
-#define IJK_LOG_VERBOSE 0
-#define IJK_LOG_DEBUG 0
-#define IJK_LOG_INFO 0
-#define IJK_LOG_WARN 0
-#define IJK_LOG_ERROR 0
-#define IJK_LOG_FATAL 0
-#define IJK_LOG_SILENT 0
+#define IJK_LOG_VERBOSE     2
+#define IJK_LOG_DEBUG       3
+#define IJK_LOG_INFO        4
+#define IJK_LOG_WARN        5
+#define IJK_LOG_ERROR       6
+#define IJK_LOG_FATAL       7
+#define IJK_LOG_SILENT      8
 
-#define VLOG(level, TAG, ...)
-#define VLOGV(...)
-#define VLOGD(...)
-#define VLOGI(...)
-#define VLOGW(...)
-#define VLOGE(...)
+#define VLOG(level, TAG, ...)    ((void)printf(__VA_ARGS__))
+#define VLOGV(...)  VLOG(IJK_LOG_VERBOSE,   IJK_LOG_TAG, __VA_ARGS__)
+#define VLOGD(...)  VLOG(IJK_LOG_DEBUG,     IJK_LOG_TAG, __VA_ARGS__)
+#define VLOGI(...)  VLOG(IJK_LOG_INFO,      IJK_LOG_TAG, __VA_ARGS__)
+#define VLOGW(...)  VLOG(IJK_LOG_WARN,      IJK_LOG_TAG, __VA_ARGS__)
+#define VLOGE(...)  VLOG(IJK_LOG_ERROR,     IJK_LOG_TAG, __VA_ARGS__)
 
-#define ALOG(level, TAG, ...)
-#define ALOGV(...)
-#define ALOGD(...)
-#define ALOGI(...)
-#define ALOGW(...)
-#define ALOGE(...)
-#define LOG_ALWAYS_FATAL(...)
+#define ALOG(level, TAG, ...)    ((void)printf(__VA_ARGS__))
+#define ALOGV(...)  ALOG(IJK_LOG_VERBOSE,   IJK_LOG_TAG, __VA_ARGS__)
+#define ALOGD(...)  ALOG(IJK_LOG_DEBUG,     IJK_LOG_TAG, __VA_ARGS__)
+#define ALOGI(...)  ALOG(IJK_LOG_INFO,      IJK_LOG_TAG, __VA_ARGS__)
+#define ALOGW(...)  ALOG(IJK_LOG_WARN,      IJK_LOG_TAG, __VA_ARGS__)
+#define ALOGE(...)  ALOG(IJK_LOG_ERROR,     IJK_LOG_TAG, __VA_ARGS__)
+#define LOG_ALWAYS_FATAL(...)   do { ALOGE(__VA_ARGS__); exit(1); } while (0)
 
 #ifdef __cplusplus
 }
