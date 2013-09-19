@@ -22,9 +22,12 @@
  */
 
 #include "ijksdl_vout.h"
+#include <stdlib.h>
 
 #include <assert.h>
+#if defined(__ANDROID__)
 #include <android/native_window_jni.h>
+#endif
 
 void SDL_VoutFree(SDL_Vout *vout)
 {

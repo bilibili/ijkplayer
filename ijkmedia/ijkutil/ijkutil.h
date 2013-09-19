@@ -63,8 +63,10 @@ inline void freep(void **mem)
     }
 }
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__)
 #include "android/ijkutil_android.h"
+#elif defined(__APPLE__)
+#include "ios/ijkutil_ios.h"
 #endif
 
 #endif

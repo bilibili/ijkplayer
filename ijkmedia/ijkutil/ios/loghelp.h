@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijklog.h
+ * loghelper.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,14 +21,43 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKUTIL__IJKLOG_H
-#define IJKUTIL__IJKLOG_H
+#ifndef IJKUTIL_IOS__LOGHELP_H
+#define IJKUTIL_IOS__LOGHELP_H
 
-#if defined(__ANDROID__)
-#include "android/loghelp.h"
-#elif defined(__APPLE__)
-#include "ios/loghelp.h"
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+#define IJK_LOG_TAG "IJKMEDIA"
+
+#define IJK_LOG_UNKNOWN 0
+#define IJK_LOG_DEFAULT 0
+
+#define IJK_LOG_VERBOSE 0
+#define IJK_LOG_DEBUG 0
+#define IJK_LOG_INFO 0
+#define IJK_LOG_WARN 0
+#define IJK_LOG_ERROR 0
+#define IJK_LOG_FATAL 0
+#define IJK_LOG_SILENT 0
+
+#define VLOG(level, TAG, ...)
+#define VLOGV(...)
+#define VLOGD(...)
+#define VLOGI(...)
+#define VLOGW(...)
+#define VLOGE(...)
+
+#define ALOG(level, TAG, ...)
+#define ALOGV(...)
+#define ALOGD(...)
+#define ALOGI(...)
+#define ALOGW(...)
+#define ALOGE(...)
+#define LOG_ALWAYS_FATAL(...)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

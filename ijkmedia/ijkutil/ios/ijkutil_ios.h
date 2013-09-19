@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijklog.h
+ * ijkutil_ios.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,14 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKUTIL__IJKLOG_H
-#define IJKUTIL__IJKLOG_H
-
-#if defined(__ANDROID__)
-#include "android/loghelp.h"
-#elif defined(__APPLE__)
-#include "ios/loghelp.h"
-#endif
-
+#ifndef IJKUTIL__IOS_ANDROID_H
+#define IJKUTIL__IOS_ANDROID_H
 
 #endif
