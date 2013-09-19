@@ -24,7 +24,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <jni.h>
-#include "ijkutil/ijkutil_android.h"
+#include "ijkutil/ijkutil.h"
 #include "../ff_ffplay.h"
 #include "ijkplayer_android_def.h"
 #include "ijkplayer_android.h"

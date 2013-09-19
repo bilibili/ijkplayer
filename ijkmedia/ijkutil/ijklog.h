@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkutil_android.h
+ * ijklog.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,40 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKUTIL__IJKUTIL_ANDROID_H
-#define IJKUTIL__IJKUTIL_ANDROID_H
+#ifndef IJKUTIL__IJKLOG_H
+#define IJKUTIL__IJKLOG_H
 
-#include "ijkutil.h"
-#include "android/jnihelp.h"
-
-#define JNI_CHECK_GOTO(condition__, env__, exception__, msg__, label__) \
-    do { \
-        if (!(condition__)) { \
-            if (exception__) { \
-                jniThrowException(env__, exception__, msg__); \
-            } \
-            goto label__; \
-        } \
-    }while(0)
-
-#define JNI_CHECK_RET_VOID(condition__, env__, exception__, msg__) \
-    do { \
-        if (!(condition__)) { \
-            if (exception__) { \
-                jniThrowException(env__, exception__, msg__); \
-            } \
-            return; \
-        } \
-    }while(0)
-
-#define JNI_CHECK_RET(condition__, env__, exception__, msg__, ret__) \
-    do { \
-        if (!(condition__)) { \
-            if (exception__) { \
-                jniThrowException(env__, exception__, msg__); \
-            } \
-            return ret__; \
-        } \
-    }while(0)
+#ifdef __ANDROID__
+#include "android/loghelp.h"
+#endif
 
 #endif

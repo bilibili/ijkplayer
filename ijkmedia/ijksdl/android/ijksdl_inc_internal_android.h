@@ -26,7 +26,7 @@
 #include <stdint.h>
 
 #include "../ijksdl_inc_internal.h"
-#include "ijkutil/ijkutil_android.h"
+#include "ijkutil/ijkutil.h"
 
 enum {
     HAL_PIXEL_FORMAT_RGBA_8888 = 1,

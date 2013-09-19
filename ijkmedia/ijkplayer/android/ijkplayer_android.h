@@ -27,7 +27,7 @@
 #include <jni.h>
 #include "ff_ffmsg_queue.h"
 
-#include "ijkutil/ijkutil_android.h"
+#include "ijkutil/android/ijkutil_android.h"
 
 #ifndef MPTRACE
 #define MPTRACE ALOGW

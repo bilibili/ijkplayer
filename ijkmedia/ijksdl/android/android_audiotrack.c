@@ -24,7 +24,7 @@
 #include "android_audiotrack.h"
 
 #include <assert.h>
-#include "ijkutil/ijkutil_android.h"
+#include "ijkutil/ijkutil.h"
 #include "../ijksdl_inc_internal.h"
 #include "../ijksdl_audio.h"
 

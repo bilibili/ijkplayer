@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkutil.h
+ * ijkutil_android.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,50 +21,39 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKUTIL__IJKUTIL_H
-#define IJKUTIL__IJKUTIL_H
+#ifndef IJKUTIL__IJKUTIL_ANDROID_H
+#define IJKUTIL__IJKUTIL_ANDROID_H
 
-#include <stdlib.h>
-#include "ijklog.h"
+#include "jnihelp.h"
 
-#ifndef IJKMAX
-#define IJKMAX(a, b)    ((a) > (b) ? (a) : (b))
-#endif
+#define JNI_CHECK_GOTO(condition__, env__, exception__, msg__, label__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                jniThrowException(env__, exception__, msg__); \
+            } \
+            goto label__; \
+        } \
+    }while(0)
 
-#ifndef IJKMIN
-#define IJKMIN(a, b)    ((a) < (b) ? (a) : (b))
-#endif
+#define JNI_CHECK_RET_VOID(condition__, env__, exception__, msg__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                jniThrowException(env__, exception__, msg__); \
+            } \
+            return; \
+        } \
+    }while(0)
 
-#ifndef IJKALIGN
-#define IJKALIGN(x, align) ((( x ) + (align) - 1) / (align) * (align))
-#endif
-
-#define IJK_CHECK_RET(condition__, retval__, ...) \
-    if (!(condition__)) { \
-        ALOGE(__VA_ARGS__); \
-        return (retval__); \
-    }
-
-inline void *mallocz(size_t size)
-{
-    void *mem = malloc(size);
-    if (!mem)
-        return mem;
-
-    memset(mem, 0, size);
-    return mem;
-}
-
-inline void freep(void **mem)
-{
-    if (mem && *mem) {
-        free(*mem);
-        *mem = NULL;
-    }
-}
-
-#ifdef __ANDROID__
-#include "android/ijkutil_android.h"
-#endif
+#define JNI_CHECK_RET(condition__, env__, exception__, msg__, ret__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                jniThrowException(env__, exception__, msg__); \
+            } \
+            return ret__; \
+        } \
+    }while(0)
 
 #endif

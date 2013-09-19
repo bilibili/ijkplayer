@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKUTIL__LOGHELP_H
-#define IJKUTIL__LOGHELP_H
+#ifndef IJKUTIL_ANDROID__LOGHELP_H
+#define IJKUTIL_ANDROID__LOGHELP_H
 
 #include <android/log.h>
 
@@ -32,8 +32,8 @@ extern "C" {
 
 #define IJK_LOG_TAG "IJKMEDIA"
 
-#define IJK_LOG_UNKNOWN     ANDROID_LOG_UNKNOWN;
-#define IJK_LOG_DEFAULT     ANDROID_LOG_DEFAULT;
+#define IJK_LOG_UNKNOWN     ANDROID_LOG_UNKNOWN
+#define IJK_LOG_DEFAULT     ANDROID_LOG_DEFAULT
 
 #define IJK_LOG_VERBOSE     ANDROID_LOG_VERBOSE
 #define IJK_LOG_DEBUG       ANDROID_LOG_DEBUG
