@@ -120,7 +120,6 @@
 		E6903FC417EAFC2C00CFD954 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavutil.a; sourceTree = "<group>"; };
 		E6903FC517EAFC2C00CFD954 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
 		E6903FC617EAFC2C00CFD954 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
-		E6903FD417EAFC6100CFD954 /* Android.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Android.mk; sourceTree = "<group>"; };
 		E6903FD517EAFC6100CFD954 /* ff_cmdutils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_cmdutils.c; sourceTree = "<group>"; };
 		E6903FD617EAFC6100CFD954 /* ff_cmdutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_cmdutils.h; sourceTree = "<group>"; };
 		E6903FD717EAFC6100CFD954 /* ff_fferror.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_fferror.h; sourceTree = "<group>"; };
@@ -378,7 +377,6 @@
 		E6903FCE17EAFC6100CFD954 /* ijkplayer */ = {
 			isa = PBXGroup;
 			children = (
-				E6903FD417EAFC6100CFD954 /* Android.mk */,
 				E6903FD517EAFC6100CFD954 /* ff_cmdutils.c */,
 				E6903FD617EAFC6100CFD954 /* ff_cmdutils.h */,
 				E6903FD717EAFC6100CFD954 /* ff_fferror.h */,
