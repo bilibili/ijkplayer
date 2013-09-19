@@ -15,6 +15,17 @@
 		E6903FC917EAFC2C00CFD954 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6903FC417EAFC2C00CFD954 /* libavutil.a */; };
 		E6903FCA17EAFC2C00CFD954 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6903FC517EAFC2C00CFD954 /* libswresample.a */; };
 		E6903FCB17EAFC2C00CFD954 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6903FC617EAFC2C00CFD954 /* libswscale.a */; };
+		E690401F17EAFC6100CFD954 /* ff_cmdutils.c in Sources */ = {isa = PBXBuildFile; fileRef = E6903FD517EAFC6100CFD954 /* ff_cmdutils.c */; };
+		E690402017EAFC6100CFD954 /* ff_ffplay.c in Sources */ = {isa = PBXBuildFile; fileRef = E6903FDB17EAFC6100CFD954 /* ff_ffplay.c */; };
+		E690402717EAFC6100CFD954 /* image_convert.c in Sources */ = {isa = PBXBuildFile; fileRef = E6903FF117EAFC6100CFD954 /* image_convert.c */; };
+		E690402D17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = E6903FFB17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.c */; };
+		E690402E17EAFC6100CFD954 /* ijksdl_aout.c in Sources */ = {isa = PBXBuildFile; fileRef = E6903FFF17EAFC6100CFD954 /* ijksdl_aout.c */; };
+		E690402F17EAFC6100CFD954 /* ijksdl_error.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400417EAFC6100CFD954 /* ijksdl_error.c */; };
+		E690403017EAFC6100CFD954 /* ijksdl_mutex.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400817EAFC6100CFD954 /* ijksdl_mutex.c */; };
+		E690403117EAFC6100CFD954 /* ijksdl_stdinc.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400A17EAFC6100CFD954 /* ijksdl_stdinc.c */; };
+		E690403217EAFC6100CFD954 /* ijksdl_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400C17EAFC6100CFD954 /* ijksdl_thread.c */; };
+		E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400E17EAFC6100CFD954 /* ijksdl_timer.c */; };
+		E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */ = {isa = PBXBuildFile; fileRef = E690401117EAFC6100CFD954 /* ijksdl_vout.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -109,6 +120,49 @@
 		E6903FC417EAFC2C00CFD954 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavutil.a; sourceTree = "<group>"; };
 		E6903FC517EAFC2C00CFD954 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
 		E6903FC617EAFC2C00CFD954 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
+		E6903FD417EAFC6100CFD954 /* Android.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Android.mk; sourceTree = "<group>"; };
+		E6903FD517EAFC6100CFD954 /* ff_cmdutils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_cmdutils.c; sourceTree = "<group>"; };
+		E6903FD617EAFC6100CFD954 /* ff_cmdutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_cmdutils.h; sourceTree = "<group>"; };
+		E6903FD717EAFC6100CFD954 /* ff_fferror.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_fferror.h; sourceTree = "<group>"; };
+		E6903FD817EAFC6100CFD954 /* ff_ffinc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffinc.h; sourceTree = "<group>"; };
+		E6903FD917EAFC6100CFD954 /* ff_ffmsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffmsg.h; sourceTree = "<group>"; };
+		E6903FDA17EAFC6100CFD954 /* ff_ffmsg_queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffmsg_queue.h; sourceTree = "<group>"; };
+		E6903FDB17EAFC6100CFD954 /* ff_ffplay.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_ffplay.c; sourceTree = "<group>"; };
+		E6903FDC17EAFC6100CFD954 /* ff_ffplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffplay.h; sourceTree = "<group>"; };
+		E6903FDD17EAFC6100CFD954 /* ff_ffplay_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffplay_config.h; sourceTree = "<group>"; };
+		E6903FDE17EAFC6100CFD954 /* ff_ffplay_def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffplay_def.h; sourceTree = "<group>"; };
+		E6903FF117EAFC6100CFD954 /* image_convert.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = image_convert.c; sourceTree = "<group>"; };
+		E6903FF917EAFC6100CFD954 /* ijksdl_image_convert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_image_convert.h; sourceTree = "<group>"; };
+		E6903FFA17EAFC6100CFD954 /* ijksdl_inc_ffmpeg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_inc_ffmpeg.h; sourceTree = "<group>"; };
+		E6903FFB17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_vout_overlay_ffmpeg.c; sourceTree = "<group>"; };
+		E6903FFC17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_vout_overlay_ffmpeg.h; sourceTree = "<group>"; };
+		E6903FFD17EAFC6100CFD954 /* ijksdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl.h; sourceTree = "<group>"; };
+		E6903FFE17EAFC6100CFD954 /* ijksdl_android.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_android.h; sourceTree = "<group>"; };
+		E6903FFF17EAFC6100CFD954 /* ijksdl_aout.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_aout.c; sourceTree = "<group>"; };
+		E690400017EAFC6100CFD954 /* ijksdl_aout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_aout.h; sourceTree = "<group>"; };
+		E690400117EAFC6100CFD954 /* ijksdl_aout_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_aout_internal.h; sourceTree = "<group>"; };
+		E690400217EAFC6100CFD954 /* ijksdl_audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_audio.h; sourceTree = "<group>"; };
+		E690400317EAFC6100CFD954 /* ijksdl_endian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_endian.h; sourceTree = "<group>"; };
+		E690400417EAFC6100CFD954 /* ijksdl_error.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_error.c; sourceTree = "<group>"; };
+		E690400517EAFC6100CFD954 /* ijksdl_error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_error.h; sourceTree = "<group>"; };
+		E690400617EAFC6100CFD954 /* ijksdl_fourcc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_fourcc.h; sourceTree = "<group>"; };
+		E690400717EAFC6100CFD954 /* ijksdl_inc_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_inc_internal.h; sourceTree = "<group>"; };
+		E690400817EAFC6100CFD954 /* ijksdl_mutex.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_mutex.c; sourceTree = "<group>"; };
+		E690400917EAFC6100CFD954 /* ijksdl_mutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_mutex.h; sourceTree = "<group>"; };
+		E690400A17EAFC6100CFD954 /* ijksdl_stdinc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_stdinc.c; sourceTree = "<group>"; };
+		E690400B17EAFC6100CFD954 /* ijksdl_stdinc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_stdinc.h; sourceTree = "<group>"; };
+		E690400C17EAFC6100CFD954 /* ijksdl_thread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_thread.c; sourceTree = "<group>"; };
+		E690400D17EAFC6100CFD954 /* ijksdl_thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_thread.h; sourceTree = "<group>"; };
+		E690400E17EAFC6100CFD954 /* ijksdl_timer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_timer.c; sourceTree = "<group>"; };
+		E690400F17EAFC6100CFD954 /* ijksdl_timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_timer.h; sourceTree = "<group>"; };
+		E690401017EAFC6100CFD954 /* ijksdl_video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_video.h; sourceTree = "<group>"; };
+		E690401117EAFC6100CFD954 /* ijksdl_vout.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_vout.c; sourceTree = "<group>"; };
+		E690401217EAFC6100CFD954 /* ijksdl_vout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_vout.h; sourceTree = "<group>"; };
+		E690401317EAFC6100CFD954 /* ijksdl_vout_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_vout_internal.h; sourceTree = "<group>"; };
+		E690401917EAFC6100CFD954 /* ijkutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkutil.h; sourceTree = "<group>"; };
+		E690403717EB079500CFD954 /* ijklog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijklog.h; sourceTree = "<group>"; };
+		E690403917EB079500CFD954 /* ijkutil_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkutil_ios.h; sourceTree = "<group>"; };
+		E690403A17EB079500CFD954 /* loghelp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loghelp.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,9 +210,10 @@
 		E6903EBE17EAF6C500CFD954 /* IJKMediaPlayer */ = {
 			isa = PBXGroup;
 			children = (
-				E6903F7617EAFC2C00CFD954 /* ffmpeg */,
 				E6903EC117EAF6C500CFD954 /* IJKMediaPlayer.h */,
 				E6903EC317EAF6C500CFD954 /* IJKMediaPlayer.m */,
+				E6903FCC17EAFC6100CFD954 /* ijkmedia */,
+				E6903F7617EAFC2C00CFD954 /* ffmpeg */,
 				E6903EBF17EAF6C500CFD954 /* Supporting Files */,
 			);
 			path = IJKMediaPlayer;
@@ -309,6 +364,105 @@
 			path = lib;
 			sourceTree = "<group>";
 		};
+		E6903FCC17EAFC6100CFD954 /* ijkmedia */ = {
+			isa = PBXGroup;
+			children = (
+				E6903FCE17EAFC6100CFD954 /* ijkplayer */,
+				E6903FDF17EAFC6100CFD954 /* ijksdl */,
+				E690401417EAFC6100CFD954 /* ijkutil */,
+			);
+			name = ijkmedia;
+			path = ../../../ijkmedia;
+			sourceTree = "<group>";
+		};
+		E6903FCE17EAFC6100CFD954 /* ijkplayer */ = {
+			isa = PBXGroup;
+			children = (
+				E6903FD417EAFC6100CFD954 /* Android.mk */,
+				E6903FD517EAFC6100CFD954 /* ff_cmdutils.c */,
+				E6903FD617EAFC6100CFD954 /* ff_cmdutils.h */,
+				E6903FD717EAFC6100CFD954 /* ff_fferror.h */,
+				E6903FD817EAFC6100CFD954 /* ff_ffinc.h */,
+				E6903FD917EAFC6100CFD954 /* ff_ffmsg.h */,
+				E6903FDA17EAFC6100CFD954 /* ff_ffmsg_queue.h */,
+				E6903FDB17EAFC6100CFD954 /* ff_ffplay.c */,
+				E6903FDC17EAFC6100CFD954 /* ff_ffplay.h */,
+				E6903FDD17EAFC6100CFD954 /* ff_ffplay_config.h */,
+				E6903FDE17EAFC6100CFD954 /* ff_ffplay_def.h */,
+			);
+			path = ijkplayer;
+			sourceTree = "<group>";
+		};
+		E6903FDF17EAFC6100CFD954 /* ijksdl */ = {
+			isa = PBXGroup;
+			children = (
+				E6903FEF17EAFC6100CFD954 /* ffmpeg */,
+				E6903FFD17EAFC6100CFD954 /* ijksdl.h */,
+				E6903FFE17EAFC6100CFD954 /* ijksdl_android.h */,
+				E6903FFF17EAFC6100CFD954 /* ijksdl_aout.c */,
+				E690400017EAFC6100CFD954 /* ijksdl_aout.h */,
+				E690400117EAFC6100CFD954 /* ijksdl_aout_internal.h */,
+				E690400217EAFC6100CFD954 /* ijksdl_audio.h */,
+				E690400317EAFC6100CFD954 /* ijksdl_endian.h */,
+				E690400417EAFC6100CFD954 /* ijksdl_error.c */,
+				E690400517EAFC6100CFD954 /* ijksdl_error.h */,
+				E690400617EAFC6100CFD954 /* ijksdl_fourcc.h */,
+				E690400717EAFC6100CFD954 /* ijksdl_inc_internal.h */,
+				E690400817EAFC6100CFD954 /* ijksdl_mutex.c */,
+				E690400917EAFC6100CFD954 /* ijksdl_mutex.h */,
+				E690400A17EAFC6100CFD954 /* ijksdl_stdinc.c */,
+				E690400B17EAFC6100CFD954 /* ijksdl_stdinc.h */,
+				E690400C17EAFC6100CFD954 /* ijksdl_thread.c */,
+				E690400D17EAFC6100CFD954 /* ijksdl_thread.h */,
+				E690400E17EAFC6100CFD954 /* ijksdl_timer.c */,
+				E690400F17EAFC6100CFD954 /* ijksdl_timer.h */,
+				E690401017EAFC6100CFD954 /* ijksdl_video.h */,
+				E690401117EAFC6100CFD954 /* ijksdl_vout.c */,
+				E690401217EAFC6100CFD954 /* ijksdl_vout.h */,
+				E690401317EAFC6100CFD954 /* ijksdl_vout_internal.h */,
+			);
+			path = ijksdl;
+			sourceTree = "<group>";
+		};
+		E6903FEF17EAFC6100CFD954 /* ffmpeg */ = {
+			isa = PBXGroup;
+			children = (
+				E6903FF017EAFC6100CFD954 /* abi_all */,
+				E6903FF917EAFC6100CFD954 /* ijksdl_image_convert.h */,
+				E6903FFA17EAFC6100CFD954 /* ijksdl_inc_ffmpeg.h */,
+				E6903FFB17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.c */,
+				E6903FFC17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.h */,
+			);
+			path = ffmpeg;
+			sourceTree = "<group>";
+		};
+		E6903FF017EAFC6100CFD954 /* abi_all */ = {
+			isa = PBXGroup;
+			children = (
+				E6903FF117EAFC6100CFD954 /* image_convert.c */,
+			);
+			path = abi_all;
+			sourceTree = "<group>";
+		};
+		E690401417EAFC6100CFD954 /* ijkutil */ = {
+			isa = PBXGroup;
+			children = (
+				E690403717EB079500CFD954 /* ijklog.h */,
+				E690401917EAFC6100CFD954 /* ijkutil.h */,
+				E690403817EB079500CFD954 /* ios */,
+			);
+			path = ijkutil;
+			sourceTree = "<group>";
+		};
+		E690403817EB079500CFD954 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				E690403917EB079500CFD954 /* ijkutil_ios.h */,
+				E690403A17EB079500CFD954 /* loghelp.h */,
+			);
+			path = ios;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -361,6 +515,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				E6903EC417EAF6C500CFD954 /* IJKMediaPlayer.m in Sources */,
+				E690401F17EAFC6100CFD954 /* ff_cmdutils.c in Sources */,
+				E690402017EAFC6100CFD954 /* ff_ffplay.c in Sources */,
+				E690402717EAFC6100CFD954 /* image_convert.c in Sources */,
+				E690402D17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.c in Sources */,
+				E690402E17EAFC6100CFD954 /* ijksdl_aout.c in Sources */,
+				E690402F17EAFC6100CFD954 /* ijksdl_error.c in Sources */,
+				E690403017EAFC6100CFD954 /* ijksdl_mutex.c in Sources */,
+				E690403117EAFC6100CFD954 /* ijksdl_stdinc.c in Sources */,
+				E690403217EAFC6100CFD954 /* ijksdl_thread.c in Sources */,
+				E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */,
+				E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -426,7 +591,10 @@
 				DSTROOT = /tmp/IJKMediaPlayer.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaPlayer/IJKMediaPlayer-Prefix.pch";
-				HEADER_SEARCH_PATHS = ../build/universal/include;
+				HEADER_SEARCH_PATHS = (
+					../build/universal/include,
+					../../ijkmedia,
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../build/universal/lib\"",
@@ -443,7 +611,10 @@
 				DSTROOT = /tmp/IJKMediaPlayer.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaPlayer/IJKMediaPlayer-Prefix.pch";
-				HEADER_SEARCH_PATHS = ../build/universal/include;
+				HEADER_SEARCH_PATHS = (
+					../build/universal/include,
+					../../ijkmedia,
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../build/universal/lib\"",
@@ -473,6 +644,7 @@
 				E6903EC917EAF6C500CFD954 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
