@@ -33,7 +33,7 @@
 		E6903F1117EAF70200CFD954 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		E6903F1317EAF70200CFD954 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		E6903F1517EAF70200CFD954 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		E6903F1C17EAF71100CFD954 /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; lastKnownFileType = file; name = libIJKMediaPlayer.a; path = "../IJKMediaPlayer/build/Release-iphoneos/libIJKMediaPlayer.a"; sourceTree = "<group>"; };
+		E6903F1C17EAF71100CFD954 /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIJKMediaPlayer.a; path = "../IJKMediaPlayer/build/Release-iphoneos/libIJKMediaPlayer.a"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -252,6 +252,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -263,6 +264,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -287,6 +289,7 @@
 				E6903F1B17EAF70200CFD954 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
