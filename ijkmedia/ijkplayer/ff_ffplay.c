@@ -29,10 +29,12 @@
 
 // FIXME: 9 work around NDKr8e or gcc4.7 bug
 // isnan() may not recognize some double NAN, so we test both double and float
+#if defined(__ANDROID__)
 #ifdef isnan
 #undef isnan
 #endif
 #define isnan(x) (isnan((double)(x)) || isnanf((float)(x)))
+#endif
 
 #if defined(__ANDROID__)
 #define printf(...) ALOGD(__VA_ARGS__)
