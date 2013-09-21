@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'IJKMediaPlayer' target in the 'IJKMediaPlayer' project
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+#endif
