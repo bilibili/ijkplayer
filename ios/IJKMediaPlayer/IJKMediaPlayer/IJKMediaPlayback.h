@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <MediaPlayer/MediaPlayer.h>
 
 
 @protocol IJKMediaPlayback;
@@ -25,7 +24,7 @@
 
 #pragma mark IJKMediaPlayback
 
-@protocol IJKMediaPlayback <NSObject, MPMediaPlayback>
+@protocol IJKMediaPlayback <NSObject>
 
 - (void)prepareToPlay;
 - (void)play;
@@ -35,7 +34,9 @@
 @property(nonatomic, readonly)  UIView *view;
 @property(nonatomic, readonly)  BOOL isPreparedToPlay;
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;
-@property(nonatomic)            float currentPlaybackRate;
-@property(nonatomic, weak)      id<IJKMediaPlaybackDelegate> delegate;
+@property(nonatomic, readonly)  NSTimeInterval duration;
+@property(nonatomic, readonly)  NSTimeInterval playableDuration;
+
+@property(nonatomic, weak)      id<IJKMediaPlaybackDelegate> playbackDelegate;
 
 @end

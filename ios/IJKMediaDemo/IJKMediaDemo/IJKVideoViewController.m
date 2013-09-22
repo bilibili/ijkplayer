@@ -7,7 +7,6 @@
 //
 
 #import "IJKVideoViewController.h"
-#import "IJKMediaPlayer/IJKMediaPlayer.h"
 #import "IJKMediaControl.h"
 
 @implementation IJKVideoViewController

@@ -10,6 +10,8 @@
 
 @interface IJKMediaControl : UIControl
 
+@property(nonatomic,weak) id<IJKMediaPlayback> delegatePlayer;
+
 @property(nonatomic,strong) IBOutlet UILabel *currentTime;
 @property(nonatomic,strong) IBOutlet UILabel *totalDuration;
 @property(nonatomic,strong) IBOutlet UISlider *mediaProgress;

@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <IJKMediaPlayer/IJKMediaPlayer.h>
 
 @class IJKMediaControl;
 

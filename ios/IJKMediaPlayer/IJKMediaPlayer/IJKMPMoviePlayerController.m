@@ -10,6 +10,14 @@
 
 @implementation IJKMPMoviePlayerController
 
+@dynamic view;
+@dynamic isPreparedToPlay;
+@dynamic currentPlaybackTime;
+@dynamic duration;
+@dynamic playableDuration;
+
+@synthesize playbackDelegate;
+
 - (id)initWithContentURL:(NSURL *)url
 {
     self = [super initWithContentURL:url];
