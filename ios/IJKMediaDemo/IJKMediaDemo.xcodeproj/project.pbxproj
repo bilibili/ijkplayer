@@ -18,6 +18,9 @@
 		E6903F1217EAF70200CFD954 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = E6903F1117EAF70200CFD954 /* Default.png */; };
 		E6903F1417EAF70200CFD954 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E6903F1317EAF70200CFD954 /* Default@2x.png */; };
 		E6903F1617EAF70200CFD954 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E6903F1517EAF70200CFD954 /* Default-568h@2x.png */; };
+		E6A9B56417EDA72C00A1A500 /* IJKVideoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A9B56217EDA72C00A1A500 /* IJKVideoViewController.m */; };
+		E6A9B56517EDA72C00A1A500 /* IJKVideoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E6A9B56317EDA72C00A1A500 /* IJKVideoViewController.xib */; };
+		E6A9B56717EDAC0000A1A500 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6A9B56617EDAC0000A1A500 /* MediaPlayer.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +38,10 @@
 		E6903F1117EAF70200CFD954 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		E6903F1317EAF70200CFD954 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		E6903F1517EAF70200CFD954 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		E6A9B56117EDA72C00A1A500 /* IJKVideoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKVideoViewController.h; sourceTree = "<group>"; };
+		E6A9B56217EDA72C00A1A500 /* IJKVideoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKVideoViewController.m; sourceTree = "<group>"; };
+		E6A9B56317EDA72C00A1A500 /* IJKVideoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IJKVideoViewController.xib; sourceTree = "<group>"; };
+		E6A9B56617EDAC0000A1A500 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,6 +50,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E6166C7117EDA43C0006B956 /* libIJKMediaPlayer.a in Frameworks */,
+				E6A9B56717EDAC0000A1A500 /* MediaPlayer.framework in Frameworks */,
 				E6903F0017EAF70200CFD954 /* UIKit.framework in Frameworks */,
 				E6903F0217EAF70200CFD954 /* Foundation.framework in Frameworks */,
 				E6903F0417EAF70200CFD954 /* CoreGraphics.framework in Frameworks */,
@@ -73,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				E6166C7017EDA43C0006B956 /* libIJKMediaPlayer.a */,
+				E6A9B56617EDAC0000A1A500 /* MediaPlayer.framework */,
 				E6903EFF17EAF70200CFD954 /* UIKit.framework */,
 				E6903F0117EAF70200CFD954 /* Foundation.framework */,
 				E6903F0317EAF70200CFD954 /* CoreGraphics.framework */,
@@ -85,6 +94,7 @@
 			children = (
 				E6903F0E17EAF70200CFD954 /* IJKAppDelegate.h */,
 				E6903F0F17EAF70200CFD954 /* IJKAppDelegate.m */,
+				E6A9B55C17EDA6AC00A1A500 /* View Controllers */,
 				E6903F0617EAF70200CFD954 /* Supporting Files */,
 			);
 			path = IJKMediaDemo;
@@ -102,6 +112,16 @@
 				E6166C9B17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E6A9B55C17EDA6AC00A1A500 /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				E6A9B56117EDA72C00A1A500 /* IJKVideoViewController.h */,
+				E6A9B56217EDA72C00A1A500 /* IJKVideoViewController.m */,
+				E6A9B56317EDA72C00A1A500 /* IJKVideoViewController.xib */,
+			);
+			name = "View Controllers";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -161,6 +181,7 @@
 				E6903F1417EAF70200CFD954 /* Default@2x.png in Resources */,
 				E6903F1617EAF70200CFD954 /* Default-568h@2x.png in Resources */,
 				E6166C9C17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch in Resources */,
+				E6A9B56517EDA72C00A1A500 /* IJKVideoViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -173,6 +194,7 @@
 			files = (
 				E6903F0C17EAF70200CFD954 /* main.m in Sources */,
 				E6903F1017EAF70200CFD954 /* IJKAppDelegate.m in Sources */,
+				E6A9B56417EDA72C00A1A500 /* IJKVideoViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,8 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
+@class IJKVideoViewController;
+
 @interface IJKAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+@property (strong, nonatomic) IJKVideoViewController *viewController;
 
 @end
