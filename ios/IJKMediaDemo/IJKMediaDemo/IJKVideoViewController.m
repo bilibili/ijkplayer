@@ -38,17 +38,28 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
 
+    [[UIApplication sharedApplication] setStatusBarHidden:YES];
+
     NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
 
     self.videoView = [[MPMoviePlayerViewController alloc] initWithContentURL:theMovieURL];
 
     self.player = [[MPMoviePlayerController alloc] initWithContentURL:theMovieURL];
+    self.player.controlStyle = MPMovieControlStyleNone;
+    self.player.scalingMode = MPMovieScalingModeAspectFit;
+    self.player.shouldAutoplay = YES;
+    self.player.useApplicationAudioSession = NO;
     [self.player prepareToPlay];
 
     [self.player.view setFrame: self.view.bounds];
     [self.view addSubview: self.player.view];
 
     [self.player play];
+}
+
+- (NSUInteger)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskLandscape;
 }
 
 - (void)didReceiveMemoryWarning
