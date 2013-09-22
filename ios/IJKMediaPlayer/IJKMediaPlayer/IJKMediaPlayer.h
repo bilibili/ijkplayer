@@ -6,8 +6,5 @@
 //  Copyright (c) 2013年 bilibili. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
-@interface IJKMediaPlayer : NSObject
-
-@end
+#import "IJKMediaPlayback.h"
+#import "IJKMPMoviePlayerController.h"

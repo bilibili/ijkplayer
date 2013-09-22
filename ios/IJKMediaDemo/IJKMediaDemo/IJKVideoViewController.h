@@ -7,14 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-
-@class MPMoviePlayerViewController;
-@class MPMoviePlayerController;
+#import <IJKMediaPlayer/IJKMediaPlayer.h>
 
 @interface IJKVideoViewController : UIViewController
 
-@property (nonatomic, retain) MPMoviePlayerViewController *videoView;
-@property (atomic, retain) MPMoviePlayerController *player;
+@property(atomic, retain) id<IJKMediaPlayback> player;
 
 - (id)initView;
 

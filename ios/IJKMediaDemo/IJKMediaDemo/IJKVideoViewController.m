@@ -7,7 +7,7 @@
 //
 
 #import "IJKVideoViewController.h"
-#import "MediaPlayer/MediaPlayer.h"
+#import "IJKMediaPlayer/IJKMediaPlayer.h"
 
 @interface IJKVideoViewController ()
 
@@ -42,13 +42,7 @@
 
     NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
 
-    self.videoView = [[MPMoviePlayerViewController alloc] initWithContentURL:theMovieURL];
-
-    self.player = [[MPMoviePlayerController alloc] initWithContentURL:theMovieURL];
-    self.player.controlStyle = MPMovieControlStyleNone;
-    self.player.scalingMode = MPMovieScalingModeAspectFit;
-    self.player.shouldAutoplay = YES;
-    self.player.useApplicationAudioSession = NO;
+    self.player = [[IJKMPMoviePlayerController alloc] initWithContentURL:theMovieURL];
     [self.player prepareToPlay];
 
     [self.player.view setFrame: self.view.bounds];
