@@ -8,10 +8,7 @@
 
 #import "IJKVideoViewController.h"
 #import "IJKMediaPlayer/IJKMediaPlayer.h"
-
-@interface IJKVideoViewController ()
-
-@end
+#import "IJKMediaControl.h"
 
 @implementation IJKVideoViewController
 
@@ -46,7 +43,8 @@
     [self.player prepareToPlay];
 
     [self.player.view setFrame: self.view.bounds];
-    [self.view addSubview: self.player.view];
+    [self.view addSubview:self.player.view];
+    [self.view addSubview:self.mediaControl];
 
     [self.player play];
 }
@@ -60,6 +58,21 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark IBAction
+
+- (IBAction)onClickBack:(id)sender
+{
+    exit(0);
+}
+
+- (IBAction)onClickPlay:(id)sender
+{
+}
+
+- (IBAction)onClickPause:(id)sender
+{
 }
 
 @end

@@ -9,10 +9,18 @@
 #import <UIKit/UIKit.h>
 #import <IJKMediaPlayer/IJKMediaPlayer.h>
 
+@class IJKMediaControl;
+
 @interface IJKVideoViewController : UIViewController
 
 @property(atomic, retain) id<IJKMediaPlayback> player;
 
 - (id)initView;
+
+- (IBAction)onClickBack:(id)sender;
+- (IBAction)onClickPlay:(id)sender;
+- (IBAction)onClickPause:(id)sender;
+
+@property(nonatomic,strong) IBOutlet IJKMediaControl *mediaControl;
 
 @end
