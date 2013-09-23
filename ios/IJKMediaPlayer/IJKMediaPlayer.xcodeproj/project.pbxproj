@@ -11,6 +11,9 @@
 		E63FC26F17EFF79F003551EB /* IJKSDLAudioUnitController.m in Sources */ = {isa = PBXBuildFile; fileRef = E63FC26E17EFF79F003551EB /* IJKSDLAudioUnitController.m */; };
 		E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27017F01143003551EB /* ijksdl_audio.c */; };
 		E63FC27617F013DE003551EB /* ijksdl_vout_dummy.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27417F013DE003551EB /* ijksdl_vout_dummy.c */; };
+		E63FC28217F04BB5003551EB /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC28117F04BB5003551EB /* MediaPlayer.framework */; };
+		E63FC28817F04C3D003551EB /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC28717F04C3D003551EB /* CoreAudio.framework */; };
+		E63FC28D17F04C76003551EB /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC28B17F04C76003551EB /* AudioToolbox.framework */; };
 		E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */; };
 		E66F8DE717EFD9C300354D80 /* IJKFFPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DE617EFD9C300354D80 /* IJKFFPlayerController.m */; };
 		E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DEF17EFEA9400354D80 /* ijkplayer.c */; };
@@ -57,6 +60,9 @@
 		E63FC27317F013DE003551EB /* ijksdl_dummy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_dummy.h; sourceTree = "<group>"; };
 		E63FC27417F013DE003551EB /* ijksdl_vout_dummy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_vout_dummy.c; sourceTree = "<group>"; };
 		E63FC27517F013DE003551EB /* ijksdl_vout_dummy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_vout_dummy.h; sourceTree = "<group>"; };
+		E63FC28117F04BB5003551EB /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		E63FC28717F04C3D003551EB /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		E63FC28B17F04C76003551EB /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		E66F8DBF17EEC65200354D80 /* IJKMPMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMPMoviePlayerController.h; path = IJKMediaPlayer/IJKMPMoviePlayerController.h; sourceTree = "<group>"; };
 		E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMPMoviePlayerController.m; path = IJKMediaPlayer/IJKMPMoviePlayerController.m; sourceTree = "<group>"; };
 		E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaPlayer.h; path = IJKMediaPlayer/IJKMediaPlayer.h; sourceTree = "<group>"; };
@@ -193,6 +199,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E63FC28D17F04C76003551EB /* AudioToolbox.framework in Frameworks */,
+				E63FC28817F04C3D003551EB /* CoreAudio.framework in Frameworks */,
+				E63FC28217F04BB5003551EB /* MediaPlayer.framework in Frameworks */,
 				E6903EBD17EAF6C500CFD954 /* Foundation.framework in Frameworks */,
 				E6903FC717EAFC2C00CFD954 /* libavcodec.a in Frameworks */,
 				E6903FC817EAFC2C00CFD954 /* libavformat.a in Frameworks */,
@@ -286,6 +295,9 @@
 		E6903EBB17EAF6C500CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E63FC28B17F04C76003551EB /* AudioToolbox.framework */,
+				E63FC28717F04C3D003551EB /* CoreAudio.framework */,
+				E63FC28117F04BB5003551EB /* MediaPlayer.framework */,
 				E6903EBC17EAF6C500CFD954 /* Foundation.framework */,
 			);
 			name = Frameworks;

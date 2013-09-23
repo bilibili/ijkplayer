@@ -46,7 +46,7 @@
         return (retval__); \
     }
 
-inline void *mallocz(size_t size)
+inline static void *mallocz(size_t size)
 {
     void *mem = malloc(size);
     if (!mem)
@@ -56,7 +56,7 @@ inline void *mallocz(size_t size)
     return mem;
 }
 
-inline void freep(void **mem)
+inline static void freep(void **mem)
 {
     if (mem && *mem) {
         free(*mem);
