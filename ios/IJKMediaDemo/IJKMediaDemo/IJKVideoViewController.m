@@ -37,14 +37,15 @@
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
 
     NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
-
     self.player = [[IJKMPMoviePlayerController alloc] initWithContentURL:theMovieURL];
-    [self.player prepareToPlay];
 
-    [self.player.view setFrame: self.view.bounds];
     [self.view addSubview:self.player.view];
     [self.view addSubview:self.mediaControl];
 
+    self.mediaControl.delegatePlayer = self.player;
+
+    [self.player prepareToPlay];
+    [self.player.view setFrame: self.view.bounds];
     [self.player play];
 }
 
@@ -61,6 +62,16 @@
 
 #pragma mark IBAction
 
+- (IBAction)onClickMediaControl:(id)sender
+{
+    [self.mediaControl showAndFade];
+}
+
+- (IBAction)onClickOverlay:(id)sender
+{
+    [self.mediaControl hide];
+}
+
 - (IBAction)onClickBack:(id)sender
 {
     exit(0);
@@ -68,10 +79,14 @@
 
 - (IBAction)onClickPlay:(id)sender
 {
+    [self.player play];
+    [self.mediaControl refreshMediaControl];
 }
 
 - (IBAction)onClickPause:(id)sender
 {
+    [self.player pause];
+    [self.mediaControl refreshMediaControl];
 }
 
 @end

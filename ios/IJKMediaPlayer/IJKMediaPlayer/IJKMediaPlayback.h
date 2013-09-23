@@ -30,9 +30,9 @@
 - (void)play;
 - (void)pause;
 - (void)stop;
+- (BOOL)isPlaying;
 
 @property(nonatomic, readonly)  UIView *view;
-@property(nonatomic, readonly)  BOOL isPreparedToPlay;
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;
 @property(nonatomic, readonly)  NSTimeInterval duration;
 @property(nonatomic, readonly)  NSTimeInterval playableDuration;

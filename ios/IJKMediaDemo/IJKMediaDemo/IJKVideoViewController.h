@@ -16,6 +16,8 @@
 
 - (id)initView;
 
+- (IBAction)onClickMediaControl:(id)sender;
+- (IBAction)onClickOverlay:(id)sender;
 - (IBAction)onClickBack:(id)sender;
 - (IBAction)onClickPlay:(id)sender;
 - (IBAction)onClickPause:(id)sender;

@@ -11,7 +11,6 @@
 @implementation IJKMPMoviePlayerController
 
 @dynamic view;
-@dynamic isPreparedToPlay;
 @dynamic currentPlaybackTime;
 @dynamic duration;
 @dynamic playableDuration;
@@ -28,6 +27,16 @@
         self.useApplicationAudioSession = NO;
     }
     return self;
+}
+
+- (BOOL)isPlaying
+{
+    switch (self.playbackState) {
+    case MPMoviePlaybackStatePlaying:
+        return YES;
+    default:
+        return NO;
+    }
 }
 
 @end
