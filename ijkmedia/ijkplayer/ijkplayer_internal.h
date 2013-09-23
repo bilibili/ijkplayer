@@ -1,5 +1,5 @@
 /*
- * ijkplayer_android.h
+ * ijkplayer_internal.h
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -20,15 +20,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER_ANDROID__IJKPLAYER_ANDROID_H
-#define IJKPLAYER_ANDROID__IJKPLAYER_ANDROID_H
+#ifndef IJKPLAYER_ANDROID__IJKPLAYER_INTERNAL_H
+#define IJKPLAYER_ANDROID__IJKPLAYER_INTERNAL_H
 
-#include <jni.h>
-#include "../ijkplayer.h"
+#include <assert.h>
+#include "ijksdl/ijksdl_android.h"
+#include "ff_fferror.h"
+#include "ff_ffplay.h"
+#include "ijkplayer.h"
 
-// ref_count is 1 after open
-IjkMediaPlayer *ijkmp_android_create(void *(*msg_loop)(void*));
+typedef struct IjkMediaPlayer {
+    volatile int ref_count;
+    pthread_mutex_t mutex;
+    FFPlayer *ffplayer;
 
-void            ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface);
+    void *(*msg_loop)(void*);
+    pthread_t msg_thread;
+
+    int mp_state;
+    char *data_source;
+    void *weak_thiz;
+
+    int restart_from_beginning;
+    int seek_req;
+    long seek_msec;
+} IjkMediaPlayer;
 
 #endif

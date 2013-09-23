@@ -29,7 +29,7 @@
 #include "ff_ffmsg_queue.h"
 
 #define DEFAULT_HIGH_WATER_MARK_IN_MS    (5 * 1000)
-#define DEFAULT_HIGH_WATER_MARK_IN_BYTES (256 * 1024)
+#define DEFAULT_HIGH_WATER_MARK_IN_BYTES (128 * 1024)
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 50000
 
