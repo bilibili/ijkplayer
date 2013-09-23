@@ -28,6 +28,4 @@
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_ios_create(void *(*msg_loop)(void*));
 
-void            ijkmp_ios_set_surface(IjkMediaPlayer *mp);
-
 #endif

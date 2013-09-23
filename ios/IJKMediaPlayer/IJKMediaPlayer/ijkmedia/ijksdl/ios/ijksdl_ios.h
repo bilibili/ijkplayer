@@ -25,7 +25,7 @@
 
 #include "ijksdl/ijksdl.h"
 
-// #include "ijksdl_aout_android_audiotrack.h"
+#include "ijksdl_aout_ios_audiounit.h"
 
 // #include "ijksdl_vout_android_nativewindow.h"
 // #include "ijksdl_vout_android_surface.h"

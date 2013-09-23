@@ -8,6 +8,7 @@
 
 #import "IJKVideoViewController.h"
 #import "IJKMediaControl.h"
+#import "IJKCommon.h"
 
 @implementation IJKVideoViewController
 
@@ -35,6 +36,7 @@
     // Do any additional setup after loading the view from its nib.
 
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
+    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
 
     NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
     self.player = [[IJKMPMoviePlayerController alloc] initWithContentURL:theMovieURL];
@@ -49,9 +51,17 @@
     [self.player play];
 }
 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation{
+    return UIInterfaceOrientationIsLandscape(toInterfaceOrientation);
+}
+
 - (NSUInteger)supportedInterfaceOrientations
 {
     return UIInterfaceOrientationMaskLandscape;
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation{
+    return UIInterfaceOrientationLandscapeLeft;
 }
 
 - (void)didReceiveMemoryWarning

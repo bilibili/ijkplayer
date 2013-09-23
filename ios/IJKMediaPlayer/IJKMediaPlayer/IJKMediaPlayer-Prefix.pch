@@ -4,5 +4,10 @@
 
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
+
     #import <MediaPlayer/MediaPlayer.h>
+
+    #import <AudioUnit/AudioUnit.h>
+    #import <CoreAudio/CoreAudioTypes.h>
+    #import <AudioToolbox/AudioToolbox.h>
 #endif

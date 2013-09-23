@@ -37,6 +37,7 @@
 /* Begin PBXFileReference section */
 		E6166C7017EDA43C0006B956 /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIJKMediaPlayer.a; path = "../../../../../Library/Developer/Xcode/DerivedData/IJKMedia-earrwrzhlmypuheegnwtfewujljd/Build/Products/Debug-iphoneos/libIJKMediaPlayer.a"; sourceTree = "<group>"; };
 		E6166C9B17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "IJKMediaDemo-Prefix.pch"; sourceTree = "<group>"; };
+		E63FC27817F032FD003551EB /* IJKCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKCommon.h; sourceTree = "<group>"; };
 		E66F8DC917EEDD8B00354D80 /* IJKMediaControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKMediaControl.h; sourceTree = "<group>"; };
 		E66F8DCA17EEDD8B00354D80 /* IJKMediaControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKMediaControl.m; sourceTree = "<group>"; };
 		E66F8DCD17EEDFCA00354D80 /* player_top_control_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = player_top_control_bg.png; path = resources/player_top_control_bg.png; sourceTree = "<group>"; };
@@ -83,6 +84,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E63FC27717F032D9003551EB /* Misc */ = {
+			isa = PBXGroup;
+			children = (
+				E63FC27817F032FD003551EB /* IJKCommon.h */,
+			);
+			name = Misc;
+			sourceTree = "<group>";
+		};
 		E66F8DCC17EEDF8E00354D80 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -135,6 +144,7 @@
 				E6903F0E17EAF70200CFD954 /* IJKAppDelegate.h */,
 				E6903F0F17EAF70200CFD954 /* IJKAppDelegate.m */,
 				E6A9B55C17EDA6AC00A1A500 /* View Controllers */,
+				E63FC27717F032D9003551EB /* Misc */,
 				E66F8DCC17EEDF8E00354D80 /* Resources */,
 				E6903F0617EAF70200CFD954 /* Supporting Files */,
 			);

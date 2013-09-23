@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E63FC26917EFF39E003551EB /* ijksdl_aout_ios_audiounit.m in Sources */ = {isa = PBXBuildFile; fileRef = E63FC26817EFF39E003551EB /* ijksdl_aout_ios_audiounit.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		E63FC26F17EFF79F003551EB /* IJKSDLAudioUnitController.m in Sources */ = {isa = PBXBuildFile; fileRef = E63FC26E17EFF79F003551EB /* IJKSDLAudioUnitController.m */; };
+		E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27017F01143003551EB /* ijksdl_audio.c */; };
+		E63FC27617F013DE003551EB /* ijksdl_vout_dummy.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27417F013DE003551EB /* ijksdl_vout_dummy.c */; };
 		E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */; };
 		E66F8DE717EFD9C300354D80 /* IJKFFPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DE617EFD9C300354D80 /* IJKFFPlayerController.m */; };
 		E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DEF17EFEA9400354D80 /* ijkplayer.c */; };
@@ -45,6 +49,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E63FC26717EFF38C003551EB /* ijksdl_aout_ios_audiounit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ijksdl_aout_ios_audiounit.h; path = ijkmedia/ijksdl/ios/ijksdl_aout_ios_audiounit.h; sourceTree = "<group>"; };
+		E63FC26817EFF39E003551EB /* ijksdl_aout_ios_audiounit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ijksdl_aout_ios_audiounit.m; path = ijkmedia/ijksdl/ios/ijksdl_aout_ios_audiounit.m; sourceTree = "<group>"; };
+		E63FC26D17EFF79F003551EB /* IJKSDLAudioUnitController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKSDLAudioUnitController.h; path = ijkmedia/ijksdl/ios/IJKSDLAudioUnitController.h; sourceTree = "<group>"; };
+		E63FC26E17EFF79F003551EB /* IJKSDLAudioUnitController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKSDLAudioUnitController.m; path = ijkmedia/ijksdl/ios/IJKSDLAudioUnitController.m; sourceTree = "<group>"; };
+		E63FC27017F01143003551EB /* ijksdl_audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_audio.c; sourceTree = "<group>"; };
+		E63FC27317F013DE003551EB /* ijksdl_dummy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_dummy.h; sourceTree = "<group>"; };
+		E63FC27417F013DE003551EB /* ijksdl_vout_dummy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_vout_dummy.c; sourceTree = "<group>"; };
+		E63FC27517F013DE003551EB /* ijksdl_vout_dummy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_vout_dummy.h; sourceTree = "<group>"; };
 		E66F8DBF17EEC65200354D80 /* IJKMPMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMPMoviePlayerController.h; path = IJKMediaPlayer/IJKMPMoviePlayerController.h; sourceTree = "<group>"; };
 		E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMPMoviePlayerController.m; path = IJKMediaPlayer/IJKMPMoviePlayerController.m; sourceTree = "<group>"; };
 		E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaPlayer.h; path = IJKMediaPlayer/IJKMediaPlayer.h; sourceTree = "<group>"; };
@@ -193,6 +205,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E63FC27217F013DE003551EB /* dummy */ = {
+			isa = PBXGroup;
+			children = (
+				E63FC27317F013DE003551EB /* ijksdl_dummy.h */,
+				E63FC27417F013DE003551EB /* ijksdl_vout_dummy.c */,
+				E63FC27517F013DE003551EB /* ijksdl_vout_dummy.h */,
+			);
+			path = dummy;
+			sourceTree = "<group>";
+		};
 		E66F8DBC17EEC2CF00354D80 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
@@ -235,6 +257,10 @@
 			isa = PBXGroup;
 			children = (
 				E66F8E0517EFEF3900354D80 /* ijksdl_ios.h */,
+				E63FC26717EFF38C003551EB /* ijksdl_aout_ios_audiounit.h */,
+				E63FC26817EFF39E003551EB /* ijksdl_aout_ios_audiounit.m */,
+				E63FC26D17EFF79F003551EB /* IJKSDLAudioUnitController.h */,
+				E63FC26E17EFF79F003551EB /* IJKSDLAudioUnitController.m */,
 			);
 			name = ios;
 			path = ../../ios/IJKMediaPlayer/IJKMediaPlayer;
@@ -458,12 +484,14 @@
 		E6903FDF17EAFC6100CFD954 /* ijksdl */ = {
 			isa = PBXGroup;
 			children = (
-				E66F8DF917EFEC2100354D80 /* ios */,
+				E63FC27217F013DE003551EB /* dummy */,
 				E6903FEF17EAFC6100CFD954 /* ffmpeg */,
+				E66F8DF917EFEC2100354D80 /* ios */,
 				E6903FFD17EAFC6100CFD954 /* ijksdl.h */,
 				E6903FFF17EAFC6100CFD954 /* ijksdl_aout.c */,
 				E690400017EAFC6100CFD954 /* ijksdl_aout.h */,
 				E690400117EAFC6100CFD954 /* ijksdl_aout_internal.h */,
+				E63FC27017F01143003551EB /* ijksdl_audio.c */,
 				E690400217EAFC6100CFD954 /* ijksdl_audio.h */,
 				E690400317EAFC6100CFD954 /* ijksdl_endian.h */,
 				E690400417EAFC6100CFD954 /* ijksdl_error.c */,
@@ -591,6 +619,10 @@
 				E66F8DE717EFD9C300354D80 /* IJKFFPlayerController.m in Sources */,
 				E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */,
 				E66F8E0317EFEEA400354D80 /* ijkplayer_ios.c in Sources */,
+				E63FC26917EFF39E003551EB /* ijksdl_aout_ios_audiounit.m in Sources */,
+				E63FC26F17EFF79F003551EB /* IJKSDLAudioUnitController.m in Sources */,
+				E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */,
+				E63FC27617F013DE003551EB /* ijksdl_vout_dummy.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

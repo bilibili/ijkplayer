@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include "ijksdl/ios/ijksdl_ios.h"
+#include "ijksdl/dummy/ijksdl_dummy.h"
 #include "ijkplayer/ff_fferror.h"
 #include "ijkplayer/ff_ffplay.h"
 #include "ijkplayer/ijkplayer_internal.h"
@@ -36,15 +37,13 @@ IjkMediaPlayer *ijkmp_ios_create(void *(*msg_loop)(void*))
     if (!mp)
         goto fail;
 
-    /*-
-    mp->ffplayer->vout = SDL_VoutAndroid_CreateForAndroidSurface();
+    mp->ffplayer->vout = SDL_VoutDummy_Create();
     if (!mp->ffplayer->vout)
         goto fail;
 
-    mp->ffplayer->aout = SDL_AoutAndroid_CreateForAudioTrack();
+    mp->ffplayer->aout = SDL_AoutIos_CreateForAudioUnit();
     if (!mp->ffplayer->vout)
         goto fail;
-     */
 
     return mp;
 

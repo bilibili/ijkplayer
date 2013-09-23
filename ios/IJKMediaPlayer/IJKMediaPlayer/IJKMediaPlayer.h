@@ -8,3 +8,4 @@
 
 #import "IJKMediaPlayback.h"
 #import "IJKMPMoviePlayerController.h"
+#import "IJKFFPlayerController.h"
