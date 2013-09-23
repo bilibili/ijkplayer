@@ -81,14 +81,6 @@ IjkMediaPlayer *ijkmp_create(void *(*msg_loop)(void*))
     if (!mp)
         goto fail;
 
-    mp->ffplayer->vout = SDL_VoutAndroid_CreateForAndroidSurface();
-    if (!mp->ffplayer->vout)
-        goto fail;
-
-    mp->ffplayer->aout = SDL_AoutAndroid_CreateForAudioTrack();
-    if (!mp->ffplayer->vout)
-        goto fail;
-
     mp->msg_loop = msg_loop;
 
     ijkmp_inc_ref(mp);
@@ -462,25 +454,6 @@ long ijkmp_get_duration(IjkMediaPlayer *mp)
     int retval = ijkmp_get_duration_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     return retval;
-}
-
-void ijkmp_set_android_surface_l(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
-{
-    assert(mp);
-    assert(mp->ffplayer);
-    assert(mp->ffplayer->vout);
-
-    SDL_VoutAndroid_SetAndroidSurface(env, mp->ffplayer->vout, android_surface);
-}
-
-void ijkmp_set_android_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
-{
-    assert(mp);
-    MPTRACE("ijkmp_set_android_surface(surface=%p)", (void*)android_surface);
-    pthread_mutex_lock(&mp->mutex);
-    ijkmp_set_android_surface_l(env, mp, android_surface);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_android_surface(surface=%p)=void", (void*)android_surface);
 }
 
 void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
