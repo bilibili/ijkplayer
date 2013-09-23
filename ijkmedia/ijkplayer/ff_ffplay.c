@@ -2466,8 +2466,8 @@ FFPlayer *ffp_create()
     if (!ffp)
         return NULL;
 
-    ffp_reset_internal(ffp);
     msg_queue_init(&ffp->msg_queue);
+    ffp_reset_internal(ffp);
     return ffp;
 }
 
