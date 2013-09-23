@@ -21,14 +21,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_ANDROID_H
-#define IJKSDL__IJKSDL_ANDROID_H
+#ifndef IJKSDL_ANDROID__IJKSDL_ANDROID_H
+#define IJKSDL_ANDROID__IJKSDL_ANDROID_H
 
-#include "ijksdl.h"
+#include "../ijksdl.h"
 
-#include "android/ijksdl_aout_android_audiotrack.h"
+#include "ijksdl_aout_android_audiotrack.h"
 
-#include "android/ijksdl_vout_android_nativewindow.h"
-#include "android/ijksdl_vout_android_surface.h"
+#include "ijksdl_vout_android_nativewindow.h"
+#include "ijksdl_vout_android_surface.h"
 
 #endif

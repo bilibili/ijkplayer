@@ -23,7 +23,7 @@
 #include "ijkplayer_android.h"
 
 #include <assert.h>
-#include "ijksdl/ijksdl_android.h"
+#include "ijksdl/android/ijksdl_android.h"
 #include "../ff_fferror.h"
 #include "../ff_ffplay.h"
 #include "../ijkplayer_internal.h"
