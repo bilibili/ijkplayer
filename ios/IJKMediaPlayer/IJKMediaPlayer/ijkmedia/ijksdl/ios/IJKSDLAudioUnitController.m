@@ -142,18 +142,27 @@
 
 - (void)play
 {
+    if (!self->_auUnit)
+        return;
+
     AudioOutputUnitStart(self->_auUnit);
     AudioSessionSetActive(true);
 }
 
 - (void)pause
 {
+    if (!self->_auUnit)
+        return;
+
     AudioOutputUnitStop(self->_auUnit);
     AudioSessionSetActive(false);
 }
 
 - (void)flush
 {
+    if (!self->_auUnit)
+        return;
+
     AudioOutputUnitStop(self->_auUnit);
 }
 
@@ -161,11 +170,14 @@
 {
     AudioSessionSetActive(false);
 
-    OSStatus status = AudioOutputUnitStop(self->_auUnit);
+    if (!self->_auUnit)
+        return;
+
+    OSStatus status = AudioOutputUnitStop(_auUnit);
     if (status != noErr)
         ALOGE("AudioUnit: failed to stop AudioUnit (%li)", status);
 
-    status = AudioComponentInstanceDispose(self->_auUnit);
+    status = AudioComponentInstanceDispose(_auUnit);
     if (status != noErr)
         ALOGE("AudioUnit: failed to dispose Audio Component instance (%li)", status);
 }
@@ -173,6 +185,19 @@
 - (void)close
 {
     [self stop];
+
+    if (!_auUnit)
+        return;
+
+    AURenderCallbackStruct callback;
+    memset(&callback, 0, sizeof(AURenderCallbackStruct));
+    AudioUnitSetProperty(_auUnit,
+                         kAudioUnitProperty_SetRenderCallback,
+                         kAudioUnitScope_Input, 0, &callback,
+                         sizeof(callback));
+
+    AudioComponentInstanceDispose(_auUnit);
+    _auUnit = NULL;
 }
 
 static OSStatus RenderCallback(void                        *inRefCon,
