@@ -28,6 +28,8 @@
 {
     self = [super init];
     if (self) {
+        ijkmp_global_init();
+
         _url = aUrl;
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
         _weakSelf = self;

@@ -15,6 +15,7 @@
 		E63FC28817F04C3D003551EB /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC28717F04C3D003551EB /* CoreAudio.framework */; };
 		E63FC28D17F04C76003551EB /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC28B17F04C76003551EB /* AudioToolbox.framework */; };
 		E63FC29417F06060003551EB /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC29317F06060003551EB /* libz.dylib */; };
+		E63FC29817F062D5003551EB /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC29717F062D4003551EB /* libbz2.dylib */; };
 		E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */; };
 		E66F8DE717EFD9C300354D80 /* IJKFFPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DE617EFD9C300354D80 /* IJKFFPlayerController.m */; };
 		E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DEF17EFEA9400354D80 /* ijkplayer.c */; };
@@ -65,6 +66,7 @@
 		E63FC28717F04C3D003551EB /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		E63FC28B17F04C76003551EB /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		E63FC29317F06060003551EB /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		E63FC29717F062D4003551EB /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
 		E66F8DBF17EEC65200354D80 /* IJKMPMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMPMoviePlayerController.h; path = IJKMediaPlayer/IJKMPMoviePlayerController.h; sourceTree = "<group>"; };
 		E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMPMoviePlayerController.m; path = IJKMediaPlayer/IJKMPMoviePlayerController.m; sourceTree = "<group>"; };
 		E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaPlayer.h; path = IJKMediaPlayer/IJKMediaPlayer.h; sourceTree = "<group>"; };
@@ -206,6 +208,7 @@
 				E63FC28217F04BB5003551EB /* MediaPlayer.framework in Frameworks */,
 				E6903EBD17EAF6C500CFD954 /* Foundation.framework in Frameworks */,
 				E63FC29417F06060003551EB /* libz.dylib in Frameworks */,
+				E63FC29817F062D5003551EB /* libbz2.dylib in Frameworks */,
 				E6903FC717EAFC2C00CFD954 /* libavcodec.a in Frameworks */,
 				E6903FC817EAFC2C00CFD954 /* libavformat.a in Frameworks */,
 				E6903FC917EAFC2C00CFD954 /* libavutil.a in Frameworks */,
@@ -303,6 +306,7 @@
 				E63FC28117F04BB5003551EB /* MediaPlayer.framework */,
 				E6903EBC17EAF6C500CFD954 /* Foundation.framework */,
 				E63FC29317F06060003551EB /* libz.dylib */,
+				E63FC29717F062D4003551EB /* libbz2.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
