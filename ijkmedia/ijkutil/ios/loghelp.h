@@ -43,7 +43,7 @@ extern "C" {
 #define IJK_LOG_FATAL       7
 #define IJK_LOG_SILENT      8
 
-#define VLOG(level, TAG, ...)    ((void)printf(__VA_ARGS__))
+#define VLOG(level, TAG, ...)    ((void)vprintf(__VA_ARGS__))
 #define VLOGV(...)  VLOG(IJK_LOG_VERBOSE,   IJK_LOG_TAG, __VA_ARGS__)
 #define VLOGD(...)  VLOG(IJK_LOG_DEBUG,     IJK_LOG_TAG, __VA_ARGS__)
 #define VLOGI(...)  VLOG(IJK_LOG_INFO,      IJK_LOG_TAG, __VA_ARGS__)
