@@ -1,5 +1,5 @@
 /*
- * ijksdl_ios.h
+ * ijkplayer_ios.h
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -20,14 +20,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKMediaPlayer_ijksdl_ios_h
-#define IJKMediaPlayer_ijksdl_ios_h
+#ifndef IJKMediaPlayer_ijkplayer_ios_h
+#define IJKMediaPlayer_ijkplayer_ios_h
 
-#include "ijksdl/ijksdl.h"
+#include "ijkplayer/ijkplayer.h"
 
-// #include "ijksdl_aout_android_audiotrack.h"
+// ref_count is 1 after open
+IjkMediaPlayer *ijkmp_ios_create(void *(*msg_loop)(void*));
 
-// #include "ijksdl_vout_android_nativewindow.h"
-// #include "ijksdl_vout_android_surface.h"
+void            ijkmp_ios_set_surface(IjkMediaPlayer *mp);
 
 #endif

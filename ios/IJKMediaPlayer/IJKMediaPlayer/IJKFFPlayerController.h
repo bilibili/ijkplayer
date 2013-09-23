@@ -6,8 +6,16 @@
 //  Copyright (c) 2013年 bilibili. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import "IJKMediaPlayback.h"
 
-@interface IJKFFPlayerController : NSObject
+@interface IJKFFPlayerController : NSObject <IJKMediaPlayback>
+
+- (id)initWithContentURL:(NSURL *)aUrl;
+
+- (void)prepareToPlay;
+- (void)play;
+- (void)pause;
+- (void)stop;
+- (BOOL)isPlaying;
 
 @end

@@ -1,5 +1,5 @@
 /*
- * ijksdl_ios.h
+ * ijkplayer_ios.c
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -20,14 +20,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKMediaPlayer_ijksdl_ios_h
-#define IJKMediaPlayer_ijksdl_ios_h
+#include <stdio.h>
 
-#include "ijksdl/ijksdl.h"
+#include "ijkplayer_ios.h"
 
-// #include "ijksdl_aout_android_audiotrack.h"
+#include <assert.h>
+#include "ijksdl/ios/ijksdl_ios.h"
+#include "ijkplayer/ff_fferror.h"
+#include "ijkplayer/ff_ffplay.h"
+#include "ijkplayer/ijkplayer_internal.h"
 
-// #include "ijksdl_vout_android_nativewindow.h"
-// #include "ijksdl_vout_android_surface.h"
+IjkMediaPlayer *ijkmp_ios_create(void *(*msg_loop)(void*))
+{
+    IjkMediaPlayer *mp = ijkmp_create(msg_loop);
+    if (!mp)
+        goto fail;
 
-#endif
+    /*-
+    mp->ffplayer->vout = SDL_VoutAndroid_CreateForAndroidSurface();
+    if (!mp->ffplayer->vout)
+        goto fail;
+
+    mp->ffplayer->aout = SDL_AoutAndroid_CreateForAudioTrack();
+    if (!mp->ffplayer->vout)
+        goto fail;
+     */
+
+    return mp;
+
+fail:
+    ijkmp_dec_ref_p(&mp);
+    return NULL;
+}

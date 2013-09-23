@@ -17,9 +17,9 @@
 
 @synthesize playbackDelegate;
 
-- (id)initWithContentURL:(NSURL *)url
+- (id)initWithContentURL:(NSURL *)aUrl
 {
-    self = [super initWithContentURL:url];
+    self = [super initWithContentURL:aUrl];
     if (self) {
         self.controlStyle = MPMovieControlStyleNone;
         self.scalingMode = MPMovieScalingModeAspectFit;

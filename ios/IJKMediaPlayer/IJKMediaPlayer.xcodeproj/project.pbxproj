@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */; };
+		E66F8DE717EFD9C300354D80 /* IJKFFPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DE617EFD9C300354D80 /* IJKFFPlayerController.m */; };
+		E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DEF17EFEA9400354D80 /* ijkplayer.c */; };
+		E66F8E0317EFEEA400354D80 /* ijkplayer_ios.c in Sources */ = {isa = PBXBuildFile; fileRef = E66F8E0117EFEEA400354D80 /* ijkplayer_ios.c */; };
 		E6903EBD17EAF6C500CFD954 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6903EBC17EAF6C500CFD954 /* Foundation.framework */; };
 		E6903EC217EAF6C500CFD954 /* IJKMediaPlayback.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E6903EC117EAF6C500CFD954 /* IJKMediaPlayback.h */; };
 		E6903FC717EAFC2C00CFD954 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6903FC217EAFC2C00CFD954 /* libavcodec.a */; };
@@ -45,6 +48,14 @@
 		E66F8DBF17EEC65200354D80 /* IJKMPMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMPMoviePlayerController.h; path = IJKMediaPlayer/IJKMPMoviePlayerController.h; sourceTree = "<group>"; };
 		E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMPMoviePlayerController.m; path = IJKMediaPlayer/IJKMPMoviePlayerController.m; sourceTree = "<group>"; };
 		E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaPlayer.h; path = IJKMediaPlayer/IJKMediaPlayer.h; sourceTree = "<group>"; };
+		E66F8DE517EFD9C300354D80 /* IJKFFPlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFPlayerController.h; sourceTree = "<group>"; };
+		E66F8DE617EFD9C300354D80 /* IJKFFPlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFPlayerController.m; sourceTree = "<group>"; };
+		E66F8DEE17EFEA9400354D80 /* ijkplayer_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkplayer_internal.h; sourceTree = "<group>"; };
+		E66F8DEF17EFEA9400354D80 /* ijkplayer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijkplayer.c; sourceTree = "<group>"; };
+		E66F8DF017EFEA9400354D80 /* ijkplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkplayer.h; sourceTree = "<group>"; };
+		E66F8E0117EFEEA400354D80 /* ijkplayer_ios.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ijkplayer_ios.c; path = ijkmedia/ijkplayer/ios/ijkplayer_ios.c; sourceTree = "<group>"; };
+		E66F8E0217EFEEA400354D80 /* ijkplayer_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ijkplayer_ios.h; path = ijkmedia/ijkplayer/ios/ijkplayer_ios.h; sourceTree = "<group>"; };
+		E66F8E0517EFEF3900354D80 /* ijksdl_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ijksdl_ios.h; path = ijkmedia/ijksdl/ios/ijksdl_ios.h; sourceTree = "<group>"; };
 		E6903EB917EAF6C500CFD954 /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libIJKMediaPlayer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6903EBC17EAF6C500CFD954 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E6903EC017EAF6C500CFD954 /* IJKMediaPlayer-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "IJKMediaPlayer-Prefix.pch"; sourceTree = "<group>"; };
@@ -138,7 +149,6 @@
 		E6903FFB17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_vout_overlay_ffmpeg.c; sourceTree = "<group>"; };
 		E6903FFC17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_vout_overlay_ffmpeg.h; sourceTree = "<group>"; };
 		E6903FFD17EAFC6100CFD954 /* ijksdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl.h; sourceTree = "<group>"; };
-		E6903FFE17EAFC6100CFD954 /* ijksdl_android.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_android.h; sourceTree = "<group>"; };
 		E6903FFF17EAFC6100CFD954 /* ijksdl_aout.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_aout.c; sourceTree = "<group>"; };
 		E690400017EAFC6100CFD954 /* ijksdl_aout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_aout.h; sourceTree = "<group>"; };
 		E690400117EAFC6100CFD954 /* ijksdl_aout_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_aout_internal.h; sourceTree = "<group>"; };
@@ -211,6 +221,25 @@
 			name = IJKMPMoviePlayerController;
 			sourceTree = "<group>";
 		};
+		E66F8DF817EFEC1300354D80 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				E66F8E0117EFEEA400354D80 /* ijkplayer_ios.c */,
+				E66F8E0217EFEEA400354D80 /* ijkplayer_ios.h */,
+			);
+			name = ios;
+			path = ../../ios/IJKMediaPlayer/IJKMediaPlayer;
+			sourceTree = "<group>";
+		};
+		E66F8DF917EFEC2100354D80 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				E66F8E0517EFEF3900354D80 /* ijksdl_ios.h */,
+			);
+			name = ios;
+			path = ../../ios/IJKMediaPlayer/IJKMediaPlayer;
+			sourceTree = "<group>";
+		};
 		E6903EB017EAF6C500CFD954 = {
 			isa = PBXGroup;
 			children = (
@@ -239,8 +268,10 @@
 		E6903EBE17EAF6C500CFD954 /* IJKFFPlayerController */ = {
 			isa = PBXGroup;
 			children = (
-				E6903FCC17EAFC6100CFD954 /* ijkmedia */,
+				E66F8DE517EFD9C300354D80 /* IJKFFPlayerController.h */,
+				E66F8DE617EFD9C300354D80 /* IJKFFPlayerController.m */,
 				E6903F7617EAFC2C00CFD954 /* ffmpeg */,
+				E6903FCC17EAFC6100CFD954 /* ijkmedia */,
 				E6903EBF17EAF6C500CFD954 /* Supporting Files */,
 			);
 			name = IJKFFPlayerController;
@@ -406,6 +437,7 @@
 		E6903FCE17EAFC6100CFD954 /* ijkplayer */ = {
 			isa = PBXGroup;
 			children = (
+				E66F8DF817EFEC1300354D80 /* ios */,
 				E6903FD517EAFC6100CFD954 /* ff_cmdutils.c */,
 				E6903FD617EAFC6100CFD954 /* ff_cmdutils.h */,
 				E6903FD717EAFC6100CFD954 /* ff_fferror.h */,
@@ -416,6 +448,9 @@
 				E6903FDC17EAFC6100CFD954 /* ff_ffplay.h */,
 				E6903FDD17EAFC6100CFD954 /* ff_ffplay_config.h */,
 				E6903FDE17EAFC6100CFD954 /* ff_ffplay_def.h */,
+				E66F8DEF17EFEA9400354D80 /* ijkplayer.c */,
+				E66F8DF017EFEA9400354D80 /* ijkplayer.h */,
+				E66F8DEE17EFEA9400354D80 /* ijkplayer_internal.h */,
 			);
 			path = ijkplayer;
 			sourceTree = "<group>";
@@ -423,9 +458,9 @@
 		E6903FDF17EAFC6100CFD954 /* ijksdl */ = {
 			isa = PBXGroup;
 			children = (
+				E66F8DF917EFEC2100354D80 /* ios */,
 				E6903FEF17EAFC6100CFD954 /* ffmpeg */,
 				E6903FFD17EAFC6100CFD954 /* ijksdl.h */,
-				E6903FFE17EAFC6100CFD954 /* ijksdl_android.h */,
 				E6903FFF17EAFC6100CFD954 /* ijksdl_aout.c */,
 				E690400017EAFC6100CFD954 /* ijksdl_aout.h */,
 				E690400117EAFC6100CFD954 /* ijksdl_aout_internal.h */,
@@ -553,6 +588,9 @@
 				E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */,
 				E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */,
 				E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */,
+				E66F8DE717EFD9C300354D80 /* IJKFFPlayerController.m in Sources */,
+				E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */,
+				E66F8E0317EFEEA400354D80 /* ijkplayer_ios.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -622,6 +660,7 @@
 				GCC_PREFIX_HEADER = "IJKMediaPlayer/IJKMediaPlayer-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					../build/universal/include,
+					IJKMediaPlayer/ijkmedia,
 					../../ijkmedia,
 				);
 				LIBRARY_SEARCH_PATHS = (
@@ -644,6 +683,7 @@
 				GCC_PREFIX_HEADER = "IJKMediaPlayer/IJKMediaPlayer-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					../build/universal/include,
+					IJKMediaPlayer/ijkmedia,
 					../../ijkmedia,
 				);
 				LIBRARY_SEARCH_PATHS = (

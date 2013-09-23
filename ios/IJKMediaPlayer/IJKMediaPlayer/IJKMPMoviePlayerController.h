@@ -10,6 +10,6 @@
 
 @interface IJKMPMoviePlayerController : MPMoviePlayerController <IJKMediaPlayback>
 
-- (id)initWithContentURL:(NSURL *)url;
+- (id)initWithContentURL:(NSURL *)aUrl;
 
 @end
