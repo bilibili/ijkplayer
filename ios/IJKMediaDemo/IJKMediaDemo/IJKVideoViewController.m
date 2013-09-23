@@ -41,6 +41,9 @@
     NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
     self.player = [[IJKMPMoviePlayerController alloc] initWithContentURL:theMovieURL];
 
+    [self.player.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+    [self.view setAutoresizesSubviews:YES];
+
     [self.view addSubview:self.player.view];
     [self.view addSubview:self.mediaControl];
 
