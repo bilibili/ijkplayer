@@ -2,7 +2,7 @@
 build/
 ffmpeg-temp/
 android/ffmpeg-armv7a
-ios/ffmpeg-armv7
+ios/ffmpeg-*
 extra
 .DS_Store
 
