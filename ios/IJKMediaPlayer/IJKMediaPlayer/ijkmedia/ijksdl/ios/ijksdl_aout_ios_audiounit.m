@@ -30,7 +30,6 @@
 #import "IJKSDLAudioUnitController.h"
 
 typedef struct SDL_Aout_Opaque {
-    SDL_AudioSpec spec;
     IJKSDLAudioUnitController *auController;
 } SDL_Aout_Opaque;
 
@@ -46,7 +45,9 @@ int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtai
         return -1;
     }
 
-    opaque->spec = opaque->auController.spec;    
+    if (obtained)
+        *obtained = opaque->auController.spec;
+
     return 0;
 }
 

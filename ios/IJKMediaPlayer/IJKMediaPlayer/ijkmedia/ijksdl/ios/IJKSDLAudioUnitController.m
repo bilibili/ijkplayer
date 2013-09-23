@@ -10,7 +10,7 @@
 #include "ijkutil/ijkutil.h"
 
 @implementation IJKSDLAudioUnitController {
-    AudioUnit _au_unit;
+    AudioUnit _auUnit;
 }
 
 - (id)initWithAudioSpec:(SDL_AudioSpec *)aSpec
@@ -30,15 +30,15 @@
         desc.componentFlags = 0;
         desc.componentFlagsMask = 0;
 
-        AudioComponent au_component = AudioComponentFindNext(NULL, &desc);
-        if (au_component == NULL) {
+        AudioComponent auComponent = AudioComponentFindNext(NULL, &desc);
+        if (auComponent == NULL) {
             ALOGE("AudioUnit: AudioComponentFindNext failed");
             self = nil;
             return nil;
         }
 
-        AudioUnit au_unit;
-        OSStatus status = AudioComponentInstanceNew(au_component, &au_unit);
+        AudioUnit auUnit;
+        OSStatus status = AudioComponentInstanceNew(auComponent, &auUnit);
         if (status != noErr) {
             ALOGE("AudioUnit: AudioComponentInstanceNew failed");
             self = nil;
@@ -46,7 +46,7 @@
         }
 
         UInt32 flag = 1;
-        status = AudioUnitSetProperty(au_unit,
+        status = AudioUnitSetProperty(auUnit,
                                       kAudioOutputUnitProperty_EnableIO,
                                       kAudioUnitScope_Output,
                                       0,
@@ -78,7 +78,7 @@
 
         /* Set the desired format */
         UInt32 i_param_size = sizeof(streamDescription);
-        status = AudioUnitSetProperty(au_unit,
+        status = AudioUnitSetProperty(auUnit,
                                       kAudioUnitProperty_StreamFormat,
                                       kAudioUnitScope_Input,
                                       0,
@@ -91,7 +91,7 @@
         }
 
         /* Retrieve actual format */
-        status = AudioUnitGetProperty(au_unit,
+        status = AudioUnitGetProperty(auUnit,
                                       kAudioUnitProperty_StreamFormat,
                                       kAudioUnitScope_Input,
                                       0,
@@ -103,8 +103,8 @@
 
         AURenderCallbackStruct callback;
         callback.inputProc = (AURenderCallback) RenderCallback;
-        callback.inputProcRefCon = (__bridge_retained void*) self;
-        status = AudioUnitSetProperty(au_unit,
+        callback.inputProcRefCon = (__bridge void*) self;
+        status = AudioUnitSetProperty(auUnit,
                                       kAudioUnitProperty_SetRenderCallback,
                                       kAudioUnitScope_Input,
                                       0, &callback, sizeof(callback));
@@ -117,7 +117,7 @@
         SDL_CalculateAudioSpec(&self->_spec);
 
         /* AU initiliaze */
-        status = AudioUnitInitialize(au_unit);
+        status = AudioUnitInitialize(auUnit);
         if (status != noErr) {
             ALOGE("AudioUnit: AudioUnitInitialize failed (%li)", status);
             self = nil;
@@ -135,37 +135,37 @@
         AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(sessionCategory), &sessionCategory);
         AudioSessionSetActive(true);
 
-        self->_au_unit = au_unit;
+        self->_auUnit = auUnit;
     }
     return self;
 }
 
 - (void)play
 {
-    AudioOutputUnitStart(self->_au_unit);
+    AudioOutputUnitStart(self->_auUnit);
     AudioSessionSetActive(true);
 }
 
 - (void)pause
 {
-    AudioOutputUnitStop(self->_au_unit);
+    AudioOutputUnitStop(self->_auUnit);
     AudioSessionSetActive(false);
 }
 
 - (void)flush
 {
-    AudioOutputUnitStop(self->_au_unit);
+    AudioOutputUnitStop(self->_auUnit);
 }
 
 - (void)stop
 {
     AudioSessionSetActive(false);
 
-    OSStatus status = AudioOutputUnitStop(self->_au_unit);
+    OSStatus status = AudioOutputUnitStop(self->_auUnit);
     if (status != noErr)
         ALOGE("AudioUnit: failed to stop AudioUnit (%li)", status);
 
-    status = AudioComponentInstanceDispose(self->_au_unit);
+    status = AudioComponentInstanceDispose(self->_auUnit);
     if (status != noErr)
         ALOGE("AudioUnit: failed to dispose Audio Component instance (%li)", status);
 }
@@ -182,9 +182,9 @@ static OSStatus RenderCallback(void                        *inRefCon,
                                UInt32                      inNumberFrames,
                                AudioBufferList             *ioData)
 {
-    IJKSDLAudioUnitController* auController = (__bridge_transfer IJKSDLAudioUnitController*) inRefCon;
+    IJKSDLAudioUnitController* auController = (__bridge IJKSDLAudioUnitController*) inRefCon;
 
-    if (!auController.paused) {
+    if (auController.paused) {
         for (UInt32 i = 0; i < ioData->mNumberBuffers; i++) {
             AudioBuffer *ioBuffer = &ioData->mBuffers[i];
             memset(ioBuffer->mData, auController.spec.silence, ioBuffer->mDataByteSize);
