@@ -93,10 +93,12 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 
 static int voud_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
-    SDL_LockMutex(vout->mutex);
-    int retval = voud_display_overlay_l(vout, overlay);
-    SDL_UnlockMutex(vout->mutex);
-    return retval;
+    @autoreleasepool {
+        SDL_LockMutex(vout->mutex);
+        int retval = voud_display_overlay_l(vout, overlay);
+        SDL_UnlockMutex(vout->mutex);
+        return retval;
+    }
 }
 
 SDL_Vout *SDL_VoutIos_CreateForGLES2()
