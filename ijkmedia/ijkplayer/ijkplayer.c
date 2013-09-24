@@ -242,7 +242,7 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
 
     msg_queue_start(&mp->ffplayer->msg_queue);
     ijkmp_inc_ref(mp);
-    mp->msg_thread = SDL_CreateThreadEx(&mp->_msg_thread, mp->msg_loop, mp);
+    mp->msg_thread = SDL_CreateThreadEx(&mp->_msg_thread, mp->msg_loop, mp, "ff_msg_loop");
     // TODO: 9 release weak_thiz if pthread_create() failed;
 
     int retval = ffp_prepare_async_l(mp->ffplayer, mp->data_source);

@@ -18,10 +18,11 @@ static void *SDL_RunThread(void *data)
     }
 }
 
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data)
+SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data, const char *name)
 {
     thread->func = fn;
     thread->data = data;
+    strlcpy(thread->name, name, sizeof(thread->name) - 1);
     int retval = pthread_create(&thread->id, NULL, SDL_RunThread, thread);
     if (retval)
         return NULL;

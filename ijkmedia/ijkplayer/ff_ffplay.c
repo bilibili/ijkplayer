@@ -1746,7 +1746,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         is->video_st = ic->streams[stream_index];
 
         packet_queue_start(&is->videoq);
-        is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp);
+        is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp, "ff_video");
         is->queue_attachments_req = 1;
         break;
     // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
@@ -2322,13 +2322,13 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->play_mutex = SDL_CreateMutex();
     ffp->is = is;
 
-    is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp);
+    is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp, "ff_vout");
     if (!is->video_refresh_tid) {
         av_freep(&ffp->is);
         return NULL;
     }
 
-    is->read_tid = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp);
+    is->read_tid = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp, "ff_read");
     if (!is->read_tid) {
         is->abort_request = true;
         SDL_WaitThread(is->video_refresh_tid, NULL);

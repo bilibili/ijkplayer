@@ -152,7 +152,7 @@ int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_A
 
     opaque->pause_on = 1;
     opaque->abort_request = 0;
-    opaque->audio_tid = SDL_CreateThreadEx(&opaque->_audio_tid, aout_thread, aout);
+    opaque->audio_tid = SDL_CreateThreadEx(&opaque->_audio_tid, aout_thread, aout, "ff_aout_android");
     if (!opaque->audio_tid) {
         ALOGE("aout_open_audio_n: failed to create audio thread");
         sdl_audiotrack_free(env, opaque->atrack);
