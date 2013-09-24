@@ -12,7 +12,7 @@ Android MediaPlayer-like video player based on [ffplay](http://ffmpeg.org)
  - sudo port -vd install git-core
  - sudo port -vd install ccache
 
-### Build (Stable)
+### Build Android (Stable)
 	git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-stable
 	cd ijkplayer-stable
 	git checkout -B stable n0.0.4
@@ -21,11 +21,11 @@ Android MediaPlayer-like video player based on [ffplay](http://ffmpeg.org)
 	sh compile-ffmpeg.sh
 	sh compile-ijk.sh
 
-### Build (Master, Unstable)
+### Build Android (Master, Unstable)
 	git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-master
 	cd ijkplayer-master
 	git checkout master
-	sh init-submodules.sh
+	sh init-android.sh
 	cd android
 	sh compile-ffmpeg.sh
 	sh compile-ijk.sh
