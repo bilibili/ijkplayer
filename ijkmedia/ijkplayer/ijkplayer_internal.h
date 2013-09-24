@@ -34,8 +34,9 @@ typedef struct IjkMediaPlayer {
     pthread_mutex_t mutex;
     FFPlayer *ffplayer;
 
-    void *(*msg_loop)(void*);
-    pthread_t msg_thread;
+    int (*msg_loop)(void*);
+    SDL_Thread *msg_thread;
+    SDL_Thread _msg_thread;
 
     int mp_state;
     char *data_source;

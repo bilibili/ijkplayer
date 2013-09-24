@@ -27,7 +27,7 @@
 #include "../ijkplayer.h"
 
 // ref_count is 1 after open
-IjkMediaPlayer *ijkmp_android_create(void *(*msg_loop)(void*));
+IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*));
 
 void            ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface);
 

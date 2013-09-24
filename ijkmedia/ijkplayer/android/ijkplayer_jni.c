@@ -85,7 +85,7 @@ static IjkMediaPlayer *jni_set_media_player(JNIEnv* env, jobject thiz, IjkMediaP
     return old;
 }
 
-static void *message_loop(void *arg);
+static int message_loop(void *arg);
 
 static void
 IjkMediaPlayer_setDataSourceAndHeaders(
@@ -390,7 +390,7 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
     (*env)->DeleteGlobalRef(env, weak_thiz);
 }
 
-static void *message_loop(void *arg)
+static int message_loop(void *arg)
 {
     MPTRACE("message_loop");
 
@@ -407,7 +407,7 @@ static void *message_loop(void *arg)
     (*g_jvm)->DetachCurrentThread(g_jvm);
 
     MPTRACE("message_loop exit");
-    return NULL;
+    return 0;
 }
 
 // ----------------------------------------------------------------------------

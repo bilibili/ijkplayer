@@ -30,7 +30,7 @@
 #include "ijkplayer/ff_ffplay.h"
 #include "ijkplayer/ijkplayer_internal.h"
 
-IjkMediaPlayer *ijkmp_ios_create(void *(*msg_loop)(void*))
+IjkMediaPlayer *ijkmp_ios_create(int (*msg_loop)(void*))
 {
     IjkMediaPlayer *mp = ijkmp_create(msg_loop);
     if (!mp)
@@ -63,9 +63,9 @@ void ijkmp_ios_set_glview_l(IjkMediaPlayer *mp, IJKSDLGLView *glView)
 void ijkmp_ios_set_glview(IjkMediaPlayer *mp, IJKSDLGLView *glView)
 {
     assert(mp);
-    MPTRACE("ijkmp_ios_set_view(glView=%p)", (void*)glView);
+    MPTRACE("ijkmp_ios_set_view(glView=%p)\n", (void*)glView);
     pthread_mutex_lock(&mp->mutex);
     ijkmp_ios_set_glview_l(mp, glView);
     pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_ios_set_view(glView=%p)=void", (void*)glView);
+    MPTRACE("ijkmp_ios_set_view(glView=%p)=void\n", (void*)glView);
 }

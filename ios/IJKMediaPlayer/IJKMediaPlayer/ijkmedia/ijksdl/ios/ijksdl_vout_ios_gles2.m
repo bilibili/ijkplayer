@@ -73,17 +73,17 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     IJKSDLGLView *gl_view = opaque->gl_view;
 
     if (!gl_view) {
-        ALOGE("voud_display_overlay_l: NULL gl_view");
+        ALOGE("voud_display_overlay_l: NULL gl_view\n");
         return -1;
     }
 
     if (!overlay) {
-        ALOGE("voud_display_overlay_l: NULL overlay");
+        ALOGE("voud_display_overlay_l: NULL overlay\n");
         return -1;
     }
 
     if (overlay->w <= 0 || overlay->h <= 0) {
-        ALOGE("voud_display_overlay_l: invalid overlay dimensions(%d, %d)", overlay->w, overlay->h);
+        ALOGE("voud_display_overlay_l: invalid overlay dimensions(%d, %d)\n", overlay->w, overlay->h);
         return -1;
     }
 

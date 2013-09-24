@@ -114,7 +114,7 @@
     
 }
 
-void *media_player_msg_loop(void* arg)
+int media_player_msg_loop(void* arg)
 {
     IjkMediaPlayer *mp = (IjkMediaPlayer*)arg;
     IJKFFPlayerController *ffpController = (__bridge_transfer IJKFFPlayerController *) ijkmp_set_weak_thiz(mp, NULL);
@@ -134,7 +134,7 @@ void *media_player_msg_loop(void* arg)
         [ffpController postEvent:&msg];
     }
 
-    return NULL;
+    return 0;
 }
 
 @end

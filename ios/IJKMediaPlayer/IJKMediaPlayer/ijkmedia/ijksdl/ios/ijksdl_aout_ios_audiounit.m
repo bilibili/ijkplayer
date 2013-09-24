@@ -36,12 +36,12 @@ typedef struct SDL_Aout_Opaque {
 int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
     assert(desired);
-    SDLTRACE("aout_open_audio()");
+    SDLTRACE("aout_open_audio()\n");
     SDL_Aout_Opaque *opaque = aout->opaque;
 
     opaque->auController = [[[IJKSDLAudioUnitController alloc] initWithAudioSpec:desired] retain];
     if (!opaque->auController) {
-        ALOGE("aout_open_audio_n: failed to new AudioTrcak()");
+        ALOGE("aout_open_audio_n: failed to new AudioTrcak()\n");
         return -1;
     }
 
@@ -53,7 +53,7 @@ int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtai
 
 void aout_pause_audio(SDL_Aout *aout, int pause_on)
 {
-    SDLTRACE("aout_pause_audio()");
+    SDLTRACE("aout_pause_audio()\n");
     SDL_Aout_Opaque *opaque = aout->opaque;
 
     if (pause_on) {
@@ -65,7 +65,7 @@ void aout_pause_audio(SDL_Aout *aout, int pause_on)
 
 void aout_flush_audio(SDL_Aout *aout)
 {
-    SDLTRACE("aout_flush_audio()");
+    SDLTRACE("aout_flush_audio()\n");
     SDL_Aout_Opaque *opaque = aout->opaque;
 
     [opaque->auController flush];
@@ -73,7 +73,7 @@ void aout_flush_audio(SDL_Aout *aout)
 
 void aout_close_audio(SDL_Aout *aout)
 {
-    SDLTRACE("aout_flush_audio()");
+    SDLTRACE("aout_flush_audio()\n");
     SDL_Aout_Opaque *opaque = aout->opaque;
 
     [opaque->auController close];

@@ -28,7 +28,7 @@
 #include "../ff_ffplay.h"
 #include "../ijkplayer_internal.h"
 
-IjkMediaPlayer *ijkmp_android_create(void *(*msg_loop)(void*))
+IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*))
 {
     IjkMediaPlayer *mp = ijkmp_create(msg_loop);
     if (!mp)

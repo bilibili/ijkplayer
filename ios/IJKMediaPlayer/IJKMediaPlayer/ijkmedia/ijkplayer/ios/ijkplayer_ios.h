@@ -24,6 +24,6 @@
 #import "IJKSDLGLView.h"
 
 // ref_count is 1 after open
-IjkMediaPlayer *ijkmp_ios_create(void *(*msg_loop)(void*));
+IjkMediaPlayer *ijkmp_ios_create(int (*msg_loop)(void*));
 
 void            ijkmp_ios_set_glview(IjkMediaPlayer *mp, IJKSDLGLView *glView);

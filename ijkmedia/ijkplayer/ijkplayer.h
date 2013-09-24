@@ -144,7 +144,7 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
  void           ijkmp_global_uninit();
 
 // ref_count is 1 after open
-IjkMediaPlayer *ijkmp_create(void *(*msg_loop)(void*));
+IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*));
 void            ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc);
 
 // preferred to be called explicity, can be called multiple times
