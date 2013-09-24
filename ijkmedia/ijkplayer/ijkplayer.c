@@ -199,12 +199,11 @@ static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
     MPST_RET_IF_EQ(mp->mp_state, MP_STATE_ERROR);
     MPST_RET_IF_EQ(mp->mp_state, MP_STATE_END);
 
-    char *dup_url = strdup(url);
-    if (!dup_url)
-        return EIJK_OUT_OF_MEMORY;
-
     av_freep(&mp->data_source);
     mp->data_source = av_strdup(url);
+    if (!mp->data_source)
+        return EIJK_OUT_OF_MEMORY;
+
     mp->mp_state = MP_STATE_INITIALIZED;
     return 0;
 }
