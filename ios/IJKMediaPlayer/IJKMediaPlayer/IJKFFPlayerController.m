@@ -116,25 +116,29 @@
 
 int media_player_msg_loop(void* arg)
 {
-    IjkMediaPlayer *mp = (IjkMediaPlayer*)arg;
-    IJKFFPlayerController *ffpController = (__bridge_transfer IJKFFPlayerController *) ijkmp_set_weak_thiz(mp, NULL);
+    @autoreleasepool {
+        IjkMediaPlayer *mp = (IjkMediaPlayer*)arg;
+        IJKFFPlayerController *ffpController = (__bridge_transfer IJKFFPlayerController *) ijkmp_set_weak_thiz(mp, NULL);
 
-    __weak IJKFFPlayerController *weakSelf = ffpController->_weakSelf;
-    ffpController = nil;
+        __weak IJKFFPlayerController *weakSelf = ffpController->_weakSelf;
+        ffpController = nil;
 
-    while (weakSelf && true) {
-        AVMessage msg;
+        while (weakSelf && true) {
+            AVMessage msg;
 
-        int retval = ijkmp_get_msg(mp, &msg, 1);
-        if (retval < 0)
-            break;
+            int retval = ijkmp_get_msg(mp, &msg, 1);
+            if (retval < 0)
+                break;
 
-        // block-get should never return 0
-        assert(retval > 0);
-        [ffpController postEvent:&msg];
+            // block-get should never return 0
+            assert(retval > 0);
+            @autoreleasepool {
+                [ffpController postEvent:&msg];
+            }
+        }
+
+        return 0;
     }
-
-    return 0;
 }
 
 @end
