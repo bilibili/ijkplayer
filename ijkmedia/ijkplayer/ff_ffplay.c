@@ -2509,6 +2509,20 @@ void ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value)
     av_dict_set(&ffp->format_opts, name, value, 0);
 }
 
+void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
+{
+    switch (chroma_fourcc) {
+        case SDL_FCC_YV12:
+        case SDL_FCC_RV16:
+        case SDL_FCC_RV32:
+            ffp->overlay_format = chroma_fourcc;
+            break;
+        default:
+            ALOGE("ffp_set_overlay_format: unknown chroma fourcc: %d", chroma_fourcc);
+            break;
+    }
+}
+
 int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
 {
     assert(ffp);
