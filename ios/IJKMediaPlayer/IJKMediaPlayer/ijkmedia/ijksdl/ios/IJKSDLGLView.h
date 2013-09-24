@@ -13,7 +13,6 @@
 @interface IJKSDLGLView : UIView
 
 - (id) initWithFrame:(CGRect)frame;
-
 - (void) display: (SDL_VoutOverlay *) overlay;
 
 @end

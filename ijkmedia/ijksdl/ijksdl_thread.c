@@ -26,6 +26,8 @@
 #include "ijksdl_inc_internal.h"
 #include "ijksdl_thread.h"
 
+#if !defined(__APPLE__)
+// using ios implement for autorelease
 static void *SDL_RunThread(void *data)
 {
     SDL_Thread *thread = data;
@@ -43,6 +45,7 @@ SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data
 
     return thread;
 }
+#endif
 
 int SDL_SetThreadPriority(SDL_ThreadPriority priority)
 {

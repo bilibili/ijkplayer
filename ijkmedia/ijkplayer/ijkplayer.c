@@ -93,6 +93,18 @@ IjkMediaPlayer *ijkmp_create(void *(*msg_loop)(void*))
     return NULL;
 }
 
+void ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc)
+{
+    if (!mp)
+        return;
+
+    MPTRACE("ijkmp_set_overlay_format(%.4s(0x%x))", (char*)&chroma_fourcc, chroma_fourcc);
+    if (mp->ffplayer) {
+        ffp_set_overlay_format(mp->ffplayer, chroma_fourcc);
+    }
+    MPTRACE("ijkmp_set_overlay_format()=void");
+}
+
 void ijkmp_shutdown_l(IjkMediaPlayer *mp)
 {
     assert(mp);

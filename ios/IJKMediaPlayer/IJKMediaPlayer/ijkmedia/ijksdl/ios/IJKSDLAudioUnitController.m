@@ -207,22 +207,24 @@ static OSStatus RenderCallback(void                        *inRefCon,
                                UInt32                      inNumberFrames,
                                AudioBufferList             *ioData)
 {
-    IJKSDLAudioUnitController* auController = (__bridge IJKSDLAudioUnitController*) inRefCon;
+    @autoreleasepool {
+        IJKSDLAudioUnitController* auController = (__bridge IJKSDLAudioUnitController*) inRefCon;
 
-    if (auController.paused) {
+        if (auController.paused) {
+            for (UInt32 i = 0; i < ioData->mNumberBuffers; i++) {
+                AudioBuffer *ioBuffer = &ioData->mBuffers[i];
+                memset(ioBuffer->mData, auController.spec.silence, ioBuffer->mDataByteSize);
+            }
+            return noErr;
+        }
+
         for (UInt32 i = 0; i < ioData->mNumberBuffers; i++) {
             AudioBuffer *ioBuffer = &ioData->mBuffers[i];
-            memset(ioBuffer->mData, auController.spec.silence, ioBuffer->mDataByteSize);
+            (*auController.spec.callback)(auController.spec.userdata, ioBuffer->mData, ioBuffer->mDataByteSize);
         }
+        
         return noErr;
     }
-
-    for (UInt32 i = 0; i < ioData->mNumberBuffers; i++) {
-        AudioBuffer *ioBuffer = &ioData->mBuffers[i];
-        (*auController.spec.callback)(auController.spec.userdata, ioBuffer->mData, ioBuffer->mDataByteSize);
-    }
-
-    return noErr;
 }
 
 @end

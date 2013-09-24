@@ -1,5 +1,5 @@
 /*
- * ijkplayer_ios.h
+ * ijksdl_vout_ios_gles2.h
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -20,10 +20,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijkplayer/ijkplayer.h"
-#import "IJKSDLGLView.h"
+#include "ijksdl/ijksdl_stdinc.h"
+#include "ijksdl/ijksdl_vout.h"
 
-// ref_count is 1 after open
-IjkMediaPlayer *ijkmp_ios_create(void *(*msg_loop)(void*));
+@class IJKSDLGLView;
 
-void            ijkmp_ios_set_glview(IjkMediaPlayer *mp, IJKSDLGLView *glView);
+SDL_Vout *SDL_VoutIos_CreateForGLES2();
+void SDL_VoutIos_SetGLView(SDL_Vout *vout, IJKSDLGLView *view);

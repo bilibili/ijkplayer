@@ -20,13 +20,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#import "ijkplayer_ios.h"
+
+#import "ijksdl/ios/ijksdl_ios.h"
+
 #include <stdio.h>
-
-#include "ijkplayer_ios.h"
-
 #include <assert.h>
-#include "ijksdl/ios/ijksdl_ios.h"
-#include "ijksdl/dummy/ijksdl_dummy.h"
 #include "ijkplayer/ff_fferror.h"
 #include "ijkplayer/ff_ffplay.h"
 #include "ijkplayer/ijkplayer_internal.h"
@@ -37,7 +36,7 @@ IjkMediaPlayer *ijkmp_ios_create(void *(*msg_loop)(void*))
     if (!mp)
         goto fail;
 
-    mp->ffplayer->vout = SDL_VoutDummy_Create();
+    mp->ffplayer->vout = SDL_VoutIos_CreateForGLES2();
     if (!mp->ffplayer->vout)
         goto fail;
 
@@ -50,4 +49,23 @@ IjkMediaPlayer *ijkmp_ios_create(void *(*msg_loop)(void*))
 fail:
     ijkmp_dec_ref_p(&mp);
     return NULL;
+}
+
+void ijkmp_ios_set_glview_l(IjkMediaPlayer *mp, IJKSDLGLView *glView)
+{
+    assert(mp);
+    assert(mp->ffplayer);
+    assert(mp->ffplayer->vout);
+
+    SDL_VoutIos_SetGLView(mp->ffplayer->vout, glView);
+}
+
+void ijkmp_ios_set_glview(IjkMediaPlayer *mp, IJKSDLGLView *glView)
+{
+    assert(mp);
+    MPTRACE("ijkmp_ios_set_view(glView=%p)", (void*)glView);
+    pthread_mutex_lock(&mp->mutex);
+    ijkmp_ios_set_glview_l(mp, glView);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_ios_set_view(glView=%p)=void", (void*)glView);
 }

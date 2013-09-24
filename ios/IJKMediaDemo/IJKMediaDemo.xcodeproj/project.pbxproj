@@ -13,6 +13,8 @@
 		E63FC29117F04C83003551EB /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC28F17F04C83003551EB /* AudioToolbox.framework */; };
 		E63FC29617F060A7003551EB /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC29517F060A7003551EB /* libz.dylib */; };
 		E63FC29A17F062E8003551EB /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC29917F062E8003551EB /* libbz2.dylib */; };
+		E63FC2B417F172EA003551EB /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC2B317F172E9003551EB /* OpenGLES.framework */; };
+		E63FC2B817F17362003551EB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC2B717F17362003551EB /* QuartzCore.framework */; };
 		E66F8DCB17EEDD8B00354D80 /* IJKMediaControl.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DCA17EEDD8B00354D80 /* IJKMediaControl.m */; };
 		E66F8DCF17EEDFCB00354D80 /* player_top_control_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = E66F8DCD17EEDFCA00354D80 /* player_top_control_bg.png */; };
 		E66F8DD017EEDFCB00354D80 /* player_top_control_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E66F8DCE17EEDFCB00354D80 /* player_top_control_bg@2x.png */; };
@@ -44,6 +46,8 @@
 		E63FC28F17F04C83003551EB /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		E63FC29517F060A7003551EB /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		E63FC29917F062E8003551EB /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
+		E63FC2B317F172E9003551EB /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		E63FC2B717F17362003551EB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		E66F8DC917EEDD8B00354D80 /* IJKMediaControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKMediaControl.h; sourceTree = "<group>"; };
 		E66F8DCA17EEDD8B00354D80 /* IJKMediaControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKMediaControl.m; sourceTree = "<group>"; };
 		E66F8DCD17EEDFCA00354D80 /* player_top_control_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = player_top_control_bg.png; path = resources/player_top_control_bg.png; sourceTree = "<group>"; };
@@ -77,6 +81,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E63FC2B817F17362003551EB /* QuartzCore.framework in Frameworks */,
+				E63FC2B417F172EA003551EB /* OpenGLES.framework in Frameworks */,
 				E63FC29117F04C83003551EB /* AudioToolbox.framework in Frameworks */,
 				E63FC28A17F04C48003551EB /* CoreAudio.framework in Frameworks */,
 				E6903F0017EAF70200CFD954 /* UIKit.framework in Frameworks */,
@@ -135,6 +141,8 @@
 		E6903EFE17EAF70200CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E63FC2B717F17362003551EB /* QuartzCore.framework */,
+				E63FC2B317F172E9003551EB /* OpenGLES.framework */,
 				E63FC28F17F04C83003551EB /* AudioToolbox.framework */,
 				E63FC28917F04C48003551EB /* CoreAudio.framework */,
 				E6903F0117EAF70200CFD954 /* Foundation.framework */,

@@ -9,6 +9,7 @@
 #import "IJKSDLGLView.h"
 #import "IJKSDLGLShader.h"
 #import "IJKSDLGLRender.h"
+#import "IJKSDLGLRenderI420.h"
 
 static NSString *const g_vertexShaderString = IJK_SHADER_STRING
 (
@@ -129,6 +130,7 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
 
     int             _frameWidth;
     int             _frameHeight;
+    int             _frameChroma;
 
     id<IJKSDLGLRender> _renderer;
 }
@@ -153,6 +155,10 @@ enum {
                                         [NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
                                         kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
                                         nil];
+
+
+        _frameChroma = SDL_FCC_I420;
+        _renderer = [[IJKSDLGLRenderI420 alloc] init];
 
         _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
 
@@ -264,6 +270,37 @@ enum {
         [self display:nil];
 }
 
+- (BOOL)setupDisplay: (SDL_VoutOverlay *) overlay
+{
+    if (_renderer && overlay && _frameChroma != overlay->format) {
+        // TODO: if format changed?
+    }
+
+    if (!_renderer) {
+        if (!overlay) {
+            return NO;
+        } else if (overlay->format == SDL_FCC_I420) {
+            _frameChroma = overlay->format;
+            _renderer = [[IJKSDLGLRenderI420 alloc] init];
+            NSLog(@"OK use I420 GL renderer");
+        } else {
+            return NO;
+        }
+
+        if (![self loadShaders]) {
+            return NO;
+        }
+    }
+
+    if (overlay && (_frameWidth != overlay->w || _frameHeight != overlay->h)) {
+        _frameWidth = overlay->w;
+        _frameHeight = overlay->h;
+        [self updateVertices];
+    }
+
+    return YES;
+}
+
 - (BOOL)loadShaders
 {
     BOOL result = NO;
@@ -341,6 +378,11 @@ exit:
 
 - (void)display: (SDL_VoutOverlay *) overlay
 {
+    if (![self setupDisplay:overlay]) {
+        NSLog(@"IJKSDLGLView: setupDisplay failed");
+        return;
+    }
+
     static const GLfloat texCoords[] = {
         0.0f, 1.0f,
         1.0f, 1.0f,

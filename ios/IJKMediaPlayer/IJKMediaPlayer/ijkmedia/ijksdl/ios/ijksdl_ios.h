@@ -20,14 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKMediaPlayer_ijksdl_ios_h
-#define IJKMediaPlayer_ijksdl_ios_h
-
 #include "ijksdl/ijksdl.h"
 
 #include "ijksdl_aout_ios_audiounit.h"
 
-// #include "ijksdl_vout_android_nativewindow.h"
-// #include "ijksdl_vout_android_surface.h"
-
-#endif
+#include "ijksdl_vout_ios_gles2.h"

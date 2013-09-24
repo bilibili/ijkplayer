@@ -17,7 +17,7 @@
     IjkMediaPlayer *_mediaPlayer;
 }
 
-@synthesize view;
+@synthesize view = _view;
 @synthesize currentPlaybackTime;
 @synthesize duration;
 @synthesize playableDuration;
@@ -34,6 +34,12 @@
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
         _weakSelf = self;
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
+
+        IJKSDLGLView *glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        self->_view = glView;
+
+        ijkmp_ios_set_glview(_mediaPlayer, glView);
+        ijkmp_set_overlay_format(_mediaPlayer, SDL_FCC_I420);
     }
     return self;
 }

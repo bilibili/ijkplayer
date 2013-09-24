@@ -2512,6 +2512,7 @@ void ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value)
 void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
 {
     switch (chroma_fourcc) {
+        case SDL_FCC_I420:
         case SDL_FCC_YV12:
         case SDL_FCC_RV16:
         case SDL_FCC_RV32:

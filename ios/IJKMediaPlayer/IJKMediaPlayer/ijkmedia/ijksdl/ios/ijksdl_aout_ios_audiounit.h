@@ -20,11 +20,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKMediaPlayer_ijksdl_aout_ios_audiounit_h
-#define IJKMediaPlayer_ijksdl_aout_ios_audiounit_h
-
 #include "ijksdl/ijksdl_aout.h"
 
 SDL_Aout *SDL_AoutIos_CreateForAudioUnit();
-
-#endif

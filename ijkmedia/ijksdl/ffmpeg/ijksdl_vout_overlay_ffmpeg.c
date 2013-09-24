@@ -147,6 +147,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     int buf_width = width;  // must be aligned to 16 bytes pitch for arm-neon image-convert
     int buf_height = height;
     switch (format) {
+    case SDL_FCC_I420:
     case SDL_FCC_YV12: {
         ff_format = AV_PIX_FMT_YUV420P;
         buf_width = IJKALIGN(width, 16); // 1 bytes per pixel for Y-plane
@@ -205,21 +206,32 @@ int SDL_VoutFFmpeg_ConvertFrame(
 
     av_frame_unref(opaque->linked_frame);
 
+    int need_swap_uv = 0;
     int use_linked_frame = 0;
     enum AVPixelFormat dst_format = AV_PIX_FMT_NONE;
     switch (overlay->format) {
     case SDL_FCC_YV12:
+        need_swap_uv = 1;
+        // no break;
+    case SDL_FCC_I420:
         if (frame->format == AV_PIX_FMT_YUV420P || frame->format == AV_PIX_FMT_YUVJ420P) {
             // ALOGE("direct draw frame");
             use_linked_frame = 1;
             av_frame_ref(opaque->linked_frame, frame);
             overlay_fill(overlay, opaque->linked_frame, opaque->planes);
-            FFSWAP(Uint8*, overlay->pixels[1], overlay->pixels[2]);
         } else {
             // ALOGE("copy draw frame");
             overlay_fill(overlay, opaque->frame, opaque->planes);
-            dest_pic.data[2] = overlay->pixels[1];
-            dest_pic.data[1] = overlay->pixels[2];
+            dest_pic.data[1] = overlay->pixels[1];
+            dest_pic.data[2] = overlay->pixels[2];
+        }
+
+        if (need_swap_uv) {
+            if (use_linked_frame) {
+                FFSWAP(Uint8*, overlay->pixels[1], overlay->pixels[2]);
+            } else {
+                FFSWAP(Uint8*, dest_pic.data[1], dest_pic.data[2]);
+            }
         }
         break;
     case SDL_FCC_RV32:
