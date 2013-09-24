@@ -740,7 +740,7 @@ static void alloc_picture(FFPlayer *ffp)
     video_open(ffp, 0, vp);
 #endif
 
-    vp->bmp = SDL_VoutFFmpeg_CreateOverlay(vp->width, vp->height,
+    vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height,
                                    ffp->overlay_format,
                                    ffp->vout);
 #ifdef FFP_MERGE

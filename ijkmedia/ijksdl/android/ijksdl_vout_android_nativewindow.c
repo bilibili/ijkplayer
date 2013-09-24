@@ -39,6 +39,19 @@ typedef struct SDL_Vout_Opaque {
     ANativeWindow *native_window;
 } SDL_Vout_Opaque;
 
+static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, Uint32 format, SDL_Vout *vout)
+{
+    return SDL_VoutFFmpeg_CreateOverlay(width, height, format, vout);
+}
+
+static SDL_VoutOverlay *vout_create_overlay(int width, int height, Uint32 format, SDL_Vout *vout)
+{
+    SDL_LockMutex(vout->mutex);
+    SDL_VoutOverlay *overlay = vout_create_overlay_l(width, height, format, vout);
+    SDL_UnlockMutex(vout->mutex);
+    return overlay;
+}
+
 static void vout_free_l(SDL_Vout *vout)
 {
     if (!vout)
@@ -94,6 +107,7 @@ SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
     SDL_Vout_Opaque *opaque = vout->opaque;
     opaque->native_window = NULL;
 
+    vout->create_overlay = vout_create_overlay;
     vout->free_l = vout_free_l;
     vout->display_overlay = voud_display_overlay;
 
