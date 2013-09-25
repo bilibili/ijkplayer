@@ -16,6 +16,14 @@
 @end
 
 
+@interface IJKFFPlayerMessagePool : NSObject
+
+- (IJKFFPlayerMessagePool *)init;
+- (IJKFFPlayerMessage *) obtain;
+- (void) recycle:(IJKFFPlayerMessage *)msg;
+
+@end
+
 
 struct IJKSize {
     NSInteger width;

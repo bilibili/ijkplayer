@@ -12,6 +12,7 @@
 @implementation IJKFFPlayerController {
     NSURL *_url;
     IjkMediaPlayer *_mediaPlayer;
+    IJKFFPlayerMessagePool *_msgPool;
 }
 
 @synthesize view = _view;
@@ -29,6 +30,8 @@
 
         _url = aUrl;
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
+        _msgPool = [[IJKFFPlayerMessagePool alloc] init];
+
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
 
         IJKSDLGLView *glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -205,6 +208,12 @@
             NSLog(@"unknown FFP_MSG_xxx(%d)", avmsg->what);
             break;
     }
+
+    [_msgPool recycle:msg];
+}
+
+- (IJKFFPlayerMessage *) obtainMessage {
+    return [_msgPool obtain];
 }
 
 inline static IJKFFPlayerController *ffplayerRetain(void *arg) {
@@ -219,7 +228,10 @@ int media_player_msg_loop(void* arg)
 
         while (ffpController && true) {
             @autoreleasepool {
-                IJKFFPlayerMessage *msg = [[IJKFFPlayerMessage alloc] init];
+                IJKFFPlayerMessage *msg = [ffpController obtainMessage];
+                if (!msg)
+                    break;
+
                 int retval = ijkmp_get_msg(mp, &msg->_msg, 1);
                 if (retval < 0)
                     break;
