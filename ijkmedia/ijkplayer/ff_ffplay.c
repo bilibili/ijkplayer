@@ -42,6 +42,8 @@
 
 // #define FFP_SHOW_FPS
 // #define FFP_SHOW_VDPS
+// #define FFP_SHOW_AUDIO_DELAY
+// #define FFP_SHOW_DEMUX_CACHE
 
 static AVPacket flush_pkt;
 static AVPacket eof_pkt;
@@ -1474,6 +1476,7 @@ static int audio_decode_frame(FFPlayer *ffp)
             else
                 is->audio_clock = NAN;
             is->audio_clock_serial = is->audio_pkt_temp_serial;
+#ifdef FFP_SHOW_AUDIO_DELAY
 #ifdef DEBUG
             {
                 static double last_clock;
@@ -1482,6 +1485,7 @@ static int audio_decode_frame(FFPlayer *ffp)
                        is->audio_clock, audio_clock0);
                 last_clock = is->audio_clock;
             }
+#endif
 #endif
             return resampled_data_size;
         }
@@ -2236,7 +2240,9 @@ static int read_thread(void *arg)
                 if (cached_duration_in_ms >= 0) {
                     buf_time_percent = av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
                     if (last_buffered_time_percentage != buf_time_percent) {
+#ifdef FFP_SHOW_DEMUX_CACHE
                         ALOGE("time cache=%%%d (%d/%d)\n", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
+#endif
                         last_buffered_time_percentage = buf_time_percent;
                         ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_duration_in_ms, hwm_in_ms);
                     }
@@ -2247,7 +2253,9 @@ static int read_thread(void *arg)
             if (hwm_in_bytes > 0) {
                 buf_size_percent = av_rescale(cached_size, 1005, hwm_in_bytes * 10);
                 if (last_buffered_size_percentage != buf_size_percent) {
+#ifdef FFP_SHOW_DEMUX_CACHE
                     ALOGE("size cache=%%%d (%d/%d)\n", buf_size_percent, cached_size, hwm_in_bytes);
+#endif
                     last_buffered_size_percentage = buf_size_percent;
                     ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_size, hwm_in_bytes);
                 }

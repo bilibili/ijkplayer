@@ -38,6 +38,7 @@
 		E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400E17EAFC6100CFD954 /* ijksdl_timer.c */; };
 		E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */ = {isa = PBXBuildFile; fileRef = E690401117EAFC6100CFD954 /* ijksdl_vout.c */; };
 		E6F727B817F2B1B10043623F /* IJKMediaModule.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727B717F2B1B10043623F /* IJKMediaModule.m */; };
+		E6F727BB17F2D9D40043623F /* IJKFFPlayerDef.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727BA17F2D9D30043623F /* IJKFFPlayerDef.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -203,6 +204,8 @@
 		E690403A17EB079500CFD954 /* loghelp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loghelp.h; sourceTree = "<group>"; };
 		E6F727B617F2B1B10043623F /* IJKMediaModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaModule.h; path = IJKMediaPlayer/IJKMediaModule.h; sourceTree = "<group>"; };
 		E6F727B717F2B1B10043623F /* IJKMediaModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMediaModule.m; path = IJKMediaPlayer/IJKMediaModule.m; sourceTree = "<group>"; };
+		E6F727B917F2D9D30043623F /* IJKFFPlayerDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFPlayerDef.h; sourceTree = "<group>"; };
+		E6F727BA17F2D9D30043623F /* IJKFFPlayerDef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFPlayerDef.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -313,6 +316,8 @@
 			children = (
 				E66F8DE517EFD9C300354D80 /* IJKFFPlayerController.h */,
 				E66F8DE617EFD9C300354D80 /* IJKFFPlayerController.m */,
+				E6F727B917F2D9D30043623F /* IJKFFPlayerDef.h */,
+				E6F727BA17F2D9D30043623F /* IJKFFPlayerDef.m */,
 				E6903F7617EAFC2C00CFD954 /* ffmpeg */,
 				E6903FCC17EAFC6100CFD954 /* ijkmedia */,
 				E6903EBF17EAF6C500CFD954 /* Supporting Files */,
@@ -657,6 +662,7 @@
 				E63FC2B017F16C0A003551EB /* ijksdl_vout_ios_gles2.m in Sources */,
 				E63FC2BE17F18469003551EB /* ijksdl_thread_ios.m in Sources */,
 				E6F727B817F2B1B10043623F /* IJKMediaModule.m in Sources */,
+				E6F727BB17F2D9D40043623F /* IJKFFPlayerDef.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

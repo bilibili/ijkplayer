@@ -7,7 +7,7 @@
 //
 
 #import "IJKFFPlayerController.h"
-#include "ijkplayer/ios/ijkplayer_ios.h"
+#import "IJKFFplayerDef.h"
 
 @implementation IJKFFPlayerController {
     NSURL *_url;
@@ -107,9 +107,104 @@
     return ret / 1000;
 }
 
-- (void)postEvent: (AVMessage *)msg
+- (void)onMediaError:(NSInteger)error
+{
+
+}
+
+- (void)onMediaPrepared
+{
+
+}
+
+- (void)onMediaCompleted
+{
+
+}
+
+- (void)onMediaVideoSizeChanged:(IJKSize)size
+{
+
+}
+
+- (void)onMediaSarChanged:(IJKIntPair)sar
+{
+
+}
+
+- (void)onMediaBufferingStart
 {
     
+}
+
+- (void)onMediaBufferingEnd
+{
+
+}
+
+- (void)onMediaBufferingUpdate:(IJKIntPair)buffering
+{
+
+}
+
+- (void)onMediaSeekComplete
+{
+    
+}
+
+- (void)postEvent: (IJKFFPlayerMessage *)msg
+{
+    if (!msg)
+        return;
+
+    AVMessage *avmsg = &msg->_msg;
+    switch (avmsg->what) {
+        case FFP_MSG_FLUSH:
+            break;
+        case FFP_MSG_ERROR:
+            NSLog(@"FFP_MSG_ERROR: %d", avmsg->arg1);
+            [self onMediaError:avmsg->arg1];
+            break;
+        case FFP_MSG_PREPARED:
+            NSLog(@"FFP_MSG_PREPARED:");
+            [self onMediaPrepared];
+            break;
+        case FFP_MSG_COMPLETED:
+            NSLog(@"FFP_MSG_COMPLETED:");
+            [self onMediaCompleted];
+            break;
+        case FFP_MSG_VIDEO_SIZE_CHANGED:
+            NSLog(@"FFP_MSG_VIDEO_SIZE_CHANGED: %d, %d", avmsg->arg1, avmsg->arg2);
+            [self onMediaVideoSizeChanged:IJKSizeMake(avmsg->arg1, avmsg->arg2)];
+            break;
+        case FFP_MSG_SAR_CHANGED:
+            NSLog(@"FFP_MSG_SAR_CHANGED: %d, %d", avmsg->arg1, avmsg->arg2);
+            [self onMediaSarChanged:IJKIntPairMake(avmsg->arg1, avmsg->arg2)];
+            break;
+        case FFP_MSG_BUFFERING_START:
+            NSLog(@"FFP_MSG_BUFFERING_START:");
+            [self onMediaBufferingStart];
+            break;
+        case FFP_MSG_BUFFERING_END:
+            NSLog(@"FFP_MSG_BUFFERING_END:");
+            [self onMediaBufferingEnd];
+            break;
+        case FFP_MSG_BUFFERING_UPDATE:
+            NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %d", avmsg->arg1, avmsg->arg2);
+            [self onMediaBufferingUpdate:IJKIntPairMake(avmsg->arg1, avmsg->arg2)];
+            break;
+        case FFP_MSG_BUFFERING_BYTES_UPDATE:
+            break;
+        case FFP_MSG_BUFFERING_TIME_UPDATE:
+            break;
+        case FFP_MSG_SEEK_COMPLETE:
+            NSLog(@"FFP_MSG_SEEK_COMPLETE:");
+            [self onMediaSeekComplete];
+            break;
+        default:
+            NSLog(@"unknown FFP_MSG_xxx(%d)", avmsg->what);
+            break;
+    }
 }
 
 inline static IJKFFPlayerController *ffplayerRetain(void *arg) {
@@ -123,16 +218,16 @@ int media_player_msg_loop(void* arg)
         __weak IJKFFPlayerController *ffpController = ffplayerRetain(ijkmp_set_weak_thiz(mp, NULL));
 
         while (ffpController && true) {
-            AVMessage msg;
-
-            int retval = ijkmp_get_msg(mp, &msg, 1);
-            if (retval < 0)
-                break;
-
-            // block-get should never return 0
-            assert(retval > 0);
             @autoreleasepool {
-                [ffpController postEvent:&msg];
+                IJKFFPlayerMessage *msg = [[IJKFFPlayerMessage alloc] init];
+                int retval = ijkmp_get_msg(mp, &msg->_msg, 1);
+                if (retval < 0)
+                    break;
+
+                // block-get should never return 0
+                assert(retval > 0);
+
+                [ffpController performSelectorOnMainThread:@selector(postEvent:) withObject:msg waitUntilDone:NO];
             }
         }
 
