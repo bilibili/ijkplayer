@@ -1,5 +1,19 @@
+Changes between 0.0.5 and 0.0.4:
+--------------------------------
+- build: disable -fmodulo-sched -fmodulo-sched-allow-regmoves
+- player: support ios
+- ijksdl: support ios gles2 video output
+- ijksdl: support ios AudioUnit audio output
+- build: add android/ios sub directory
+- player: fix some dead lock
+- build: use shell scripts instead of git-submodule
+- android: use RV32 as default chroma
+
 Changes between 0.0.4 and 0.0.3:
 --------------------------------
+- ffmpeg: enable ac3
+- android: target API-18
+- build: switch to NDKr9 gcc4.8 toolchain
 
 Changes between 0.0.3 and 0.0.1:
 --------------------------------
