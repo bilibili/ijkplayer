@@ -11,9 +11,6 @@
 
 @implementation IJKFFPlayerController {
     NSURL *_url;
-
-    __weak IJKFFPlayerController *_weakSelf;
-
     IjkMediaPlayer *_mediaPlayer;
 }
 
@@ -32,7 +29,6 @@
 
         _url = aUrl;
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
-        _weakSelf = self;
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
 
         IJKSDLGLView *glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -114,16 +110,17 @@
     
 }
 
+inline static IJKFFPlayerController *ffplayerRetain(void *arg) {
+    return (__bridge_transfer IJKFFPlayerController *) arg;
+}
+
 int media_player_msg_loop(void* arg)
 {
     @autoreleasepool {
         IjkMediaPlayer *mp = (IjkMediaPlayer*)arg;
-        IJKFFPlayerController *ffpController = (__bridge_transfer IJKFFPlayerController *) ijkmp_set_weak_thiz(mp, NULL);
+        __weak IJKFFPlayerController *ffpController = ffplayerRetain(ijkmp_set_weak_thiz(mp, NULL));
 
-        __weak IJKFFPlayerController *weakSelf = ffpController->_weakSelf;
-        ffpController = nil;
-
-        while (weakSelf && true) {
+        while (ffpController && true) {
             AVMessage msg;
 
             int retval = ijkmp_get_msg(mp, &msg, 1);
