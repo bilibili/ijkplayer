@@ -37,6 +37,7 @@
 		E690403217EAFC6100CFD954 /* ijksdl_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400C17EAFC6100CFD954 /* ijksdl_thread.c */; };
 		E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400E17EAFC6100CFD954 /* ijksdl_timer.c */; };
 		E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */ = {isa = PBXBuildFile; fileRef = E690401117EAFC6100CFD954 /* ijksdl_vout.c */; };
+		E6F727B817F2B1B10043623F /* IJKMediaModule.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727B717F2B1B10043623F /* IJKMediaModule.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -200,6 +201,8 @@
 		E690403717EB079500CFD954 /* ijklog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijklog.h; sourceTree = "<group>"; };
 		E690403917EB079500CFD954 /* ijkutil_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkutil_ios.h; sourceTree = "<group>"; };
 		E690403A17EB079500CFD954 /* loghelp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loghelp.h; sourceTree = "<group>"; };
+		E6F727B617F2B1B10043623F /* IJKMediaModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaModule.h; path = IJKMediaPlayer/IJKMediaModule.h; sourceTree = "<group>"; };
+		E6F727B717F2B1B10043623F /* IJKMediaModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMediaModule.m; path = IJKMediaPlayer/IJKMediaModule.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -231,20 +234,11 @@
 		E66F8DBC17EEC2CF00354D80 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				E66F8DBD17EEC2D800354D80 /* Protocols */,
+				E6F727B517F2B1690043623F /* IJKMediaPlayer */,
 				E66F8DBE17EEC5DE00354D80 /* IJKMPMoviePlayerController */,
 				E6903EBE17EAF6C500CFD954 /* IJKFFPlayerController */,
 			);
 			name = Classes;
-			sourceTree = "<group>";
-		};
-		E66F8DBD17EEC2D800354D80 /* Protocols */ = {
-			isa = PBXGroup;
-			children = (
-				E6903EC117EAF6C500CFD954 /* IJKMediaPlayback.h */,
-				E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */,
-			);
-			name = Protocols;
 			sourceTree = "<group>";
 		};
 		E66F8DBE17EEC5DE00354D80 /* IJKMPMoviePlayerController */ = {
@@ -576,6 +570,17 @@
 			path = ios;
 			sourceTree = "<group>";
 		};
+		E6F727B517F2B1690043623F /* IJKMediaPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				E6F727B617F2B1B10043623F /* IJKMediaModule.h */,
+				E6F727B717F2B1B10043623F /* IJKMediaModule.m */,
+				E6903EC117EAF6C500CFD954 /* IJKMediaPlayback.h */,
+				E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */,
+			);
+			name = IJKMediaPlayer;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -651,6 +656,7 @@
 				E63FC2AD17F153D5003551EB /* IJKSDLGLView.m in Sources */,
 				E63FC2B017F16C0A003551EB /* ijksdl_vout_ios_gles2.m in Sources */,
 				E63FC2BE17F18469003551EB /* ijksdl_thread_ios.m in Sources */,
+				E6F727B817F2B1B10043623F /* IJKMediaModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -15,4 +15,6 @@
 - (id) initWithFrame:(CGRect)frame;
 - (void) display: (SDL_VoutOverlay *) overlay;
 
+@property(nonatomic,strong) NSLock *appActivityLock;
+
 @end

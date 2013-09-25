@@ -140,6 +140,11 @@
     return self;
 }
 
+- (void)dealloc
+{
+    [self close];
+}
+
 - (void)play
 {
     if (!self->_auUnit)
@@ -208,9 +213,9 @@ static OSStatus RenderCallback(void                        *inRefCon,
                                AudioBufferList             *ioData)
 {
     @autoreleasepool {
-        IJKSDLAudioUnitController* auController = (__bridge IJKSDLAudioUnitController*) inRefCon;
+        IJKSDLAudioUnitController* auController = (__bridge IJKSDLAudioUnitController *) inRefCon;
 
-        if (auController.paused) {
+        if (!auController || auController.paused) {
             for (UInt32 i = 0; i < ioData->mNumberBuffers; i++) {
                 AudioBuffer *ioBuffer = &ioData->mBuffers[i];
                 memset(ioBuffer->mData, auController.spec.silence, ioBuffer->mDataByteSize);

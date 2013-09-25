@@ -10,6 +10,7 @@
 #import "IJKSDLGLShader.h"
 #import "IJKSDLGLRender.h"
 #import "IJKSDLGLRenderI420.h"
+#import "IJKMediaModule.h"
 
 static NSString *const g_vertexShaderString = IJK_SHADER_STRING
 (
@@ -377,6 +378,19 @@ exit:
 }
 
 - (void)display: (SDL_VoutOverlay *) overlay
+{
+    // gles throws gpus_ReturnNotPermittedKillClient, while app is in background
+    if (![[IJKMediaModule sharedModule] tryLockActiveApp]) {
+        NSLog(@"IJKSDLGLView:display: unable to tryLock app activity");
+        return;
+    }
+
+    [self displayInternal:overlay];
+
+    [[IJKMediaModule sharedModule] unlockApp];
+}
+
+- (void)displayInternal: (SDL_VoutOverlay *) overlay
 {
     if (![self setupDisplay:overlay]) {
         NSLog(@"IJKSDLGLView: setupDisplay failed");
