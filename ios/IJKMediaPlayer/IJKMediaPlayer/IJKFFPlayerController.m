@@ -7,7 +7,9 @@
 //
 
 #import "IJKFFPlayerController.h"
-#import "IJKFFplayerDef.h"
+#import "IJKFFPlayerDef.h"
+#import "IJKMediaPlayback.h"
+
 
 @implementation IJKFFPlayerController {
     NSURL *_url;
@@ -110,54 +112,13 @@
     return ret / 1000;
 }
 
-- (void)onMediaError:(NSInteger)error
-{
-
-}
-
-- (void)onMediaPrepared
-{
-
-}
-
-- (void)onMediaCompleted
-{
-
-}
-
-- (void)onMediaVideoSizeChanged:(IJKSize)size
-{
-
-}
-
-- (void)onMediaSarChanged:(IJKIntPair)sar
-{
-
-}
-
-- (void)onMediaBufferingStart
-{
-    
-}
-
-- (void)onMediaBufferingEnd
-{
-
-}
-
-- (void)onMediaBufferingUpdate:(IJKIntPair)buffering
-{
-
-}
-
-- (void)onMediaSeekComplete
-{
-    
-}
-
 - (void)postEvent: (IJKFFPlayerMessage *)msg
 {
     if (!msg)
+        return;
+
+    id<IJKMediaPlaybackDelegate> delegate = self.playbackDelegate;
+    if (!delegate)
         return;
 
     AVMessage *avmsg = &msg->_msg;
@@ -166,43 +127,52 @@
             break;
         case FFP_MSG_ERROR:
             NSLog(@"FFP_MSG_ERROR: %d", avmsg->arg1);
-            [self onMediaError:avmsg->arg1];
+            if ([delegate respondsToSelector:@selector(playerDidFail:)])
+                [delegate playerDidFail:avmsg->arg1];
             break;
         case FFP_MSG_PREPARED:
             NSLog(@"FFP_MSG_PREPARED:");
-            [self onMediaPrepared];
+            if ([delegate respondsToSelector:@selector(playerDidPrepare:)])
+                [delegate playerDidPrepare];
             break;
         case FFP_MSG_COMPLETED:
             NSLog(@"FFP_MSG_COMPLETED:");
-            [self onMediaCompleted];
+            if ([delegate respondsToSelector:@selector(playerDidComplete:)])
+                [delegate playerDidComplete];
             break;
         case FFP_MSG_VIDEO_SIZE_CHANGED:
             NSLog(@"FFP_MSG_VIDEO_SIZE_CHANGED: %d, %d", avmsg->arg1, avmsg->arg2);
-            [self onMediaVideoSizeChanged:IJKSizeMake(avmsg->arg1, avmsg->arg2)];
+            if ([delegate respondsToSelector:@selector(playerDidChangeVideoSize:)])
+                [delegate playerDidChangeVideoSize:IJKSizeMake(avmsg->arg1, avmsg->arg2)];
             break;
         case FFP_MSG_SAR_CHANGED:
             NSLog(@"FFP_MSG_SAR_CHANGED: %d, %d", avmsg->arg1, avmsg->arg2);
-            [self onMediaSarChanged:IJKIntPairMake(avmsg->arg1, avmsg->arg2)];
+            if ([delegate respondsToSelector:@selector(playerDidChangeSampleAspectRatio:)])
+                [delegate playerDidChangeSampleAspectRatio:IJKSampleAspectRatioMake(avmsg->arg1, avmsg->arg2)];
             break;
         case FFP_MSG_BUFFERING_START:
             NSLog(@"FFP_MSG_BUFFERING_START:");
-            [self onMediaBufferingStart];
+            if ([delegate respondsToSelector:@selector(playerDidStartBuffering:)])
+                [delegate playerDidStartBuffering];
             break;
         case FFP_MSG_BUFFERING_END:
             NSLog(@"FFP_MSG_BUFFERING_END:");
-            [self onMediaBufferingEnd];
+            if ([delegate respondsToSelector:@selector(playerDidStopBuffering:)])
+                [delegate playerDidStopBuffering];
             break;
         case FFP_MSG_BUFFERING_UPDATE:
             NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %d", avmsg->arg1, avmsg->arg2);
-            [self onMediaBufferingUpdate:IJKIntPairMake(avmsg->arg1, avmsg->arg2)];
             break;
         case FFP_MSG_BUFFERING_BYTES_UPDATE:
+            NSLog(@"FFP_MSG_BUFFERING_BYTES_UPDATE: %d", avmsg->arg1);
             break;
         case FFP_MSG_BUFFERING_TIME_UPDATE:
+            NSLog(@"FFP_MSG_BUFFERING_TIME_UPDATE: %d", avmsg->arg1);
             break;
         case FFP_MSG_SEEK_COMPLETE:
             NSLog(@"FFP_MSG_SEEK_COMPLETE:");
-            [self onMediaSeekComplete];
+            if ([delegate respondsToSelector:@selector(playerDidSeek:)])
+                [delegate playerDidSeek];
             break;
         default:
             NSLog(@"unknown FFP_MSG_xxx(%d)", avmsg->what);

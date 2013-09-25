@@ -42,19 +42,19 @@
     // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/113820563.hlv?KID=sina,viask&Expires=1380124800&ssig=iswfgpZ1Jp"];
     // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115380070.hlv?KID=sina,viask&Expires=1380124800&ssig=s5khawIcuO"];
     NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
-    // self.player = [[IJKMPMoviePlayerController alloc] initWithContentURL:theMovieURL];
+
     self.player = [[IJKFFPlayerController alloc] initWithContentURL:theMovieURL];
+    self.player.playbackDelegate = self;
+    self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+    self.player.view.frame = self.view.bounds;
 
-    [self.player.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
-    [self.view setAutoresizesSubviews:YES];
-
+    self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
     [self.view addSubview:self.mediaControl];
 
     self.mediaControl.delegatePlayer = self.player;
 
     [self.player prepareToPlay];
-    [self.player.view setFrame: self.view.bounds];
     [self.player play];
 }
 
