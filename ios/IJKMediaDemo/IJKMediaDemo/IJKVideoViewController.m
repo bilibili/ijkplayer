@@ -38,10 +38,10 @@
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
     [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
 
-    NSURL *theMovieURL = [NSURL URLWithString:@"rtsp://l.m.cztv.com:554/hdmi/hntv1hd.stream"];
+    // NSURL *theMovieURL = [NSURL URLWithString:@"rtsp://l.m.cztv.com:554/hdmi/hntv1hd.stream"];
     // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/113820563.hlv?KID=sina,viask&Expires=1380124800&ssig=iswfgpZ1Jp"];
     // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115380070.hlv?KID=sina,viask&Expires=1380124800&ssig=s5khawIcuO"];
-    // NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
+    NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
     // self.player = [[IJKMPMoviePlayerController alloc] initWithContentURL:theMovieURL];
     self.player = [[IJKFFPlayerController alloc] initWithContentURL:theMovieURL];
 
