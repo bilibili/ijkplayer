@@ -2210,15 +2210,14 @@ static int read_thread(void *arg)
         }
 
         do {
-            int     buf_percent      = INT_MAX;
-            int     buf_size_percent = INT_MAX;
-            int     buf_time_percent = INT_MAX;
+            int     buf_size_percent = -1;
+            int     buf_time_percent = -1;
             int     hwm_in_bytes     = ffp->high_water_mark_in_bytes;
             int     hwm_in_ms        = ffp->high_water_mark_in_ms;
             if (hwm_in_ms > 0) {
-                int     cached_duration_in_ms = INT_MAX;
-                int64_t audio_cached_duration = INT_MAX;
-                int64_t video_cached_duration = INT_MAX;
+                int     cached_duration_in_ms = -1;
+                int64_t audio_cached_duration = -1;
+                int64_t video_cached_duration = -1;
 
                 if (is->audio_st && is->audio_st->time_base.den > 0 && is->audio_st->time_base.num > 0)
                     audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
@@ -2226,11 +2225,18 @@ static int read_thread(void *arg)
                 if (is->video_st && is->video_st->time_base.den > 0 && is->video_st->time_base.num > 0)
                     video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
 
-                cached_duration_in_ms = IJKMIN(video_cached_duration, audio_cached_duration);
-                if (cached_duration_in_ms < INT_MAX) {
+                if (video_cached_duration >= 0 && audio_cached_duration >= 0) {
+                    cached_duration_in_ms = IJKMAX(video_cached_duration, audio_cached_duration);
+                } else if (video_cached_duration >= 0) {
+                    cached_duration_in_ms = video_cached_duration;
+                } else if (audio_cached_duration >= 0) {
+                    cached_duration_in_ms = audio_cached_duration;
+                }
+
+                if (cached_duration_in_ms >= 0) {
                     buf_time_percent = av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
                     if (last_buffered_time_percentage != buf_time_percent) {
-                        // ALOGE("time cache=%%%d (%d/%d)\n", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
+                        ALOGE("time cache=%%%d (%d/%d)\n", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
                         last_buffered_time_percentage = buf_time_percent;
                         ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_duration_in_ms, hwm_in_ms);
                     }
@@ -2241,15 +2247,20 @@ static int read_thread(void *arg)
             if (hwm_in_bytes > 0) {
                 buf_size_percent = av_rescale(cached_size, 1005, hwm_in_bytes * 10);
                 if (last_buffered_size_percentage != buf_size_percent) {
-                    // ALOGE("size cache=%%%d (%d/%d)\n",buf_size_percent, cached_size, hwm_in_bytes);
+                    ALOGE("size cache=%%%d (%d/%d)\n", buf_size_percent, cached_size, hwm_in_bytes);
                     last_buffered_size_percentage = buf_size_percent;
                     ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_size, hwm_in_bytes);
                 }
             }
 
-            buf_percent = IJKMIN(buf_size_percent, buf_time_percent);
-            if (buf_percent >= 100)
-                ffp_toggle_buffering(ffp, 0);
+            if (buf_time_percent >= 0) {
+                // alwas depend on cache duration if valid
+                if (buf_time_percent >= 100)
+                    ffp_toggle_buffering(ffp, 0);
+            } else {
+                if (buf_size_percent >= 100)
+                    ffp_toggle_buffering(ffp, 0);
+            }
         } while(0);
 
         // FIXME: 0 notify progress
