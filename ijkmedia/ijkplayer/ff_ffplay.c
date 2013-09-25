@@ -2257,7 +2257,7 @@ static int read_thread(void *arg)
                     ALOGE("size cache=%%%d (%d/%d)\n", buf_size_percent, cached_size, hwm_in_bytes);
 #endif
                     last_buffered_size_percentage = buf_size_percent;
-                    ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_size, hwm_in_bytes);
+                    ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_BYTES_UPDATE, cached_size, hwm_in_bytes);
                 }
             }
 
