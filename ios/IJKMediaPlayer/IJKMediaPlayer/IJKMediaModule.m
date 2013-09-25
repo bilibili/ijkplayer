@@ -8,7 +8,9 @@
 
 #import "IJKMediaModule.h"
 
-@interface IJKMediaModule()
+@interface IJKMediaModule() {
+    BOOL _isAppIsLockedOnResignActive;
+}
 @property(atomic,strong) NSRecursiveLock *appLock;
 @end;
 
@@ -36,7 +38,9 @@
 
 - (void) unlockApp
 {
-    [self.appLock unlock];
+    @synchronized(self) {
+        [self.appLock unlock];
+    }
 }
 
 - (BOOL) tryLockActiveApp
@@ -57,13 +61,35 @@
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     [self lockApp];
-    NSLog(@"applicationWillResignActive: state: %d", [UIApplication sharedApplication].applicationState);
+    _isAppIsLockedOnResignActive = TRUE;
+    NSLog(@"IJKMediaModule:applicationWillResignActive lockApp");
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
-    [self unlockApp];
-    NSLog(@"applicationDidEnterBackground: state: %d", [UIApplication sharedApplication].applicationState);
+    if (_isAppIsLockedOnResignActive) {
+        [self unlockApp];
+        _isAppIsLockedOnResignActive = FALSE;
+        NSLog(@"IJKMediaModule:applicationDidEnterBackground unlockApp");
+    }
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+    if (_isAppIsLockedOnResignActive) {
+        [self unlockApp];
+        _isAppIsLockedOnResignActive = FALSE;
+        NSLog(@"IJKMediaModule:applicationWillEnterForeground unlockApp");
+    }
+}
+
+- (void)applicationWillTerminate:(UIApplication *)application
+{
+    if (_isAppIsLockedOnResignActive) {
+        [self unlockApp];
+        _isAppIsLockedOnResignActive = FALSE;
+        NSLog(@"IJKMediaModule:applicationWillTerminate unlockApp");
+    }
 }
 
 @end
