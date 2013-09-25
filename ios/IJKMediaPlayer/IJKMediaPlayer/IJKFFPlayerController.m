@@ -86,23 +86,25 @@
     if (!_mediaPlayer)
         return;
 
-    ijkmp_seek_to(_mediaPlayer, aCurrentPlaybackTime);
+    ijkmp_seek_to(_mediaPlayer, aCurrentPlaybackTime * 1000);
 }
 
-- (NSTimeInterval)getCurrentPlaybackTime
+- (NSTimeInterval)currentPlaybackTime
 {
     if (!_mediaPlayer)
         return 0.0f;
 
-    return ijkmp_get_current_position(_mediaPlayer);
+    NSTimeInterval ret = ijkmp_get_current_position(_mediaPlayer);
+    return ret / 1000;
 }
 
-- (NSTimeInterval)getDuration
+- (NSTimeInterval)duration
 {
     if (!_mediaPlayer)
         return 0.0f;
 
-    return ijkmp_get_duration(_mediaPlayer);
+    NSTimeInterval ret = ijkmp_get_duration(_mediaPlayer);
+    return ret / 1000;
 }
 
 - (void)postEvent: (AVMessage *)msg

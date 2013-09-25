@@ -50,11 +50,11 @@
 
 - (void)refreshMediaControl
 {
-    NSTimeInterval duration = [self.delegatePlayer duration];
-    NSTimeInterval position = [self.delegatePlayer currentPlaybackTime];
+    NSTimeInterval duration = self.delegatePlayer.duration;
+    NSTimeInterval position = self.delegatePlayer.currentPlaybackTime;
 
-    NSInteger intDuration = duration;
-    NSInteger intPosition = position;
+    NSInteger intDuration = duration + 0.5;
+    NSInteger intPosition = position + 0.5;
 
     self.currentTimeLabel.text = [NSString stringWithFormat:@"%02d:%02d", intPosition / 60, intPosition % 60];
 
