@@ -7,7 +7,7 @@
 //
 
 #import "IJKAppDelegate.h"
-#import "IJKVideoViewController.h"
+#import "IJKMoviePlayerViewController.h"
 
 @implementation IJKAppDelegate
 

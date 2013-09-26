@@ -17,7 +17,7 @@
 		E63FC2B017F16C0A003551EB /* ijksdl_vout_ios_gles2.m in Sources */ = {isa = PBXBuildFile; fileRef = E63FC2AF17F16C09003551EB /* ijksdl_vout_ios_gles2.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		E63FC2BE17F18469003551EB /* ijksdl_thread_ios.m in Sources */ = {isa = PBXBuildFile; fileRef = E63FC2BD17F18467003551EB /* ijksdl_thread_ios.m */; };
 		E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */; };
-		E66F8DE717EFD9C300354D80 /* IJKFFPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DE617EFD9C300354D80 /* IJKFFPlayerController.m */; };
+		E66F8DE717EFD9C300354D80 /* IJKFFMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DE617EFD9C300354D80 /* IJKFFMoviePlayerController.m */; };
 		E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DEF17EFEA9400354D80 /* ijkplayer.c */; };
 		E66F8E0317EFEEA400354D80 /* ijkplayer_ios.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8E0117EFEEA400354D80 /* ijkplayer_ios.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		E6903EC217EAF6C500CFD954 /* IJKMediaPlayback.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E6903EC117EAF6C500CFD954 /* IJKMediaPlayback.h */; };
@@ -38,10 +38,10 @@
 		E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400E17EAFC6100CFD954 /* ijksdl_timer.c */; };
 		E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */ = {isa = PBXBuildFile; fileRef = E690401117EAFC6100CFD954 /* ijksdl_vout.c */; };
 		E6F727B817F2B1B10043623F /* IJKMediaModule.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727B717F2B1B10043623F /* IJKMediaModule.m */; };
-		E6F727BB17F2D9D40043623F /* IJKFFPlayerDef.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727BA17F2D9D30043623F /* IJKFFPlayerDef.m */; };
+		E6F727BB17F2D9D40043623F /* IJKFFMoviePlayerDef.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727BA17F2D9D30043623F /* IJKFFMoviePlayerDef.m */; };
 		E6F727BC17F40C1C0043623F /* IJKMediaPlayer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */; };
 		E6F727BD17F40C360043623F /* IJKMPMoviePlayerController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DBF17EEC65200354D80 /* IJKMPMoviePlayerController.h */; };
-		E6F727BE17F40C390043623F /* IJKFFPlayerController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DE517EFD9C300354D80 /* IJKFFPlayerController.h */; };
+		E6F727BE17F40C390043623F /* IJKFFMoviePlayerController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DE517EFD9C300354D80 /* IJKFFMoviePlayerController.h */; };
 		E6F727BF17F40C4A0043623F /* IJKMediaModule.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E6F727B617F2B1B10043623F /* IJKMediaModule.h */; };
 /* End PBXBuildFile section */
 
@@ -53,7 +53,7 @@
 			dstSubfolderSpec = 16;
 			files = (
 				E6F727BF17F40C4A0043623F /* IJKMediaModule.h in CopyFiles */,
-				E6F727BE17F40C390043623F /* IJKFFPlayerController.h in CopyFiles */,
+				E6F727BE17F40C390043623F /* IJKFFMoviePlayerController.h in CopyFiles */,
 				E6F727BD17F40C360043623F /* IJKMPMoviePlayerController.h in CopyFiles */,
 				E6F727BC17F40C1C0043623F /* IJKMediaPlayer.h in CopyFiles */,
 				E6903EC217EAF6C500CFD954 /* IJKMediaPlayback.h in CopyFiles */,
@@ -85,8 +85,8 @@
 		E66F8DBF17EEC65200354D80 /* IJKMPMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMPMoviePlayerController.h; path = IJKMediaPlayer/IJKMPMoviePlayerController.h; sourceTree = "<group>"; };
 		E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMPMoviePlayerController.m; path = IJKMediaPlayer/IJKMPMoviePlayerController.m; sourceTree = "<group>"; };
 		E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaPlayer.h; path = IJKMediaPlayer/IJKMediaPlayer.h; sourceTree = "<group>"; };
-		E66F8DE517EFD9C300354D80 /* IJKFFPlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFPlayerController.h; sourceTree = "<group>"; };
-		E66F8DE617EFD9C300354D80 /* IJKFFPlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFPlayerController.m; sourceTree = "<group>"; };
+		E66F8DE517EFD9C300354D80 /* IJKFFMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFMoviePlayerController.h; sourceTree = "<group>"; };
+		E66F8DE617EFD9C300354D80 /* IJKFFMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFMoviePlayerController.m; sourceTree = "<group>"; };
 		E66F8DEE17EFEA9400354D80 /* ijkplayer_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkplayer_internal.h; sourceTree = "<group>"; };
 		E66F8DEF17EFEA9400354D80 /* ijkplayer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijkplayer.c; sourceTree = "<group>"; };
 		E66F8DF017EFEA9400354D80 /* ijkplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkplayer.h; sourceTree = "<group>"; };
@@ -212,8 +212,8 @@
 		E690403A17EB079500CFD954 /* loghelp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loghelp.h; sourceTree = "<group>"; };
 		E6F727B617F2B1B10043623F /* IJKMediaModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaModule.h; path = IJKMediaPlayer/IJKMediaModule.h; sourceTree = "<group>"; };
 		E6F727B717F2B1B10043623F /* IJKMediaModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMediaModule.m; path = IJKMediaPlayer/IJKMediaModule.m; sourceTree = "<group>"; };
-		E6F727B917F2D9D30043623F /* IJKFFPlayerDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFPlayerDef.h; sourceTree = "<group>"; };
-		E6F727BA17F2D9D30043623F /* IJKFFPlayerDef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFPlayerDef.m; sourceTree = "<group>"; };
+		E6F727B917F2D9D30043623F /* IJKFFMoviePlayerDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFMoviePlayerDef.h; sourceTree = "<group>"; };
+		E6F727BA17F2D9D30043623F /* IJKFFMoviePlayerDef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFMoviePlayerDef.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -247,7 +247,7 @@
 			children = (
 				E6F727B517F2B1690043623F /* IJKMediaPlayer */,
 				E66F8DBE17EEC5DE00354D80 /* IJKMPMoviePlayerController */,
-				E6903EBE17EAF6C500CFD954 /* IJKFFPlayerController */,
+				E6903EBE17EAF6C500CFD954 /* IJKFFMoviePlayerController */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -319,18 +319,18 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		E6903EBE17EAF6C500CFD954 /* IJKFFPlayerController */ = {
+		E6903EBE17EAF6C500CFD954 /* IJKFFMoviePlayerController */ = {
 			isa = PBXGroup;
 			children = (
-				E66F8DE517EFD9C300354D80 /* IJKFFPlayerController.h */,
-				E66F8DE617EFD9C300354D80 /* IJKFFPlayerController.m */,
-				E6F727B917F2D9D30043623F /* IJKFFPlayerDef.h */,
-				E6F727BA17F2D9D30043623F /* IJKFFPlayerDef.m */,
+				E66F8DE517EFD9C300354D80 /* IJKFFMoviePlayerController.h */,
+				E66F8DE617EFD9C300354D80 /* IJKFFMoviePlayerController.m */,
+				E6F727B917F2D9D30043623F /* IJKFFMoviePlayerDef.h */,
+				E6F727BA17F2D9D30043623F /* IJKFFMoviePlayerDef.m */,
 				E6903F7617EAFC2C00CFD954 /* ffmpeg */,
 				E6903FCC17EAFC6100CFD954 /* ijkmedia */,
 				E6903EBF17EAF6C500CFD954 /* Supporting Files */,
 			);
-			name = IJKFFPlayerController;
+			name = IJKFFMoviePlayerController;
 			path = IJKMediaPlayer;
 			sourceTree = "<group>";
 		};
@@ -657,7 +657,7 @@
 				E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */,
 				E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */,
 				E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */,
-				E66F8DE717EFD9C300354D80 /* IJKFFPlayerController.m in Sources */,
+				E66F8DE717EFD9C300354D80 /* IJKFFMoviePlayerController.m in Sources */,
 				E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */,
 				E66F8E0317EFEEA400354D80 /* ijkplayer_ios.m in Sources */,
 				E63FC26917EFF39E003551EB /* ijksdl_aout_ios_audiounit.m in Sources */,
@@ -670,7 +670,7 @@
 				E63FC2B017F16C0A003551EB /* ijksdl_vout_ios_gles2.m in Sources */,
 				E63FC2BE17F18469003551EB /* ijksdl_thread_ios.m in Sources */,
 				E6F727B817F2B1B10043623F /* IJKMediaModule.m in Sources */,
-				E6F727BB17F2D9D40043623F /* IJKFFPlayerDef.m in Sources */,
+				E6F727BB17F2D9D40043623F /* IJKFFMoviePlayerDef.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

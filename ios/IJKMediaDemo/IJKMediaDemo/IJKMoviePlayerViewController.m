@@ -1,12 +1,12 @@
 //
-//  IJKVideoViewController.m
+//  IJKMoviePlayerController.m
 //  IJKMediaDemo
 //
 //  Created by ZhangRui on 13-9-21.
 //  Copyright (c) 2013年 bilibili. All rights reserved.
 //
 
-#import "IJKVideoViewController.h"
+#import "IJKMoviePlayerViewController.h"
 #import "IJKMediaControl.h"
 #import "IJKCommon.h"
 
@@ -15,9 +15,9 @@
 - (id)initView
 {
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        return [self initWithNibName:@"IJKVideoViewController" bundle:nil];
+        return [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
     } else {
-        return [self initWithNibName:@"IJKVideoViewController" bundle:nil];
+        return [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
     }
 }
 
@@ -39,11 +39,11 @@
     [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
 
     // NSURL *theMovieURL = [NSURL URLWithString:@"rtsp://l.m.cztv.com:554/hdmi/hntv1hd.stream"];
-    // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/113820563.hlv?KID=sina,viask&Expires=1380124800&ssig=iswfgpZ1Jp"];
-    // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115380070.hlv?KID=sina,viask&Expires=1380124800&ssig=s5khawIcuO"];
-    NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
+    // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115151121.hlv?KID=sina,viask&Expires=1380297600&ssig=SjfwCmaiLe"];
+    NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115279108.hlv?KID=sina,viask&Expires=1380297600&ssig=KpcdjFjrhW"];
+    // NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
 
-    self.player = [[IJKFFPlayerController alloc] initWithContentURL:theMovieURL];
+    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL];
     self.player.playbackDelegate = self;
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;

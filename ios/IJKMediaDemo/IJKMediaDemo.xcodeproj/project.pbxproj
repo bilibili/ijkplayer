@@ -33,8 +33,8 @@
 		E6903F1217EAF70200CFD954 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = E6903F1117EAF70200CFD954 /* Default.png */; };
 		E6903F1417EAF70200CFD954 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E6903F1317EAF70200CFD954 /* Default@2x.png */; };
 		E6903F1617EAF70200CFD954 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E6903F1517EAF70200CFD954 /* Default-568h@2x.png */; };
-		E6A9B56417EDA72C00A1A500 /* IJKVideoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A9B56217EDA72C00A1A500 /* IJKVideoViewController.m */; };
-		E6A9B56517EDA72C00A1A500 /* IJKVideoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E6A9B56317EDA72C00A1A500 /* IJKVideoViewController.xib */; };
+		E6A9B56417EDA72C00A1A500 /* IJKMoviePlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A9B56217EDA72C00A1A500 /* IJKMoviePlayerViewController.m */; };
+		E6A9B56517EDA72C00A1A500 /* IJKMoviePlayerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E6A9B56317EDA72C00A1A500 /* IJKMoviePlayerViewController.xib */; };
 		E6F727C017F40DC50043623F /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6166C7017EDA43C0006B956 /* libIJKMediaPlayer.a */; };
 /* End PBXBuildFile section */
 
@@ -71,9 +71,9 @@
 		E6903F1117EAF70200CFD954 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		E6903F1317EAF70200CFD954 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		E6903F1517EAF70200CFD954 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		E6A9B56117EDA72C00A1A500 /* IJKVideoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKVideoViewController.h; sourceTree = "<group>"; };
-		E6A9B56217EDA72C00A1A500 /* IJKVideoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKVideoViewController.m; sourceTree = "<group>"; };
-		E6A9B56317EDA72C00A1A500 /* IJKVideoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IJKVideoViewController.xib; sourceTree = "<group>"; };
+		E6A9B56117EDA72C00A1A500 /* IJKMoviePlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKMoviePlayerViewController.h; sourceTree = "<group>"; };
+		E6A9B56217EDA72C00A1A500 /* IJKMoviePlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKMoviePlayerViewController.m; sourceTree = "<group>"; };
+		E6A9B56317EDA72C00A1A500 /* IJKMoviePlayerViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IJKMoviePlayerViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -184,9 +184,9 @@
 		E6A9B55C17EDA6AC00A1A500 /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				E6A9B56117EDA72C00A1A500 /* IJKVideoViewController.h */,
-				E6A9B56217EDA72C00A1A500 /* IJKVideoViewController.m */,
-				E6A9B56317EDA72C00A1A500 /* IJKVideoViewController.xib */,
+				E6A9B56117EDA72C00A1A500 /* IJKMoviePlayerViewController.h */,
+				E6A9B56217EDA72C00A1A500 /* IJKMoviePlayerViewController.m */,
+				E6A9B56317EDA72C00A1A500 /* IJKMoviePlayerViewController.xib */,
 				E66F8DC917EEDD8B00354D80 /* IJKMediaControl.h */,
 				E66F8DCA17EEDD8B00354D80 /* IJKMediaControl.m */,
 			);
@@ -250,7 +250,7 @@
 				E6903F1417EAF70200CFD954 /* Default@2x.png in Resources */,
 				E6903F1617EAF70200CFD954 /* Default-568h@2x.png in Resources */,
 				E6166C9C17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch in Resources */,
-				E6A9B56517EDA72C00A1A500 /* IJKVideoViewController.xib in Resources */,
+				E6A9B56517EDA72C00A1A500 /* IJKMoviePlayerViewController.xib in Resources */,
 				E66F8DCF17EEDFCB00354D80 /* player_top_control_bg.png in Resources */,
 				E66F8DD017EEDFCB00354D80 /* player_top_control_bg@2x.png in Resources */,
 				E66F8DD517EEE01D00354D80 /* btn_player_back_highlighted.png in Resources */,
@@ -273,7 +273,7 @@
 			files = (
 				E6903F0C17EAF70200CFD954 /* main.m in Sources */,
 				E6903F1017EAF70200CFD954 /* IJKAppDelegate.m in Sources */,
-				E6A9B56417EDA72C00A1A500 /* IJKVideoViewController.m in Sources */,
+				E6A9B56417EDA72C00A1A500 /* IJKMoviePlayerViewController.m in Sources */,
 				E66F8DCB17EEDD8B00354D80 /* IJKMediaControl.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

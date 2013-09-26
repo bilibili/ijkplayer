@@ -1,5 +1,5 @@
 /*
- * IJKFFPlayerDef.h
+ * IJKFFMoviePlayerDef.h
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -23,17 +23,17 @@
 #import <Foundation/Foundation.h>
 #include "ijkplayer/ios/ijkplayer_ios.h"
 
-@interface IJKFFPlayerMessage : NSObject {
+@interface IJKFFMoviePlayerMessage : NSObject {
 @public
     AVMessage _msg;
 }
 @end
 
 
-@interface IJKFFPlayerMessagePool : NSObject
+@interface IJKFFMoviePlayerMessagePool : NSObject
 
-- (IJKFFPlayerMessagePool *)init;
-- (IJKFFPlayerMessage *) obtain;
-- (void) recycle:(IJKFFPlayerMessage *)msg;
+- (IJKFFMoviePlayerMessagePool *)init;
+- (IJKFFMoviePlayerMessage *) obtain;
+- (void) recycle:(IJKFFMoviePlayerMessage *)msg;
 
 @end

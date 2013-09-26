@@ -37,7 +37,7 @@
             self = nil;
             return nil;
         }
-        self->_spec = *aSpec;
+        _spec = *aSpec;
 
         AudioComponentDescription desc;
         desc.componentType = kAudioUnitType_Output;
@@ -74,19 +74,19 @@
 
         /* Get the current format */
         AudioStreamBasicDescription streamDescription;
-        streamDescription.mSampleRate = self->_spec.freq;
-        self->_spec.format = AUDIO_S16SYS;
+        streamDescription.mSampleRate = _spec.freq;
+        _spec.format = AUDIO_S16SYS;
         streamDescription.mFormatID = kAudioFormatLinearPCM;
         streamDescription.mFormatFlags = kLinearPCMFormatFlagIsPacked;
-        streamDescription.mChannelsPerFrame = self->_spec.channels;
+        streamDescription.mChannelsPerFrame = _spec.channels;
         streamDescription.mFramesPerPacket = 1;
 
-        streamDescription.mBitsPerChannel = SDL_AUDIO_BITSIZE(self->_spec.format);
-        if (SDL_AUDIO_ISBIGENDIAN(self->_spec.format))
+        streamDescription.mBitsPerChannel = SDL_AUDIO_BITSIZE(_spec.format);
+        if (SDL_AUDIO_ISBIGENDIAN(_spec.format))
             streamDescription.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;
-        if (SDL_AUDIO_ISFLOAT(self->_spec.format))
+        if (SDL_AUDIO_ISFLOAT(_spec.format))
             streamDescription.mFormatFlags |= kLinearPCMFormatFlagIsFloat;
-        if (SDL_AUDIO_ISSIGNED(self->_spec.format))
+        if (SDL_AUDIO_ISSIGNED(_spec.format))
             streamDescription.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
 
         streamDescription.mBytesPerFrame = streamDescription.mBitsPerChannel * streamDescription.mChannelsPerFrame / 8;
@@ -130,7 +130,7 @@
             return nil;
         }
 
-        SDL_CalculateAudioSpec(&self->_spec);
+        SDL_CalculateAudioSpec(&_spec);
 
         /* AU initiliaze */
         status = AudioUnitInitialize(auUnit);
@@ -151,7 +151,12 @@
         AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(sessionCategory), &sessionCategory);
         AudioSessionSetActive(true);
 
-        self->_auUnit = auUnit;
+        Float32 preferredBufferDuration = _spec.samples * 1.0f / _spec.freq;
+        AudioSessionSetProperty(kAudioSessionProperty_PreferredHardwareIOBufferDuration,
+                                sizeof (preferredBufferDuration),
+                                &preferredBufferDuration);
+
+        _auUnit = auUnit;
     }
     return self;
 }
@@ -163,35 +168,35 @@
 
 - (void)play
 {
-    if (!self->_auUnit)
+    if (!_auUnit)
         return;
 
-    AudioOutputUnitStart(self->_auUnit);
+    AudioOutputUnitStart(_auUnit);
     AudioSessionSetActive(true);
 }
 
 - (void)pause
 {
-    if (!self->_auUnit)
+    if (!_auUnit)
         return;
 
-    AudioOutputUnitStop(self->_auUnit);
+    AudioOutputUnitStop(_auUnit);
     AudioSessionSetActive(false);
 }
 
 - (void)flush
 {
-    if (!self->_auUnit)
+    if (!_auUnit)
         return;
 
-    AudioOutputUnitStop(self->_auUnit);
+    AudioOutputUnitStop(_auUnit);
 }
 
 - (void)stop
 {
     AudioSessionSetActive(false);
 
-    if (!self->_auUnit)
+    if (!_auUnit)
         return;
 
     OSStatus status = AudioOutputUnitStop(_auUnit);

@@ -1,5 +1,5 @@
 /*
- * IJKFFPlayerController.h
+ * IJKFFMoviePlayerController.h
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -22,7 +22,7 @@
 
 #import "IJKMediaPlayback.h"
 
-@interface IJKFFPlayerController : NSObject <IJKMediaPlayback>
+@interface IJKFFMoviePlayerController : NSObject <IJKMediaPlayback>
 
 - (id)initWithContentURL:(NSURL *)aUrl;
 

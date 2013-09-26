@@ -1,5 +1,5 @@
 /*
- * IJKFFPlayerController.m
+ * IJKFFMoviePlayerController.m
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -20,15 +20,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import "IJKFFPlayerController.h"
-#import "IJKFFPlayerDef.h"
+#import "IJKFFMoviePlayerController.h"
+#import "IJKFFMoviePlayerDef.h"
 #import "IJKMediaPlayback.h"
 
 
-@implementation IJKFFPlayerController {
+@implementation IJKFFMoviePlayerController {
     NSURL *_url;
     IjkMediaPlayer *_mediaPlayer;
-    IJKFFPlayerMessagePool *_msgPool;
+    IJKFFMoviePlayerMessagePool *_msgPool;
 }
 
 @synthesize view = _view;
@@ -46,7 +46,7 @@
 
         _url = aUrl;
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
-        _msgPool = [[IJKFFPlayerMessagePool alloc] init];
+        _msgPool = [[IJKFFMoviePlayerMessagePool alloc] init];
 
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
 
@@ -126,7 +126,7 @@
     return ret / 1000;
 }
 
-- (void)postEvent: (IJKFFPlayerMessage *)msg
+- (void)postEvent: (IJKFFMoviePlayerMessage *)msg
 {
     if (!msg)
         return;
@@ -175,13 +175,13 @@
                 [delegate playerDidStopBuffering];
             break;
         case FFP_MSG_BUFFERING_UPDATE:
-            NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %d", avmsg->arg1, avmsg->arg2);
+            // NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %d", avmsg->arg1, avmsg->arg2);
             break;
         case FFP_MSG_BUFFERING_BYTES_UPDATE:
-            NSLog(@"FFP_MSG_BUFFERING_BYTES_UPDATE: %d", avmsg->arg1);
+            // NSLog(@"FFP_MSG_BUFFERING_BYTES_UPDATE: %d", avmsg->arg1);
             break;
         case FFP_MSG_BUFFERING_TIME_UPDATE:
-            NSLog(@"FFP_MSG_BUFFERING_TIME_UPDATE: %d", avmsg->arg1);
+            // NSLog(@"FFP_MSG_BUFFERING_TIME_UPDATE: %d", avmsg->arg1);
             break;
         case FFP_MSG_SEEK_COMPLETE:
             NSLog(@"FFP_MSG_SEEK_COMPLETE:");
@@ -196,23 +196,23 @@
     [_msgPool recycle:msg];
 }
 
-- (IJKFFPlayerMessage *) obtainMessage {
+- (IJKFFMoviePlayerMessage *) obtainMessage {
     return [_msgPool obtain];
 }
 
-inline static IJKFFPlayerController *ffplayerRetain(void *arg) {
-    return (__bridge_transfer IJKFFPlayerController *) arg;
+inline static IJKFFMoviePlayerController *ffplayerRetain(void *arg) {
+    return (__bridge_transfer IJKFFMoviePlayerController *) arg;
 }
 
 int media_player_msg_loop(void* arg)
 {
     @autoreleasepool {
         IjkMediaPlayer *mp = (IjkMediaPlayer*)arg;
-        __weak IJKFFPlayerController *ffpController = ffplayerRetain(ijkmp_set_weak_thiz(mp, NULL));
+        __weak IJKFFMoviePlayerController *ffpController = ffplayerRetain(ijkmp_set_weak_thiz(mp, NULL));
 
         while (ffpController && true) {
             @autoreleasepool {
-                IJKFFPlayerMessage *msg = [ffpController obtainMessage];
+                IJKFFMoviePlayerMessage *msg = [ffpController obtainMessage];
                 if (!msg)
                     break;
 

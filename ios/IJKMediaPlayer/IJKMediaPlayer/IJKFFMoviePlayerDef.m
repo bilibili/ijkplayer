@@ -1,5 +1,5 @@
 /*
- * IJKFFPlayerDef.m
+ * IJKFFMoviePlayerDef.m
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -20,16 +20,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import "IJKFFPlayerDef.h"
+#import "IJKFFMoviePlayerDef.h"
 
-@implementation IJKFFPlayerMessage
+@implementation IJKFFMoviePlayerMessage
 @end
 
-@implementation IJKFFPlayerMessagePool{
+@implementation IJKFFMoviePlayerMessagePool{
     NSMutableArray *_array;
 }
 
-- (IJKFFPlayerMessagePool *)init
+- (IJKFFMoviePlayerMessagePool *)init
 {
     self = [super init];
     if (self) {
@@ -38,9 +38,9 @@
     return self;
 }
 
-- (IJKFFPlayerMessage *) obtain
+- (IJKFFMoviePlayerMessage *) obtain
 {
-    IJKFFPlayerMessage *msg = nil;
+    IJKFFMoviePlayerMessage *msg = nil;
 
     @synchronized(self) {
         NSUInteger count = [_array count];
@@ -51,12 +51,12 @@
     }
 
     if (!msg)
-        msg = [[IJKFFPlayerMessage alloc] init];
+        msg = [[IJKFFMoviePlayerMessage alloc] init];
 
     return msg;
 }
 
-- (void) recycle:(IJKFFPlayerMessage *)msg
+- (void) recycle:(IJKFFMoviePlayerMessage *)msg
 {
     if (!msg)
         return;

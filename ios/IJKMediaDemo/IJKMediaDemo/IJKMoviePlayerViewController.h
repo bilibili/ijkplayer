@@ -1,5 +1,5 @@
 //
-//  IJKVideoViewController.h
+//  IJKMoviePlayerController.h
 //  IJKMediaDemo
 //
 //  Created by ZhangRui on 13-9-21.
