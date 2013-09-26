@@ -44,7 +44,7 @@
 /* If a frame duration is longer than this, it will not be duplicated to compensate AV sync */
 #define AV_SYNC_FRAMEDUP_THRESHOLD 0.1
 /* no AV correction is done if too big error */
-#define AV_NOSYNC_THRESHOLD 10.0
+#define AV_NOSYNC_THRESHOLD 100.0
 
 /* maximum audio speed change to get correct sync */
 #define SAMPLE_CORRECTION_PERCENT_MAX 10
@@ -58,7 +58,8 @@
 #define AUDIO_DIFF_AVG_NB   20
 
 /* polls for possible required screen refresh at least this often, should be less than 1/fps */
-#define REFRESH_RATE 0.0029 // 172.0 fps at most (High Level 5.2 1,920×1,080@172.0)
+// 172.0 fps at most (High Level 5.2 1,920×1,080@172.0)
+#define REFRESH_RATE 0.03
 
 /* NOTE: the size must be big enough to compensate the hardware audio buffersize size */
 /* TODO: We assume that a decoded and resampled frame fits into this buffer */
@@ -264,6 +265,8 @@ typedef struct VideoState {
 
     int buffering_on;
     int pause_req;
+
+    int recover_skip_frame;
 } VideoState;
 
 /* options specified by the user */
@@ -292,7 +295,7 @@ static int av_sync_type = AV_SYNC_AUDIO_MASTER;
 static int64_t start_time = AV_NOPTS_VALUE;
 static int64_t duration = AV_NOPTS_VALUE;
 static int workaround_bugs = 1;
-static int fast = 0;
+static int fast = 1;
 static int genpts = 0;
 static int lowres = 0;
 static int idct = FF_IDCT_AUTO;

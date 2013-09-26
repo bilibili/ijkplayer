@@ -895,6 +895,19 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         return 0;
     }
 
+    if (is->recover_skip_frame && (pkt->flags & AV_PKT_FLAG_KEY)) {
+        is->recover_skip_frame = 0;
+        is->video_st->codec->skip_frame = AVDISCARD_NONREF;
+        avcodec_flush_buffers(is->video_st->codec);
+    }
+
+    if (is->frame_drops_early > 0) {
+        is->frame_drops_early = 0;
+        is->video_st->codec->skip_frame = AVDISCARD_NONKEY;
+        avcodec_flush_buffers(is->video_st->codec);
+        return 0;
+    }
+
 #ifdef FFP_SHOW_VDPS
         int64_t start = SDL_GetTickHR();
 #endif
@@ -946,6 +959,9 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
             }
             SDL_UnlockMutex(is->pictq_mutex);
         }
+
+        if (ret)
+            is->recover_skip_frame = 1;
 
         return ret;
     }
@@ -1664,6 +1680,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     }
 
     avctx->skip_loop_filter  = AVDISCARD_ALL;
+    avctx->skip_frame        = AVDISCARD_NONREF;
+    avctx->flags            |= CODEC_FLAG_LOW_DELAY;
 
     avctx->codec_id = codec->id;
     avctx->workaround_bugs   = ffp->workaround_bugs;
