@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E6166C7117EDA43C0006B956 /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6166C7017EDA43C0006B956 /* libIJKMediaPlayer.a */; };
 		E6166C9C17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch in Resources */ = {isa = PBXBuildFile; fileRef = E6166C9B17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch */; };
 		E63FC28A17F04C48003551EB /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC28917F04C48003551EB /* CoreAudio.framework */; };
 		E63FC29117F04C83003551EB /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC28F17F04C83003551EB /* AudioToolbox.framework */; };
@@ -36,6 +35,7 @@
 		E6903F1617EAF70200CFD954 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E6903F1517EAF70200CFD954 /* Default-568h@2x.png */; };
 		E6A9B56417EDA72C00A1A500 /* IJKVideoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A9B56217EDA72C00A1A500 /* IJKVideoViewController.m */; };
 		E6A9B56517EDA72C00A1A500 /* IJKVideoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E6A9B56317EDA72C00A1A500 /* IJKVideoViewController.xib */; };
+		E6F727C017F40DC50043623F /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6166C7017EDA43C0006B956 /* libIJKMediaPlayer.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -89,7 +89,7 @@
 				E6903F0217EAF70200CFD954 /* Foundation.framework in Frameworks */,
 				E63FC29617F060A7003551EB /* libz.dylib in Frameworks */,
 				E63FC29A17F062E8003551EB /* libbz2.dylib in Frameworks */,
-				E6166C7117EDA43C0006B956 /* libIJKMediaPlayer.a in Frameworks */,
+				E6F727C017F40DC50043623F /* libIJKMediaPlayer.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,7 +317,6 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../IJKMediaPlayer;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -343,7 +342,6 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../IJKMediaPlayer;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;

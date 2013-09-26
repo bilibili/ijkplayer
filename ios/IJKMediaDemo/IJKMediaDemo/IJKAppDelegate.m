@@ -8,7 +8,6 @@
 
 #import "IJKAppDelegate.h"
 #import "IJKVideoViewController.h"
-#import "IJKMediaPlayer/IJKMediaModule.h"
 
 @implementation IJKAppDelegate
 

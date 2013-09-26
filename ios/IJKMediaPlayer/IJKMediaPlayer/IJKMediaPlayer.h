@@ -6,6 +6,7 @@
 //  Copyright (c) 2013年 bilibili. All rights reserved.
 //
 
+#import "IJKMediaModule.h"
 #import "IJKMediaPlayback.h"
 #import "IJKMPMoviePlayerController.h"
 #import "IJKFFPlayerController.h"
