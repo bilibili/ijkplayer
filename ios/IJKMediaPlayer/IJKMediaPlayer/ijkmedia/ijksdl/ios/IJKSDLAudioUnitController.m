@@ -151,10 +151,12 @@
         AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(sessionCategory), &sessionCategory);
         AudioSessionSetActive(true);
 
+        /*-
         Float32 preferredBufferDuration = _spec.samples * 1.0f / _spec.freq;
         AudioSessionSetProperty(kAudioSessionProperty_PreferredHardwareIOBufferDuration,
                                 sizeof (preferredBufferDuration),
                                 &preferredBufferDuration);
+         */
 
         _auUnit = auUnit;
     }
@@ -181,7 +183,7 @@
         return;
 
     AudioOutputUnitStop(_auUnit);
-    AudioSessionSetActive(false);
+    // AudioSessionSetActive(false);
 }
 
 - (void)flush
