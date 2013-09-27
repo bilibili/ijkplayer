@@ -266,6 +266,7 @@ typedef struct VideoState {
     int buffering_on;
     int pause_req;
 
+    int dropping_frame;
     int recover_skip_frame;
 } VideoState;
 
@@ -432,6 +433,9 @@ typedef struct FFPlayer {
     int high_water_mark_in_ms;
     int high_water_mark_in_bytes;
     int max_buffer_size;
+
+    int skip_loop_filter;
+    int skip_frame;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -455,7 +459,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->wanted_stream[AVMEDIA_TYPE_SUBTITLE]   = -1;
     ffp->seek_by_bytes          = -1;
     ffp->display_disable        = 0;
-    ffp->show_status            = 1;
+    ffp->show_status            = 0;
     ffp->av_sync_type           = AV_SYNC_AUDIO_MASTER;
     ffp->start_time             = AV_NOPTS_VALUE;
     ffp->duration               = AV_NOPTS_VALUE;
@@ -502,6 +506,9 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->high_water_mark_in_ms    = DEFAULT_HIGH_WATER_MARK_IN_MS;
     ffp->high_water_mark_in_bytes = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
     ffp->max_buffer_size          = MAX_QUEUE_SIZE;
+
+    ffp->skip_loop_filter         = AVDISCARD_ALL;
+    ffp->skip_frame               = AVDISCARD_NONREF;
 
     msg_queue_flush(&ffp->msg_queue);
 }

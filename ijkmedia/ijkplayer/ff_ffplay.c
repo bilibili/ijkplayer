@@ -895,15 +895,31 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         return 0;
     }
 
+    // slower than discard packet directly
+    /*-
     if (is->recover_skip_frame && (pkt->flags & AV_PKT_FLAG_KEY)) {
         ALOGW("skip frame: end\n");
         is->recover_skip_frame = 0;
-        is->video_st->codec->skip_frame = AVDISCARD_DEFAULT;
+        is->video_st->codec->skip_frame = ffp->skip_frame;
         avcodec_flush_buffers(is->video_st->codec);
+    }
+     */
+
+    if (is->dropping_frame) {
+        if (pkt->flags & AV_PKT_FLAG_KEY) {
+            ALOGW("skip frame(fast): end\n");
+            is->dropping_frame = 0;
+            is->recover_skip_frame = 0;
+            is->video_st->codec->skip_frame = ffp->skip_frame;
+            avcodec_flush_buffers(is->video_st->codec);
+        } else {
+            return 0;
+        }
     }
 
     if (is->frame_drops_early > 12) {
         ALOGW("skip frame: start\n");
+        is->dropping_frame = 1;
         is->frame_drops_early = 0;
         is->video_st->codec->skip_frame = AVDISCARD_NONKEY;
         avcodec_flush_buffers(is->video_st->codec);
@@ -963,7 +979,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         }
 
         if (ret && !is->recover_skip_frame) {
-            ALOGW("skip frame: recover");
+            ALOGW("skip frame: recover\n");
             is->recover_skip_frame = 1;
         }
 
@@ -1683,7 +1699,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         return -1;
     }
 
-    avctx->skip_loop_filter  = AVDISCARD_ALL;
+    avctx->skip_frame        = ffp->skip_frame;
+    avctx->skip_loop_filter  = ffp->skip_loop_filter;
 
     avctx->codec_id = codec->id;
     avctx->workaround_bugs   = ffp->workaround_bugs;
