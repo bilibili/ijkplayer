@@ -267,7 +267,6 @@ typedef struct VideoState {
     int pause_req;
 
     int dropping_frame;
-    int recover_skip_frame;
 } VideoState;
 
 /* options specified by the user */

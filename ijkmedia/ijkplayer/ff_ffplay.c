@@ -895,21 +895,10 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         return 0;
     }
 
-    // slower than discard packet directly
-    /*-
-    if (is->recover_skip_frame && (pkt->flags & AV_PKT_FLAG_KEY)) {
-        ALOGW("skip frame: end\n");
-        is->recover_skip_frame = 0;
-        is->video_st->codec->skip_frame = ffp->skip_frame;
-        avcodec_flush_buffers(is->video_st->codec);
-    }
-     */
-
     if (is->dropping_frame) {
         if (pkt->flags & AV_PKT_FLAG_KEY) {
             ALOGW("skip frame(fast): end\n");
             is->dropping_frame = 0;
-            is->recover_skip_frame = 0;
             is->video_st->codec->skip_frame = ffp->skip_frame;
             avcodec_flush_buffers(is->video_st->codec);
         } else {
@@ -976,11 +965,6 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
                 }
             }
             SDL_UnlockMutex(is->pictq_mutex);
-        }
-
-        if (ret && !is->recover_skip_frame) {
-            ALOGW("skip frame: recover\n");
-            is->recover_skip_frame = 1;
         }
 
         return ret;
