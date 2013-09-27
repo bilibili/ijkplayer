@@ -105,6 +105,39 @@ void ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc)
     MPTRACE("ijkmp_set_overlay_format()=void\n");
 }
 
+void ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value)
+{
+    assert(mp);
+
+    MPTRACE("ijkmp_set_format_option()\n");
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_format_option(mp->ffplayer, name, value);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_set_format_option()=void\n");
+}
+
+void ijkmp_set_codec_option(IjkMediaPlayer *mp, const char *name, const char *value)
+{
+    assert(mp);
+
+    MPTRACE("ijkmp_set_codec_option()\n");
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_codec_option(mp->ffplayer, name, value);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_set_codec_option()=void\n");
+}
+
+void ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *value)
+{
+    assert(mp);
+
+    MPTRACE("ijkmp_set_sws_option()\n");
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_sws_option(mp->ffplayer, name, value);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_set_sws_option()=void\n");
+}
+
 void ijkmp_shutdown_l(IjkMediaPlayer *mp)
 {
     assert(mp);
@@ -140,17 +173,6 @@ void ijkmp_reset(IjkMediaPlayer *mp)
     MPTRACE("ijkmp_reset()\n");
     pthread_mutex_lock(&mp->mutex);
     ijkmp_reset_l(mp);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_reset()=void\n");
-}
-
-void ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value)
-{
-    assert(mp);
-
-    MPTRACE("ijkmp_reset()\n");
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_format_option(mp->ffplayer, name, value);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_reset()=void\n");
 }

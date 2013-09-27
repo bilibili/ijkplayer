@@ -896,12 +896,14 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
     }
 
     if (is->recover_skip_frame && (pkt->flags & AV_PKT_FLAG_KEY)) {
+        ALOGW("skip frame: end\n");
         is->recover_skip_frame = 0;
-        is->video_st->codec->skip_frame = AVDISCARD_NONREF;
+        is->video_st->codec->skip_frame = AVDISCARD_DEFAULT;
         avcodec_flush_buffers(is->video_st->codec);
     }
 
-    if (is->frame_drops_early > 0) {
+    if (is->frame_drops_early > 12) {
+        ALOGW("skip frame: start\n");
         is->frame_drops_early = 0;
         is->video_st->codec->skip_frame = AVDISCARD_NONKEY;
         avcodec_flush_buffers(is->video_st->codec);
@@ -960,8 +962,10 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
             SDL_UnlockMutex(is->pictq_mutex);
         }
 
-        if (ret)
+        if (ret && !is->recover_skip_frame) {
+            ALOGW("skip frame: recover");
             is->recover_skip_frame = 1;
+        }
 
         return ret;
     }
@@ -1680,8 +1684,6 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     }
 
     avctx->skip_loop_filter  = AVDISCARD_ALL;
-    avctx->skip_frame        = AVDISCARD_NONREF;
-    avctx->flags            |= CODEC_FLAG_LOW_DELAY;
 
     avctx->codec_id = codec->id;
     avctx->workaround_bugs   = ffp->workaround_bugs;
@@ -2546,6 +2548,22 @@ void ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value)
     av_dict_set(&ffp->format_opts, name, value, 0);
 }
 
+void ffp_set_codec_option(FFPlayer *ffp, const char *name, const char *value)
+{
+    if (!ffp)
+        return;
+
+    av_dict_set(&ffp->codec_opts, name, value, 0);
+}
+
+void ffp_set_sws_option(FFPlayer *ffp, const char *name, const char *value)
+{
+    if (!ffp)
+        return;
+
+    av_dict_set(&ffp->sws_opts, name, value, 0);
+}
+
 void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
 {
     switch (chroma_fourcc) {
@@ -2716,11 +2734,13 @@ void ffp_toggle_buffering_l(FFPlayer *ffp, int buffering_on)
     if (buffering_on && !is->buffering_on) {
         ALOGD("ffp_toggle_buffering_l: start\n");
         is->buffering_on = 1;
+        is->frame_drops_early = 0;
         stream_update_pause_l(ffp);
         ffp_notify_msg1(ffp, FFP_MSG_BUFFERING_START);
     } else if (!buffering_on && is->buffering_on){
         ALOGD("ffp_toggle_buffering_l: end\n");
         is->buffering_on = 0;
+        is->frame_drops_early = 0;
         stream_update_pause_l(ffp);
         ffp_notify_msg1(ffp, FFP_MSG_BUFFERING_END);
     }

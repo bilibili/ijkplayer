@@ -38,6 +38,8 @@ void      ffp_reset(FFPlayer *ffp);
 
 /* set options before ffp_prepare_async_l() */
 void      ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value);
+void      ffp_set_codec_option(FFPlayer *ffp, const char *name, const char *value);
+void      ffp_set_sws_option(FFPlayer *ffp, const char *name, const char *value);
 void      ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc);
 
 /* playback controll */

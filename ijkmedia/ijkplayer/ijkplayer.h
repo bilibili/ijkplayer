@@ -146,6 +146,9 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*));
 void            ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc);
+void            ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value);
+void            ijkmp_set_codec_option(IjkMediaPlayer *mp, const char *name, const char *value);
+void            ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *value);
 
 // preferred to be called explicity, can be called multiple times
 // NOTE: ijkmp_shutdown may block thread
@@ -168,8 +171,6 @@ bool            ijkmp_is_playing(IjkMediaPlayer *mp);
 long            ijkmp_get_current_position(IjkMediaPlayer *mp);
 long            ijkmp_get_duration(IjkMediaPlayer *mp);
 void            ijkmp_reset(IjkMediaPlayer *mp);
-
-void            ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value);
 
 void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 

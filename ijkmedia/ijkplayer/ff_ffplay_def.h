@@ -28,7 +28,7 @@
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
 
-#define DEFAULT_HIGH_WATER_MARK_IN_MS    (5 * 1000)
+#define DEFAULT_HIGH_WATER_MARK_IN_MS    (10 * 1000)
 #define DEFAULT_HIGH_WATER_MARK_IN_BYTES (128 * 1024)
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 50000
@@ -295,7 +295,7 @@ static int av_sync_type = AV_SYNC_AUDIO_MASTER;
 static int64_t start_time = AV_NOPTS_VALUE;
 static int64_t duration = AV_NOPTS_VALUE;
 static int workaround_bugs = 1;
-static int fast = 1;
+static int fast = 0;
 static int genpts = 0;
 static int lowres = 0;
 static int idct = FF_IDCT_AUTO;
@@ -455,12 +455,12 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->wanted_stream[AVMEDIA_TYPE_SUBTITLE]   = -1;
     ffp->seek_by_bytes          = -1;
     ffp->display_disable        = 0;
-    ffp->show_status            = 0;
+    ffp->show_status            = 1;
     ffp->av_sync_type           = AV_SYNC_AUDIO_MASTER;
     ffp->start_time             = AV_NOPTS_VALUE;
     ffp->duration               = AV_NOPTS_VALUE;
     ffp->workaround_bugs        = 1;
-    ffp->fast                   = 0;
+    ffp->fast                   = 1;
     ffp->genpts                 = 0;
     ffp->lowres                 = 0;
     ffp->idct                   = FF_IDCT_AUTO;
