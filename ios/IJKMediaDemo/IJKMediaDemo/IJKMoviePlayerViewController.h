@@ -10,7 +10,7 @@
 
 @class IJKMediaControl;
 
-@interface IJKVideoViewController : UIViewController <IJKMediaPlaybackDelegate>
+@interface IJKVideoViewController : UIViewController
 
 @property(atomic, retain) id<IJKMediaPlayback> player;
 

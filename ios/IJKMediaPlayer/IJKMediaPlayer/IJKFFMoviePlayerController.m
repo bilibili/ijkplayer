@@ -24,11 +24,15 @@
 #import "IJKFFMoviePlayerDef.h"
 #import "IJKMediaPlayback.h"
 
-
 @implementation IJKFFMoviePlayerController {
     NSURL *_url;
     IjkMediaPlayer *_mediaPlayer;
     IJKFFMoviePlayerMessagePool *_msgPool;
+
+    NSInteger _videoWidth;
+    NSInteger _videoHeight;
+    NSInteger _sampleAspectRatioNumerator;
+    NSInteger _sampleAspectRatioDenominator;
 }
 
 @synthesize view = _view;
@@ -36,7 +40,9 @@
 @synthesize duration;
 @synthesize playableDuration;
 
-@synthesize playbackDelegate;
+@synthesize isPreparedToPlay;
+@synthesize playbackState = _playbackState;
+@synthesize loadState = _loadState;
 
 - (id)initWithContentURL:(NSURL *)aUrl
 {
@@ -131,49 +137,82 @@
     if (!msg)
         return;
 
-    id<IJKMediaPlaybackDelegate> delegate = self.playbackDelegate;
-    if (!delegate)
-        return;
-
     AVMessage *avmsg = &msg->_msg;
     switch (avmsg->what) {
         case FFP_MSG_FLUSH:
             break;
-        case FFP_MSG_ERROR:
+        case FFP_MSG_ERROR: {
             NSLog(@"FFP_MSG_ERROR: %d", avmsg->arg1);
-            if ([delegate respondsToSelector:@selector(playerDidFail:)])
-                [delegate playerDidFail:avmsg->arg1];
+
+            _playbackState = MPMoviePlaybackStateStopped;
+
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:self];
+
+            [[NSNotificationCenter defaultCenter]
+                postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
+                object:self
+                userInfo:@{
+                    MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError),
+                    @"error": @(avmsg->arg1)}];
             break;
+        }
         case FFP_MSG_PREPARED:
             NSLog(@"FFP_MSG_PREPARED:");
-            if ([delegate respondsToSelector:@selector(playerDidPrepare:)])
-                [delegate playerDidPrepare];
+
+            isPreparedToPlay = YES;
+
+            [[NSNotificationCenter defaultCenter] postNotificationName:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
+
             break;
-        case FFP_MSG_COMPLETED:
-            NSLog(@"FFP_MSG_COMPLETED:");
-            if ([delegate respondsToSelector:@selector(playerDidComplete:)])
-                [delegate playerDidComplete];
+        case FFP_MSG_COMPLETED: {
+
+            _playbackState = MPMoviePlaybackStateStopped;
+
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:self];
+
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
+             object:self
+             userInfo:@{MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError)}];
             break;
+        }
         case FFP_MSG_VIDEO_SIZE_CHANGED:
             NSLog(@"FFP_MSG_VIDEO_SIZE_CHANGED: %d, %d", avmsg->arg1, avmsg->arg2);
-            if ([delegate respondsToSelector:@selector(playerDidChangeVideoSize:)])
-                [delegate playerDidChangeVideoSize:IJKSizeMake(avmsg->arg1, avmsg->arg2)];
+            if (avmsg->arg1 > 0)
+                _videoWidth = avmsg->arg1;
+            if (avmsg->arg2 > 0)
+                _videoHeight = avmsg->arg2;
+            // TODO: notify size changed
             break;
         case FFP_MSG_SAR_CHANGED:
             NSLog(@"FFP_MSG_SAR_CHANGED: %d, %d", avmsg->arg1, avmsg->arg2);
-            if ([delegate respondsToSelector:@selector(playerDidChangeSampleAspectRatio:)])
-                [delegate playerDidChangeSampleAspectRatio:IJKSampleAspectRatioMake(avmsg->arg1, avmsg->arg2)];
+            if (avmsg->arg1 > 0)
+                _sampleAspectRatioNumerator = avmsg->arg1;
+            if (avmsg->arg2 > 0)
+                _sampleAspectRatioDenominator = avmsg->arg2;
             break;
-        case FFP_MSG_BUFFERING_START:
+        case FFP_MSG_BUFFERING_START: {
             NSLog(@"FFP_MSG_BUFFERING_START:");
-            if ([delegate respondsToSelector:@selector(playerDidStartBuffering:)])
-                [delegate playerDidStartBuffering];
+
+            _loadState = MPMovieLoadStateStalled;
+
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
+             object:self];
             break;
-        case FFP_MSG_BUFFERING_END:
+        }
+        case FFP_MSG_BUFFERING_END: {
             NSLog(@"FFP_MSG_BUFFERING_END:");
-            if ([delegate respondsToSelector:@selector(playerDidStopBuffering:)])
-                [delegate playerDidStopBuffering];
+
+            _loadState = MPMovieLoadStatePlaythroughOK;
+
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
+             object:self];
             break;
+        }
         case FFP_MSG_BUFFERING_UPDATE:
             // NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %d", avmsg->arg1, avmsg->arg2);
             break;
@@ -184,12 +223,10 @@
             // NSLog(@"FFP_MSG_BUFFERING_TIME_UPDATE: %d", avmsg->arg1);
             break;
         case FFP_MSG_SEEK_COMPLETE:
-            NSLog(@"FFP_MSG_SEEK_COMPLETE:");
-            if ([delegate respondsToSelector:@selector(playerDidSeek:)])
-                [delegate playerDidSeek];
+            // NSLog(@"FFP_MSG_SEEK_COMPLETE:");
             break;
         default:
-            NSLog(@"unknown FFP_MSG_xxx(%d)", avmsg->what);
+            // NSLog(@"unknown FFP_MSG_xxx(%d)", avmsg->what);
             break;
     }
 
@@ -210,7 +247,7 @@ int media_player_msg_loop(void* arg)
         IjkMediaPlayer *mp = (IjkMediaPlayer*)arg;
         __weak IJKFFMoviePlayerController *ffpController = ffplayerRetain(ijkmp_set_weak_thiz(mp, NULL));
 
-        while (ffpController && true) {
+        while (ffpController) {
             @autoreleasepool {
                 IJKFFMoviePlayerMessage *msg = [ffpController obtainMessage];
                 if (!msg)

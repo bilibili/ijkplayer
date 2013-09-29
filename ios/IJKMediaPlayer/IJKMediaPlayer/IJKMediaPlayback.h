@@ -61,22 +61,6 @@ IJKSampleAspectRatioMake(NSInteger numerator, NSInteger denominator)
 }
 
 
-#pragma mark IJKMediaPlaybackDelegate
-
-@protocol IJKMediaPlaybackDelegate <NSObject>
-
-@optional
-- (void)playerDidFail:(NSInteger)error;
-- (void)playerDidPrepare;
-- (void)playerDidComplete;
-- (void)playerDidChangeVideoSize:(IJKSize)size;
-- (void)playerDidChangeSampleAspectRatio:(IJKSampleAspectRatio)sampleAspectRatio;
-- (void)playerDidStartBuffering;
-- (void)playerDidStopBuffering;
-- (void)playerDidSeek;
-
-@end
-
 
 #pragma mark IJKMediaPlayback
 
@@ -93,6 +77,22 @@ IJKSampleAspectRatioMake(NSInteger numerator, NSInteger denominator)
 @property(nonatomic, readonly)  NSTimeInterval duration;
 @property(nonatomic, readonly)  NSTimeInterval playableDuration;
 
-@property(nonatomic, weak)      id<IJKMediaPlaybackDelegate> playbackDelegate;
+@property(nonatomic, readonly)  BOOL isPreparedToPlay;
+@property(nonatomic, readonly)  MPMoviePlaybackState playbackState;
+@property(nonatomic, readonly)  MPMovieLoadState loadState;
+
+#pragma mark Notifications
+
+#ifdef __cplusplus
+#define IJK_EXTERN extern "C" __attribute__((visibility ("default")))
+#else
+#define IJK_EXTERN extern __attribute__((visibility ("default")))
+#endif
+
+IJK_EXTERN NSString *const IJKMediaPlaybackIsPreparedToPlayDidChangeNotification;
+
+IJK_EXTERN NSString *const IJKMoviePlayerLoadStateDidChangeNotification;
+IJK_EXTERN NSString *const IJKMoviePlayerPlaybackDidFinishNotification;
+IJK_EXTERN NSString *const IJKMoviePlayerPlaybackStateDidChangeNotification;
 
 @end

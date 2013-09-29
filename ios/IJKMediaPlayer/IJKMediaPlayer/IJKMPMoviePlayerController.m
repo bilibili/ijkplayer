@@ -29,7 +29,9 @@
 @dynamic duration;
 @dynamic playableDuration;
 
-@synthesize playbackDelegate;
+@dynamic isPreparedToPlay;
+@dynamic playbackState;
+@dynamic loadState;
 
 - (id)initWithContentURL:(NSURL *)aUrl
 {
@@ -43,6 +45,11 @@
     return self;
 }
 
+- (void)dealloc
+{
+    [self removeMovieNotificationObservers];
+}
+
 - (BOOL)isPlaying
 {
     switch (self.playbackState) {
@@ -51,6 +58,61 @@
     default:
         return NO;
     }
+}
+
+#pragma mark Movie Notification Handlers
+
+/* Register observers for the various movie object notifications. */
+-(void)installMovieNotificationObservers
+{
+	[[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:)
+                                                 name:MPMediaPlaybackIsPreparedToPlayDidChangeNotification
+                                               object:self];
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(dispatchMPMoviePlayerLoadStateDidChangeNotification:)
+                                                 name:MPMoviePlayerLoadStateDidChangeNotification
+                                               object:self];
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(dispatchMPMoviePlayerPlaybackDidFinishNotification:)
+                                                 name:MPMoviePlayerPlaybackDidFinishNotification
+                                               object:self];
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(dispatchMPMoviePlayerPlaybackStateDidChangeNotification:)
+                                                 name:MPMoviePlayerPlaybackStateDidChangeNotification
+                                               object:self];
+}
+
+- (void)removeMovieNotificationObservers
+{
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
+
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerLoadStateDidChangeNotification object:self];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:self];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerPlaybackStateDidChangeNotification object:self];
+}
+
+- (void)dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:(NSNotification*)notification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification object:notification.object userInfo:notification.userInfo];
+}
+
+- (void)dispatchMPMoviePlayerLoadStateDidChangeNotification:(NSNotification*)notification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification object:notification.object userInfo:notification.userInfo];
+}
+
+- (void)dispatchMPMoviePlayerPlaybackDidFinishNotification:(NSNotification*)notification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:notification.object userInfo:notification.userInfo];
+}
+
+- (void)dispatchMPMoviePlayerPlaybackStateDidChangeNotification:(NSNotification*)notification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification object:notification.object userInfo:notification.userInfo];
 }
 
 @end
