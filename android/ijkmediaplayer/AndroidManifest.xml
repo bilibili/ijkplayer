@@ -1,7 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="tv.danmaku.ijk.media.lib"
-    android:versionCode="5"
-    android:versionName="0.0.5-git" >
+    package="tv.danmaku.ijk.media.lib" >
 
     <uses-sdk
         android:minSdkVersion="9"

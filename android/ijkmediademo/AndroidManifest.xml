@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tv.danmaku.ijk.media.demo"
     android:versionCode="5"
-    android:versionName="0.0.5-git" >
+    android:versionName="0.0.5" >
 
     <uses-sdk
         android:minSdkVersion="9"
