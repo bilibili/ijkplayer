@@ -18,9 +18,9 @@ do_lipo () {
 }
 
 
-if [ $FF_TARGET == "armv7" -o $FF_TARGET == "armv7s" -o $FF_TARGET == "i386" ]; then
+if [ "$FF_TARGET" == "armv7" -o "$FF_TARGET" == "armv7s" -o "$FF_TARGET" == "i386" ]; then
     sh tools/do-compile-ffmpeg.sh $FF_TARGET
-elif [ $FF_TARGET == "all" ]; then
+elif [ "$FF_TARGET" == "all" ]; then
     sh tools/do-compile-ffmpeg.sh armv7
     sh tools/do-compile-ffmpeg.sh armv7s
     sh tools/do-compile-ffmpeg.sh i386
@@ -34,7 +34,7 @@ elif [ $FF_TARGET == "all" ]; then
 
     cp -R $UNI_BUILD_ROOT/build/ffmpeg-armv7/output/include $UNI_BUILD_ROOT/build/universal/
 
-elif [ $FF_TARGET == "clean" ]; then
+elif [ "$FF_TARGET" == "clean" ]; then
     cd ffmpeg-armv7 && git clean -xdf && cd -
     cd ffmpeg-armv7s && git clean -xdf && cd -
     cd ffmpeg-i386 && git clean -xdf && cd -
