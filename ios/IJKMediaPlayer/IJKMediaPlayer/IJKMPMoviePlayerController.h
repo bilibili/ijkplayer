@@ -1,8 +1,7 @@
-/*****************************************************************************
- * ijksdl_android.h
- *****************************************************************************
+/*
+ * IJKMPMoviePlayerController.h
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,14 +20,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_ANDROID_H
-#define IJKSDL__IJKSDL_ANDROID_H
+#import "IJKMediaPlayback.h"
 
-#include "ijksdl.h"
+@interface IJKMPMoviePlayerController : MPMoviePlayerController <IJKMediaPlayback>
 
-#include "android/ijksdl_aout_android_audiotrack.h"
+- (id)initWithContentURL:(NSURL *)aUrl;
 
-#include "android/ijksdl_vout_android_nativewindow.h"
-#include "android/ijksdl_vout_android_surface.h"
-
-#endif
+@end

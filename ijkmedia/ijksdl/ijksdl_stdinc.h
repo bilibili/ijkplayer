@@ -24,6 +24,7 @@
 #ifndef IJKSDL__IJKSDL_STDINC_H
 #define IJKSDL__IJKSDL_STDINC_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 typedef int8_t      Sint8;

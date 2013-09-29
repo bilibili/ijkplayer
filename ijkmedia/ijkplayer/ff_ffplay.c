@@ -29,15 +29,21 @@
 
 // FIXME: 9 work around NDKr8e or gcc4.7 bug
 // isnan() may not recognize some double NAN, so we test both double and float
+#if defined(__ANDROID__)
 #ifdef isnan
 #undef isnan
 #endif
 #define isnan(x) (isnan((double)(x)) || isnanf((float)(x)))
+#endif
 
+#if defined(__ANDROID__)
 #define printf(...) ALOGD(__VA_ARGS__)
+#endif
 
 // #define FFP_SHOW_FPS
 // #define FFP_SHOW_VDPS
+// #define FFP_SHOW_AUDIO_DELAY
+// #define FFP_SHOW_DEMUX_CACHE
 
 static AVPacket flush_pkt;
 static AVPacket eof_pkt;
@@ -247,7 +253,7 @@ static void video_image_display2(FFPlayer *ffp)
         g_fps_counter++;
         int64_t avg_frame_time = g_fps_total_time / g_fps_counter;
         double fps = 1.0f / avg_frame_time * 1000;
-        ALOGE("fps:  [%f][%d] %"PRId64" ms/frame, fps=%f, +%"PRId64,
+        ALOGE("fps:  [%f][%d] %"PRId64" ms/frame, fps=%f, +%"PRId64"\n",
             vp->pts, g_fps_counter, (int64_t)avg_frame_time, fps, dur);
 #endif
     }
@@ -263,9 +269,9 @@ static void stream_close(FFPlayer *ffp)
     int i;
     /* XXX: use a special url_shutdown call to abort parse cleanly */
     is->abort_request = 1;
-    ALOGW("wait for read_tid");
+    ALOGW("wait for read_tid\n");
     SDL_WaitThread(is->read_tid, NULL);
-    ALOGW("wait for video_refresh_tid");
+    ALOGW("wait for video_refresh_tid\n");
     SDL_WaitThread(is->video_refresh_tid, NULL);
 
     packet_queue_destroy(&is->videoq);
@@ -436,9 +442,9 @@ static void stream_toggle_pause_l(FFPlayer *ffp, int pause_on)
         }
 #endif
         set_clock(&is->vidclk, get_clock(&is->vidclk), is->vidclk.serial);
-        // ALOGE("stream_toggle_pause_l: pause -> start");
+        // ALOGE("stream_toggle_pause_l: pause -> start\n");
     } else {
-        // ALOGE("stream_toggle_pause_l: %d", pause_on);
+        // ALOGE("stream_toggle_pause_l: %d\n", pause_on);
     }
     set_clock(&is->extclk, get_clock(&is->extclk), is->extclk.serial);
     is->paused = is->audclk.paused = is->vidclk.paused = is->extclk.paused = pause_on;
@@ -449,19 +455,19 @@ static void stream_toggle_pause_l(FFPlayer *ffp, int pause_on)
 static void stream_update_pause_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
-    // ALOGE("stream_update_pause_l: (!%d && (%d || %d)", is->step, is->pause_req, is->buffering_on);
+    // ALOGE("stream_update_pause_l: (!%d && (%d || %d)\n", is->step, is->pause_req, is->buffering_on);
     if (!is->step && (is->pause_req || is->buffering_on)) {
-        // ALOGE("stream_update_pause_l: 1");
+        // ALOGE("stream_update_pause_l: 1\n");
         stream_toggle_pause_l(ffp, 1);
     } else {
-        // ALOGE("stream_update_pause_l: 0");
+        // ALOGE("stream_update_pause_l: 0\n");
         stream_toggle_pause_l(ffp, 0);
     }
 }
 
 static void toggle_pause_l(FFPlayer *ffp, int pause_on)
 {
-    // ALOGE("toggle_pause_l");
+    // ALOGE("toggle_pause_l\n");
     VideoState *is = ffp->is;
     is->pause_req = pause_on;
     ffp->auto_start = !pause_on;
@@ -480,7 +486,7 @@ static void step_to_next_frame_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
     /* if the stream is paused unpause it, then step */
-    // ALOGE("step_to_next_frame");
+    // ALOGE("step_to_next_frame\n");
     if (is->paused)
         stream_toggle_pause_l(ffp, 0);
     is->step = 1;
@@ -488,7 +494,7 @@ static void step_to_next_frame_l(FFPlayer *ffp)
 
 static double compute_target_delay(double delay, VideoState *is)
 {
-    double sync_threshold, diff;
+    double sync_threshold, diff = 0.0f;
 
     /* update delay to follow master synchronisation source */
     if (get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER) {
@@ -576,7 +582,7 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
             is->last_vis_time = time;
         }
         /*
-        ALOGE("remaining[1] %.3f = FFMIN(%.3f, %.3f + %.3f - %.3f)",
+        ALOGE("remaining[1] %.3f = FFMIN(%.3f, %.3f + %.3f - %.3f)\n",
               *remaining_time,
               is->last_vis_time,
               ffp->rdftspeed,
@@ -736,7 +742,7 @@ static void alloc_picture(FFPlayer *ffp)
     video_open(ffp, 0, vp);
 #endif
 
-    vp->bmp = SDL_VoutFFmpeg_CreateOverlay(vp->width, vp->height,
+    vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height,
                                    ffp->overlay_format,
                                    ffp->vout);
 #ifdef FFP_MERGE
@@ -889,6 +895,26 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         return 0;
     }
 
+    if (is->dropping_frame) {
+        if (pkt->flags & AV_PKT_FLAG_KEY) {
+            ALOGW("skip frame(fast): end\n");
+            is->dropping_frame = 0;
+            is->video_st->codec->skip_frame = ffp->skip_frame;
+            avcodec_flush_buffers(is->video_st->codec);
+        } else {
+            return 0;
+        }
+    }
+
+    if (is->frame_drops_early > 12) {
+        ALOGW("skip frame: start\n");
+        is->dropping_frame = 1;
+        is->frame_drops_early = 0;
+        is->video_st->codec->skip_frame = AVDISCARD_NONKEY;
+        avcodec_flush_buffers(is->video_st->codec);
+        return 0;
+    }
+
 #ifdef FFP_SHOW_VDPS
         int64_t start = SDL_GetTickHR();
 #endif
@@ -900,7 +926,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         g_vdps_counter++;
         int64_t avg_frame_time = g_vdps_total_time / g_vdps_counter;
         double fps = 1.0f / avg_frame_time * 1000;
-        ALOGE("vdps: [%f][%d] %"PRId64" ms/frame, vdps=%f, +%"PRId64,
+        ALOGE("vdps: [%f][%d] %"PRId64" ms/frame, vdps=%f, +%"PRId64"\n",
             frame->pts, g_vdps_counter, (int64_t)avg_frame_time, fps, dur);
 #endif
 
@@ -1470,6 +1496,7 @@ static int audio_decode_frame(FFPlayer *ffp)
             else
                 is->audio_clock = NAN;
             is->audio_clock_serial = is->audio_pkt_temp_serial;
+#ifdef FFP_SHOW_AUDIO_DELAY
 #ifdef DEBUG
             {
                 static double last_clock;
@@ -1478,6 +1505,7 @@ static int audio_decode_frame(FFPlayer *ffp)
                        is->audio_clock, audio_clock0);
                 last_clock = is->audio_clock;
             }
+#endif
 #endif
             return resampled_data_size;
         }
@@ -1535,7 +1563,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
            is->audio_buf_index = 0;
         }
         if (is->audio_pkt_temp_serial != is->audioq.serial) {
-            // ALOGE("aout_cb: flush");
+            // ALOGE("aout_cb: flush\n");
             is->audio_buf_index = is->audio_buf_size;
             memset(stream, 0, len);
             stream += len;
@@ -1655,7 +1683,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         return -1;
     }
 
-    avctx->skip_loop_filter  = AVDISCARD_ALL;
+    avctx->skip_frame        = ffp->skip_frame;
+    avctx->skip_loop_filter  = ffp->skip_loop_filter;
 
     avctx->codec_id = codec->id;
     avctx->workaround_bugs   = ffp->workaround_bugs;
@@ -1742,7 +1771,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         is->video_st = ic->streams[stream_index];
 
         packet_queue_start(&is->videoq);
-        is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp);
+        is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp, "ff_video");
         is->queue_attachments_req = 1;
         break;
     // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
@@ -1915,7 +1944,7 @@ static int read_thread(void *arg)
         ffp->seek_by_bytes = !!(ic->iformat->flags & AVFMT_TS_DISCONT) && strcmp("ogg", ic->iformat->name);
 
     is->max_frame_duration = (ic->iformat->flags & AVFMT_TS_DISCONT) ? 10.0 : 3600.0;
-    ALOGI("max_frame_duration: %.3f", is->max_frame_duration);
+    ALOGI("max_frame_duration: %.3f\n", is->max_frame_duration);
 
 #ifdef FFP_MERGE
     if (!window_title && (t = av_dict_get(ic->metadata, "title", NULL, 0)))
@@ -2064,7 +2093,7 @@ static int read_thread(void *arg)
             eof = 0;
             SDL_LockMutex(ffp->is->play_mutex);
             if (ffp->auto_start) {
-                // ALOGE("seek: auto_start");
+                // ALOGE("seek: auto_start\n");
                 is->pause_req = 0;
                 is->buffering_on = 1;
                 ffp->auto_start = 0;
@@ -2101,7 +2130,7 @@ static int read_thread(void *arg)
                 ))) {
 #endif
             if (!eof) {
-                // ALOGE("ffp_toggle_buffering: full");
+                // ALOGE("ffp_toggle_buffering: full\n");
                 ffp_toggle_buffering(ffp, 0);
             }
             /* wait 10 ms */
@@ -2148,7 +2177,7 @@ static int read_thread(void *arg)
                         ffp->auto_start = 0;
 
                         // TODO: 0 it's a bit early to notify complete here
-                        // ALOGE("ffp_toggle_buffering: eof");
+                        // ALOGE("ffp_toggle_buffering: eof\n");
                         ffp_toggle_buffering(ffp, 0);
                         toggle_pause(ffp, 1);
                         ffp_notify_msg1(ffp, FFP_MSG_COMPLETED);
@@ -2176,7 +2205,7 @@ static int read_thread(void *arg)
             } else if (ic->pb && ic->pb->error) {
                 // TODO: 9 notify error until a/v finished
                 last_error = ic->pb->error;
-                ALOGE("av_read_frame error: %d", ic->pb->error);
+                ALOGE("av_read_frame error: %d\n", ic->pb->error);
                 ffp_notify_msg2(ffp, FFP_MSG_ERROR, last_error);
                 break;
             }
@@ -2206,15 +2235,14 @@ static int read_thread(void *arg)
         }
 
         do {
-            int     buf_percent      = INT_MAX;
-            int     buf_size_percent = INT_MAX;
-            int     buf_time_percent = INT_MAX;
+            int     buf_size_percent = -1;
+            int     buf_time_percent = -1;
             int     hwm_in_bytes     = ffp->high_water_mark_in_bytes;
             int     hwm_in_ms        = ffp->high_water_mark_in_ms;
             if (hwm_in_ms > 0) {
-                int     cached_duration_in_ms = INT_MAX;
-                int64_t audio_cached_duration = INT_MAX;
-                int64_t video_cached_duration = INT_MAX;
+                int     cached_duration_in_ms = -1;
+                int64_t audio_cached_duration = -1;
+                int64_t video_cached_duration = -1;
 
                 if (is->audio_st && is->audio_st->time_base.den > 0 && is->audio_st->time_base.num > 0)
                     audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
@@ -2222,11 +2250,20 @@ static int read_thread(void *arg)
                 if (is->video_st && is->video_st->time_base.den > 0 && is->video_st->time_base.num > 0)
                     video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
 
-                cached_duration_in_ms = IJKMIN(video_cached_duration, audio_cached_duration);
-                if (cached_duration_in_ms < INT_MAX) {
+                if (video_cached_duration >= 0 && audio_cached_duration >= 0) {
+                    cached_duration_in_ms = IJKMAX(video_cached_duration, audio_cached_duration);
+                } else if (video_cached_duration >= 0) {
+                    cached_duration_in_ms = video_cached_duration;
+                } else if (audio_cached_duration >= 0) {
+                    cached_duration_in_ms = audio_cached_duration;
+                }
+
+                if (cached_duration_in_ms >= 0) {
                     buf_time_percent = av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
                     if (last_buffered_time_percentage != buf_time_percent) {
-                        // ALOGE("time cache=%%%d (%d/%d)", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
+#ifdef FFP_SHOW_DEMUX_CACHE
+                        ALOGE("time cache=%%%d (%d/%d)\n", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
+#endif
                         last_buffered_time_percentage = buf_time_percent;
                         ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_duration_in_ms, hwm_in_ms);
                     }
@@ -2237,15 +2274,22 @@ static int read_thread(void *arg)
             if (hwm_in_bytes > 0) {
                 buf_size_percent = av_rescale(cached_size, 1005, hwm_in_bytes * 10);
                 if (last_buffered_size_percentage != buf_size_percent) {
-                    // ALOGE("size cache=%%%d (%d/%d)",buf_size_percent, cached_size, hwm_in_bytes);
+#ifdef FFP_SHOW_DEMUX_CACHE
+                    ALOGE("size cache=%%%d (%d/%d)\n", buf_size_percent, cached_size, hwm_in_bytes);
+#endif
                     last_buffered_size_percentage = buf_size_percent;
-                    ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_size, hwm_in_bytes);
+                    ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_BYTES_UPDATE, cached_size, hwm_in_bytes);
                 }
             }
 
-            buf_percent = IJKMIN(buf_size_percent, buf_time_percent);
-            if (buf_percent >= 100)
-                ffp_toggle_buffering(ffp, 0);
+            if (buf_time_percent >= 0) {
+                // alwas depend on cache duration if valid
+                if (buf_time_percent >= 100)
+                    ffp_toggle_buffering(ffp, 0);
+            } else {
+                if (buf_size_percent >= 100)
+                    ffp_toggle_buffering(ffp, 0);
+            }
         } while(0);
 
         // FIXME: 0 notify progress
@@ -2318,13 +2362,13 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->play_mutex = SDL_CreateMutex();
     ffp->is = is;
 
-    is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp);
+    is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp, "ff_vout");
     if (!is->video_refresh_tid) {
         av_freep(&ffp->is);
         return NULL;
     }
 
-    is->read_tid = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp);
+    is->read_tid = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp, "ff_read");
     if (!is->read_tid) {
         is->abort_request = true;
         SDL_WaitThread(is->video_refresh_tid, NULL);
@@ -2462,8 +2506,8 @@ FFPlayer *ffp_create()
     if (!ffp)
         return NULL;
 
-    ffp_reset_internal(ffp);
     msg_queue_init(&ffp->msg_queue);
+    ffp_reset_internal(ffp);
     return ffp;
 }
 
@@ -2505,6 +2549,37 @@ void ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value)
     av_dict_set(&ffp->format_opts, name, value, 0);
 }
 
+void ffp_set_codec_option(FFPlayer *ffp, const char *name, const char *value)
+{
+    if (!ffp)
+        return;
+
+    av_dict_set(&ffp->codec_opts, name, value, 0);
+}
+
+void ffp_set_sws_option(FFPlayer *ffp, const char *name, const char *value)
+{
+    if (!ffp)
+        return;
+
+    av_dict_set(&ffp->sws_opts, name, value, 0);
+}
+
+void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
+{
+    switch (chroma_fourcc) {
+        case SDL_FCC_I420:
+        case SDL_FCC_YV12:
+        case SDL_FCC_RV16:
+        case SDL_FCC_RV32:
+            ffp->overlay_format = chroma_fourcc;
+            break;
+        default:
+            ALOGE("ffp_set_overlay_format: unknown chroma fourcc: %d\n", chroma_fourcc);
+            break;
+    }
+}
+
 int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
 {
     assert(ffp);
@@ -2523,7 +2598,7 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
 
 int ffp_start_from_l(FFPlayer *ffp, long msec)
 {
-    // ALOGE("ffp_start_at_l");
+    // ALOGE("ffp_start_at_l\n");
     assert(ffp);
     VideoState *is = ffp->is;
     if (!is)
@@ -2537,7 +2612,7 @@ int ffp_start_from_l(FFPlayer *ffp, long msec)
 
 int ffp_start_l(FFPlayer *ffp)
 {
-    // ALOGE("ffp_start_l");
+    // ALOGE("ffp_start_l\n");
     assert(ffp);
     VideoState *is = ffp->is;
     if (!is)
@@ -2549,7 +2624,7 @@ int ffp_start_l(FFPlayer *ffp)
 
 int ffp_pause_l(FFPlayer *ffp)
 {
-    // ALOGE("ffp_pause_l");
+    // ALOGE("ffp_pause_l\n");
     assert(ffp);
     VideoState *is = ffp->is;
     if (!is)
@@ -2598,7 +2673,7 @@ int ffp_seek_to_l(FFPlayer *ffp, long msec)
     // FIXME: 9 seek by bytes
     // FIXME: 9 seek out of range
     // FIXME: 9 seekable
-    // ALOGE("stream_seek %"PRId64"(%d) + %"PRId64", ", seek_pos, (int)msec, start_time);
+    // ALOGE("stream_seek %"PRId64"(%d) + %"PRId64", \n", seek_pos, (int)msec, start_time);
     stream_seek(is, seek_pos, 0, 0);
     return 0;
 }
@@ -2618,10 +2693,10 @@ long ffp_get_current_position_l(FFPlayer *ffp)
     int64_t pos = 0;
     double pos_clock = get_master_clock(is);
     if (isnan(pos_clock)) {
-        // ALOGE("pos = seek_pos: %d", (int)is->seek_pos);
+        // ALOGE("pos = seek_pos: %d\n", (int)is->seek_pos);
         pos = fftime_to_milliseconds(is->seek_pos);
     } else {
-        // ALOGE("pos = pos_clock: %f", pos_clock);
+        // ALOGE("pos = pos_clock: %f\n", pos_clock);
         pos = pos_clock * 1000;
     }
 
@@ -2629,7 +2704,7 @@ long ffp_get_current_position_l(FFPlayer *ffp)
         return 0;
 
     int64_t adjust_pos = pos - start_diff;
-    // ALOGE("pos=%ld", (long)adjust_pos);
+    // ALOGE("pos=%ld\n", (long)adjust_pos);
     return (long)adjust_pos;
 }
 
@@ -2650,7 +2725,7 @@ long ffp_get_duration_l(FFPlayer *ffp)
         return 0;
 
     int64_t adjust_duration = duration - start_diff;
-    // ALOGE("dur=%ld", (long)adjust_duration);
+    // ALOGE("dur=%ld\n", (long)adjust_duration);
     return (long)adjust_duration;
 }
 
@@ -2658,13 +2733,15 @@ void ffp_toggle_buffering_l(FFPlayer *ffp, int buffering_on)
 {
     VideoState *is = ffp->is;
     if (buffering_on && !is->buffering_on) {
-        ALOGD("ffp_toggle_buffering_l: start");
+        ALOGD("ffp_toggle_buffering_l: start\n");
         is->buffering_on = 1;
+        is->frame_drops_early = 0;
         stream_update_pause_l(ffp);
         ffp_notify_msg1(ffp, FFP_MSG_BUFFERING_START);
     } else if (!buffering_on && is->buffering_on){
-        ALOGD("ffp_toggle_buffering_l: end");
+        ALOGD("ffp_toggle_buffering_l: end\n");
         is->buffering_on = 0;
+        is->frame_drops_early = 0;
         stream_update_pause_l(ffp);
         ffp_notify_msg1(ffp, FFP_MSG_BUFFERING_END);
     }

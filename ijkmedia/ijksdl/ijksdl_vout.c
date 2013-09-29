@@ -22,9 +22,12 @@
  */
 
 #include "ijksdl_vout.h"
+#include <stdlib.h>
 
 #include <assert.h>
+#if defined(__ANDROID__)
 #include <android/native_window_jni.h>
+#endif
 
 void SDL_VoutFree(SDL_Vout *vout)
 {
@@ -54,6 +57,15 @@ int SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 
     return -1;
 }
+
+SDL_VoutOverlay *SDL_Vout_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout)
+{
+    if (vout && vout->create_overlay)
+        return vout->create_overlay(width, height, format, vout);
+
+    return NULL;
+}
+
 int SDL_VoutLockYUVOverlay(SDL_VoutOverlay *overlay)
 {
     if (overlay && overlay->lock)

@@ -27,12 +27,15 @@ LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
 LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 
 LOCAL_SRC_FILES += ijksdl_aout.c
+LOCAL_SRC_FILES += ijksdl_audio.c
 LOCAL_SRC_FILES += ijksdl_error.c
 LOCAL_SRC_FILES += ijksdl_mutex.c
 LOCAL_SRC_FILES += ijksdl_stdinc.c
 LOCAL_SRC_FILES += ijksdl_thread.c
 LOCAL_SRC_FILES += ijksdl_timer.c
 LOCAL_SRC_FILES += ijksdl_vout.c
+
+LOCAL_SRC_FILES += dummy/ijksdl_vout_dummy.c
 
 LOCAL_SRC_FILES += ffmpeg/ijksdl_vout_overlay_ffmpeg.c
 
