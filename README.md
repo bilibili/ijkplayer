@@ -55,7 +55,7 @@ sh compile-ijk.sh
 # import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
 ```
 
-### iOS
+### iOS (works, but not really stable for now)
 - Stable
 
 ```
