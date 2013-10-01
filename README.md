@@ -23,13 +23,13 @@ ijkplayer
  - remove rarely used ffmpeg components to reduce binary size
  - workaround for some buggy online video.
 - Android
- - platform: API-9~18
+ - platform: API 9~18
  - cpu: ARMv7a-NEON
  - api: MediaPlayer-like
  - video output: NativeWindow (YUV2RGB shaders)
  - audio output: AudioTrack
 - iOS
- - platform: iOS-5.0~7.0.x
+ - platform: iOS 5.0~7.0.x
  - cpu: ARMv7, ARMv7s, i386
  - api: MediaPlayer.framework-like
  - video-output: OpenGL ES 2.0 (YUV2RGB shaders)
