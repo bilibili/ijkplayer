@@ -36,12 +36,20 @@ ijkplayer
  - audio-output: CoreAudio
 
 ### TODO
+- Common
+ - segmented videos
 - Android
  - video-output: OpenGL ES 2.0 (YUV2RGB shaders)
  - hw-accelerator: HW decode
+ - cpu: x86 (maybe)
 - iOS
  - api: AVFoundation-like
  - hw-accelerator: HW decode
+
+### NOT-ON-PLAN
+- obsolete playforms (Android: API 8-; iOS: 4.x-)
+- obsolete cpu: ARMv5, ARMv6, MIPS (I don't even have these types of devices…)
+- native subtitle render
 
 ### Build Android
 - Stable
