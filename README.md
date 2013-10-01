@@ -8,13 +8,13 @@ ijkplayer
 - Common
  - Mac OS X 10.8.4
 - Android
- - ADT v22.0.4-741630
- - NDK r9
+ - [ADT v22.0.4-741630](http://developer.android.com/sdk/index.html)
+ - [NDK r9](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
  - Xcode 4.6.3 (with iOS SDK 6.1)
 
 ### Dependent Tools (Mac OS X)
-- MacPorts http://www.macports.org/install.php
+- [MacPorts](http://www.macports.org/install.php)
  - sudo port -vd install git-core
  - sudo port -vd install ccache
 
@@ -130,11 +130,11 @@ Licensed under LGPLv2.1 or later
 
 Other libraries projects are distributed on theirs own license:
 - LGPL
-  - FFmpeg http://git.videolan.org/?p=ffmpeg.git
-  - libVLC http://git.videolan.org/?p=vlc.git
-  - kxmovie https://github.com/kolyvan/kxmovie
+  - [FFmpeg](http://git.videolan.org/?p=ffmpeg.git)
+  - [libVLC](http://git.videolan.org/?p=vlc.git)
+  - [kxmovie](https://github.com/kolyvan/kxmovie)
 - zlib license
-  - SDL http://www.libsdl.org
+  - [SDL](http://www.libsdl.org)
 - Apache License v2
-  - VitamioBundle https://github.com/yixia/VitamioBundle
+  - [VitamioBundle](https://github.com/yixia/VitamioBundle)
 
