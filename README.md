@@ -1,8 +1,8 @@
 ijkplayer
 =========
 - Video player based on [ffplay](http://ffmpeg.org)
- - Android: MediaPlayer-like 
- - iOS: MediaPlayer.framework-like
+ - Android: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/AbstractMediaPlayer.java)
+ - iOS: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
 
 ### My Build Enviroment
 - Common
@@ -25,13 +25,13 @@ ijkplayer
 - Android
  - platform: API 9~18
  - cpu: ARMv7a-NEON
- - api: MediaPlayer-like
+ - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/AbstractMediaPlayer.java)
  - video output: NativeWindow (YUV2RGB shaders)
  - audio output: AudioTrack
 - iOS
  - platform: iOS 5.0~7.0.x
  - cpu: ARMv7, ARMv7s, i386
- - api: MediaPlayer.framework-like
+ - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
  - video-output: OpenGL ES 2.0 (YUV2RGB shaders)
  - audio-output: CoreAudio
 
