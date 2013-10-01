@@ -128,7 +128,7 @@ Copyright (C) 2013 Zhang Rui <bbcallen@gmail.com>
 Licensed under LGPLv2.1 or later
 ```
 
-Other libraries projects are distributed on theirs own license:
+ijkplayer is based on or derives from projects below:
 - LGPL
   - [FFmpeg](http://git.videolan.org/?p=ffmpeg.git)
   - [libVLC](http://git.videolan.org/?p=vlc.git)
