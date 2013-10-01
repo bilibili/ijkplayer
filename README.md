@@ -138,3 +138,9 @@ Other libraries projects are distributed on theirs own license:
 - Apache License v2
   - [VitamioBundle](https://github.com/yixia/VitamioBundle)
 
+### Commercial Use
+ijkplayer is licensed under LGPLv2.1 or later, so itself is free for commercial use under LGPLv2.1 or later
+
+But ijkplayer is also based on other different projects under various licenses, which I have no idea whether they are compatible to each other or to your product.
+
+[IANAL](http://en.wikipedia.org/wiki/IANAL), you should always ask your lawyer for these stuffs before use it in your product.
