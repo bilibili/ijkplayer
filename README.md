@@ -18,6 +18,31 @@ ijkplayer
  - sudo port -vd install git-core
  - sudo port -vd install ccache
 
+### Features
+- Common
+ - remove rarely used ffmpeg components to reduce binary size
+ - workaround for some buggy online video.
+- Android
+ - platform: API-9~18
+ - cpu: ARMv7a-NEON
+ - api: MediaPlayer-like
+ - video output: NativeWindow (YUV2RGB shaders)
+ - audio output: AudioTrack
+- iOS
+ - platform: iOS-5.0~7.0.x
+ - cpu: ARMv7, ARMv7s, i386
+ - api: MediaPlayer.framework-like
+ - video-output: OpenGL ES 2.0 (YUV2RGB shaders)
+ - audio-output: CoreAudio
+
+### TODO
+- Android
+ - video-output: OpenGL ES 2.0 (YUV2RGB shaders)
+ - hw-accelerator: HW decode
+- iOS
+ - api: AVFoundation-like
+ - hw-accelerator: HW decode
+
 ### Build Android
 - Stable
 
@@ -100,6 +125,8 @@ Other libraries projects are distributed on theirs own license:
   - FFmpeg http://git.videolan.org/?p=ffmpeg.git
   - libVLC http://git.videolan.org/?p=vlc.git
   - kxmovie https://github.com/kolyvan/kxmovie
+- zlib license
+  - SDL http://www.libsdl.org
 - Apache License v2
   - VitamioBundle https://github.com/yixia/VitamioBundle
 
