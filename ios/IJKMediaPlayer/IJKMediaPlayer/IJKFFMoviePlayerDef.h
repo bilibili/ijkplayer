@@ -23,6 +23,42 @@
 #import <Foundation/Foundation.h>
 #include "ijkplayer/ios/ijkplayer_ios.h"
 
+
+
+struct IJKSize {
+    NSInteger width;
+    NSInteger height;
+};
+typedef struct IJKSize IJKSize;
+
+CG_INLINE IJKSize
+IJKSizeMake(NSInteger width, NSInteger height)
+{
+    IJKSize size;
+    size.width = width;
+    size.height = height;
+    return size;
+}
+
+
+
+struct IJKSampleAspectRatio {
+    NSInteger numerator;
+    NSInteger denominator;
+};
+typedef struct IJKSampleAspectRatio IJKSampleAspectRatio;
+
+CG_INLINE IJKSampleAspectRatio
+IJKSampleAspectRatioMake(NSInteger numerator, NSInteger denominator)
+{
+    IJKSampleAspectRatio sampleAspectRatio;
+    sampleAspectRatio.numerator = numerator;
+    sampleAspectRatio.denominator = denominator;
+    return sampleAspectRatio;
+}
+
+
+
 @interface IJKFFMoviePlayerMessage : NSObject {
 @public
     AVMessage _msg;
