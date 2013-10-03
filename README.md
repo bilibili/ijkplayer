@@ -26,7 +26,7 @@ ijkplayer
  - platform: API 9~18
  - cpu: ARMv7a-NEON
  - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/AbstractMediaPlayer.java)
- - video output: NativeWindow (YUV2RGB shaders)
+ - video output: NativeWindow
  - audio output: AudioTrack
 - iOS
  - platform: iOS 5.0~7.0.x
