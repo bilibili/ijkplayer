@@ -204,10 +204,6 @@
     OSStatus status = AudioOutputUnitStop(_auUnit);
     if (status != noErr)
         ALOGE("AudioUnit: failed to stop AudioUnit (%li)", status);
-
-    status = AudioComponentInstanceDispose(_auUnit);
-    if (status != noErr)
-        ALOGE("AudioUnit: failed to dispose Audio Component instance (%li)", status);
 }
 
 - (void)close
