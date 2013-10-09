@@ -41,7 +41,7 @@
 @synthesize playableDuration;
 
 @synthesize isPreparedToPlay;
-@synthesize playbackState = _playbackState;
+@synthesize playbackState;
 @synthesize loadState = _loadState;
 
 @synthesize naturalSize = _naturalSize;
@@ -124,6 +124,40 @@
     return ijkmp_is_playing(_mediaPlayer);
 }
 
+- (MPMoviePlaybackState)playbackState
+{
+    if (!_mediaPlayer)
+        return NO;
+
+    MPMoviePlaybackState mp_state = MPMoviePlaybackStateStopped;
+    int state = ijkmp_get_state(_mediaPlayer);
+    switch (state) {
+        case MP_STATE_STOPPED:
+        case MP_STATE_COMPLETED:
+        case MP_STATE_ERROR:
+        case MP_STATE_END:
+            mp_state = MPMoviePlaybackStateStopped;
+            break;
+        case MP_STATE_IDLE:
+        case MP_STATE_INITIALIZED:
+        case MP_STATE_ASYNC_PREPARING:
+        case MP_STATE_PREPARED:
+        case MP_STATE_PAUSED:
+            mp_state = MPMoviePlaybackStatePaused;
+            break;
+        case MP_STATE_STARTED:
+            mp_state = MPMoviePlaybackStatePlaying;
+            break;
+    }
+    // MPMoviePlaybackStatePlaying,
+    // MPMoviePlaybackStatePaused,
+    // MPMoviePlaybackStateStopped,
+    // MPMoviePlaybackStateInterrupted,
+    // MPMoviePlaybackStateSeekingForward,
+    // MPMoviePlaybackStateSeekingBackward
+    return ijkmp_is_playing(_mediaPlayer);
+}
+
 - (void)setCurrentPlaybackTime:(NSTimeInterval)aCurrentPlaybackTime
 {
     if (!_mediaPlayer)
@@ -168,8 +202,6 @@
         case FFP_MSG_ERROR: {
             NSLog(@"FFP_MSG_ERROR: %d", avmsg->arg1);
 
-            _playbackState = MPMoviePlaybackStateStopped;
-
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:self];
 
@@ -190,8 +222,6 @@
 
             break;
         case FFP_MSG_COMPLETED: {
-
-            _playbackState = MPMoviePlaybackStateStopped;
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:self];
@@ -245,6 +275,11 @@
             break;
         case FFP_MSG_BUFFERING_TIME_UPDATE:
             // NSLog(@"FFP_MSG_BUFFERING_TIME_UPDATE: %d", avmsg->arg1);
+            break;
+        case FFP_MSG_PLAYBACK_STATE_CHANGED:
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification
+             object:self];
             break;
         case FFP_MSG_SEEK_COMPLETE:
             // NSLog(@"FFP_MSG_SEEK_COMPLETE:");

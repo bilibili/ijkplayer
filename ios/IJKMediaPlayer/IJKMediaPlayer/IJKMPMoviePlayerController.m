@@ -51,13 +51,15 @@
         self.scalingMode = MPMovieScalingModeAspectFit;
         self.shouldAutoplay = YES;
         self.useApplicationAudioSession = NO;
+
+        [self IJK_installMovieNotificationObservers];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    [self removeMovieNotificationObservers];
+    [self IJK_removeMovieNotificationObservers];
 }
 
 - (BOOL)isPlaying
@@ -73,30 +75,30 @@
 #pragma mark Movie Notification Handlers
 
 /* Register observers for the various movie object notifications. */
--(void)installMovieNotificationObservers
+-(void)IJK_installMovieNotificationObservers
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:)
+                                             selector:@selector(IJK_dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:)
                                                  name:MPMediaPlaybackIsPreparedToPlayDidChangeNotification
                                                object:self];
 
 	[[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(dispatchMPMoviePlayerLoadStateDidChangeNotification:)
+                                             selector:@selector(IJK_dispatchMPMoviePlayerLoadStateDidChangeNotification:)
                                                  name:MPMoviePlayerLoadStateDidChangeNotification
                                                object:self];
 
 	[[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(dispatchMPMoviePlayerPlaybackDidFinishNotification:)
+                                             selector:@selector(IJK_dispatchMPMoviePlayerPlaybackDidFinishNotification:)
                                                  name:MPMoviePlayerPlaybackDidFinishNotification
                                                object:self];
 
 	[[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(dispatchMPMoviePlayerPlaybackStateDidChangeNotification:)
+                                             selector:@selector(IJK_dispatchMPMoviePlayerPlaybackStateDidChangeNotification:)
                                                  name:MPMoviePlayerPlaybackStateDidChangeNotification
                                                object:self];
 }
 
-- (void)removeMovieNotificationObservers
+- (void)IJK_removeMovieNotificationObservers
 {
     [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
 
@@ -105,22 +107,22 @@
     [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerPlaybackStateDidChangeNotification object:self];
 }
 
-- (void)dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:(NSNotification*)notification
+- (void)IJK_dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:(NSNotification*)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification object:notification.object userInfo:notification.userInfo];
 }
 
-- (void)dispatchMPMoviePlayerLoadStateDidChangeNotification:(NSNotification*)notification
+- (void)IJK_dispatchMPMoviePlayerLoadStateDidChangeNotification:(NSNotification*)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification object:notification.object userInfo:notification.userInfo];
 }
 
-- (void)dispatchMPMoviePlayerPlaybackDidFinishNotification:(NSNotification*)notification
+- (void)IJK_dispatchMPMoviePlayerPlaybackDidFinishNotification:(NSNotification*)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:notification.object userInfo:notification.userInfo];
 }
 
-- (void)dispatchMPMoviePlayerPlaybackStateDidChangeNotification:(NSNotification*)notification
+- (void)IJK_dispatchMPMoviePlayerPlaybackStateDidChangeNotification:(NSNotification*)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification object:notification.object userInfo:notification.userInfo];
 }
