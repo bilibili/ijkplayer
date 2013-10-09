@@ -33,6 +33,8 @@
     NSInteger _videoHeight;
     NSInteger _sampleAspectRatioNumerator;
     NSInteger _sampleAspectRatioDenominator;
+
+    NSInteger _bufferingTime;
 }
 
 @synthesize view = _view;
@@ -184,6 +186,11 @@
     return ret / 1000;
 }
 
+- (NSTimeInterval)playableDuration
+{
+    return self.currentPlaybackTime + ((NSTimeInterval)_bufferingTime) / 1000;
+}
+
 // deprecated, for MPMoviePlayerController compatiable
 - (UIImage *)thumbnailImageAtTime:(NSTimeInterval)playbackTime timeOption:(MPMovieTimeOption)option
 {
@@ -274,6 +281,7 @@
             // NSLog(@"FFP_MSG_BUFFERING_BYTES_UPDATE: %d", avmsg->arg1);
             break;
         case FFP_MSG_BUFFERING_TIME_UPDATE:
+            _bufferingTime = avmsg->arg1;
             // NSLog(@"FFP_MSG_BUFFERING_TIME_UPDATE: %d", avmsg->arg1);
             break;
         case FFP_MSG_PLAYBACK_STATE_CHANGED:
