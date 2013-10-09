@@ -44,11 +44,29 @@
 @synthesize playbackState = _playbackState;
 @synthesize loadState = _loadState;
 
+@synthesize naturalSize = _naturalSize;
+
+@synthesize controlStyle = _controlStyle;
+@synthesize scalingMode = _scalingMode;
+@synthesize shouldAutoplay = _shouldAutoplay;
+@synthesize useApplicationAudioSession = _useApplicationAudioSession;
+@synthesize currentPlaybackRate = _currentPlaybackRate;
+@synthesize initialPlaybackTime = _initialPlaybackTime;
+@synthesize endPlaybackTime = _endPlaybackTime;
+
 - (id)initWithContentURL:(NSURL *)aUrl
 {
     self = [super init];
     if (self) {
         ijkmp_global_init();
+
+        _controlStyle = MPMovieControlStyleNone;
+        _scalingMode = MPMovieScalingModeAspectFit;
+        _shouldAutoplay = NO;
+        _useApplicationAudioSession = NO;
+        _currentPlaybackRate = 1.0f;
+        _initialPlaybackTime = 0;
+        _endPlaybackTime = 0;
 
         _url = aUrl;
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
@@ -130,6 +148,12 @@
 
     NSTimeInterval ret = ijkmp_get_duration(_mediaPlayer);
     return ret / 1000;
+}
+
+// deprecated, for MPMoviePlayerController compatiable
+- (UIImage *)thumbnailImageAtTime:(NSTimeInterval)playbackTime timeOption:(MPMovieTimeOption)option
+{
+    return nil;
 }
 
 - (void)postEvent: (IJKFFMoviePlayerMessage *)msg

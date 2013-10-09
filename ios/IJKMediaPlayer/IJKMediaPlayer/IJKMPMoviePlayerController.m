@@ -33,6 +33,16 @@
 @dynamic playbackState;
 @dynamic loadState;
 
+@dynamic naturalSize;
+
+@dynamic controlStyle;
+@dynamic scalingMode;
+@dynamic shouldAutoplay;
+@dynamic useApplicationAudioSession;
+@dynamic currentPlaybackRate;
+@dynamic initialPlaybackTime;
+@dynamic endPlaybackTime;
+
 - (id)initWithContentURL:(NSURL *)aUrl
 {
     self = [super initWithContentURL:aUrl];

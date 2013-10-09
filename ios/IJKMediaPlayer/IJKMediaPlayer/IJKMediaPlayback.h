@@ -22,6 +22,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <MediaPlayer/MediaPlayer.h>
 
 
 @protocol IJKMediaPlayback;
@@ -45,6 +46,20 @@
 @property(nonatomic, readonly)  BOOL isPreparedToPlay;
 @property(nonatomic, readonly)  MPMoviePlaybackState playbackState;
 @property(nonatomic, readonly)  MPMovieLoadState loadState;
+
+@property(nonatomic, readonly) CGSize naturalSize;
+
+// deprecated, for MPMoviePlayerController compatiable
+// no effect for IJKFFMoviePlayerController
+- (UIImage *)thumbnailImageAtTime:(NSTimeInterval)playbackTime timeOption:(MPMovieTimeOption)option;
+
+@property(nonatomic) MPMovieControlStyle controlStyle;
+@property(nonatomic) MPMovieScalingMode scalingMode;
+@property(nonatomic) BOOL shouldAutoplay;
+@property(nonatomic) BOOL useApplicationAudioSession;
+@property(nonatomic) float currentPlaybackRate;
+@property(nonatomic) NSTimeInterval initialPlaybackTime;
+@property(nonatomic) NSTimeInterval endPlaybackTime;
 
 #pragma mark Notifications
 
