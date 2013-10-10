@@ -261,6 +261,7 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
             buff_w, buff_h, (char*)&overlay->format, overlay->format);
         // TODO: 8 set all black
         ANativeWindow_unlockAndPost(native_window);
+        ANativeWindow_setBuffersGeometry(native_window, buff_w, buff_h, overlayDesc->hal_format);
         return -1;
     }
 
