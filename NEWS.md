@@ -1,6 +1,9 @@
+Changes between 0.0.6 and 0.0.5:
+- android: fix NativeWindow leak
+
 Changes between 0.0.5 and 0.0.4:
 --------------------------------
-- build: disable -fmodulo-sched -fmodulo-sched-allow-regmoves
+- build: disable -fmodulo-sched -fmodulo-sched-allow-regmoves, may crash on gcc4.7~4.8
 - player: support ios
 - ijksdl: support ios gles2 video output
 - ijksdl: support ios AudioUnit audio output
