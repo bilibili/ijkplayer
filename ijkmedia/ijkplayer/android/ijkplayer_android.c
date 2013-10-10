@@ -51,16 +51,17 @@ IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*))
 
 void ijkmp_android_set_surface_l(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
 {
-    assert(mp);
-    assert(mp->ffplayer);
-    assert(mp->ffplayer->vout);
+    if (!mp || !mp->ffplayer || !mp->ffplayer->vout)
+        return;
 
     SDL_VoutAndroid_SetAndroidSurface(env, mp->ffplayer->vout, android_surface);
 }
 
 void ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
 {
-    assert(mp);
+    if (!mp)
+        return;
+
     MPTRACE("ijkmp_set_android_surface(surface=%p)", (void*)android_surface);
     pthread_mutex_lock(&mp->mutex);
     ijkmp_android_set_surface_l(env, mp, android_surface);

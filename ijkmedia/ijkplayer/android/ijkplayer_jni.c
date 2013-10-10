@@ -242,6 +242,7 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
         return;
 
     // explicit shutdown mp, in case it is not the last mp-ref here
+    ijkmp_android_set_surface(env, mp, NULL);
     ijkmp_shutdown(mp);
     jni_set_media_player(env, thiz, NULL);
 
@@ -255,6 +256,7 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: reset: null mp", LABEL_RETURN);
 
+    ijkmp_android_set_surface(env, mp, NULL);
     ijkmp_reset(mp);
 
     LABEL_RETURN:
