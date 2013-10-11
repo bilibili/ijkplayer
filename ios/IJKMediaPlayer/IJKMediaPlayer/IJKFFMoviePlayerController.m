@@ -91,6 +91,7 @@
         return;
 
     ijkmp_set_data_source(_mediaPlayer, [[_url absoluteString] UTF8String]);
+    ijkmp_set_format_option(_mediaPlayer, "safe", "0"); // for concat demuxer
     ijkmp_prepare_async(_mediaPlayer);
 }
 
