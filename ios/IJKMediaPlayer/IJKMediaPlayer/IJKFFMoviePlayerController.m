@@ -236,6 +236,12 @@
 
             [[NSNotificationCenter defaultCenter] postNotificationName:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
 
+            _loadState |= MPMovieLoadStatePlayable;
+
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
+             object:self];
+
             break;
         case FFP_MSG_COMPLETED: {
 
@@ -266,7 +272,7 @@
         case FFP_MSG_BUFFERING_START: {
             NSLog(@"FFP_MSG_BUFFERING_START:");
 
-            _loadState = MPMovieLoadStateStalled;
+            _loadState = MPMovieLoadStatePlayable | MPMovieLoadStateStalled;
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
@@ -276,7 +282,7 @@
         case FFP_MSG_BUFFERING_END: {
             NSLog(@"FFP_MSG_BUFFERING_END:");
 
-            _loadState = MPMovieLoadStatePlaythroughOK;
+            _loadState = MPMovieLoadStatePlayable | MPMovieLoadStatePlaythroughOK;
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
