@@ -23,9 +23,11 @@
 #import "IJKFFMoviePlayerController.h"
 #import "IJKFFMoviePlayerDef.h"
 #import "IJKMediaPlayback.h"
+#import "IJKFFMrl.h"
 
 @implementation IJKFFMoviePlayerController {
-    NSURL *_url;
+    IJKFFMrl *_ffMrl;
+
     IjkMediaPlayer *_mediaPlayer;
     IJKFFMoviePlayerMessagePool *_msgPool;
 
@@ -70,7 +72,8 @@
         _initialPlaybackTime = 0;
         _endPlaybackTime = 0;
 
-        _url = aUrl;
+        _ffMrl = [[IJKFFMrl alloc] initWithMrl:[aUrl absoluteString]];
+
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
         _msgPool = [[IJKFFMoviePlayerMessagePool alloc] init];
 
@@ -85,12 +88,17 @@
     return self;
 }
 
+- (void)dealloc
+{
+    [_ffMrl removeTempFiles];
+}
+
 - (void)prepareToPlay
 {
     if (!_mediaPlayer)
         return;
 
-    ijkmp_set_data_source(_mediaPlayer, [[_url absoluteString] UTF8String]);
+    ijkmp_set_data_source(_mediaPlayer, [_ffMrl.resolvedMrl UTF8String]);
     ijkmp_set_format_option(_mediaPlayer, "safe", "0"); // for concat demuxer
     ijkmp_prepare_async(_mediaPlayer);
 }
