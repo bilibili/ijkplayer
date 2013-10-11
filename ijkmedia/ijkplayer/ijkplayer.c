@@ -585,7 +585,7 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             if (0 == ikjmp_chkst_pause_l(mp->mp_state)) {
                 int retval = ffp_pause_l(mp->ffplayer);
                 if (retval == 0)
-                    ijkmp_change_state_l(mp, MP_STATE_STARTED);
+                    ijkmp_change_state_l(mp, MP_STATE_PAUSED);
             }
             pthread_mutex_unlock(&mp->mutex);
             break;
