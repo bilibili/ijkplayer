@@ -36,8 +36,6 @@ ijkplayer
  - audio-output: CoreAudio
 
 ### TODO
-- Common
- - segmented videos
 - Android
  - video-output: OpenGL ES 2.0 (YUV2RGB shaders)
  - hw-accelerator: HW decode
