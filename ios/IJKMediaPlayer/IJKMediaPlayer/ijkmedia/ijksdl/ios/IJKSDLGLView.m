@@ -26,7 +26,7 @@
 #import "IJKSDLGLShader.h"
 #import "IJKSDLGLRender.h"
 #import "IJKSDLGLRenderI420.h"
-#import "IJKMediaModule.h"
+#import "IJKMediaPlayer/IJKMediaModule.h"
 
 static NSString *const g_vertexShaderString = IJK_SHADER_STRING
 (
@@ -374,23 +374,42 @@ exit:
 
 - (void)updateVertices
 {
-    const BOOL fit      = (self.contentMode == UIViewContentModeScaleAspectFit);
     const float width   = _frameWidth;
     const float height  = _frameHeight;
+    const float dW      = (float)_backingWidth	/ width;
     const float dH      = (float)_backingHeight / height;
-    const float dW      = (float)_backingWidth	  / width;
-    const float dd      = fit ? MIN(dH, dW) : MAX(dH, dW);
-    const float h       = (height * dd / (float)_backingHeight);
-    const float w       = (width  * dd / (float)_backingWidth );
+    float dd            = 1.0f;
+    float nW            = 1.0f;
+    float nH            = 1.0f;
 
-    _vertices[0] = - w;
-    _vertices[1] = - h;
-    _vertices[2] =   w;
-    _vertices[3] = - h;
-    _vertices[4] = - w;
-    _vertices[5] =   h;
-    _vertices[6] =   w;
-    _vertices[7] =   h;
+    switch (self.contentMode) {
+        case UIViewContentModeScaleToFill:
+            break;
+        case UIViewContentModeCenter:
+            nW = 1.0f / dW / [UIScreen mainScreen].scale;
+            nH = 1.0f / dH / [UIScreen mainScreen].scale;
+            break;
+        case UIViewContentModeScaleAspectFill:
+            dd = MAX(dW, dH);
+            nW = (width  * dd / (float)_backingWidth );
+            nH = (height * dd / (float)_backingHeight);
+            break;
+        case UIViewContentModeScaleAspectFit:
+        default:
+            dd = MIN(dW, dH);
+            nW = (width  * dd / (float)_backingWidth );
+            nH = (height * dd / (float)_backingHeight);
+            break;
+    }
+
+    _vertices[0] = - nW;
+    _vertices[1] = - nH;
+    _vertices[2] =   nW;
+    _vertices[3] = - nH;
+    _vertices[4] = - nW;
+    _vertices[5] =   nH;
+    _vertices[6] =   nW;
+    _vertices[7] =   nH;
 }
 
 - (void)display: (SDL_VoutOverlay *) overlay

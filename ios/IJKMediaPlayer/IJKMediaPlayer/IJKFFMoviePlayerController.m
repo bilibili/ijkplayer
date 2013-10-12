@@ -200,6 +200,29 @@
     return self.currentPlaybackTime + ((NSTimeInterval)_bufferingTime) / 1000;
 }
 
+- (void)setScalingMode: (MPMovieScalingMode) aScalingMode
+{
+    MPMovieScalingMode newScalingMode = aScalingMode;
+    switch (aScalingMode) {
+        case MPMovieScalingModeNone:
+            [_view setContentMode:UIViewContentModeCenter];
+            break;
+        case MPMovieScalingModeAspectFit:
+            [_view setContentMode:UIViewContentModeScaleAspectFit];
+            break;
+        case MPMovieScalingModeAspectFill:
+            [_view setContentMode:UIViewContentModeScaleAspectFill];
+            break;
+        case MPMovieScalingModeFill:
+            [_view setContentMode:UIViewContentModeScaleToFill];
+            break;
+        default:
+            newScalingMode = _scalingMode;
+    }
+
+    _scalingMode = newScalingMode;
+}
+
 // deprecated, for MPMoviePlayerController compatiable
 - (UIImage *)thumbnailImageAtTime:(NSTimeInterval)playbackTime timeOption:(MPMovieTimeOption)option
 {
