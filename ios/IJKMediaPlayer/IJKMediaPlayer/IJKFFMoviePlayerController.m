@@ -45,7 +45,7 @@
 @synthesize playableDuration;
 
 @synthesize isPreparedToPlay;
-@synthesize playbackState;
+@synthesize playbackState = _playbackState;
 @synthesize loadState = _loadState;
 
 @synthesize naturalSize = _naturalSize;
@@ -140,24 +140,24 @@
     if (!_mediaPlayer)
         return NO;
 
-    MPMoviePlaybackState mp_state = MPMoviePlaybackStateStopped;
+    MPMoviePlaybackState mpState = MPMoviePlaybackStateStopped;
     int state = ijkmp_get_state(_mediaPlayer);
     switch (state) {
         case MP_STATE_STOPPED:
         case MP_STATE_COMPLETED:
         case MP_STATE_ERROR:
         case MP_STATE_END:
-            mp_state = MPMoviePlaybackStateStopped;
+            mpState = MPMoviePlaybackStateStopped;
             break;
         case MP_STATE_IDLE:
         case MP_STATE_INITIALIZED:
         case MP_STATE_ASYNC_PREPARING:
         case MP_STATE_PREPARED:
         case MP_STATE_PAUSED:
-            mp_state = MPMoviePlaybackStatePaused;
+            mpState = MPMoviePlaybackStatePaused;
             break;
         case MP_STATE_STARTED:
-            mp_state = MPMoviePlaybackStatePlaying;
+            mpState = MPMoviePlaybackStatePlaying;
             break;
     }
     // MPMoviePlaybackStatePlaying,
@@ -166,7 +166,7 @@
     // MPMoviePlaybackStateInterrupted,
     // MPMoviePlaybackStateSeekingForward,
     // MPMoviePlaybackStateSeekingBackward
-    return ijkmp_is_playing(_mediaPlayer);
+    return mpState;
 }
 
 - (void)setCurrentPlaybackTime:(NSTimeInterval)aCurrentPlaybackTime
