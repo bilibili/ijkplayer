@@ -26,7 +26,7 @@
 #import "IJKSDLGLShader.h"
 #import "IJKSDLGLRender.h"
 #import "IJKSDLGLRenderI420.h"
-#import "IJKMediaPlayer/IJKMediaModule.h"
+#import "../../../IJKMediaModule.h"
 
 static NSString *const g_vertexShaderString = IJK_SHADER_STRING
 (
