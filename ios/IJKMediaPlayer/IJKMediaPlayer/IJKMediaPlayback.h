@@ -37,6 +37,7 @@
 - (void)pause;
 - (void)stop;
 - (BOOL)isPlaying;
+- (void)shutdown;
 
 @property(nonatomic, readonly)  UIView *view;
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;

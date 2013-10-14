@@ -135,6 +135,14 @@
     return ijkmp_is_playing(_mediaPlayer);
 }
 
+- (void)shutdown
+{
+    if (!_mediaPlayer)
+        return;
+
+    ijkmp_shutdown(_mediaPlayer);
+}
+
 - (MPMoviePlaybackState)playbackState
 {
     if (!_mediaPlayer)

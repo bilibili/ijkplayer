@@ -72,6 +72,11 @@
     }
 }
 
+- (void)shutdown
+{
+    // do nothing
+}
+
 #pragma mark Movie Notification Handlers
 
 /* Register observers for the various movie object notifications. */
