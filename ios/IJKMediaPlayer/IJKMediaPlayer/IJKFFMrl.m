@@ -75,9 +75,9 @@
     uint8_t *utf8Plain = NULL;
     size_t in_size = strlen(utf8Cipher);
 
-    size_t out_size = 3 * (in_size / 4) + 1;
+    size_t out_size = (in_size + 1) * 3 / 4 + 1;
 
-    if (out_size > INT_MAX || !(utf8Plain = av_malloc(out_size)))
+    if (out_size > INT_MAX || !(utf8Plain = av_mallocz(out_size)))
         return NULL;
     if ((ret = av_base64_decode(utf8Plain, utf8Cipher, out_size)) < 0) {
         av_free(utf8Plain);
