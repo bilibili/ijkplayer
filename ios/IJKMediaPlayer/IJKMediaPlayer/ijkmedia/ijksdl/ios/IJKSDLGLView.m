@@ -150,6 +150,8 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     int             _frameChroma;
 
     id<IJKSDLGLRender> _renderer;
+
+    BOOL            _didRelayoutSubViews;
 }
 
 enum {
@@ -260,6 +262,11 @@ enum {
 
 - (void)layoutSubviews
 {
+    _didRelayoutSubViews = YES;
+}
+
+- (void)layoutOnDisplayThread
+{
     glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
     [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
@@ -276,7 +283,8 @@ enum {
     }
 
     [self updateVertices];
-    [self display: nil];
+    // FIXME: trigger a redisplay on display thread
+    // [self display: nil];
 }
 
 - (void)setContentMode:(UIViewContentMode)contentMode
@@ -440,6 +448,11 @@ exit:
     };
 
     [EAGLContext setCurrentContext:_context];
+
+    if (_didRelayoutSubViews) {
+        [self layoutOnDisplayThread];
+        _didRelayoutSubViews = NO;
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
     glViewport(0, 0, _backingWidth, _backingHeight);
