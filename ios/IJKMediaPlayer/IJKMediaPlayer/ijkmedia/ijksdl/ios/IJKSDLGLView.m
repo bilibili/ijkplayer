@@ -151,6 +151,7 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
 
     id<IJKSDLGLRender> _renderer;
 
+    BOOL            _didSetContentMode;
     BOOL            _didRelayoutSubViews;
 }
 
@@ -289,10 +290,8 @@ enum {
 
 - (void)setContentMode:(UIViewContentMode)contentMode
 {
+    _didSetContentMode = YES;
     [super setContentMode:contentMode];
-    [self updateVertices];
-    if (_renderer.isValid)
-        [self display:nil];
 }
 
 - (BOOL)setupDisplay: (SDL_VoutOverlay *) overlay
@@ -452,6 +451,11 @@ exit:
     if (_didRelayoutSubViews) {
         [self layoutOnDisplayThread];
         _didRelayoutSubViews = NO;
+    }
+
+    if (_didSetContentMode) {
+        [self updateVertices];
+        _didSetContentMode = NO;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
