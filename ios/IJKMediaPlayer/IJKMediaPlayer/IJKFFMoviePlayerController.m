@@ -140,7 +140,25 @@
     if (!_mediaPlayer)
         return;
 
+    [self performSelectorInBackground:@selector(shupdownWaitStop:) withObject:self];
+}
+
+- (void)shupdownWaitStop:(IJKFFMoviePlayerController *) mySelf
+{
+    if (!_mediaPlayer)
+        return;
+
+    ijkmp_stop(_mediaPlayer);
+    [self performSelectorOnMainThread:@selector(shupdownClose:) withObject:self waitUntilDone:YES];
+}
+
+- (void)shupdownClose:(IJKFFMoviePlayerController *) mySelf
+{
+    if (!_mediaPlayer)
+        return;
+
     ijkmp_shutdown(_mediaPlayer);
+    ijkmp_dec_ref_p(&_mediaPlayer);
 }
 
 - (MPMoviePlaybackState)playbackState
