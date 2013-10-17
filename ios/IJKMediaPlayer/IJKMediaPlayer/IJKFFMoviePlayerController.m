@@ -287,7 +287,7 @@
 
             [[NSNotificationCenter defaultCenter] postNotificationName:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
 
-            _loadState |= MPMovieLoadStatePlayable;
+            _loadState = MPMovieLoadStatePlayable | MPMovieLoadStatePlaythroughOK;
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
