@@ -1683,8 +1683,11 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         return -1;
     }
 
+    // FIXME: android set these from outside
+#ifndef __APPLE__
     avctx->skip_frame        = ffp->skip_frame;
     avctx->skip_loop_filter  = ffp->skip_loop_filter;
+#endif
 
     avctx->codec_id = codec->id;
     avctx->workaround_bugs   = ffp->workaround_bugs;

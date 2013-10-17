@@ -21,10 +21,11 @@
  */
 
 #import "IJKMediaPlayback.h"
+#import "IJKFFOptions.h"
 
 @interface IJKFFMoviePlayerController : NSObject <IJKMediaPlayback>
 
-- (id)initWithContentURL:(NSURL *)aUrl;
+- (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options;
 
 - (void)prepareToPlay;
 - (void)play;

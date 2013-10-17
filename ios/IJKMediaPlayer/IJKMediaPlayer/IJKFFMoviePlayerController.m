@@ -58,7 +58,7 @@
 @synthesize initialPlaybackTime = _initialPlaybackTime;
 @synthesize endPlaybackTime = _endPlaybackTime;
 
-- (id)initWithContentURL:(NSURL *)aUrl
+- (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
 {
     self = [super init];
     if (self) {
@@ -84,6 +84,8 @@
 
         ijkmp_ios_set_glview(_mediaPlayer, glView);
         ijkmp_set_overlay_format(_mediaPlayer, SDL_FCC_I420);
+
+        [options applyTo:_mediaPlayer];
     }
     return self;
 }
