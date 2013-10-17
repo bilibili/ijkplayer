@@ -269,6 +269,8 @@ static void stream_close(FFPlayer *ffp)
     int i;
     /* XXX: use a special url_shutdown call to abort parse cleanly */
     is->abort_request = 1;
+    packet_queue_abort(&is->videoq);
+    packet_queue_abort(&is->audioq);
     ALOGW("wait for read_tid\n");
     SDL_WaitThread(is->read_tid, NULL);
     ALOGW("wait for video_refresh_tid\n");
@@ -2180,7 +2182,7 @@ static int read_thread(void *arg)
                         ffp->auto_start = 0;
 
                         // TODO: 0 it's a bit early to notify complete here
-                        // ALOGE("ffp_toggle_buffering: eof\n");
+                        ALOGE("ffp_toggle_buffering: eof\n");
                         ffp_toggle_buffering(ffp, 0);
                         toggle_pause(ffp, 1);
                         ffp_notify_msg1(ffp, FFP_MSG_COMPLETED);
@@ -2641,11 +2643,10 @@ int ffp_stop_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = ffp->is;
-    msg_queue_abort(&ffp->msg_queue);
-
     if (is)
         is->abort_request = 1;
 
+    msg_queue_abort(&ffp->msg_queue);
     return 0;
 }
 
