@@ -1,5 +1,8 @@
 Changes between 0.0.6 and 0.0.5:
 - android: fix NativeWindow leak
+- ios: fix a deadlock related to AudioUnit
+- ios: support ffmpeg concat playback
+- ios: add ffmpeg options methods
 
 Changes between 0.0.5 and 0.0.4:
 --------------------------------
