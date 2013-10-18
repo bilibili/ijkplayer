@@ -37,6 +37,9 @@
     NSInteger _sampleAspectRatioDenominator;
 
     NSInteger _bufferingTime;
+
+    BOOL _keepScreenOnWhilePlaying;
+    BOOL _savedIdleTimerDisabled;
 }
 
 @synthesize view = _view;
@@ -86,8 +89,17 @@
         ijkmp_set_overlay_format(_mediaPlayer, SDL_FCC_I420);
 
         [options applyTo:_mediaPlayer];
+
+        _keepScreenOnWhilePlaying = YES;
+        _savedIdleTimerDisabled = [UIApplication sharedApplication].idleTimerDisabled;
+        [self setScreenOn:YES];
     }
     return self;
+}
+
+- (void)setScreenOn: (BOOL)on
+{
+    [UIApplication sharedApplication].idleTimerDisabled = on;
 }
 
 - (void)dealloc
@@ -100,6 +112,8 @@
     if (!_mediaPlayer)
         return;
 
+    [self setScreenOn:_keepScreenOnWhilePlaying];
+
     ijkmp_set_data_source(_mediaPlayer, [_ffMrl.resolvedMrl UTF8String]);
     ijkmp_set_format_option(_mediaPlayer, "safe", "0"); // for concat demuxer
     ijkmp_prepare_async(_mediaPlayer);
@@ -109,6 +123,8 @@
 {
     if (!_mediaPlayer)
         return;
+
+    [self setScreenOn:_keepScreenOnWhilePlaying];
 
     ijkmp_start(_mediaPlayer);
 }
@@ -126,6 +142,8 @@
     if (!_mediaPlayer)
         return;
 
+    [self setScreenOn:_savedIdleTimerDisabled];
+
     ijkmp_stop(_mediaPlayer);
 }
 
@@ -141,6 +159,8 @@
 {
     if (!_mediaPlayer)
         return;
+
+    [self setScreenOn:_savedIdleTimerDisabled];
 
     [self performSelectorInBackground:@selector(shupdownWaitStop:) withObject:self];
 }
@@ -269,6 +289,8 @@
         case FFP_MSG_ERROR: {
             NSLog(@"FFP_MSG_ERROR: %d", avmsg->arg1);
 
+            [self setScreenOn:_savedIdleTimerDisabled];
+
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:self];
 
@@ -295,6 +317,8 @@
 
             break;
         case FFP_MSG_COMPLETED: {
+
+            [self setScreenOn:_savedIdleTimerDisabled];
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:self];
