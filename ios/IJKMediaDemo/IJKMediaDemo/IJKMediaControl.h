@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol IJKMediaPlayback;
+
 @interface IJKMediaControl : UIControl
 
 - (void)showNoFade;

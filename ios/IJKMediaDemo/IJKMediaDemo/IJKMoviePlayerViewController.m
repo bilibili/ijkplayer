@@ -9,6 +9,7 @@
 #import "IJKMoviePlayerViewController.h"
 #import "IJKMediaControl.h"
 #import "IJKCommon.h"
+#import "IJKMediaPlayer/IJKMediaPlayer.h"
 
 @implementation IJKVideoViewController
 
@@ -40,10 +41,10 @@
 
     // NSURL *theMovieURL = [NSURL URLWithString:@"rtsp://l.m.cztv.com:554/hdmi/hntv1hd.stream"];
     // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115151121.hlv?KID=sina,viask&Expires=1380297600&ssig=SjfwCmaiLe"];
-    NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115279108.hlv?KID=sina,viask&Expires=1380297600&ssig=KpcdjFjrhW"];
-    // NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
+    // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115279108.hlv?KID=sina,viask&Expires=1380297600&ssig=KpcdjFjrhW"];
+    NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
 
-    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL];
+    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
 

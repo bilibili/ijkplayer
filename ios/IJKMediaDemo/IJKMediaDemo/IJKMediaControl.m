@@ -7,6 +7,7 @@
 //
 
 #import "IJKMediaControl.h"
+#import "IJKMediaPlayer/IJKMediaPlayer.h"
 
 @implementation IJKMediaControl
 

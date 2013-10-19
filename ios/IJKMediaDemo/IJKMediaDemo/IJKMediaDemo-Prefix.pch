@@ -12,6 +12,4 @@
     #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
     #import <MediaPlayer/MediaPlayer.h>
-
-    #import "IJKMediaPlayer/IJKMediaPlayer.h"
 #endif
