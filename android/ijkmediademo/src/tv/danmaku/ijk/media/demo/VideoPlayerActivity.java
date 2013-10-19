@@ -77,6 +77,9 @@ public class VideoPlayerActivity extends Activity {
     
     // progress
     mVideoPath = "http://113.142.44.44/e0012jy0ana.m3u8?type=m3u8&srctype=mp4&srcname=e0012jy0ana.mp4&fc=0&sha=82e0d6adb6e697d1821abbbacb766373afa26ff4&vkey=OAz_lwrlhx0tqBefQmHnxKTm8PqvrJCl5iJtLhVtSj6hla57btxiuw"
+
+    // 96kHz av799077
+    mVideoPath = "http://edge.v.iask.com/117040829.hlv?KID=sina,viask&Expires=1382284800&ssig=RyT3tEUyfJ"
      */
 
     @Override
@@ -84,8 +87,7 @@ public class VideoPlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mVideoPath = "rtsp://l.m.cztv.com:554/hdmi/hntv1hd.stream";
-        // mVideoPath = "http://live.gslb.letv.com/gslb?stream_id=btv6_800&tag=live&ext=m3u8";
+        mVideoPath = "http://edge.v.iask.com/117040829.hlv?KID=sina,viask&Expires=1382284800&ssig=RyT3tEUyfJ";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
