@@ -55,7 +55,7 @@ ijkplayer
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-stable
 cd ijkplayer-android-stable
-git checkout -B stable n0.0.5
+git checkout -B stable n0.0.6
 
 sh init-android.sh
 
@@ -92,7 +92,7 @@ sh compile-ijk.sh
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-stable
 cd ijkplayer-ios-stable
-git checkout -B stable n0.0.5
+git checkout -B stable n0.0.6
 
 sh init-ios.sh
 
