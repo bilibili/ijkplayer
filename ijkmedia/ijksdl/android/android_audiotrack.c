@@ -272,33 +272,44 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudi
         return NULL;
     }
 
-    int min_buffer_size = audiotrack_get_min_buffer_size(env, spec);
+    SDL_AndroidAudioTrack *atrack = (SDL_AndroidAudioTrack*) mallocz(sizeof(SDL_AndroidAudioTrack));
+    if (!atrack) {
+        (*env)->CallVoidMethod(env, g_clazz.clazz, atrack->thiz, g_clazz.release);
+        return NULL;
+    }
+    atrack->spec = *spec;
+    if (atrack->spec.sample_rate_in_hz > 48000) {
+        ALOGW("sdl_audiotrack_new: sample rate too high: %d:", atrack->spec.sample_rate_in_hz);
+        atrack->spec.sample_rate_in_hz = 48000;
+    } else if (atrack->spec.sample_rate_in_hz < 4000) {
+        ALOGW("sdl_audiotrack_new: sample rate too low: %d:", atrack->spec.sample_rate_in_hz);
+        atrack->spec.sample_rate_in_hz = 4000;
+    }
+
+    int min_buffer_size = audiotrack_get_min_buffer_size(env, &atrack->spec);
     if (min_buffer_size <= 0) {
         ALOGE("sdl_audiotrack_new: sdl_audiotrack_get_min_buffer_size: return %d:", min_buffer_size);
+        free(atrack);
         return NULL;
     }
 
     jobject thiz = (*env)->NewObject(env, g_clazz.clazz, g_clazz.constructor,
-        (int) spec->stream_type, (int) spec->sample_rate_in_hz, (int) spec->channel_config,
-        (int) spec->audio_format, (int) min_buffer_size, (int) spec->mode);
+        (int) atrack->spec.stream_type,
+        (int) atrack->spec.sample_rate_in_hz,
+        (int) atrack->spec.channel_config,
+        (int) atrack->spec.audio_format,
+        (int) min_buffer_size,
+        (int) atrack->spec.mode);
     if (!thiz || (*env)->ExceptionCheck(env)) {
         ALOGE("sdl_audiotrack_new: NewObject: Exception:");
         if ((*env)->ExceptionCheck(env)) {
             (*env)->ExceptionDescribe(env);
             (*env)->ExceptionClear(env);
         }
+        free(atrack);
         return NULL;
     }
 
-    SDL_AndroidAudioTrack *atrack = (SDL_AndroidAudioTrack*) mallocz(sizeof(SDL_AndroidAudioTrack));
-    if (!atrack) {
-        (*env)->CallVoidMethod(env, g_clazz.clazz, atrack->thiz, g_clazz.release);
-        (*env)->DeleteLocalRef(env, thiz);
-        return NULL;
-    }
-
-
-    atrack->spec = *spec;
     atrack->min_buffer_size = min_buffer_size;
     atrack->spec.buffer_size_in_bytes = min_buffer_size;
     atrack->max_volume = audiotrack_get_max_volume(env);
