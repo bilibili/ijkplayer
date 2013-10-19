@@ -78,7 +78,6 @@ static NSString *const g_yuvFragmentShaderString = IJK_SHADER_STRING
     // assert(yuvFrame.chromaB.length == (yuvFrame.width * yuvFrame.height) / 4);
     // assert(yuvFrame.chromaR.length == (yuvFrame.width * yuvFrame.height) / 4);
 
-    const NSUInteger frameWidth = overlay->w;
     const NSUInteger frameHeight = overlay->h;
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

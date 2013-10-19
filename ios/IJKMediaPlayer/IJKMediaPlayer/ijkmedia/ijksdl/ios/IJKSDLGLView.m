@@ -144,15 +144,19 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     GLuint          _program;
     GLint           _uniformMatrix;
     GLfloat         _vertices[8];
+    GLfloat         _texCoords[8];
 
     int             _frameWidth;
     int             _frameHeight;
     int             _frameChroma;
+    int             _rightPaddingPixels;
+    GLfloat         _rightPadding;
 
     id<IJKSDLGLRender> _renderer;
 
     BOOL            _didSetContentMode;
     BOOL            _didRelayoutSubViews;
+    BOOL            _didPaddingChanged;
 }
 
 enum {
@@ -228,6 +232,17 @@ enum {
         _vertices[5] =  1.0f;
         _vertices[6] =  1.0f;  // x3
         _vertices[7] =  1.0f;  // y3
+
+        _texCoords[0] = 0.0f;
+        _texCoords[1] = 1.0f;
+        _texCoords[2] = 1.0f;
+        _texCoords[3] = 1.0f;
+        _texCoords[4] = 0.0f;
+        _texCoords[5] = 0.0f;
+        _texCoords[6] = 1.0f;
+        _texCoords[7] = 0.0f;
+
+        _rightPadding = 0.0f;
 
         NSLog(@"OK setup GL");
     }
@@ -381,13 +396,16 @@ exit:
 
 - (void)updateVertices
 {
-    const float width   = _frameWidth;
-    const float height  = _frameHeight;
-    const float dW      = (float)_backingWidth	/ width;
-    const float dH      = (float)_backingHeight / height;
-    float dd            = 1.0f;
-    float nW            = 1.0f;
-    float nH            = 1.0f;
+    const int rightPadding      = _rightPaddingPixels;
+    const float width           = _frameWidth;
+    const float height          = _frameHeight;
+    const float dW              = (float)_backingWidth	/ width;
+    const float dH              = (float)_backingHeight / height;
+    const float dRightPadding   = (float)rightPadding * dW / width;
+    float dd                    = 1.0f;
+    float nW                    = 1.0f;
+    float nH                    = 1.0f;
+    float nRightPadding         = 0.0f;
 
     switch (self.contentMode) {
         case UIViewContentModeScaleToFill:
@@ -395,17 +413,20 @@ exit:
         case UIViewContentModeCenter:
             nW = 1.0f / dW / [UIScreen mainScreen].scale;
             nH = 1.0f / dH / [UIScreen mainScreen].scale;
+            nRightPadding = 1.0f / dRightPadding / [UIScreen mainScreen].scale;
             break;
         case UIViewContentModeScaleAspectFill:
             dd = MAX(dW, dH);
             nW = (width  * dd / (float)_backingWidth );
             nH = (height * dd / (float)_backingHeight);
+            nRightPadding = (rightPadding * dd / (float)_backingWidth);
             break;
         case UIViewContentModeScaleAspectFit:
         default:
             dd = MIN(dW, dH);
             nW = (width  * dd / (float)_backingWidth );
             nH = (height * dd / (float)_backingHeight);
+            nRightPadding = (rightPadding * dd / (float)_backingWidth);
             break;
     }
 
@@ -439,23 +460,22 @@ exit:
         return;
     }
 
-    static const GLfloat texCoords[] = {
-        0.0f, 1.0f,
-        1.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-    };
-
     [EAGLContext setCurrentContext:_context];
+
+    if (overlay->pitches[0] > _frameWidth) {
+        _rightPaddingPixels = overlay->pitches[0] - _frameWidth;
+        _didPaddingChanged = YES;
+    }
 
     if (_didRelayoutSubViews) {
         [self layoutOnDisplayThread];
         _didRelayoutSubViews = NO;
     }
 
-    if (_didSetContentMode) {
-        [self updateVertices];
+    if (_didSetContentMode || _didPaddingChanged) {
         _didSetContentMode = NO;
+        _didPaddingChanged = NO;
+        [self updateVertices];
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
@@ -471,6 +491,17 @@ exit:
     }
 
     if ([_renderer prepareDisplay]) {
+        if (_frameWidth > 0)
+            _rightPadding = ((GLfloat)_rightPaddingPixels) / _frameWidth;
+
+        _texCoords[0] = 0.0f;
+        _texCoords[1] = 1.0f;
+        _texCoords[2] = 1.0f - _rightPadding;
+        _texCoords[3] = 1.0f;
+        _texCoords[4] = 0.0f;
+        _texCoords[5] = 0.0f;
+        _texCoords[6] = 1.0f - _rightPadding;
+        _texCoords[7] = 0.0f;
 
         GLfloat modelviewProj[16];
         mat4f_LoadOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f, modelviewProj);
@@ -478,7 +509,7 @@ exit:
 
         glVertexAttribPointer(ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, _vertices);
         glEnableVertexAttribArray(ATTRIBUTE_VERTEX);
-        glVertexAttribPointer(ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, 0, 0, texCoords);
+        glVertexAttribPointer(ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, 0, 0, _texCoords);
         glEnableVertexAttribArray(ATTRIBUTE_TEXCOORD);
 
 #if 0
