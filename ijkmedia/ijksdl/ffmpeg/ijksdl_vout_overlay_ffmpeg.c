@@ -144,13 +144,22 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     overlay->h = height;
 
     enum AVPixelFormat ff_format = AV_PIX_FMT_NONE;
-    int buf_width = width;  // must be aligned to 16 bytes pitch for arm-neon image-convert
+    int buf_width = width;
     int buf_height = height;
     switch (format) {
     case SDL_FCC_I420:
     case SDL_FCC_YV12: {
         ff_format = AV_PIX_FMT_YUV420P;
+        // FIXME: need runtime config
+#if defined(__ANDROID__)
+        // 16 bytes align pitch for arm-neon image-convert
         buf_width = IJKALIGN(width, 16); // 1 bytes per pixel for Y-plane
+#elif defined(__APPLE__)
+        // 2^n align for width
+        buf_width  = 1 << (sizeof(int) * 8 - __builtin_clz(width));
+#else
+        buf_width = IJKALIGN(width, 16); // unknown platform
+#endif
         opaque->planes = 3;
         break;
     }

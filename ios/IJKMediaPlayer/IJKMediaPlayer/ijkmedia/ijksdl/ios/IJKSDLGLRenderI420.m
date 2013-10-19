@@ -86,8 +86,8 @@ static NSString *const g_yuvFragmentShaderString = IJK_SHADER_STRING
     if (0 == _textures[0])
         glGenTextures(3, _textures);
 
-    const UInt8 *pixels[3] = {overlay->pixels[0], overlay->pixels[1], overlay->pixels[2]};
-    const NSUInteger widths[3]  = { frameWidth, frameWidth / 2, frameWidth / 2 };
+    const UInt8 *pixels[3] = { overlay->pixels[0], overlay->pixels[1], overlay->pixels[2] };
+    const NSUInteger widths[3]  = { overlay->pitches[0], overlay->pitches[1], overlay->pitches[2] };
     const NSUInteger heights[3] = { frameHeight, frameHeight / 2, frameHeight / 2 };
 
     for (int i = 0; i < 3; ++i) {
