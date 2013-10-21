@@ -1,5 +1,6 @@
 Changes between 0.0.7 and 0.0.6:
 --------------------------------
+- ios: support build with SDK7
 
 Changes between 0.0.6 and 0.0.5:
 --------------------------------

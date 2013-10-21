@@ -4,160 +4,150 @@
 # https://github.com/kolyvan/kxmovie
 # https://github.com/yixia/FFmpeg-Android
 # http://git.videolan.org/?p=vlc-ports/android.git;a=summary
-
+# https://github.com/kewlbear/FFmpeg-iOS-build-script/
 
 #--------------------
 echo "===================="
-echo "[*] check env"
+echo "[*] check host"
 echo "===================="
 set -e
 
+#--------------------
+# include
 
-FF_TARGET=$1
-if [ -z "$FF_TARGET" ]; then
-    echo "You must specific target 'armv7, armv7s, ...'.\n"
+
+#--------------------
+# common defines
+FF_ARCH=$1
+if [ -z "$FF_ARCH" ]; then
+    echo "You must specific an architecture 'armv7, armv7s, arm64, i386, x86_64, ...'.\n"
     exit 1
 fi
-
-
-XCODE_ROOT="/Applications/Xcode4.6.3.app/Contents/Developer/Platforms"
 
 
 FF_BUILD_ROOT=`pwd`
 FF_TAGET_OS="darwin"
 
 
-FF_CFG_FLAGS=
-FF_EXTRA_CFLAGS=
-FF_EXTRA_LDFLAGS=
-FF_PLATFORM_NAME=
-FF_SDK_NAME=
-
-
-echo "===================="
-echo "[*] config target"
-echo "===================="
-#----- common begin -----
-FF_TOOLS_ROOT="$FF_BUILD_ROOT/../extra"
-# FIXME: REMOVE ME
-GAS_PREP_PATH="$FF_BUILD_ROOT/../extra/gas-preprocessor/gas-preprocessor.pl"
-
-IPHONE_IOS_FF_PLATFORM_NAME="iPhoneOS.platform"
-IPHONE_SIM_FF_PLATFORM_NAME="iPhoneSimulator.platform"
-
-IPHONE_IOS_FF_SDK_NAME="iPhoneOS6.1.sdk"
-IPHONE_SIM_FF_SDK_NAME="iPhoneSimulator6.1.sdk"
-
-I386_FF_CFG_FLAGS=
-I386_FF_CFG_FLAGS="$I386_FF_CFG_FLAGS --arch=i386"
-I386_FF_CFG_FLAGS="$I386_FF_CFG_FLAGS --cpu=i386"
-I386_FF_CFG_FLAGS="$I386_FF_CFG_FLAGS --disable-asm"
-I386_FF_CFG_FLAGS="$I386_FF_CFG_FLAGS --disable-mmx"
-I386_FF_CFG_FLAGS="$I386_FF_CFG_FLAGS --assert-level=2"
-
-ARMV7_FF_CFG_FLAGS=
-ARMV7_FF_CFG_FLAGS="$ARMV7_FF_CFG_FLAGS --arch=arm"
-ARMV7_FF_CFG_FLAGS="$ARMV7_FF_CFG_FLAGS --cpu=cortex-a8"
-ARMV7_FF_CFG_FLAGS="$ARMV7_FF_CFG_FLAGS --enable-pic"
-ARMV7_FF_CFG_FLAGS="$ARMV7_FF_CFG_FLAGS --enable-neon"
-ARMV7_FF_CFG_FLAGS="$ARMV7_FF_CFG_FLAGS --enable-optimizations"
-ARMV7_FF_CFG_FLAGS="$ARMV7_FF_CFG_FLAGS --disable-debug"
-ARMV7_FF_CFG_FLAGS="$ARMV7_FF_CFG_FLAGS --enable-small"
-
-ARMV7_FF_EXTRA_CFLAGS="-mfpu=neon -mfloat-abi=softfp -mvectorize-with-neon-quad"
-ARMV7_FF_EXTRA_LDFLAGS="-Wl"
-
+# ffmpeg build params
 export COMMON_FF_CFG_FLAGS=
 source $FF_BUILD_ROOT/../tools/ffmpeg-common-profiles.sh
-#----- common end -----
 
+FFMPEG_CFG_FLAGS=
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --arch=$FF_ARCH"
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --target-os=$FF_TAGET_OS"
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-static"
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-shared"
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $COMMON_FF_CFG_FLAGS"
+FFMPEG_EXTRA_CFLAGS=
 
-if [ $FF_TARGET == "armv7" ]; then
-    echo "armv7"
-    FF_BUILD_NAME="ffmpeg-armv7"
-    FF_PLATFORM_NAME="$IPHONE_IOS_FF_PLATFORM_NAME"
-    FF_SDK_NAME="$IPHONE_IOS_FF_SDK_NAME"
+# i386, x86_64
+FFMPEG_CFG_FLAGS_SIMULATOR=
+FFMPEG_CFG_FLAGS_SIMULATOR="$FFMPEG_CFG_FLAGS_SIMULATOR --disable-asm"
+FFMPEG_CFG_FLAGS_SIMULATOR="$FFMPEG_CFG_FLAGS_SIMULATOR --disable-mmx"
+FFMPEG_CFG_FLAGS_SIMULATOR="$FFMPEG_CFG_FLAGS_SIMULATOR --assert-level=2"
 
-    FF_CFG_FLAGS="$FF_CFG_FLAGS $ARMV7_FF_CFG_FLAGS"
+# armv7, armv7s, arm64
+FFMPEG_CFG_FLAGS_ARM=
+FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-pic"
+FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-neon"
+FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-optimizations"
+FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --disable-debug"
+FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-small"
 
-    FF_EXTRA_CFLAGS=" $FF_EXTRA_CFLAGS  $ARMV7_FF_EXTRA_CFLAGS  -arch armv7"
-    FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS $ARMV7_FF_EXTRA_LDFLAGS -arch armv7"
-elif [ $FF_TARGET == "armv7s" ]; then
-    echo "armv7s"
-    FF_BUILD_NAME="ffmpeg-armv7s"
-    FF_PLATFORM_NAME="$IPHONE_IOS_FF_PLATFORM_NAME"
-    FF_SDK_NAME="$IPHONE_IOS_FF_SDK_NAME"
+echo "build_root: $FF_BUILD_ROOT"
 
-    FF_CFG_FLAGS="$FF_CFG_FLAGS $ARMV7_FF_CFG_FLAGS"
+#--------------------
+echo "===================="
+echo "[*] check gas-preprocessor"
+echo "===================="
+FF_TOOLS_ROOT="$FF_BUILD_ROOT/../extra"
+export PATH="$FF_TOOLS_ROOT/gas-preprocessor:$PATH"
 
-    FF_EXTRA_CFLAGS=" $FF_EXTRA_CFLAGS  $ARMV7_FF_EXTRA_CFLAGS  -arch armv7s"
-    FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS $ARMV7_FF_EXTRA_LDFLAGS -arch armv7s"
-elif [ $FF_TARGET == "i386" ]; then
-    echo "i386"
+echo "gasp: $FF_TOOLS_ROOT/gas-preprocessor/gas-preprocessor.pl"
+
+#--------------------
+echo "===================="
+echo "[*] config arch $FF_ARCH"
+echo "===================="
+
+FF_BUILD_NAME="unknown"
+FF_XCRUN_PLATFORM="iPhoneOS"
+FF_XCRUN_SIMULATOR=
+
+if [ "$FF_ARCH" == "i386" ]; then
     FF_BUILD_NAME="ffmpeg-i386"
-    FF_PLATFORM_NAME="$IPHONE_SIM_FF_PLATFORM_NAME"
-    FF_SDK_NAME="$IPHONE_SIM_FF_SDK_NAME"
-
-    FF_CFG_FLAGS="$FF_CFG_FLAGS $I386_FF_CFG_FLAGS"
-
-    FF_EXTRA_CFLAGS=" $FF_EXTRA_CFLAGS  -arch i386"
-    FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS -arch i386"
+    FF_XCRUN_PLATFORM="iPhoneSimulator"
+    FF_XCRUN_SIMULATOR="-mios-simulator-version-min=5.0"
+    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_SIMULATOR"
+elif [ "$FF_ARCH" == "x86_64" ]; then
+    FF_BUILD_NAME="ffmpeg-x86_64"
+    FF_XCRUN_PLATFORM="iPhoneSimulator"
+    FF_XCRUN_SIMULATOR="-mios-simulator-version-min=7.0"
+    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_SIMULATOR"
+elif [ "$FF_ARCH" == "armv7" ]; then
+    FF_BUILD_NAME="ffmpeg-armv7"
+    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
+#    FFMPEG_CFG_CPU="--cpu=cortex-a8"
+elif [ "$FF_ARCH" == "armv7s" ]; then
+    FF_BUILD_NAME="ffmpeg-armv7s"
+    FFMPEG_CFG_CPU="--cpu=swift"
+    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
+elif [ "$FF_ARCH" == "arm64" ]; then
+    FF_BUILD_NAME="ffmpeg-arm64"
+    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
 else
-    echo "unknown target $FF_TARGET";
+    echo "unknown architecture $FF_ARCH";
     exit 1
 fi
 
+echo "build_name: $FF_BUILD_NAME"
+echo "platform:   $FF_XCRUN_PLATFORM"
+echo "simulator:  $FF_XCRUN_SIMULATOR"
 
-echo "===================="
-echo "[*] make ios toolchain"
-echo "===================="
-
-FF_SOURCE="$FF_BUILD_ROOT/$FF_BUILD_NAME"
-FF_PREFIX="$FF_BUILD_ROOT/build/$FF_BUILD_NAME/output"
-
-FF_PLATFORM_ROOT="$XCODE_ROOT/$FF_PLATFORM_NAME"
-FF_SDK_ROOT="$FF_PLATFORM_ROOT/Developer/SDKs/$FF_SDK_NAME"
-FF_LIB_ROOT="$FF_PLATFORM_ROOT/Developer/SDKs/$FF_SDK_NAME/usr/lib/system"
-
-FF_CC_FLAG="$FF_PLATFORM_ROOT/Developer/usr/bin/gcc"
-# FIXME: REMOVE ME
-FF_AS_FLAG="$GAS_PREP_PATH $FF_CC_FLAG"
-echo "SDK: $FF_SDK_ROOT"
-
-
-export PATH="$FF_TOOLS_ROOT/gas-preprocessor:$PATH"
-
-FF_CFG_FLAGS="$FF_CFG_FLAGS --cc=$FF_CC_FLAG"
-# FIXME: REMOVE ME
-# FF_CFG_FLAGS="$FF_CFG_FLAGS --as=\"$FF_AS_FLAG\""
-FF_CFG_FLAGS="$FF_CFG_FLAGS --sysroot=$FF_SDK_ROOT"
-FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS --isysroot=$FF_SDK_ROOT -L$FF_LIB_ROOT"
-
-
-mkdir -p $FF_PREFIX
 #--------------------
-echo "\n--------------------"
-echo "[*] check ffmpeg env"
-echo "--------------------"
-FF_CFG_FLAGS="$FF_CFG_FLAGS          $COMMON_FF_CFG_FLAGS"
-FF_CFG_FLAGS="$FF_CFG_FLAGS --prefix=$FF_PREFIX"
-FF_CFG_FLAGS="$FF_CFG_FLAGS --target-os=$FF_TAGET_OS"
-FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-static"
-FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-shared"
+echo "===================="
+echo "[*] make ios toolchain $FF_BUILD_NAME"
+echo "===================="
 
+FF_BUILD_SOURCE="$FF_BUILD_ROOT/$FF_BUILD_NAME"
+FF_BUILD_PREFIX="$FF_BUILD_ROOT/build/$FF_BUILD_NAME/output"
+
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --prefix=$FF_BUILD_PREFIX"
+
+mkdir -p $FF_BUILD_PREFIX
+
+echo "build_source: $FF_BUILD_SOURCE"
+echo "build_prefix: $FF_BUILD_PREFIX"
 
 #--------------------
 echo "\n--------------------"
 echo "[*] configurate ffmpeg"
 echo "--------------------"
-cd $FF_SOURCE
+FF_XCRUN_SDK=`echo $FF_XCRUN_PLATFORM | tr '[:upper:]' '[:lower:]'`
+FF_XCRUN_CC="xcrun -sdk $FF_XCRUN_SDK clang"
+
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_CPU"
+
+FFMPEG_CFLAGS=
+FFMPEG_CFLAGS="$FFMPEG_CFLAGS -arch $FF_ARCH"
+FFMPEG_CFLAGS="$FFMPEG_CFLAGS $FF_XCRUN_SIMULATOR"
+FFMPEG_CFLAGS="$FFMPEG_CFLAGS $FFMPEG_EXTRA_CFLAGS"
+FFMPEG_CXXFLAGS="$FFMPEG_CFLAGS"
+FFMPEG_LDFLAGS="$FFMPEG_CFLAGS"
+
+cd $FF_BUILD_SOURCE
 if [ -f "./config.h" ]; then
     echo 'reuse configure'
 else
-    echo "config: $FF_CFG_FLAGS"
-    ./configure $FF_CFG_FLAGS \
-        --extra-cflags="$FF_CFLAGS $FF_EXTRA_CFLAGS" \
-        --extra-ldflags="$FF_EXTRA_LDFLAGS"
+    echo "config: $FFMPEG_CFG_FLAGS $FF_XCRUN_CC"
+    ./configure \
+        $FFMPEG_CFG_FLAGS \
+        --cc="$FF_XCRUN_CC" \
+        $FFMPEG_CFG_CPU \
+        --extra-cflags="$FFMPEG_CFLAGS" \
+        --extra-cxxflags="$FFMPEG_CXXFLAGS" \
+        --extra-ldflags="$FFMPEG_LDFLAGS"
     make clean
 fi
 
@@ -165,6 +155,6 @@ fi
 echo "\n--------------------"
 echo "[*] compile ffmpeg"
 echo "--------------------"
-cp config.* $FF_PREFIX
-make $FF_MAKEFLAGS
+cp config.* $FF_BUILD_PREFIX
+make -j3
 make install
