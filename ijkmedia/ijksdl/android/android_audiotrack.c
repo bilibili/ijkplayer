@@ -114,6 +114,7 @@ typedef struct audio_track_fields_t {
     jmethodID getMinBufferSize;
     jmethodID getMaxVolume;
     jmethodID getMinVolume;
+    jmethodID getNativeOutputSampleRate;
 
     jmethodID play;
     jmethodID pause;
@@ -148,6 +149,9 @@ int sdl_audiotrack_global_init(JNIEnv *env)
 
     g_clazz.getMinVolume = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getMinVolume", "()F");
     IJK_CHECK_RET(g_clazz.getMinVolume, -1, "missing AudioTrack.getMinVolume");
+
+    g_clazz.getNativeOutputSampleRate = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getNativeOutputSampleRate", "(I)I");
+    IJK_CHECK_RET(g_clazz.getNativeOutputSampleRate, -1, "missing AudioTrack.getNativeOutputSampleRate");
 
     g_clazz.play = (*env)->GetMethodID(env, g_clazz.clazz, "play", "()V");
     IJK_CHECK_RET(g_clazz.play, -1, "missing AudioTrack.play");
@@ -229,6 +233,21 @@ static float audiotrack_get_min_volume(JNIEnv *env)
     return retval;
 }
 
+#define STREAM_MUSIC 3
+static int audiotrack_get_native_output_sample_rate(JNIEnv *env)
+{
+    SDLTRACE("audiotrack_get_native_output_sample_rate");
+    int retval = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.getNativeOutputSampleRate, STREAM_MUSIC);
+    if ((*env)->ExceptionCheck(env)) {
+        ALOGE("audiotrack_get_native_output_sample_rate: getMinVolume: Exception:");
+        (*env)->ExceptionDescribe(env);
+        (*env)->ExceptionClear(env);
+        return -1;
+    }
+
+    return retval;
+}
+
 static int audiotrack_set_stereo_volume(JNIEnv *env, SDL_AndroidAudioTrack *atrack, float left, float right)
 {
     int retval = (*env)->CallIntMethod(env, atrack->thiz, g_clazz.setStereoVolume, left, right);
@@ -278,12 +297,15 @@ SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudi
         return NULL;
     }
     atrack->spec = *spec;
-    if (atrack->spec.sample_rate_in_hz > 48000) {
-        ALOGW("sdl_audiotrack_new: sample rate too high: %d:", atrack->spec.sample_rate_in_hz);
-        atrack->spec.sample_rate_in_hz = 48000;
-    } else if (atrack->spec.sample_rate_in_hz < 4000) {
-        ALOGW("sdl_audiotrack_new: sample rate too low: %d:", atrack->spec.sample_rate_in_hz);
-        atrack->spec.sample_rate_in_hz = 4000;
+
+    if (atrack->spec.sample_rate_in_hz < 4000 || atrack->spec.sample_rate_in_hz > 48000) {
+        int native_sample_rate_in_hz = audiotrack_get_native_output_sample_rate(env);
+        if (native_sample_rate_in_hz > 0) {
+            ALOGE("sdl_audiotrack_new: cast sample rate %d to %d:",
+                atrack->spec.sample_rate_in_hz,
+                native_sample_rate_in_hz);
+            atrack->spec.sample_rate_in_hz = native_sample_rate_in_hz;
+        }
     }
 
     int min_buffer_size = audiotrack_get_min_buffer_size(env, &atrack->spec);
