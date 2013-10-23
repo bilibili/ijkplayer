@@ -68,19 +68,23 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
 
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
+    if (!opaque->abort_request && !opaque->pause_on)
+        sdl_audiotrack_play(env, atrack);
+
     while (!opaque->abort_request) {
         SDL_LockMutex(opaque->wakeup_mutex);
-        if (!opaque->abort_request && opaque->pause_on)
+        if (!opaque->abort_request && opaque->pause_on) {
             sdl_audiotrack_pause(env, atrack);
-        while (!opaque->abort_request && opaque->pause_on) {
-            SDL_CondWaitTimeout(opaque->wakeup_cond, opaque->wakeup_mutex, 1000);
-            if (opaque->need_flush) {
-                opaque->need_flush = 0;
-                sdl_audiotrack_flush(env, atrack);
+            while (!opaque->abort_request && opaque->pause_on) {
+                SDL_CondWaitTimeout(opaque->wakeup_cond, opaque->wakeup_mutex, 1000);
             }
+            if (!opaque->abort_request && !opaque->pause_on)
+                sdl_audiotrack_play(env, atrack);
         }
-        if (!opaque->abort_request && !opaque->pause_on)
-            sdl_audiotrack_play(env, atrack);
+        if (opaque->need_flush) {
+            opaque->need_flush = 0;
+            sdl_audiotrack_flush(env, atrack);
+        }
         SDL_UnlockMutex(opaque->wakeup_mutex);
 
         audio_cblk(userdata, buffer, copy_size);
