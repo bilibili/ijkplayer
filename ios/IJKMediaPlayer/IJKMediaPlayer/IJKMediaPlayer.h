@@ -23,4 +23,6 @@
 #import "IJKMediaModule.h"
 #import "IJKMediaPlayback.h"
 #import "IJKMPMoviePlayerController.h"
+
+#import "IJKFFOptions.h"
 #import "IJKFFMoviePlayerController.h"
