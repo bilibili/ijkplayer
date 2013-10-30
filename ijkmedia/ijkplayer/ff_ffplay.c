@@ -238,6 +238,15 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
 // FFP_MERGE: YUVA_OUT
 // FFP_MERGE: BPP
 // FFP_MERGE: blend_subrect
+
+static void free_picture(VideoPicture *vp)
+{
+    if (vp->bmp) {
+        SDL_VoutFreeYUVOverlay(vp->bmp);
+        vp->bmp = NULL;
+    }
+}
+
 // FFP_MERGE: free_subpicture
 // FFP_MERGE: calculate_display_rect
 // FFP_MERGE: video_image_display
@@ -275,7 +284,6 @@ static void video_image_display2(FFPlayer *ffp)
 static void stream_close(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
-    VideoPicture *vp;
     int i;
     /* XXX: use a special url_shutdown call to abort parse cleanly */
     is->abort_request = 1;
@@ -293,16 +301,8 @@ static void stream_close(FFPlayer *ffp)
 #endif
 
     /* free all pictures */
-    for (i = 0; i < VIDEO_PICTURE_QUEUE_SIZE; i++) {
-        vp = &is->pictq[i];
-#if CONFIG_AVFILTER
-        avfilter_unref_bufferp(&vp->picref);
-#endif
-        if (vp->bmp) {
-            SDL_VoutFreeYUVOverlay(vp->bmp);
-            vp->bmp = NULL;
-        }
-    }
+    for (i = 0; i < VIDEO_PICTURE_QUEUE_SIZE; i++)
+        free_picture(&is->pictq[i]);
 #ifdef FFP_MERGE
     for (i = 0; i < SUBPICTURE_QUEUE_SIZE; i++)
         free_subpicture(&is->subpq[i]);
@@ -751,8 +751,7 @@ static void alloc_picture(FFPlayer *ffp)
 
     vp = &is->pictq[is->pictq_windex];
 
-    if (vp->bmp)
-        SDL_VoutFreeYUVOverlay(vp->bmp);
+    free_picture(vp);
 
 #ifdef FFP_MERGE
     video_open(ffp, 0, vp);
@@ -774,11 +773,7 @@ static void alloc_picture(FFPlayer *ffp)
                "Error: the video system does not support an image\n"
                         "size of %dx%d pixels. Try using -lowres or -vf \"scale=w:h\"\n"
                         "to reduce the image size.\n", vp->width, vp->height );
-        if (vp->bmp)
-        {
-            SDL_VoutFreeYUVOverlay(vp->bmp);
-            vp->bmp = NULL;
-        }
+        free_picture(vp);
     }
 
     SDL_LockMutex(is->pictq_mutex);
