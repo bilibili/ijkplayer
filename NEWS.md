@@ -1,6 +1,7 @@
 Changes between 0.0.7 and 0.0.6:
 --------------------------------
 - ios: support build with SDK7
+- ffmpeg: switch to n2.1 base
 
 Changes between 0.0.6 and 0.0.5:
 --------------------------------
