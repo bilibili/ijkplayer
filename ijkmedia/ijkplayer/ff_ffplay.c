@@ -1699,7 +1699,6 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
                 codec->max_lowres);
         avctx->lowres= codec->max_lowres;
     }
-    avctx->idct_algo         = ffp->idct;
     avctx->error_concealment = ffp->error_concealment;
 
     if(avctx->lowres) avctx->flags |= CODEC_FLAG_EMU_EDGE;

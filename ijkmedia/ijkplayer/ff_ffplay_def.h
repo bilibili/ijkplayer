@@ -298,7 +298,6 @@ static int workaround_bugs = 1;
 static int fast = 0;
 static int genpts = 0;
 static int lowres = 0;
-static int idct = FF_IDCT_AUTO;
 static int error_concealment = 3;
 static int decoder_reorder_pts = -1;
 static int autoexit;
@@ -377,7 +376,6 @@ typedef struct FFPlayer {
     int fast;
     int genpts;
     int lowres;
-    int idct;
     int error_concealment;
     int decoder_reorder_pts;
     int autoexit;
@@ -466,7 +464,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->fast                   = 1;
     ffp->genpts                 = 0;
     ffp->lowres                 = 0;
-    ffp->idct                   = FF_IDCT_AUTO;
     ffp->error_concealment      = 3;
     ffp->decoder_reorder_pts    = -1;
     ffp->autoexit               = 0;
