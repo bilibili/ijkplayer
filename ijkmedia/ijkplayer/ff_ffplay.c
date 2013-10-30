@@ -1712,10 +1712,10 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     avctx->codec_id = codec->id;
     avctx->workaround_bugs   = ffp->workaround_bugs;
     avctx->lowres            = ffp->lowres;
-    if(avctx->lowres > codec->max_lowres){
+    if(avctx->lowres > av_codec_get_max_lowres(codec)){
         av_log(avctx, AV_LOG_WARNING, "The maximum value for lowres supported by the decoder is %d\n",
-                codec->max_lowres);
-        avctx->lowres= codec->max_lowres;
+                av_codec_get_max_lowres(codec));
+        avctx->lowres= av_codec_get_max_lowres(codec);
     }
     avctx->error_concealment = ffp->error_concealment;
 
