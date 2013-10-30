@@ -1613,7 +1613,7 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
     FFPlayer *ffp = opaque;
     SDL_AudioSpec wanted_spec, spec;
     const char *env;
-    const int next_nb_channels[] = {0, 0, 1, 6, 2, 6, 4, 6};
+    static const int next_nb_channels[] = {0, 0, 1, 6, 2, 6, 4, 6};
 
     env = SDL_getenv("SDL_AUDIO_CHANNELS");
     if (env) {
