@@ -53,7 +53,7 @@ int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtai
 
 void aout_pause_audio(SDL_Aout *aout, int pause_on)
 {
-    SDLTRACE("aout_pause_audio()\n");
+    SDLTRACE("aout_pause_audio(%d)\n", pause_on);
     SDL_Aout_Opaque *opaque = aout->opaque;
 
     if (pause_on) {

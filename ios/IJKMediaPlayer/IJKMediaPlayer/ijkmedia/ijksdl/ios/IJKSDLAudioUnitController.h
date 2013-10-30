@@ -37,6 +37,5 @@
 - (void)close;
 
 @property (nonatomic, readonly) SDL_AudioSpec spec;
-@property (nonatomic, getter=isPaused) BOOL paused;
 
 @end

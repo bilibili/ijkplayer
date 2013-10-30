@@ -27,6 +27,7 @@
 
 @implementation IJKSDLAudioUnitController {
     AudioUnit _auUnit;
+    BOOL _isPaused;
 }
 
 - (id)initWithAudioSpec:(SDL_AudioSpec *)aSpec
@@ -173,6 +174,7 @@
     if (!_auUnit)
         return;
 
+    _isPaused = NO;
     AudioOutputUnitStart(_auUnit);
     AudioSessionSetActive(true);
 }
@@ -182,8 +184,7 @@
     if (!_auUnit)
         return;
 
-    AudioOutputUnitStop(_auUnit);
-    // AudioSessionSetActive(false);
+    _isPaused = YES;
 }
 
 - (void)flush
@@ -191,7 +192,7 @@
     if (!_auUnit)
         return;
 
-    AudioOutputUnitStop(_auUnit);
+    AudioUnitReset(_auUnit, kAudioUnitScope_Global, 0);
 }
 
 - (void)stop
@@ -234,7 +235,7 @@ static OSStatus RenderCallback(void                        *inRefCon,
     @autoreleasepool {
         IJKSDLAudioUnitController* auController = (__bridge IJKSDLAudioUnitController *) inRefCon;
 
-        if (!auController || auController.paused) {
+        if (!auController || auController->_isPaused) {
             for (UInt32 i = 0; i < ioData->mNumberBuffers; i++) {
                 AudioBuffer *ioBuffer = &ioData->mBuffers[i];
                 memset(ioBuffer->mData, auController.spec.silence, ioBuffer->mDataByteSize);
@@ -242,11 +243,11 @@ static OSStatus RenderCallback(void                        *inRefCon,
             return noErr;
         }
 
-        for (UInt32 i = 0; i < ioData->mNumberBuffers; i++) {
+        for (int i = 0; i < (int)ioData->mNumberBuffers; i++) {
             AudioBuffer *ioBuffer = &ioData->mBuffers[i];
             (*auController.spec.callback)(auController.spec.userdata, ioBuffer->mData, ioBuffer->mDataByteSize);
         }
-        
+
         return noErr;
     }
 }
