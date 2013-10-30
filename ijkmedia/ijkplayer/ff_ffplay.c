@@ -293,6 +293,10 @@ static void stream_close(FFPlayer *ffp)
             vp->bmp = NULL;
         }
     }
+#ifdef FFP_MERGE
+    for (i = 0; i < SUBPICTURE_QUEUE_SIZE; i++)
+        free_subpicture(&is->subpq[i]);
+#endif
     SDL_DestroyMutex(is->pictq_mutex);
     SDL_DestroyCond(is->pictq_cond);
 #ifdef FFP_MERGE
