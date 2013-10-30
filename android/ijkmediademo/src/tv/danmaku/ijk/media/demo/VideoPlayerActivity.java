@@ -90,7 +90,7 @@ public class VideoPlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mVideoPath = "http://bili-test.u.qiniudn.com/aac-96khz.flv";
+        mVideoPath = "http://v.youku.com/player/getM3U8/vid/XNTY1ODE5NjMy/type//v.m3u8";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
