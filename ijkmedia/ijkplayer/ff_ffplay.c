@@ -46,7 +46,6 @@
 // #define FFP_SHOW_DEMUX_CACHE
 
 static AVPacket flush_pkt;
-static AVPacket eof_pkt;
 
 // FFP_MERGE: cmp_audio_fmts
 // FFP_MERGE: get_valid_channel_layout
@@ -88,14 +87,14 @@ static int packet_queue_put(PacketQueue *q, AVPacket *pkt)
     int ret;
 
     /* duplicate the packet */
-    if (pkt != &flush_pkt && pkt != &eof_pkt && av_dup_packet(pkt) < 0)
+    if (pkt != &flush_pkt && av_dup_packet(pkt) < 0)
         return -1;
 
     SDL_LockMutex(q->mutex);
     ret = packet_queue_put_private(q, pkt);
     SDL_UnlockMutex(q->mutex);
 
-    if (pkt != &flush_pkt && pkt != &eof_pkt && ret < 0)
+    if (pkt != &flush_pkt && ret < 0)
         av_free_packet(pkt);
 
     return ret;
@@ -204,25 +203,22 @@ static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *seria
     return ret;
 }
 
-static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket *pkt, int *serial)
+static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket *pkt, int *serial, int finished)
 {
-    int eof = 0;
-
     while (1) {
         int new_packet = packet_queue_get(q, pkt, 0, serial);
         if (new_packet < 0)
             return -1;
         else if (new_packet == 0) {
-            if (!eof)
+            if (!finished)
                 ffp_toggle_buffering(ffp, 1);
             new_packet = packet_queue_get(q, pkt, 1, serial);
             if (new_packet < 0)
                 return -1;
-            eof = 0;
         }
 
-        if (pkt->data == eof_pkt.data)
-            eof = 1;
+        if (finished)
+            continue;
         else
             break;
     }
@@ -886,7 +882,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
     VideoState *is = ffp->is;
     int got_picture;
 
-    if (packet_queue_get_or_buffering(ffp, &is->videoq, pkt, serial) < 0)
+    if (packet_queue_get_or_buffering(ffp, &is->videoq, pkt, serial, is->video_finished) < 0)
         return -1;
 
     if (pkt->data == flush_pkt.data) {
@@ -941,8 +937,10 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
             frame->pts, g_vdps_counter, (int64_t)avg_frame_time, fps, dur);
 #endif
 
-    if (!got_picture && !pkt->data)
+    if (!got_picture && !pkt->data) {
+        ALOGE("video_finished");
         is->video_finished = *serial;
+    }
 
     if (got_picture) {
         int ret = 1;
@@ -1383,8 +1381,10 @@ static int audio_decode_frame(FFPlayer *ffp)
                 pkt_temp->size -= len1;
                 if ((pkt_temp->data && pkt_temp->size <= 0) || (!pkt_temp->data && !got_frame))
                     pkt_temp->stream_index = -1;
-                if (!pkt_temp->data && !got_frame)
+                if (!pkt_temp->data && !got_frame) {
+                    ALOGE("audio_finished");
                     is->audio_finished = is->audio_pkt_temp_serial;
+                }
 
                 if (!got_frame)
                     continue;
@@ -1554,7 +1554,7 @@ static int audio_decode_frame(FFPlayer *ffp)
             SDL_CondSignal(is->continue_read_thread);
 
         /* read next packet */
-        if (packet_queue_get_or_buffering(ffp, &is->audioq, pkt, &is->audio_pkt_temp_serial) <= 0)
+        if (packet_queue_get_or_buffering(ffp, &is->audioq, pkt, &is->audio_pkt_temp_serial, is->audio_finished) <= 0)
             return -1;
 
         if (pkt->data == flush_pkt.data) {
@@ -2093,8 +2093,6 @@ static int read_thread(void *arg)
         }
 #endif
         if (is->seek_req) {
-            completed = 0;
-
             int64_t seek_target = is->seek_pos;
             int64_t seek_min    = is->seek_rel > 0 ? seek_target - is->seek_rel + 2: INT64_MIN;
             int64_t seek_max    = is->seek_rel < 0 ? seek_target - is->seek_rel - 2: INT64_MAX;
@@ -2129,6 +2127,7 @@ static int read_thread(void *arg)
             is->seek_req = 0;
             is->queue_attachments_req = 1;
             eof = 0;
+            completed = 0;
             SDL_LockMutex(ffp->is->play_mutex);
             if (ffp->auto_start) {
                 // ALOGE("seek: auto_start\n");
@@ -2178,7 +2177,7 @@ static int read_thread(void *arg)
             SDL_UnlockMutex(wait_mutex);
             continue;
         }
-        if (!is->paused &&
+        if ((!is->paused || completed) &&
             (!is->audio_st || is->audio_finished == is->audioq.serial) &&
             (!is->video_st || (is->video_finished == is->videoq.serial && is->pictq_size == 0))) {
             if (ffp->loop != 1 && (!ffp->loop || --ffp->loop)) {
@@ -2188,17 +2187,20 @@ static int read_thread(void *arg)
                 goto fail;
             } else {
                 if (completed) {
+                    ALOGE("ffp_toggle_buffering: eof\n");
                     SDL_LockMutex(wait_mutex);
                     // infinite wait may block shutdown
-                    while(!is->abort_request)
+                    while(!is->abort_request && !is->seek_req)
                         SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
                     SDL_UnlockMutex(wait_mutex);
+                    if (!is->abort_request)
+                        continue;
                 } else {
                     completed = 1;
                     ffp->auto_start = 0;
 
                     // TODO: 0 it's a bit early to notify complete here
-                    ALOGE("ffp_toggle_buffering: eof\n");
+                    ALOGE("ffp_toggle_buffering: completed\n");
                     ffp_toggle_buffering(ffp, 0);
                     toggle_pause(ffp, 1);
                     ffp_notify_msg1(ffp, FFP_MSG_COMPLETED);
@@ -2210,6 +2212,7 @@ static int read_thread(void *arg)
                 packet_queue_put_nullpacket(&is->videoq, is->video_stream);
             if (is->audio_stream >= 0)
                 packet_queue_put_nullpacket(&is->audioq, is->audio_stream);
+            ffp_toggle_buffering(ffp, 0);
             SDL_Delay(10);
             eof=0;
             continue;
@@ -2218,17 +2221,6 @@ static int read_thread(void *arg)
         if (ret < 0) {
             if (ret == AVERROR_EOF || url_feof(ic->pb)) {
                 eof = 1;
-
-                if (is->audio_stream >= 0)
-                    packet_queue_put(&is->audioq, &eof_pkt);
-#ifdef FFP_MERGE
-                if (is->subtitle_stream >= 0)
-                    packet_queue_put(&is->subtitleq, &eof_pkt);
-#endif
-                if (is->video_stream >= 0)
-                    packet_queue_put(&is->videoq, &eof_pkt);
-
-                ffp_toggle_buffering(ffp, 0);
             } else if (ic->pb && ic->pb->error) {
                 // TODO: 9 notify error until a/v finished
                 last_error = ic->pb->error;
@@ -2699,7 +2691,7 @@ int ffp_seek_to_l(FFPlayer *ffp, long msec)
     // FIXME: 9 seek by bytes
     // FIXME: 9 seek out of range
     // FIXME: 9 seekable
-    // ALOGE("stream_seek %"PRId64"(%d) + %"PRId64", \n", seek_pos, (int)msec, start_time);
+    ALOGE("stream_seek %"PRId64"(%d) + %"PRId64", \n", seek_pos, (int)msec, start_time);
     stream_seek(is, seek_pos, 0, 0);
     return 0;
 }
