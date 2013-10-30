@@ -153,6 +153,8 @@ typedef struct VideoState {
 #endif
     AVFormatContext *ic;
     int realtime;
+    int audio_finished;
+    int video_finished;
 
     Clock audclk;
     Clock vidclk;
