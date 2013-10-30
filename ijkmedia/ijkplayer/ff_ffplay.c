@@ -1354,7 +1354,7 @@ static int audio_decode_frame(FFPlayer *ffp)
 
     for (;;) {
         /* NOTE: the audio packet can contain several frames */
-        while (pkt_temp->size > 0 || is->audio_buf_frames_pending) {
+        while (pkt_temp->stream_index != -1 || is->audio_buf_frames_pending) {
             if (!is->frame) {
                 if (!(is->frame = avcodec_alloc_frame()))
                     return AVERROR(ENOMEM);
