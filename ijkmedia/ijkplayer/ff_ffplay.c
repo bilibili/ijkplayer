@@ -1218,6 +1218,8 @@ static int video_thread(void *arg)
 
             ret = av_buffersink_get_frame_flags(filt_out, frame, 0);
             if (ret < 0) {
+                if (ret == AVERROR_EOF)
+                    is->video_finished = serial;
                 ret = 0;
                 break;
             }
@@ -1429,6 +1431,8 @@ static int audio_decode_frame(FFPlayer *ffp)
                     is->audio_buf_frames_pending = 0;
                     continue;
                 }
+                if (ret == AVERROR_EOF)
+                    is->audio_finished = is->audio_pkt_temp_serial;
                 return ret;
             }
             is->audio_buf_frames_pending = 1;
