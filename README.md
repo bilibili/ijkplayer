@@ -18,6 +18,9 @@ ijkplayer
  - sudo port -vd install git-core
  - sudo port -vd install ccache
 
+### Latest Changes
+- [NEWS.md](NEWS.md)
+
 ### Features
 - Common
  - remove rarely used ffmpeg components to reduce binary size
