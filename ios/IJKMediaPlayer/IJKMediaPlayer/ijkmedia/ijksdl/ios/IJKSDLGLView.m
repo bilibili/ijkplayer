@@ -416,7 +416,6 @@ exit:
 
 - (void)updateVertices
 {
-    const int rightPadding      = _rightPaddingPixels;
     const float width           = _frameWidth;
     const float height          = _frameHeight;
     const float dW              = (float)_backingWidth	/ width;
