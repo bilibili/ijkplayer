@@ -421,11 +421,9 @@ exit:
     const float height          = _frameHeight;
     const float dW              = (float)_backingWidth	/ width;
     const float dH              = (float)_backingHeight / height;
-    const float dRightPadding   = (float)rightPadding * dW / width;
     float dd                    = 1.0f;
     float nW                    = 1.0f;
     float nH                    = 1.0f;
-    float nRightPadding         = 0.0f;
 
     switch (self.contentMode) {
         case UIViewContentModeScaleToFill:
@@ -433,20 +431,17 @@ exit:
         case UIViewContentModeCenter:
             nW = 1.0f / dW / [UIScreen mainScreen].scale;
             nH = 1.0f / dH / [UIScreen mainScreen].scale;
-            nRightPadding = 1.0f / dRightPadding / [UIScreen mainScreen].scale;
             break;
         case UIViewContentModeScaleAspectFill:
             dd = MAX(dW, dH);
             nW = (width  * dd / (float)_backingWidth );
             nH = (height * dd / (float)_backingHeight);
-            nRightPadding = (rightPadding * dd / (float)_backingWidth);
             break;
         case UIViewContentModeScaleAspectFit:
         default:
             dd = MIN(dW, dH);
             nW = (width  * dd / (float)_backingWidth );
             nH = (height * dd / (float)_backingHeight);
-            nRightPadding = (rightPadding * dd / (float)_backingWidth);
             break;
     }
 
