@@ -32,6 +32,7 @@ typedef struct SDL_VoutSurface_Opaque {
 } SDL_VoutSurface_Opaque;
 
 typedef struct SDL_Vout_Opaque {
+    char dummy;
 } SDL_Vout_Opaque;
 
 static void vout_free_l(SDL_Vout *vout)
