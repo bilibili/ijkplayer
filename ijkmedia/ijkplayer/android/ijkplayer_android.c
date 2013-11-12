@@ -39,7 +39,7 @@ IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*))
         goto fail;
 
     mp->ffplayer->aout = SDL_AoutAndroid_CreateForAudioTrack();
-    if (!mp->ffplayer->vout)
+    if (!mp->ffplayer->aout)
         goto fail;
 
     return mp;
@@ -52,7 +52,8 @@ IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*))
 void ijkmp_android_set_surface_l(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
 {
     if (!mp || !mp->ffplayer || !mp->ffplayer->vout)
-        return;
+        return;/vout
+
 
     SDL_VoutAndroid_SetAndroidSurface(env, mp->ffplayer->vout, android_surface);
 }
