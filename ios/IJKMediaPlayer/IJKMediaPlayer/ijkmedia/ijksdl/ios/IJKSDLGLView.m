@@ -181,6 +181,12 @@ enum {
                                         kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
                                         nil];
 
+        CGFloat scaleFactor = [[UIScreen mainScreen] scale];
+        if (scaleFactor < 1.0f)
+            scaleFactor = 1.0f;
+
+        [eaglLayer setContentsScale:scaleFactor];
+
         switch (chroma) {
             case SDL_FCC_I420:
                 NSLog(@"OK use I420 GL renderer");
