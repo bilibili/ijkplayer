@@ -26,6 +26,7 @@
 #import "IJKSDLGLShader.h"
 #import "IJKSDLGLRender.h"
 #import "IJKSDLGLRenderI420.h"
+#import "IJKSDLGLRenderRV24.h"
 #import "../../../IJKMediaModule.h"
 
 static NSString *const g_vertexShaderString = IJK_SHADER_STRING
@@ -169,20 +170,31 @@ enum {
 	return [CAEAGLLayer class];
 }
 
-- (id) initWithFrame:(CGRect)frame
+- (id) initWithFrame:(CGRect)frame withChroma:(NSInteger)chroma
 {
     self = [super initWithFrame:frame];
     if (self) {
         CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
         eaglLayer.opaque = YES;
         eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                        [NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
+                                        [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
                                         kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
                                         nil];
 
-
-        _frameChroma = SDL_FCC_I420;
-        _renderer = [[IJKSDLGLRenderI420 alloc] init];
+        switch (chroma) {
+            case SDL_FCC_I420:
+                NSLog(@"OK use I420 GL renderer");
+                _frameChroma = SDL_FCC_I420;
+                _renderer = [[IJKSDLGLRenderI420 alloc] init];
+                break;
+            case SDL_FCC_RV24:
+                NSLog(@"OK use RV24 GL renderer");
+                _frameChroma = SDL_FCC_RV24;
+                _renderer = [[IJKSDLGLRenderRV24 alloc] init];
+                break;
+            default:
+                NSLog(@"unknown chroma %d\n", chroma);
+        }
 
         _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
 
@@ -322,8 +334,10 @@ enum {
             _frameChroma = overlay->format;
             _renderer = [[IJKSDLGLRenderI420 alloc] init];
             NSLog(@"OK use I420 GL renderer");
-        } else {
-            return NO;
+        } else if (overlay->format == SDL_FCC_RV24) {
+            _frameChroma = overlay->format;
+            _renderer = [[IJKSDLGLRenderRV24 alloc] init];
+            NSLog(@"OK use RV24 GL renderer");
         }
 
         if (![self loadShaders]) {
@@ -462,8 +476,8 @@ exit:
 
     [EAGLContext setCurrentContext:_context];
 
-    if (overlay->pitches[0] > _frameWidth) {
-        _rightPaddingPixels = overlay->pitches[0] - _frameWidth;
+    if (overlay->pitches[0] / 3 > _frameWidth) {
+        _rightPaddingPixels = overlay->pitches[0] / 3 - _frameWidth;
         _didPaddingChanged = YES;
     }
 

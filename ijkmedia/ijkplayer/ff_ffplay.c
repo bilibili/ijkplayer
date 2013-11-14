@@ -2590,6 +2590,7 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
         case SDL_FCC_I420:
         case SDL_FCC_YV12:
         case SDL_FCC_RV16:
+        case SDL_FCC_RV24:
         case SDL_FCC_RV32:
             ffp->overlay_format = chroma_fourcc;
             break;

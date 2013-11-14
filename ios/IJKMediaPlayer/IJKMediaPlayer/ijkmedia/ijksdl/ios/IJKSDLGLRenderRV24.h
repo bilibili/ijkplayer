@@ -1,5 +1,5 @@
 /*
- * IJKSDLGLView.h
+ * IJKSDLGLRenderRV24.h
  *
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -22,16 +22,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import "IJKSDLGLRender.h"
 
-#include "ijksdl/ijksdl_vout.h"
-
-@interface IJKSDLGLView : UIView
-
-- (id) initWithFrame:(CGRect)frame
-          withChroma:(int)chroma;
-- (void) display: (SDL_VoutOverlay *) overlay;
-
-@property(nonatomic,strong) NSLock *appActivityLock;
+@interface IJKSDLGLRenderRV24 : NSObject<IJKSDLGLRender>
 
 @end

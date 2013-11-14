@@ -171,6 +171,23 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         opaque->planes = 1;
         break;
     }
+    case SDL_FCC_RV24: {
+        ff_format = AV_PIX_FMT_RGB24;
+#if defined(__ANDROID__)
+        // 16 bytes align pitch for arm-neon image-convert
+        buf_width = IJKALIGN(width, 16); // 1 bytes per pixel for Y-plane
+#elif defined(__APPLE__)
+        // 2^n align for width
+        buf_width = width;
+        if (width > 0)
+            buf_width = 1 << (sizeof(int) * 8 - __builtin_clz(width));
+        buf_width = width;
+#else
+        buf_width = IJKALIGN(width, 16); // unknown platform
+#endif
+        opaque->planes = 1;
+        break;
+    }
     case SDL_FCC_RV32: {
         ff_format = AV_PIX_FMT_0BGR32;
         buf_width = IJKALIGN(width, 4); // 4 bytes per pixel
@@ -246,12 +263,14 @@ int SDL_VoutFFmpeg_ConvertFrame(
         }
         break;
     case SDL_FCC_RV32:
-        // TODO: 9 android only
         overlay_fill(overlay, opaque->frame, opaque->planes);
         dst_format = AV_PIX_FMT_0BGR32;
         break;
+    case SDL_FCC_RV24:
+        overlay_fill(overlay, opaque->frame, opaque->planes);
+        dst_format = AV_PIX_FMT_RGB24;
+        break;
     case SDL_FCC_RV16:
-        // TODO: 9 android only
         overlay_fill(overlay, opaque->frame, opaque->planes);
         dst_format = AV_PIX_FMT_RGB565;
         break;

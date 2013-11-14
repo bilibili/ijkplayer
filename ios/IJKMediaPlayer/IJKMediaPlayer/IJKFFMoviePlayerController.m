@@ -82,11 +82,14 @@
 
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
 
-        IJKSDLGLView *glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+//        int chroma = SDL_FCC_RV24;
+        int chroma = SDL_FCC_I420;
+        IJKSDLGLView *glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]
+                                                        withChroma:chroma];
         self->_view = glView;
 
         ijkmp_ios_set_glview(_mediaPlayer, glView);
-        ijkmp_set_overlay_format(_mediaPlayer, SDL_FCC_I420);
+        ijkmp_set_overlay_format(_mediaPlayer, chroma);
 
         [options applyTo:_mediaPlayer];
 
