@@ -31,6 +31,13 @@ cd ios/ffmpeg-armv7s
 git checkout ${IJK_FFMPEG_COMMIT}
 cd -
 
+echo "== pull ffmpeg fork arm64 =="
+sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK ios/ffmpeg-arm64 ${IJK_FFMPEG_LOCAL_REPO}
+
+cd ios/ffmpeg-arm64
+git checkout ${IJK_FFMPEG_COMMIT}
+cd -
+
 echo "== pull ffmpeg fork i386 =="
 sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK ios/ffmpeg-i386 ${IJK_FFMPEG_LOCAL_REPO}
 
