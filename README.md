@@ -6,12 +6,12 @@ ijkplayer
 
 ### My Build Enviroment
 - Common
- - Mac OS X 10.8.4
+ - Mac OS X 10.8.5
 - Android
- - [ADT v22.0.4-741630](http://developer.android.com/sdk/index.html)
+ - [ADT v22.3.0-887826](http://developer.android.com/sdk/index.html)
  - [NDK r9](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
- - Xcode 4.6.3 (with iOS SDK 6.1)
+ - Xcode 5.0.0 (with iOS SDK 7)
 
 ### Dependent Tools (Mac OS X)
 - [MacPorts](http://www.macports.org/install.php)
