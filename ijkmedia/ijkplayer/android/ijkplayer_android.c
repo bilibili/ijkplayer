@@ -52,7 +52,7 @@ IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*))
 void ijkmp_android_set_surface_l(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
 {
     if (!mp || !mp->ffplayer || !mp->ffplayer->vout)
-        return;/vout
+        return;
 
 
     SDL_VoutAndroid_SetAndroidSurface(env, mp->ffplayer->vout, android_surface);
