@@ -76,7 +76,7 @@
 {
     [self lockApp];
     _isAppIsLockedOnResignActive = TRUE;
-    NSLog(@"IJKMediaModule:applicationWillResignActive lockApp");
+    // NSLog(@"IJKMediaModule:applicationWillResignActive lockApp");
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
@@ -84,7 +84,7 @@
     if (_isAppIsLockedOnResignActive) {
         [self unlockApp];
         _isAppIsLockedOnResignActive = FALSE;
-        NSLog(@"IJKMediaModule:applicationDidEnterBackground unlockApp");
+        // NSLog(@"IJKMediaModule:applicationDidEnterBackground unlockApp");
     }
 }
 
@@ -93,7 +93,7 @@
     if (_isAppIsLockedOnResignActive) {
         [self unlockApp];
         _isAppIsLockedOnResignActive = FALSE;
-        NSLog(@"IJKMediaModule:applicationWillEnterForeground unlockApp");
+        // NSLog(@"IJKMediaModule:applicationWillEnterForeground unlockApp");
     }
 }
 
@@ -102,7 +102,7 @@
     if (_isAppIsLockedOnResignActive) {
         [self unlockApp];
         _isAppIsLockedOnResignActive = FALSE;
-        NSLog(@"IJKMediaModule:applicationWillTerminate unlockApp");
+        // NSLog(@"IJKMediaModule:applicationWillTerminate unlockApp");
     }
 }
 
