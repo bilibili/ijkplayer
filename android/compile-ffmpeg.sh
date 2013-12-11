@@ -116,9 +116,11 @@ FF_CFLAGS="-O3 -Wall -pipe \
     -std=c99 \
     -ffast-math \
     -fstrict-aliasing -Werror=strict-aliasing \
-    -fmodulo-sched -fmodulo-sched-allow-regmoves \
     -Wno-psabi -Wa,--noexecstack \
     -DANDROID -DNDEBUG"
+
+# cause av_strlcpy crash with gcc4.7, gcc4.8
+# -fmodulo-sched -fmodulo-sched-allow-regmoves
 
 # --enable-thumb is OK
 #FF_CFLAGS="$FF_CFLAGS -mthumb"
@@ -294,6 +296,7 @@ FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-parser=gsm"
 # FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-parser=h261"
 # FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-parser=h263"
 # FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-parser=h264"
+FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-parser=hevc"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-parser=mjpeg"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-parser=mlp"
 # FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-parser=mpeg4video"

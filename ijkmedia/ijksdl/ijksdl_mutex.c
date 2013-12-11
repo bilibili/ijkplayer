@@ -24,6 +24,7 @@
 #include "ijksdl_mutex.h"
 #include <errno.h>
 #include <assert.h>
+#include <sys/time.h>
 #include "ijksdl_inc_internal.h"
 
 SDL_mutex *SDL_CreateMutex(void)
@@ -35,6 +36,7 @@ SDL_mutex *SDL_CreateMutex(void)
 
     if (pthread_mutex_init(&mutex->id, NULL) != 0) {
         free(mutex);
+        return NULL;
     }
 
     return mutex;
@@ -75,6 +77,7 @@ SDL_cond *SDL_CreateCond(void)
 
     if (pthread_cond_init(&cond->id, NULL) != 0) {
         free(cond);
+        return NULL;
     }
 
     return cond;

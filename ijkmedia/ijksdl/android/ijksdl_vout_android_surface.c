@@ -35,13 +35,11 @@ SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface()
 
 void SDL_VoutAndroid_SetAndroidSurface(JNIEnv *env, SDL_Vout *vout, jobject android_surface)
 {
-    if (!android_surface)
-        return;
-
-    ANativeWindow *native_window = ANativeWindow_fromSurface(env, android_surface);
-    if (!native_window)
-        return;
+    ANativeWindow *native_window = NULL;
+    if (android_surface)
+        native_window = ANativeWindow_fromSurface(env, android_surface);
 
     SDL_VoutAndroid_SetNativeWindow(vout, native_window);
-    ANativeWindow_release(native_window);
+    if (native_window)
+        ANativeWindow_release(native_window);
 }

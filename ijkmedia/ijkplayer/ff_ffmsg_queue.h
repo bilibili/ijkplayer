@@ -197,7 +197,7 @@ inline static int msg_queue_get(MessageQueue *q, AVMessage *msg, int block)
     return ret;
 }
 
-inline void msg_queue_remove(MessageQueue *q, int what)
+inline static void msg_queue_remove(MessageQueue *q, int what)
 {
     AVMessage **p_msg, *msg, *last_msg = q->first_msg;
     SDL_LockMutex(q->mutex);

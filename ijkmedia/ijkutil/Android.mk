@@ -25,7 +25,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_CFLAGS += -std=c99
 
-LOCAL_SRC_FILES += loghelp.c
+LOCAL_SRC_FILES += android/loghelp.c
 
 LOCAL_MODULE := ijkutil_c
 include $(BUILD_STATIC_LIBRARY)

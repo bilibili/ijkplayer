@@ -1,5 +1,35 @@
+Changes between 0.0.7 and 0.0.6:
+--------------------------------
+- ios: support build with SDK7
+- ffmpeg: switch to n2.1 base
+- ios: fix possible block on ijkmp_pause
+- ios: set CAEAGLLayer.contentsScale to avoid bad image on retina devices
+
+Changes between 0.0.6 and 0.0.5:
+--------------------------------
+- android: fix NativeWindow leak
+- ios: fix a deadlock related to AudioUnit
+- ios: support ffmpeg concat playback
+- ios: add ffmpeg options methods
+- android: limait audio sample-rate to 4kHz~48kHz
+- ios: fix gles texture alignment
+
+Changes between 0.0.5 and 0.0.4:
+--------------------------------
+- build: disable -fmodulo-sched -fmodulo-sched-allow-regmoves, may crash on gcc4.7~4.8
+- player: support ios
+- ijksdl: support ios gles2 video output
+- ijksdl: support ios AudioUnit audio output
+- build: add android/ios sub directory
+- player: fix some dead lock
+- build: use shell scripts instead of git-submodule
+- android: use RV32 as default chroma
+
 Changes between 0.0.4 and 0.0.3:
 --------------------------------
+- ffmpeg: enable ac3
+- android: target API-18
+- build: switch to NDKr9 gcc4.8 toolchain
 
 Changes between 0.0.3 and 0.0.1:
 --------------------------------

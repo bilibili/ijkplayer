@@ -24,7 +24,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <jni.h>
-#include "ijkutil/ijkutil_android.h"
+#include "ijkutil/ijkutil.h"
 #include "../ff_ffplay.h"
 #include "ijkplayer_android_def.h"
 #include "ijkplayer_android.h"
@@ -85,7 +85,7 @@ static IjkMediaPlayer *jni_set_media_player(JNIEnv* env, jobject thiz, IjkMediaP
     return old;
 }
 
-static void *message_loop(void *arg);
+static int message_loop(void *arg);
 
 static void
 IjkMediaPlayer_setDataSourceAndHeaders(
@@ -119,7 +119,7 @@ IjkMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setVideoSurface: null mp", LABEL_RETURN);
 
-    ijkmp_set_android_surface(env, mp, jsurface);
+    ijkmp_android_set_surface(env, mp, jsurface);
 
     LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
@@ -242,6 +242,7 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
         return;
 
     // explicit shutdown mp, in case it is not the last mp-ref here
+    ijkmp_android_set_surface(env, mp, NULL);
     ijkmp_shutdown(mp);
     jni_set_media_player(env, thiz, NULL);
 
@@ -255,6 +256,7 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: reset: null mp", LABEL_RETURN);
 
+    ijkmp_android_set_surface(env, mp, NULL);
     ijkmp_reset(mp);
 
     LABEL_RETURN:
@@ -296,7 +298,7 @@ static void
 IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
     MPTRACE("IjkMediaPlayer_native_setup");
-    IjkMediaPlayer *mp = ijkmp_create(message_loop);
+    IjkMediaPlayer *mp = ijkmp_android_create(message_loop);
     JNI_CHECK_GOTO(mp, env, "java/lang/OutOfMemoryError", "mpjni: native_setup: ijkmp_create() failed", LABEL_RETURN);
 
     jni_set_media_player(env, thiz, mp);
@@ -390,7 +392,7 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
     (*env)->DeleteGlobalRef(env, weak_thiz);
 }
 
-static void *message_loop(void *arg)
+static int message_loop(void *arg)
 {
     MPTRACE("message_loop");
 
@@ -407,7 +409,7 @@ static void *message_loop(void *arg)
     (*g_jvm)->DetachCurrentThread(g_jvm);
 
     MPTRACE("message_loop exit");
-    return NULL;
+    return 0;
 }
 
 // ----------------------------------------------------------------------------

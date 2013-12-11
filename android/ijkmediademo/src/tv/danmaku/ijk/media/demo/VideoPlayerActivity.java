@@ -77,6 +77,12 @@ public class VideoPlayerActivity extends Activity {
     
     // progress
     mVideoPath = "http://113.142.44.44/e0012jy0ana.m3u8?type=m3u8&srctype=mp4&srcname=e0012jy0ana.mp4&fc=0&sha=82e0d6adb6e697d1821abbbacb766373afa26ff4&vkey=OAz_lwrlhx0tqBefQmHnxKTm8PqvrJCl5iJtLhVtSj6hla57btxiuw"
+
+    // 96kHz av799077
+    mVideoPath = "http://bili-test.u.qiniudn.com/aac-96khz.flv"
+
+    // 2kHz
+    mVideoPath = "http://people.videolan.org/~funman/bouteille.wav"
      */
 
     @Override
@@ -84,7 +90,7 @@ public class VideoPlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        mVideoPath = "http://113.142.44.44/e0012jy0ana.m3u8?type=m3u8&srctype=mp4&srcname=e0012jy0ana.mp4&fc=0&sha=82e0d6adb6e697d1821abbbacb766373afa26ff4&vkey=OAz_lwrlhx0tqBefQmHnxKTm8PqvrJCl5iJtLhVtSj6hla57btxiuw";
+        mVideoPath = "http://v.youku.com/player/getM3U8/vid/XNTY1ODE5NjMy/type//v.m3u8";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();

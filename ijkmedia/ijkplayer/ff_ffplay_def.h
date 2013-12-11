@@ -28,8 +28,8 @@
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
 
-#define DEFAULT_HIGH_WATER_MARK_IN_MS    (5 * 1000)
-#define DEFAULT_HIGH_WATER_MARK_IN_BYTES (256 * 1024)
+#define DEFAULT_HIGH_WATER_MARK_IN_MS    (10 * 1000)
+#define DEFAULT_HIGH_WATER_MARK_IN_BYTES (128 * 1024)
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 50000
 
@@ -44,7 +44,7 @@
 /* If a frame duration is longer than this, it will not be duplicated to compensate AV sync */
 #define AV_SYNC_FRAMEDUP_THRESHOLD 0.1
 /* no AV correction is done if too big error */
-#define AV_NOSYNC_THRESHOLD 10.0
+#define AV_NOSYNC_THRESHOLD 100.0
 
 /* maximum audio speed change to get correct sync */
 #define SAMPLE_CORRECTION_PERCENT_MAX 10
@@ -58,7 +58,8 @@
 #define AUDIO_DIFF_AVG_NB   20
 
 /* polls for possible required screen refresh at least this often, should be less than 1/fps */
-#define REFRESH_RATE 0.0029 // 172.0 fps at most (High Level 5.2 1,920×1,080@172.0)
+// 172.0 fps at most (High Level 5.2 1,920×1,080@172.0)
+#define REFRESH_RATE 0.03
 
 /* NOTE: the size must be big enough to compensate the hardware audio buffersize size */
 /* TODO: We assume that a decoded and resampled frame fits into this buffer */
@@ -152,6 +153,8 @@ typedef struct VideoState {
 #endif
     AVFormatContext *ic;
     int realtime;
+    int audio_finished;
+    int video_finished;
 
     Clock audclk;
     Clock vidclk;
@@ -191,6 +194,7 @@ typedef struct VideoState {
     int frame_drops_early;
     int frame_drops_late;
     AVFrame *frame;
+    int64_t audio_frame_next_pts;
 
     enum ShowMode {
         SHOW_MODE_NONE = -1, SHOW_MODE_VIDEO = 0, SHOW_MODE_WAVES, SHOW_MODE_RDFT, SHOW_MODE_NB
@@ -264,6 +268,8 @@ typedef struct VideoState {
 
     int buffering_on;
     int pause_req;
+
+    int dropping_frame;
 } VideoState;
 
 /* options specified by the user */
@@ -295,7 +301,6 @@ static int workaround_bugs = 1;
 static int fast = 0;
 static int genpts = 0;
 static int lowres = 0;
-static int idct = FF_IDCT_AUTO;
 static int error_concealment = 3;
 static int decoder_reorder_pts = -1;
 static int autoexit;
@@ -374,7 +379,6 @@ typedef struct FFPlayer {
     int fast;
     int genpts;
     int lowres;
-    int idct;
     int error_concealment;
     int decoder_reorder_pts;
     int autoexit;
@@ -429,6 +433,9 @@ typedef struct FFPlayer {
     int high_water_mark_in_ms;
     int high_water_mark_in_bytes;
     int max_buffer_size;
+
+    int skip_loop_filter;
+    int skip_frame;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -457,10 +464,9 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->start_time             = AV_NOPTS_VALUE;
     ffp->duration               = AV_NOPTS_VALUE;
     ffp->workaround_bugs        = 1;
-    ffp->fast                   = 0;
+    ffp->fast                   = 1;
     ffp->genpts                 = 0;
     ffp->lowres                 = 0;
-    ffp->idct                   = FF_IDCT_AUTO;
     ffp->error_concealment      = 3;
     ffp->decoder_reorder_pts    = -1;
     ffp->autoexit               = 0;
@@ -499,6 +505,9 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->high_water_mark_in_ms    = DEFAULT_HIGH_WATER_MARK_IN_MS;
     ffp->high_water_mark_in_bytes = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
     ffp->max_buffer_size          = MAX_QUEUE_SIZE;
+
+    ffp->skip_loop_filter         = AVDISCARD_ALL;
+    ffp->skip_frame               = AVDISCARD_NONREF;
 
     msg_queue_flush(&ffp->msg_queue);
 }

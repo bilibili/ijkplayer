@@ -24,6 +24,15 @@
 #include "ijksdl_timer.h"
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
+
+#if defined(__APPLE__)
+#include <mach/mach_time.h>
+
+static int g_is_mach_base_info_inited = 0;
+static kern_return_t g_mach_base_info_ret = 0;
+static mach_timebase_info_data_t g_mach_base_info;
+#endif
 
 void SDL_Delay(Uint32 ms)
 {
@@ -43,8 +52,23 @@ void SDL_Delay(Uint32 ms)
 Uint64 SDL_GetTickHR(void)
 {
     Uint64 clock;
+#if defined(__ANDROID__)
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC_HR, &now);
     clock = now.tv_sec * 1000 + now.tv_nsec / 1000000;
+#elif defined(__APPLE__)
+    if (!g_is_mach_base_info_inited) {
+        g_mach_base_info_ret = mach_timebase_info(&g_mach_base_info);
+        g_is_mach_base_info_inited = 1;
+    }
+    if (g_mach_base_info_ret == 0) {
+        uint64_t now = mach_absolute_time();
+        clock = now * g_mach_base_info.numer / g_mach_base_info.denom / 1000000;
+    } else {
+        struct timeval now;
+        gettimeofday(&now, NULL);
+        clock = now.tv_sec  * 1000 + now.tv_usec / 1000;
+    }
+#endif
     return (clock);
 }

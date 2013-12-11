@@ -21,7 +21,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "../loghelp.h"
+#include "loghelp.h"
 
 /**
  * Equivalent to ScopedLocalRef, but for C_JNIEnv instead. (And slightly more powerful.)
