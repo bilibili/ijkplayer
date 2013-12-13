@@ -37,7 +37,7 @@
 {
     ijkmp_set_codec_option(mediaPlayer,
                            [optionName UTF8String],
-                           [[NSString stringWithFormat:@"%d", value] UTF8String]);
+                           [[NSString stringWithFormat:@"%d", (int)value] UTF8String]);
 }
 
 @end

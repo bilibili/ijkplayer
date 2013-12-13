@@ -70,7 +70,7 @@
                                       &flag,
                                       sizeof(flag));
         if (status != noErr) {
-            ALOGE("AudioUnit: failed to set IO mode (%li)", status);
+            ALOGE("AudioUnit: failed to set IO mode (%d)", (int)status);
         }
 
         /* Get the current format */
@@ -102,7 +102,7 @@
                                       &streamDescription,
                                       i_param_size);
         if (status != noErr) {
-            ALOGE("AudioUnit: failed to set stream format (%li)", status);
+            ALOGE("AudioUnit: failed to set stream format (%d)", (int)status);
             self = nil;
             return nil;
         }
@@ -115,7 +115,7 @@
                                       &streamDescription,
                                       &i_param_size);
         if (status != noErr) {
-            ALOGE("AudioUnit: failed to verify stream format (%li)", status);
+            ALOGE("AudioUnit: failed to verify stream format (%d)", (int)status);
         }
 
         AURenderCallbackStruct callback;
@@ -126,7 +126,7 @@
                                       kAudioUnitScope_Input,
                                       0, &callback, sizeof(callback));
         if (status != noErr) {
-            ALOGE("AudioUnit: render callback setup failed (%li)", status);
+            ALOGE("AudioUnit: render callback setup failed (%d)", (int)status);
             self = nil;
             return nil;
         }
@@ -136,7 +136,7 @@
         /* AU initiliaze */
         status = AudioUnitInitialize(auUnit);
         if (status != noErr) {
-            ALOGE("AudioUnit: AudioUnitInitialize failed (%li)", status);
+            ALOGE("AudioUnit: AudioUnitInitialize failed (%d)", (int)status);
             self = nil;
             return nil;
         }
@@ -204,7 +204,7 @@
 
     OSStatus status = AudioOutputUnitStop(_auUnit);
     if (status != noErr)
-        ALOGE("AudioUnit: failed to stop AudioUnit (%li)", status);
+        ALOGE("AudioUnit: failed to stop AudioUnit (%d)", (int)status);
 }
 
 - (void)close

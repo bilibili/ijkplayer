@@ -445,7 +445,7 @@ int ijkmp_seek_to_l(IjkMediaPlayer *mp, long msec)
     mp->seek_req = 1;
     mp->seek_msec = msec;
     ffp_remove_msg(mp->ffplayer, FFP_REQ_SEEK);
-    ffp_notify_msg2(mp->ffplayer, FFP_REQ_SEEK, msec);
+    ffp_notify_msg2(mp->ffplayer, FFP_REQ_SEEK, (int)msec);
     // TODO: 9 64-bit long?
 
     return 0;
@@ -495,7 +495,7 @@ long ijkmp_get_duration(IjkMediaPlayer *mp)
 {
     assert(mp);
     pthread_mutex_lock(&mp->mutex);
-    int retval = ijkmp_get_duration_l(mp);
+    long retval = ijkmp_get_duration_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     return retval;
 }

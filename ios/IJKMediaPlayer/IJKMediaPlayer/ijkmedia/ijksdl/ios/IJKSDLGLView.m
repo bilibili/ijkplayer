@@ -170,7 +170,7 @@ enum {
 	return [CAEAGLLayer class];
 }
 
-- (id) initWithFrame:(CGRect)frame withChroma:(NSInteger)chroma
+- (id) initWithFrame:(CGRect)frame withChroma:(int)chroma
 {
     self = [super initWithFrame:frame];
     if (self) {
