@@ -405,7 +405,7 @@ typedef struct FFPlayer {
     char *afilters;
 #endif
 
-    int64_t sws_flags;
+    int sws_flags;
 
     /* current context */
 #ifdef FFP_MERGE

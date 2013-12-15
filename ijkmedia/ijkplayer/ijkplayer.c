@@ -445,7 +445,7 @@ int ijkmp_seek_to_l(IjkMediaPlayer *mp, long msec)
     mp->seek_req = 1;
     mp->seek_msec = msec;
     ffp_remove_msg(mp->ffplayer, FFP_REQ_SEEK);
-    ffp_notify_msg2(mp->ffplayer, FFP_REQ_SEEK, msec);
+    ffp_notify_msg2(mp->ffplayer, FFP_REQ_SEEK, (int)msec);
     // TODO: 9 64-bit long?
 
     return 0;
@@ -495,7 +495,7 @@ long ijkmp_get_duration(IjkMediaPlayer *mp)
 {
     assert(mp);
     pthread_mutex_lock(&mp->mutex);
-    int retval = ijkmp_get_duration_l(mp);
+    long retval = ijkmp_get_duration_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     return retval;
 }
@@ -583,8 +583,8 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             continue_wait_next_msg = 1;
             pthread_mutex_lock(&mp->mutex);
             if (0 == ikjmp_chkst_pause_l(mp->mp_state)) {
-                int retval = ffp_pause_l(mp->ffplayer);
-                if (retval == 0)
+                int pause_ret = ffp_pause_l(mp->ffplayer);
+                if (pause_ret == 0)
                     ijkmp_change_state_l(mp, MP_STATE_PAUSED);
             }
             pthread_mutex_unlock(&mp->mutex);

@@ -1486,7 +1486,7 @@ static int audio_decode_frame(FFPlayer *ffp)
             if (is->swr_ctx) {
                 const uint8_t **in = (const uint8_t **)is->frame->extended_data;
                 uint8_t **out = &is->audio_buf1;
-                int out_count = (int64_t)wanted_nb_samples * is->audio_tgt.freq / is->frame->sample_rate + 256;
+                int out_count = (int)((int64_t)wanted_nb_samples * is->audio_tgt.freq / is->frame->sample_rate + 256);
                 int out_size  = av_samples_get_buffer_size(NULL, is->audio_tgt.channels, out_count, is->audio_tgt.fmt, 0);
                 int len2;
                 if (out_size < 0) {
@@ -2270,15 +2270,15 @@ static int read_thread(void *arg)
                     video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
 
                 if (video_cached_duration >= 0 && audio_cached_duration >= 0) {
-                    cached_duration_in_ms = IJKMAX(video_cached_duration, audio_cached_duration);
+                    cached_duration_in_ms = (int)IJKMAX(video_cached_duration, audio_cached_duration);
                 } else if (video_cached_duration >= 0) {
-                    cached_duration_in_ms = video_cached_duration;
+                    cached_duration_in_ms = (int)video_cached_duration;
                 } else if (audio_cached_duration >= 0) {
-                    cached_duration_in_ms = audio_cached_duration;
+                    cached_duration_in_ms = (int)audio_cached_duration;
                 }
 
                 if (cached_duration_in_ms >= 0) {
-                    buf_time_percent = av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
+                    buf_time_percent = (int)av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
                     if (last_buffered_time_percentage != buf_time_percent) {
 #ifdef FFP_SHOW_DEMUX_CACHE
                         ALOGE("time cache=%%%d (%d/%d)\n", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
@@ -2291,7 +2291,7 @@ static int read_thread(void *arg)
 
             int cached_size = is->audioq.size + is->videoq.size;
             if (hwm_in_bytes > 0) {
-                buf_size_percent = av_rescale(cached_size, 1005, hwm_in_bytes * 10);
+                buf_size_percent = (int)av_rescale(cached_size, 1005, hwm_in_bytes * 10);
                 if (last_buffered_size_percentage != buf_size_percent) {
 #ifdef FFP_SHOW_DEMUX_CACHE
                     ALOGE("size cache=%%%d (%d/%d)\n", buf_size_percent, cached_size, hwm_in_bytes);
@@ -2424,7 +2424,7 @@ static int video_refresh_thread(void *arg)
     double remaining_time = 0.0;
     while (!is->abort_request) {
         if (remaining_time > 0.0)
-            av_usleep((int64_t)(remaining_time * 1000000.0));
+            av_usleep((int)(int64_t)(remaining_time * 1000000.0));
         remaining_time = REFRESH_RATE;
         if (is->show_mode != SHOW_MODE_NONE && (!is->paused || is->force_refresh))
             video_refresh(ffp, &remaining_time);
