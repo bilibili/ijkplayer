@@ -222,7 +222,7 @@ public abstract class AbstractMediaListPlayer extends SimpleMediaPlayer {
 
     private void onItemComplete() {
         int order = mItemPlayer.getOrder();
-        if (order >= mMediaList.size()) {
+        if (order >= mMediaList.size()-1) {
             notifyOnCompletion(this);
         } else {
             mItemPlayer.releaseToDummyPlayer(true);
