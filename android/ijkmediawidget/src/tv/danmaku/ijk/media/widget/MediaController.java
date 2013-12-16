@@ -24,6 +24,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -263,6 +264,9 @@ public class MediaController extends FrameLayout {
      */
     public void show(int timeout) {
         if (!mShowing && mAnchor != null && mAnchor.getWindowToken() != null) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH){
+                mAnchor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            }
             if (mPauseButton != null)
                 mPauseButton.requestFocus();
             disableUnsupportedButtons();
@@ -278,8 +282,8 @@ public class MediaController extends FrameLayout {
                                 + mAnchor.getHeight());
 
                 mWindow.setAnimationStyle(mAnimStyle);
-                mWindow.showAtLocation(mAnchor, Gravity.NO_GRAVITY,
-                        anchorRect.left, anchorRect.bottom);
+                mWindow.showAtLocation(mAnchor, Gravity.BOTTOM,
+                        anchorRect.left, 0);
             }
             mShowing = true;
             if (mShownListener != null)
@@ -304,6 +308,9 @@ public class MediaController extends FrameLayout {
             return;
 
         if (mShowing) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH){
+                mAnchor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            }
             try {
                 mHandler.removeMessages(SHOW_PROGRESS);
                 if (mFromXml)
