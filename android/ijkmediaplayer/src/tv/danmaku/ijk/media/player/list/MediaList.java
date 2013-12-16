@@ -60,9 +60,25 @@ public final class MediaList {
         public abstract void resolveAsync(Context context);
 
         public abstract MediaList getMediaList() throws ResolveException;
+        
+        /**
+         * Youku's resolution
+         * <pre>
+         * 
+         * hd3|hd2|mp4|flv
+         * ---------------
+         *  3 | 2 | 1 | 0
+         * </pre>
+         * 
+         * @param resolution
+         *            video resolution
+         * @throws ResolveException
+         */
+        MediaList getMediaList(int resolution) throws ResolveException;
 
         public abstract MediaSegment getMediaSegment(int segmentId)
                 throws ResolveException;
+        void setOnResolvedListener(OnResolvedListener l);
     }
 
     public static class SimpleResolver implements Resolver {
@@ -97,5 +113,19 @@ public final class MediaList {
                 throws ResolveException {
             return mMediaList.mSegmentList.get(segmentId);
         }
+
+        @Override
+        public void setOnResolvedListener(OnResolvedListener l) {
+            // do nothing
+        }
+
+        @Override
+        public MediaList getMediaList(int mode) throws ResolveException {
+            
+            return mMediaList;
+        }
+    }
+    public interface OnResolvedListener{
+        void onResolved(Resolver resolver);
     }
 }
