@@ -6,6 +6,8 @@ import tv.danmaku.ijk.media.player.AbstractMediaPlayer;
 import tv.danmaku.ijk.media.player.DebugLog;
 import tv.danmaku.ijk.media.player.DummyMediaPlayer;
 import tv.danmaku.ijk.media.player.SimpleMediaPlayer;
+import tv.danmaku.ijk.media.player.list.MediaList.OnResolvedListener;
+import tv.danmaku.ijk.media.player.list.MediaList.Resolver;
 import android.content.Context;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -28,15 +30,17 @@ public abstract class AbstractMediaListPlayer extends SimpleMediaPlayer {
 
     private MediaList mMediaList;
     private boolean mPrepared;
+    private Resolver mResolver;
 
     public AbstractMediaListPlayer(Context context, MediaList.Resolver resolver) {
         mContext = context.getApplicationContext();
         mItemPlayer = new SimpleMediaSegmentPlayer(0, new DummyMediaPlayer());
-        try {
-            mMediaList = resolver.getMediaList();
-        } catch (ResolveException e) {
-            DebugLog.printStackTrace(e);
-        }
+//        try {
+//            mMediaList = resolver.getMediaList();
+//        } catch (ResolveException e) {
+//            DebugLog.printStackTrace(e);
+//        }
+        mResolver = resolver;
     }
 
     protected abstract AbstractMediaPlayer onCreateMediaPlayer();
@@ -65,7 +69,28 @@ public abstract class AbstractMediaListPlayer extends SimpleMediaPlayer {
 
     @Override
     public void prepareAsync() throws IllegalStateException {
-        openPlayer(0);
+        if(mMediaList != null){
+            openPlayer(0);
+        }else{
+            mResolver.setOnResolvedListener(new OnResolvedListener(){
+
+                @Override
+                public void onResolved(Resolver resolver) {
+                    try {
+                        if(resolver.getMediaList() != null){
+                            mMediaList = resolver.getMediaList();
+                            openPlayer(0);
+                        }else{
+                            notifyOnError(AbstractMediaListPlayer.this, MEDIA_ERROR, MEDIA_ERROR_UNKNOWN);
+                        }
+                    } catch (ResolveException e) {
+                        e.printStackTrace();
+                        notifyOnError(AbstractMediaListPlayer.this, MEDIA_ERROR, MEDIA_ERROR_UNKNOWN);
+                    }
+                }
+            });
+            mResolver.resolveAsync(mContext);
+        }
     }
 
     @Override

@@ -29,16 +29,15 @@ import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnInfoListener;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnPreparedListener;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnSeekCompleteListener;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnVideoSizeChangedListener;
-import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+import tv.danmaku.ijk.media.player.list.IjkMediaListPlayer;
+import tv.danmaku.ijk.media.player.list.MediaList.Resolver;
 import tv.danmaku.ijk.media.player.option.format.AvFormatOption_HttpDetectRangeSupport;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.util.AttributeSet;
@@ -110,6 +109,7 @@ public class VideoView extends SurfaceView implements
     private boolean mCanSeekBack = true;
     private boolean mCanSeekForward = true;
     private Context mContext;
+    private Resolver mResolver;
 
     public VideoView(Context context) {
         super(context);
@@ -222,6 +222,10 @@ public class VideoView extends SurfaceView implements
         invalidate();
     }
 
+    public void setVideoResolver(Resolver resolver){
+        mResolver = resolver;
+        setVideoURI(null);
+    }
     public void stopPlayback() {
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
@@ -233,7 +237,7 @@ public class VideoView extends SurfaceView implements
     }
 
     private void openVideo() {
-        if (mUri == null || mSurfaceHolder == null)
+        if (mResolver == null && mUri == null || mSurfaceHolder == null)
             return;
 
         Intent i = new Intent("com.android.music.musicservicecommand");
@@ -245,9 +249,13 @@ public class VideoView extends SurfaceView implements
             mDuration = -1;
             mCurrentBufferPercentage = 0;
             // mMediaPlayer = new AndroidMediaPlayer();
-            IjkMediaPlayer ijkMediaPlayer = new IjkMediaPlayer();
-            ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
-
+            AbstractMediaPlayer ijkMediaPlayer;
+            if (mUri != null) {
+                ijkMediaPlayer = new IjkMediaPlayer();
+                ((IjkMediaPlayer) ijkMediaPlayer).setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
+            } else {
+                ijkMediaPlayer = new IjkMediaListPlayer(mContext, mResolver);
+            }
             mMediaPlayer = ijkMediaPlayer;
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
@@ -256,10 +264,9 @@ public class VideoView extends SurfaceView implements
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
             mMediaPlayer.setOnInfoListener(mInfoListener);
             mMediaPlayer.setOnSeekCompleteListener(mSeekCompleteListener);
-            mMediaPlayer.setDataSource(mUri.toString());
+            if (mUri != null) mMediaPlayer.setDataSource(mUri.toString());
             mMediaPlayer.setDisplay(mSurfaceHolder);
             mMediaPlayer.setScreenOnWhilePlaying(true);
-
             mMediaPlayer.prepareAsync();
             mCurrentState = STATE_PREPARING;
             attachMediaController();
