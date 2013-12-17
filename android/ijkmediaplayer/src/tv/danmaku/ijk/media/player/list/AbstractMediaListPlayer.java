@@ -35,12 +35,8 @@ public abstract class AbstractMediaListPlayer extends SimpleMediaPlayer {
     public AbstractMediaListPlayer(Context context, MediaList.Resolver resolver) {
         mContext = context.getApplicationContext();
         mItemPlayer = new SimpleMediaSegmentPlayer(0, new DummyMediaPlayer());
-//        try {
-//            mMediaList = resolver.getMediaList();
-//        } catch (ResolveException e) {
-//            DebugLog.printStackTrace(e);
-//        }
         mResolver = resolver;
+        mMediaList = resolver.getMediaList();
     }
 
     protected abstract AbstractMediaPlayer onCreateMediaPlayer();
