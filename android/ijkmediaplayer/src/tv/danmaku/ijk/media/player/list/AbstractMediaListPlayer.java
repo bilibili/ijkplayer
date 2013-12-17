@@ -76,15 +76,10 @@ public abstract class AbstractMediaListPlayer extends SimpleMediaPlayer {
 
                 @Override
                 public void onResolved(Resolver resolver) {
-                    try {
-                        if(resolver.getMediaList() != null){
-                            mMediaList = resolver.getMediaList();
-                            openPlayer(0);
-                        }else{
-                            notifyOnError(AbstractMediaListPlayer.this, MEDIA_ERROR, MEDIA_ERROR_UNKNOWN);
-                        }
-                    } catch (ResolveException e) {
-                        e.printStackTrace();
+                    if (resolver.getMediaList() != null) {
+                        mMediaList = resolver.getMediaList();
+                        openPlayer(0);
+                    } else {
                         notifyOnError(AbstractMediaListPlayer.this, MEDIA_ERROR, MEDIA_ERROR_UNKNOWN);
                     }
                 }

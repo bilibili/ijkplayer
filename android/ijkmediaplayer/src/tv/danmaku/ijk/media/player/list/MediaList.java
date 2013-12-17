@@ -55,11 +55,11 @@ public final class MediaList {
     public static interface Resolver {
         public abstract void clearCache();
 
-        public abstract void resolve(Context context);
+        public abstract void resolve(Context context)throws ResolveException;
 
         public abstract void resolveAsync(Context context);
 
-        public abstract MediaList getMediaList() throws ResolveException;
+        public abstract MediaList getMediaList() ;
         
         /**
          * Youku's resolution
@@ -74,10 +74,10 @@ public final class MediaList {
          *            video resolution
          * @throws ResolveException
          */
-        MediaList getMediaList(int resolution) throws ResolveException;
+        MediaList getMediaList(int resolution);
 
-        public abstract MediaSegment getMediaSegment(int segmentId)
-                throws ResolveException;
+        public abstract MediaSegment getMediaSegment(int segmentId);
+
         void setOnResolvedListener(OnResolvedListener l);
     }
 
@@ -104,13 +104,12 @@ public final class MediaList {
         }
 
         @Override
-        public MediaList getMediaList() throws ResolveException {
+        public MediaList getMediaList(){
             return mMediaList;
         }
 
         @Override
-        public MediaSegment getMediaSegment(int segmentId)
-                throws ResolveException {
+        public MediaSegment getMediaSegment(int segmentId) {
             return mMediaList.mSegmentList.get(segmentId);
         }
 
@@ -120,7 +119,7 @@ public final class MediaList {
         }
 
         @Override
-        public MediaList getMediaList(int mode) throws ResolveException {
+        public MediaList getMediaList(int mode){
             
             return mMediaList;
         }
