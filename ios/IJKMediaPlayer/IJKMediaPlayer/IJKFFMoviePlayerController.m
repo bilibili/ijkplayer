@@ -350,7 +350,7 @@
         case FFP_MSG_BUFFERING_START: {
             NSLog(@"FFP_MSG_BUFFERING_START:");
 
-            _loadState = MPMovieLoadStatePlayable | MPMovieLoadStateStalled;
+            _loadState = MPMovieLoadStateStalled;
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
