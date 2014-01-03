@@ -1931,6 +1931,7 @@ static int read_thread(void *arg)
     int last_error = 0;
     int last_buffered_time_percentage = -1;
     int last_buffered_size_percentage = -1;
+    int hwm_in_ms = ffp->fast_high_water_mark_in_ms; // use fast water mark for first loading
 
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
@@ -2099,6 +2100,8 @@ static int read_thread(void *arg)
 // FIXME the +-2 is due to rounding being not done in the correct direction in generation
 //      of the seek_pos/seek_rel variables
 
+            hwm_in_ms = ffp->fast_high_water_mark_in_ms;
+            ffp_toggle_buffering(ffp, 1);
             ret = avformat_seek_file(is->ic, -1, seek_min, seek_target, seek_max, is->seek_flags);
             if (ret < 0) {
                 av_log(NULL, AV_LOG_ERROR,
@@ -2140,6 +2143,7 @@ static int read_thread(void *arg)
                 step_to_next_frame_l(ffp);
             SDL_UnlockMutex(ffp->is->play_mutex);
             ffp_notify_msg1(ffp, FFP_MSG_SEEK_COMPLETE);
+            ffp_toggle_buffering(ffp, 1);
         }
         if (is->queue_attachments_req) {
             if (is->video_st && (is->video_st->disposition & AV_DISPOSITION_ATTACHED_PIC)) {
@@ -2254,10 +2258,10 @@ static int read_thread(void *arg)
         }
 
         do {
-            int     buf_size_percent = -1;
-            int     buf_time_percent = -1;
-            int     hwm_in_bytes     = ffp->high_water_mark_in_bytes;
-            int     hwm_in_ms        = ffp->high_water_mark_in_ms;
+            int buf_size_percent     = -1;
+            int buf_time_percent     = -1;
+            int hwm_in_bytes         = ffp->high_water_mark_in_bytes;
+            int need_start_buffering = 0;
             if (hwm_in_ms > 0) {
                 int     cached_duration_in_ms = -1;
                 int64_t audio_cached_duration = -1;
@@ -2304,10 +2308,22 @@ static int read_thread(void *arg)
             if (buf_time_percent >= 0) {
                 // alwas depend on cache duration if valid
                 if (buf_time_percent >= 100)
-                    ffp_toggle_buffering(ffp, 0);
+                    need_start_buffering = 1;
             } else {
                 if (buf_size_percent >= 100)
-                    ffp_toggle_buffering(ffp, 0);
+                    need_start_buffering = 1;
+            }
+
+            if (need_start_buffering) {
+                if (hwm_in_ms < ffp->normal_high_water_mark_in_ms)
+                    hwm_in_ms = ffp->normal_high_water_mark_in_ms;
+
+                hwm_in_ms *= 2;
+
+                if (hwm_in_ms > ffp->max_high_water_mark_in_ms)
+                    hwm_in_ms = ffp->max_high_water_mark_in_ms;
+
+                ffp_toggle_buffering(ffp, 0);
             }
         } while(0);
 

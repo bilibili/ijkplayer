@@ -28,8 +28,12 @@
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
 
-#define DEFAULT_HIGH_WATER_MARK_IN_MS    (10 * 1000)
-#define DEFAULT_HIGH_WATER_MARK_IN_BYTES (128 * 1024)
+#define DEFAULT_HIGH_WATER_MARK_IN_BYTES    (128 * 1024)
+
+#define DEFAULT_MAX_HIGH_WATER_MARK_IN_MS       (10 * 1000)
+#define DEFAULT_NORMAL_HIGH_WATER_MARK_IN_MS    (2 * 1000)
+#define DEFAULT_FAST_HIGH_WATER_MARK_IN_MS      (100)
+
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 50000
 
@@ -430,8 +434,10 @@ typedef struct FFPlayer {
 
     MessageQueue msg_queue;
 
-    int high_water_mark_in_ms;
     int high_water_mark_in_bytes;
+    int max_high_water_mark_in_ms;
+    int normal_high_water_mark_in_ms;
+    int fast_high_water_mark_in_ms;
     int max_buffer_size;
 
     int skip_loop_filter;
@@ -502,12 +508,14 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->prepared               = 0;
     ffp->auto_start             = 0;
 
-    ffp->high_water_mark_in_ms    = DEFAULT_HIGH_WATER_MARK_IN_MS;
     ffp->high_water_mark_in_bytes = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
-    ffp->max_buffer_size          = MAX_QUEUE_SIZE;
+    ffp->max_high_water_mark_in_ms      = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS;
+    ffp->normal_high_water_mark_in_ms   = DEFAULT_NORMAL_HIGH_WATER_MARK_IN_MS;
+    ffp->fast_high_water_mark_in_ms     = DEFAULT_FAST_HIGH_WATER_MARK_IN_MS;
+    ffp->max_buffer_size                = MAX_QUEUE_SIZE;
 
-    ffp->skip_loop_filter         = AVDISCARD_ALL;
-    ffp->skip_frame               = AVDISCARD_NONREF;
+    ffp->skip_loop_filter               = AVDISCARD_ALL;
+    ffp->skip_frame                     = AVDISCARD_NONREF;
 
     msg_queue_flush(&ffp->msg_queue);
 }
