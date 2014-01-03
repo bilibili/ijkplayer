@@ -36,6 +36,7 @@
     NSInteger _sampleAspectRatioNumerator;
     NSInteger _sampleAspectRatioDenominator;
 
+    BOOL      _seeking;
     NSInteger _bufferingTime;
 
     BOOL _keepScreenOnWhilePlaying;
@@ -207,9 +208,13 @@
         case MP_STATE_PAUSED:
             mpState = MPMoviePlaybackStatePaused;
             break;
-        case MP_STATE_STARTED:
-            mpState = MPMoviePlaybackStatePlaying;
+        case MP_STATE_STARTED: {
+            if (_seeking)
+                mpState = MPMoviePlaybackStateSeekingForward;
+            else
+                mpState = MPMoviePlaybackStatePlaying;
             break;
+        }
     }
     // MPMoviePlaybackStatePlaying,
     // MPMoviePlaybackStatePaused,
@@ -224,6 +229,11 @@
 {
     if (!_mediaPlayer)
         return;
+
+    _seeking = YES;
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification
+     object:self];
 
     ijkmp_seek_to(_mediaPlayer, aCurrentPlaybackTime * 1000);
 }
@@ -365,6 +375,9 @@
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
              object:self];
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification
+             object:self];
             break;
         }
         case FFP_MSG_BUFFERING_UPDATE:
@@ -382,9 +395,11 @@
              postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification
              object:self];
             break;
-        case FFP_MSG_SEEK_COMPLETE:
-            // NSLog(@"FFP_MSG_SEEK_COMPLETE:");
+        case FFP_MSG_SEEK_COMPLETE: {
+            NSLog(@"FFP_MSG_SEEK_COMPLETE:");
+            _seeking = NO;
             break;
+        }
         default:
             // NSLog(@"unknown FFP_MSG_xxx(%d)", avmsg->what);
             break;
