@@ -4,6 +4,8 @@ Changes between 0.0.7 and 0.0.6:
 - ffmpeg: switch to n2.1 base
 - ios: fix possible block on ijkmp_pause
 - ios: set CAEAGLLayer.contentsScale to avoid bad image on retina devices
+- ios: fix handle of AudioSession interruption
+- ios: add AudioQueue api as replacement of AudioUnit api
 
 Changes between 0.0.6 and 0.0.5:
 --------------------------------
