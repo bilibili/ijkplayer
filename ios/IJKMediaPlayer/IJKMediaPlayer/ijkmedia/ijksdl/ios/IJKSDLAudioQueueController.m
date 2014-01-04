@@ -136,8 +136,8 @@
     if (!_audioQueueRef)
         return;
 
-    AudioQueueStop(_audioQueueRef, true);
-    AudioQueueDispose(_audioQueueRef, true);
+    AudioQueueStop(_audioQueueRef, false);
+    AudioQueueDispose(_audioQueueRef, false);
 }
 
 - (void)close
