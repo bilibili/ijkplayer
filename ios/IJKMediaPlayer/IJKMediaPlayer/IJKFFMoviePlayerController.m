@@ -24,6 +24,10 @@
 #import "IJKFFMoviePlayerDef.h"
 #import "IJKMediaPlayback.h"
 #import "IJKFFMrl.h"
+#import "IJKAudioKit.h"
+
+@interface IJKFFMoviePlayerController() <IJKAudioSessionDelegate>
+@end
 
 @implementation IJKFFMoviePlayerController {
     IJKFFMrl *_ffMrl;
@@ -75,6 +79,8 @@
         _currentPlaybackRate = 1.0f;
         _initialPlaybackTime = 0;
         _endPlaybackTime = 0;
+
+        [[IJKAudioKit sharedInstance] setupAudioSession:self];
 
         _ffMrl = [[IJKFFMrl alloc] initWithMrl:[aUrl absoluteString]];
 
@@ -441,6 +447,18 @@ int media_player_msg_loop(void* arg)
 
         return 0;
     }
+}
+
+#pragma mark IJKAudioSessionDelegate
+
+- (void)ijkAudioBeginInterruption
+{
+    [self pause];
+}
+
+- (void)ijkAudioEndInterruption
+{
+    [self pause];
 }
 
 @end

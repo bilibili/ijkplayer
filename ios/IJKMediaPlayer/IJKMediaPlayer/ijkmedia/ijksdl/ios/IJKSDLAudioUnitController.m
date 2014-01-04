@@ -141,24 +141,6 @@
             return nil;
         }
 
-        /* start audio session so playback continues if mute switch is on */
-        AudioSessionInitialize (NULL,
-                                kCFRunLoopCommonModes,
-                                NULL,
-                                NULL);
-
-        /* Set audio session to mediaplayback */
-        UInt32 sessionCategory = kAudioSessionCategory_MediaPlayback;
-        AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(sessionCategory), &sessionCategory);
-        AudioSessionSetActive(true);
-
-        /*-
-        Float32 preferredBufferDuration = _spec.samples * 1.0f / _spec.freq;
-        AudioSessionSetProperty(kAudioSessionProperty_PreferredHardwareIOBufferDuration,
-                                sizeof (preferredBufferDuration),
-                                &preferredBufferDuration);
-         */
-
         _auUnit = auUnit;
     }
     return self;
