@@ -157,8 +157,8 @@
         return;
 
     _isPaused = NO;
-    AudioOutputUnitStart(_auUnit);
     AudioSessionSetActive(true);
+    AudioOutputUnitStart(_auUnit);
 }
 
 - (void)pause
@@ -167,6 +167,10 @@
         return;
 
     _isPaused = YES;
+    AudioSessionSetActive(false);
+    OSStatus status = AudioOutputUnitStop(_auUnit);
+    if (status != noErr)
+        ALOGE("AudioUnit: failed to stop AudioUnit (%d)", (int)status);
 }
 
 - (void)flush
