@@ -28,9 +28,10 @@
 #include "ijksdl/ijksdl_thread.h"
 #include "ijksdl/ijksdl_aout_internal.h"
 #import "IJKSDLAudioUnitController.h"
+#import "IJKSDLAudioQueueController.h"
 
 typedef struct SDL_Aout_Opaque {
-    IJKSDLAudioUnitController *auController;
+    IJKSDLAudioQueueController *aoutController;
 } SDL_Aout_Opaque;
 
 int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
@@ -39,14 +40,14 @@ int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtai
     SDLTRACE("aout_open_audio()\n");
     SDL_Aout_Opaque *opaque = aout->opaque;
 
-    opaque->auController = [[[IJKSDLAudioUnitController alloc] initWithAudioSpec:desired] retain];
-    if (!opaque->auController) {
+    opaque->aoutController = [[[IJKSDLAudioQueueController alloc] initWithAudioSpec:desired] retain];
+    if (!opaque->aoutController) {
         ALOGE("aout_open_audio_n: failed to new AudioTrcak()\n");
         return -1;
     }
 
     if (obtained)
-        *obtained = opaque->auController.spec;
+        *obtained = opaque->aoutController.spec;
 
     return 0;
 }
@@ -57,9 +58,9 @@ void aout_pause_audio(SDL_Aout *aout, int pause_on)
     SDL_Aout_Opaque *opaque = aout->opaque;
 
     if (pause_on) {
-        [opaque->auController pause];
+        [opaque->aoutController pause];
     } else {
-        [opaque->auController play];
+        [opaque->aoutController play];
     }
 }
 
@@ -68,7 +69,7 @@ void aout_flush_audio(SDL_Aout *aout)
     SDLTRACE("aout_flush_audio()\n");
     SDL_Aout_Opaque *opaque = aout->opaque;
 
-    [opaque->auController flush];
+    [opaque->aoutController flush];
 }
 
 void aout_close_audio(SDL_Aout *aout)
@@ -76,7 +77,7 @@ void aout_close_audio(SDL_Aout *aout)
     SDLTRACE("aout_flush_audio()\n");
     SDL_Aout_Opaque *opaque = aout->opaque;
 
-    [opaque->auController close];
+    [opaque->aoutController close];
 }
 
 void aout_free_l(SDL_Aout *aout)
@@ -88,8 +89,8 @@ void aout_free_l(SDL_Aout *aout)
 
     SDL_Aout_Opaque *opaque = aout->opaque;
     if (opaque) {
-        [opaque->auController release];
-        opaque->auController = nil;
+        [opaque->aoutController release];
+        opaque->aoutController = nil;
     }
 
     SDL_Aout_FreeInternal(aout);

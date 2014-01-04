@@ -24,6 +24,7 @@
 
 #import "IJKSDLAudioUnitController.h"
 #include "ijkutil/ijkutil.h"
+#import "IJKSDLAudioKit.h"
 
 @implementation IJKSDLAudioUnitController {
     AudioUnit _auUnit;
@@ -41,11 +42,7 @@
         _spec = *aSpec;
 
         AudioComponentDescription desc;
-        desc.componentType = kAudioUnitType_Output;
-        desc.componentSubType = kAudioUnitSubType_RemoteIO;
-        desc.componentManufacturer = kAudioUnitManufacturer_Apple;
-        desc.componentFlags = 0;
-        desc.componentFlagsMask = 0;
+        IJKSDLGetAudioComponentDescriptionFromSpec(&_spec, &desc);
 
         AudioComponent auComponent = AudioComponentFindNext(NULL, &desc);
         if (auComponent == NULL) {
@@ -74,24 +71,9 @@
         }
 
         /* Get the current format */
-        AudioStreamBasicDescription streamDescription;
-        streamDescription.mSampleRate = _spec.freq;
         _spec.format = AUDIO_S16SYS;
-        streamDescription.mFormatID = kAudioFormatLinearPCM;
-        streamDescription.mFormatFlags = kLinearPCMFormatFlagIsPacked;
-        streamDescription.mChannelsPerFrame = _spec.channels;
-        streamDescription.mFramesPerPacket = 1;
-
-        streamDescription.mBitsPerChannel = SDL_AUDIO_BITSIZE(_spec.format);
-        if (SDL_AUDIO_ISBIGENDIAN(_spec.format))
-            streamDescription.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;
-        if (SDL_AUDIO_ISFLOAT(_spec.format))
-            streamDescription.mFormatFlags |= kLinearPCMFormatFlagIsFloat;
-        if (SDL_AUDIO_ISSIGNED(_spec.format))
-            streamDescription.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
-
-        streamDescription.mBytesPerFrame = streamDescription.mBitsPerChannel * streamDescription.mChannelsPerFrame / 8;
-        streamDescription.mBytesPerPacket = streamDescription.mBytesPerFrame * streamDescription.mFramesPerPacket;
+        AudioStreamBasicDescription streamDescription;
+        IJKSDLGetAudioStreamBasicDescriptionFromSpec(&_spec, &streamDescription);
 
         /* Set the desired format */
         UInt32 i_param_size = sizeof(streamDescription);
