@@ -21,6 +21,10 @@
  */
 
 #import "IJKMPMoviePlayerController.h"
+#import "IJKAudioKit.h"
+
+@interface IJKMPMoviePlayerController() <IJKAudioSessionDelegate>
+@end
 
 @implementation IJKMPMoviePlayerController
 
@@ -50,9 +54,11 @@
         self.controlStyle = MPMovieControlStyleNone;
         self.scalingMode = MPMovieScalingModeAspectFit;
         self.shouldAutoplay = YES;
-        self.useApplicationAudioSession = NO;
 
         [self IJK_installMovieNotificationObservers];
+
+        self.useApplicationAudioSession = YES;
+        [[IJKAudioKit sharedInstance] setupAudioSession:self];
     }
     return self;
 }
@@ -130,6 +136,18 @@
 - (void)IJK_dispatchMPMoviePlayerPlaybackStateDidChangeNotification:(NSNotification*)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification object:notification.object userInfo:notification.userInfo];
+}
+
+#pragma mark IJKAudioSessionDelegate
+
+- (void)ijkAudioBeginInterruption
+{
+    [self pause];
+}
+
+- (void)ijkAudioEndInterruption
+{
+    [self pause];
 }
 
 @end

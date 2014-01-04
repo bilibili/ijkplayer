@@ -42,6 +42,7 @@
 		E690403217EAFC6100CFD954 /* ijksdl_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400C17EAFC6100CFD954 /* ijksdl_thread.c */; };
 		E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */ = {isa = PBXBuildFile; fileRef = E690400E17EAFC6100CFD954 /* ijksdl_timer.c */; };
 		E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */ = {isa = PBXBuildFile; fileRef = E690401117EAFC6100CFD954 /* ijksdl_vout.c */; };
+		E6EE92A3187810C5009EAB56 /* IJKAudioKit.m in Sources */ = {isa = PBXBuildFile; fileRef = E6EE92A2187810C5009EAB56 /* IJKAudioKit.m */; };
 		E6F727B817F2B1B10043623F /* IJKMediaModule.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727B717F2B1B10043623F /* IJKMediaModule.m */; };
 		E6F727BB17F2D9D40043623F /* IJKFFMoviePlayerDef.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727BA17F2D9D30043623F /* IJKFFMoviePlayerDef.m */; };
 		E6F727BC17F40C1C0043623F /* IJKMediaPlayer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */; };
@@ -225,6 +226,8 @@
 		E690403717EB079500CFD954 /* ijklog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijklog.h; sourceTree = "<group>"; };
 		E690403917EB079500CFD954 /* ijkutil_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkutil_ios.h; sourceTree = "<group>"; };
 		E690403A17EB079500CFD954 /* loghelp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loghelp.h; sourceTree = "<group>"; };
+		E6EE92A1187810C5009EAB56 /* IJKAudioKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKAudioKit.h; path = IJKMediaPlayer/IJKAudioKit.h; sourceTree = "<group>"; };
+		E6EE92A2187810C5009EAB56 /* IJKAudioKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKAudioKit.m; path = IJKMediaPlayer/IJKAudioKit.m; sourceTree = "<group>"; };
 		E6F727B617F2B1B10043623F /* IJKMediaModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaModule.h; path = IJKMediaPlayer/IJKMediaModule.h; sourceTree = "<group>"; };
 		E6F727B717F2B1B10043623F /* IJKMediaModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMediaModule.m; path = IJKMediaPlayer/IJKMediaModule.m; sourceTree = "<group>"; };
 		E6F727B917F2D9D30043623F /* IJKFFMoviePlayerDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFMoviePlayerDef.h; sourceTree = "<group>"; };
@@ -615,6 +618,8 @@
 				E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */,
 				E6716E491807E5FC00B3FBC1 /* IJKMediaUtils.h */,
 				E6716E4A1807E5FC00B3FBC1 /* IJKMediaUtils.m */,
+				E6EE92A1187810C5009EAB56 /* IJKAudioKit.h */,
+				E6EE92A2187810C5009EAB56 /* IJKAudioKit.m */,
 			);
 			name = IJKMediaPlayer;
 			sourceTree = "<group>";
@@ -670,6 +675,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E6EE92A3187810C5009EAB56 /* IJKAudioKit.m in Sources */,
 				E690401F17EAFC6100CFD954 /* ff_cmdutils.c in Sources */,
 				E690402017EAFC6100CFD954 /* ff_ffplay.c in Sources */,
 				E690402717EAFC6100CFD954 /* image_convert.c in Sources */,
