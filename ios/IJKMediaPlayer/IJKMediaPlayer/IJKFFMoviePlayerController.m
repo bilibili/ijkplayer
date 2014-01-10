@@ -52,7 +52,7 @@
 @synthesize duration;
 @synthesize playableDuration;
 
-@synthesize isPreparedToPlay;
+@synthesize isPreparedToPlay = _isPreparedToPlay;
 @synthesize playbackState = _playbackState;
 @synthesize loadState = _loadState;
 
@@ -324,7 +324,7 @@
         case FFP_MSG_PREPARED:
             NSLog(@"FFP_MSG_PREPARED:");
 
-            isPreparedToPlay = YES;
+            _isPreparedToPlay = YES;
 
             [[NSNotificationCenter defaultCenter] postNotificationName:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
 
