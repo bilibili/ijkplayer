@@ -1,5 +1,5 @@
 /*****************************************************************************
- * android_nativewindow_yv12.h
+ * android_nativewindow.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL_ANDROID__ANDROID_NATIVEWINDOW_YV12_H
-#define IJKSDL_ANDROID__ANDROID_NATIVEWINDOW_YV12_H
+#ifndef IJKSDL_ANDROID__ANDROID_NATIVEWINDOW_H
+#define IJKSDL_ANDROID__ANDROID_NATIVEWINDOW_H
 
 typedef struct ANativeWindow ANativeWindow;
 typedef struct SDL_VoutOverlay SDL_VoutOverlay;

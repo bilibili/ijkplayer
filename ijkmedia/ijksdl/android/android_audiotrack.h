@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_android_audiotrack.h
+ * android_audiotrack.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL_ANDROID__IJKSDL_ANDROID_AUDIOTRACK_H
-#define IJKSDL_ANDROID__IJKSDL_ANDROID_AUDIOTRACK_H
+#ifndef IJKSDL_ANDROID__ANDROID_AUDIOTRACK_H
+#define IJKSDL_ANDROID__ANDROID_AUDIOTRACK_H
 
 #include <stdint.h>
 #include <jni.h>
