@@ -152,6 +152,7 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     int             _frameChroma;
     int             _rightPaddingPixels;
     GLfloat         _rightPadding;
+    int             _bytesPerPixel;
 
     id<IJKSDLGLRender> _renderer;
 
@@ -192,11 +193,13 @@ enum {
                 NSLog(@"OK use I420 GL renderer");
                 _frameChroma = SDL_FCC_I420;
                 _renderer = [[IJKSDLGLRenderI420 alloc] init];
+                _bytesPerPixel = 1;
                 break;
             case SDL_FCC_RV24:
                 NSLog(@"OK use RV24 GL renderer");
                 _frameChroma = SDL_FCC_RV24;
                 _renderer = [[IJKSDLGLRenderRV24 alloc] init];
+                _bytesPerPixel = 3;
                 break;
             default:
                 NSLog(@"unknown chroma %d\n", chroma);
@@ -339,10 +342,12 @@ enum {
         } else if (overlay->format == SDL_FCC_I420) {
             _frameChroma = overlay->format;
             _renderer = [[IJKSDLGLRenderI420 alloc] init];
+            _bytesPerPixel = 1;
             NSLog(@"OK use I420 GL renderer");
         } else if (overlay->format == SDL_FCC_RV24) {
             _frameChroma = overlay->format;
             _renderer = [[IJKSDLGLRenderRV24 alloc] init];
+            _bytesPerPixel = 3;
             NSLog(@"OK use RV24 GL renderer");
         }
 
@@ -476,8 +481,8 @@ exit:
 
     [EAGLContext setCurrentContext:_context];
 
-    if (overlay->pitches[0] / 3 > _frameWidth) {
-        _rightPaddingPixels = overlay->pitches[0] / 3 - _frameWidth;
+    if (overlay->pitches[0] / _bytesPerPixel > _frameWidth) {
+        _rightPaddingPixels = overlay->pitches[0] / _bytesPerPixel - _frameWidth;
         _didPaddingChanged = YES;
     }
 
