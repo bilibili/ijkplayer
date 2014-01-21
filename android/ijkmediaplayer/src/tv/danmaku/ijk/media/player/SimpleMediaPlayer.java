@@ -76,45 +76,42 @@ public abstract class SimpleMediaPlayer extends AbstractMediaPlayer {
         mp.setOnInfoListener(mOnInfoListener);
     }
 
-    protected static final void notifyOnPrepared(SimpleMediaPlayer mp) {
-        if (mp != null && mp.mOnPreparedListener != null)
-            mp.mOnPreparedListener.onPrepared(mp);
+    protected final void notifyOnPrepared() {
+        if (mOnPreparedListener != null)
+            mOnPreparedListener.onPrepared(this);
     }
 
-    protected static final void notifyOnCompletion(SimpleMediaPlayer mp) {
-        if (mp != null && mp.mOnCompletionListener != null)
-            mp.mOnCompletionListener.onCompletion(mp);
+    protected final void notifyOnCompletion() {
+        if (mOnCompletionListener != null)
+            mOnCompletionListener.onCompletion(this);
     }
 
-    protected static final void notifyOnBufferingUpdate(SimpleMediaPlayer mp,
-            int percent) {
-        if (mp != null && mp.mOnBufferingUpdateListener != null)
-            mp.mOnBufferingUpdateListener.onBufferingUpdate(mp, percent);
+    protected final void notifyOnBufferingUpdate(int percent) {
+        if (mOnBufferingUpdateListener != null)
+            mOnBufferingUpdateListener.onBufferingUpdate(this, percent);
     }
 
-    protected static final void notifyOnSeekComplete(SimpleMediaPlayer mp) {
-        if (mp != null && mp.mOnSeekCompleteListener != null)
-            mp.mOnSeekCompleteListener.onSeekComplete(mp);
+    protected final void notifyOnSeekComplete() {
+        if (mOnSeekCompleteListener != null)
+            mOnSeekCompleteListener.onSeekComplete(this);
     }
 
-    protected static final void notifyOnVideoSizeChanged(SimpleMediaPlayer mp,
-            int width, int height, int sarNum, int sarDen) {
-        if (mp != null && mp.mOnVideoSizeChangedListener != null)
-            mp.mOnVideoSizeChangedListener.onVideoSizeChanged(mp, width,
-                    height, sarNum, sarDen);
+    protected final void notifyOnVideoSizeChanged(int width, int height,
+            int sarNum, int sarDen) {
+        if (mOnVideoSizeChangedListener != null)
+            mOnVideoSizeChangedListener.onVideoSizeChanged(this, width, height,
+                    sarNum, sarDen);
     }
 
-    protected static final boolean notifyOnError(SimpleMediaPlayer mp,
-            int what, int extra) {
-        if (mp != null && mp.mOnErrorListener != null)
-            return mp.mOnErrorListener.onError(mp, what, extra);
+    protected final boolean notifyOnError(int what, int extra) {
+        if (mOnErrorListener != null)
+            return mOnErrorListener.onError(this, what, extra);
         return false;
     }
 
-    protected static final boolean notifyOnInfo(SimpleMediaPlayer mp, int what,
-            int extra) {
-        if (mp != null && mp.mOnInfoListener != null)
-            return mp.mOnInfoListener.onInfo(mp, what, extra);
+    protected final boolean notifyOnInfo(int what, int extra) {
+        if (mOnInfoListener != null)
+            return mOnInfoListener.onInfo(this, what, extra);
         return false;
     }
 }

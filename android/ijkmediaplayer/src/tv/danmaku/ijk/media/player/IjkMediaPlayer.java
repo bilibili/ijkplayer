@@ -23,6 +23,7 @@ import java.lang.ref.WeakReference;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
 import tv.danmaku.ijk.media.player.option.AvFormatOption;
+import tv.danmaku.ijk.media.player.util.DebugLog;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
@@ -323,7 +324,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     }
 
     private native void _reset();
-    
+
     public void setAvOption(AvFormatOption option) {
         setAvFormatOption(option.getName(), option.getValue());
     }
@@ -331,7 +332,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     public void setAvFormatOption(String name, String value) {
         _setAvFormatOption(name, value);
     }
-    
+
     private native void _setAvFormatOption(String name, String value);
 
     @Override
@@ -352,59 +353,60 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     }
 
     private static class EventHandler extends Handler {
-        private IjkMediaPlayer mIjkMediaPlayer;
+        private WeakReference<IjkMediaPlayer> mWeakPlayer;
 
         public EventHandler(IjkMediaPlayer mp, Looper looper) {
             super(looper);
-            mIjkMediaPlayer = mp;
+            mWeakPlayer = new WeakReference<IjkMediaPlayer>(mp);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            if (mIjkMediaPlayer.mNativeMediaPlayer == 0) {
+            IjkMediaPlayer player = mWeakPlayer.get();
+            if (player == null || player.mNativeMediaPlayer == 0) {
                 DebugLog.w(TAG,
                         "IjkMediaPlayer went away with unhandled events");
                 return;
             }
+
             switch (msg.what) {
             case MEDIA_PREPARED:
-                notifyOnPrepared(mIjkMediaPlayer);
+                player.notifyOnPrepared();
                 return;
 
             case MEDIA_PLAYBACK_COMPLETE:
-                notifyOnCompletion(mIjkMediaPlayer);
-                mIjkMediaPlayer.stayAwake(false);
+                player.notifyOnCompletion();
+                player.stayAwake(false);
                 return;
 
             case MEDIA_BUFFERING_UPDATE:
-                notifyOnBufferingUpdate(mIjkMediaPlayer, msg.arg1);
+                player.notifyOnBufferingUpdate(msg.arg1);
                 return;
 
             case MEDIA_SEEK_COMPLETE:
-                notifyOnSeekComplete(mIjkMediaPlayer);
+                player.notifyOnSeekComplete();
                 return;
 
             case MEDIA_SET_VIDEO_SIZE:
-                mIjkMediaPlayer.mVideoWidth = msg.arg1;
-                mIjkMediaPlayer.mVideoHeight = msg.arg2;
-                notifyOnVideoSizeChanged(mIjkMediaPlayer, msg.arg1, msg.arg2,
-                        mIjkMediaPlayer.mVideoSarNum,
-                        mIjkMediaPlayer.mVideoSarDen);
+                player.mVideoWidth = msg.arg1;
+                player.mVideoHeight = msg.arg2;
+                player.notifyOnVideoSizeChanged(msg.arg1, msg.arg2,
+                        player.mVideoSarNum, player.mVideoSarDen);
                 return;
 
             case MEDIA_ERROR:
                 DebugLog.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
-                if (!notifyOnError(mIjkMediaPlayer, msg.arg1, msg.arg2)) {
-                    notifyOnCompletion(mIjkMediaPlayer);
+                if (!player.notifyOnError(msg.arg1, msg.arg2)) {
+                    player.notifyOnCompletion();
                 }
-                mIjkMediaPlayer.stayAwake(false);
+                player.stayAwake(false);
                 return;
 
             case MEDIA_INFO:
                 if (msg.arg1 != MEDIA_INFO_VIDEO_TRACK_LAGGING) {
                     DebugLog.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
                 }
-                notifyOnInfo(mIjkMediaPlayer, msg.arg1, msg.arg2);
+                player.notifyOnInfo(msg.arg1, msg.arg2);
                 // No real default action so far.
                 return;
             case MEDIA_TIMED_TEXT:
@@ -415,11 +417,10 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
                 break;
 
             case MEDIA_SET_VIDEO_SAR:
-                mIjkMediaPlayer.mVideoSarNum = msg.arg1;
-                mIjkMediaPlayer.mVideoSarDen = msg.arg2;
-                notifyOnVideoSizeChanged(mIjkMediaPlayer, msg.arg1, msg.arg2,
-                        mIjkMediaPlayer.mVideoSarNum,
-                        mIjkMediaPlayer.mVideoSarDen);
+                player.mVideoSarNum = msg.arg1;
+                player.mVideoSarDen = msg.arg2;
+                player.notifyOnVideoSizeChanged(msg.arg1, msg.arg2,
+                        player.mVideoSarNum, player.mVideoSarDen);
                 break;
 
             default:

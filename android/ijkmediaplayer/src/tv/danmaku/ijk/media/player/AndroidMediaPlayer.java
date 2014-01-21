@@ -27,11 +27,11 @@ import android.view.SurfaceHolder;
 
 public final class AndroidMediaPlayer extends SimpleMediaPlayer {
     private MediaPlayer mInternalMediaPlayer;
-    private MediaPlayerListenerAdapter mInternalListenerAdapter;
+    private AndroidMediaPlayerListenerHolder mInternalListenerAdapter;
 
     public AndroidMediaPlayer() {
         mInternalMediaPlayer = new MediaPlayer();
-        mInternalListenerAdapter = new MediaPlayerListenerAdapter(this);
+        mInternalListenerAdapter = new AndroidMediaPlayerListenerHolder(this);
         attachInternalListeners();
     }
 
@@ -148,7 +148,7 @@ public final class AndroidMediaPlayer extends SimpleMediaPlayer {
         mInternalMediaPlayer.setOnInfoListener(mInternalListenerAdapter);
     }
 
-    private static class MediaPlayerListenerAdapter implements
+    private class AndroidMediaPlayerListenerHolder implements
             MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener,
             MediaPlayer.OnBufferingUpdateListener,
             MediaPlayer.OnSeekCompleteListener,
@@ -156,44 +156,71 @@ public final class AndroidMediaPlayer extends SimpleMediaPlayer {
             MediaPlayer.OnErrorListener, MediaPlayer.OnInfoListener {
         public WeakReference<AndroidMediaPlayer> mWeakMediaPlayer;
 
-        public MediaPlayerListenerAdapter(AndroidMediaPlayer mp) {
+        public AndroidMediaPlayerListenerHolder(AndroidMediaPlayer mp) {
             mWeakMediaPlayer = new WeakReference<AndroidMediaPlayer>(mp);
         }
 
         @Override
         public boolean onInfo(MediaPlayer mp, int what, int extra) {
-            return notifyOnInfo(mWeakMediaPlayer.get(), what, extra);
+            AndroidMediaPlayer self = mWeakMediaPlayer.get();
+            if (self == null)
+                return false;
+
+            return notifyOnInfo(what, extra);
         }
 
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
-            return notifyOnError(mWeakMediaPlayer.get(), what, extra);
+            AndroidMediaPlayer self = mWeakMediaPlayer.get();
+            if (self == null)
+                return false;
+
+            return notifyOnError(what, extra);
         }
 
         @Override
         public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-            notifyOnVideoSizeChanged(mWeakMediaPlayer.get(), width, height, 1,
-                    1);
+            AndroidMediaPlayer self = mWeakMediaPlayer.get();
+            if (self == null)
+                return;
+
+            notifyOnVideoSizeChanged(width, height, 1, 1);
         }
 
         @Override
         public void onSeekComplete(MediaPlayer mp) {
-            notifyOnSeekComplete(mWeakMediaPlayer.get());
+            AndroidMediaPlayer self = mWeakMediaPlayer.get();
+            if (self == null)
+                return;
+
+            notifyOnSeekComplete();
         }
 
         @Override
         public void onBufferingUpdate(MediaPlayer mp, int percent) {
-            notifyOnBufferingUpdate(mWeakMediaPlayer.get(), percent);
+            AndroidMediaPlayer self = mWeakMediaPlayer.get();
+            if (self == null)
+                return;
+
+            notifyOnBufferingUpdate(percent);
         }
 
         @Override
         public void onCompletion(MediaPlayer mp) {
-            notifyOnCompletion(mWeakMediaPlayer.get());
+            AndroidMediaPlayer self = mWeakMediaPlayer.get();
+            if (self == null)
+                return;
+
+            notifyOnCompletion();
         }
 
         @Override
         public void onPrepared(MediaPlayer mp) {
-            notifyOnPrepared(mWeakMediaPlayer.get());
+            AndroidMediaPlayer self = mWeakMediaPlayer.get();
+            if (self == null)
+                return;
+
+            notifyOnPrepared();
         }
     }
 }
