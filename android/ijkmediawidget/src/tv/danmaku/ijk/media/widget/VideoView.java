@@ -30,8 +30,6 @@ import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnPreparedListener;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnSeekCompleteListener;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnVideoSizeChangedListener;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
-import tv.danmaku.ijk.media.player.list.IjkMediaListPlayer;
-import tv.danmaku.ijk.media.player.list.MediaList.Resolver;
 import tv.danmaku.ijk.media.player.option.format.AvFormatOption_HttpDetectRangeSupport;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -59,7 +57,6 @@ import android.view.ViewGroup.LayoutParams;
  * {@link io.vov.vitamio.MediaPlayer}, such as {@link #getVideoWidth()},
  * {@link #setSubShown(boolean)}
  */
-@SuppressWarnings("unused")
 public class VideoView extends SurfaceView implements
         MediaController.MediaPlayerControl {
     private static final String TAG = VideoView.class.getName();
@@ -109,7 +106,6 @@ public class VideoView extends SurfaceView implements
     private boolean mCanSeekBack = true;
     private boolean mCanSeekForward = true;
     private Context mContext;
-    private Resolver mResolver;
 
     public VideoView(Context context) {
         super(context);
@@ -222,10 +218,6 @@ public class VideoView extends SurfaceView implements
         invalidate();
     }
 
-    public void setVideoResolver(Resolver resolver){
-        mResolver = resolver;
-        setVideoURI(null);
-    }
     public void stopPlayback() {
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
@@ -237,7 +229,7 @@ public class VideoView extends SurfaceView implements
     }
 
     private void openVideo() {
-        if (mResolver == null && mUri == null || mSurfaceHolder == null)
+        if (mUri == null || mSurfaceHolder == null)
             return;
 
         Intent i = new Intent("com.android.music.musicservicecommand");
@@ -249,12 +241,10 @@ public class VideoView extends SurfaceView implements
             mDuration = -1;
             mCurrentBufferPercentage = 0;
             // mMediaPlayer = new AndroidMediaPlayer();
-            AbstractMediaPlayer ijkMediaPlayer;
+            AbstractMediaPlayer ijkMediaPlayer = null;
             if (mUri != null) {
                 ijkMediaPlayer = new IjkMediaPlayer();
                 ((IjkMediaPlayer) ijkMediaPlayer).setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
-            } else {
-                ijkMediaPlayer = new IjkMediaListPlayer(mContext, mResolver);
             }
             mMediaPlayer = ijkMediaPlayer;
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
