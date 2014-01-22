@@ -2,7 +2,9 @@ package tv.danmaku.ijk.media.player;
 
 import java.io.IOException;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -43,6 +45,7 @@ public abstract class AbstractMediaPlayer {
 
     public abstract void setDisplay(SurfaceHolder sh);
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public abstract void setSurface(Surface surface);
 
     public abstract void setDataSource(String path) throws IOException,
