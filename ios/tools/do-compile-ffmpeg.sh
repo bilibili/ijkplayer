@@ -34,11 +34,22 @@ export COMMON_FF_CFG_FLAGS=
 source $FF_BUILD_ROOT/../tools/ffmpeg-common-profiles.sh
 
 FFMPEG_CFG_FLAGS=
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $COMMON_FF_CFG_FLAGS"
+
+# Optimization options (experts only):
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv5te"
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv6"
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv6t2"
+
+# Advanced options (experts only):
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-cross-compile"
+FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-symver"
+
+##
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --arch=$FF_ARCH"
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --target-os=$FF_TAGET_OS"
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-static"
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-shared"
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $COMMON_FF_CFG_FLAGS"
 FFMPEG_EXTRA_CFLAGS=
 
 # i386, x86_64
