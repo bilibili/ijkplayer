@@ -21,14 +21,14 @@ package tv.danmaku.ijk.media.widget;
 import java.io.IOException;
 import java.util.List;
 
-import tv.danmaku.ijk.media.player.AbstractMediaPlayer;
-import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnBufferingUpdateListener;
-import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnCompletionListener;
-import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnErrorListener;
-import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnInfoListener;
-import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnPreparedListener;
-import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnSeekCompleteListener;
-import tv.danmaku.ijk.media.player.AbstractMediaPlayer.OnVideoSizeChangedListener;
+import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.IMediaPlayer.OnBufferingUpdateListener;
+import tv.danmaku.ijk.media.player.IMediaPlayer.OnCompletionListener;
+import tv.danmaku.ijk.media.player.IMediaPlayer.OnErrorListener;
+import tv.danmaku.ijk.media.player.IMediaPlayer.OnInfoListener;
+import tv.danmaku.ijk.media.player.IMediaPlayer.OnPreparedListener;
+import tv.danmaku.ijk.media.player.IMediaPlayer.OnSeekCompleteListener;
+import tv.danmaku.ijk.media.player.IMediaPlayer.OnVideoSizeChangedListener;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.option.format.AvFormatOption_HttpDetectRangeSupport;
 import android.app.Activity;
@@ -85,7 +85,7 @@ public class VideoView extends SurfaceView implements
     public static final int VIDEO_LAYOUT_ZOOM = 3;
 
     private SurfaceHolder mSurfaceHolder = null;
-    private AbstractMediaPlayer mMediaPlayer = null;
+    private IMediaPlayer mMediaPlayer = null;
     private int mVideoWidth;
     private int mVideoHeight;
     private int mVideoSarNum;
@@ -241,10 +241,11 @@ public class VideoView extends SurfaceView implements
             mDuration = -1;
             mCurrentBufferPercentage = 0;
             // mMediaPlayer = new AndroidMediaPlayer();
-            AbstractMediaPlayer ijkMediaPlayer = null;
+            IMediaPlayer ijkMediaPlayer = null;
             if (mUri != null) {
                 ijkMediaPlayer = new IjkMediaPlayer();
-                ((IjkMediaPlayer) ijkMediaPlayer).setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
+                ((IjkMediaPlayer) ijkMediaPlayer)
+                        .setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
             }
             mMediaPlayer = ijkMediaPlayer;
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
@@ -254,7 +255,8 @@ public class VideoView extends SurfaceView implements
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
             mMediaPlayer.setOnInfoListener(mInfoListener);
             mMediaPlayer.setOnSeekCompleteListener(mSeekCompleteListener);
-            if (mUri != null) mMediaPlayer.setDataSource(mUri.toString());
+            if (mUri != null)
+                mMediaPlayer.setDataSource(mUri.toString());
             mMediaPlayer.setDisplay(mSurfaceHolder);
             mMediaPlayer.setScreenOnWhilePlaying(true);
             mMediaPlayer.prepareAsync();
@@ -265,14 +267,14 @@ public class VideoView extends SurfaceView implements
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
             mErrorListener.onError(mMediaPlayer,
-                    AbstractMediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+                    IMediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
             return;
         } catch (IllegalArgumentException ex) {
             DebugLog.e(TAG, "Unable to open content: " + mUri, ex);
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
             mErrorListener.onError(mMediaPlayer,
-                    AbstractMediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+                    IMediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
             return;
         }
     }
@@ -308,8 +310,8 @@ public class VideoView extends SurfaceView implements
     }
 
     OnVideoSizeChangedListener mSizeChangedListener = new OnVideoSizeChangedListener() {
-        public void onVideoSizeChanged(AbstractMediaPlayer mp, int width,
-                int height, int sarNum, int sarDen) {
+        public void onVideoSizeChanged(IMediaPlayer mp, int width, int height,
+                int sarNum, int sarDen) {
             DebugLog.dfmt(TAG, "onVideoSizeChanged: (%dx%d)", width, height);
             mVideoWidth = mp.getVideoWidth();
             mVideoHeight = mp.getVideoHeight();
@@ -321,7 +323,7 @@ public class VideoView extends SurfaceView implements
     };
 
     OnPreparedListener mPreparedListener = new OnPreparedListener() {
-        public void onPrepared(AbstractMediaPlayer mp) {
+        public void onPrepared(IMediaPlayer mp) {
             DebugLog.d(TAG, "onPrepared");
             mCurrentState = STATE_PREPARED;
             mTargetState = STATE_PLAYING;
@@ -358,7 +360,7 @@ public class VideoView extends SurfaceView implements
     };
 
     private OnCompletionListener mCompletionListener = new OnCompletionListener() {
-        public void onCompletion(AbstractMediaPlayer mp) {
+        public void onCompletion(IMediaPlayer mp) {
             DebugLog.d(TAG, "onCompletion");
             mCurrentState = STATE_PLAYBACK_COMPLETED;
             mTargetState = STATE_PLAYBACK_COMPLETED;
@@ -370,8 +372,7 @@ public class VideoView extends SurfaceView implements
     };
 
     private OnErrorListener mErrorListener = new OnErrorListener() {
-        public boolean onError(AbstractMediaPlayer mp, int framework_err,
-                int impl_err) {
+        public boolean onError(IMediaPlayer mp, int framework_err, int impl_err) {
             DebugLog.dfmt(TAG, "Error: %d, %d", framework_err, impl_err);
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
@@ -385,7 +386,7 @@ public class VideoView extends SurfaceView implements
             }
 
             if (getWindowToken() != null) {
-                int message = framework_err == AbstractMediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK ? R.string.vitamio_videoview_error_text_invalid_progressive_playback
+                int message = framework_err == IMediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK ? R.string.vitamio_videoview_error_text_invalid_progressive_playback
                         : R.string.vitamio_videoview_error_text_unknown;
 
                 new AlertDialog.Builder(mContext)
@@ -407,7 +408,7 @@ public class VideoView extends SurfaceView implements
     };
 
     private OnBufferingUpdateListener mBufferingUpdateListener = new OnBufferingUpdateListener() {
-        public void onBufferingUpdate(AbstractMediaPlayer mp, int percent) {
+        public void onBufferingUpdate(IMediaPlayer mp, int percent) {
             mCurrentBufferPercentage = percent;
             if (mOnBufferingUpdateListener != null)
                 mOnBufferingUpdateListener.onBufferingUpdate(mp, percent);
@@ -416,16 +417,16 @@ public class VideoView extends SurfaceView implements
 
     private OnInfoListener mInfoListener = new OnInfoListener() {
         @Override
-        public boolean onInfo(AbstractMediaPlayer mp, int what, int extra) {
+        public boolean onInfo(IMediaPlayer mp, int what, int extra) {
             DebugLog.dfmt(TAG, "onInfo: (%d, %d)", what, extra);
             if (mOnInfoListener != null) {
                 mOnInfoListener.onInfo(mp, what, extra);
             } else if (mMediaPlayer != null) {
-                if (what == AbstractMediaPlayer.MEDIA_INFO_BUFFERING_START) {
+                if (what == IMediaPlayer.MEDIA_INFO_BUFFERING_START) {
                     DebugLog.dfmt(TAG, "onInfo: (MEDIA_INFO_BUFFERING_START)");
                     if (mMediaBufferingIndicator != null)
                         mMediaBufferingIndicator.setVisibility(View.VISIBLE);
-                } else if (what == AbstractMediaPlayer.MEDIA_INFO_BUFFERING_END) {
+                } else if (what == IMediaPlayer.MEDIA_INFO_BUFFERING_END) {
                     DebugLog.dfmt(TAG, "onInfo: (MEDIA_INFO_BUFFERING_END)");
                     if (mMediaBufferingIndicator != null)
                         mMediaBufferingIndicator.setVisibility(View.GONE);
@@ -438,7 +439,7 @@ public class VideoView extends SurfaceView implements
 
     private OnSeekCompleteListener mSeekCompleteListener = new OnSeekCompleteListener() {
         @Override
-        public void onSeekComplete(AbstractMediaPlayer mp) {
+        public void onSeekComplete(IMediaPlayer mp) {
             DebugLog.d(TAG, "onSeekComplete");
             if (mOnSeekCompleteListener != null)
                 mOnSeekCompleteListener.onSeekComplete(mp);

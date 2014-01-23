@@ -17,7 +17,7 @@
 
 package tv.danmaku.ijk.media.player;
 
-public abstract class SimpleMediaPlayer extends AbstractMediaPlayer {
+public abstract class SimpleMediaPlayer extends AbstractMediaPlayer2 {
     private OnPreparedListener mOnPreparedListener;
     private OnCompletionListener mOnCompletionListener;
     private OnBufferingUpdateListener mOnBufferingUpdateListener;
@@ -66,7 +66,7 @@ public abstract class SimpleMediaPlayer extends AbstractMediaPlayer {
         mOnInfoListener = null;
     }
 
-    public void attachListeners(AbstractMediaPlayer mp) {
+    public void attachListeners(IMediaPlayer mp) {
         mp.setOnPreparedListener(mOnPreparedListener);
         mp.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
         mp.setOnCompletionListener(mOnCompletionListener);
