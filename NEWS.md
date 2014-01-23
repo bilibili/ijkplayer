@@ -1,5 +1,7 @@
-Changes between 0.0.7 and 0.0.6:
+Changes between 0.1.0 and 0.0.6:
 --------------------------------
+- android: replace AbstractMediaPlayer with IMediaPlayer and other misc interfaces
+- android: remove list player classes due to lack of regression test
 - ios: support build with SDK7
 - ffmpeg: switch to n2.1 base
 - ios: fix possible block on ijkmp_pause

@@ -11,7 +11,7 @@ ijkplayer
  - [ADT v22.3.0-887826](http://developer.android.com/sdk/index.html)
  - [NDK r9](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
- - Xcode 5.0.0 (with iOS SDK 7)
+ - Xcode 5.0.2 (with iOS SDK 7)
 
 ### Dependent Tools (Mac OS X)
 - [MacPorts](http://www.macports.org/install.php)
@@ -26,7 +26,7 @@ ijkplayer
  - remove rarely used ffmpeg components to reduce binary size
  - workaround for some buggy online video.
 - Android
- - platform: API 9~18
+ - platform: API 9~19
  - cpu: ARMv7a-NEON
  - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/AbstractMediaPlayer.java)
  - video output: NativeWindow
@@ -83,6 +83,13 @@ sh init-android.sh
 cd android
 sh compile-ffmpeg.sh
 sh compile-ijk.sh
+
+cd ijkmediaplayer/jni
+ndk-build
+
+# or Add Native Support in eclipse
+# cd ijkmediaplayer
+# cp .cproject.bak .cproject
 
 # import android/ijkmediaplayer for MediaPlayer-like interface (recommended)
 # import android/ijkmediawidget for VideoView-like interface (based on Vitamio UI)
