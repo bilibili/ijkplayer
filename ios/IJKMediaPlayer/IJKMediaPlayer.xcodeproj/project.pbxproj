@@ -521,7 +521,7 @@
 			children = (
 				E63FC27217F013DE003551EB /* dummy */,
 				E6903FEF17EAFC6100CFD954 /* ffmpeg */,
-				E6EE92A41878230C009EAB56 /* ijksdl */,
+				E6EE92A51878230C009EAB56 /* ios */,
 				E6903FFD17EAFC6100CFD954 /* ijksdl.h */,
 				E6903FFF17EAFC6100CFD954 /* ijksdl_aout.c */,
 				E690400017EAFC6100CFD954 /* ijksdl_aout.h */,
@@ -588,15 +588,6 @@
 			path = ios;
 			sourceTree = "<group>";
 		};
-		E6EE92A41878230C009EAB56 /* ijksdl */ = {
-			isa = PBXGroup;
-			children = (
-				E6EE92A51878230C009EAB56 /* ios */,
-			);
-			name = ijksdl;
-			path = IJKMediaPlayer/ijkmedia/ijksdl;
-			sourceTree = SOURCE_ROOT;
-		};
 		E6EE92A51878230C009EAB56 /* ios */ = {
 			isa = PBXGroup;
 			children = (
@@ -623,7 +614,8 @@
 				E6EE92B61878230C009EAB56 /* IJKSDLGLView.h */,
 				E6EE92B71878230C009EAB56 /* IJKSDLGLView.m */,
 			);
-			path = ios;
+			name = ios;
+			path = ../../ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/ios;
 			sourceTree = "<group>";
 		};
 		E6F727B517F2B1690043623F /* IJKMediaPlayer */ = {
