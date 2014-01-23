@@ -248,6 +248,7 @@ int SDL_VoutFFmpeg_ConvertFrame(
             overlay_fill(overlay, opaque->frame, opaque->planes);
             dest_pic.data[1] = overlay->pixels[1];
             dest_pic.data[2] = overlay->pixels[2];
+            dst_format = AV_PIX_FMT_YUV420P;
         }
 
         if (need_swap_uv) {
