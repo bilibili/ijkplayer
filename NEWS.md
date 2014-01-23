@@ -8,6 +8,7 @@ Changes between 0.1.0 and 0.0.6:
 - ios: set CAEAGLLayer.contentsScale to avoid bad image on retina devices
 - ios: fix handle of AudioSession interruption
 - ios: add AudioQueue api as replacement of AudioUnit api
+- ijksdl: fix non-I420 pixel-format support
 
 Changes between 0.0.6 and 0.0.5:
 --------------------------------
