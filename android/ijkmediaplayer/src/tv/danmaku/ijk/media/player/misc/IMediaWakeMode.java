@@ -10,5 +10,4 @@ import android.content.Context;
 public interface IMediaWakeMode {
     @Deprecated
     public abstract void setWakeMode(Context context, int mode);
-
 }

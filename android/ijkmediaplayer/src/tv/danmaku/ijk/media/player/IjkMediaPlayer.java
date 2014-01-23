@@ -86,6 +86,8 @@ public final class IjkMediaPlayer extends BaseMediaPlayer implements
     private int mVideoSarNum;
     private int mVideoSarDen;
 
+    private String mDataSource;
+
     /**
      * Default constructor. Consider using one of the create() methods for
      * synchronously instantiating a IjkMediaPlayer from a Uri or resource.
@@ -197,12 +199,18 @@ public final class IjkMediaPlayer extends BaseMediaPlayer implements
     @Override
     public void setDataSource(String path) throws IOException,
             IllegalArgumentException, SecurityException, IllegalStateException {
+        mDataSource = path;
         _setDataSource(path, null, null);
     }
 
     private native void _setDataSource(String path, String[] keys,
             String[] values) throws IOException, IllegalArgumentException,
             SecurityException, IllegalStateException;
+
+    @Override
+    public String getDataSource() {
+        return mDataSource;
+    }
 
     @Override
     public native void prepareAsync() throws IllegalStateException;
@@ -292,6 +300,16 @@ public final class IjkMediaPlayer extends BaseMediaPlayer implements
     @Override
     public int getVideoHeight() {
         return mVideoHeight;
+    }
+
+    @Override
+    public int getVideoSarNum() {
+        return mVideoSarNum;
+    }
+
+    @Override
+    public int getVideoSarDen() {
+        return mVideoSarDen;
     }
 
     @Override

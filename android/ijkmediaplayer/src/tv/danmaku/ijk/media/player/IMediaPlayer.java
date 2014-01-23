@@ -38,6 +38,8 @@ public interface IMediaPlayer {
     public abstract void setDataSource(String path) throws IOException,
             IllegalArgumentException, SecurityException, IllegalStateException;
 
+    public abstract String getDataSource();
+
     public abstract void prepareAsync() throws IllegalStateException;
 
     public abstract void start() throws IllegalStateException;
@@ -51,6 +53,10 @@ public interface IMediaPlayer {
     public abstract int getVideoWidth();
 
     public abstract int getVideoHeight();
+
+    public abstract int getVideoSarNum();
+
+    public abstract int getVideoSarDen();
 
     public abstract boolean isPlaying();
 

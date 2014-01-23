@@ -32,6 +32,7 @@ public final class AndroidMediaPlayer extends BaseMediaPlayer implements
         IMediaWakeMode, IMediaAudioStreamType {
     private MediaPlayer mInternalMediaPlayer;
     private AndroidMediaPlayerListenerHolder mInternalListenerAdapter;
+    private String mDataSource;
 
     public AndroidMediaPlayer() {
         mInternalMediaPlayer = new MediaPlayer();
@@ -52,7 +53,13 @@ public final class AndroidMediaPlayer extends BaseMediaPlayer implements
     @Override
     public void setDataSource(String path) throws IOException,
             IllegalArgumentException, SecurityException, IllegalStateException {
+        mDataSource = path;
         mInternalMediaPlayer.setDataSource(path);
+    }
+
+    @Override
+    public String getDataSource() {
+        return mDataSource;
     }
 
     @Override
@@ -88,6 +95,16 @@ public final class AndroidMediaPlayer extends BaseMediaPlayer implements
     @Override
     public int getVideoHeight() {
         return mInternalMediaPlayer.getVideoHeight();
+    }
+
+    @Override
+    public int getVideoSarNum() {
+        return 1;
+    }
+
+    @Override
+    public int getVideoSarDen() {
+        return 1;
     }
 
     @Override
