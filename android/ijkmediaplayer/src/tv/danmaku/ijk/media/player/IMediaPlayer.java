@@ -2,6 +2,9 @@ package tv.danmaku.ijk.media.player;
 
 import java.io.IOException;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 
 public interface IMediaPlayer {
@@ -28,6 +31,9 @@ public interface IMediaPlayer {
     public static final int MEDIA_ERROR_TIMED_OUT = -110;
 
     public abstract void setDisplay(SurfaceHolder sh);
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    public abstract void setSurface(Surface surface);
 
     public abstract void setDataSource(String path) throws IOException,
             IllegalArgumentException, SecurityException, IllegalStateException;

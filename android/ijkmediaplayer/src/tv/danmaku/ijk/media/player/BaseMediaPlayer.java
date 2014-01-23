@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
- * Copyright (C) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +16,12 @@
 
 package tv.danmaku.ijk.media.player;
 
-public abstract class SimpleMediaPlayer extends AbstractMediaPlayer2 {
+/**
+ * @author bbcallen
+ * 
+ *         Common IMediaPlayer implement
+ */
+public abstract class BaseMediaPlayer implements IMediaPlayer {
     private OnPreparedListener mOnPreparedListener;
     private OnCompletionListener mOnCompletionListener;
     private OnBufferingUpdateListener mOnBufferingUpdateListener;

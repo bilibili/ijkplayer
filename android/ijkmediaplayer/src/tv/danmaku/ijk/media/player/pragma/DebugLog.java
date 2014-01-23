@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player.util;
+package tv.danmaku.ijk.media.player.pragma;
 
 import java.util.Locale;
 
-import tv.danmaku.ijk.media.player.Pragma;
+
 import android.util.Log;
 
 public class DebugLog {

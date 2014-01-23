@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
+import tv.danmaku.ijk.media.player.misc.IMediaAudioStreamType;
+import tv.danmaku.ijk.media.player.misc.IMediaWakeMode;
 import tv.danmaku.ijk.media.player.option.AvFormatOption;
-import tv.danmaku.ijk.media.player.util.DebugLog;
+import tv.danmaku.ijk.media.player.pragma.DebugLog;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
@@ -34,8 +36,26 @@ import android.os.PowerManager;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-public final class IjkMediaPlayer extends SimpleMediaPlayer {
+/**
+ * @author bbcallen
+ * 
+ *         Java wrapper of ffplay.
+ */
+public final class IjkMediaPlayer extends BaseMediaPlayer implements
+        IMediaWakeMode, IMediaAudioStreamType {
     private final static String TAG = IjkMediaPlayer.class.getName();
+
+    private static final int MEDIA_NOP = 0; // interface test message
+    private static final int MEDIA_PREPARED = 1;
+    private static final int MEDIA_PLAYBACK_COMPLETE = 2;
+    private static final int MEDIA_BUFFERING_UPDATE = 3;
+    private static final int MEDIA_SEEK_COMPLETE = 4;
+    private static final int MEDIA_SET_VIDEO_SIZE = 5;
+    private static final int MEDIA_TIMED_TEXT = 99;
+    private static final int MEDIA_ERROR = 100;
+    private static final int MEDIA_INFO = 200;
+
+    protected static final int MEDIA_SET_VIDEO_SAR = 10001;
 
     static {
         System.loadLibrary("stlport_shared");

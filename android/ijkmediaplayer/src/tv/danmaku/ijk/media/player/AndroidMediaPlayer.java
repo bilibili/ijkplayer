@@ -20,12 +20,16 @@ package tv.danmaku.ijk.media.player;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
+import tv.danmaku.ijk.media.player.misc.IMediaAudioStreamType;
+import tv.danmaku.ijk.media.player.misc.IMediaWakeMode;
+
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-public final class AndroidMediaPlayer extends SimpleMediaPlayer {
+public final class AndroidMediaPlayer extends BaseMediaPlayer implements
+        IMediaWakeMode, IMediaAudioStreamType {
     private MediaPlayer mInternalMediaPlayer;
     private AndroidMediaPlayerListenerHolder mInternalListenerAdapter;
 
@@ -69,11 +73,6 @@ public final class AndroidMediaPlayer extends SimpleMediaPlayer {
     @Override
     public void pause() throws IllegalStateException {
         mInternalMediaPlayer.pause();
-    }
-
-    @Override
-    public void setWakeMode(Context context, int mode) {
-        mInternalMediaPlayer.setWakeMode(context, mode);
     }
 
     @Override
@@ -125,6 +124,14 @@ public final class AndroidMediaPlayer extends SimpleMediaPlayer {
 
         resetListeners();
         attachInternalListeners();
+    }
+
+    /*--------------------
+     * IMediaPlayer2
+     */
+    @Override
+    public void setWakeMode(Context context, int mode) {
+        mInternalMediaPlayer.setWakeMode(context, mode);
     }
 
     @Override

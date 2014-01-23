@@ -20,5 +20,5 @@ package tv.danmaku.ijk.media.widget;
  * configurated by app project
  */
 public class Pragma {
-    public static final boolean ENABLE_VERBOSE = tv.danmaku.ijk.media.player.Pragma.ENABLE_VERBOSE;
+    public static final boolean ENABLE_VERBOSE = tv.danmaku.ijk.media.player.pragma.Pragma.ENABLE_VERBOSE;
 }
