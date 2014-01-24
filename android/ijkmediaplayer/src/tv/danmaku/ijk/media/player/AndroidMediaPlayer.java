@@ -21,29 +21,66 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import tv.danmaku.ijk.media.player.misc.IMediaAudioStreamType;
+import tv.danmaku.ijk.media.player.misc.IMediaKeepInBackground;
 import tv.danmaku.ijk.media.player.misc.IMediaWakeMode;
+import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.text.TextUtils;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+import android.view.SurfaceHolder.Callback;
 
-public final class AndroidMediaPlayer extends BaseMediaPlayer implements
-        IMediaWakeMode, IMediaAudioStreamType {
+public class AndroidMediaPlayer extends BaseMediaPlayer implements
+        IMediaWakeMode, IMediaAudioStreamType, IMediaKeepInBackground {
     private MediaPlayer mInternalMediaPlayer;
     private AndroidMediaPlayerListenerHolder mInternalListenerAdapter;
     private String mDataSource;
 
+    private Object mInitLock = new Object();
+    private boolean mIsReleased;
+
+    private boolean mKeepInBackground;
+
     public AndroidMediaPlayer() {
-        mInternalMediaPlayer = new MediaPlayer();
+        synchronized (mInitLock) {
+            mInternalMediaPlayer = new MediaPlayer();
+        }
+        mInternalMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mInternalListenerAdapter = new AndroidMediaPlayerListenerHolder(this);
         attachInternalListeners();
     }
 
     @Override
     public void setDisplay(SurfaceHolder sh) {
-        mInternalMediaPlayer.setDisplay(sh);
+        synchronized (mInitLock) {
+            if (!mIsReleased) {
+                mInternalMediaPlayer.setDisplay(sh);
+                if (sh != null)
+                    sh.addCallback(mSurfaceCallback);
+            }
+        }
     }
+
+    private SurfaceHolder.Callback mSurfaceCallback = new Callback() {
+        public void surfaceChanged(SurfaceHolder holder, int format, int width,
+                int height) {
+        }
+
+        public void surfaceCreated(SurfaceHolder holder) {
+        }
+
+        public void surfaceDestroyed(SurfaceHolder holder) {
+            if (mInternalMediaPlayer != null) {
+                if (!mKeepInBackground) {
+                    mInternalMediaPlayer.release();
+                }
+            }
+        }
+    };
 
     @Override
     public void setSurface(Surface surface) {
@@ -54,7 +91,14 @@ public final class AndroidMediaPlayer extends BaseMediaPlayer implements
     public void setDataSource(String path) throws IOException,
             IllegalArgumentException, SecurityException, IllegalStateException {
         mDataSource = path;
-        mInternalMediaPlayer.setDataSource(path);
+
+        Uri uri = Uri.parse(path);
+        String scheme = uri.getScheme();
+        if (!TextUtils.isEmpty(scheme) && scheme.equalsIgnoreCase("file")) {
+            mInternalMediaPlayer.setDataSource(uri.getPath());
+        } else {
+            mInternalMediaPlayer.setDataSource(path);
+        }
     }
 
     @Override
@@ -109,7 +153,12 @@ public final class AndroidMediaPlayer extends BaseMediaPlayer implements
 
     @Override
     public boolean isPlaying() {
-        return mInternalMediaPlayer.isPlaying();
+        try {
+            return mInternalMediaPlayer.isPlaying();
+        } catch (IllegalStateException e) {
+            DebugLog.printStackTrace(e);
+            return false;
+        }
     }
 
     @Override
@@ -119,16 +168,27 @@ public final class AndroidMediaPlayer extends BaseMediaPlayer implements
 
     @Override
     public long getCurrentPosition() {
-        return mInternalMediaPlayer.getCurrentPosition();
+        try {
+            return mInternalMediaPlayer.getCurrentPosition();
+        } catch (IllegalStateException e) {
+            DebugLog.printStackTrace(e);
+            return 0;
+        }
     }
 
     @Override
     public long getDuration() {
-        return mInternalMediaPlayer.getDuration();
+        try {
+            return mInternalMediaPlayer.getDuration();
+        } catch (IllegalStateException e) {
+            DebugLog.printStackTrace(e);
+            return 0;
+        }
     }
 
     @Override
     public void release() {
+        mIsReleased = true;
         mInternalMediaPlayer.release();
 
         resetListeners();
@@ -144,7 +204,7 @@ public final class AndroidMediaPlayer extends BaseMediaPlayer implements
     }
 
     /*--------------------
-     * IMediaPlayer2
+     * misc
      */
     @Override
     public void setWakeMode(Context context, int mode) {
@@ -154,6 +214,11 @@ public final class AndroidMediaPlayer extends BaseMediaPlayer implements
     @Override
     public void setAudioStreamType(int streamtype) {
         mInternalMediaPlayer.setAudioStreamType(streamtype);
+    }
+
+    @Override
+    public void setKeepInBackground(boolean keepInBackground) {
+        mKeepInBackground = keepInBackground;
     }
 
     /*--------------------
