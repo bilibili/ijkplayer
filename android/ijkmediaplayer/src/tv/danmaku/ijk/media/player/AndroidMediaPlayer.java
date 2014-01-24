@@ -23,6 +23,7 @@ import java.lang.ref.WeakReference;
 import tv.danmaku.ijk.media.player.misc.IMediaAudioStreamType;
 import tv.danmaku.ijk.media.player.misc.IMediaKeepInBackground;
 import tv.danmaku.ijk.media.player.misc.IMediaWakeMode;
+import tv.danmaku.ijk.media.player.misc.MediaInfo;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 import android.content.Context;
@@ -44,6 +45,8 @@ public class AndroidMediaPlayer extends BaseMediaPlayer implements
     private boolean mIsReleased;
 
     private boolean mKeepInBackground;
+
+    private static MediaInfo sMediaInfo;
 
     public AndroidMediaPlayer() {
         synchronized (mInitLock) {
@@ -201,6 +204,23 @@ public class AndroidMediaPlayer extends BaseMediaPlayer implements
 
         resetListeners();
         attachInternalListeners();
+    }
+
+    @Override
+    public MediaInfo getMediaInfo() {
+        if (sMediaInfo == null) {
+            MediaInfo module = new MediaInfo();
+
+            module.mVideoDecoder = "android";
+            module.mVideoDecoderImpl = "HW";
+
+            module.mAudioDecoder = "android";
+            module.mAudioDecoderImpl = "HW";
+
+            sMediaInfo = module;
+        }
+
+        return sMediaInfo;
     }
 
     /*--------------------

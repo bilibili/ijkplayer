@@ -3,7 +3,7 @@ package tv.danmaku.ijk.media.player.misc;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-public class ModuleInfo {
+public class MediaInfo {
     private static final String BUNDLE_VIDEO_DECODER = "video_decoder";
     private static final String BUNDLE_VIDEO_DECODER_IMPL = "video_decoder_impl";
 
@@ -16,11 +16,11 @@ public class ModuleInfo {
     public String mAudioDecoder;
     public String mAudioDecoderImpl;
 
-    public static ModuleInfo sAndroidModuleInfo;
-    public static ModuleInfo sAndroidListModuleInfo;
+    public static MediaInfo sAndroidMediaInfo;
+    public static MediaInfo sAndroidListMediaInfo;
 
-    public static ModuleInfo parseModuleInfo(Bundle args) {
-        ModuleInfo moduleInfo = new ModuleInfo();
+    public static MediaInfo parseModuleInfo(Bundle args) {
+        MediaInfo moduleInfo = new MediaInfo();
 
         moduleInfo.mVideoDecoder = args.getString(BUNDLE_VIDEO_DECODER);
         moduleInfo.mVideoDecoderImpl = args
@@ -33,40 +33,8 @@ public class ModuleInfo {
         return moduleInfo;
     }
 
-    public static ModuleInfo getAndroidModuleInfo() {
-        if (sAndroidModuleInfo == null) {
-            ModuleInfo module = new ModuleInfo();
-
-            module.mVideoDecoder = "android";
-            module.mVideoDecoderImpl = "HW";
-
-            module.mAudioDecoder = "android";
-            module.mAudioDecoderImpl = "HW";
-
-            sAndroidModuleInfo = module;
-        }
-
-        return sAndroidModuleInfo;
-    }
-
-    public static ModuleInfo getAndroidListModuleInfo() {
-        if (sAndroidModuleInfo == null) {
-            ModuleInfo module = new ModuleInfo();
-
-            module.mVideoDecoder = "android";
-            module.mVideoDecoderImpl = "SYS-HW";
-
-            module.mAudioDecoder = "android";
-            module.mAudioDecoderImpl = "SYS-HW";
-
-            sAndroidModuleInfo = module;
-        }
-
-        return sAndroidModuleInfo;
-    }
-
-    public static ModuleInfo getNullModuleInfo() {
-        ModuleInfo module = new ModuleInfo();
+    public static MediaInfo getNullModuleInfo() {
+        MediaInfo module = new MediaInfo();
         return module;
     }
 

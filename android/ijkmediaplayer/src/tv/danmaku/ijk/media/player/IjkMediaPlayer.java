@@ -24,6 +24,7 @@ import java.lang.ref.WeakReference;
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
 import tv.danmaku.ijk.media.player.misc.IMediaAudioStreamType;
 import tv.danmaku.ijk.media.player.misc.IMediaWakeMode;
+import tv.danmaku.ijk.media.player.misc.MediaInfo;
 import tv.danmaku.ijk.media.player.option.AvFormatOption;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 import android.annotation.SuppressLint;
@@ -362,6 +363,19 @@ public final class IjkMediaPlayer extends BaseMediaPlayer implements
     }
 
     private native void _reset();
+
+    @Override
+    public MediaInfo getMediaInfo() {
+        MediaInfo mediaInfo = new MediaInfo();
+
+        mediaInfo.mVideoDecoder = "ijkmedia";
+        mediaInfo.mVideoDecoderImpl = "SW";
+
+        mediaInfo.mAudioDecoder = "ijkmedia";
+        mediaInfo.mAudioDecoderImpl = "SW";
+
+        return mediaInfo;
+    }
 
     public void setAvOption(AvFormatOption option) {
         setAvFormatOption(option.getName(), option.getValue());

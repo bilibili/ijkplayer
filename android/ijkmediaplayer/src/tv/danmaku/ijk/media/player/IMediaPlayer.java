@@ -2,6 +2,8 @@ package tv.danmaku.ijk.media.player;
 
 import java.io.IOException;
 
+import tv.danmaku.ijk.media.player.misc.MediaInfo;
+
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.view.Surface;
@@ -69,6 +71,8 @@ public interface IMediaPlayer {
     public abstract void release();
 
     public abstract void reset();
+
+    public abstract MediaInfo getMediaInfo();
 
     public abstract void setOnPreparedListener(OnPreparedListener listener);
 
