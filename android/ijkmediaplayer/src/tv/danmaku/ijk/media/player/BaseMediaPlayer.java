@@ -40,6 +40,10 @@ public abstract class BaseMediaPlayer implements IMediaPlayer {
         mIsLogEnabled = enable;
     }
 
+    public boolean isPlayable() {
+        return true;
+    }
+
     public final void setOnPreparedListener(OnPreparedListener listener) {
         mOnPreparedListener = listener;
     }
