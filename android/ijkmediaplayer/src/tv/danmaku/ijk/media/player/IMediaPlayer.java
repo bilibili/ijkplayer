@@ -74,6 +74,8 @@ public interface IMediaPlayer {
 
     public abstract MediaInfo getMediaInfo();
 
+    public abstract void setLogEnabled(boolean enable);
+
     public abstract void setOnPreparedListener(OnPreparedListener listener);
 
     public abstract void setOnCompletionListener(OnCompletionListener listener);
