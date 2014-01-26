@@ -83,12 +83,14 @@
             AudioQueueEnqueueBuffer(audioQueueRef, _audioQueueBufferRefArray[i], 0, NULL);
         }
 
+        /*-
         status = AudioQueueStart(audioQueueRef, NULL);
         if (status != noErr) {
             NSLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
             self = nil;
             return nil;
         }
+         */
     }
     return self;
 }
@@ -154,7 +156,9 @@ static void IJKSDLAudioQueueOuptutCallback(void * inUserData, AudioQueueRef inAQ
     @autoreleasepool {
         IJKSDLAudioQueueController* aqController = (__bridge IJKSDLAudioQueueController *) inUserData;
 
-        if (!aqController || aqController->_isPaused) {
+        if (!aqController) {
+            // do nothing;
+        } else if (aqController->_isPaused) {
             memset(inBuffer->mAudioData, aqController.spec.silence, inBuffer->mAudioDataByteSize);
         } else {
             (*aqController.spec.callback)(aqController.spec.userdata, inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
