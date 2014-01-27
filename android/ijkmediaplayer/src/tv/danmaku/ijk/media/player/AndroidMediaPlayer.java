@@ -20,12 +20,7 @@ package tv.danmaku.ijk.media.player;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
-import tv.danmaku.ijk.media.player.misc.IMediaAudioStreamType;
-import tv.danmaku.ijk.media.player.misc.IMediaKeepInBackground;
-import tv.danmaku.ijk.media.player.misc.IMediaWakeMode;
-import tv.danmaku.ijk.media.player.misc.MediaInfo;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
-
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -35,8 +30,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 
-public class AndroidMediaPlayer extends BaseMediaPlayer implements
-        IMediaWakeMode, IMediaAudioStreamType, IMediaKeepInBackground {
+public class AndroidMediaPlayer extends SimpleMediaPlayer {
     private MediaPlayer mInternalMediaPlayer;
     private AndroidMediaPlayerListenerHolder mInternalListenerAdapter;
     private String mDataSource;

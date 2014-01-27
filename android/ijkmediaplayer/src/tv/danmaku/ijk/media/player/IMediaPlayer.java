@@ -2,9 +2,9 @@ package tv.danmaku.ijk.media.player;
 
 import java.io.IOException;
 
-import tv.danmaku.ijk.media.player.misc.MediaInfo;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.os.Build;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -34,9 +34,6 @@ public interface IMediaPlayer {
 
     public abstract void setDisplay(SurfaceHolder sh);
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public abstract void setSurface(Surface surface);
-
     public abstract void setDataSource(String path) throws IOException,
             IllegalArgumentException, SecurityException, IllegalStateException;
 
@@ -55,10 +52,6 @@ public interface IMediaPlayer {
     public abstract int getVideoWidth();
 
     public abstract int getVideoHeight();
-
-    public abstract int getVideoSarNum();
-
-    public abstract int getVideoSarDen();
 
     public abstract boolean isPlaying();
 
@@ -126,4 +119,21 @@ public interface IMediaPlayer {
     public static interface OnInfoListener {
         boolean onInfo(IMediaPlayer mp, int what, int extra);
     }
+
+    /*--------------------
+     * Optional
+     */
+    public abstract void setAudioStreamType(int streamtype);
+
+    public abstract void setKeepInBackground(boolean keepInBackground);
+
+    public abstract int getVideoSarNum();
+
+    public abstract int getVideoSarDen();
+
+    @Deprecated
+    public abstract void setWakeMode(Context context, int mode);
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public abstract void setSurface(Surface surface);
 }

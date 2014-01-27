@@ -1,4 +1,4 @@
-package tv.danmaku.ijk.media.player.misc;
+package tv.danmaku.ijk.media.player;
 
 import android.text.TextUtils;
 

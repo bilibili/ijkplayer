@@ -22,9 +22,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
-import tv.danmaku.ijk.media.player.misc.IMediaAudioStreamType;
-import tv.danmaku.ijk.media.player.misc.IMediaWakeMode;
-import tv.danmaku.ijk.media.player.misc.MediaInfo;
 import tv.danmaku.ijk.media.player.option.AvFormatOption;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 import android.annotation.SuppressLint;
@@ -42,8 +39,7 @@ import android.view.SurfaceHolder;
  * 
  *         Java wrapper of ffplay.
  */
-public final class IjkMediaPlayer extends BaseMediaPlayer implements
-        IMediaWakeMode, IMediaAudioStreamType {
+public final class IjkMediaPlayer extends SimpleMediaPlayer {
     private final static String TAG = IjkMediaPlayer.class.getName();
 
     private static final int MEDIA_NOP = 0; // interface test message
