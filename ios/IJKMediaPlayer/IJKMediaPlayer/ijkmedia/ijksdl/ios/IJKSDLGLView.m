@@ -207,7 +207,7 @@ enum {
 
         _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
 
-        if (!_context || ![EAGLContext setCurrentContext:_context]) {
+        if (_context == nil || ![EAGLContext setCurrentContext:_context]) {
             NSLog(@"failed to setup EAGLContext");
             self = nil;
             return nil;
@@ -340,8 +340,8 @@ enum {
         // TODO: if format changed?
     }
 
-    if (!_renderer) {
-        if (!overlay) {
+    if (_renderer == nil) {
+        if (overlay == nil) {
             return NO;
         } else if (overlay->format == SDL_FCC_I420) {
             _frameChroma = overlay->format;
@@ -467,7 +467,7 @@ exit:
 {
     // gles throws gpus_ReturnNotPermittedKillClient, while app is in background
     if (![[IJKMediaModule sharedModule] tryLockActiveApp]) {
-        NSLog(@"IJKSDLGLView:display: unable to tryLock app activity");
+        NSLog(@"IJKSDLGLView:display: unable to tryLock app activity\n");
         return;
     }
 
@@ -479,7 +479,12 @@ exit:
 - (void)displayInternal: (SDL_VoutOverlay *) overlay
 {
     if (![self setupDisplay:overlay]) {
-        NSLog(@"IJKSDLGLView: setupDisplay failed");
+        NSLog(@"IJKSDLGLView: setupDisplay failed\n");
+        return;
+    }
+
+    if (_context == nil) {
+        NSLog(@"IJKSDLGLView: nil EAGLContext\n");
         return;
     }
 
