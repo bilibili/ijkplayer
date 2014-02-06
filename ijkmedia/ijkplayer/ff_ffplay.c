@@ -827,7 +827,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
         return -1;
 
     if (drop_frame) {
-        ALOGW("queue_picture drop too late frame\n");
+        ALOGD("queue_picture drop too late frame\n");
         return 0;
     }
 
@@ -914,7 +914,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
 
     if (is->dropping_frame) {
         if (pkt->flags & AV_PKT_FLAG_KEY) {
-            ALOGW("skip frame(fast): end\n");
+            ALOGD("skip frame(fast): end\n");
             is->dropping_frame = 0;
             avcodec_flush_buffers(is->video_st->codec);
         } else {
@@ -924,7 +924,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
 
     int can_drop_pkt = ffp->pktdrop > 0 || (ffp->pktdrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER);
     if (can_drop_pkt && is->frame_drops_early > 6) {
-        ALOGW("skip frame: start\n");
+        ALOGD("skip frame: start\n");
         is->dropping_frame = 1;
         is->frame_drops_early = 0;
         avcodec_flush_buffers(is->video_st->codec);
