@@ -913,7 +913,8 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         }
     }
 
-    if (is->frame_drops_early > 6) {
+    int can_drop_pkt = ffp->pktdrop > 0 || (ffp->pktdrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER);
+    if (can_drop_pkt && is->frame_drops_early > 6) {
         ALOGW("skip frame: start\n");
         is->dropping_frame = 1;
         is->frame_drops_early = 0;
@@ -959,8 +960,9 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
 
         frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(is->ic, is->video_st, frame);
 
-        if (ffp->framedrop > 0 || (ffp->framedrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
-            int frame_dropped = 0;
+        int can_drop_frame = ffp->framedrop > 0 || (ffp->framedrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER);
+        if (can_drop_frame || can_drop_pkt) {
+            int frame_delayed = 0;
             SDL_LockMutex(is->pictq_mutex);
             if (is->frame_last_pts != AV_NOPTS_VALUE && frame->pts != AV_NOPTS_VALUE) {
                 double clockdiff = get_clock(&is->vidclk) - get_master_clock(is);
@@ -970,16 +972,21 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
                     clockdiff + ptsdiff - is->frame_last_filter_delay < 0 &&
                     *serial == is->vidclk.serial &&
                     is->videoq.nb_packets) {
-                    is->frame_last_dropped_pos = av_frame_get_pkt_pos(frame);
-                    is->frame_last_dropped_pts = dpts;
-                    is->frame_last_dropped_serial = *serial;
-                    is->frame_drops_early++;
-                    frame_dropped = 1;
-                    av_frame_unref(frame);
-                    ret = 0;
+                    if (can_drop_frame) {
+                        is->frame_last_dropped_pos = av_frame_get_pkt_pos(frame);
+                        is->frame_last_dropped_pts = dpts;
+                        is->frame_last_dropped_serial = *serial;
+                        is->frame_drops_early++;
+                        av_frame_unref(frame);
+                        ret = 0;
+                    }
+                    if (can_drop_pkt) {
+                        is->frame_drops_early++;
+                        frame_delayed = 1;
+                    }
                 }
             }
-            if (frame_dropped == 0)
+            if (!frame_delayed)
                 is->frame_drops_early = 0;;
             SDL_UnlockMutex(is->pictq_mutex);
         }

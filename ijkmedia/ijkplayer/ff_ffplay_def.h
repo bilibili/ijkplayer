@@ -392,6 +392,7 @@ typedef struct FFPlayer {
 #endif
     int loop;
     int framedrop;
+    int pktdrop;
     int infinite_buffer;
     enum ShowMode show_mode;
     char *audio_codec_name;
@@ -477,7 +478,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->decoder_reorder_pts    = -1;
     ffp->autoexit               = 0;
     ffp->loop                   = 1;
-    ffp->framedrop              = -1;
+    ffp->framedrop              = 0;
+    ffp->pktdrop                = 0;
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
     av_freep(&ffp->audio_codec_name);
