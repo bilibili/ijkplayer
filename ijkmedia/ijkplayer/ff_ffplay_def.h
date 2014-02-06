@@ -516,8 +516,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->fast_high_water_mark_in_ms     = DEFAULT_FAST_HIGH_WATER_MARK_IN_MS;
     ffp->max_buffer_size                = MAX_QUEUE_SIZE;
 
-    ffp->skip_loop_filter               = AVDISCARD_ALL;
-    ffp->skip_frame                     = AVDISCARD_NONREF;
+    ffp->skip_loop_filter               = AVDISCARD_NONREF;
+    ffp->skip_frame                     = AVDISCARD_DEFAULT;
 
     msg_queue_flush(&ffp->msg_queue);
 }
