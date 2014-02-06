@@ -798,10 +798,11 @@ static void duplicate_right_border_pixels(SDL_Overlay *bmp) {
 }
 #endif
 
-static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t pos, int serial)
+static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t pos, int serial, int is_late)
 {
     VideoState *is = ffp->is;
     VideoPicture *vp;
+    int drop_frame = 0;
 
 #if defined(DEBUG_SYNC) && 0
     printf("frame_type=%c pts=%0.3f\n",
@@ -814,12 +815,21 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
     /* keep the last already displayed picture in the queue */
     while (is->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE - 1 &&
            !is->videoq.abort_request) {
+        if (is_late) {
+            drop_frame = 1;
+            break;
+        }
         SDL_CondWait(is->pictq_cond, is->pictq_mutex);
     }
     SDL_UnlockMutex(is->pictq_mutex);
 
     if (is->videoq.abort_request)
         return -1;
+
+    if (drop_frame) {
+        ALOGW("queue_picture drop too late frame\n");
+        return 0;
+    }
 
     vp = &is->pictq[is->pictq_windex];
 
@@ -877,7 +887,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
 static int g_vdps_counter = 0;
 static int64_t g_vdps_total_time = 0;
 #endif
-static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *serial)
+static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *serial, int *is_late)
 {
     VideoState *is = ffp->is;
     int got_picture;
@@ -967,9 +977,10 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
                 double ptsdiff = dpts - is->frame_last_pts;
                 if (!isnan(clockdiff) && fabs(clockdiff) < AV_NOSYNC_THRESHOLD &&
                     !isnan(ptsdiff) && ptsdiff > 0 && ptsdiff < AV_NOSYNC_THRESHOLD &&
-                    clockdiff + ptsdiff - is->frame_last_filter_delay < 0 &&
+                    clockdiff + ptsdiff - is->frame_last_filter_delay < (0 - ffp->dropdelay) &&
                     *serial == is->vidclk.serial &&
                     is->videoq.nb_packets) {
+                    *is_late = 1;
                     if (can_drop_frame) {
                         is->frame_last_dropped_pos = av_frame_get_pkt_pos(frame);
                         is->frame_last_dropped_pts = dpts;
@@ -1192,7 +1203,8 @@ static int video_thread(void *arg)
         avcodec_get_frame_defaults(frame);
         av_free_packet(&pkt);
 
-        ret = get_video_frame(ffp, frame, &pkt, &serial);
+        int is_late = 0;
+        ret = get_video_frame(ffp, frame, &pkt, &serial, &is_late);
         if (ret < 0)
             goto the_end;
         if (!ret)
@@ -1255,7 +1267,7 @@ static int video_thread(void *arg)
         }
 #else
         pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(is->video_st->time_base);
-        ret = queue_picture(ffp, frame, pts, av_frame_get_pkt_pos(frame), serial);
+        ret = queue_picture(ffp, frame, pts, av_frame_get_pkt_pos(frame), serial, is_late);
         av_frame_unref(frame);
 #endif
 
