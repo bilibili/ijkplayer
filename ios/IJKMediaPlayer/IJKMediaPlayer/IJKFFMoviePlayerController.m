@@ -68,6 +68,9 @@
 
 - (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
 {
+    if (aUrl == nil)
+        return nil;
+
     self = [super init];
     if (self) {
         ijkmp_global_init();
