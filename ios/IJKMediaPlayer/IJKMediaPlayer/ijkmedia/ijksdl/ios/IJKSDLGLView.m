@@ -207,9 +207,7 @@ enum {
 
         _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
 
-        if (!_context ||
-            ![EAGLContext setCurrentContext:_context]) {
-
+        if (!_context || ![EAGLContext setCurrentContext:_context]) {
             NSLog(@"failed to setup EAGLContext");
             self = nil;
             return nil;
@@ -226,21 +224,25 @@ enum {
 
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
-
-            NSLog(@"failed to make complete framebuffer object %x", status);
+            NSLog(@"failed to make complete framebuffer object %x\n", status);
+            if ([EAGLContext currentContext] == _context)
+                [EAGLContext setCurrentContext:nil];
             self = nil;
             return nil;
         }
 
         GLenum glError = glGetError();
         if (GL_NO_ERROR != glError) {
-
-            NSLog(@"failed to setup GL %x", glError);
+            NSLog(@"failed to setup GL %x\n", glError);
+            if ([EAGLContext currentContext] == _context)
+                [EAGLContext setCurrentContext:nil];
             self = nil;
             return nil;
         }
 
         if (![self loadShaders]) {
+            if ([EAGLContext currentContext] == _context)
+                [EAGLContext setCurrentContext:nil];
             self = nil;
             return nil;
         }
@@ -266,6 +268,8 @@ enum {
         _rightPadding = 0.0f;
 
         NSLog(@"OK setup GL");
+        if ([EAGLContext currentContext] == _context)
+            [EAGLContext setCurrentContext:nil];
     }
 
     return self;
@@ -544,6 +548,10 @@ exit:
 
     glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
     [_context presentRenderbuffer:GL_RENDERBUFFER];
+
+    // Detach context before leaving display, to avoid multiple thread issues.
+    if ([EAGLContext currentContext] == _context)
+        [EAGLContext setCurrentContext:nil];
 }
 
 @end
