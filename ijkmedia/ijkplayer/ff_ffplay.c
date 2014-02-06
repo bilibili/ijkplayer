@@ -906,7 +906,6 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         if (pkt->flags & AV_PKT_FLAG_KEY) {
             ALOGW("skip frame(fast): end\n");
             is->dropping_frame = 0;
-            is->video_st->codec->skip_frame = ffp->skip_frame;
             avcodec_flush_buffers(is->video_st->codec);
         } else {
             return 0;
@@ -918,7 +917,6 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         ALOGW("skip frame: start\n");
         is->dropping_frame = 1;
         is->frame_drops_early = 0;
-        is->video_st->codec->skip_frame = AVDISCARD_NONKEY;
         avcodec_flush_buffers(is->video_st->codec);
         return 0;
     }
@@ -1728,12 +1726,6 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
                                       "No codec could be found with id %d\n", avctx->codec_id);
         return -1;
     }
-
-    // FIXME: android set these from outside
-#ifndef __APPLE__
-    avctx->skip_frame        = ffp->skip_frame;
-    avctx->skip_loop_filter  = ffp->skip_loop_filter;
-#endif
 
     avctx->codec_id = codec->id;
     avctx->workaround_bugs   = ffp->workaround_bugs;

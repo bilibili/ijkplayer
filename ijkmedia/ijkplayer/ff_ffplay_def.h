@@ -440,9 +440,6 @@ typedef struct FFPlayer {
     int normal_high_water_mark_in_ms;
     int fast_high_water_mark_in_ms;
     int max_buffer_size;
-
-    int skip_loop_filter;
-    int skip_frame;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -515,9 +512,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->normal_high_water_mark_in_ms   = DEFAULT_NORMAL_HIGH_WATER_MARK_IN_MS;
     ffp->fast_high_water_mark_in_ms     = DEFAULT_FAST_HIGH_WATER_MARK_IN_MS;
     ffp->max_buffer_size                = MAX_QUEUE_SIZE;
-
-    ffp->skip_loop_filter               = AVDISCARD_NONREF;
-    ffp->skip_frame                     = AVDISCARD_DEFAULT;
 
     msg_queue_flush(&ffp->msg_queue);
 }
