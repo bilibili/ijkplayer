@@ -798,7 +798,7 @@ static void duplicate_right_border_pixels(SDL_Overlay *bmp) {
 }
 #endif
 
-static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t pos, int serial, int is_late)
+static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t pos, int serial, int is_too_late)
 {
     VideoState *is = ffp->is;
     VideoPicture *vp;
@@ -815,7 +815,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
     /* keep the last already displayed picture in the queue */
     while (is->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE - 1 &&
            !is->videoq.abort_request) {
-        if (is_late) {
+        if (is_too_late) {
             drop_frame = 1;
             break;
         }
@@ -887,7 +887,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, int64_t 
 static int g_vdps_counter = 0;
 static int64_t g_vdps_total_time = 0;
 #endif
-static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *serial, int *is_late)
+static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *serial, int *is_too_late)
 {
     VideoState *is = ffp->is;
     int got_picture;
@@ -922,8 +922,12 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         }
     }
 
+    // drop packet only if there is enough cached buffer
     int can_drop_pkt = ffp->pktdrop > 0 || (ffp->pktdrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER);
-    if (can_drop_pkt && is->frame_drops_early > 6) {
+    int64_t least_cached_duration = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS + 2 * ffp->dropdelay;
+    if (can_drop_pkt && is->frame_drops_early > 6 &&
+        ((is->videoq_duration == -1) || is->videoq_duration > least_cached_duration) &&
+        ((is->videoq_duration == -1) || is->audioq_duration > least_cached_duration)) {
         ALOGD("skip frame: start\n");
         is->dropping_frame = 1;
         is->frame_drops_early = 0;
@@ -980,7 +984,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
                     clockdiff + ptsdiff - is->frame_last_filter_delay < (0 - ffp->dropdelay) &&
                     *serial == is->vidclk.serial &&
                     is->videoq.nb_packets) {
-                    *is_late = 1;
+                    *is_too_late = 1;
                     if (can_drop_frame) {
                         is->frame_last_dropped_pos = av_frame_get_pkt_pos(frame);
                         is->frame_last_dropped_pts = dpts;
@@ -1203,8 +1207,8 @@ static int video_thread(void *arg)
         avcodec_get_frame_defaults(frame);
         av_free_packet(&pkt);
 
-        int is_late = 0;
-        ret = get_video_frame(ffp, frame, &pkt, &serial, &is_late);
+        int is_too_late = 0;
+        ret = get_video_frame(ffp, frame, &pkt, &serial, &is_too_late);
         if (ret < 0)
             goto the_end;
         if (!ret)
@@ -1267,7 +1271,7 @@ static int video_thread(void *arg)
         }
 #else
         pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(is->video_st->time_base);
-        ret = queue_picture(ffp, frame, pts, av_frame_get_pkt_pos(frame), serial, is_late);
+        ret = queue_picture(ffp, frame, pts, av_frame_get_pkt_pos(frame), serial, is_too_late);
         av_frame_unref(frame);
 #endif
 
@@ -2288,6 +2292,9 @@ static int read_thread(void *arg)
 
                 if (is->video_st && is->video_st->time_base.den > 0 && is->video_st->time_base.num > 0)
                     video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
+
+                is->audioq_duration = audio_cached_duration;
+                is->videoq_duration = video_cached_duration;
 
                 if (video_cached_duration >= 0 && audio_cached_duration >= 0) {
                     cached_duration_in_ms = (int)IJKMAX(video_cached_duration, audio_cached_duration);
