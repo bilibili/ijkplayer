@@ -2025,8 +2025,25 @@ static int read_thread(void *arg)
 
     is->realtime = is_realtime(ic);
 
-    for (i = 0; i < ic->nb_streams; i++)
+    int video_stream_count = 0;
+    int h264_stream_count = 0;
+    int first_h264_stream = -1;
+    for (i = 0; i < ic->nb_streams; i++) {
         ic->streams[i]->discard = AVDISCARD_ALL;
+        AVCodecContext *codec = ic->streams[i]->codec;
+        if (codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+            video_stream_count++;
+            if (codec->codec_id == AV_CODEC_ID_H264) {
+                h264_stream_count++;
+                if (first_h264_stream < 0)
+                    first_h264_stream = i;
+            }
+        }
+    }
+    if (video_stream_count > 1 && ffp->wanted_stream[AVMEDIA_TYPE_VIDEO] < 0) {
+        ffp->wanted_stream[AVMEDIA_TYPE_VIDEO] = first_h264_stream;
+        av_log(NULL, AV_LOG_WARNING, "multiple video stream found, prefer first h264 stream: %d\n", first_h264_stream);
+    }
     if (!ffp->video_disable)
         st_index[AVMEDIA_TYPE_VIDEO] =
             av_find_best_stream(ic, AVMEDIA_TYPE_VIDEO,
