@@ -1,3 +1,6 @@
+Changes between 0.1.1 and 0.1.0:
+--------------------------------
+
 Changes between 0.1.0 and 0.0.6:
 --------------------------------
 - android: replace AbstractMediaPlayer with IMediaPlayer and other misc interfaces
@@ -9,6 +12,8 @@ Changes between 0.1.0 and 0.0.6:
 - ios: fix handle of AudioSession interruption
 - ios: add AudioQueue api as replacement of AudioUnit api
 - ijksdl: fix non-I420 pixel-format support
+- player: improve late packet/frame dropping
+- player: prefer h264 stream if multiple video stream exists
 
 Changes between 0.0.6 and 0.0.5:
 --------------------------------
