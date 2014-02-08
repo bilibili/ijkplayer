@@ -36,12 +36,27 @@
 		E6903F1617EAF70200CFD954 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E6903F1517EAF70200CFD954 /* Default-568h@2x.png */; };
 		E6A9B56417EDA72C00A1A500 /* IJKMoviePlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A9B56217EDA72C00A1A500 /* IJKMoviePlayerViewController.m */; };
 		E6A9B56517EDA72C00A1A500 /* IJKMoviePlayerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E6A9B56317EDA72C00A1A500 /* IJKMoviePlayerViewController.xib */; };
-		E6F727C017F40DC50043623F /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6166C7017EDA43C0006B956 /* libIJKMediaPlayer.a */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E6D74F2D18A5F94B00165BFD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E6903EB917EAF6C500CFD954;
+			remoteInfo = IJKMediaPlayer;
+		};
+		E6D74F2F18A5F97800165BFD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = E6903EB817EAF6C500CFD954;
+			remoteInfo = IJKMediaPlayer;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		E612EAE417F7E0F800BEE660 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
-		E6166C7017EDA43C0006B956 /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIJKMediaPlayer.a; path = "../../../../../Library/Developer/Xcode/DerivedData/IJKMedia-earrwrzhlmypuheegnwtfewujljd/Build/Products/Debug-iphoneos/libIJKMediaPlayer.a"; sourceTree = "<group>"; };
 		E6166C9B17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "IJKMediaDemo-Prefix.pch"; sourceTree = "<group>"; };
 		E63FC27817F032FD003551EB /* IJKCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKCommon.h; sourceTree = "<group>"; };
 		E63FC28917F04C48003551EB /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
@@ -76,6 +91,7 @@
 		E6A9B56117EDA72C00A1A500 /* IJKMoviePlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKMoviePlayerViewController.h; sourceTree = "<group>"; };
 		E6A9B56217EDA72C00A1A500 /* IJKMoviePlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKMoviePlayerViewController.m; sourceTree = "<group>"; };
 		E6A9B56317EDA72C00A1A500 /* IJKMoviePlayerViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IJKMoviePlayerViewController.xib; sourceTree = "<group>"; };
+		E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = IJKMediaPlayer.xcodeproj; path = ../IJKMediaPlayer/IJKMediaPlayer.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,7 +108,6 @@
 				E6903F0217EAF70200CFD954 /* Foundation.framework in Frameworks */,
 				E63FC29617F060A7003551EB /* libz.dylib in Frameworks */,
 				E63FC29A17F062E8003551EB /* libbz2.dylib in Frameworks */,
-				E6F727C017F40DC50043623F /* libIJKMediaPlayer.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,6 +142,7 @@
 		E6903EF317EAF70200CFD954 = {
 			isa = PBXGroup;
 			children = (
+				E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */,
 				E6903F0517EAF70200CFD954 /* IJKMediaDemo */,
 				E6903EFE17EAF70200CFD954 /* Frameworks */,
 				E6903EFD17EAF70200CFD954 /* Products */,
@@ -153,7 +169,6 @@
 				E6903EFF17EAF70200CFD954 /* UIKit.framework */,
 				E63FC29517F060A7003551EB /* libz.dylib */,
 				E63FC29917F062E8003551EB /* libbz2.dylib */,
-				E6166C7017EDA43C0006B956 /* libIJKMediaPlayer.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -197,6 +212,14 @@
 			name = "View Controllers";
 			sourceTree = "<group>";
 		};
+		E6D74F2A18A5F94B00165BFD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E6D74F2E18A5F94B00165BFD /* libIJKMediaPlayer.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -211,6 +234,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				E6D74F3018A5F97800165BFD /* PBXTargetDependency */,
 			);
 			name = IJKMediaDemo;
 			productName = IJKMediaDemo;
@@ -237,12 +261,28 @@
 			mainGroup = E6903EF317EAF70200CFD954;
 			productRefGroup = E6903EFD17EAF70200CFD954 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = E6D74F2A18A5F94B00165BFD /* Products */;
+					ProjectRef = E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				E6903EFB17EAF70200CFD954 /* IJKMediaDemo */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		E6D74F2E18A5F94B00165BFD /* libIJKMediaPlayer.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libIJKMediaPlayer.a;
+			remoteRef = E6D74F2D18A5F94B00165BFD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E6903EFA17EAF70200CFD954 /* Resources */ = {
@@ -283,6 +323,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E6D74F3018A5F97800165BFD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = IJKMediaPlayer;
+			targetProxy = E6D74F2F18A5F97800165BFD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		E6903F0817EAF70200CFD954 /* InfoPlist.strings */ = {
