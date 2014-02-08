@@ -32,8 +32,8 @@ ijkplayer
  - video output: NativeWindow
  - audio output: AudioTrack
 - iOS
- - platform: iOS 5.0~7.0.x
- - cpu: ARMv7, ARMv7s, i386
+ - platform: iOS 5.1.1~7.0.x
+ - cpu: ARMv7, ARMv7s, ARM64, i386
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
  - video-output: OpenGL ES 2.0 (YUV2RGB shaders)
  - audio-output: CoreAudio
@@ -58,13 +58,16 @@ ijkplayer
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-stable
 cd ijkplayer-android-stable
-git checkout -B stable n0.0.6
+git checkout -B stable n0.1.0
 
 sh init-android.sh
 
 cd android
 sh compile-ffmpeg.sh
 sh compile-ijk.sh
+
+cd ijkmediaplayer/jni
+ndk-build
 
 # import android/ijkmediaplayer for MediaPlayer-like interface (recommended)
 # import android/ijkmediawidget for VideoView-like interface (based on Vitamio UI)
@@ -102,7 +105,7 @@ ndk-build
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-stable
 cd ijkplayer-ios-stable
-git checkout -B stable n0.0.6
+git checkout -B stable n0.1.0
 
 sh init-ios.sh
 
@@ -110,7 +113,7 @@ cd ios
 sh compile-ffmpeg.sh all
 
 # import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
-# open ios/IJKMedia.xcworkspace with Xcode
+# open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
 ```
 
 - Unstable
@@ -126,7 +129,7 @@ cd ios
 sh compile-ffmpeg.sh all
 
 # import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
-# open ios/IJKMedia.xcworkspace with Xcode
+# open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
 ```
 
 ### License
@@ -152,5 +155,3 @@ ijkplayer is licensed under LGPLv2.1 or later, so itself is free for commercial 
 But ijkplayer is also based on other different projects under various licenses, which I have no idea whether they are compatible to each other or to your product.
 
 [IANAL](http://en.wikipedia.org/wiki/IANAL), you should always ask your lawyer for these stuffs before use it in your product.
-
-[![xrefs](https://sourcegraph.com/api/repos/github.com/bbcallen/ijkplayer/badges/xrefs.png)](https://sourcegraph.com/github.com/bbcallen/ijkplayer)
