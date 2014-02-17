@@ -479,7 +479,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->autoexit               = 0;
     ffp->loop                   = 1;
     ffp->framedrop              = 0;
-    ffp->pktdrop                = -1;
+    ffp->pktdrop                = 0;
     ffp->dropdelay              = 0.5f;
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
