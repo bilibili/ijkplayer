@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
-import tv.danmaku.ijk.media.player.misc.IMediaAudioStreamType;
-import tv.danmaku.ijk.media.player.misc.IMediaWakeMode;
 import tv.danmaku.ijk.media.player.option.AvFormatOption;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 import android.annotation.SuppressLint;
@@ -41,8 +39,7 @@ import android.view.SurfaceHolder;
  * 
  *         Java wrapper of ffplay.
  */
-public final class IjkMediaPlayer extends BaseMediaPlayer implements
-        IMediaWakeMode, IMediaAudioStreamType {
+public final class IjkMediaPlayer extends SimpleMediaPlayer {
     private final static String TAG = IjkMediaPlayer.class.getName();
 
     private static final int MEDIA_NOP = 0; // interface test message
@@ -85,6 +82,8 @@ public final class IjkMediaPlayer extends BaseMediaPlayer implements
     private int mVideoHeight;
     private int mVideoSarNum;
     private int mVideoSarDen;
+
+    private String mDataSource;
 
     /**
      * Default constructor. Consider using one of the create() methods for
@@ -197,12 +196,18 @@ public final class IjkMediaPlayer extends BaseMediaPlayer implements
     @Override
     public void setDataSource(String path) throws IOException,
             IllegalArgumentException, SecurityException, IllegalStateException {
+        mDataSource = path;
         _setDataSource(path, null, null);
     }
 
     private native void _setDataSource(String path, String[] keys,
             String[] values) throws IOException, IllegalArgumentException,
             SecurityException, IllegalStateException;
+
+    @Override
+    public String getDataSource() {
+        return mDataSource;
+    }
 
     @Override
     public native void prepareAsync() throws IllegalStateException;
@@ -295,6 +300,16 @@ public final class IjkMediaPlayer extends BaseMediaPlayer implements
     }
 
     @Override
+    public int getVideoSarNum() {
+        return mVideoSarNum;
+    }
+
+    @Override
+    public int getVideoSarDen() {
+        return mVideoSarDen;
+    }
+
+    @Override
     public native boolean isPlaying();
 
     @Override
@@ -344,6 +359,19 @@ public final class IjkMediaPlayer extends BaseMediaPlayer implements
     }
 
     private native void _reset();
+
+    @Override
+    public MediaInfo getMediaInfo() {
+        MediaInfo mediaInfo = new MediaInfo();
+
+        mediaInfo.mVideoDecoder = "ijkmedia";
+        mediaInfo.mVideoDecoderImpl = "SW";
+
+        mediaInfo.mAudioDecoder = "ijkmedia";
+        mediaInfo.mAudioDecoderImpl = "SW";
+
+        return mediaInfo;
+    }
 
     public void setAvOption(AvFormatOption option) {
         setAvFormatOption(option.getName(), option.getValue());
