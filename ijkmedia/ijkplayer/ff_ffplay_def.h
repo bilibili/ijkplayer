@@ -30,7 +30,7 @@
 
 #define DEFAULT_HIGH_WATER_MARK_IN_BYTES    (128 * 1024)
 
-#define DEFAULT_MAX_HIGH_WATER_MARK_IN_MS       (10 * 1000)
+#define DEFAULT_MAX_HIGH_WATER_MARK_IN_MS       (5 * 1000)
 #define DEFAULT_NORMAL_HIGH_WATER_MARK_IN_MS    (2 * 1000)
 #define DEFAULT_FAST_HIGH_WATER_MARK_IN_MS      (100)
 
@@ -394,8 +394,6 @@ typedef struct FFPlayer {
 #endif
     int loop;
     int framedrop;
-    int pktdrop;
-    double dropdelay;
     int infinite_buffer;
     enum ShowMode show_mode;
     char *audio_codec_name;
@@ -479,8 +477,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->autoexit               = 0;
     ffp->loop                   = 1;
     ffp->framedrop              = 0;
-    ffp->pktdrop                = 0;
-    ffp->dropdelay              = 0.5f;
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
     av_freep(&ffp->audio_codec_name);

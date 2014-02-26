@@ -42,8 +42,8 @@
 
 // #define FFP_SHOW_FPS
 // #define FFP_SHOW_VDPS
-// #define FFP_SHOW_AUDIO_DELAY
-// #define FFP_SHOW_DEMUX_CACHE
+#define FFP_SHOW_AUDIO_DELAY
+#define FFP_SHOW_DEMUX_CACHE
 
 static AVPacket flush_pkt;
 
@@ -912,42 +912,19 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
         return 0;
     }
 
-    if (is->dropping_frame) {
-        if (pkt->flags & AV_PKT_FLAG_KEY) {
-            ALOGD("skip frame(fast): end\n");
-            is->dropping_frame = 0;
-            avcodec_flush_buffers(is->video_st->codec);
-        } else {
-            return 0;
-        }
-    }
-
-    // drop packet only if there is enough cached buffer
-    int can_drop_pkt = ffp->pktdrop > 0 || (ffp->pktdrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER);
-    int64_t least_cached_duration = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS + 2 * ffp->dropdelay;
-    if (can_drop_pkt && is->frame_drops_early > 6 &&
-        ((is->videoq_duration == -1) || is->videoq_duration > least_cached_duration) &&
-        ((is->videoq_duration == -1) || is->audioq_duration > least_cached_duration)) {
-        ALOGD("skip frame: start\n");
-        is->dropping_frame = 1;
-        is->frame_drops_early = 0;
-        avcodec_flush_buffers(is->video_st->codec);
-        return 0;
-    }
-
 #ifdef FFP_SHOW_VDPS
-        int64_t start = SDL_GetTickHR();
+    int64_t start = SDL_GetTickHR();
 #endif
     if(avcodec_decode_video2(is->video_st->codec, frame, &got_picture, pkt) < 0)
         return 0;
 #ifdef FFP_SHOW_VDPS
-        int64_t dur = SDL_GetTickHR() - start;
-        g_vdps_total_time += dur;
-        g_vdps_counter++;
-        int64_t avg_frame_time = g_vdps_total_time / g_vdps_counter;
-        double fps = 1.0f / avg_frame_time * 1000;
-        ALOGE("vdps: [%f][%d] %"PRId64" ms/frame, vdps=%f, +%"PRId64"\n",
-            frame->pts, g_vdps_counter, (int64_t)avg_frame_time, fps, dur);
+    int64_t dur = SDL_GetTickHR() - start;
+    g_vdps_total_time += dur;
+    g_vdps_counter++;
+    int64_t avg_frame_time = g_vdps_total_time / g_vdps_counter;
+    double fps = 1.0f / avg_frame_time * 1000;
+    ALOGE("vdps: [%f][%d] %"PRId64" ms/frame, vdps=%f, +%"PRId64"\n",
+        frame->pts, g_vdps_counter, (int64_t)avg_frame_time, fps, dur);
 #endif
 
     if (!got_picture && !pkt->data) {
@@ -972,35 +949,23 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
 
         frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(is->ic, is->video_st, frame);
 
-        int can_drop_frame = ffp->framedrop > 0 || (ffp->framedrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER);
-        if (can_drop_frame || can_drop_pkt) {
-            int frame_delayed = 0;
+        if (ffp->framedrop>0 || (ffp->framedrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
             SDL_LockMutex(is->pictq_mutex);
             if (is->frame_last_pts != AV_NOPTS_VALUE && frame->pts != AV_NOPTS_VALUE) {
                 double clockdiff = get_clock(&is->vidclk) - get_master_clock(is);
                 double ptsdiff = dpts - is->frame_last_pts;
                 if (!isnan(clockdiff) && fabs(clockdiff) < AV_NOSYNC_THRESHOLD &&
                     !isnan(ptsdiff) && ptsdiff > 0 && ptsdiff < AV_NOSYNC_THRESHOLD &&
-                    clockdiff + ptsdiff - is->frame_last_filter_delay < (0 - ffp->dropdelay) &&
-                    *serial == is->vidclk.serial &&
+                    clockdiff + ptsdiff - is->frame_last_filter_delay < 0 &&
                     is->videoq.nb_packets) {
-                    *is_too_late = 1;
-                    if (can_drop_frame) {
-                        is->frame_last_dropped_pos = av_frame_get_pkt_pos(frame);
-                        is->frame_last_dropped_pts = dpts;
-                        is->frame_last_dropped_serial = *serial;
-                        is->frame_drops_early++;
-                        av_frame_unref(frame);
-                        ret = 0;
-                    }
-                    if (can_drop_pkt) {
-                        is->frame_drops_early++;
-                        frame_delayed = 1;
-                    }
+                    is->frame_last_dropped_pos = av_frame_get_pkt_pos(frame);
+                    is->frame_last_dropped_pts = dpts;
+                    is->frame_last_dropped_serial = *serial;
+                    is->frame_drops_early++;
+                    av_frame_unref(frame);
+                    ret = 0;
                 }
             }
-            if (!frame_delayed)
-                is->frame_drops_early = 0;;
             SDL_UnlockMutex(is->pictq_mutex);
         }
 
@@ -2304,17 +2269,27 @@ static int read_thread(void *arg)
                 int64_t audio_cached_duration = -1;
                 int64_t video_cached_duration = -1;
 
-                if (is->audio_st && is->audio_st->time_base.den > 0 && is->audio_st->time_base.num > 0)
+                if (is->audio_st && is->audio_st->time_base.den > 0 && is->audio_st->time_base.num > 0) {
                     audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
+#ifdef FFP_SHOW_DEMUX_CACHE
+                    int video_cached_percent = (int)av_rescale(audio_cached_duration, 1005, hwm_in_ms * 10);
+                    ALOGE("audio cache=%%%d (%d/%d)\n", video_cached_percent, (int)audio_cached_duration, hwm_in_ms);
+#endif
+                }
 
-                if (is->video_st && is->video_st->time_base.den > 0 && is->video_st->time_base.num > 0)
+                if (is->video_st && is->video_st->time_base.den > 0 && is->video_st->time_base.num > 0) {
                     video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
+#ifdef FFP_SHOW_DEMUX_CACHE
+                    int audio_cached_percent = (int)av_rescale(video_cached_duration, 1005, hwm_in_ms * 10);
+                    ALOGE("video cache=%%%d (%d/%d)\n", audio_cached_percent, (int)video_cached_duration, hwm_in_ms);
+#endif
+                }
 
                 is->audioq_duration = audio_cached_duration;
                 is->videoq_duration = video_cached_duration;
 
                 if (video_cached_duration >= 0 && audio_cached_duration >= 0) {
-                    cached_duration_in_ms = (int)IJKMAX(video_cached_duration, audio_cached_duration);
+                    cached_duration_in_ms = (int)IJKMIN(video_cached_duration, audio_cached_duration);
                 } else if (video_cached_duration >= 0) {
                     cached_duration_in_ms = (int)video_cached_duration;
                 } else if (audio_cached_duration >= 0) {
