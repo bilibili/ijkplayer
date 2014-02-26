@@ -92,7 +92,11 @@ typedef struct PacketQueue {
     SDL_cond *cond;
 } PacketQueue;
 
-#define VIDEO_PICTURE_QUEUE_SIZE 3
+// #define VIDEO_PICTURE_QUEUE_SIZE 3
+#define VIDEO_PICTURE_QUEUE_SIZE (is->pictq_capacity)
+#define VIDEO_PICTURE_QUEUE_SIZE_MIN        (3)
+#define VIDEO_PICTURE_QUEUE_SIZE_MAX        (24)
+#define VIDEO_PICTURE_QUEUE_SIZE_DEFAULT    (VIDEO_PICTURE_QUEUE_SIZE_MIN)
 #define SUBPICTURE_QUEUE_SIZE 4
 
 typedef struct VideoPicture {
@@ -240,8 +244,9 @@ typedef struct VideoState {
     int64_t videoq_duration;
     int64_t video_current_pos;      // current displayed file pos
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
-    VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE];
+    VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE_MAX];
     int pictq_size, pictq_rindex, pictq_windex;
+    int pictq_capacity;
     SDL_mutex *pictq_mutex;
     SDL_cond *pictq_cond;
 #if !CONFIG_AVFILTER
@@ -441,6 +446,8 @@ typedef struct FFPlayer {
     int normal_high_water_mark_in_ms;
     int fast_high_water_mark_in_ms;
     int max_buffer_size;
+
+    int pictq_capacity;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -499,19 +506,21 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->sar_num                = 0;
     ffp->sar_den                = 0;
 
-    // ffp->overlay_format         = SDL_FCC_YV12;
-    ffp->overlay_format         = SDL_FCC_RV32;
+    ffp->overlay_format         = SDL_FCC_YV12;
+    // ffp->overlay_format         = SDL_FCC_RV32;
     // ffp->overlay_format         = SDL_FCC_RV16;
 
     ffp->last_error             = 0;
     ffp->prepared               = 0;
     ffp->auto_start             = 0;
 
-    ffp->high_water_mark_in_bytes = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
+    ffp->high_water_mark_in_bytes       = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
     ffp->max_high_water_mark_in_ms      = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS;
     ffp->normal_high_water_mark_in_ms   = DEFAULT_NORMAL_HIGH_WATER_MARK_IN_MS;
     ffp->fast_high_water_mark_in_ms     = DEFAULT_FAST_HIGH_WATER_MARK_IN_MS;
     ffp->max_buffer_size                = MAX_QUEUE_SIZE;
+
+    ffp->pictq_capacity                 = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT;
 
     msg_queue_flush(&ffp->msg_queue);
 }

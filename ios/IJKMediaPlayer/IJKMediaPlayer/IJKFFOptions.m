@@ -18,6 +18,8 @@
     options.skipLoopFilter  = IJK_AVDISCARD_ALL;
     options.skipFrame       = IJK_AVDISCARD_NONREF;
 
+    options.frameBufferCount = 3;
+
     return options;
 }
 
@@ -29,6 +31,8 @@
     [self setCodecOption:@"skip_frame"
              withInteger:self.skipFrame
                       to:mediaPlayer];
+
+    ijkmp_set_picture_queue_capicity(mediaPlayer, _frameBufferCount);
 }
 
 -(void)setCodecOption:(NSString *)optionName

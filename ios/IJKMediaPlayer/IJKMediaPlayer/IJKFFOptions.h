@@ -30,4 +30,6 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 @property(nonatomic) IJKAVDiscard skipLoopFilter;
 @property(nonatomic) IJKAVDiscard skipFrame;
 
+@property(nonatomic) int frameBufferCount;
+
 @end

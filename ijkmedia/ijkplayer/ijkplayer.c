@@ -144,6 +144,17 @@ void ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *valu
     MPTRACE("ijkmp_set_sws_option()=void\n");
 }
 
+void ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count)
+{
+    assert(mp);
+
+    MPTRACE("ijkmp_set_picture_queue_capicity(%d)\n", frame_count);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_picture_queue_capicity(mp->ffplayer, frame_count);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_set_picture_queue_capicity()=void\n");
+}
+
 void ijkmp_shutdown_l(IjkMediaPlayer *mp)
 {
     assert(mp);

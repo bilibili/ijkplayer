@@ -31,7 +31,7 @@
 #import "IJKSDLAudioQueueController.h"
 
 typedef struct SDL_Aout_Opaque {
-    IJKSDLAudioQueueController *aoutController;
+    IJKSDLAudioUnitController *aoutController;
 } SDL_Aout_Opaque;
 
 int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
@@ -40,7 +40,7 @@ int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtai
     SDLTRACE("aout_open_audio()\n");
     SDL_Aout_Opaque *opaque = aout->opaque;
 
-    opaque->aoutController = [[[IJKSDLAudioQueueController alloc] initWithAudioSpec:desired] retain];
+    opaque->aoutController = [[[IJKSDLAudioUnitController alloc] initWithAudioSpec:desired] retain];
     if (!opaque->aoutController) {
         ALOGE("aout_open_audio_n: failed to new AudioTrcak()\n");
         return -1;

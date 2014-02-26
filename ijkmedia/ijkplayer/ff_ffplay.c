@@ -40,10 +40,11 @@
 #define printf(...) ALOGD(__VA_ARGS__)
 #endif
 
+#define FFP_XPS_PERIOD (3)
 // #define FFP_SHOW_FPS
 // #define FFP_SHOW_VDPS
-#define FFP_SHOW_AUDIO_DELAY
-#define FFP_SHOW_DEMUX_CACHE
+// #define FFP_SHOW_AUDIO_DELAY
+// #define FFP_SHOW_DEMUX_CACHE
 
 static AVPacket flush_pkt;
 
@@ -270,6 +271,10 @@ static void video_image_display2(FFPlayer *ffp)
         double fps = 1.0f / avg_frame_time * 1000;
         ALOGE("fps:  [%f][%d] %"PRId64" ms/frame, fps=%f, +%"PRId64"\n",
             vp->pts, g_fps_counter, (int64_t)avg_frame_time, fps, dur);
+        if (g_fps_total_time >= FFP_XPS_PERIOD) {
+            g_fps_total_time -= avg_frame_time;
+            g_fps_counter--;
+        }
 #endif
     }
 }
@@ -923,8 +928,14 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
     g_vdps_counter++;
     int64_t avg_frame_time = g_vdps_total_time / g_vdps_counter;
     double fps = 1.0f / avg_frame_time * 1000;
+    if (dur >= 30) {
     ALOGE("vdps: [%f][%d] %"PRId64" ms/frame, vdps=%f, +%"PRId64"\n",
         frame->pts, g_vdps_counter, (int64_t)avg_frame_time, fps, dur);
+    }
+    if (g_vdps_total_time >= FFP_XPS_PERIOD) {
+        g_vdps_total_time -= avg_frame_time;
+        g_vdps_counter--;
+    }
 #endif
 
     if (!got_picture && !pkt->data) {
@@ -2388,6 +2399,7 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     /* start video display */
     is->pictq_mutex = SDL_CreateMutex();
     is->pictq_cond  = SDL_CreateCond();
+    is->pictq_capacity = ffp->pictq_capacity;
 
 #ifdef FFP_MERGE
     is->subpq_mutex = SDL_CreateMutex();
@@ -2631,6 +2643,11 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
     }
 }
 
+void ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count)
+{
+    ffp->pictq_capacity = frame_count;
+}
+
 int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
 {
     assert(ffp);
@@ -2785,13 +2802,11 @@ void ffp_toggle_buffering_l(FFPlayer *ffp, int buffering_on)
     if (buffering_on && !is->buffering_on) {
         ALOGD("ffp_toggle_buffering_l: start\n");
         is->buffering_on = 1;
-        is->frame_drops_early = 0;
         stream_update_pause_l(ffp);
         ffp_notify_msg1(ffp, FFP_MSG_BUFFERING_START);
     } else if (!buffering_on && is->buffering_on){
         ALOGD("ffp_toggle_buffering_l: end\n");
         is->buffering_on = 0;
-        is->frame_drops_early = 0;
         stream_update_pause_l(ffp);
         ffp_notify_msg1(ffp, FFP_MSG_BUFFERING_END);
     }
