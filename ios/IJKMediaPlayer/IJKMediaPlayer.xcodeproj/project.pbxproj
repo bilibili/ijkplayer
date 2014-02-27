@@ -45,12 +45,10 @@
 		E6EE92BF1878230C009EAB56 /* IJKSDLGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = E6EE92B71878230C009EAB56 /* IJKSDLGLView.m */; };
 		E6EE92C21878236A009EAB56 /* IJKSDLAudioQueueController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6EE92C11878236A009EAB56 /* IJKSDLAudioQueueController.m */; };
 		E6EE92C818782770009EAB56 /* IJKSDLAudioKit.m in Sources */ = {isa = PBXBuildFile; fileRef = E6EE92C718782770009EAB56 /* IJKSDLAudioKit.m */; };
-		E6F727B817F2B1B10043623F /* IJKMediaModule.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727B717F2B1B10043623F /* IJKMediaModule.m */; };
 		E6F727BB17F2D9D40043623F /* IJKFFMoviePlayerDef.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727BA17F2D9D30043623F /* IJKFFMoviePlayerDef.m */; };
 		E6F727BC17F40C1C0043623F /* IJKMediaPlayer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */; };
 		E6F727BD17F40C360043623F /* IJKMPMoviePlayerController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DBF17EEC65200354D80 /* IJKMPMoviePlayerController.h */; };
 		E6F727BE17F40C390043623F /* IJKFFMoviePlayerController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DE517EFD9C300354D80 /* IJKFFMoviePlayerController.h */; };
-		E6F727BF17F40C4A0043623F /* IJKMediaModule.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E6F727B617F2B1B10043623F /* IJKMediaModule.h */; };
 		E6F727C217F7C9BA0043623F /* IJKMediaPlayback.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727C117F7C9B90043623F /* IJKMediaPlayback.m */; };
 /* End PBXBuildFile section */
 
@@ -62,7 +60,6 @@
 			dstSubfolderSpec = 16;
 			files = (
 				E62139BF180FAE5F00553533 /* IJKFFOptions.h in CopyFiles */,
-				E6F727BF17F40C4A0043623F /* IJKMediaModule.h in CopyFiles */,
 				E6F727BE17F40C390043623F /* IJKFFMoviePlayerController.h in CopyFiles */,
 				E6F727BD17F40C360043623F /* IJKMPMoviePlayerController.h in CopyFiles */,
 				E6F727BC17F40C1C0043623F /* IJKMediaPlayer.h in CopyFiles */,
@@ -234,8 +231,6 @@
 		E6EE92C11878236A009EAB56 /* IJKSDLAudioQueueController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKSDLAudioQueueController.m; sourceTree = "<group>"; };
 		E6EE92C618782770009EAB56 /* IJKSDLAudioKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKSDLAudioKit.h; sourceTree = "<group>"; };
 		E6EE92C718782770009EAB56 /* IJKSDLAudioKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKSDLAudioKit.m; sourceTree = "<group>"; };
-		E6F727B617F2B1B10043623F /* IJKMediaModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaModule.h; path = IJKMediaPlayer/IJKMediaModule.h; sourceTree = "<group>"; };
-		E6F727B717F2B1B10043623F /* IJKMediaModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMediaModule.m; path = IJKMediaPlayer/IJKMediaModule.m; sourceTree = "<group>"; };
 		E6F727B917F2D9D30043623F /* IJKFFMoviePlayerDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFMoviePlayerDef.h; sourceTree = "<group>"; };
 		E6F727BA17F2D9D30043623F /* IJKFFMoviePlayerDef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFMoviePlayerDef.m; sourceTree = "<group>"; };
 		E6F727C117F7C9B90043623F /* IJKMediaPlayback.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMediaPlayback.m; path = IJKMediaPlayer/IJKMediaPlayback.m; sourceTree = "<group>"; };
@@ -621,8 +616,6 @@
 		E6F727B517F2B1690043623F /* IJKMediaPlayer */ = {
 			isa = PBXGroup;
 			children = (
-				E6F727B617F2B1B10043623F /* IJKMediaModule.h */,
-				E6F727B717F2B1B10043623F /* IJKMediaModule.m */,
 				E6903EC117EAF6C500CFD954 /* IJKMediaPlayback.h */,
 				E6F727C117F7C9B90043623F /* IJKMediaPlayback.m */,
 				E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */,
@@ -710,7 +703,6 @@
 				E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */,
 				E6EE92BD1878230C009EAB56 /* IJKSDLGLRenderRV24.m in Sources */,
 				E63FC27617F013DE003551EB /* ijksdl_vout_dummy.c in Sources */,
-				E6F727B817F2B1B10043623F /* IJKMediaModule.m in Sources */,
 				E6EE92BF1878230C009EAB56 /* IJKSDLGLView.m in Sources */,
 				E6F727BB17F2D9D40043623F /* IJKFFMoviePlayerDef.m in Sources */,
 				E6EE92BE1878230C009EAB56 /* IJKSDLGLShader.m in Sources */,

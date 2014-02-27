@@ -27,7 +27,6 @@
 #import "IJKSDLGLRender.h"
 #import "IJKSDLGLRenderI420.h"
 #import "IJKSDLGLRenderRV24.h"
-#import "../../../IJKMediaModule.h"
 
 static NSString *const g_vertexShaderString = IJK_SHADER_STRING
 (
@@ -136,6 +135,12 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
 	mout[15] = 1.0f;
 }
 
+
+@interface IJKSDLGLView()
+@property(atomic,strong) NSRecursiveLock *glActiveLock;
+@property(atomic) BOOL glActivePaused;
+@end
+
 @implementation IJKSDLGLView {
     EAGLContext     *_context;
     GLuint          _framebuffer;
@@ -159,6 +164,8 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     BOOL            _didSetContentMode;
     BOOL            _didRelayoutSubViews;
     BOOL            _didPaddingChanged;
+
+    NSMutableArray *_registeredNotifications;
 }
 
 enum {
@@ -175,6 +182,9 @@ enum {
 {
     self = [super initWithFrame:frame];
     if (self) {
+        self.glActiveLock = [[NSRecursiveLock alloc] init];
+        _registeredNotifications = [[NSMutableArray alloc] init];
+
         CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
         eaglLayer.opaque = YES;
         eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -270,6 +280,8 @@ enum {
         NSLog(@"OK setup GL");
         if ([EAGLContext currentContext] == _context)
             [EAGLContext setCurrentContext:nil];
+
+        [self registerApplicationObservers];
     }
 
     return self;
@@ -299,6 +311,8 @@ enum {
 	}
 
 	_context = nil;
+
+    [self unregisterApplicationObservers];
 }
 
 - (void)layoutSubviews
@@ -466,14 +480,14 @@ exit:
 - (void)display: (SDL_VoutOverlay *) overlay
 {
     // gles throws gpus_ReturnNotPermittedKillClient, while app is in background
-    if (![[IJKMediaModule sharedModule] tryLockActiveApp]) {
-        NSLog(@"IJKSDLGLView:display: unable to tryLock app activity\n");
+    if (![self tryLockGLActive]) {
+        NSLog(@"IJKSDLGLView:display: unable to tryLock GL active\n");
         return;
     }
 
     [self displayInternal:overlay];
 
-    [[IJKMediaModule sharedModule] unlockApp];
+    [self unlockGLActive];
 }
 
 - (void)displayInternal: (SDL_VoutOverlay *) overlay
@@ -557,6 +571,121 @@ exit:
     // Detach context before leaving display, to avoid multiple thread issues.
     if ([EAGLContext currentContext] == _context)
         [EAGLContext setCurrentContext:nil];
+}
+
+#pragma mark AppDelegate
+
+- (void) lockGLActive
+{
+    [self.glActiveLock lock];
+}
+
+- (void) unlockGLActive
+{
+    @synchronized(self) {
+        [self.glActiveLock unlock];
+    }
+}
+
+- (BOOL) tryLockGLActive
+{
+    if (![self.glActiveLock tryLock])
+        return NO;
+
+    /*-
+    if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive &&
+        [UIApplication sharedApplication].applicationState != UIApplicationStateInactive) {
+        [self.appLock unlock];
+        return NO;
+    }
+     */
+
+    if (self.glActivePaused) {
+        [self.glActiveLock unlock];
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (void)toggleGLPaused:(BOOL)paused
+{
+    [self lockGLActive];
+    self.glActivePaused = paused;
+    [self unlockGLActive];
+}
+
+- (void)registerApplicationObservers
+{
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillEnterForeground)
+                                                 name:UIApplicationWillEnterForegroundNotification
+                                               object:nil];
+    [_registeredNotifications addObject:UIApplicationWillEnterForegroundNotification];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationDidBecomeActive)
+                                                 name:UIApplicationDidBecomeActiveNotification
+                                               object:nil];
+    [_registeredNotifications addObject:UIApplicationDidBecomeActiveNotification];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillResignActive)
+                                                 name:UIApplicationWillResignActiveNotification
+                                               object:nil];
+    [_registeredNotifications addObject:UIApplicationWillResignActiveNotification];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationDidEnterBackground)
+                                                 name:UIApplicationDidEnterBackgroundNotification
+                                               object:nil];
+    [_registeredNotifications addObject:UIApplicationDidEnterBackgroundNotification];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillTerminate)
+                                                 name:UIApplicationWillTerminateNotification
+                                               object:nil];
+    [_registeredNotifications addObject:UIApplicationWillTerminateNotification];
+}
+
+- (void)unregisterApplicationObservers
+{
+    for (NSString *name in _registeredNotifications) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                        name:name
+                                                      object:nil];
+    }
+}
+
+- (void)applicationWillEnterForeground
+{
+    NSLog(@"IJKSDLGLView:applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
+    [self toggleGLPaused:NO];
+}
+
+- (void)applicationDidBecomeActive
+{
+    NSLog(@"IJKSDLGLView:applicationDidBecomeActive: %d", (int)[UIApplication sharedApplication].applicationState);
+    [self toggleGLPaused:NO];
+}
+
+- (void)applicationWillResignActive
+{
+    NSLog(@"IJKSDLGLView:applicationWillResignActive: %d", (int)[UIApplication sharedApplication].applicationState);
+    // [self toggleGLPaused:YES];
+}
+
+- (void)applicationDidEnterBackground
+{
+    NSLog(@"IJKSDLGLView:applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
+    [self toggleGLPaused:YES];
+}
+
+- (void)applicationWillTerminate
+{
+    NSLog(@"IJKSDLGLView:applicationWillTerminate: %d", (int)[UIApplication sharedApplication].applicationState);
+    [self toggleGLPaused:YES];
 }
 
 @end
