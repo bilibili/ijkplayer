@@ -27,6 +27,7 @@ static void *SDL_RunThread(void *data)
 {
     @autoreleasepool {
         SDL_Thread *thread = data;
+        pthread_setname_np(thread->name);
         thread->retval = thread->func(thread->data);
         return NULL;
     }
