@@ -101,6 +101,11 @@
         ijkmp_ios_set_glview(_mediaPlayer, glView);
         ijkmp_set_overlay_format(_mediaPlayer, chroma);
 
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(applicationDidEnterBackgroundNotification)
+                                                     name:UIApplicationDidEnterBackgroundNotification
+                                                   object:nil];
+
         [options applyTo:_mediaPlayer];
 
         _keepScreenOnWhilePlaying = YES;
@@ -108,6 +113,13 @@
         [self setScreenOn:YES];
     }
     return self;
+}
+
+- (void)applicationDidEnterBackgroundNotification
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self pause];
+    });
 }
 
 - (void)setScreenOn: (BOOL)on
@@ -118,6 +130,10 @@
 - (void)dealloc
 {
     [_ffMrl removeTempFiles];
+
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIApplicationDidEnterBackgroundNotification
+                                                  object:nil];
 }
 
 - (void)prepareToPlay
