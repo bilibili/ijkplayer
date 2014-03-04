@@ -218,8 +218,10 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
                 return -1;
         }
 
-        if (finished)
+        if (finished == *serial) {
+            av_free_packet(pkt);
             continue;
+        }
         else
             break;
     }
