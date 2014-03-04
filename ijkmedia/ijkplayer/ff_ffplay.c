@@ -267,8 +267,12 @@ static void video_image_display2(FFPlayer *ffp)
         int64_t dur = SDL_GetTickHR() - start;
         g_fps_total_time += dur;
         g_fps_counter++;
-        int64_t avg_frame_time = g_fps_total_time / g_fps_counter;
-        double fps = 1.0f / avg_frame_time * 1000;
+        int64_t avg_frame_time = 0;
+        if (g_fps_counter > 0)
+            avg_frame_time = g_fps_total_time / g_fps_counter;
+        double fps = 0;
+        if (avg_frame_time > 0)
+            fps = 1.0f / avg_frame_time * 1000;
         ALOGE("fps:  [%f][%d] %"PRId64" ms/frame, fps=%f, +%"PRId64"\n",
             vp->pts, g_fps_counter, (int64_t)avg_frame_time, fps, dur);
         if (g_fps_total_time >= FFP_XPS_PERIOD) {
@@ -926,8 +930,12 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
     int64_t dur = SDL_GetTickHR() - start;
     g_vdps_total_time += dur;
     g_vdps_counter++;
-    int64_t avg_frame_time = g_vdps_total_time / g_vdps_counter;
-    double fps = 1.0f / avg_frame_time * 1000;
+    int64_t avg_frame_time = 0;
+    if (g_vdps_counter > 0)
+        avg_frame_time = g_vdps_total_time / g_vdps_counter;
+    double fps = 0;
+    if (avg_frame_time > 0)
+        fps = 1.0f / avg_frame_time * 1000;
     if (dur >= 30) {
     ALOGE("vdps: [%f][%d] %"PRId64" ms/frame, vdps=%f, +%"PRId64"\n",
         frame->pts, g_vdps_counter, (int64_t)avg_frame_time, fps, dur);
