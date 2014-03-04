@@ -34,7 +34,7 @@
 typedef struct SDL_VoutOverlay_Opaque {
     SDL_mutex *mutex;
 
-    AVFrame *frame;
+    AVFrame *managed_frame;
     AVBufferRef *frame_buffer;
     int planes;
 
@@ -86,8 +86,8 @@ static void overlay_free_l(SDL_VoutOverlay *overlay)
     if (!opaque)
         return;
 
-    if (opaque->frame)
-        av_frame_free(&opaque->frame);
+    if (opaque->managed_frame)
+        av_frame_free(&opaque->managed_frame);
 
     if (opaque->linked_frame) {
         av_frame_unref(opaque->linked_frame);
@@ -195,13 +195,13 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         goto fail;
     }
 
-    opaque->frame = alloc_avframe(opaque, ff_format, buf_width, buf_height);
-    if (!opaque->frame) {
+    opaque->managed_frame = alloc_avframe(opaque, ff_format, buf_width, buf_height);
+    if (!opaque->managed_frame) {
         ALOGE("overlay->opaque->frame allocation failed");
         goto fail;
     }
     opaque->mutex = SDL_CreateMutex();
-    overlay_fill(overlay, opaque->frame, opaque->planes);
+    overlay_fill(overlay, opaque->managed_frame, opaque->planes);
 
     overlay->free_l = overlay_free_l;
     overlay->lock = overlay_lock;
@@ -245,7 +245,7 @@ int SDL_VoutFFmpeg_ConvertFrame(
             overlay_fill(overlay, opaque->linked_frame, opaque->planes);
         } else {
             // ALOGE("copy draw frame");
-            overlay_fill(overlay, opaque->frame, opaque->planes);
+            overlay_fill(overlay, opaque->managed_frame, opaque->planes);
             dest_pic.data[1] = overlay->pixels[1];
             dest_pic.data[2] = overlay->pixels[2];
             dst_format = AV_PIX_FMT_YUV420P;
@@ -260,15 +260,15 @@ int SDL_VoutFFmpeg_ConvertFrame(
         }
         break;
     case SDL_FCC_RV32:
-        overlay_fill(overlay, opaque->frame, opaque->planes);
+        overlay_fill(overlay, opaque->managed_frame, opaque->planes);
         dst_format = AV_PIX_FMT_0BGR32;
         break;
     case SDL_FCC_RV24:
-        overlay_fill(overlay, opaque->frame, opaque->planes);
+        overlay_fill(overlay, opaque->managed_frame, opaque->planes);
         dst_format = AV_PIX_FMT_RGB24;
         break;
     case SDL_FCC_RV16:
-        overlay_fill(overlay, opaque->frame, opaque->planes);
+        overlay_fill(overlay, opaque->managed_frame, opaque->planes);
         dst_format = AV_PIX_FMT_RGB565;
         break;
     default:
