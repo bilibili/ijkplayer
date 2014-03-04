@@ -1814,6 +1814,32 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         packet_queue_start(&is->videoq);
         is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp, "ff_video");
         is->queue_attachments_req = 1;
+
+        if(is->video_st->avg_frame_rate.den && is->video_st->avg_frame_rate.num) {
+            double fps = av_q2d(is->video_st->avg_frame_rate);
+            if (fps > 30.0001 && fps < 100.0) {
+                is->is_video_high_fps = 1;
+                ALOGI("fps: %lf (too high)\n", fps);
+            } else {
+                ALOGI("fps: %lf (normal)\n", fps);
+            }
+        }
+        if(is->video_st->r_frame_rate.den && is->video_st->r_frame_rate.num) {
+            double tbr = av_q2d(is->video_st->r_frame_rate);
+            if (tbr > 30.0001 && tbr < 100.0) {
+                is->is_video_high_fps = 1;
+                ALOGI("fps: %lf (too high)\n", tbr);
+            } else {
+                ALOGI("fps: %lf (normal)\n", tbr);
+            }
+        }
+
+        if (is->is_video_high_fps) {
+            avctx->skip_frame       = FFMAX(avctx->skip_frame, AVDISCARD_NONREF);
+            avctx->skip_loop_filter = FFMAX(avctx->skip_loop_filter, AVDISCARD_NONREF);
+            avctx->skip_idct        = FFMAX(avctx->skip_loop_filter, AVDISCARD_NONREF);
+        }
+
         break;
     // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:

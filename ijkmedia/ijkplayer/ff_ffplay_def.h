@@ -281,6 +281,8 @@ typedef struct VideoState {
     int pause_req;
 
     int dropping_frame;
+    int is_video_high_fps; // above 30fps
+    int is_video_high_res; // above 1080p
 } VideoState;
 
 /* options specified by the user */
