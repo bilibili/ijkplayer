@@ -63,7 +63,7 @@
 
 /* polls for possible required screen refresh at least this often, should be less than 1/fps */
 // 172.0 fps at most (High Level 5.2 1,920×1,080@172.0)
-#define REFRESH_RATE 0.03
+#define REFRESH_RATE 0.01
 
 /* NOTE: the size must be big enough to compensate the hardware audio buffersize size */
 /* TODO: We assume that a decoded and resampled frame fits into this buffer */
