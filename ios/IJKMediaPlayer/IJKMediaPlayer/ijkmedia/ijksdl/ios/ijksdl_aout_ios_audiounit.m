@@ -74,7 +74,7 @@ void aout_flush_audio(SDL_Aout *aout)
 
 void aout_close_audio(SDL_Aout *aout)
 {
-    SDLTRACE("aout_flush_audio()\n");
+    SDLTRACE("aout_close_audio()\n");
     SDL_Aout_Opaque *opaque = aout->opaque;
 
     [opaque->aoutController close];
