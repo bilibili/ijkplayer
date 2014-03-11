@@ -2272,9 +2272,9 @@ static int read_thread(void *arg)
         }
         ret = av_read_frame(ic, pkt);
         if (ret < 0) {
-            if (ret == AVERROR_EOF || url_feof(ic->pb)) {
+            if (ret == AVERROR_EOF || url_feof(ic->pb))
                 eof = 1;
-            } else if (ic->pb && ic->pb->error) {
+            if (ic->pb && ic->pb->error) {
                 // TODO: 9 notify error until a/v finished
                 last_error = ic->pb->error;
                 ALOGE("av_read_frame error: %d\n", ic->pb->error);
