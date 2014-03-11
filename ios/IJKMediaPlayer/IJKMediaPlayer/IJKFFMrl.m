@@ -35,7 +35,7 @@
 - (IJKFFMrl *)initWithMrl: (NSString*)aMrl
 {
     self = [super init];
-    if (self) {
+    if (self != nil) {
         _rawMrl      = aMrl;
         _resolvedMrl = aMrl;
         if ([_rawMrl hasPrefix:@"data://"]) {
@@ -54,7 +54,7 @@
             }
         }
 
-        if (!_resolvedMrl)
+        if (_resolvedMrl == nil)
             _resolvedMrl = _rawMrl;
     }
     return self;
@@ -62,7 +62,7 @@
 
 - (void) removeTempFiles
 {
-    if (_tmpFile) {
+    if (_tmpFile != nil) {
         [[NSFileManager defaultManager] removeItemAtPath:_tmpFile error:nil];
         _tmpFile = nil;
     }
