@@ -23,6 +23,7 @@
 #import "IJKFFMoviePlayerController.h"
 #import "IJKFFMoviePlayerDef.h"
 #import "IJKMediaPlayback.h"
+#import "IJKMediaModule.h"
 #import "IJKFFMrl.h"
 #import "IJKAudioKit.h"
 
@@ -44,7 +45,6 @@
     NSInteger _bufferingTime;
 
     BOOL _keepScreenOnWhilePlaying;
-    BOOL _savedIdleTimerDisabled;
 }
 
 @synthesize view = _view;
@@ -109,7 +109,6 @@
         [options applyTo:_mediaPlayer];
 
         _keepScreenOnWhilePlaying = YES;
-        _savedIdleTimerDisabled = [UIApplication sharedApplication].idleTimerDisabled;
         [self setScreenOn:YES];
     }
     return self;
@@ -124,7 +123,8 @@
 
 - (void)setScreenOn: (BOOL)on
 {
-    [UIApplication sharedApplication].idleTimerDisabled = on;
+    [IJKMediaModule sharedModule].mediaModuleIdleTimerDisabled = on;
+    // [UIApplication sharedApplication].idleTimerDisabled = on;
 }
 
 - (void)dealloc
@@ -171,7 +171,7 @@
     if (!_mediaPlayer)
         return;
 
-    [self setScreenOn:_savedIdleTimerDisabled];
+    [self setScreenOn:NO];
 
     ijkmp_stop(_mediaPlayer);
 }
@@ -189,7 +189,7 @@
     if (!_mediaPlayer)
         return;
 
-    [self setScreenOn:_savedIdleTimerDisabled];
+    [self setScreenOn:NO];
 
     [self performSelectorInBackground:@selector(shupdownWaitStop:) withObject:self];
 }
@@ -327,7 +327,7 @@
         case FFP_MSG_ERROR: {
             NSLog(@"FFP_MSG_ERROR: %d", avmsg->arg1);
 
-            [self setScreenOn:_savedIdleTimerDisabled];
+            [self setScreenOn:NO];
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:self];
@@ -356,7 +356,7 @@
             break;
         case FFP_MSG_COMPLETED: {
 
-            [self setScreenOn:_savedIdleTimerDisabled];
+            [self setScreenOn:NO];
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:self];
