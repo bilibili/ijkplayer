@@ -5,6 +5,8 @@ android/ffmpeg-armv7a
 ios/ffmpeg-*
 extra
 .DS_Store
+android/ijkmediaplayer/.settings/*
+android/ijkmediawidget/.settings/*
 
 # built application files
 *.apk
