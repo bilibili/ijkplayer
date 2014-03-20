@@ -174,9 +174,6 @@ make install
 echo "\n--------------------"
 echo "[*] link ffmpeg"
 echo "--------------------"
-rm libavcodec/log2_tab.o
-rm libavutil/log2_tab.o
-rm libswresample/log2_tab.o
 $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack $FF_EXTRA_LDFLAGS \
     compat/*.o \
     libavutil/*.o \
@@ -193,3 +190,8 @@ cp $FF_PREFIX/libffmpeg.so $FF_PREFIX/libffmpeg-debug.so
 cp $FF_PREFIX/libffmpeg.so $FF_PREFIX/libffmpeg-release.so
 $STRIP --strip-unneeded $FF_PREFIX/libffmpeg-release.so
 
+echo "\n--------------------"
+echo "[*] Finished"
+echo "--------------------"
+echo "# to continue to build ijkplayer, run script below,"
+echo "sh compile-ijk.sh "
