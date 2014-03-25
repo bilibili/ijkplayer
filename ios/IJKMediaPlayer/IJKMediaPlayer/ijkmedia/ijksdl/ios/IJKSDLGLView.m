@@ -673,7 +673,7 @@ exit:
 - (void)applicationWillResignActive
 {
     NSLog(@"IJKSDLGLView:applicationWillResignActive: %d", (int)[UIApplication sharedApplication].applicationState);
-    // [self toggleGLPaused:YES];
+    [self toggleGLPaused:YES];
 }
 
 - (void)applicationDidEnterBackground
