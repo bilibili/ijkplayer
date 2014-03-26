@@ -47,6 +47,7 @@
 
         /* Get the current format */
         _spec.format = AUDIO_S16SYS;
+        _spec.channels = 2;
         AudioStreamBasicDescription streamDescription;
         IJKSDLGetAudioStreamBasicDescriptionFromSpec(&_spec, &streamDescription);
 
