@@ -399,7 +399,7 @@
             break;
         }
         case FFP_MSG_BUFFERING_UPDATE:
-            // NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %d", avmsg->arg1, avmsg->arg2);
+            // NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %%%d", avmsg->arg1, avmsg->arg2);
             _bufferingPosition   = avmsg->arg1;
             _bufferingPercentage = avmsg->arg2;
             break;
