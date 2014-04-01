@@ -2253,10 +2253,14 @@ static int read_thread(void *arg)
                     ffp->auto_start = 0;
 
                     // TODO: 0 it's a bit early to notify complete here
-                    ALOGE("ffp_toggle_buffering: completed\n");
+                    ALOGE("ffp_toggle_buffering: completed: (error=%d)\n", ffp->error);
                     ffp_toggle_buffering(ffp, 0);
                     toggle_pause(ffp, 1);
-                    ffp_notify_msg1(ffp, FFP_MSG_COMPLETED);
+                    if (ffp->error) {
+                        ffp_notify_msg1(ffp, FFP_MSG_ERROR);
+                    } else {
+                        ffp_notify_msg1(ffp, FFP_MSG_COMPLETED);
+                    }
                 }
             }
         }
@@ -2275,11 +2279,12 @@ static int read_thread(void *arg)
             if (ret == AVERROR_EOF || url_feof(ic->pb))
                 eof = 1;
             if (ic->pb && ic->pb->error) {
-                // TODO: 9 notify error until a/v finished
-                last_error = ic->pb->error;
-                ALOGE("av_read_frame error: %d\n", ic->pb->error);
-                ffp_notify_msg2(ffp, FFP_MSG_ERROR, last_error);
+                eof = 1;
+                ffp->error = ic->pb->error;
+                ALOGE("av_read_frame error: %d\n", ffp->error);
                 break;
+            } else {
+                ffp->error = 0;
             }
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
