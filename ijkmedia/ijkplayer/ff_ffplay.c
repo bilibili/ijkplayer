@@ -2316,6 +2316,7 @@ static int read_thread(void *arg)
             int buf_time_percent     = -1;
             int hwm_in_bytes         = ffp->high_water_mark_in_bytes;
             int need_start_buffering = 0;
+            int64_t buf_time_position        = -1;
             if (hwm_in_ms > 0) {
                 int     cached_duration_in_ms = -1;
                 int64_t audio_cached_duration = -1;
@@ -2349,6 +2350,7 @@ static int read_thread(void *arg)
                 }
 
                 if (cached_duration_in_ms >= 0) {
+                    buf_time_position = ffp_get_current_position_l(ffp) + cached_duration_in_ms;
                     buf_time_percent = (int)av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
                     if (last_buffered_time_percentage != buf_time_percent) {
 #ifdef FFP_SHOW_DEMUX_CACHE
@@ -2372,13 +2374,26 @@ static int read_thread(void *arg)
                 }
             }
 
+            int buf_percent = -1;
             if (buf_time_percent >= 0) {
                 // alwas depend on cache duration if valid
                 if (buf_time_percent >= 100)
                     need_start_buffering = 1;
+                buf_percent = buf_time_percent;
             } else {
                 if (buf_size_percent >= 100)
                     need_start_buffering = 1;
+                buf_percent = buf_size_percent;
+            }
+
+            if (buf_time_percent >= 0 && buf_size_percent >= 0) {
+                buf_percent = FFMIN(buf_time_percent, buf_size_percent);
+            }
+            if (buf_percent) {
+#ifdef FFP_SHOW_DEMUX_CACHE
+                ALOGE("buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
+#endif
+                ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_UPDATE, buf_time_position, buf_percent);
             }
 
             if (need_start_buffering) {

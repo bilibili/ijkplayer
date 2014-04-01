@@ -43,6 +43,8 @@
 
     BOOL      _seeking;
     NSInteger _bufferingTime;
+    NSInteger _bufferingPosition;
+    NSInteger _bufferingPercentage;
 
     BOOL _keepScreenOnWhilePlaying;
 
@@ -273,7 +275,8 @@
 
 - (NSTimeInterval)playableDuration
 {
-    return self.currentPlaybackTime + ((NSTimeInterval)_bufferingTime) / 1000;
+    // return self.currentPlaybackTime + ((NSTimeInterval)_bufferingTime) / 1000;
+    return ((NSTimeInterval)_bufferingPosition) / 1000;
 }
 
 - (void)setScalingMode: (MPMovieScalingMode) aScalingMode
@@ -397,12 +400,14 @@
         }
         case FFP_MSG_BUFFERING_UPDATE:
             // NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %d", avmsg->arg1, avmsg->arg2);
+            _bufferingPosition   = avmsg->arg1;
+            _bufferingPercentage = avmsg->arg2;
             break;
         case FFP_MSG_BUFFERING_BYTES_UPDATE:
             // NSLog(@"FFP_MSG_BUFFERING_BYTES_UPDATE: %d", avmsg->arg1);
             break;
         case FFP_MSG_BUFFERING_TIME_UPDATE:
-            _bufferingTime = avmsg->arg1;
+            _bufferingTime       = avmsg->arg1;
             // NSLog(@"FFP_MSG_BUFFERING_TIME_UPDATE: %d", avmsg->arg1);
             break;
         case FFP_MSG_PLAYBACK_STATE_CHANGED:
