@@ -78,7 +78,7 @@ static AVFrame *alloc_avframe(SDL_VoutOverlay_Opaque* opaque, enum AVPixelFormat
 
 static void overlay_free_l(SDL_VoutOverlay *overlay)
 {
-    ALOGE("SDL_Overlay(ffmpeg): overlay_free_l(%p)", overlay);
+    ALOGE("SDL_Overlay(ffmpeg): overlay_free_l(%p)\n", overlay);
     if (!overlay)
         return;
 
