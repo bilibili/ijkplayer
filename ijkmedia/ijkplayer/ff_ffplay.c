@@ -2640,12 +2640,11 @@ void ffp_destroy(FFPlayer *ffp)
         ffp->is = NULL;
     }
 
+    SDL_VoutFreeP(&ffp->vout);
+    SDL_AoutFreeP(&ffp->aout);
     ffp_reset_internal(ffp);
 
     msg_queue_destroy(&ffp->msg_queue);
-
-    SDL_VoutFreeP(&ffp->vout);
-    SDL_AoutFreeP(&ffp->aout);
 
     av_free(ffp);
 }
