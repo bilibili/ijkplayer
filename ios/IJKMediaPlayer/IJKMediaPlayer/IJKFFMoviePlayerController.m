@@ -401,7 +401,7 @@
         case FFP_MSG_BUFFERING_UPDATE:
             _bufferingPosition = avmsg->arg1;
             _bufferingProgress = avmsg->arg2;
-            NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %%%d", _bufferingPosition, _bufferingProgress);
+            // NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %%%d", _bufferingPosition, _bufferingProgress);
             break;
         case FFP_MSG_BUFFERING_BYTES_UPDATE:
             // NSLog(@"FFP_MSG_BUFFERING_BYTES_UPDATE: %d", avmsg->arg1);
