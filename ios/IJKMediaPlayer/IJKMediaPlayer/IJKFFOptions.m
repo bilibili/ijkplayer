@@ -19,6 +19,7 @@
     options.skipFrame       = IJK_AVDISCARD_NONREF;
 
     options.frameBufferCount = 3;
+    options.maxFps           = 30;
 
     return options;
 }
@@ -33,6 +34,7 @@
                       to:mediaPlayer];
 
     ijkmp_set_picture_queue_capicity(mediaPlayer, _frameBufferCount);
+    ijkmp_set_max_fps(mediaPlayer, _maxFps);
 }
 
 -(void)setCodecOption:(NSString *)optionName

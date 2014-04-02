@@ -155,6 +155,17 @@ void ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count)
     MPTRACE("ijkmp_set_picture_queue_capicity()=void\n");
 }
 
+void ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps)
+{
+    assert(mp);
+
+    MPTRACE("ijkmp_set_max_fp(%d)\n", max_fps);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_max_fps(mp->ffplayer, max_fps);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_set_max_fp()=void\n");
+}
+
 void ijkmp_shutdown_l(IjkMediaPlayer *mp)
 {
     assert(mp);

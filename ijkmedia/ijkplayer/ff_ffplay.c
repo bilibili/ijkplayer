@@ -1819,7 +1819,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         if(is->video_st->avg_frame_rate.den && is->video_st->avg_frame_rate.num) {
             double fps = av_q2d(is->video_st->avg_frame_rate);
-            if (fps > 30.0001 && fps < 100.0) {
+            if (fps > ffp->max_fps && fps < 100.0) {
                 is->is_video_high_fps = 1;
                 ALOGI("fps: %lf (too high)\n", fps);
             } else {
@@ -1828,7 +1828,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         }
         if(is->video_st->r_frame_rate.den && is->video_st->r_frame_rate.num) {
             double tbr = av_q2d(is->video_st->r_frame_rate);
-            if (tbr > 30.0001 && tbr < 100.0) {
+            if (tbr > ffp->max_fps && tbr < 100.0) {
                 is->is_video_high_fps = 1;
                 ALOGI("fps: %lf (too high)\n", tbr);
             } else {
@@ -2705,6 +2705,11 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
 void ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count)
 {
     ffp->pictq_capacity = frame_count;
+}
+
+void ffp_set_max_fps(FFPlayer *ffp, int max_fps)
+{
+    ffp->max_fps = max_fps;
 }
 
 int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)

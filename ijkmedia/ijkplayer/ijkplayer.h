@@ -150,6 +150,7 @@ void            ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, co
 void            ijkmp_set_codec_option(IjkMediaPlayer *mp, const char *name, const char *value);
 void            ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *value);
 void            ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count);
+void            ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps);
 
 // preferred to be called explicity, can be called multiple times
 // NOTE: ijkmp_shutdown may block thread

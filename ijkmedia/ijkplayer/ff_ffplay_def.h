@@ -99,6 +99,8 @@ typedef struct PacketQueue {
 #define VIDEO_PICTURE_QUEUE_SIZE_DEFAULT    (VIDEO_PICTURE_QUEUE_SIZE_MIN)
 #define SUBPICTURE_QUEUE_SIZE 4
 
+#define VIDEO_MAX_FPS_DEFAULT 30
+
 typedef struct VideoPicture {
     double pts;             // presentation timestamp for this picture
     int64_t pos;            // byte position in file
@@ -452,6 +454,7 @@ typedef struct FFPlayer {
     int max_buffer_size;
 
     int pictq_capacity;
+    int max_fps;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -527,6 +530,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->max_buffer_size                = MAX_QUEUE_SIZE;
 
     ffp->pictq_capacity                 = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT;
+    ffp->max_fps                        = VIDEO_MAX_FPS_DEFAULT;
 
     msg_queue_flush(&ffp->msg_queue);
 }

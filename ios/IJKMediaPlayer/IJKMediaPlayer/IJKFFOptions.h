@@ -31,5 +31,6 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 @property(nonatomic) IJKAVDiscard skipFrame;
 
 @property(nonatomic) int frameBufferCount;
+@property(nonatomic) int maxFps;
 
 @end
