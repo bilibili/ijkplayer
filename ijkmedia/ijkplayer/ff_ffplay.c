@@ -1964,6 +1964,7 @@ static int read_thread(void *arg)
     int last_buffered_time_percentage = -1;
     int last_buffered_size_percentage = -1;
     int hwm_in_ms = ffp->fast_high_water_mark_in_ms; // use fast water mark for first loading
+    int last_buffered_percent = -1;
 
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
@@ -2390,10 +2391,13 @@ static int read_thread(void *arg)
                 buf_percent = FFMIN(buf_time_percent, buf_size_percent);
             }
             if (buf_percent) {
+                if (buf_percent <= 100 && abs(last_buffered_percent - buf_percent) >= 1) {
+                    last_buffered_percent = buf_percent;
 #ifdef FFP_SHOW_DEMUX_CACHE
-                ALOGE("buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
+                    ALOGE("buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
 #endif
-                ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_UPDATE, buf_time_position, buf_percent);
+                    ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_UPDATE, (int)buf_time_position, buf_percent);
+                }
             }
 
             if (need_start_buffering) {
