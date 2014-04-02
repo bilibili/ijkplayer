@@ -291,6 +291,10 @@ enum {
 {
     _renderer = nil;
 
+    if ([EAGLContext currentContext] != _context) {
+        [EAGLContext setCurrentContext:_context];
+    }
+
     if (_framebuffer) {
         glDeleteFramebuffers(1, &_framebuffer);
         _framebuffer = 0;
@@ -306,9 +310,9 @@ enum {
         _program = 0;
     }
 
-	if ([EAGLContext currentContext] == _context) {
-		[EAGLContext setCurrentContext:nil];
-	}
+    if ([EAGLContext currentContext] == _context) {
+        [EAGLContext setCurrentContext:nil];
+    }
 
 	_context = nil;
 
