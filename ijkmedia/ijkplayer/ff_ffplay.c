@@ -949,7 +949,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame, AVPacket *pkt, int *se
 #endif
 
     if (!got_picture && !pkt->data) {
-        ALOGE("video_finished");
+        ALOGE("video_finished\n");
         is->video_finished = *serial;
     }
 
@@ -1394,7 +1394,7 @@ static int audio_decode_frame(FFPlayer *ffp)
                 if ((pkt_temp->data && pkt_temp->size <= 0) || (!pkt_temp->data && !got_frame))
                     pkt_temp->stream_index = -1;
                 if (!pkt_temp->data && !got_frame) {
-                    ALOGE("audio_finished");
+                    ALOGE("audio_finished\n");
                     is->audio_finished = is->audio_pkt_temp_serial;
                 }
 
