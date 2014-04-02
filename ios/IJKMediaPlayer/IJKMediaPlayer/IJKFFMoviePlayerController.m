@@ -44,7 +44,6 @@
     BOOL      _seeking;
     NSInteger _bufferingTime;
     NSInteger _bufferingPosition;
-    NSInteger _bufferingPercentage;
 
     BOOL _keepScreenOnWhilePlaying;
 
@@ -55,6 +54,7 @@
 @synthesize currentPlaybackTime;
 @synthesize duration;
 @synthesize playableDuration;
+@synthesize bufferingProgress = _bufferingProgress;
 
 @synthesize isPreparedToPlay = _isPreparedToPlay;
 @synthesize playbackState = _playbackState;
@@ -399,9 +399,9 @@
             break;
         }
         case FFP_MSG_BUFFERING_UPDATE:
-            // NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %%%d", avmsg->arg1, avmsg->arg2);
-            _bufferingPosition   = avmsg->arg1;
-            _bufferingPercentage = avmsg->arg2;
+            _bufferingPosition = avmsg->arg1;
+            _bufferingProgress = avmsg->arg2;
+            NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %%%d", _bufferingPosition, _bufferingProgress);
             break;
         case FFP_MSG_BUFFERING_BYTES_UPDATE:
             // NSLog(@"FFP_MSG_BUFFERING_BYTES_UPDATE: %d", avmsg->arg1);

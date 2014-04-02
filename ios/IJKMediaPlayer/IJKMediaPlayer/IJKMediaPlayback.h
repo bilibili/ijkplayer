@@ -43,6 +43,7 @@
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;
 @property(nonatomic, readonly)  NSTimeInterval duration;
 @property(nonatomic, readonly)  NSTimeInterval playableDuration;
+@property(nonatomic, readonly)  NSInteger bufferingProgress;
 
 @property(nonatomic, readonly)  BOOL isPreparedToPlay;
 @property(nonatomic, readonly)  MPMoviePlaybackState playbackState;

@@ -32,6 +32,7 @@
 @dynamic currentPlaybackTime;
 @dynamic duration;
 @dynamic playableDuration;
+@synthesize bufferingProgress = _bufferingProgress;
 
 @dynamic isPreparedToPlay;
 @dynamic playbackState;
@@ -59,6 +60,8 @@
 
         self.useApplicationAudioSession = YES;
         [[IJKAudioKit sharedInstance] setupAudioSession:self];
+
+        _bufferingProgress = -1;
     }
     return self;
 }
