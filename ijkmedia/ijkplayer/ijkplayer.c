@@ -205,7 +205,7 @@ void ijkmp_dec_ref(IjkMediaPlayer *mp)
     if (!mp)
         return;
 
-    int ref_count = __sync_fetch_and_sub(&mp->ref_count, 1);
+    int ref_count = __sync_sub_and_fetch(&mp->ref_count, 1);
     if (ref_count == 0) {
         MPTRACE("ijkmp_dec_ref(): ref=0\n");
         ijkmp_shutdown(mp);
@@ -279,6 +279,8 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
     ijkmp_change_state_l(mp, MP_STATE_ASYNC_PREPARING);
 
     msg_queue_start(&mp->ffplayer->msg_queue);
+
+    // released in msg_loop
     ijkmp_inc_ref(mp);
     mp->msg_thread = SDL_CreateThreadEx(&mp->_msg_thread, mp->msg_loop, mp, "ff_msg_loop");
     // TODO: 9 release weak_thiz if pthread_create() failed;

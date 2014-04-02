@@ -459,6 +459,8 @@ int media_player_msg_loop(void* arg)
             }
         }
 
+        // retained in prepare_async, before SDL_CreateThreadEx
+        ijkmp_dec_ref_p(&mp);
         return 0;
     }
 }
