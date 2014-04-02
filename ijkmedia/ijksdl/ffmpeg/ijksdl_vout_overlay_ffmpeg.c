@@ -128,7 +128,7 @@ static int overlay_unlock(SDL_VoutOverlay *overlay)
 
 SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *display)
 {
-    SDLTRACE("SDL_VoutFFmpeg_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, dp=%p)",
+    SDLTRACE("SDL_VoutFFmpeg_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, dp=%p)\n",
         width, height, (const char*) &format, format, display);
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
     if (!overlay) {
@@ -191,13 +191,13 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         break;
     }
     default:
-        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...): unknown format %.4s(0x%x)", (char*)&format, format);
+        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...): unknown format %.4s(0x%x)\n", (char*)&format, format);
         goto fail;
     }
 
     opaque->managed_frame = alloc_avframe(opaque, ff_format, buf_width, buf_height);
     if (!opaque->managed_frame) {
-        ALOGE("overlay->opaque->frame allocation failed");
+        ALOGE("overlay->opaque->frame allocation failed\n");
         goto fail;
     }
     opaque->mutex = SDL_CreateMutex();
