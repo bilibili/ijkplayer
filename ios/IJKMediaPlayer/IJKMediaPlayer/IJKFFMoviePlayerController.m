@@ -221,10 +221,10 @@
         case MP_STATE_IDLE:
         case MP_STATE_INITIALIZED:
         case MP_STATE_ASYNC_PREPARING:
-        case MP_STATE_PREPARED:
         case MP_STATE_PAUSED:
             mpState = MPMoviePlaybackStatePaused;
             break;
+        case MP_STATE_PREPARED:
         case MP_STATE_STARTED: {
             if (_seeking)
                 mpState = MPMoviePlaybackStateSeekingForward;
