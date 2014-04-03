@@ -9,9 +9,10 @@ ijkplayer
  - Mac OS X 10.8.5
 - Android
  - [ADT v22.3.0-887826](http://developer.android.com/sdk/index.html)
- - [NDK r9](http://developer.android.com/tools/sdk/ndk/index.html)
+ - [NDK r9c](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
  - Xcode 5.0.2 (with iOS SDK 7)
+ - Xcode 5.1 (can not build arm64 for some xcrun bug for now, http://llvm.org/bugs/show_bug.cgi?id=19179)
 
 ### Dependent Tools (Mac OS X)
 - [MacPorts](http://www.macports.org/install.php)
