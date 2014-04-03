@@ -1,5 +1,15 @@
+Changes between 0.1.2 and 0.1.1:
+--------------------------------
+
 Changes between 0.1.1 and 0.1.0:
 --------------------------------
+player: remove ugly frame drop trick
+ios: simplify application state handle
+ios: fix 5.1 channel support
+player: handle ffmpeg error
+player: fix leak
+player: improve buffer indicator
+player: drop frame for high fps video
 
 Changes between 0.1.0 and 0.0.6:
 --------------------------------
