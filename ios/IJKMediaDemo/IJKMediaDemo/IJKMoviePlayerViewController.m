@@ -54,8 +54,16 @@
 
     self.mediaControl.delegatePlayer = self.player;
 
+    [self installMovieNotificationObservers];
+
     [self.player prepareToPlay];
     [self.player play];
+}
+
+- (void)dealloc
+{
+    [self.player shutdown];
+    [self removeMovieNotificationObservers];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation{
@@ -104,6 +112,132 @@
 {
     [self.player pause];
     [self.mediaControl refreshMediaControl];
+}
+
+- (void)loadStateDidChange:(NSNotification*)notification
+{
+    //    MPMovieLoadStateUnknown        = 0,
+    //    MPMovieLoadStatePlayable       = 1 << 0,
+    //    MPMovieLoadStatePlaythroughOK  = 1 << 1, // Playback will be automatically started in this state when shouldAutoplay is YES
+    //    MPMovieLoadStateStalled        = 1 << 2, // Playback will be automatically paused in this state, if started
+
+    MPMovieLoadState loadState = _player.loadState;
+
+    if ((loadState & MPMovieLoadStatePlaythroughOK) != 0) {
+        NSLog(@"loadStateDidChange: MPMovieLoadStatePlaythroughOK: %d\n", loadState);
+    } else if ((loadState & MPMovieLoadStateStalled) != 0) {
+        NSLog(@"loadStateDidChange: MPMovieLoadStateStalled: %d\n", loadState);
+    } else {
+        NSLog(@"loadStateDidChange: ???: %d\n", loadState);
+    }
+}
+
+- (void)moviePlayBackDidFinish:(NSNotification*)notification
+{
+    //    MPMovieFinishReasonPlaybackEnded,
+    //    MPMovieFinishReasonPlaybackError,
+    //    MPMovieFinishReasonUserExited
+    int reason = [[[notification userInfo] valueForKey:MPMoviePlayerPlaybackDidFinishReasonUserInfoKey] intValue];
+
+    switch (reason)
+    {
+        case MPMovieFinishReasonPlaybackEnded:
+            NSLog(@"loadStateDidChange: MPMovieFinishReasonPlaybackEnded: %d\n", reason);
+            break;
+
+        case MPMovieFinishReasonUserExited:
+            NSLog(@"loadStateDidChange: MPMovieFinishReasonUserExited: %d\n", reason);
+            break;
+
+        case MPMovieFinishReasonPlaybackError:
+            NSLog(@"loadStateDidChange: MPMovieFinishReasonPlaybackError: %d\n", reason);
+            break;
+
+        default:
+            NSLog(@"moviePlayBackDidFinish: ???: %d\n", reason);
+            break;
+    }
+}
+
+- (void)mediaIsPreparedToPlayDidChange:(NSNotification*)notification
+{
+    NSLog(@"mediaIsPreparedToPlayDidChange\n");
+}
+
+- (void)moviePlayBackStateDidChange:(NSNotification*)notification
+{
+    //    MPMoviePlaybackStateStopped,
+    //    MPMoviePlaybackStatePlaying,
+    //    MPMoviePlaybackStatePaused,
+    //    MPMoviePlaybackStateInterrupted,
+    //    MPMoviePlaybackStateSeekingForward,
+    //    MPMoviePlaybackStateSeekingBackward
+
+    switch (_player.playbackState)
+    {
+        case MPMoviePlaybackStateStopped: {
+            NSLog(@"moviePlayBackStateDidChange %d: stoped", (int)_player.playbackState);
+            break;
+        }
+        case MPMoviePlaybackStatePlaying: {
+            NSLog(@"moviePlayBackStateDidChange %d: playing", (int)_player.playbackState);
+            break;
+        }
+        case MPMoviePlaybackStatePaused: {
+            NSLog(@"moviePlayBackStateDidChange %d: paused", (int)_player.playbackState);
+            break;
+        }
+        case MPMoviePlaybackStateInterrupted: {
+            NSLog(@"moviePlayBackStateDidChange %d: interrupted", (int)_player.playbackState);
+            break;
+        }
+        case MPMoviePlaybackStateSeekingForward:
+        case MPMoviePlaybackStateSeekingBackward: {
+            NSLog(@"moviePlayBackStateDidChange %d: seeking", (int)_player.playbackState);
+            break;
+        }
+        default: {
+            NSLog(@"moviePlayBackStateDidChange %d: unknown", (int)_player.playbackState);
+            break;
+        }
+    }
+}
+
+#pragma mark Install Movie Notifications
+
+/* Register observers for the various movie object notifications. */
+-(void)installMovieNotificationObservers
+{
+	[[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(loadStateDidChange:)
+                                                 name:IJKMoviePlayerLoadStateDidChangeNotification
+                                               object:_player];
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(moviePlayBackDidFinish:)
+                                                 name:IJKMoviePlayerPlaybackDidFinishNotification
+                                               object:_player];
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(mediaIsPreparedToPlayDidChange:)
+                                                 name:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification
+                                               object:_player];
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(moviePlayBackStateDidChange:)
+                                                 name:IJKMoviePlayerPlaybackStateDidChangeNotification
+                                               object:_player];
+}
+
+#pragma mark Remove Movie Notification Handlers
+
+/* Remove the movie notification observers from the movie object. */
+-(void)removeMovieNotificationObservers
+{
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMoviePlayerLoadStateDidChangeNotification object:_player];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMoviePlayerPlaybackDidFinishNotification object:_player];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification object:_player];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMoviePlayerPlaybackStateDidChangeNotification object:_player];
 }
 
 @end
