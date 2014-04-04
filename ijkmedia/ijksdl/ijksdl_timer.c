@@ -54,7 +54,11 @@ Uint64 SDL_GetTickHR(void)
     Uint64 clock;
 #if defined(__ANDROID__)
     struct timespec now;
+#ifdef CLOCK_MONOTONIC_COARSE
+    clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
+#else
     clock_gettime(CLOCK_MONOTONIC_HR, &now);
+#endif
     clock = now.tv_sec * 1000 + now.tv_nsec / 1000000;
 #elif defined(__APPLE__)
     if (!g_is_mach_base_info_inited) {
