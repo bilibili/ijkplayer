@@ -142,19 +142,19 @@
     switch (reason)
     {
         case MPMovieFinishReasonPlaybackEnded:
-            NSLog(@"loadStateDidChange: MPMovieFinishReasonPlaybackEnded: %d\n", reason);
+            NSLog(@"playbackStateDidChange: MPMovieFinishReasonPlaybackEnded: %d\n", reason);
             break;
 
         case MPMovieFinishReasonUserExited:
-            NSLog(@"loadStateDidChange: MPMovieFinishReasonUserExited: %d\n", reason);
+            NSLog(@"playbackStateDidChange: MPMovieFinishReasonUserExited: %d\n", reason);
             break;
 
         case MPMovieFinishReasonPlaybackError:
-            NSLog(@"loadStateDidChange: MPMovieFinishReasonPlaybackError: %d\n", reason);
+            NSLog(@"playbackStateDidChange: MPMovieFinishReasonPlaybackError: %d\n", reason);
             break;
 
         default:
-            NSLog(@"moviePlayBackDidFinish: ???: %d\n", reason);
+            NSLog(@"playbackPlayBackDidFinish: ???: %d\n", reason);
             break;
     }
 }
