@@ -61,11 +61,11 @@ git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-stable
 cd ijkplayer-android-stable
 git checkout -B stable n0.1.1
 
-sh init-android.sh
+./init-android.sh
 
 cd android
-sh compile-ffmpeg.sh
-sh compile-ijk.sh
+./compile-ffmpeg.sh
+./compile-ijk.sh
 
 cd ijkmediaplayer/jni
 ndk-build
@@ -82,11 +82,11 @@ git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-master
 cd ijkplayer-android-master
 git checkout master
 
-sh init-android.sh
+./init-android.sh
 
 cd android
-sh compile-ffmpeg.sh
-sh compile-ijk.sh
+./compile-ffmpeg.sh
+./compile-ijk.sh
 
 cd ijkmediaplayer/jni
 ndk-build
@@ -108,10 +108,10 @@ git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-stable
 cd ijkplayer-ios-stable
 git checkout -B stable n0.1.1
 
-sh init-ios.sh
+./init-ios.sh
 
 cd ios
-sh compile-ffmpeg.sh all
+./compile-ffmpeg.sh all
 
 # import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
 # open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
@@ -124,10 +124,10 @@ git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-master
 cd ijkplayer-ios-master
 git checkout master
 
-sh init-ios.sh
+./init-ios.sh
 
 cd ios
-sh compile-ffmpeg.sh all
+./compile-ffmpeg.sh all
 
 # import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
 # open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
