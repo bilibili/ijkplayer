@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /usr/bin/env bash
 
 # This script is based on projects below
 # https://github.com/kolyvan/kxmovie

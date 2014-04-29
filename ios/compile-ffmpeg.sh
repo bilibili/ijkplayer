@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /usr/bin/env bash
 
 #----------
 # modify for your build tool

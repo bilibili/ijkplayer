@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /usr/bin/env bash
 
 cd ffmpeg-armv7a
 

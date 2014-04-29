@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /usr/bin/env bash
 
 IJK_FFMPEG_UPSTREAM=git://git.videolan.org/ffmpeg.git
 IJK_FFMPEG_FORK=https://github.com/bbcallen/FFmpeg.git

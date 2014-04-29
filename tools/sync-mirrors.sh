@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /usr/bin/env bash
 
 git push origin --all --follow-tags
 git push gitcafe --all --follow-tags
