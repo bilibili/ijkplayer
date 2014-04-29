@@ -11,7 +11,7 @@
 
 @implementation IJKFFOptions
 
-+(IJKFFOptions *)optionsByDefault
++ (IJKFFOptions *)optionsByDefault
 {
     IJKFFOptions *options = [[IJKFFOptions alloc] init];
 
@@ -24,8 +24,10 @@
     return options;
 }
 
--(void)applyTo:(IjkMediaPlayer *)mediaPlayer
+- (void)applyTo:(IjkMediaPlayer *)mediaPlayer
 {
+    [self logOptions];
+
     [self setCodecOption:@"skip_loop_filter"
              withInteger:self.skipLoopFilter
                       to:mediaPlayer];
@@ -37,7 +39,40 @@
     ijkmp_set_max_fps(mediaPlayer, _maxFps);
 }
 
--(void)setCodecOption:(NSString *)optionName
+- (void)logOptions
+{
+    NSMutableString *echo = [[NSMutableString alloc] init];
+    [echo appendString:@"========================================\n"];
+    [echo appendString:@"= FFmpeg options:\n"];
+    [echo appendFormat:@"= skip_loop_filter: %@\n", [IJKFFOptions getDiscardString:self.skipLoopFilter]];
+    [echo appendFormat:@"= skipFrame:        %@\n", [IJKFFOptions getDiscardString:self.skipFrame]];
+    [echo appendFormat:@"= frameBufferCount: %d\n", self.frameBufferCount];
+    [echo appendFormat:@"= maxFps:           %d\n", self.maxFps];
+    [echo appendString:@"========================================\n"];
+    NSLog(@"%@", echo);
+}
+
++ (NSString *)getDiscardString:(IJKAVDiscard)discard
+{
+    switch (discard) {
+        case IJK_AVDISCARD_NONE:
+            return @"avdiscard none";
+        case IJK_AVDISCARD_DEFAULT:
+            return @"avdiscard default";
+        case IJK_AVDISCARD_NONREF:
+            return @"avdiscard nonref";
+        case IJK_AVDISCARD_BIDIR:
+            return @"avdicard bidir;";
+        case IJK_AVDISCARD_NONKEY:
+            return @"avdicard nonkey";
+        case IJK_AVDISCARD_ALL:
+            return @"avdicard all;";
+        default:
+            return @"avdiscard unknown";
+    }
+}
+
+- (void)setCodecOption:(NSString *)optionName
           withInteger:(NSInteger)value
                    to:(IjkMediaPlayer *)mediaPlayer
 {
