@@ -289,6 +289,31 @@ IjkMediaPlayer_setAvFormatOption(JNIEnv *env, jobject thiz, jobject name, jobjec
 }
 
 static void
+IjkMediaPlayer_setAvCodecOption(JNIEnv *env, jobject thiz, jobject name, jobject value)
+{
+    MPTRACE("IjkMediaPlayer_setAvCodecOption");
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    const char *c_name = NULL;
+    const char *c_value = NULL;
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setAvCodecOption: null mp", LABEL_RETURN);
+
+    c_name = (*env)->GetStringUTFChars(env, name, NULL);
+    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setAvCodecOption: name.string oom", LABEL_RETURN);
+
+    c_value = (*env)->GetStringUTFChars(env, value, NULL);
+    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setAvCodecOption: name.string oom", LABEL_RETURN);
+
+    ijkmp_set_codec_option(mp, c_name, c_value);
+
+    LABEL_RETURN:
+    if (c_name)
+        (*env)->ReleaseStringUTFChars(env, name, c_name);
+    if (c_value)
+        (*env)->ReleaseStringUTFChars(env, value, c_value);
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
 IjkMediaPlayer_native_init(JNIEnv *env)
 {
     MPTRACE("IjkMediaPlayer_native_init");
@@ -436,6 +461,7 @@ static JNINativeMethod g_methods[] = {
     { "native_finalize", "()V", (void *) IjkMediaPlayer_native_finalize },
 
     { "_setAvFormatOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvFormatOption },
+    { "_setAvCodecOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvCodecOption },
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)

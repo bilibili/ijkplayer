@@ -381,7 +381,12 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         _setAvFormatOption(name, value);
     }
 
+    public void setAvCodecOption(String name, String value) {
+        _setAvCodecOption(name, value);
+    }
+
     private native void _setAvFormatOption(String name, String value);
+    private native void _setAvCodecOption(String name, String value);
 
     @Override
     public void setAudioStreamType(int streamtype) {
