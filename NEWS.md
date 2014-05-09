@@ -1,5 +1,6 @@
 Changes between 0.1.2 and 0.1.1:
 --------------------------------
+ffmpeg: build with openssl
 
 Changes between 0.1.1 and 0.1.0:
 --------------------------------
