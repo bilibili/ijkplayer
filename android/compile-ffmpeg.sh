@@ -107,7 +107,8 @@ echo "\n--------------------"
 echo "[*] check ffmpeg env"
 echo "--------------------"
 export PATH=$FF_TOOLCHAIN_PATH/bin:$PATH
-export CC="ccache ${FF_CROSS_PREFIX}-gcc"
+#export CC="ccache ${FF_CROSS_PREFIX}-gcc"
+export CC="${FF_CROSS_PREFIX}-gcc"
 export LD=${FF_CROSS_PREFIX}-ld
 export AR=${FF_CROSS_PREFIX}-ar
 export STRIP=${FF_CROSS_PREFIX}-strip
