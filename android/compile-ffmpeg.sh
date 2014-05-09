@@ -46,15 +46,19 @@ FF_TAGET_OS=
 FF_BUILD_NAME=
 FF_SOURCE=
 FF_CROSS_PREFIX=
+FF_DEP_OPENSSL_INC=
+FF_DEP_OPENSSL_LIB=
 
 FF_CFG_FLAGS=
 
 FF_EXTRA_CFLAGS=
 FF_EXTRA_LDFLAGS=
+FF_DEP_LIBS=
 
 #----- armv7a begin -----
 FF_TAGET_OS=linux
 FF_BUILD_NAME=ffmpeg-armv7a
+FF_BUILD_NAME_OPENSSL=openssl-armv7a
 FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 FF_CROSS_PREFIX=arm-linux-androideabi
 
@@ -71,6 +75,8 @@ FF_TOOLCHAIN_PATH=$FF_BUILD_ROOT/build/$FF_BUILD_NAME/toolchain
 
 FF_SYSROOT=$FF_TOOLCHAIN_PATH/sysroot
 FF_PREFIX=$FF_BUILD_ROOT/build/$FF_BUILD_NAME/output
+FF_DEP_OPENSSL_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/include
+FF_DEP_OPENSSL_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/lib
 
 mkdir -p $FF_PREFIX
 mkdir -p $FF_SYSROOT
@@ -132,6 +138,18 @@ FF_CFLAGS="-O3 -Wall -pipe \
 export COMMON_FF_CFG_FLAGS=
 source $FF_BUILD_ROOT/../tools/ffmpeg-common-profiles.sh
 
+
+#--------------------
+# with openssl
+if [ -f "${FF_DEP_OPENSSL_LIB}/libssl.a" ]; then
+# FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-nonfree"
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-openssl"
+
+    FF_CFLAGS="$FF_CFLAGS -I${FF_DEP_OPENSSL_INC}"
+    FF_DEP_LIBS="-L${FF_DEP_OPENSSL_LIB} -lssl -lcrypto"
+fi
+
+
 FF_CFG_FLAGS="$FF_CFG_FLAGS $COMMON_FF_CFG_FLAGS"
 
 #--------------------
@@ -175,6 +193,7 @@ make install
 echo "\n--------------------"
 echo "[*] link ffmpeg"
 echo "--------------------"
+echo $FF_EXTRA_LDFLAGS
 $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack $FF_EXTRA_LDFLAGS \
     compat/*.o \
     libavutil/*.o \
@@ -185,6 +204,7 @@ $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack 
     libswresample/*.o \
     libswresample/arm/*.o \
     libswscale/*.o \
+    $FF_DEP_LIBS \
     -o $FF_PREFIX/libffmpeg.so
 
 cp $FF_PREFIX/libffmpeg.so $FF_PREFIX/libffmpeg-debug.so
