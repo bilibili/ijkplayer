@@ -567,10 +567,10 @@ exit:
 #endif
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    }
 
-    glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-    [_context presentRenderbuffer:GL_RENDERBUFFER];
+        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+        [_context presentRenderbuffer:GL_RENDERBUFFER];
+    }
 
     // Detach context before leaving display, to avoid multiple thread issues.
     if ([EAGLContext currentContext] == _context)
