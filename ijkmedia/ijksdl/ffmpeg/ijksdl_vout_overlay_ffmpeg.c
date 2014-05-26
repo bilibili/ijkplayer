@@ -48,32 +48,55 @@ typedef struct SDL_VoutOverlay_Opaque {
 
 /* Always assume a linesize alignment of 1 here */
 // TODO: 9 alignment to speed up memcpy when display
-static AVFrame *alloc_avframe(SDL_VoutOverlay_Opaque* opaque, enum AVPixelFormat format, int width, int height)
+static AVFrame *opaque_setup_frame(SDL_VoutOverlay_Opaque* opaque, enum AVPixelFormat format, int width, int height)
 {
-    int frame_bytes = avpicture_get_size(format, width, height);
-    AVBufferRef *frame_buffer_ref = av_buffer_alloc(frame_bytes);
-    if (!frame_buffer_ref)
-        return NULL;
-
-    AVFrame *frame = av_frame_alloc();
-    if (!frame) {
-        av_buffer_unref(&frame_buffer_ref);
+    AVFrame *managed_frame = av_frame_alloc();
+    if (!managed_frame) {
         return NULL;
     }
 
     AVFrame *linked_frame = av_frame_alloc();
-    if (!frame) {
-        av_frame_free(&frame);
-        av_buffer_unref(&frame_buffer_ref);
+    if (!linked_frame) {
+        av_frame_free(&managed_frame);
         return NULL;
     }
 
-    AVPicture *pic = (AVPicture *) frame;
-    avcodec_get_frame_defaults(frame);
-    avpicture_fill(pic, frame_buffer_ref->data, format, width, height);
-    opaque->frame_buffer = frame_buffer_ref;
-    opaque->linked_frame = linked_frame;
-    return frame;
+    /*-
+     * Lazily allocate frame buffer in opaque_obtain_managed_frame_buffer
+     *
+     * For refererenced frame management, we use buffer allocated by decoder
+     *
+    int frame_bytes = avpicture_get_size(format, width, height);
+    AVBufferRef *frame_buffer_ref = av_buffer_alloc(frame_bytes);
+    if (!frame_buffer_ref)
+        return NULL;
+    opaque->frame_buffer  = frame_buffer_ref;
+     */
+
+    avcodec_get_frame_defaults(managed_frame);
+    avcodec_get_frame_defaults(linked_frame);
+    AVPicture *pic = (AVPicture *) managed_frame;
+    avpicture_fill(pic, NULL, format, width, height);
+    opaque->managed_frame = managed_frame;
+    opaque->linked_frame  = linked_frame;
+    return managed_frame;
+}
+
+static AVFrame *opaque_obtain_managed_frame_buffer(SDL_VoutOverlay_Opaque* opaque)
+{
+    if (opaque->frame_buffer != NULL)
+        return opaque->managed_frame;
+
+    AVFrame *managed_frame = opaque->managed_frame;
+    int frame_bytes = avpicture_get_size(managed_frame->format, managed_frame->width, managed_frame->height);
+    AVBufferRef *frame_buffer_ref = av_buffer_alloc(frame_bytes);
+    if (!frame_buffer_ref)
+        return NULL;
+
+    AVPicture *pic = (AVPicture *) managed_frame;
+    avpicture_fill(pic, frame_buffer_ref->data, managed_frame->format, managed_frame->width, managed_frame->height);
+    opaque->frame_buffer  = frame_buffer_ref;
+    return opaque->managed_frame;
 }
 
 static void overlay_free_l(SDL_VoutOverlay *overlay)
@@ -195,7 +218,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         goto fail;
     }
 
-    opaque->managed_frame = alloc_avframe(opaque, ff_format, buf_width, buf_height);
+    opaque->managed_frame = opaque_setup_frame(opaque, ff_format, buf_width, buf_height);
     if (!opaque->managed_frame) {
         ALOGE("overlay->opaque->frame allocation failed\n");
         goto fail;
@@ -221,12 +244,7 @@ int SDL_VoutFFmpeg_ConvertFrame(
     assert(overlay);
     assert(p_sws_ctx);
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
-    AVPicture dest_pic = { { 0 } };
-
-    for (int i = 0; i < overlay->planes; ++i) {
-        dest_pic.data[i] = overlay->pixels[i];
-        dest_pic.linesize[i] = overlay->pitches[i];
-    }
+    AVPicture swscale_dst_pic = { { 0 } };
 
     av_frame_unref(opaque->linked_frame);
 
@@ -241,34 +259,19 @@ int SDL_VoutFFmpeg_ConvertFrame(
         if (frame->format == AV_PIX_FMT_YUV420P || frame->format == AV_PIX_FMT_YUVJ420P) {
             // ALOGE("direct draw frame");
             use_linked_frame = 1;
-            av_frame_ref(opaque->linked_frame, frame);
-            overlay_fill(overlay, opaque->linked_frame, opaque->planes);
+            dst_format = frame->format;
         } else {
             // ALOGE("copy draw frame");
-            overlay_fill(overlay, opaque->managed_frame, opaque->planes);
-            dest_pic.data[1] = overlay->pixels[1];
-            dest_pic.data[2] = overlay->pixels[2];
             dst_format = AV_PIX_FMT_YUV420P;
-        }
-
-        if (need_swap_uv) {
-            if (use_linked_frame) {
-                FFSWAP(Uint8*, overlay->pixels[1], overlay->pixels[2]);
-            } else {
-                FFSWAP(Uint8*, dest_pic.data[1], dest_pic.data[2]);
-            }
         }
         break;
     case SDL_FCC_RV32:
-        overlay_fill(overlay, opaque->managed_frame, opaque->planes);
         dst_format = AV_PIX_FMT_0BGR32;
         break;
     case SDL_FCC_RV24:
-        overlay_fill(overlay, opaque->managed_frame, opaque->planes);
         dst_format = AV_PIX_FMT_RGB24;
         break;
     case SDL_FCC_RV16:
-        overlay_fill(overlay, opaque->managed_frame, opaque->planes);
         dst_format = AV_PIX_FMT_RGB565;
         break;
     default:
@@ -277,10 +280,42 @@ int SDL_VoutFFmpeg_ConvertFrame(
         return -1;
     }
 
+
+    // setup frame
+    if (use_linked_frame) {
+        // linked frame
+        av_frame_ref(opaque->linked_frame, frame);
+
+        overlay_fill(overlay, opaque->linked_frame, opaque->planes);
+
+        if (need_swap_uv)
+            FFSWAP(Uint8*, overlay->pixels[1], overlay->pixels[2]);
+    } else {
+        // managed frame
+        AVFrame* managed_frame = opaque_obtain_managed_frame_buffer(opaque);
+        if (!managed_frame) {
+            ALOGE("OOM in opaque_obtain_managed_frame_buffer");
+            return -1;
+        }
+
+        // setup frame managed
+        for (int i = 0; i < overlay->planes; ++i) {
+            swscale_dst_pic.data[i] = overlay->pixels[i];
+            swscale_dst_pic.linesize[i] = overlay->pitches[i];
+        }
+
+        overlay_fill(overlay, opaque->managed_frame, opaque->planes);
+
+        if (need_swap_uv)
+            FFSWAP(Uint8*, swscale_dst_pic.data[1], swscale_dst_pic.data[2]);
+    }
+
+
+    // swscale / direct draw
     if (use_linked_frame) {
         // do nothing
     } else if (ijk_image_convert(frame->width, frame->height,
-        dst_format, dest_pic.data, dest_pic.linesize,
+        dst_format, swscale_dst_pic.data, swscale_dst_pic.linesize,
         frame->format, (const uint8_t**) frame->data, frame->linesize)) {
         *p_sws_ctx = sws_getCachedContext(*p_sws_ctx,
             frame->width, frame->height, frame->format, frame->width, frame->height,
@@ -291,7 +326,7 @@ int SDL_VoutFFmpeg_ConvertFrame(
         }
 
         sws_scale(*p_sws_ctx, (const uint8_t**) frame->data, frame->linesize,
-            0, frame->height, dest_pic.data, dest_pic.linesize);
+            0, frame->height, swscale_dst_pic.data, swscale_dst_pic.linesize);
 
         if (!opaque->no_neon_warned) {
             opaque->no_neon_warned = 1;
