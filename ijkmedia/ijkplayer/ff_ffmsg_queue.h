@@ -69,13 +69,14 @@ inline static int msg_queue_put_private(MessageQueue *q, AVMessage *msg)
     }
 #ifdef FFP_SHOW_MSG_RECYCLE
     int total_count = q->recycle_count + q->alloc_count;
-    if (!(total_count % 50)) {
+    if (!(total_count % 10)) {
         ALOGE("msg-recycle \t%d + \t%d = \t%d\n", q->recycle_count, q->alloc_count, total_count);
     }
 #endif
 #endif
     if (!msg1)
         return -1;
+    // ALOGE("msg-recycle %d, %d, %d\n", msg->what, msg->arg1, msg->arg2);
 
     *msg1 = *msg;
     msg1->next = NULL;

@@ -47,6 +47,8 @@
 // #define FFP_SHOW_DEMUX_CACHE
 // #define FFP_SHOW_PKT_RECYCLE
 
+#define FFP_BUF_MSG_PERIOD (3)
+
 static AVPacket flush_pkt;
 
 // FFP_MERGE: cmp_audio_fmts
@@ -2390,7 +2392,7 @@ static int read_thread(void *arg)
                 if (cached_duration_in_ms >= 0) {
                     buf_time_position = ffp_get_current_position_l(ffp) + cached_duration_in_ms;
                     buf_time_percent = (int)av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
-                    if (last_buffered_time_percentage != buf_time_percent) {
+                    if (buf_time_percent <= 100 && abs(last_buffered_time_percentage - buf_time_percent) >= FFP_BUF_MSG_PERIOD) {
 #ifdef FFP_SHOW_DEMUX_CACHE
                         ALOGE("time cache=%%%d (%d/%d)\n", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
 #endif
@@ -2403,7 +2405,7 @@ static int read_thread(void *arg)
             int cached_size = is->audioq.size + is->videoq.size;
             if (hwm_in_bytes > 0) {
                 buf_size_percent = (int)av_rescale(cached_size, 1005, hwm_in_bytes * 10);
-                if (last_buffered_size_percentage != buf_size_percent) {
+                if (buf_size_percent <= 100 && abs(last_buffered_size_percentage - buf_size_percent) >= FFP_BUF_MSG_PERIOD) {
 #ifdef FFP_SHOW_DEMUX_CACHE
                     ALOGE("size cache=%%%d (%d/%d)\n", buf_size_percent, cached_size, hwm_in_bytes);
 #endif
@@ -2428,7 +2430,7 @@ static int read_thread(void *arg)
                 buf_percent = FFMIN(buf_time_percent, buf_size_percent);
             }
             if (buf_percent) {
-                if (buf_percent <= 100 && abs(last_buffered_percent - buf_percent) >= 1) {
+                if (buf_percent <= 100 && abs(last_buffered_percent - buf_percent) >= FFP_BUF_MSG_PERIOD) {
                     last_buffered_percent = buf_percent;
 #ifdef FFP_SHOW_DEMUX_CACHE
                     ALOGE("buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
