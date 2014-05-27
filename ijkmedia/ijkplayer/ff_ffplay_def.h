@@ -90,6 +90,9 @@ typedef struct PacketQueue {
     int serial;
     SDL_mutex *mutex;
     SDL_cond *cond;
+    MyAVPacketList *recycle_pkt;
+    int recycle_count;
+    int alloc_count;
 } PacketQueue;
 
 // #define VIDEO_PICTURE_QUEUE_SIZE 3

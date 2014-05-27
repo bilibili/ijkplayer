@@ -45,6 +45,7 @@
 // #define FFP_SHOW_VDPS
 // #define FFP_SHOW_AUDIO_DELAY
 // #define FFP_SHOW_DEMUX_CACHE
+// #define FFP_SHOW_PKT_RECYCLE
 
 static AVPacket flush_pkt;
 
@@ -60,7 +61,24 @@ static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
     if (q->abort_request)
        return -1;
 
+#ifdef FFP_MERGE
     pkt1 = av_malloc(sizeof(MyAVPacketList));
+#else
+    pkt1 = q->recycle_pkt;
+    if (pkt1) {
+        q->recycle_pkt = pkt1->next;
+        q->recycle_count++;
+    } else {
+        q->alloc_count++;
+        pkt1 = av_malloc(sizeof(MyAVPacketList));
+    }
+#ifdef FFP_SHOW_PKT_RECYCLE
+    int total_count = q->recycle_count + q->alloc_count;
+    if (!(total_count % 50)) {
+        ALOGE("pkt-recycle \t%d + \t%d = \t%d\n", q->recycle_count, q->alloc_count, total_count);
+    }
+#endif
+#endif
     if (!pkt1)
         return -1;
     pkt1->pkt = *pkt;
@@ -128,7 +146,12 @@ static void packet_queue_flush(PacketQueue *q)
     for (pkt = q->first_pkt; pkt != NULL; pkt = pkt1) {
         pkt1 = pkt->next;
         av_free_packet(&pkt->pkt);
+#ifdef FFP_MERGE
         av_freep(&pkt);
+#else
+        pkt->next = q->recycle_pkt;
+        q->recycle_pkt = pkt;
+#endif
     }
     q->last_pkt = NULL;
     q->first_pkt = NULL;
@@ -140,6 +163,15 @@ static void packet_queue_flush(PacketQueue *q)
 
 static void packet_queue_destroy(PacketQueue *q)
 {
+    SDL_LockMutex(q->mutex);
+    while(q->recycle_pkt) {
+        MyAVPacketList *pkt = q->recycle_pkt;
+        if (pkt)
+            q->recycle_pkt = pkt->next;
+        av_freep(&pkt);
+    }
+    SDL_UnlockMutex(q->mutex);
+
     packet_queue_flush(q);
     SDL_DestroyMutex(q->mutex);
     SDL_DestroyCond(q->cond);
@@ -190,7 +222,12 @@ static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *seria
             *pkt = pkt1->pkt;
             if (serial)
                 *serial = pkt1->serial;
+#ifdef FFP_MERGE
             av_free(pkt1);
+#else
+            pkt1->next = q->recycle_pkt;
+            q->recycle_pkt = pkt1;
+#endif
             ret = 1;
             break;
         } else if (!block) {
