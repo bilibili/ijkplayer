@@ -301,13 +301,13 @@ int SDL_VoutFFmpeg_ConvertFrame(
             return -1;
         }
 
+        overlay_fill(overlay, opaque->managed_frame, opaque->planes);
+
         // setup frame managed
         for (int i = 0; i < overlay->planes; ++i) {
             swscale_dst_pic.data[i] = overlay->pixels[i];
             swscale_dst_pic.linesize[i] = overlay->pitches[i];
         }
-
-        overlay_fill(overlay, opaque->managed_frame, opaque->planes);
 
         if (need_swap_uv)
             FFSWAP(Uint8*, swscale_dst_pic.data[1], swscale_dst_pic.data[2]);
@@ -315,6 +315,17 @@ int SDL_VoutFFmpeg_ConvertFrame(
 
 
     // swscale / direct draw
+    /*
+    ALOGE("ijk_image_convert w=%d, h=%d, df=%d, dd=%d, dl=%d, sf=%d, sd=%d, sl=%d",
+          (int)frame->width,
+          (int)frame->height,
+          (int)dst_format,
+          (int)swscale_dst_pic.data[0],
+          (int)swscale_dst_pic.linesize[0],
+          (int)frame->format,
+          (int)(const uint8_t**) frame->data,
+          (int)frame->linesize);
+     */
     if (use_linked_frame) {
         // do nothing
     } else if (ijk_image_convert(frame->width, frame->height,
