@@ -27,6 +27,8 @@
 #include "ff_ffinc.h"
 #include "ff_ffmsg.h"
 
+// #define FFP_SHOW_MSG_RECYCLE
+
 typedef struct AVMessage {
     int what;
     int arg1;
@@ -40,6 +42,10 @@ typedef struct MessageQueue {
     int abort_request;
     SDL_mutex *mutex;
     SDL_cond *cond;
+
+    AVMessage *recycle_msg;
+    int recycle_count;
+    int alloc_count;
 } MessageQueue;
 
 // TODO: 9 msg pool
@@ -50,9 +56,27 @@ inline static int msg_queue_put_private(MessageQueue *q, AVMessage *msg)
     if (q->abort_request)
         return -1;
 
+#ifdef FFP_MERGE
     msg1 = av_malloc(sizeof(AVMessage));
+#else
+    msg1 = q->recycle_msg;
+    if (msg1) {
+        q->recycle_msg = msg1->next;
+        q->recycle_count++;
+    } else {
+        q->alloc_count++;
+        msg1 = av_malloc(sizeof(AVMessage));
+    }
+#ifdef FFP_SHOW_MSG_RECYCLE
+    int total_count = q->recycle_count + q->alloc_count;
+    if (!(total_count % 50)) {
+        ALOGE("msg-recycle \t%d + \t%d = \t%d\n", q->recycle_count, q->alloc_count, total_count);
+    }
+#endif
+#endif
     if (!msg1)
         return -1;
+
     *msg1 = *msg;
     msg1->next = NULL;
 
@@ -124,7 +148,12 @@ inline static void msg_queue_flush(MessageQueue *q)
     SDL_LockMutex(q->mutex);
     for (msg = q->first_msg; msg != NULL; msg = msg1) {
         msg1 = msg->next;
+#ifdef FFP_MERGE
         av_freep(&msg);
+#else
+        msg->next = q->recycle_msg;
+        q->recycle_msg = msg;
+#endif
     }
     q->last_msg = NULL;
     q->first_msg = NULL;
@@ -137,6 +166,15 @@ inline static void msg_queue_destroy(MessageQueue *q)
     msg_queue_flush(q);
     SDL_DestroyMutex(q->mutex);
     SDL_DestroyCond(q->cond);
+
+    SDL_LockMutex(q->mutex);
+    while(q->recycle_msg) {
+        AVMessage *msg = q->recycle_msg;
+        if (msg)
+            q->recycle_msg = msg->next;
+        av_freep(&msg);
+    }
+    SDL_UnlockMutex(q->mutex);
 }
 
 inline static void msg_queue_abort(MessageQueue *q)
@@ -183,7 +221,12 @@ inline static int msg_queue_get(MessageQueue *q, AVMessage *msg, int block)
                 q->last_msg = NULL;
             q->nb_messages--;
             *msg = *msg1;
+#ifdef FFP_MERGE
             av_free(msg1);
+#else
+            msg1->next = q->recycle_msg;
+            q->recycle_msg = msg1;
+#endif
             ret = 1;
             break;
         } else if (!block) {
@@ -211,7 +254,12 @@ inline static void msg_queue_remove(MessageQueue *q, int what)
                 // ALOGE("remove msg %d", msg->what);
                 *p_msg = msg->next;
                 p_msg = &msg->next;
+#ifdef FFP_MERGE
                 av_free(msg);
+#else
+                msg->next = q->recycle_msg;
+                q->recycle_msg = msg;
+#endif
             } else {
                 // ALOGE("retain msg %d", msg->what);
                 last_msg = msg;
