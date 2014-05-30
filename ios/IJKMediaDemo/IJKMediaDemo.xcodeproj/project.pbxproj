@@ -15,7 +15,8 @@
 		E63FC29617F060A7003551EB /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC29517F060A7003551EB /* libz.dylib */; };
 		E63FC29A17F062E8003551EB /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC29917F062E8003551EB /* libbz2.dylib */; };
 		E63FC2B417F172EA003551EB /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC2B317F172E9003551EB /* OpenGLES.framework */; };
-		E63FC2B817F17362003551EB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC2B717F17362003551EB /* QuartzCore.framework */; };
+		E64D4F4E1938CCCC00F1C75D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E64D4F4D1938CCCC00F1C75D /* CoreGraphics.framework */; };
+		E64D4F4F1938CD2100F1C75D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC2B717F17362003551EB /* QuartzCore.framework */; };
 		E66F8DCB17EEDD8B00354D80 /* IJKMediaControl.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DCA17EEDD8B00354D80 /* IJKMediaControl.m */; };
 		E66F8DCF17EEDFCB00354D80 /* player_top_control_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = E66F8DCD17EEDFCA00354D80 /* player_top_control_bg.png */; };
 		E66F8DD017EEDFCB00354D80 /* player_top_control_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E66F8DCE17EEDFCB00354D80 /* player_top_control_bg@2x.png */; };
@@ -66,6 +67,8 @@
 		E63FC29917F062E8003551EB /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
 		E63FC2B317F172E9003551EB /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		E63FC2B717F17362003551EB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		E64D4F4B1938CC9400F1C75D /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
+		E64D4F4D1938CCCC00F1C75D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		E66F8DC917EEDD8B00354D80 /* IJKMediaControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKMediaControl.h; sourceTree = "<group>"; };
 		E66F8DCA17EEDD8B00354D80 /* IJKMediaControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKMediaControl.m; sourceTree = "<group>"; };
 		E66F8DCD17EEDFCA00354D80 /* player_top_control_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = player_top_control_bg.png; path = resources/player_top_control_bg.png; sourceTree = "<group>"; };
@@ -101,8 +104,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				E60FFBE418BF695700825D7F /* libIJKMediaPlayer.a in Frameworks */,
+				E64D4F4F1938CD2100F1C75D /* QuartzCore.framework in Frameworks */,
+				E64D4F4E1938CCCC00F1C75D /* CoreGraphics.framework in Frameworks */,
 				E612EAE517F7E0F800BEE660 /* MediaPlayer.framework in Frameworks */,
-				E63FC2B817F17362003551EB /* QuartzCore.framework in Frameworks */,
 				E63FC2B417F172EA003551EB /* OpenGLES.framework in Frameworks */,
 				E63FC29117F04C83003551EB /* AudioToolbox.framework in Frameworks */,
 				E63FC28A17F04C48003551EB /* CoreAudio.framework in Frameworks */,
@@ -162,6 +166,8 @@
 		E6903EFE17EAF70200CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E64D4F4D1938CCCC00F1C75D /* CoreGraphics.framework */,
+				E64D4F4B1938CC9400F1C75D /* CoreImage.framework */,
 				E612EAE417F7E0F800BEE660 /* MediaPlayer.framework */,
 				E63FC2B717F17362003551EB /* QuartzCore.framework */,
 				E63FC2B317F172E9003551EB /* OpenGLES.framework */,
@@ -350,6 +356,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					armv7s,
+					armv7,
+				);
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -382,6 +392,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					armv7s,
+					armv7,
+				);
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -407,6 +421,10 @@
 		E6903F1A17EAF70200CFD954 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					armv7s,
+					armv7,
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
@@ -421,6 +439,10 @@
 		E6903F1B17EAF70200CFD954 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					armv7s,
+					armv7,
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
