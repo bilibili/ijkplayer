@@ -106,7 +106,7 @@ ndk-build
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-stable
 cd ijkplayer-ios-stable
-git checkout -B stable n0.1.1
+git checkout -B stable n0.1.2
 
 ./init-ios.sh
 
