@@ -32,6 +32,8 @@
           withChroma:(int)chroma;
 - (void) display: (SDL_VoutOverlay *) overlay;
 
+- (UIImage*) snapshot;
+
 @property(nonatomic,strong) NSLock *appActivityLock;
 
 @end

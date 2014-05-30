@@ -55,6 +55,8 @@
 // no effect for IJKFFMoviePlayerController
 - (UIImage *)thumbnailImageAtTime:(NSTimeInterval)playbackTime timeOption:(MPMovieTimeOption)option;
 
+- (UIImage *)thumbnailImageAtCurrentTime;
+
 @property(nonatomic) MPMovieControlStyle controlStyle;
 @property(nonatomic) MPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;

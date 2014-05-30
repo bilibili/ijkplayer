@@ -308,6 +308,16 @@
     return nil;
 }
 
+- (UIImage *)thumbnailImageAtCurrentTime
+{
+    if ([_view isKindOfClass:[IJKSDLGLView class]]) {
+        IJKSDLGLView *glView = (IJKSDLGLView *)_view;
+        return [glView snapshot];
+    }
+
+    return nil;
+}
+
 - (void)postEvent: (IJKFFMoviePlayerMessage *)msg
 {
     if (!msg)

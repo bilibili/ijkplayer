@@ -86,6 +86,11 @@
     // do nothing
 }
 
+- (UIImage *)thumbnailImageAtCurrentTime
+{
+    return [super thumbnailImageAtTime:self.currentPlaybackTime timeOption:MPMovieTimeOptionExact];
+}
+
 #pragma mark Movie Notification Handlers
 
 /* Register observers for the various movie object notifications. */
