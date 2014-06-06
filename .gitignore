@@ -4,6 +4,7 @@ ffmpeg-temp/
 android/ffmpeg-armv7a
 android/openssl-armv7a
 ios/ffmpeg-*
+ios/openssl-*
 extra
 .DS_Store
 android/ijkmediaplayer/.settings/*
