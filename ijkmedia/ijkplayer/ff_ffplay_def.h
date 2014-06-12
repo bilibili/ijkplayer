@@ -106,6 +106,7 @@ typedef struct PacketQueue {
 
 typedef struct VideoPicture {
     double pts;             // presentation timestamp for this picture
+    double duration;        // estimated duration based on frame rate
     int64_t pos;            // byte position in file
     SDL_VoutOverlay *bmp;
     int width, height; /* source height & width */
@@ -127,6 +128,8 @@ typedef struct AudioParams {
     int channels;
     int64_t channel_layout;
     enum AVSampleFormat fmt;
+    int frame_size;
+    int bytes_per_sec;
 } AudioParams;
 
 typedef struct Clock {
@@ -236,13 +239,8 @@ typedef struct VideoState {
 #endif
 
     double frame_timer;
-    double frame_last_pts;
-    double frame_last_duration;
-    double frame_last_dropped_pts;
     double frame_last_returned_time;
     double frame_last_filter_delay;
-    int64_t frame_last_dropped_pos;
-    int frame_last_dropped_serial;
     int video_stream;
     AVStream *video_st;
     PacketQueue videoq;
