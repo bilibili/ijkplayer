@@ -2,6 +2,7 @@ Changes between 0.1.2 and 0.1.1:
 --------------------------------
 ffmpeg: switch to ffmpeg n2.2
 ffmpeg: build with openssl
+ffmpeg: drop arm64 support for now, due to aarch64 asm compile issues
 player: fix aout leak
 player: reduce memory footprint for I420/YV12 overlay
 ios: snapshot last displayed image
