@@ -1632,7 +1632,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     is->audio_write_buf_size = is->audio_buf_size - is->audio_buf_index;
     /* Let's assume the audio driver that is used by SDL has two periods. */
     if (!isnan(is->audio_clock)) {
-        set_clock_at(&is->audclk, is->audio_clock - (double)(2 * is->audio_hw_buf_size + is->audio_write_buf_size) / is->audio_tgt.bytes_per_sec, is->audio_clock_serial, ffp->audio_callback_time / 1000000.0);
+        set_clock_at(&is->audclk, is->audio_clock - (double)(1 * is->audio_hw_buf_size + is->audio_write_buf_size) / is->audio_tgt.bytes_per_sec, is->audio_clock_serial, ffp->audio_callback_time / 1000000.0);
         sync_clock_to_slave(&is->extclk, &is->audclk);
     }
 }
@@ -2265,7 +2265,7 @@ static int read_thread(void *arg)
                     SDL_LockMutex(wait_mutex);
                     // infinite wait may block shutdown
                     while(!is->abort_request && !is->seek_req)
-                        SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
+                        SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 100);
                     SDL_UnlockMutex(wait_mutex);
                     if (!is->abort_request)
                         continue;
@@ -2291,7 +2291,7 @@ static int read_thread(void *arg)
             if (is->audio_stream >= 0)
                 packet_queue_put_nullpacket(&is->audioq, is->audio_stream);
             ffp_toggle_buffering(ffp, 0);
-            SDL_Delay(10);
+            SDL_Delay(1000);
             eof=0;
             continue;
         }
@@ -2302,8 +2302,12 @@ static int read_thread(void *arg)
             if (ic->pb && ic->pb->error) {
                 eof = 1;
                 ffp->error = ic->pb->error;
-                ALOGE("av_read_frame error: %d\n", ffp->error);
-                break;
+                ALOGE("av_read_frame error: %x(%c,%c,%c,%c)\n", ffp->error,
+                      (char) (0xff & (ffp->error >> 24)),
+                      (char) (0xff & (ffp->error >> 16)),
+                      (char) (0xff & (ffp->error >> 8)),
+                      (char) (0xff & (ffp->error)));
+                // break;
             } else {
                 ffp->error = 0;
             }
