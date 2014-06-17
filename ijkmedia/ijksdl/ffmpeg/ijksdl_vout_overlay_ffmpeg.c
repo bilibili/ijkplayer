@@ -73,8 +73,6 @@ static AVFrame *opaque_setup_frame(SDL_VoutOverlay_Opaque* opaque, enum AVPixelF
     opaque->frame_buffer  = frame_buffer_ref;
      */
 
-    avcodec_get_frame_defaults(managed_frame);
-    avcodec_get_frame_defaults(linked_frame);
     AVPicture *pic = (AVPicture *) managed_frame;
     managed_frame->format = format;
     managed_frame->width  = width;

@@ -97,7 +97,7 @@ public class VideoPlayerActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_player);
 
-		// mVideoPath = "http://v.youku.com/player/getM3U8/vid/XNTY1ODE5NjMy/type//v.m3u8";
+		mVideoPath = "http://live.gslb.letv.com/gslb?stream_id=btv6_800&tag=live&ext=m3u8";
 
 		Intent intent = getIntent();
 		String intentAction = intent.getAction();

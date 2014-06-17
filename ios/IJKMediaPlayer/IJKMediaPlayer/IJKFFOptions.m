@@ -21,6 +21,8 @@
     options.frameBufferCount = 3;
     options.maxFps           = 30;
 
+    options.timeout         = -1;
+
     return options;
 }
 
@@ -29,14 +31,20 @@
     [self logOptions];
 
     [self setCodecOption:@"skip_loop_filter"
-             withInteger:self.skipLoopFilter
+               withInt64:self.skipLoopFilter
                       to:mediaPlayer];
     [self setCodecOption:@"skip_frame"
-             withInteger:self.skipFrame
+               withInt64:self.skipFrame
                       to:mediaPlayer];
 
     ijkmp_set_picture_queue_capicity(mediaPlayer, _frameBufferCount);
     ijkmp_set_max_fps(mediaPlayer, _maxFps);
+
+    if (self.timeout > 0) {
+        [self setFormatOption:@"timeout"
+                    withInt64:self.timeout
+                           to:mediaPlayer];
+    }
 }
 
 - (void)logOptions
@@ -44,10 +52,11 @@
     NSMutableString *echo = [[NSMutableString alloc] init];
     [echo appendString:@"========================================\n"];
     [echo appendString:@"= FFmpeg options:\n"];
-    [echo appendFormat:@"= skip_loop_filter: %@\n", [IJKFFOptions getDiscardString:self.skipLoopFilter]];
-    [echo appendFormat:@"= skipFrame:        %@\n", [IJKFFOptions getDiscardString:self.skipFrame]];
-    [echo appendFormat:@"= frameBufferCount: %d\n", self.frameBufferCount];
-    [echo appendFormat:@"= maxFps:           %d\n", self.maxFps];
+    [echo appendFormat:@"= skip_loop_filter: %@\n",   [IJKFFOptions getDiscardString:self.skipLoopFilter]];
+    [echo appendFormat:@"= skipFrame:        %@\n",   [IJKFFOptions getDiscardString:self.skipFrame]];
+    [echo appendFormat:@"= frameBufferCount: %d\n",   self.frameBufferCount];
+    [echo appendFormat:@"= maxFps:           %d\n",   self.maxFps];
+    [echo appendFormat:@"= timeout:          %lld\n", self.timeout];
     [echo appendString:@"========================================\n"];
     NSLog(@"%@", echo);
 }
@@ -72,13 +81,22 @@
     }
 }
 
+- (void)setFormatOption:(NSString *)optionName
+              withInt64:(int64_t)value
+                     to:(IjkMediaPlayer *)mediaPlayer
+{
+    ijkmp_set_format_option(mediaPlayer,
+                           [optionName UTF8String],
+                           [[NSString stringWithFormat:@"%lld", value] UTF8String]);
+}
+
 - (void)setCodecOption:(NSString *)optionName
-          withInteger:(NSInteger)value
-                   to:(IjkMediaPlayer *)mediaPlayer
+             withInt64:(int64_t)value
+                    to:(IjkMediaPlayer *)mediaPlayer
 {
     ijkmp_set_codec_option(mediaPlayer,
                            [optionName UTF8String],
-                           [[NSString stringWithFormat:@"%d", (int)value] UTF8String]);
+                           [[NSString stringWithFormat:@"%lld", value] UTF8String]);
 }
 
 @end
