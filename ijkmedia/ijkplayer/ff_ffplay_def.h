@@ -454,6 +454,10 @@ typedef struct FFPlayer {
     int fast_high_water_mark_in_ms;
     int max_buffer_size;
 
+    int last_buffered_time_percentage;
+    int last_buffered_size_percentage;
+    int last_buffered_percent;
+
     int pictq_capacity;
     int max_fps;
 } FFPlayer;
@@ -529,6 +533,10 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->normal_high_water_mark_in_ms   = DEFAULT_NORMAL_HIGH_WATER_MARK_IN_MS;
     ffp->fast_high_water_mark_in_ms     = DEFAULT_FAST_HIGH_WATER_MARK_IN_MS;
     ffp->max_buffer_size                = MAX_QUEUE_SIZE;
+
+    ffp->last_buffered_time_percentage  = -1;
+    ffp->last_buffered_size_percentage  = -1;
+    ffp->last_buffered_percent          = -1;
 
     ffp->pictq_capacity                 = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT;
     ffp->max_fps                        = VIDEO_MAX_FPS_DEFAULT;
