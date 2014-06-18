@@ -2341,36 +2341,38 @@ static int read_thread(void *arg)
             int buf_time_percent     = -1;
             int hwm_in_bytes         = ffp->high_water_mark_in_bytes;
             int need_start_buffering = 0;
+            int audio_time_base_valid = is->audio_st->time_base.den > 0 && is->audio_st->time_base.num > 0;
+            int video_time_base_valid = is->video_st->time_base.den > 0 && is->video_st->time_base.num > 0;
             int64_t buf_time_position        = -1;
             if (hwm_in_ms > 0) {
                 int     cached_duration_in_ms = -1;
                 int64_t audio_cached_duration = -1;
                 int64_t video_cached_duration = -1;
 
-                if (is->audio_st && is->audio_st->time_base.den > 0 && is->audio_st->time_base.num > 0) {
+                if (is->audio_st && audio_time_base_valid) {
                     audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
 #ifdef FFP_SHOW_DEMUX_CACHE
-                    int video_cached_percent = (int)av_rescale(audio_cached_duration, 1005, hwm_in_ms * 10);
-                    ALOGE("audio cache=%%%d (%d/%d)\n", video_cached_percent, (int)audio_cached_duration, hwm_in_ms);
+                    int audio_cached_percent = (int)av_rescale(audio_cached_duration, 1005, hwm_in_ms * 10);
+                    ALOGE("audio cache=%%%d (%d/%d)\n", audio_cached_percent, (int)audio_cached_duration, hwm_in_ms);
 #endif
                 }
 
-                if (is->video_st && is->video_st->time_base.den > 0 && is->video_st->time_base.num > 0) {
+                if (is->video_st && video_time_base_valid) {
                     video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
 #ifdef FFP_SHOW_DEMUX_CACHE
-                    int audio_cached_percent = (int)av_rescale(video_cached_duration, 1005, hwm_in_ms * 10);
-                    ALOGE("video cache=%%%d (%d/%d)\n", audio_cached_percent, (int)video_cached_duration, hwm_in_ms);
+                    int video_cached_percent = (int)av_rescale(video_cached_duration, 1005, hwm_in_ms * 10);
+                    ALOGE("video cache=%%%d (%d/%d)\n", video_cached_percent, (int)video_cached_duration, hwm_in_ms);
 #endif
                 }
 
                 is->audioq_duration = audio_cached_duration;
                 is->videoq_duration = video_cached_duration;
 
-                if (video_cached_duration >= 0 && audio_cached_duration >= 0) {
+                if (video_cached_duration > 0 && audio_cached_duration > 0) {
                     cached_duration_in_ms = (int)IJKMIN(video_cached_duration, audio_cached_duration);
-                } else if (video_cached_duration >= 0) {
+                } else if (video_cached_duration > 0) {
                     cached_duration_in_ms = (int)video_cached_duration;
-                } else if (audio_cached_duration >= 0) {
+                } else if (audio_cached_duration > 0) {
                     cached_duration_in_ms = (int)audio_cached_duration;
                 }
 
