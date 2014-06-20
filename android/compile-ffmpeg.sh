@@ -9,6 +9,7 @@ echo "===================="
 echo "[*] check env"
 echo "===================="
 set -e
+set +x
 
 if [ -z "$ANDROID_NDK" -o -z "$ANDROID_SDK" ]; then
     echo "You must define ANDROID_NDK, ANDROID_SDK before starting."
@@ -210,6 +211,39 @@ $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack 
 cp $FF_PREFIX/libffmpeg.so $FF_PREFIX/libffmpeg-debug.so
 cp $FF_PREFIX/libffmpeg.so $FF_PREFIX/libffmpeg-release.so
 $STRIP --strip-unneeded $FF_PREFIX/libffmpeg-release.so
+
+function mysedi() {
+    f=$1
+    exp=$2
+    n=`basename $f`
+    cp $f /tmp/$n
+    sed $exp /tmp/$n > $f
+    rm /tmp/$n
+}
+
+echo "\n--------------------"
+echo "[*] create files for shared ffmpeg"
+echo "--------------------"
+rm -rf $FF_PREFIX/shared 
+mkdir -p $FF_PREFIX/shared/lib/pkgconfig
+ln -s $FF_PREFIX/include $FF_PREFIX/shared/include
+ln -s $FF_PREFIX/libffmpeg.so $FF_PREFIX/shared/lib/libffmpeg.so
+cp $FF_PREFIX/lib/pkgconfig/*.pc $FF_PREFIX/shared/lib/pkgconfig
+for f in $FF_PREFIX/lib/pkgconfig/*.pc; do
+    # in case empty dir
+    if [ ! -f $f ]; then
+        continue
+    fi
+    cp $f $FF_PREFIX/shared/lib/pkgconfig
+    f=$FF_PREFIX/shared/lib/pkgconfig/`basename $f`
+    # OSX sed doesn't have in-place(-i)
+    mysedi $f 's/\/output/\/output\/shared/g'
+    mysedi $f 's/-lavcodec/-lffmpeg/g'
+    mysedi $f 's/-lavformat/-lffmpeg/g'
+    mysedi $f 's/-lavutil/-lffmpeg/g'
+    mysedi $f 's/-lswresample/-lffmpeg/g'
+    mysedi $f 's/-lswscale/-lffmpeg/g'
+done
 
 echo "\n--------------------"
 echo "[*] Finished"
