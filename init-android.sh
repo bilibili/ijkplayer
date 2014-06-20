@@ -18,8 +18,23 @@ TOOLS=tools
 echo "== pull ffmpeg base =="
 sh $TOOLS/pull-repo-base.sh $IJK_FFMPEG_UPSTREAM $IJK_FFMPEG_LOCAL_REPO
 
-echo "== pull ffmpeg fork =="
+echo "== pull ffmpeg fork armv7a =="
 sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK android/ffmpeg-armv7a ${IJK_FFMPEG_LOCAL_REPO}
+cd android/ffmpeg-armv7a
+git checkout ${IJK_FFMPEG_COMMIT}
+cd -
+
+echo "== pull ffmpeg fork armv5 =="
+sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK android/ffmpeg-armv5 ${IJK_FFMPEG_LOCAL_REPO}
+cd android/ffmpeg-armv5
+git checkout ${IJK_FFMPEG_COMMIT}
+cd -
+
+echo "== pull ffmpeg fork x86 =="
+sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK android/ffmpeg-x86 ${IJK_FFMPEG_LOCAL_REPO}
+cd android/ffmpeg-x86
+git checkout ${IJK_FFMPEG_COMMIT}
+cd -
 
 
 
@@ -30,7 +45,3 @@ echo "== pull openssl fork =="
 sh $TOOLS/pull-repo-ref.sh $IJK_OPENSSL_FORK android/openssl-armv7a ${IJK_OPENSSL_LOCAL_REPO}
 
 
-
-cd android/ffmpeg-armv7a
-git checkout ${IJK_FFMPEG_COMMIT}
-cd -
