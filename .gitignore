@@ -1,8 +1,8 @@
 # -----
 build/
 ffmpeg-temp/
-android/ffmpeg-armv7a
-android/openssl-armv7a
+android/ffmpeg-*
+android/openssl-*
 ios/ffmpeg-*
 ios/openssl-*
 extra
