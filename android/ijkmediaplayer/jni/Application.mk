@@ -26,7 +26,6 @@ APP_STL := stlport_shared
 APP_CFLAGS := -O3 -Wall -pipe \
     -ffast-math \
     -fstrict-aliasing -Werror=strict-aliasing \
-    -fmodulo-sched -fmodulo-sched-allow-regmoves \
     -Wno-psabi -Wa,--noexecstack \
     -DANDROID -DNDEBUG
 
