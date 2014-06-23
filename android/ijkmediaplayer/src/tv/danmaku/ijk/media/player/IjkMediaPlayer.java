@@ -54,10 +54,6 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     protected static final int MEDIA_SET_VIDEO_SAR = 10001;
 
-    static {
-        native_init();
-    }
-
     @AccessedByNative
     private long mNativeMediaPlayer;
 
@@ -85,7 +81,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
      * Load them by yourself, if your libraries are not installed at default place.
      */
     private static volatile boolean mIsLibLoaded = false;
-    public static void loadLibraries() {
+    public static void loadLibrariesOnce() {
         synchronized (IjkMediaPlayer.class) {
             if (!mIsLibLoaded) {
                 System.loadLibrary("stlport_shared");
@@ -94,6 +90,16 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
                 System.loadLibrary("ijksdl");
                 System.loadLibrary("ijkplayer");
                 mIsLibLoaded = true;
+            }
+        }
+    }
+
+    private static volatile boolean mIsNativeInitialized = false;
+    private static void initNativeOnce() {
+        synchronized (IjkMediaPlayer.class) {
+            if (!mIsNativeInitialized) {
+                native_init();
+                mIsNativeInitialized = true;
             }
         }
     }
@@ -125,8 +131,9 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     private void initPlayer(InitMode initMode) {
         if (initMode != InitMode.CustomLibrary) {
-            loadLibraries();
+            loadLibrariesOnce();
         }
+        initNativeOnce();
 
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
