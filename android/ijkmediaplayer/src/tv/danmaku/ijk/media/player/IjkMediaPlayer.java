@@ -55,11 +55,6 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     protected static final int MEDIA_SET_VIDEO_SAR = 10001;
 
     static {
-        System.loadLibrary("stlport_shared");
-        System.loadLibrary("ffmpeg");
-        System.loadLibrary("ijkutil");
-        System.loadLibrary("ijksdl");
-        System.loadLibrary("ijkplayer");
         native_init();
     }
 
@@ -86,6 +81,28 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     private String mDataSource;
 
     /**
+     * Default library loader
+     * Load them by yourself, if your libraries are not installed at default place.
+     */
+    private static volatile boolean mIsLibLoaded = false;
+    public static void loadLibraries() {
+        synchronized (IjkMediaPlayer.class) {
+            if (!mIsLibLoaded) {
+                System.loadLibrary("stlport_shared");
+                System.loadLibrary("ffmpeg");
+                System.loadLibrary("ijkutil");
+                System.loadLibrary("ijksdl");
+                System.loadLibrary("ijkplayer");
+                mIsLibLoaded = true;
+            }
+        }
+    }
+
+    public enum InitMode {
+        Default, CustomLibrary
+    }
+
+    /**
      * Default constructor. Consider using one of the create() methods for
      * synchronously instantiating a IjkMediaPlayer from a Uri or resource.
      * <p>
@@ -95,6 +112,22 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
      * </p>
      */
     public IjkMediaPlayer() {
+        this(InitMode.Default);
+    }
+
+    /**
+     * do not loadLibaray
+     * @param reserved
+     */
+    public IjkMediaPlayer(InitMode initMode) {
+        initPlayer(initMode);
+    }
+
+    private void initPlayer(InitMode initMode) {
+        if (initMode != InitMode.CustomLibrary) {
+            loadLibraries();
+        }
+
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
             mEventHandler = new EventHandler(this, looper);
