@@ -93,6 +93,7 @@ int sdl_audiotrack_get_min_buffer_size(SDL_AndroidAudioTrack* atrack);
 void sdl_audiotrack_play(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
 void sdl_audiotrack_pause(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
 void sdl_audiotrack_flush(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
+void sdl_audiotrack_set_volume(JNIEnv *env, SDL_AndroidAudioTrack *atrack, float left_volume, float right_volume);
 void sdl_audiotrack_stop(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
 void sdl_audiotrack_release(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
 int sdl_audiotrack_reserve_buffer(JNIEnv *env, SDL_AndroidAudioTrack *atrack, int len);

@@ -50,6 +50,10 @@ typedef struct SDL_Aout_Opaque {
     volatile bool pause_on;
     volatile bool abort_request;
 
+    volatile bool need_set_volume;
+    volatile float left_volume;
+    volatile float right_volume;
+
     SDL_Thread *audio_tid;
     SDL_Thread _audio_tid;
 } SDL_Aout_Opaque;
@@ -84,6 +88,10 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
         if (opaque->need_flush) {
             opaque->need_flush = 0;
             sdl_audiotrack_flush(env, atrack);
+        }
+        if (opaque->need_set_volume) {
+            opaque->need_set_volume = 0;
+            sdl_audiotrack_set_volume(env, atrack, opaque->left_volume, opaque->right_volume);
         }
         SDL_UnlockMutex(opaque->wakeup_mutex);
 
@@ -201,6 +209,18 @@ void aout_flush_audio(SDL_Aout *aout)
     SDL_UnlockMutex(opaque->wakeup_mutex);
 }
 
+void aout_set_volume(SDL_Aout *aout, float left_volume, float right_volume)
+{
+    SDL_Aout_Opaque *opaque = aout->opaque;
+    SDL_LockMutex(opaque->wakeup_mutex);
+    SDLTRACE("aout_flush_audio()");
+    opaque->left_volume = left_volume;
+    opaque->right_volume = right_volume;
+    opaque->need_set_volume = 1;
+    SDL_CondSignal(opaque->wakeup_cond);
+    SDL_UnlockMutex(opaque->wakeup_mutex);
+}
+
 void aout_close_audio(SDL_Aout *aout)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
@@ -249,6 +269,7 @@ SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack()
     aout->open_audio = aout_open_audio;
     aout->pause_audio = aout_pause_audio;
     aout->flush_audio = aout_flush_audio;
+    aout->set_volume = aout_set_volume;
     aout->close_audio = aout_close_audio;
 
     return aout;

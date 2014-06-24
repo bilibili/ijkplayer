@@ -65,6 +65,8 @@ public interface IMediaPlayer {
 
     public abstract void reset();
 
+    public abstract void setVolume(float leftVolume, float rightVolume);
+
     public abstract MediaInfo getMediaInfo();
 
     public abstract void setLogEnabled(boolean enable);

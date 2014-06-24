@@ -69,3 +69,19 @@ void ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_set_android_surface(surface=%p)=void", (void*)android_surface);
 }
+
+void ijkmp_android_set_volume(JNIEnv *env, IjkMediaPlayer *mp, float left, float right)
+{
+    if (!mp)
+        return;
+
+    MPTRACE("ijkmp_android_set_volume(%f, %f)", left, right);
+    pthread_mutex_lock(&mp->mutex);
+
+    if (mp && mp->ffplayer && mp->ffplayer->aout) {
+        SDL_AoutSetStereoVolume(mp->ffplayer->aout, left, right);
+    }
+
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_android_set_volume(%f, %f)=void", left, right);
+}

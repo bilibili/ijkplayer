@@ -263,6 +263,11 @@ static int audiotrack_set_stereo_volume(JNIEnv *env, SDL_AndroidAudioTrack *atra
     return retval;
 }
 
+void sdl_audiotrack_set_volume(JNIEnv *env, SDL_AndroidAudioTrack *atrack, float left_volume, float right_volume)
+{
+    audiotrack_set_stereo_volume(env, atrack, left_volume, right_volume);
+}
+
 SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudioTrack_Spec *spec)
 {
     assert(spec);

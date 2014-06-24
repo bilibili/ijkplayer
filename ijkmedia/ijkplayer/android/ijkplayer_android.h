@@ -31,4 +31,6 @@ IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*));
 
 void            ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface);
 
+void            ijkmp_android_set_volume(JNIEnv *env, IjkMediaPlayer *mp, float left, float right);
+
 #endif

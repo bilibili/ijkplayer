@@ -264,6 +264,19 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 }
 
 static void
+IjkMediaPlayer_setVolume(JNIEnv *env, jobject thiz, jfloat leftVolume, jfloat rightVolume)
+{
+    MPTRACE("IjkMediaPlayer_setVolume");
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setVolume: null mp", LABEL_RETURN);
+
+    ijkmp_android_set_volume(env, mp, leftVolume, rightVolume);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
 IjkMediaPlayer_setAvFormatOption(JNIEnv *env, jobject thiz, jobject name, jobject value)
 {
     MPTRACE("IjkMediaPlayer_setAvFormatOption");
@@ -445,23 +458,24 @@ static JNINativeMethod g_methods[] = {
         "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
         (void *) IjkMediaPlayer_setDataSourceAndHeaders
     },
-    { "_setVideoSurface", "(Landroid/view/Surface;)V", (void *) IjkMediaPlayer_setVideoSurface },
-    { "prepareAsync", "()V", (void *) IjkMediaPlayer_prepareAsync },
-    { "_start", "()V", (void *) IjkMediaPlayer_start },
-    { "_stop", "()V", (void *) IjkMediaPlayer_stop },
-    { "seekTo", "(J)V", (void *) IjkMediaPlayer_seekTo },
-    { "_pause", "()V", (void *) IjkMediaPlayer_pause },
-    { "isPlaying", "()Z", (void *) IjkMediaPlayer_isPlaying },
-    { "getCurrentPosition", "()J", (void *) IjkMediaPlayer_getCurrentPosition },
-    { "getDuration", "()J", (void *) IjkMediaPlayer_getDuration },
-    { "_release", "()V", (void *) IjkMediaPlayer_release },
-    { "_reset", "()V", (void *) IjkMediaPlayer_reset },
-    { "native_init", "()V", (void *) IjkMediaPlayer_native_init },
-    { "native_setup", "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_setup },
-    { "native_finalize", "()V", (void *) IjkMediaPlayer_native_finalize },
+    { "_setVideoSurface",   "(Landroid/view/Surface;)V", (void *) IjkMediaPlayer_setVideoSurface },
+    { "prepareAsync",       "()V",      (void *) IjkMediaPlayer_prepareAsync },
+    { "_start",             "()V",      (void *) IjkMediaPlayer_start },
+    { "_stop",              "()V",      (void *) IjkMediaPlayer_stop },
+    { "seekTo",             "(J)V",     (void *) IjkMediaPlayer_seekTo },
+    { "_pause",             "()V",      (void *) IjkMediaPlayer_pause },
+    { "isPlaying",          "()Z",      (void *) IjkMediaPlayer_isPlaying },
+    { "getCurrentPosition", "()J",      (void *) IjkMediaPlayer_getCurrentPosition },
+    { "getDuration",        "()J",      (void *) IjkMediaPlayer_getDuration },
+    { "_release",           "()V",      (void *) IjkMediaPlayer_release },
+    { "_reset",             "()V",      (void *) IjkMediaPlayer_reset },
+    { "setVolume",          "(FF)V",    (void *) IjkMediaPlayer_setVolume },
+    { "native_init",        "()V",      (void *) IjkMediaPlayer_native_init },
+    { "native_setup",       "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_setup },
+    { "native_finalize",    "()V",      (void *) IjkMediaPlayer_native_finalize },
 
     { "_setAvFormatOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvFormatOption },
-    { "_setAvCodecOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvCodecOption },
+    { "_setAvCodecOption",  "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvCodecOption },
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
