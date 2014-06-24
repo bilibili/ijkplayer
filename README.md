@@ -6,10 +6,10 @@ ijkplayer
 
 ### My Build Enviroment
 - Common
- - Mac OS X 10.8.5
+ - Mac OS X 10.9.3
 - Android
- - [ADT v22.3.0-887826](http://developer.android.com/sdk/index.html)
- - [NDK r9c](http://developer.android.com/tools/sdk/ndk/index.html)
+ - [ADT v22.6.2-1085508](http://developer.android.com/sdk/index.html)
+ - [NDK r9d](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
  - Xcode 5.0.2 (with iOS SDK 7)
  - Xcode 5.1 (can not build arm64 for some xcrun bug for now, http://llvm.org/bugs/show_bug.cgi?id=19179)
@@ -17,33 +17,30 @@ ijkplayer
 ### Dependent Tools (Mac OS X)
 - [MacPorts](http://www.macports.org/install.php)
  - sudo port -vd install git-core
- - sudo port -vd install ccache
 
 ### Latest Changes
 - [NEWS.md](NEWS.md)
 
 ### Features
 - Common
- - remove rarely used ffmpeg components to reduce binary size
+ - remove rarely used ffmpeg components to reduce binary size [tools/ffmpeg-common-profiles.sh](tools/ffmpeg-common-profiles.sh)
  - workaround for some buggy online video.
 - Android
  - platform: API 9~19
- - cpu: ARMv7a-NEON
+ - cpu: ARMv7a, x86, ARMv5 (not tested on real devices)
  - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/AbstractMediaPlayer.java)
  - video output: NativeWindow
  - audio output: AudioTrack
 - iOS
  - platform: iOS 5.1.1~7.0.x
- - cpu: ARMv7, ARMv7s, ARM64, i386
+ - cpu: ARMv7, ARMv7s, i386, ARM64 (not support for now, due to some aarch64 asm)
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
- - video-output: OpenGL ES 2.0 (YUV2RGB shaders)
+ - video-output: OpenGL ES 2.0 (I420/YV12 shaders)
  - audio-output: CoreAudio
 
 ### TODO
 - Android
- - video-output: OpenGL ES 2.0 (YUV2RGB shaders)
  - hw-accelerator: HW decode
- - cpu: x86 (maybe)
 - iOS
  - api: AVFoundation-like
  - hw-accelerator: HW decode
@@ -59,7 +56,7 @@ ijkplayer
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-stable
 cd ijkplayer-android-stable
-git checkout -B stable n0.1.1
+git checkout -B stable n0.1.2
 
 ./init-android.sh
 
