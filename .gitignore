@@ -9,6 +9,7 @@ extra
 .DS_Store
 android/ijkmediaplayer/.settings/*
 android/ijkmediawidget/.settings/*
+ijkmedia/ijkyuv/
 
 # built application files
 *.apk
