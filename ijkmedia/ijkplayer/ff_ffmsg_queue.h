@@ -165,8 +165,6 @@ inline static void msg_queue_flush(MessageQueue *q)
 inline static void msg_queue_destroy(MessageQueue *q)
 {
     msg_queue_flush(q);
-    SDL_DestroyMutex(q->mutex);
-    SDL_DestroyCond(q->cond);
 
     SDL_LockMutex(q->mutex);
     while(q->recycle_msg) {
@@ -176,6 +174,9 @@ inline static void msg_queue_destroy(MessageQueue *q)
         av_freep(&msg);
     }
     SDL_UnlockMutex(q->mutex);
+
+    SDL_DestroyMutex(q->mutex);
+    SDL_DestroyCond(q->cond);
 }
 
 inline static void msg_queue_abort(MessageQueue *q)

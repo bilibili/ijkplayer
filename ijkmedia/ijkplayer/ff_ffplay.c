@@ -166,8 +166,6 @@ static void packet_queue_flush(PacketQueue *q)
 static void packet_queue_destroy(PacketQueue *q)
 {
     packet_queue_flush(q);
-    SDL_DestroyMutex(q->mutex);
-    SDL_DestroyCond(q->cond);
 
     SDL_LockMutex(q->mutex);
     while(q->recycle_pkt) {
@@ -177,6 +175,9 @@ static void packet_queue_destroy(PacketQueue *q)
         av_freep(&pkt);
     }
     SDL_UnlockMutex(q->mutex);
+
+    SDL_DestroyMutex(q->mutex);
+    SDL_DestroyCond(q->cond);
 }
 
 static void packet_queue_abort(PacketQueue *q)

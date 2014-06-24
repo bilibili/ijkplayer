@@ -249,18 +249,19 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
     ijkmp_dec_ref_p(&mp);
 }
 
+static void IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this);
 static void
 IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 {
     MPTRACE("IjkMediaPlayer_reset");
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: reset: null mp", LABEL_RETURN);
+    if (!mp)
+        return;
 
-    ijkmp_android_set_surface(env, mp, NULL);
-    ijkmp_reset(mp);
+    jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL);
 
-    LABEL_RETURN:
-    ijkmp_dec_ref_p(&mp);
+    IjkMediaPlayer_release(env, thiz);
+    IjkMediaPlayer_native_setup(env, thiz, weak_thiz);
 }
 
 static void
