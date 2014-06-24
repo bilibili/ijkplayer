@@ -23,3 +23,5 @@ function pull_fork()
 pull_fork "armv7a"
 pull_fork "armv5"
 pull_fork "x86"
+
+sh init-android-libyuv.sh

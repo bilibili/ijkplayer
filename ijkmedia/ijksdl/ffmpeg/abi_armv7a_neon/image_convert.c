@@ -24,6 +24,7 @@
 
 #include <cpu-features.h>
 #include "chroma_neon.h"
+#include "libyuv.h"
 
 static void ijk_i420_rgb32_neon(int width, int height, uint8_t **dst_data, int *dst_linesize, const uint8_t **src_data, int *src_linesize)
 {
@@ -72,7 +73,13 @@ int ijk_image_convert(int width, int height,
             return 0;
             break;
         case AV_PIX_FMT_0BGR32:
-            ijk_i420_rgb32_neon(width, height, dst_data, dst_linesize, src_data, src_linesize);
+            I420ToABGR(
+                src_data[0], src_linesize[0],
+                src_data[1], src_linesize[1],
+                src_data[2], src_linesize[2],
+                dst_data[0], dst_linesize[0],
+                width, height);
+            // ijk_i420_rgb32_neon(width, height, dst_data, dst_linesize, src_data, src_linesize);
             return 0;
         default:
             break;
