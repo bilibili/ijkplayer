@@ -13,10 +13,9 @@ ijkplayer
 - iOS
  - Xcode 5.0.2 (with iOS SDK 7)
  - Xcode 5.1 (can not build arm64 for some xcrun bug for now, http://llvm.org/bugs/show_bug.cgi?id=19179)
-
-### Dependent Tools (Mac OS X)
-- [MacPorts](http://www.macports.org/install.php)
- - sudo port -vd install git-core
+- [HomeBrew](http://brew.sh)
+ - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+ - brew install git
 
 ### Latest Changes
 - [NEWS.md](NEWS.md)
