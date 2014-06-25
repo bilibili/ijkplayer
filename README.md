@@ -32,7 +32,7 @@ ijkplayer
  - audio output: AudioTrack
 - iOS
  - platform: iOS 5.1.1~7.0.x
- - cpu: ARMv7, ARMv7s, i386, ARM64 (not support for now, due to some aarch64 asm)
+ - cpu: ARMv7, ARMv7s, ARM64, i386, x86_64
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
  - video-output: OpenGL ES 2.0 (I420/YV12 shaders)
  - audio-output: CoreAudio
@@ -145,6 +145,10 @@ ijkplayer is based on or derives from projects below:
   - [SDL](http://www.libsdl.org)
 - Apache License v2
   - [VitamioBundle](https://github.com/yixia/VitamioBundle)
+- BSD-style license
+  - [libyuv](https://code.google.com/p/libyuv/)
+- ISC license
+  - [libyuv/source/x86inc.asm](https://code.google.com/p/libyuv/source/browse/trunk/source/x86inc.asm)
 
 ### Commercial Use
 ijkplayer is licensed under LGPLv2.1 or later, so itself is free for commercial use under LGPLv2.1 or later
