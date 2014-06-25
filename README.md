@@ -149,6 +149,8 @@ ijkplayer is based on or derives from projects below:
   - [libyuv](https://code.google.com/p/libyuv/)
 - ISC license
   - [libyuv/source/x86inc.asm](https://code.google.com/p/libyuv/source/browse/trunk/source/x86inc.asm)
+- Other license
+  - [kewlbear's FFmpeg-ios-build-script](http://github.com/kewlbear/FFmpeg-iOS-build-script) 
 
 ### Commercial Use
 ijkplayer is licensed under LGPLv2.1 or later, so itself is free for commercial use under LGPLv2.1 or later
