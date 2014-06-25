@@ -185,7 +185,7 @@ FF_CFLAGS="-O3 -Wall -pipe \
 #FF_CFLAGS="$FF_CFLAGS -finline-limit=300"
 
 export COMMON_FF_CFG_FLAGS=
-source $FF_BUILD_ROOT/../tools/ffmpeg-common-profiles.sh
+source $FF_BUILD_ROOT/../config/module.sh
 
 
 #--------------------
