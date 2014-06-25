@@ -1,8 +1,9 @@
 Changes between 0.1.3 and 0.1.2:
 --------------------------------
 ffmpeg: switch to ffmpeg n2.2
-ffmpeg: drop arm64 support for now, due to aarch64 asm compile issues
 player: fix complete/error state handle
+ffmpeg: build with x86_64
+android: replace vlc-chroma-asm with libyuv
 
 Changes between 0.1.2 and 0.1.1:
 --------------------------------
