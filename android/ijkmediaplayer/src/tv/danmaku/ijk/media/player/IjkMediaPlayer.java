@@ -80,15 +80,22 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
      * Default library loader
      * Load them by yourself, if your libraries are not installed at default place.
      */
+    private static IjkLibLoader sLocalLibLoader = new IjkLibLoader() {
+        @Override
+        public void loadLibrary(String libName) throws UnsatisfiedLinkError, SecurityException {
+            System.loadLibrary(libName);
+        }
+    };
+
     private static volatile boolean mIsLibLoaded = false;
-    public static void loadLibrariesOnce() {
+    public static void loadLibrariesOnce(IjkLibLoader libLoader) {
         synchronized (IjkMediaPlayer.class) {
             if (!mIsLibLoaded) {
-                System.loadLibrary("stlport_shared");
-                System.loadLibrary("ijkffmpeg");
-                System.loadLibrary("ijkutil");
-                System.loadLibrary("ijksdl");
-                System.loadLibrary("ijkplayer");
+                libLoader.loadLibrary("stlport_shared");
+                libLoader.loadLibrary("ijkffmpeg");
+                libLoader.loadLibrary("ijkutil");
+                libLoader.loadLibrary("ijksdl");
+                libLoader.loadLibrary("ijkplayer");
                 mIsLibLoaded = true;
             }
         }
@@ -104,10 +111,6 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         }
     }
 
-    public enum InitMode {
-        Default, CustomLibrary
-    }
-
     /**
      * Default constructor. Consider using one of the create() methods for
      * synchronously instantiating a IjkMediaPlayer from a Uri or resource.
@@ -118,21 +121,19 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
      * </p>
      */
     public IjkMediaPlayer() {
-        this(InitMode.Default);
+        this(sLocalLibLoader);
     }
 
     /**
      * do not loadLibaray
      * @param reserved
      */
-    public IjkMediaPlayer(InitMode initMode) {
-        initPlayer(initMode);
+    public IjkMediaPlayer(IjkLibLoader libLoader) {
+        initPlayer(libLoader);
     }
 
-    private void initPlayer(InitMode initMode) {
-        if (initMode != InitMode.CustomLibrary) {
-            loadLibrariesOnce();
-        }
+    private void initPlayer(IjkLibLoader libLoader) {
+        loadLibrariesOnce(libLoader);
         initNativeOnce();
 
         Looper looper;
