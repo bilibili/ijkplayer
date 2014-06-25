@@ -34,8 +34,8 @@ do_lipo () {
         LIPO_FLAGS="$LIPO_FLAGS $UNI_BUILD_ROOT/build/ffmpeg-$ARCH/output/lib/$LIB_FILE"
     done
 
-    lipo -create $LIPO_FLAGS -output $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
-    lipo -info $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
+    xcrun lipo -create $LIPO_FLAGS -output $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
+    xcrun lipo -info $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
 }
 
 do_lipo_all () {
