@@ -88,6 +88,7 @@ echo "===================="
 FF_BUILD_NAME="unknown"
 FF_XCRUN_PLATFORM="iPhoneOS"
 FF_XCRUN_OSVERSION=
+FF_GASPP_EXPORT=
 
 if [ "$FF_ARCH" == "i386" ]; then
     FF_BUILD_NAME="ffmpeg-i386"
@@ -113,6 +114,7 @@ elif [ "$FF_ARCH" == "arm64" ]; then
     FF_BUILD_NAME="ffmpeg-arm64"
     FF_XCRUN_OSVERSION="-miphoneos-version-min=5.1.1"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
+    FF_GASPP_EXPORT="GASPP_FIX_XCODE5=1"
 else
     echo "unknown architecture $FF_ARCH";
     exit 1
@@ -176,5 +178,5 @@ echo "\n--------------------"
 echo "[*] compile ffmpeg"
 echo "--------------------"
 cp config.* $FF_BUILD_PREFIX
-make -j3
+make -j3 $FF_GASPP_EXPORT
 make install
