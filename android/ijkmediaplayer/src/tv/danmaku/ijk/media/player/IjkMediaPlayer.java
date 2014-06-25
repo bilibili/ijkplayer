@@ -427,8 +427,19 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         _setAvCodecOption(name, value);
     }
 
+    /**
+     * @param chromaFourCC
+     *      AvFourCC.SDL_FCC_RV16
+     *      AvFourCC.SDL_FCC_RV32
+     *      AvFourCC.SDL_FCC_YV12
+     */
+    public void setOverlayFormat(int chromaFourCC) {
+        _setOverlayFormat(chromaFourCC);
+    }
+
     private native void _setAvFormatOption(String name, String value);
     private native void _setAvCodecOption(String name, String value);
+    private native void _setOverlayFormat(int chromaFourCC);
 
     @Override
     public void setAudioStreamType(int streamtype) {

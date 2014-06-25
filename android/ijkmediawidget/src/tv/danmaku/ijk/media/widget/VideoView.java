@@ -30,6 +30,7 @@ import tv.danmaku.ijk.media.player.IMediaPlayer.OnPreparedListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnSeekCompleteListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnVideoSizeChangedListener;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+import tv.danmaku.ijk.media.player.option.AvFourCC;
 import tv.danmaku.ijk.media.player.option.format.AvFormatOption_HttpDetectRangeSupport;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -238,11 +239,11 @@ public class VideoView extends SurfaceView implements
             mDuration = -1;
             mCurrentBufferPercentage = 0;
             // mMediaPlayer = new AndroidMediaPlayer();
-            IMediaPlayer ijkMediaPlayer = null;
+            IjkMediaPlayer ijkMediaPlayer = null;
             if (mUri != null) {
                 ijkMediaPlayer = new IjkMediaPlayer();
-                ((IjkMediaPlayer) ijkMediaPlayer)
-                        .setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
+                ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
+                ijkMediaPlayer.setOverlayFormat(AvFourCC.SDL_FCC_RV32);
             }
             mMediaPlayer = ijkMediaPlayer;
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
