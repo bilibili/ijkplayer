@@ -85,7 +85,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         synchronized (IjkMediaPlayer.class) {
             if (!mIsLibLoaded) {
                 System.loadLibrary("stlport_shared");
-                System.loadLibrary("ffmpeg");
+                System.loadLibrary("ijkffmpeg");
                 System.loadLibrary("ijkutil");
                 System.loadLibrary("ijksdl");
                 System.loadLibrary("ijkplayer");

@@ -252,11 +252,7 @@ $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack 
     libswscale/*.o \
     $FF_ASM_OBJ_DIR \
     $FF_DEP_LIBS \
-    -o $FF_PREFIX/libffmpeg.so
-
-cp $FF_PREFIX/libffmpeg.so $FF_PREFIX/libffmpeg-debug.so
-cp $FF_PREFIX/libffmpeg.so $FF_PREFIX/libffmpeg-release.so
-$STRIP --strip-unneeded $FF_PREFIX/libffmpeg-release.so
+    -o $FF_PREFIX/libijkffmpeg.so
 
 function mysedi() {
     f=$1
@@ -273,7 +269,7 @@ echo "--------------------"
 rm -rf $FF_PREFIX/shared
 mkdir -p $FF_PREFIX/shared/lib/pkgconfig
 ln -s $FF_PREFIX/include $FF_PREFIX/shared/include
-ln -s $FF_PREFIX/libffmpeg.so $FF_PREFIX/shared/lib/libffmpeg.so
+ln -s $FF_PREFIX/libijkffmpeg.so $FF_PREFIX/shared/lib/libijkffmpeg.so
 cp $FF_PREFIX/lib/pkgconfig/*.pc $FF_PREFIX/shared/lib/pkgconfig
 for f in $FF_PREFIX/lib/pkgconfig/*.pc; do
     # in case empty dir
@@ -284,9 +280,9 @@ for f in $FF_PREFIX/lib/pkgconfig/*.pc; do
     f=$FF_PREFIX/shared/lib/pkgconfig/`basename $f`
     # OSX sed doesn't have in-place(-i)
     mysedi $f 's/\/output/\/output\/shared/g'
-    mysedi $f 's/-lavcodec/-lffmpeg/g'
-    mysedi $f 's/-lavformat/-lffmpeg/g'
-    mysedi $f 's/-lavutil/-lffmpeg/g'
-    mysedi $f 's/-lswresample/-lffmpeg/g'
-    mysedi $f 's/-lswscale/-lffmpeg/g'
+    mysedi $f 's/-lavcodec/-lijkffmpeg/g'
+    mysedi $f 's/-lavformat/-lijkffmpeg/g'
+    mysedi $f 's/-lavutil/-lijkffmpeg/g'
+    mysedi $f 's/-lswresample/-lijkffmpeg/g'
+    mysedi $f 's/-lswscale/-lijkffmpeg/g'
 done
