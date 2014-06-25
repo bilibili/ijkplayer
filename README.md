@@ -132,7 +132,7 @@ cd ios
 ### License
 
 ```
-Copyright (C) 2013 Zhang Rui <bbcallen@gmail.com> 
+Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com> 
 Licensed under LGPLv2.1 or later
 ```
 
