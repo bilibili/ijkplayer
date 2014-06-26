@@ -1972,6 +1972,7 @@ static int read_thread(void *arg)
     int orig_nb_streams;
     SDL_mutex *wait_mutex = SDL_CreateMutex();
     int last_error = 0;
+    int64_t io_counter = 0;
 
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
@@ -2312,6 +2313,7 @@ static int read_thread(void *arg)
             SDL_UnlockMutex(wait_mutex);
             continue;
         }
+        io_counter += pkt->size;
         /* check if packet is in play range specified by user, then queue, otherwise discard */
         stream_start_time = ic->streams[pkt->stream_index]->start_time;
         pkt_in_play_range = ffp->duration == AV_NOPTS_VALUE ||
@@ -2332,7 +2334,10 @@ static int read_thread(void *arg)
             av_free_packet(pkt);
         }
 
-        ffp_check_buffering_l(ffp);
+        if (io_counter > BUFFERING_CHECK_PER_BYTES) {
+            io_counter = 0;
+            ffp_check_buffering_l(ffp);
+        }
     }
     /* wait until the end */
     while (!is->abort_request) {
