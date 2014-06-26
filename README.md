@@ -63,9 +63,6 @@ cd android
 ./compile-ffmpeg.sh
 ./compile-ijk.sh
 
-cd ijkmediaplayer/jni
-ndk-build
-
 # import android/ijkmediaplayer for MediaPlayer-like interface (recommended)
 # import android/ijkmediawidget for VideoView-like interface (based on Vitamio UI)
 # import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
@@ -83,9 +80,6 @@ git checkout master
 cd android
 ./compile-ffmpeg.sh
 ./compile-ijk.sh
-
-cd ijkmediaplayer/jni
-ndk-build
 
 # or Add Native Support in eclipse
 # cd ijkmediaplayer
