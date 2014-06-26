@@ -1,18 +1,18 @@
-Changes between 0.1.3 and 0.1.2:
+tag <next>:
 --------------------------------
 ffmpeg: switch to ffmpeg n2.2
 player: fix complete/error state handle
 ffmpeg: build with x86_64
 android: replace vlc-chroma-asm with libyuv
 
-Changes between 0.1.2 and 0.1.1:
+tag n0.1.2:
 --------------------------------
 ffmpeg: build with openssl
 player: fix aout leak
 player: reduce memory footprint for I420/YV12 overlay
 ios: snapshot last displayed image
 
-Changes between 0.1.1 and 0.1.0:
+tag n0.1.1:
 --------------------------------
 player: remove ugly frame drop trick
 ios: simplify application state handle
@@ -22,7 +22,7 @@ player: fix leak
 player: improve buffer indicator
 player: drop frame for high fps video
 
-Changes between 0.1.0 and 0.0.6:
+tag n0.1.0:
 --------------------------------
 - android: replace AbstractMediaPlayer with IMediaPlayer and other misc interfaces
 - android: remove list player classes due to lack of regression test
@@ -36,7 +36,7 @@ Changes between 0.1.0 and 0.0.6:
 - player: improve late packet/frame dropping
 - player: prefer h264 stream if multiple video stream exists
 
-Changes between 0.0.6 and 0.0.5:
+tag n0.0.6:
 --------------------------------
 - android: fix NativeWindow leak
 - ios: fix a deadlock related to AudioUnit
@@ -45,7 +45,7 @@ Changes between 0.0.6 and 0.0.5:
 - android: limait audio sample-rate to 4kHz~48kHz
 - ios: fix gles texture alignment
 
-Changes between 0.0.5 and 0.0.4:
+tag n0.0.5:
 --------------------------------
 - build: disable -fmodulo-sched -fmodulo-sched-allow-regmoves, may crash on gcc4.7~4.8
 - player: support ios
@@ -56,13 +56,13 @@ Changes between 0.0.5 and 0.0.4:
 - build: use shell scripts instead of git-submodule
 - android: use RV32 as default chroma
 
-Changes between 0.0.4 and 0.0.3:
+tag n0.0.4:
 --------------------------------
 - ffmpeg: enable ac3
 - android: target API-18
 - build: switch to NDKr9 gcc4.8 toolchain
 
-Changes between 0.0.3 and 0.0.1:
+tag n0.0.3:
 --------------------------------
 - ffmpeg: switch to tag n2.0
 - ffmpeg: remove rarely used decoders, parsers, demuxers
