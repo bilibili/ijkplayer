@@ -45,7 +45,7 @@ ijkplayer
  - hw-accelerator: HW decode
 
 ### NOT-ON-PLAN
-- obsolete platforms (Android: API 8-; iOS: 4.x-)
+- obsolete platforms (Android: API-8 and below; iOS: below 5.1.1)
 - obsolete cpu: ARMv5, ARMv6, MIPS (I don't even have these types of devices…)
 - native subtitle render
 
