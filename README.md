@@ -50,12 +50,12 @@ ijkplayer
 - native subtitle render
 
 ### Build Android
-- Stable
+- Latest tag
 
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-stable
 cd ijkplayer-android-stable
-git checkout -B stable n0.1.2
+git checkout -B latest n0.1.2
 
 ./init-android.sh
 
@@ -90,13 +90,13 @@ cd android
 # import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
 ```
 
-### iOS (works, but not really stable for now)
-- Stable
+### iOS
+- Latest tag
 
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-stable
 cd ijkplayer-ios-stable
-git checkout -B stable n0.1.2
+git checkout -B latest n0.1.2
 
 ./init-ios.sh
 
