@@ -22,7 +22,7 @@ ijkplayer
 
 ### Features
 - Common
- - remove rarely used ffmpeg components to reduce binary size [tools/ffmpeg-common-profiles.sh](tools/ffmpeg-common-profiles.sh)
+ - remove rarely used ffmpeg components to reduce binary size [config/module-lite.sh](config/module-lite.sh)
  - workaround for some buggy online video.
 - Android
  - platform: API 9~19
