@@ -131,9 +131,10 @@ echo "\n--------------------"
 echo "[*] make NDK standalone toolchain"
 echo "--------------------"
 UNAMES=$(uname -s)
+UNAMESM=$(uname -sm)
+echo "build on $UNAMESM"
 FF_MAKE_TOOLCHAIN_FLAGS="--install-dir=$FF_TOOLCHAIN_PATH"
 if [ "$UNAMES" == "Darwin" ]; then
-    echo "build on darwin-x86_64"
     FF_MAKE_TOOLCHAIN_FLAGS="$FF_MAKE_TOOLCHAIN_FLAGS --system=darwin-x86_64"
     FF_MAKE_FLAG=-j`sysctl -n machdep.cpu.thread_count`
 fi
