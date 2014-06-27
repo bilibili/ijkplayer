@@ -111,6 +111,17 @@ void ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc)
     MPTRACE("ijkmp_set_overlay_format()=void\n");
 }
 
+void ijkmp_set_format_callback(IjkMediaPlayer *mp, ijk_format_control_message cb, void *opaque)
+{
+    assert(mp);
+
+    MPTRACE("ijkmp_set_format_callback(%p, %p)\n", cb, opaque);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_format_callback(mp->ffplayer, cb, opaque);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_set_format_callback()=void\n");
+}
+
 void ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value)
 {
     assert(mp);

@@ -37,6 +37,7 @@ void      ffp_destroy_p(FFPlayer **pffp);
 void      ffp_reset(FFPlayer *ffp);
 
 /* set options before ffp_prepare_async_l() */
+void      ffp_set_format_callback(FFPlayer *ffp, ijk_format_control_message cb, void *opaque);
 void      ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value);
 void      ffp_set_codec_option(FFPlayer *ffp, const char *name, const char *value);
 void      ffp_set_sws_option(FFPlayer *ffp, const char *name, const char *value);
@@ -61,5 +62,9 @@ long      ffp_get_duration_l(FFPlayer *ffp);
 void      ffp_toggle_buffering_l(FFPlayer *ffp, int start_buffering);
 void      ffp_toggle_buffering(FFPlayer *ffp, int start_buffering);
 void      ffp_check_buffering_l(FFPlayer *ffp);
+
+struct AVFormatContext;
+static int ffp_format_control_message(struct AVFormatContext *s, int type,
+                                      void *data, size_t data_size);
 
 #endif

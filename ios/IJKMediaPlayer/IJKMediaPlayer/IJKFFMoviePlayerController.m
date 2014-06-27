@@ -27,11 +27,14 @@
 #import "IJKFFMrl.h"
 #import "IJKAudioKit.h"
 
+#include "string.h"
+
 @interface IJKFFMoviePlayerController() <IJKAudioSessionDelegate>
 @end
 
 @implementation IJKFFMoviePlayerController {
     IJKFFMrl *_ffMrl;
+    id<IJKMediaSegmentResolver> _segmentResolver;
 
     IjkMediaPlayer *_mediaPlayer;
     IJKFFMoviePlayerMessagePool *_msgPool;
@@ -72,6 +75,15 @@
 
 - (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
 {
+    return [self initWithContentURL:aUrl
+                        withOptions:options
+                withSegmentResolver:nil];
+}
+
+- (id)initWithContentURL:(NSURL *)aUrl
+             withOptions:(IJKFFOptions *)options
+     withSegmentResolver:(id<IJKMediaSegmentResolver>)segmentResolver
+{
     if (aUrl == nil)
         return nil;
 
@@ -79,6 +91,7 @@
     if (self) {
         ijkmp_global_init();
 
+        // init fields
         _controlStyle = MPMovieControlStyleNone;
         _scalingMode = MPMovieScalingModeAspectFit;
         _shouldAutoplay = NO;
@@ -87,15 +100,18 @@
         _initialPlaybackTime = 0;
         _endPlaybackTime = 0;
 
-        [[IJKAudioKit sharedInstance] setupAudioSession:self];
-
+        // init media resource
         _ffMrl = [[IJKFFMrl alloc] initWithMrl:[aUrl absoluteString]];
+        _segmentResolver = segmentResolver;
 
+        // init player
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
         _msgPool = [[IJKFFMoviePlayerMessagePool alloc] init];
 
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
+        ijkmp_set_format_callback(_mediaPlayer, format_control_message, (__bridge void *) self);
 
+        // init video sink
 //        int chroma = SDL_FCC_RV24;
         int chroma = SDL_FCC_I420;
         IJKSDLGLView *glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]
@@ -105,8 +121,13 @@
         ijkmp_ios_set_glview(_mediaPlayer, glView);
         ijkmp_set_overlay_format(_mediaPlayer, chroma);
 
+        // init audio sink
+        [[IJKAudioKit sharedInstance] setupAudioSession:self];
+
+        // apply ffmpeg options
         [options applyTo:_mediaPlayer];
 
+        // init extra
         _keepScreenOnWhilePlaying = YES;
         [self setScreenOn:YES];
 
@@ -472,6 +493,49 @@ int media_player_msg_loop(void* arg)
         // retained in prepare_async, before SDL_CreateThreadEx
         ijkmp_dec_ref_p(&mp);
         return 0;
+    }
+}
+
+#pragma mark av_format_control_message
+
+int onControlResolveSegment(IJKFFMoviePlayerController *mpc, int type, void *data, size_t data_size)
+{
+    if (mpc == nil)
+        return -1;
+
+    IJKFormatSegmentContext *fsc = data;
+    if (fsc == NULL || sizeof(IJKFormatSegmentContext) != data_size) {
+        NSLog(@"IJKAVF_CM_RESOLVE_SEGMENT: invalid call\n");
+        return -1;
+    }
+
+    NSString *url = [mpc->_segmentResolver urlOfSegment:fsc->position];
+    if (url == nil)
+        return -1;
+
+    const char *rawUrl = [url UTF8String];
+    if (url == NULL)
+        return -1;
+
+    fsc->url = strdup(rawUrl);
+    if (fsc->url == NULL)
+        return -1;
+
+    fsc->url_free = free;
+    return 0;
+}
+
+// NOTE: support to be called from read_thread
+int format_control_message(void *opaque, int type, void *data, size_t data_size)
+{
+    IJKFFMoviePlayerController *mpc = (__bridge IJKFFMoviePlayerController*)opaque;
+
+    switch (type) {
+        case IJKAVF_CM_RESOLVE_SEGMENT:
+            return onControlResolveSegment(mpc, type, data, data_size);
+        default: {
+            return -1;
+        }
     }
 }
 

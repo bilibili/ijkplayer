@@ -80,3 +80,11 @@ IJK_EXTERN NSString *const IJKMoviePlayerPlaybackDidFinishNotification;
 IJK_EXTERN NSString *const IJKMoviePlayerPlaybackStateDidChangeNotification;
 
 @end
+
+#pragma mark IJKMediaResource
+
+@protocol IJKMediaSegmentResolver <NSObject>
+
+- (NSString *)urlOfSegment:(int)segmentPosition;
+
+@end

@@ -1984,6 +1984,10 @@ static int read_thread(void *arg)
     ic = avformat_alloc_context();
     ic->interrupt_callback.callback = decode_interrupt_cb;
     ic->interrupt_callback.opaque = is;
+    if (ffp->format_control_message) {
+        av_format_set_control_message_cb(ic, ffp_format_control_message);
+        av_format_set_opaque(ic, ffp);
+    }
     err = avformat_open_input(&ic, is->filename, is->iformat, &ffp->format_opts);
     if (err < 0) {
         print_error(is->filename, err);
@@ -2588,6 +2592,12 @@ void ffp_destroy_p(FFPlayer **pffp)
     *pffp = NULL;
 }
 
+void ffp_set_format_callback(FFPlayer *ffp, ijk_format_control_message cb, void *opaque)
+{
+    ffp->format_control_message = cb;
+    ffp->format_control_opaque  = opaque;
+}
+
 void ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value)
 {
     if (!ffp)
@@ -2913,4 +2923,20 @@ void ffp_check_buffering_l(FFPlayer *ffp)
 
         ffp_toggle_buffering(ffp, 0);
     }
+}
+
+static int ffp_format_control_message(struct AVFormatContext *s, int type,
+                                      void *data, size_t data_size)
+{
+    if (s == NULL)
+        return -1;
+
+    FFPlayer *ffp = (FFPlayer *)s->opaque;
+    if (ffp == NULL)
+        return -1;
+
+    if (!ffp->format_control_message)
+        return -1;
+
+    return ffp->format_control_message(ffp->format_control_opaque, type, data, data_size);
 }

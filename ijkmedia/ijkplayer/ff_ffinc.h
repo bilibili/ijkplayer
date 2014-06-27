@@ -33,8 +33,11 @@
 #include "libswscale/swscale.h"
 #include "libavutil/opt.h"
 #include "libswresample/swresample.h"
-#include "ijksdl/ijksdl.h"
 
+#include "libavformat/ijkavfmsg.h"
+#include "ijksdl/ijksdl.h"
 #include "ijkutil/ijkutil.h"
+
+typedef int (*ijk_format_control_message)(void *opaque, int type, void *data, size_t data_size);
 
 #endif

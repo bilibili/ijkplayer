@@ -32,7 +32,7 @@
 #define MPTRACE ALOGW
 #endif
 
-struct IjkMediaPlayer;
+typedef struct IjkMediaPlayer IjkMediaPlayer;
 typedef struct FFPlayer FFPlayer;
 typedef struct SDL_Vout SDL_Vout;
 
@@ -138,17 +138,16 @@ typedef struct SDL_Vout SDL_Vout;
  */
 #define MP_STATE_END                9
 
-typedef struct IjkMediaPlayer IjkMediaPlayer;
-
  void           ijkmp_global_init();
  void           ijkmp_global_uninit();
 
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*));
-void            ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc);
+void            ijkmp_set_format_callback(IjkMediaPlayer *mp, ijk_format_control_message cb, void *opaque);
 void            ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value);
 void            ijkmp_set_codec_option(IjkMediaPlayer *mp, const char *name, const char *value);
 void            ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *value);
+void            ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc);
 void            ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count);
 void            ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps);
 

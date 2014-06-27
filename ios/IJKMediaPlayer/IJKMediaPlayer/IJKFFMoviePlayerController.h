@@ -25,7 +25,12 @@
 
 @interface IJKFFMoviePlayerController : NSObject <IJKMediaPlayback>
 
-- (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options;
+- (id)initWithContentURL:(NSURL *)aUrl
+             withOptions:(IJKFFOptions *)options;
+
+- (id)initWithContentURL:(NSURL *)aUrl
+             withOptions:(IJKFFOptions *)options
+     withSegmentResolver:(id<IJKMediaSegmentResolver>)segmentResolver;
 
 - (void)prepareToPlay;
 - (void)play;
