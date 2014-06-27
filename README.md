@@ -146,9 +146,9 @@ ijkplayer is based on or derives from projects below:
 
 ijkplayer's build scripts are based on or derives from projects below:
 - [gas-preprocessor](http://git.libav.org/?p=gas-preprocessor.git)
-- [VideoLAN vlc-ports/android](http://git.videolan.org/?p=vlc-ports/android.git;a=summary)
+- [VideoLAN](http://git.videolan.org)
 - [yixia/FFmpeg-Android](https://github.com/yixia/FFmpeg-Android)
-- [kewlbear's FFmpeg-ios-build-script](http://github.com/kewlbear/FFmpeg-iOS-build-script) 
+- [kewlbear/FFmpeg-iOS-build-script](http://github.com/kewlbear/FFmpeg-iOS-build-script) 
 
 ### Commercial Use
 ijkplayer is licensed under LGPLv2.1 or later, so itself is free for commercial use under LGPLv2.1 or later
