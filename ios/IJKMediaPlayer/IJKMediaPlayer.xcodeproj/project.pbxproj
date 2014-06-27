@@ -95,6 +95,7 @@
 		E6716E4D1807EA5000B3FBC1 /* IJKFFMrl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFMrl.m; sourceTree = "<group>"; };
 		E672D6F118D3445100C51FF9 /* IJKMediaModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaModule.h; path = IJKMediaPlayer/IJKMediaModule.h; sourceTree = "<group>"; };
 		E672D6F218D3445100C51FF9 /* IJKMediaModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMediaModule.m; path = IJKMediaPlayer/IJKMediaModule.m; sourceTree = "<group>"; };
+		E6850E7A195D6ABF00550718 /* ijkavfmsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkavfmsg.h; sourceTree = "<group>"; };
 		E6903EB917EAF6C500CFD954 /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libIJKMediaPlayer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6903EC017EAF6C500CFD954 /* IJKMediaPlayer-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "IJKMediaPlayer-Prefix.pch"; sourceTree = "<group>"; };
 		E6903EC117EAF6C500CFD954 /* IJKMediaPlayback.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = IJKMediaPlayback.h; path = IJKMediaPlayer/IJKMediaPlayback.h; sourceTree = "<group>"; };
@@ -390,6 +391,7 @@
 			children = (
 				E6903F8317EAFC2C00CFD954 /* avformat.h */,
 				E6903F8417EAFC2C00CFD954 /* avio.h */,
+				E6850E7A195D6ABF00550718 /* ijkavfmsg.h */,
 				E6903F8517EAFC2C00CFD954 /* version.h */,
 			);
 			path = libavformat;
