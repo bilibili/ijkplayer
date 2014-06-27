@@ -27,7 +27,7 @@ ijkplayer
 - Android
  - platform: API 9~19
  - cpu: ARMv7a, x86, ARMv5 (not tested on real devices)
- - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/AbstractMediaPlayer.java)
+ - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - video output: NativeWindow
  - audio output: AudioTrack
 - iOS
