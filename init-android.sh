@@ -15,7 +15,7 @@ function pull_fork()
 {
     echo "== pull ffmpeg fork $1 =="
     sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK android/ffmpeg-$1 ${IJK_FFMPEG_LOCAL_REPO}
-    cd android/ffmpeg-armv7a
+    cd android/ffmpeg-$1
     git checkout ${IJK_FFMPEG_COMMIT}
     cd -
 }
