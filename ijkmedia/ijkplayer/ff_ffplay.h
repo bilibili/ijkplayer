@@ -63,8 +63,4 @@ void      ffp_toggle_buffering_l(FFPlayer *ffp, int start_buffering);
 void      ffp_toggle_buffering(FFPlayer *ffp, int start_buffering);
 void      ffp_check_buffering_l(FFPlayer *ffp);
 
-struct AVFormatContext;
-static int ffp_format_control_message(struct AVFormatContext *s, int type,
-                                      void *data, size_t data_size);
-
 #endif

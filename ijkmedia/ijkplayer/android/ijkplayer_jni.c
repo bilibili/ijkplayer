@@ -25,6 +25,7 @@
 #include <pthread.h>
 #include <jni.h>
 #include "ijkutil/ijkutil.h"
+#include "ijkadk/ijkadk.h"
 #include "../ff_ffplay.h"
 #include "ijkplayer_android_def.h"
 #include "ijkplayer_android.h"
@@ -522,6 +523,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     g_clazz.postEventFromNative = (*env)->GetStaticMethodID(env, g_clazz.clazz, "postEventFromNative", "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     IJK_CHECK_RET(g_clazz.postEventFromNative, -1, "missing postEventFromNative");
 
+    ijkadk_global_init(env);
     ijkmp_global_init();
 
     return JNI_VERSION_1_4;

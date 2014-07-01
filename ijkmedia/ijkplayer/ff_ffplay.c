@@ -47,6 +47,10 @@
 // #define FFP_SHOW_DEMUX_CACHE
 // #define FFP_SHOW_PKT_RECYCLE
 
+static int ffp_format_control_message(struct AVFormatContext *s, int type,
+                                      void *data, size_t data_size);
+
+
 #define FFP_BUF_MSG_PERIOD (3)
 
 static AVPacket flush_pkt;

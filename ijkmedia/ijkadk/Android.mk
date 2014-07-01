@@ -1,5 +1,4 @@
-#
-# Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+# copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
 #
 # This file is part of ijkPlayer.
 #
@@ -19,22 +18,20 @@
 
 LOCAL_PATH := $(call my-dir)
 
+
 include $(CLEAR_VARS)
 LOCAL_CFLAGS += -std=c99
 LOCAL_LDLIBS += -llog -landroid
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
-LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 
-LOCAL_SRC_FILES += ff_cmdutils.c
-LOCAL_SRC_FILES += ff_ffplay.c
-LOCAL_SRC_FILES += ijkplayer.c
 
-LOCAL_SRC_FILES += android/ijkplayer_android.c
-LOCAL_SRC_FILES += android/ijkplayer_jni.c
+LOCAL_SRC_FILES += ijkadk_android_os_bundle.c
+LOCAL_SRC_FILES += ijkadk.c
 
-LOCAL_SHARED_LIBRARIES := ijkffmpeg ijkutil ijksdl ijkadk
 
-LOCAL_MODULE := ijkplayer
+LOCAL_SHARED_LIBRARIES := ijkutil
+
+LOCAL_MODULE := ijkadk
 include $(BUILD_SHARED_LIBRARY)
