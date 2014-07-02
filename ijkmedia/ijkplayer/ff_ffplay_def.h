@@ -28,12 +28,18 @@
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
 
-#define DEFAULT_HIGH_WATER_MARK_IN_BYTES    (128 * 1024)
+#define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
 
+/*
+ * START: buffering after prepared/seeked
+ * NEXT:  buffering for the second time after START
+ * MAX:   ...
+ */
+#define DEFAULT_START_HIGH_WATER_MARK_IN_MS     (100)
+#define DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS      (1 * 1000)
 #define DEFAULT_MAX_HIGH_WATER_MARK_IN_MS       (5 * 1000)
-#define DEFAULT_NORMAL_HIGH_WATER_MARK_IN_MS    (2 * 1000)
-#define DEFAULT_FAST_HIGH_WATER_MARK_IN_MS      (100)
-#define BUFFERING_CHECK_PER_BYTES               (1 * 1024)
+
+#define BUFFERING_CHECK_PER_BYTES               (512)
 
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 50000
@@ -449,11 +455,13 @@ typedef struct FFPlayer {
 
     MessageQueue msg_queue;
 
-    int high_water_mark_in_bytes;
-    int max_high_water_mark_in_ms;
-    int normal_high_water_mark_in_ms;
-    int fast_high_water_mark_in_ms;
     int max_buffer_size;
+    int high_water_mark_in_bytes;
+
+    int start_high_water_mark_in_ms;
+    int next_high_water_mark_in_ms;
+    int max_high_water_mark_in_ms;
+    int current_high_water_mark_in_ms;
 
     int last_buffered_time_percentage;
     int last_buffered_size_percentage;
@@ -532,11 +540,13 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->error                  = 0;
     ffp->error_count            = 0;
 
-    ffp->high_water_mark_in_bytes       = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
-    ffp->max_high_water_mark_in_ms      = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS;
-    ffp->normal_high_water_mark_in_ms   = DEFAULT_NORMAL_HIGH_WATER_MARK_IN_MS;
-    ffp->fast_high_water_mark_in_ms     = DEFAULT_FAST_HIGH_WATER_MARK_IN_MS;
     ffp->max_buffer_size                = MAX_QUEUE_SIZE;
+    ffp->high_water_mark_in_bytes       = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
+
+    ffp->start_high_water_mark_in_ms    = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
+    ffp->next_high_water_mark_in_ms     = DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS;
+    ffp->max_high_water_mark_in_ms      = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS;
+    ffp->current_high_water_mark_in_ms  = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
 
     ffp->last_buffered_time_percentage  = -1;
     ffp->last_buffered_size_percentage  = -1;

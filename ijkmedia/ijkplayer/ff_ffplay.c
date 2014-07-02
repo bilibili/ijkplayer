@@ -45,6 +45,7 @@
 // #define FFP_SHOW_VDPS
 // #define FFP_SHOW_AUDIO_DELAY
 // #define FFP_SHOW_DEMUX_CACHE
+#define FFP_SHOW_BUF_POS
 // #define FFP_SHOW_PKT_RECYCLE
 
 static int ffp_format_control_message(struct AVFormatContext *s, int type,
@@ -2202,6 +2203,7 @@ static int read_thread(void *arg)
                    set_clock(&is->extclk, seek_target / (double)AV_TIME_BASE, 0);
                 }
             }
+            ffp->current_high_water_mark_in_ms = ffp->start_high_water_mark_in_ms;
             is->seek_req = 0;
             is->queue_attachments_req = 1;
             eof = 0;
@@ -2826,7 +2828,7 @@ void ffp_toggle_buffering(FFPlayer *ffp, int start_buffering)
 void ffp_check_buffering_l(FFPlayer *ffp)
 {
     VideoState *is            = ffp->is;
-    int hwm_in_ms             = ffp->fast_high_water_mark_in_ms; // use fast water mark for first loading
+    int hwm_in_ms             = ffp->current_high_water_mark_in_ms; // use fast water mark for first loading
     int buf_size_percent      = -1;
     int buf_time_percent      = -1;
     int hwm_in_bytes          = ffp->high_water_mark_in_bytes;
@@ -2909,7 +2911,7 @@ void ffp_check_buffering_l(FFPlayer *ffp)
     if (buf_percent) {
         if (buf_percent <= 100 && abs(ffp->last_buffered_percent - buf_percent) >= FFP_BUF_MSG_PERIOD) {
             ffp->last_buffered_percent = buf_percent;
-#ifdef FFP_SHOW_DEMUX_CACHE
+#ifdef FFP_SHOW_BUF_POS
             ALOGE("buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
 #endif
             ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_UPDATE, (int)buf_time_position, buf_percent);
@@ -2917,14 +2919,16 @@ void ffp_check_buffering_l(FFPlayer *ffp)
     }
 
     if (need_start_buffering) {
-        if (hwm_in_ms < ffp->normal_high_water_mark_in_ms)
-            hwm_in_ms = ffp->normal_high_water_mark_in_ms;
-
-        hwm_in_ms *= 2;
+        if (hwm_in_ms < ffp->next_high_water_mark_in_ms) {
+            hwm_in_ms = ffp->next_high_water_mark_in_ms;
+        } else {
+            hwm_in_ms *= 2;
+        }
 
         if (hwm_in_ms > ffp->max_high_water_mark_in_ms)
             hwm_in_ms = ffp->max_high_water_mark_in_ms;
 
+        ffp->current_high_water_mark_in_ms = hwm_in_ms;
         ffp_toggle_buffering(ffp, 0);
     }
 }
