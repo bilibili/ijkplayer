@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
+import tv.danmaku.ijk.media.player.annotations.CalledByNative;
 import tv.danmaku.ijk.media.player.option.AvFormatOption;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 import android.annotation.SuppressLint;
@@ -31,6 +32,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.text.TextUtils;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -75,6 +77,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     private int mVideoSarDen;
 
     private String mDataSource;
+    private String mFFConcatContent;
 
     /**
      * Default library loader
@@ -251,8 +254,20 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         return mDataSource;
     }
 
+    public void setDataSourceAsFFConcatContent(String ffConcatContent) {
+        mFFConcatContent = ffConcatContent;
+    }
+
     @Override
-    public native void prepareAsync() throws IllegalStateException;
+    public void prepareAsync() throws IllegalStateException {
+        if (TextUtils.isEmpty(mFFConcatContent)) {
+            _prepareAsync();
+        } else {
+            _prepareAsync();
+        }
+    }
+
+    public native void _prepareAsync() throws IllegalStateException;
 
     @Override
     public void start() throws IllegalStateException {
@@ -545,6 +560,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
      * that the native code is safe from the object disappearing from underneath
      * it. (This is the cookie passed to native_setup().)
      */
+    @CalledByNative
     private static void postEventFromNative(Object weakThiz, int what,
             int arg1, int arg2, Object obj) {
         if (weakThiz == null)
@@ -565,5 +581,93 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             Message m = mp.mEventHandler.obtainMessage(what, arg1, arg2, obj);
             mp.mEventHandler.sendMessage(m);
         }
+    }
+
+    private OnControlMessageListener mOnControlMessageListener;
+    public void setOnControlMessageListener(OnControlMessageListener listener) {
+        mOnControlMessageListener = listener;
+    }
+
+    public static interface OnControlMessageListener {
+        public int onControlResolveSegmentCount();
+        public String onControlResolveSegmentUrl(int segment);
+        public String onControlResolveSegmentOfflineMrl(int segment);
+        public int onControlResolveSegmentDuration(int segment);
+    }
+
+    @CalledByNative
+    private static int onControlResolveSegmentCount(Object weakThiz) {
+        DebugLog.ifmt(TAG, "onControlResolveSegmentCount");
+        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
+            return -1;
+
+        @SuppressWarnings("unchecked")
+        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
+        IjkMediaPlayer player = weakPlayer.get();
+        if (player == null)
+            return -1;
+
+        OnControlMessageListener listener = player.mOnControlMessageListener;
+        if (listener == null)
+            return -1;
+
+        return listener.onControlResolveSegmentCount();
+    }
+
+    @CalledByNative
+    private static String onControlResolveSegmentUrl(Object weakThiz, int segment) {
+        DebugLog.ifmt(TAG, "onControlResolveSegmentUrl %d", segment);
+        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
+            return null;
+
+        @SuppressWarnings("unchecked")
+        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
+        IjkMediaPlayer player = weakPlayer.get();
+        if (player == null)
+            return null;
+
+        OnControlMessageListener listener = player.mOnControlMessageListener;
+        if (listener == null)
+            return null;
+        
+        return listener.onControlResolveSegmentUrl(segment);
+    }
+
+    @CalledByNative
+    private static String onControlResolveSegmentOfflineMrl(Object weakThiz, int segment) {
+        DebugLog.ifmt(TAG, "onControlResolveSegmentOfflineMrl %d", segment);
+        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
+            return null;
+
+        @SuppressWarnings("unchecked")
+        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
+        IjkMediaPlayer player = weakPlayer.get();
+        if (player == null)
+            return null;
+
+        OnControlMessageListener listener = player.mOnControlMessageListener;
+        if (listener == null)
+            return null;
+        
+        return listener.onControlResolveSegmentOfflineMrl(segment);
+    }
+
+    @CalledByNative
+    private static int onControlResolveSegmentDuration(Object weakThiz, int segment) {
+        DebugLog.ifmt(TAG, "onControlResolveSegmentDuration %d", segment);
+        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
+            return -1;
+
+        @SuppressWarnings("unchecked")
+        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
+        IjkMediaPlayer player = weakPlayer.get();
+        if (player == null)
+            return -1;
+
+        OnControlMessageListener listener = player.mOnControlMessageListener;
+        if (listener == null)
+            return -1;
+        
+        return listener.onControlResolveSegmentDuration(segment);
     }
 }

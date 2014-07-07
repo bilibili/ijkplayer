@@ -29,6 +29,7 @@
 #include "../ff_ffplay.h"
 #include "ijkplayer_android_def.h"
 #include "ijkplayer_android.h"
+#include "ijksdl/android/ijksdl_android_jni.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
@@ -50,8 +51,14 @@ typedef struct player_fields_t {
     jfieldID surface_texture;
 
     jmethodID postEventFromNative;
+    jmethodID onControlResolveSegmentCount;
+    jmethodID onControlResolveSegmentUrl;
+    jmethodID onControlResolveSegmentOfflineMrl;
+    jmethodID onControlResolveSegmentDuration;
 } player_fields_t;
 static player_fields_t g_clazz;
+
+static int format_control_message(void *opaque, int type, void *data, size_t data_size);
 
 static IjkMediaPlayer *jni_get_media_player(JNIEnv* env, jobject thiz)
 {
@@ -356,6 +363,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 
     jni_set_media_player(env, thiz, mp);
     ijkmp_set_weak_thiz(mp, (*env)->NewGlobalRef(env, weak_this));
+    ijkmp_set_format_callback(mp, format_control_message, (*env)->NewGlobalRef(env, weak_this));
 
     LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
@@ -368,6 +376,107 @@ IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz, jobject name, jobject 
     IjkMediaPlayer_release(env, thiz);
 }
 
+static int
+_onNativeControlResolveSegmentConcat(JNIEnv *env, jobject weak_thiz, int type, void *data, size_t data_size)
+{
+    if (weak_thiz == NULL || data == NULL)
+        return -1;
+
+    IJKFormatSegmentConcatContext *fsc_concat = (IJKFormatSegmentConcatContext *)data;
+
+    jint count = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.onControlResolveSegmentCount, weak_thiz);
+    if (count <= 0)
+        return -1;
+
+    fsc_concat->count = count;
+    return 0;
+}
+
+static int
+_onNativeControlResolveSegment(JNIEnv *env, jobject weak_thiz, int type, void *data, size_t data_size)
+{
+    if (weak_thiz == NULL || data == NULL)
+        return -1;
+
+    IJKFormatSegmentContext *fsc = (IJKFormatSegmentContext *)data;
+
+    jint duration = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.onControlResolveSegmentDuration, weak_thiz, fsc->position);
+
+    jstring url = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.onControlResolveSegmentUrl, weak_thiz, fsc->position);
+    if (url == NULL)
+        return -1;
+
+    const char* c_url = (*env)->GetStringUTFChars(env, url, NULL);
+    if (c_url == NULL)
+        return -1;
+
+    fsc->url = strdup(c_url);
+    (*env)->ReleaseStringUTFChars(env, url, c_url);
+
+    if (fsc->url == NULL)
+        return -1;
+
+    fsc->duration  = duration;
+    fsc->duration *= 1000;
+    fsc->url_free  = free;
+    return 0;
+}
+
+static int
+_onNativeControlResolveSegmentOffline(JNIEnv *env, jobject weak_thiz, int type, void *data, size_t data_size)
+{
+    if (weak_thiz == NULL || data == NULL)
+        return -1;
+
+    IJKFormatSegmentContext *fsc = (IJKFormatSegmentContext *)data;
+    jint duration = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.onControlResolveSegmentDuration, weak_thiz, fsc->position);
+
+    jstring mrl = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.onControlResolveSegmentOfflineMrl, weak_thiz, fsc->position);
+    if (mrl == NULL)
+        return -1;
+
+    const char* c_mrl = (*env)->GetStringUTFChars(env, mrl, NULL);
+    if (c_mrl == NULL)
+        return -1;
+
+    fsc->url = strdup(c_mrl);
+    (*env)->ReleaseStringUTFChars(env, mrl, c_mrl);
+
+    if (fsc->url == NULL)
+        return -1;
+
+    fsc->duration  = duration;
+    fsc->duration *= 1000;
+    fsc->url_free  = free;
+    return 0;
+}
+
+// NOTE: support to be called from read_thread
+static int
+format_control_message(void *opaque, int type, void *data, size_t data_size)
+{
+    JNIEnv *env = NULL;
+    SDL_AndroidJni_SetupThreadEnv(&env);
+
+    jobject weak_thiz = (jobject) opaque;
+    if (weak_thiz == NULL)
+        return -1;
+
+    switch (type) {
+        case IJKAVF_CM_RESOLVE_SEGMENT_CONCAT:
+            return _onNativeControlResolveSegmentConcat(env, weak_thiz, type, data, data_size);
+        case IJKAVF_CM_RESOLVE_SEGMENT:
+            return _onNativeControlResolveSegment(env, weak_thiz, type, data, data_size);
+        case IJKAVF_CM_RESOLVE_SEGMENT_OFFLINE:
+            return _onNativeControlResolveSegmentOffline(env, weak_thiz, type, data, data_size);
+        default: {
+            return -1;
+        }
+    }
+
+    return -1;
+}
+
 inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2)
 {
     // MPTRACE("post_event(%p, %p, %d, %d, %d)", (void*)env, (void*) weak_this, what, arg1, arg2);
@@ -378,7 +487,7 @@ inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1
 static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
 {
     jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null weak_thiz", LABEL_RETURN);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: message_loop_n: null weak_thiz", LABEL_RETURN);
 
     while (true) {
         AVMessage msg;
@@ -474,7 +583,7 @@ static JNINativeMethod g_methods[] = {
         (void *) IjkMediaPlayer_setDataSourceAndHeaders
     },
     { "_setVideoSurface",   "(Landroid/view/Surface;)V", (void *) IjkMediaPlayer_setVideoSurface },
-    { "prepareAsync",       "()V",      (void *) IjkMediaPlayer_prepareAsync },
+    { "_prepareAsync",      "()V",      (void *) IjkMediaPlayer_prepareAsync },
     { "_start",             "()V",      (void *) IjkMediaPlayer_start },
     { "_stop",              "()V",      (void *) IjkMediaPlayer_stop },
     { "seekTo",             "(J)V",     (void *) IjkMediaPlayer_seekTo },
@@ -522,6 +631,18 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
     g_clazz.postEventFromNative = (*env)->GetStaticMethodID(env, g_clazz.clazz, "postEventFromNative", "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     IJK_CHECK_RET(g_clazz.postEventFromNative, -1, "missing postEventFromNative");
+
+    g_clazz.onControlResolveSegmentCount = (*env)->GetStaticMethodID(env, g_clazz.clazz, "onControlResolveSegmentCount", "(Ljava/lang/Object;)I");
+    IJK_CHECK_RET(g_clazz.onControlResolveSegmentCount, -1, "missing onControlResolveSegmentCount");
+
+    g_clazz.onControlResolveSegmentDuration = (*env)->GetStaticMethodID(env, g_clazz.clazz, "onControlResolveSegmentDuration", "(Ljava/lang/Object;I)I");
+    IJK_CHECK_RET(g_clazz.onControlResolveSegmentDuration, -1, "missing onControlResolveSegmentDuration");
+
+    g_clazz.onControlResolveSegmentUrl = (*env)->GetStaticMethodID(env, g_clazz.clazz, "onControlResolveSegmentUrl", "(Ljava/lang/Object;I)Ljava/lang/String;");
+    IJK_CHECK_RET(g_clazz.onControlResolveSegmentUrl, -1, "missing onControlResolveSegmentUrl");
+
+    g_clazz.onControlResolveSegmentOfflineMrl = (*env)->GetStaticMethodID(env, g_clazz.clazz, "onControlResolveSegmentOfflineMrl", "(Ljava/lang/Object;I)Ljava/lang/String;");
+    IJK_CHECK_RET(g_clazz.onControlResolveSegmentUrl, -1, "missing onControlResolveSegmentOfflineMrl");
 
     ijkadk_global_init(env);
     ijkmp_global_init();
