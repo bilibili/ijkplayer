@@ -40,11 +40,11 @@ typedef struct ijkadk_android_os_Bundle_class
 static ijkadk_android_os_Bundle_class g_clazz;
 
 
-typedef struct ijkBundle{
+typedef struct ijkadk_android_os_Bundle{
     jobject thiz;
 
     char *getString_buffer;
-} ijkBundle;
+} ijkadk_android_os_Bundle;
 
 
 int
@@ -62,29 +62,40 @@ ijkadk_android_os_Bundle__loadClass(JNIEnv *env)
 }
 
 
-ijkBundle *
-ijkBundle_init(JNIEnv *env, jobject java_bundle)
+ijkadk_android_os_Bundle *
+ijkadk_android_os_Bundle__init(JNIEnv *env)
 {
-    ijkBundle *new_bundle = (ijkBundle *)malloc(sizeof(ijkBundle));
-    memset(new_bundle, 0, sizeof(ijkBundle));
+    jobject java_bundle = (*env)->NewObject(env, g_clazz.clazz, g_clazz.constructor);
+    return ijkadk_android_os_Bundle__initWithObject(env, java_bundle);
+}
 
-    if (java_bundle) {
-        new_bundle->thiz = (*env)->NewGlobalRef(env, java_bundle);
-    } else {
-        java_bundle      = (*env)->NewObject(env, g_clazz.clazz, g_clazz.constructor);
-        new_bundle->thiz = (*env)->NewGlobalRef(env, java_bundle);
-        (*env)->NewGlobalRef(env, java_bundle);
+ijkadk_android_os_Bundle *
+ijkadk_android_os_Bundle__initWithObject(JNIEnv *env, jobject java_bundle)
+{
+    if (java_bundle == NULL)
+        return NULL;
+
+    ijkadk_android_os_Bundle *new_bundle = (ijkadk_android_os_Bundle *)malloc(sizeof(ijkadk_android_os_Bundle));
+    if (new_bundle == NULL)
+        return NULL;
+
+    memset(new_bundle, 0, sizeof(ijkadk_android_os_Bundle));
+    new_bundle->thiz = (*env)->NewGlobalRef(env, java_bundle);
+    if (new_bundle->thiz == NULL) {
+        free(new_bundle);
+        return NULL;
     }
+
     return new_bundle;
 }
 
 void
-ijkBundle_destroyP(JNIEnv *env, ijkBundle **p_bundle)
+ijkadk_android_os_Bundle__destroyP(JNIEnv *env, ijkadk_android_os_Bundle **p_bundle)
 {
     if (p_bundle == NULL || *p_bundle == NULL)
         return;
 
-    ijkBundle *bundle = *p_bundle;
+    ijkadk_android_os_Bundle *bundle = *p_bundle;
     if (bundle->thiz) {
         (*env)->DeleteGlobalRef(env, bundle->thiz);
     }
@@ -95,7 +106,7 @@ ijkBundle_destroyP(JNIEnv *env, ijkBundle **p_bundle)
 
 
 void
-ijkBundle_putInt(JNIEnv *env, ijkBundle *bundle, const char *key, int value)
+ijkadk_android_os_Bundle__putInt(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, int value)
 {
     assert(key);
 
@@ -105,7 +116,7 @@ ijkBundle_putInt(JNIEnv *env, ijkBundle *bundle, const char *key, int value)
 }
 
 int
-ijkBundle_getInt(JNIEnv *env, ijkBundle *bundle, const char *key, int default_value)
+ijkadk_android_os_Bundle__getInt(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, int default_value)
 {
     assert(key);
 
@@ -118,7 +129,7 @@ ijkBundle_getInt(JNIEnv *env, ijkBundle *bundle, const char *key, int default_va
 
 
 void
-ijkBundle_putString(JNIEnv *env, ijkBundle *bundle, const char *key, const char *value)
+ijkadk_android_os_Bundle__putString(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, const char *value)
 {
     assert(key);
 
@@ -130,7 +141,7 @@ ijkBundle_putString(JNIEnv *env, ijkBundle *bundle, const char *key, const char 
 }
 
 const char *
-ijkBundle_getString(JNIEnv *env, ijkBundle *bundle, const char *key)
+ijkadk_android_os_Bundle__getString(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key)
 {
     assert(key);
 

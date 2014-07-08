@@ -32,23 +32,25 @@
 int ijkadk_android_os_Bundle__loadClass(JNIEnv *env);
 
 
-typedef struct ijkBundle ijkBundle;
+typedef struct ijkadk_android_os_Bundle ijkadk_android_os_Bundle;
 
 
-ijkBundle *
-ijkBundle_init(JNIEnv *env, jobject java_bundle /* = NULL */ );
+ijkadk_android_os_Bundle *
+ijkadk_android_os_Bundle__init(JNIEnv *env);
+ijkadk_android_os_Bundle *
+ijkadk_android_os_Bundle__initWithObject(JNIEnv *env, jobject java_bundle);
 void
-ijkBundle_destroyP(JNIEnv *env, ijkBundle **p_bundle);
+ijkadk_android_os_Bundle__destroyP(JNIEnv *env, ijkadk_android_os_Bundle **p_bundle);
 
 void
-ijkBundle_putInt(JNIEnv *env, ijkBundle *bundle, const char *key, int value);
+ijkadk_android_os_Bundle__putInt(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, int value);
 int
-ijkBundle_getInt(JNIEnv *env, ijkBundle *bundle, const char *key, int default_value);
+ijkadk_android_os_Bundle__getInt(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, int default_value);
 
 void
-ijkBundle_putString(JNIEnv *env, ijkBundle *bundle, const char *key, const char *value);
+ijkadk_android_os_Bundle__putString(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, const char *value);
 const char *
-ijkBundle_getString(JNIEnv *env, ijkBundle *bundle, const char *key);
+ijkadk_android_os_Bundle__getString(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key);
 
 
 #endif /* IJKADK__IJKADK_ANDROID_OS_BUNDLE_H */
