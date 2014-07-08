@@ -1,8 +1,11 @@
 tag <next>:
 --------------------------------
+
+tag n0.1.3
+--------------------------------
 ffmpeg: switch to ffmpeg n2.2
 player: fix complete/error state handle
-ffmpeg: build with x86_64
+ffmpeg: build with x86_64, armv5
 android: replace vlc-chroma-asm with libyuv
 
 tag n0.1.2:
