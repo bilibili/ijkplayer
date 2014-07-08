@@ -509,8 +509,10 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
                 long dur = player.getDuration();
                 if (dur > 0) {
                     long percentage = msg.arg1 * 100 / dur;
+                    /*-
                     DebugLog.wfmt(TAG,
                             "IjkMediaPlayer: %d, %d, %%%d", msg.arg1, msg.arg2, (int)percentage);
+                     */
                     player.notifyOnBufferingUpdate((int)percentage);
                 }
                 return;
