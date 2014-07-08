@@ -222,6 +222,11 @@ public class AndroidMediaPlayer extends SimpleMediaPlayer {
         return sMediaInfo;
     }
 
+    @Override
+    public void setLogEnabled(boolean enable) {
+        
+    }
+
     /*--------------------
      * misc
      */

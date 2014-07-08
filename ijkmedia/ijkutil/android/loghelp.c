@@ -22,3 +22,15 @@
  */
 
 #include "loghelp.h"
+
+int g_ijk_log_enabled = 0;
+
+void ijklog_set_enabled(int enabled)
+{
+    g_ijk_log_enabled = enabled;
+}
+
+int ijklog_get_enabled()
+{
+    return g_ijk_log_enabled;
+}

@@ -44,18 +44,20 @@ extern "C" {
 #define IJK_LOG_SILENT      ANDROID_LOG_SILENT
 
 #define VLOG(level, TAG, ...)    ((void)__android_log_vprint(level, TAG, __VA_ARGS__))
-#define VLOGV(...)  VLOG(IJK_LOG_VERBOSE,   IJK_LOG_TAG, __VA_ARGS__)
-#define VLOGD(...)  VLOG(IJK_LOG_DEBUG,     IJK_LOG_TAG, __VA_ARGS__)
-#define VLOGI(...)  VLOG(IJK_LOG_INFO,      IJK_LOG_TAG, __VA_ARGS__)
-#define VLOGW(...)  VLOG(IJK_LOG_WARN,      IJK_LOG_TAG, __VA_ARGS__)
-#define VLOGE(...)  VLOG(IJK_LOG_ERROR,     IJK_LOG_TAG, __VA_ARGS__)
 
-#define ALOG(level, TAG, ...)    ((void)__android_log_print(level, TAG, __VA_ARGS__))
-#define ALOGV(...)  ALOG(IJK_LOG_VERBOSE,   IJK_LOG_TAG, __VA_ARGS__)
-#define ALOGD(...)  ALOG(IJK_LOG_DEBUG,     IJK_LOG_TAG, __VA_ARGS__)
-#define ALOGI(...)  ALOG(IJK_LOG_INFO,      IJK_LOG_TAG, __VA_ARGS__)
-#define ALOGW(...)  ALOG(IJK_LOG_WARN,      IJK_LOG_TAG, __VA_ARGS__)
-#define ALOGE(...)  ALOG(IJK_LOG_ERROR,     IJK_LOG_TAG, __VA_ARGS__)
+void ijklog_set_enabled(int enabled);
+int  ijklog_get_enabled();
+
+#define ALOG(level, log_enabled, TAG, ...) do { \
+    if (log_enabled) { \
+    	((void)__android_log_print(level, TAG, __VA_ARGS__)); \
+    } \
+} while(0)
+#define ALOGV(...)  ALOG(IJK_LOG_VERBOSE, ijklog_get_enabled(), IJK_LOG_TAG, __VA_ARGS__)
+#define ALOGD(...)  ALOG(IJK_LOG_DEBUG,   ijklog_get_enabled(), IJK_LOG_TAG, __VA_ARGS__)
+#define ALOGI(...)  ALOG(IJK_LOG_INFO,    ijklog_get_enabled(), IJK_LOG_TAG, __VA_ARGS__)
+#define ALOGW(...)  ALOG(IJK_LOG_WARN,    ijklog_get_enabled(), IJK_LOG_TAG, __VA_ARGS__)
+#define ALOGE(...)  ALOG(IJK_LOG_ERROR,   1,                    IJK_LOG_TAG, __VA_ARGS__)
 #define LOG_ALWAYS_FATAL(...)   do { ALOGE(__VA_ARGS__); exit(1); } while (0)
 
 #ifdef __cplusplus

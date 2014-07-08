@@ -18,11 +18,6 @@ public abstract class BaseMediaPlayer implements IMediaPlayer {
     }
 
     @Override
-    public void setLogEnabled(boolean enable) {
-        mIsLogEnabled = enable;
-    }
-
-    @Override
     public boolean isPlayable() {
         return true;
     }

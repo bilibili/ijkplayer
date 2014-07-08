@@ -423,14 +423,17 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     public MediaInfo getMediaInfo() {
         MediaInfo mediaInfo = new MediaInfo();
 
-        mediaInfo.mVideoDecoder = "ijkmedia";
+        mediaInfo.mVideoDecoder = "ijkplayer";
         mediaInfo.mVideoDecoderImpl = "SW";
 
-        mediaInfo.mAudioDecoder = "ijkmedia";
+        mediaInfo.mAudioDecoder = "ijkplayer";
         mediaInfo.mAudioDecoderImpl = "SW";
 
         return mediaInfo;
     }
+
+    @Override
+    public native void setLogEnabled(boolean enable);
 
     public void setAvOption(AvFormatOption option) {
         setAvFormatOption(option.getName(), option.getValue());
