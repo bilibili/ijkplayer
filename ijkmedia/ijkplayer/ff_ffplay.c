@@ -2875,11 +2875,12 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         if (cached_duration_in_ms >= 0) {
             buf_time_position = ffp_get_current_position_l(ffp) + cached_duration_in_ms;
             buf_time_percent = (int)av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
-            if (buf_time_percent <= 100 && abs(ffp->last_buffered_time_percentage - buf_time_percent) >= FFP_BUF_MSG_PERIOD) {
+
+            if ((abs(ffp->last_buffered_time_update_date - now) >= 500)) {
+                ffp->last_buffered_time_update_date = now;
 #ifdef FFP_SHOW_DEMUX_CACHE
                 ALOGE("time cache=%%%d (%d/%d)\n", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
 #endif
-                ffp->last_buffered_time_percentage = buf_time_percent;
                 ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_duration_in_ms, hwm_in_ms);
             }
         }
@@ -2888,11 +2889,11 @@ void ffp_check_buffering_l(FFPlayer *ffp)
     int cached_size = is->audioq.size + is->videoq.size;
     if (hwm_in_bytes > 0) {
         buf_size_percent = (int)av_rescale(cached_size, 1005, hwm_in_bytes * 10);
-        if (buf_size_percent <= 100 && abs(ffp->last_buffered_size_percentage - buf_size_percent) >= FFP_BUF_MSG_PERIOD) {
+        if ((abs(ffp->last_buffered_size_update_date - now) >= 500)) {
+            ffp->last_buffered_size_update_date = now;
 #ifdef FFP_SHOW_DEMUX_CACHE
             ALOGE("size cache=%%%d (%d/%d)\n", buf_size_percent, cached_size, hwm_in_bytes);
 #endif
-            ffp->last_buffered_size_percentage = buf_size_percent;
             ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_BYTES_UPDATE, cached_size, hwm_in_bytes);
         }
     }
@@ -2913,8 +2914,8 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         buf_percent = FFMIN(buf_time_percent, buf_size_percent);
     }
     if (buf_percent) {
-        if (buf_percent <= 100 && abs(ffp->last_buffered_percent - buf_percent) >= FFP_BUF_MSG_PERIOD) {
-            ffp->last_buffered_percent = buf_percent;
+        if ((abs(ffp->last_buffered_update_date - now) >= 500)) {
+            ffp->last_buffered_update_date = now;
 #ifdef FFP_SHOW_BUF_POS
             ALOGE("buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
 #endif
