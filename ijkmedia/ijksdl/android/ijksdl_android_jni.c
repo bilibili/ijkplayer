@@ -28,51 +28,14 @@
 
 static JavaVM *g_jvm;
 
-static pthread_key_t g_thread_key;
-static pthread_once_t g_key_once = PTHREAD_ONCE_INIT;
-
 JavaVM *SDL_AndroidJni_GetJvm()
 {
     return g_jvm;
 }
 
-static void SDL_AndroidJni_ThreadDestroyed(void* value)
-{
-    JNIEnv *env = (JNIEnv*) value;
-    if (env != NULL) {
-        (*g_jvm)->DetachCurrentThread(g_jvm);
-        pthread_setspecific(g_thread_key, NULL);
-    }
-}
-
-static void make_thread_key()
-{
-    pthread_key_create(&g_thread_key, SDL_AndroidJni_ThreadDestroyed);
-}
-
 jint SDL_AndroidJni_SetupThreadEnv(JNIEnv **p_env)
 {
-    JavaVM *jvm = g_jvm;
-    if (!jvm) {
-        ALOGE("SDL_AndroidJni_GetJvm: AttachCurrentThread: NULL jvm");
-        return -1;
-    }
-
-    pthread_once(&g_key_once, make_thread_key);
-
-    JNIEnv *env = (JNIEnv*) pthread_getspecific(g_thread_key);
-    if (env) {
-        *p_env = env;
-        return 0;
-    }
-
-    if ((*jvm)->AttachCurrentThread(jvm, &env, NULL) == JNI_OK) {
-        pthread_setspecific(g_thread_key, env);
-        *p_env = env;
-        return 0;
-    }
-
-    return -1;
+    return ijkadk_setup_thread_env(p_env);
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)

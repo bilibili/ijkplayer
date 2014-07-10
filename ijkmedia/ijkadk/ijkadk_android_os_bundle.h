@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk_android_os_bundle.h
+ * ijkadk_android_os_Bundle.h
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -24,9 +24,7 @@
 #ifndef IJKADK__IJKADK_ANDROID_OS_BUNDLE_H
 #define IJKADK__IJKADK_ANDROID_OS_BUNDLE_H
 
-#include <stdint.h>
-#include <jni.h>
-
+#include "ijkadkinc.h"
 
 // load_class
 int ijkadk_android_os_Bundle__loadClass(JNIEnv *env);
@@ -38,19 +36,19 @@ typedef struct ijkadk_android_os_Bundle ijkadk_android_os_Bundle;
 ijkadk_android_os_Bundle *
 ijkadk_android_os_Bundle__init(JNIEnv *env);
 ijkadk_android_os_Bundle *
-ijkadk_android_os_Bundle__initWithObject(JNIEnv *env, jobject java_bundle);
+ijkadk_android_os_Bundle__initWithObject(JNIEnv *env, jobject java_object);
 void
-ijkadk_android_os_Bundle__destroyP(JNIEnv *env, ijkadk_android_os_Bundle **p_bundle);
+ijkadk_android_os_Bundle__destroyP(JNIEnv *env, ijkadk_android_os_Bundle **p_object);
 
 void
-ijkadk_android_os_Bundle__putInt(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, int value);
+ijkadk_android_os_Bundle__putInt(JNIEnv *env, ijkadk_android_os_Bundle *object, const char *key, int value);
 int
-ijkadk_android_os_Bundle__getInt(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, int default_value);
+ijkadk_android_os_Bundle__getInt(JNIEnv *env, ijkadk_android_os_Bundle *object, const char *key, int default_value);
 
 void
-ijkadk_android_os_Bundle__putString(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, const char *value);
+ijkadk_android_os_Bundle__putString(JNIEnv *env, ijkadk_android_os_Bundle *object, const char *key, const char *value);
 const char *
-ijkadk_android_os_Bundle__getString(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key);
+ijkadk_android_os_Bundle__getString(JNIEnv *env, ijkadk_android_os_Bundle *object, const char *key);
 
 
 #endif /* IJKADK__IJKADK_ANDROID_OS_BUNDLE_H */

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk.h
+ * ijkadk_android_media_MediaCodec.hpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -20,25 +20,25 @@
  * License along with ijkPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+ 
+#ifndef IJKADK__IJKADK_ANDROID_MEDIA_MEDIACODEC_HPP
+#define IJKADK__IJKADK_ANDROID_MEDIA_MEDIACODEC_HPP
 
-#ifndef IJKADK__IJKADK_H
-#define IJKADK__IJKADK_H
+#include "ijkadkobject.hpp"
 
-#include <stdint.h>
-#include <jni.h>
+namespace ijkadk {
+namespace android {
+namespace media {
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+class MediaCodec: public ::ijkadk::ADKObject
+{
+public:
+    ADK_OBJ_BEGIN(MediaCodec);
+    ADK_OBJ_END();
+};
 
-void    ijkadk_global_init(JNIEnv *env);
+} // end ::ijkadk::android::media
+} // end ::ijkadk::android
+} // end ::ijkadk
 
-JavaVM *ijkadk_get_jvm();
-jint    ijkadk_setup_thread_env(JNIEnv **p_env);
-JNIEnv *ijkadk_get_env();
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* IJKADK__IJKADK_H */
+#endif /* IJKADK__IJKADK_ANDROID_MEDIA_MEDIACODEC_HPP */

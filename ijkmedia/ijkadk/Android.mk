@@ -18,7 +18,45 @@
 
 LOCAL_PATH := $(call my-dir)
 
+#--------------------
+# C files
+#--------------------
+include $(CLEAR_VARS)
+LOCAL_CFLAGS += -std=c99
 
+LOCAL_C_INCLUDES += $(LOCAL_PATH)
+LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
+
+# LOCAL_SRC_FILES += ijkadk.c
+
+LOCAL_SHARED_LIBRARIES := ijkutil
+
+LOCAL_MODULE := ijkadk_c
+include $(BUILD_STATIC_LIBRARY)
+
+
+#--------------------
+# CPP files: android
+#--------------------
+include $(CLEAR_VARS)
+
+LOCAL_C_INCLUDES += $(LOCAL_PATH)
+LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
+
+LOCAL_SRC_FILES += ijkadk_android_media_MediaCodec.cpp
+LOCAL_SRC_FILES += ijkadk_java_lang_String.cpp
+LOCAL_SRC_FILES += ijkadkinternal.cpp
+LOCAL_SRC_FILES += ijkadkobject.cpp
+
+LOCAL_SHARED_LIBRARIES := ijkutil
+
+LOCAL_MODULE := ijkadk_cpp
+include $(BUILD_STATIC_LIBRARY)
+
+
+#--------------------
+# so
+#--------------------
 include $(CLEAR_VARS)
 LOCAL_CFLAGS += -std=c99
 LOCAL_LDLIBS += -llog -landroid
@@ -26,12 +64,10 @@ LOCAL_LDLIBS += -llog -landroid
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
 
-
-LOCAL_SRC_FILES += ijkadk_android_os_bundle.c
 LOCAL_SRC_FILES += ijkadk.c
 
-
 LOCAL_SHARED_LIBRARIES := ijkutil
+LOCAL_WHOLE_STATIC_LIBRARIES := ijkadk_c ijkadk_cpp
 
 LOCAL_MODULE := ijkadk
 include $(BUILD_SHARED_LIBRARY)

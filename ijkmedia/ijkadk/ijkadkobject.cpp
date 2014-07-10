@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk.h
+ * ijkadkobject.cpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,24 +21,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADK_H
-#define IJKADK__IJKADK_H
+#include "ijkadkobject.hpp"
+#include "ijkadk.h"
 
-#include <stdint.h>
-#include <jni.h>
+using namespace ::ijkadk;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void    ijkadk_global_init(JNIEnv *env);
-
-JavaVM *ijkadk_get_jvm();
-jint    ijkadk_setup_thread_env(JNIEnv **p_env);
-JNIEnv *ijkadk_get_env();
-
-#ifdef __cplusplus
+ADKObject::~ADKObject()
+{
+    if (mThiz) {
+        JNIEnv *env = getJNIEnv();
+        env->DeleteGlobalRef(mThiz);
+        mThiz = NULL;
+    }
 }
-#endif
 
-#endif /* IJKADK__IJKADK_H */
+void ADKObject::init(jobject thiz)
+{
+    // only called once
+    IJKADK_VALIDATE(mThiz);
+
+    JNIEnv *env = getJNIEnv();
+
+    if (thiz) {
+        mThiz = env->NewGlobalRef(thiz);
+    }
+}
+
+JNIEnv *ADKObject::getJNIEnv()
+{
+    return ijkadk_get_env();
+}

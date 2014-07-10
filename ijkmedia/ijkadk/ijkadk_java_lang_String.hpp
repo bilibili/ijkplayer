@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk.h
+ * ijkadk_java_lang_String.hpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,24 +21,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADK_H
-#define IJKADK__IJKADK_H
+#ifndef IJKADK__IJKADK_JAVA_LANG_STRING_HPP
+#define IJKADK__IJKADK_JAVA_LANG_STRING_HPP
 
-#include <stdint.h>
-#include <jni.h>
+#include "ijkadkobject.hpp"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace ijkadk {
+namespace java {
+namespace lang {
 
-void    ijkadk_global_init(JNIEnv *env);
+class String: public ::ijkadk::ADKObject
+{
+public:
+    ADK_OBJ_BEGIN(String);
+    ADK_OBJ_END();
 
-JavaVM *ijkadk_get_jvm();
-jint    ijkadk_setup_thread_env(JNIEnv **p_env);
-JNIEnv *ijkadk_get_env();
+protected:
+    String():mStringUTFChars(NULL) {;}
+    ~String();
 
-#ifdef __cplusplus
-}
-#endif
+public:
+    static String *createWithUTFChars(const char *utfChars);
 
-#endif /* IJKADK__IJKADK_H */
+    jstring     getThiz() {return (jstring)ADKObject::getThiz();}
+    const char *getUTFChars();
+
+private:
+    const char *mStringUTFChars;
+};
+
+} // end ::ijkadk::java::lang
+} // end ::ijkadk::java
+} // end ::ijkadk
+
+#endif /* IJKADK__IJKADK_JAVA_LANG_STRING_HPP */

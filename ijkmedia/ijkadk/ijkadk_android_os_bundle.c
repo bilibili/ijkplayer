@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk_android_os_bundle.c
+ * ijkadk_android_os_Bundle.c
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijkadk_android_os_bundle.h"
+#include "ijkadk_android_os_Bundle.h"
 #include <string.h>
 #include <assert.h>
 
@@ -70,9 +70,9 @@ ijkadk_android_os_Bundle__init(JNIEnv *env)
 }
 
 ijkadk_android_os_Bundle *
-ijkadk_android_os_Bundle__initWithObject(JNIEnv *env, jobject java_bundle)
+ijkadk_android_os_Bundle__initWithObject(JNIEnv *env, jobject java_object)
 {
-    if (java_bundle == NULL)
+    if (java_object == NULL)
         return NULL;
 
     ijkadk_android_os_Bundle *new_bundle = (ijkadk_android_os_Bundle *)malloc(sizeof(ijkadk_android_os_Bundle));
@@ -80,7 +80,7 @@ ijkadk_android_os_Bundle__initWithObject(JNIEnv *env, jobject java_bundle)
         return NULL;
 
     memset(new_bundle, 0, sizeof(ijkadk_android_os_Bundle));
-    new_bundle->thiz = (*env)->NewGlobalRef(env, java_bundle);
+    new_bundle->thiz = (*env)->NewGlobalRef(env, java_object);
     if (new_bundle->thiz == NULL) {
         free(new_bundle);
         return NULL;
@@ -90,38 +90,38 @@ ijkadk_android_os_Bundle__initWithObject(JNIEnv *env, jobject java_bundle)
 }
 
 void
-ijkadk_android_os_Bundle__destroyP(JNIEnv *env, ijkadk_android_os_Bundle **p_bundle)
+ijkadk_android_os_Bundle__destroyP(JNIEnv *env, ijkadk_android_os_Bundle **p_object)
 {
-    if (p_bundle == NULL || *p_bundle == NULL)
+    if (p_object == NULL || *p_object == NULL)
         return;
 
-    ijkadk_android_os_Bundle *bundle = *p_bundle;
+    ijkadk_android_os_Bundle *bundle = *p_object;
     if (bundle->thiz) {
         (*env)->DeleteGlobalRef(env, bundle->thiz);
     }
 
-    free(*p_bundle);
-    *p_bundle = NULL;
+    free(*p_object);
+    *p_object = NULL;
 }
 
 
 void
-ijkadk_android_os_Bundle__putInt(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, int value)
+ijkadk_android_os_Bundle__putInt(JNIEnv *env, ijkadk_android_os_Bundle *object, const char *key, int value)
 {
     assert(key);
 
     jstring j_key = (*env)->NewStringUTF(env, key);
-    (*env)->CallVoidMethod(env, bundle->thiz, g_clazz.putInt, j_key, value);
+    (*env)->CallVoidMethod(env, object->thiz, g_clazz.putInt, j_key, value);
     (*env)->DeleteLocalRef(env, j_key);
 }
 
 int
-ijkadk_android_os_Bundle__getInt(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, int default_value)
+ijkadk_android_os_Bundle__getInt(JNIEnv *env, ijkadk_android_os_Bundle *object, const char *key, int default_value)
 {
     assert(key);
 
     jstring j_key = (*env)->NewStringUTF(env, key);
-    int value = (*env)->CallIntMethod(env, bundle->thiz, g_clazz.getInt, j_key, default_value);
+    int value = (*env)->CallIntMethod(env, object->thiz, g_clazz.getInt, j_key, default_value);
     (*env)->DeleteLocalRef(env, j_key);
 
     return value;
@@ -129,35 +129,35 @@ ijkadk_android_os_Bundle__getInt(JNIEnv *env, ijkadk_android_os_Bundle *bundle, 
 
 
 void
-ijkadk_android_os_Bundle__putString(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key, const char *value)
+ijkadk_android_os_Bundle__putString(JNIEnv *env, ijkadk_android_os_Bundle *object, const char *key, const char *value)
 {
     assert(key);
 
     jstring j_key   = (*env)->NewStringUTF(env, key);
     jstring j_value = (*env)->NewStringUTF(env, value);
-    (*env)->CallVoidMethod(env, bundle->thiz, g_clazz.putString, j_key, j_value);
+    (*env)->CallVoidMethod(env, object->thiz, g_clazz.putString, j_key, j_value);
     (*env)->DeleteLocalRef(env, j_key);
     (*env)->DeleteLocalRef(env, j_value);
 }
 
 const char *
-ijkadk_android_os_Bundle__getString(JNIEnv *env, ijkadk_android_os_Bundle *bundle, const char *key)
+ijkadk_android_os_Bundle__getString(JNIEnv *env, ijkadk_android_os_Bundle *object, const char *key)
 {
     assert(key);
 
-    free(bundle->getString_buffer);
-    bundle->getString_buffer = NULL;
+    free(object->getString_buffer);
+    object->getString_buffer = NULL;
 
     jstring j_key   = (*env)->NewStringUTF(env, key);
-    jstring j_value = (*env)->CallObjectMethod(env, bundle->thiz, g_clazz.getString, j_key);
+    jstring j_value = (*env)->CallObjectMethod(env, object->thiz, g_clazz.getString, j_key);
 
     const char *value = (*env)->GetStringUTFChars(env, j_value, NULL);
     if (value != NULL) {
-        bundle->getString_buffer = strdup(value);
+        object->getString_buffer = strdup(value);
     }
 
     (*env)->DeleteLocalRef(env, j_key);
     (*env)->DeleteLocalRef(env, j_value);
 
-    return bundle->getString_buffer;
+    return object->getString_buffer;
 }

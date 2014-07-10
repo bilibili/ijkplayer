@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk.h
+ * ijkadk_java_lang_String.cpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,24 +21,49 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADK_H
-#define IJKADK__IJKADK_H
+#include "ijkadk_java_lang_String.hpp"
 
-#include <stdint.h>
-#include <jni.h>
+using namespace ::ijkadk::java::lang;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+String::~String()
+{
+    jstring thiz = getThiz();
+    if (!thiz)
+        return;
 
-void    ijkadk_global_init(JNIEnv *env);
-
-JavaVM *ijkadk_get_jvm();
-jint    ijkadk_setup_thread_env(JNIEnv **p_env);
-JNIEnv *ijkadk_get_env();
-
-#ifdef __cplusplus
+    JNIEnv *env = getJNIEnv();
+    if (mStringUTFChars) {
+        env->ReleaseStringUTFChars(thiz, mStringUTFChars);
+        mStringUTFChars = NULL;
+    }
 }
-#endif
 
-#endif /* IJKADK__IJKADK_H */
+String* String::createWithUTFChars(const char *utfChars)
+{
+    JNIEnv *env = getJNIEnv();
+    ADKPtr<String> str(create());
+    if (utfChars) {
+        jstring jString = env->NewStringUTF(utfChars);
+        IJKADK_VALIDATE(jString);
+
+        str->init(jString);
+
+        env->DeleteLocalRef(jString);
+    }
+    return str.detach();
+}
+
+const char *String::getUTFChars()
+{
+    if (mStringUTFChars)
+        return mStringUTFChars;
+
+    jstring thiz = getThiz();
+    if (!thiz)
+        return NULL;
+
+    JNIEnv *env = getJNIEnv();
+    mStringUTFChars = env->GetStringUTFChars(thiz, NULL);
+
+    return mStringUTFChars;
+}

@@ -22,8 +22,70 @@
  */
 
 #include "ijkadk.h"
+#include "ijkutil/ijkutil.h"
+
+#include <pthread.h>
+#include <jni.h>
+
+static JavaVM *g_jvm;
+
+static pthread_key_t g_thread_key;
+static pthread_once_t g_key_once = PTHREAD_ONCE_INIT;
 
 void ijkadk_global_init(JNIEnv *env)
 {
-    ijkadk_android_os_Bundle__loadClass(env);
+}
+
+JavaVM *ijkadk_get_jvm()
+{
+    return g_jvm;
+}
+
+static void thread_destroyed(void* value)
+{
+    JNIEnv *env = (JNIEnv*) value;
+    if (env != NULL) {
+        (*g_jvm)->DetachCurrentThread(g_jvm);
+        pthread_setspecific(g_thread_key, NULL);
+    }
+}
+
+static void make_thread_key()
+{
+    pthread_key_create(&g_thread_key, thread_destroyed);
+}
+
+jint ijkadk_setup_thread_env(JNIEnv **p_env)
+{
+    JavaVM *jvm = g_jvm;
+    if (!jvm) {
+        ALOGE("SDL_AndroidJni_GetJvm: AttachCurrentThread: NULL jvm");
+        return -1;
+    }
+
+    pthread_once(&g_key_once, make_thread_key);
+
+    JNIEnv *env = (JNIEnv*) pthread_getspecific(g_thread_key);
+    if (env) {
+        *p_env = env;
+        return 0;
+    }
+
+    if ((*jvm)->AttachCurrentThread(jvm, &env, NULL) == JNI_OK) {
+        pthread_setspecific(g_thread_key, env);
+        *p_env = env;
+        return 0;
+    }
+
+    return -1;
+}
+
+JNIEnv *ijkadk_get_env()
+{
+    JNIEnv *env = NULL;
+    int ret = ijkadk_setup_thread_env(&env);
+    if (ret != 0)
+        return NULL;
+
+    return env;
 }

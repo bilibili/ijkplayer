@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk.h
+ * ijkadkinternal.cpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,24 +21,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADK_H
-#define IJKADK__IJKADK_H
+#include "ijkadkinternal.hpp"
+#include "ijkadk.h"
 
-#include <stdint.h>
-#include <jni.h>
+using namespace ijkadk;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void    ijkadk_global_init(JNIEnv *env);
-
-JavaVM *ijkadk_get_jvm();
-jint    ijkadk_setup_thread_env(JNIEnv **p_env);
-JNIEnv *ijkadk_get_env();
-
-#ifdef __cplusplus
+IJKLocalRef::IJKLocalRef(jobject obj)
+{
+    mObject = obj;
 }
-#endif
 
-#endif /* IJKADK__IJKADK_H */
+IJKLocalRef::~IJKLocalRef()
+{
+    release();
+}
+
+jobject IJKLocalRef::detach()
+{
+    jobject obj = mObject;
+    mObject = NULL;
+    return obj;
+}
+
+void IJKLocalRef::release()
+{
+    if (!mObject)
+        return;
+
+    JNIEnv *env = ijkadk_get_env();
+    env->DeleteLocalRef(NULL);
+    mObject = NULL;
+}
