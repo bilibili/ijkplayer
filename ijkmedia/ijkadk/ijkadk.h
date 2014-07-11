@@ -24,21 +24,6 @@
 #ifndef IJKADK__IJKADK_H
 #define IJKADK__IJKADK_H
 
-#include <stdint.h>
-#include <jni.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void    ijkadk_global_init(JNIEnv *env);
-
-JavaVM *ijkadk_get_jvm();
-jint    ijkadk_setup_thread_env(JNIEnv **p_env);
-JNIEnv *ijkadk_get_env();
-
-#ifdef __cplusplus
-}
-#endif
+#include "ijkadkutils.h"
 
 #endif /* IJKADK__IJKADK_H */

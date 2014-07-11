@@ -29,6 +29,19 @@
 #include <assert.h>
 
 #define IJKADK_VALIDATE(condition__) (assert(!!condition__))
-#define IJKADK_VALIDATE_ALLOC(condition__) (assert(!!condition__))
+
+#define IJKADK_CHECK_EXCEPTION(env__)
+
+#define IJKADK_FIND_CLASS(env__, var__, classsign__) \
+    do { \
+    	var__ = (env__)->FindClass(classsign__); \
+    	IJKADK_VALIDATE((var__)); \
+    } while(0)
+
+#define IJKADK_FIND_METHOD(env__, var__, clazz__, name__, sign__) \
+    do { \
+        var__ = (env__)->GetMethodID(clazz__, name__, sign__); \
+        IJKADK_VALIDATE((var__)); \
+    } while(0)
 
 #endif /* IJKADK__IJKADKINC_H */

@@ -26,6 +26,19 @@
 using namespace ::ijkadk;
 using namespace ::ijkadk::java::lang;
 
+typedef struct StringClass
+{
+    jclass      clazz;
+} StringClass;
+static StringClass gClazz;
+
+int String::loadClass(JNIEnv *env)
+{
+    IJKADK_FIND_CLASS(env, gClazz.clazz, "Ljava/lang/String;");
+
+    return 0;
+}
+
 String::~String()
 {
     jstring thiz = getThiz();
@@ -42,16 +55,13 @@ String::~String()
 ADKPtr<String> String::createWithUTFChars(const char *utfChars)
 {
     JNIEnv *env = getJNIEnv();
-    ADKPtr<String> self(create());
-    if (utfChars) {
-        jstring jString = env->NewStringUTF(utfChars);
-        IJKADK_VALIDATE(jString);
+    if (utfChars == NULL)
+        return create();
 
-        self->init(jString);
+    ADKLocalRef<jstring> jString(env->NewStringUTF(utfChars));
+    IJKADK_VALIDATE(jString);
 
-        env->DeleteLocalRef(jString);
-    }
-    return self;
+    return create(jString.get());
 }
 
 const char *String::getUTFChars()

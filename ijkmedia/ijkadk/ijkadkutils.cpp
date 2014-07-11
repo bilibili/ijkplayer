@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadkfoundation.cpp
+ * ijkadkutils.cpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,18 +21,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijkadkfoundation.hpp"
+#include "ijkadkutils.h"
 
 #include "ijkadk_android_media_MediaCodec.hpp"
 #include "ijkadk_java_lang_String.hpp"
 #include "ijkadk_java_nio_ByteBuffer.hpp"
 
-using namespace ::ijkadk;
-using namespace ::ijkadk::android::media;
-using namespace ::ijkadk::java::lang;
-using namespace ::ijkadk::java::nio;
-
-void ijkadk_foundation_test()
+void ijkadk_global_init(JNIEnv *env)
 {
-    ADKPtr<MediaCodec> mediaCodec = MediaCodec::createByCodecName("");
+    ijkadk::android::media::MediaCodec::loadClass(env);
+    ijkadk::java::lang::String::loadClass(env);
 }

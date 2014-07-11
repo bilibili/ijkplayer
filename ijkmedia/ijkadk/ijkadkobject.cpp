@@ -22,7 +22,9 @@
  */
 
 #include "ijkadkobject.hpp"
-#include "ijkadk.h"
+#include "ijkadkutils.h"
+
+#include "ijkadkinternal.hpp"
 
 using namespace ::ijkadk;
 
@@ -38,7 +40,7 @@ ADKObject::~ADKObject()
 void ADKObject::init(jobject thiz)
 {
     // only called once
-    IJKADK_VALIDATE(mThiz);
+    IJKADK_VALIDATE(!mThiz);
 
     JNIEnv *env = getJNIEnv();
 

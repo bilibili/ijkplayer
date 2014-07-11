@@ -39,6 +39,7 @@ include $(BUILD_STATIC_LIBRARY)
 # CPP files: android
 #--------------------
 include $(CLEAR_VARS)
+LOCAL_CPPFLAGS += -std=c++11
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
@@ -49,7 +50,7 @@ LOCAL_SRC_FILES += ijkadk_java_nio_ByteBuffer.cpp
 LOCAL_SRC_FILES += ijkadkinternal.cpp
 LOCAL_SRC_FILES += ijkadkobject.cpp
 
-LOCAL_SRC_FILES += ijkadkfoundation.cpp
+LOCAL_SRC_FILES += ijkadkutils.cpp
 
 LOCAL_SHARED_LIBRARIES := ijkutil
 
@@ -67,7 +68,7 @@ LOCAL_LDLIBS += -llog -landroid
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
 
-LOCAL_SRC_FILES += ijkadk.c
+LOCAL_SRC_FILES += ijkadkutils.c
 
 LOCAL_SHARED_LIBRARIES := ijkutil
 LOCAL_WHOLE_STATIC_LIBRARIES := ijkadk_c ijkadk_cpp

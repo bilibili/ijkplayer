@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadkfoundation.hpp
+ * ijkadkutils.h
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,11 +21,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADKFOUNDATION_HPP
-#define IJKADK__IJKADKFOUNDATION_HPP
+#ifndef IJKADK__IJKADKUTILS_H
+#define IJKADK__IJKADKUTILS_H
 
-#include "ijkadk.h"
+#include <stdint.h>
+#include <jni.h>
 
-#include "ijkadk_android_media.hpp"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif /* IJKADK__IJKADKFOUNDATION_HPP */
+void    ijkadk_global_init(JNIEnv *env);
+
+JavaVM *ijkadk_get_jvm();
+jint    ijkadk_setup_thread_env(JNIEnv **p_env);
+JNIEnv *ijkadk_get_env();
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* IJKADK__IJKADKUTILS_H */

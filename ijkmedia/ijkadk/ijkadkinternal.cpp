@@ -25,30 +25,3 @@
 #include "ijkadk.h"
 
 using namespace ijkadk;
-
-IJKLocalRef::IJKLocalRef(jobject obj)
-{
-    mObject = obj;
-}
-
-IJKLocalRef::~IJKLocalRef()
-{
-    release();
-}
-
-jobject IJKLocalRef::detach()
-{
-    jobject obj = mObject;
-    mObject = NULL;
-    return obj;
-}
-
-void IJKLocalRef::release()
-{
-    if (!mObject)
-        return;
-
-    JNIEnv *env = ijkadk_get_env();
-    env->DeleteLocalRef(NULL);
-    mObject = NULL;
-}

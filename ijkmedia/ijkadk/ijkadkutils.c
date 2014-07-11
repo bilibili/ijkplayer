@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk.c
+ * ijkadkutils.c
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijkadk.h"
+#include "ijkadkutils.h"
 #include "ijkutil/ijkutil.h"
 
 #include <pthread.h>
@@ -31,10 +31,6 @@ static JavaVM *g_jvm;
 
 static pthread_key_t g_thread_key;
 static pthread_once_t g_key_once = PTHREAD_ONCE_INIT;
-
-void ijkadk_global_init(JNIEnv *env)
-{
-}
 
 JavaVM *ijkadk_get_jvm()
 {

@@ -48,6 +48,9 @@ public:
 
 private:
     const char *mStringUTFChars;
+
+public:
+    static int loadClass(JNIEnv *env);
 };
 
 } // end ::ijkadk::java::lang

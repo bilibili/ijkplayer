@@ -28,57 +28,67 @@
 #include <jni.h>
 #include <sys/atomics.h>
 #include "ijkadkinc.h"
+#include "ijkadkutils.h"
 
 namespace ijkadk {
 
-class ADKObject
-{
-public:
-    virtual ~ADKObject();
-
-    virtual unsigned long adk_addRef() = 0;
-    virtual unsigned long adk_release() = 0;
-
-protected:
-    ADKObject(): mThiz(NULL) {;}
-    void init(jobject thiz);
-
-protected:
-    static JNIEnv *getJNIEnv();
-    jobject getThiz() {return mThiz;}
-
-private:
-    jobject mThiz;
-
-private:
-    ADKObject(const ADKObject&);
-    ADKObject& operator=(const ADKObject&);
-};
-
 template <class T>
-class ADKObjectImpl: public T
+class ADKLocalRef
 {
 public:
-    ADKObjectImpl(): mRefCount(0) {;}
-    virtual ~ADKObjectImpl() {;}
+    ~ADKLocalRef() {release();}
 
-    unsigned long adk_addRef()
+    ADKLocalRef(): mObject(0) {;}
+    ADKLocalRef(const T& obj): mObject(0)
     {
-        return __atomic_inc(&mRefCount);
+        attach(obj);
     }
 
-    unsigned long adk_release()
+    ADKLocalRef(ADKLocalRef<T>& obj): mObject(0)
     {
-        long ret = __atomic_dec(&mRefCount);
-        if (0 == ret)
-            delete this;
-
-        return ret;
+        attach(obj.detach());
     }
+
+public:
+    bool operator!() {return !mObject;}
+    T    operator->() {return mObject;}
+
+    void attach(T obj)
+    {
+        release();
+        mObject = obj;
+    }
+
+    T detach()
+    {
+        T obj = mObject;
+        mObject = NULL;
+        return obj;
+    }
+
+    T get() const
+    {
+        return mObject;
+    }
+
+    void release() {
+        JNIEnv *env = ijkadk_get_env();
+        if (mObject != NULL) {
+            env->DeleteLocalRef(mObject);
+            mObject = NULL;
+        }
+    }
+
+private: // do not overload these operator
+    // T &operator*();
+    // T **operator&();
+    ADKLocalRef<T>& operator=(const ADKLocalRef<T>& obj);
+    ADKLocalRef<T>& operator=(T obj);
 
 private:
-    volatile int mRefCount;
+    T mObject;
 };
+
 
 template <class T>
 class ADKPtr
@@ -87,18 +97,14 @@ public:
     ~ADKPtr() {release();}
 
     ADKPtr(): mObject(0) {;}
-    ADKPtr(T* obj)
+    ADKPtr(T* obj): mObject(0)
     {
-        mObject = obj;
-        if (mObject != NULL)
-            mObject->adk_addRef();
+        assign(obj);
     }
 
-    ADKPtr(const ADKPtr<T>& obj)
+    ADKPtr(const ADKPtr<T>& obj): mObject(0)
     {
-        mObject = obj.get();
-        if (mObject != NULL)
-            mObject->adk_addRef();
+        assign(obj.get());
     }
 
 public:
@@ -139,6 +145,11 @@ public:
         return mObject;
     }
 
+    const char *getObjectClassName() const
+    {
+        return mObject->getObjectClassName();
+    }
+
     void release() {
         if (mObject != NULL) {
             mObject->adk_release();
@@ -154,13 +165,84 @@ private:
     T *mObject;
 };
 
+
+
+template <class T>
+class ADKObjectImpl: public T
+{
+public:
+    ADKObjectImpl(): mRefCount(0) {;}
+    ADKObjectImpl(jobject thiz): mRefCount(0) {T::init(thiz);}
+
+    virtual ~ADKObjectImpl() {;}
+
+    virtual unsigned long adk_addRef()
+    {
+        return __atomic_inc(&mRefCount);
+    }
+
+    virtual unsigned long adk_release()
+    {
+        long ret = __atomic_dec(&mRefCount);
+        if (0 == ret)
+            delete this;
+
+        return ret;
+    }
+
+    virtual const char *getObjectClassName()
+    {
+        return T::getClassName();
+    }
+
+private:
+    volatile int mRefCount;
+};
+
+
+
+class ADKObject
+{
+public:
+    virtual ~ADKObject();
+
+    virtual unsigned long adk_addRef() = 0;
+    virtual unsigned long adk_release() = 0;
+    virtual const char   *getObjectClassName() = 0;
+
+protected:
+    ADKObject(): mThiz(NULL) {;}
+    void init(jobject thiz);
+
+protected:
+    static JNIEnv *getJNIEnv();
+    jobject getThiz() {return mThiz;}
+
+private:
+    jobject mThiz;
+
+private:
+    ADKObject(const ADKObject&);
+    ADKObject& operator=(const ADKObject&);
+};
+
 } // end ::ijkadk
 
-#define ADK_OBJ_BEGIN(class__) \
-    static ADKPtr<class__> create() \
-    { \
-        class__ *self = new ADKObjectImpl<class__>(); \
-        return self; \
+#define ADK_OBJ_BEGIN(class__)                              \
+    static ADKPtr<class__> create()                         \
+    {                                                       \
+        class__ *self = new ADKObjectImpl<class__>();       \
+        return self;                                        \
+    }                                                       \
+    static ADKPtr<class__> create(jobject obj)              \
+    {                                                       \
+        class__ *self = new ADKObjectImpl<class__>();       \
+        self->init(obj);                                    \
+        return self;                                        \
+    }                                                       \
+	static const char *getClassName()                       \
+    {                                                       \
+        return "";                                          \
     }
 
 #define ADK_OBJ_END()

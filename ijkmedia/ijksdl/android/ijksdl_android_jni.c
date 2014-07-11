@@ -23,6 +23,8 @@
 
 #include "ijksdl_android_jni.h"
 
+#include "ijkadk/ijkadkutils.h"
+
 #include "ijksdl_inc_internal_android.h"
 #include "android_audiotrack.h"
 

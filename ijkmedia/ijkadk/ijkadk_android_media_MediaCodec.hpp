@@ -45,9 +45,9 @@ public:
     ADK_OBJ_END();
 
 public:
-    static ADKPtr<MediaCodec> createByCodecName(ADKPtr<String> name);
+    static ADKPtr<MediaCodec> createByCodecName(const ADKPtr<String>& name);
     static ADKPtr<MediaCodec> createByCodecName(const char *name) {return createByCodecName(ADKString(name));}
-    static ADKPtr<MediaCodec> createDecoderByType(ADKPtr<String> type);
+    static ADKPtr<MediaCodec> createDecoderByType(const ADKPtr<String>& type);
     static ADKPtr<MediaCodec> createDecoderByType(const char *type) {return createDecoderByType(ADKString(type));}
 
     // void configure(MediaFormat format, Surface surface, MediaCrypto crypto, jint flags);
@@ -66,6 +66,9 @@ public:
     // API-18
     // ADKPtr<String>         getName ()
     // ADKPtr<MediaCodecInfo> getCodecInfo();
+
+public:
+    static int loadClass(JNIEnv *env);
 };
 
 } // end ::ijkadk::android::media

@@ -27,9 +27,10 @@
 #include <stdint.h>
 #include <jni.h>
 #include "ijkutil/ijkutil.h"
+#include "ijkadkutils.h"
 
 
-#define IJKADK_FIND_JAVA_CLASS(env__, var__, classsign__) \
+#define DEPRECATED_IJKADK_FIND_JAVA_CLASS(env__, var__, classsign__) \
     do { \
     	var__ = (*env__)->FindClass(env__, classsign__); \
         if (!(var__)) { \
@@ -39,7 +40,7 @@
     } while(0);
 
 
-#define IJKADK_FIND_JAVA_METHOD(env__, var__, clazz__, funcsign__, retsign__) \
+#define DEPRECATEDIJKADK_FIND_JAVA_METHOD(env__, var__, clazz__, funcsign__, retsign__) \
     do { \
 	    (var__) = (*env__)->GetMethodID((env__), (clazz__), (funcsign__), (retsign__)); \
 	    if (!(var__)) { \
@@ -50,25 +51,6 @@
 
 
 namespace ijkadk {
-
-class IJKLocalRef {
-public:
-    IJKLocalRef(jobject obj);
-    ~IJKLocalRef();
-    jobject operator->(){return mObject;}
-
-    void    attach(jobject obj);
-    jobject detach();
-    jobject get() {return mObject;}
-    void    release();
-
-private:
-    IJKLocalRef(const IJKLocalRef&);
-    IJKLocalRef& operator=(const IJKLocalRef&);
-
-
-    jobject mObject;
-};
 
 } // end ::ijkadk
 
