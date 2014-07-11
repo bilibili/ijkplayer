@@ -23,6 +23,7 @@
 
 #include "ijkadk_java_lang_String.hpp"
 
+using namespace ::ijkadk;
 using namespace ::ijkadk::java::lang;
 
 String::~String()
@@ -38,19 +39,19 @@ String::~String()
     }
 }
 
-String* String::createWithUTFChars(const char *utfChars)
+ADKPtr<String> String::createWithUTFChars(const char *utfChars)
 {
     JNIEnv *env = getJNIEnv();
-    ADKPtr<String> str(create());
+    ADKPtr<String> self(create());
     if (utfChars) {
         jstring jString = env->NewStringUTF(utfChars);
         IJKADK_VALIDATE(jString);
 
-        str->init(jString);
+        self->init(jString);
 
         env->DeleteLocalRef(jString);
     }
-    return str.detach();
+    return self;
 }
 
 const char *String::getUTFChars()

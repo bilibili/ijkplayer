@@ -41,7 +41,7 @@ protected:
     ~String();
 
 public:
-    static String *createWithUTFChars(const char *utfChars);
+    static ADKPtr<String> createWithUTFChars(const char *utfChars);
 
     jstring     getThiz() {return (jstring)ADKObject::getThiz();}
     const char *getUTFChars();
@@ -53,5 +53,10 @@ private:
 } // end ::ijkadk::java::lang
 } // end ::ijkadk::java
 } // end ::ijkadk
+
+inline ijkadk::ADKPtr<ijkadk::java::lang::String> ADKString(const char *utfChars)
+{
+    return ijkadk::java::lang::String::createWithUTFChars(utfChars);
+}
 
 #endif /* IJKADK__IJKADK_JAVA_LANG_STRING_HPP */

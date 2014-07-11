@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk.hpp
+ * ijkadk_java_nio.hpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,9 +21,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADK_HPP
-#define IJKADK__IJKADK_HPP
+#ifndef IJKADK__IJKADK_JAVA_NIO_HPP
+#define IJKADK__IJKADK_JAVA_NIO_HPP
 
-#include "ijkadk.h"
+#include "ijkadk_java_nio_ByteBuffer.hpp"
 
-#endif /* IJKADK__IJKADK_HPP */
+namespace ijkadk {
+namespace java {
+namespace nio {
+class ByteBuffer;
+}
+}
+}
+
+#endif /* IJKADK__IJKADK_JAVA_NIO_HPP */
+

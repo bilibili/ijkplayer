@@ -36,8 +36,8 @@ class ADKObject
 public:
     virtual ~ADKObject();
 
-    virtual unsigned long addRef() = 0;
-    virtual unsigned long release() = 0;
+    virtual unsigned long adk_addRef() = 0;
+    virtual unsigned long adk_release() = 0;
 
 protected:
     ADKObject(): mThiz(NULL) {;}
@@ -62,12 +62,12 @@ public:
     ADKObjectImpl(): mRefCount(0) {;}
     virtual ~ADKObjectImpl() {;}
 
-    unsigned long addRef()
+    unsigned long adk_addRef()
     {
         return __atomic_inc(&mRefCount);
     }
 
-    unsigned long release()
+    unsigned long adk_release()
     {
         long ret = __atomic_dec(&mRefCount);
         if (0 == ret)
@@ -84,28 +84,40 @@ template <class T>
 class ADKPtr
 {
 public:
-    ADKPtr(): mObject(0) {;}
     ~ADKPtr() {release();}
+
+    ADKPtr(): mObject(0) {;}
     ADKPtr(T* obj)
     {
         mObject = obj;
         if (mObject != NULL)
-            mObject->addRef();
+            mObject->adk_addRef();
     }
 
     ADKPtr(const ADKPtr<T>& obj)
     {
-        mObject = obj.mObject;
+        mObject = obj.get();
         if (mObject != NULL)
-            mObject->addRef();
+            mObject->adk_addRef();
     }
 
 public:
-    T &operator*() {return *mObject;}
+    bool operator!() {return !mObject;}
     T *operator->() {return mObject;}
     ADKPtr<T>& operator=(const ADKPtr<T>& obj)
     {
-        attach(obj.get());
+        return assign(obj.get());
+    }
+
+    ADKPtr<T>& operator=(T *obj)
+    {
+        return assign(obj);
+    }
+
+    ADKPtr<T>& assign(T *obj) {
+        if (obj)
+            obj->adk_addRef();
+        attach(obj);
         return *this;
     }
 
@@ -129,10 +141,14 @@ public:
 
     void release() {
         if (mObject != NULL) {
-            mObject->release();
+            mObject->adk_release();
             mObject = NULL;
         }
     }
+
+private: // do not overload these operator
+    // T &operator*();
+    // T **operator&();
 
 private:
     T *mObject;
@@ -141,13 +157,10 @@ private:
 } // end ::ijkadk
 
 #define ADK_OBJ_BEGIN(class__) \
-    static class__ *create() \
+    static ADKPtr<class__> create() \
     { \
-        class__ *obj = new ADKObjectImpl<class__>(); \
-        if (obj != NULL) { \
-            obj->addRef(); \
-        } \
-        return obj; \
+        class__ *self = new ADKObjectImpl<class__>(); \
+        return self; \
     }
 
 #define ADK_OBJ_END()

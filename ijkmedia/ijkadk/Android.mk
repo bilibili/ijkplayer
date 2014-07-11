@@ -45,8 +45,11 @@ LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
 
 LOCAL_SRC_FILES += ijkadk_android_media_MediaCodec.cpp
 LOCAL_SRC_FILES += ijkadk_java_lang_String.cpp
+LOCAL_SRC_FILES += ijkadk_java_nio_ByteBuffer.cpp
 LOCAL_SRC_FILES += ijkadkinternal.cpp
 LOCAL_SRC_FILES += ijkadkobject.cpp
+
+LOCAL_SRC_FILES += ijkadkfoundation.cpp
 
 LOCAL_SHARED_LIBRARIES := ijkutil
 

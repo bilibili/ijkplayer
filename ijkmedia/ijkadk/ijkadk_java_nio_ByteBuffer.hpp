@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk_android_media_MediaCodec.cpp
+ * ijkadk_java_nio_ByteBuffer.hpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,20 +21,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijkadk_android_media_MediaCodec.hpp"
+#ifndef IJKADK__IJKADK_JAVA_NIO_BYTEBUFFER_HPP
+#define IJKADK__IJKADK_JAVA_NIO_BYTEBUFFER_HPP
 
-#include "ijkadk_java_lang_String.hpp"
+#include "ijkadkobject.hpp"
 
-using namespace ::ijkadk;
-using namespace ::ijkadk::android::media;
-using namespace ::ijkadk::java::lang;
+namespace ijkadk {
+namespace java {
+namespace nio {
 
-ADKPtr<MediaCodec> MediaCodec::createByCodecName(ADKPtr<String> name)
+class ByteBuffer: public ::ijkadk::ADKObject
 {
-    return NULL;
-}
+public:
+    ADK_OBJ_BEGIN(ByteBuffer);
+    ADK_OBJ_END();
 
-ADKPtr<MediaCodec> MediaCodec::createDecoderByType(ADKPtr<String> type)
-{
-    return NULL;
-}
+protected:
+    ByteBuffer() {;}
+    ~ByteBuffer();
+
+public:
+
+private:
+};
+
+} // end ::ijkadk::nio::ByteBuffer
+} // end ::ijkadk::nio
+} // end ::ijkadk
+
+#endif /* IJKADK__IJKADK_JAVA_NIO_BYTEBUFFER_HPP */

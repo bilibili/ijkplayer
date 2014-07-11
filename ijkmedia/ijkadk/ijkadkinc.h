@@ -28,6 +28,7 @@
 #include <jni.h>
 #include <assert.h>
 
-#define IJKADK_VALIDATE(condition__) (assert(condition__))
+#define IJKADK_VALIDATE(condition__) (assert(!!condition__))
+#define IJKADK_VALIDATE_ALLOC(condition__) (assert(!!condition__))
 
 #endif /* IJKADK__IJKADKINC_H */

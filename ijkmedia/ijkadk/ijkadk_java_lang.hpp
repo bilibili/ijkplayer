@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk_android_media_MediaCodec.cpp
+ * ijkadk_java_lang.hpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,20 +21,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijkadk_android_media_MediaCodec.hpp"
+#ifndef IJKADK__IJKADK_JAVA_LANG_HPP
+#define IJKADK__IJKADK_JAVA_LANG_HPP
 
 #include "ijkadk_java_lang_String.hpp"
 
-using namespace ::ijkadk;
-using namespace ::ijkadk::android::media;
-using namespace ::ijkadk::java::lang;
-
-ADKPtr<MediaCodec> MediaCodec::createByCodecName(ADKPtr<String> name)
-{
-    return NULL;
+namespace ijkadk {
+namespace java {
+namespace lang {
+class String;
+}
+}
 }
 
-ADKPtr<MediaCodec> MediaCodec::createDecoderByType(ADKPtr<String> type)
-{
-    return NULL;
-}
+#endif /* IJKADK__IJKADK_JAVA_LANG_HPP */
+
