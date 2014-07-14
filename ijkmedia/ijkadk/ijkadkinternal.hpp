@@ -51,7 +51,47 @@
 
 
 namespace ijkadk {
+class ADKJniClassLoadHelper
+{
+public:
+    ADKJniClassLoadHelper(JNIEnv *env): mEnv(env), mClazz(NULL), mErrorCount(0) {;}
 
+    // return GlobalRef
+    jclass findClassAsGlobalRef(const char *signature)
+    {
+        assert(!mClazz);
+        jclass clazz = mEnv->FindClass(signature);
+        if (!clazz) {
+            ++mErrorCount;
+            mClazz = NULL;
+        } else {
+            mClazz = mEnv->NewGlobalRef(clazz);
+        }
+
+        return mClazz;
+    }
+
+    jmethodID getMethodID(const char *name, const char *signature)
+    {
+        jmethodID method = mEnv->GetMethodID(mClazz, name, signature);
+        if (!mClazz)
+            ++mErrorCount;
+        return method;
+    }
+
+    int getIntResult()
+    {
+        if (mErrorCount != 0)
+            return -1;
+
+        return 0;
+    }
+
+private:
+    JNIEnv *mEnv;
+    jclass mClazz; // do not own this
+    int    mErrorCount;
+};
 } // end ::ijkadk
 
 #endif /* IJKADK__IJKADKINTERNAL_HPP */

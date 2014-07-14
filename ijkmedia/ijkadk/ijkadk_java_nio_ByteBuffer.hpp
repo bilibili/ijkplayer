@@ -41,8 +41,7 @@ protected:
     ~ByteBuffer();
 
 public:
-
-private:
+    static int loadClass(JNIEnv *env);
 };
 
 } // end ::ijkadk::nio::ByteBuffer

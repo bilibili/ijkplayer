@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk_java_nio_ByteBuffer.cpp
+ * ijkadk_android_media_MediaCodec_BufferInfo.hpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -20,21 +20,40 @@
  * License along with ijkPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+ 
+#ifndef IJKADK__IJKADK_ANDROID_MEDIA_MEDIACODEC_BUFFERINFO_HPP
+#define IJKADK__IJKADK_ANDROID_MEDIA_MEDIACODEC_BUFFERINFO_HPP
 
-#include "ijkadk_java_nio_ByteBuffer.hpp"
+#include "ijkadkobject.hpp"
+#include "ijkadk_java_lang.hpp"
+#include "ijkadk_java_nio.hpp"
+#include <vector>
 
+namespace ijkadk {
+namespace android {
+namespace media {
+namespace MediaCodec_ {
+
+using namespace ::std;
+using namespace ::ijkadk::java::lang;
 using namespace ::ijkadk::java::nio;
 
-typedef struct ByteBufferClass
+// API-16
+class BufferInfo: public ::ijkadk::ADKObject
 {
-    jclass      clazz;
-} ByteBufferClass;
-static ByteBufferClass gClazz;
+public:
+    ADK_OBJ_BEGIN(BufferInfo);
+    ADK_OBJ_END();
 
-int ByteBuffer::loadClass(JNIEnv *env)
-{
-    ADKJniClassLoadHelper helper(env);
-    gClazz.clazz = helper.findClassAsGlobalRef("Ljava/nio/ByteBuffer;");
+public:
 
-    return helper.getIntResult();
-}
+public:
+    static int loadClass(JNIEnv *env);
+};
+
+} // end ::ijkadk::android::media::MediaCodec_
+} // end ::ijkadk::android::media
+} // end ::ijkadk::android
+} // end ::ijkadk
+
+#endif /* IJKADK__IJKADK_ANDROID_MEDIA_MEDIACODEC_BUFFERINFO_HPP */

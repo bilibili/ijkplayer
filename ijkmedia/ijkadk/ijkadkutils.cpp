@@ -31,4 +31,5 @@ void ijkadk_global_init(JNIEnv *env)
 {
     ijkadk::android::media::MediaCodec::loadClass(env);
     ijkadk::java::lang::String::loadClass(env);
+    ijkadk::java::nio::ByteBuffer::loadClass(env);
 }

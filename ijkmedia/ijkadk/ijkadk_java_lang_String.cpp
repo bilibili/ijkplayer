@@ -34,9 +34,10 @@ static StringClass gClazz;
 
 int String::loadClass(JNIEnv *env)
 {
-    IJKADK_FIND_CLASS(env, gClazz.clazz, "Ljava/lang/String;");
+    ADKJniClassLoadHelper helper(env);
+    gClazz.clazz = helper.findClassAsGlobalRef("Ljava/lang/String;");
 
-    return 0;
+    return helper.getIntResult();
 }
 
 String::~String()

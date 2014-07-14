@@ -62,6 +62,11 @@ public:
 
     void queueInputBuffer(jint index, jint offset, jint size, jlong presentationTimeUs, jint flags);
     void release();
+    void releaseOutputBuffer_render(int index, jboolean render);
+    void releaseOutputBuffer_timestamp(int index, jlong renderTimestampNs);
+
+    void start();
+    void stop();
 
     // API-18
     // ADKPtr<String>         getName ()
