@@ -1,5 +1,6 @@
 tag <next>:
 --------------------------------
+player: fix crash on invalid audio
 
 tag n0.1.3
 --------------------------------
