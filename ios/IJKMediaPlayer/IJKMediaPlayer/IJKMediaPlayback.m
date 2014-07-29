@@ -27,3 +27,5 @@ NSString *const IJKMediaPlaybackIsPreparedToPlayDidChangeNotification = @"IJKMed
 NSString *const IJKMoviePlayerLoadStateDidChangeNotification = @"IJKMoviePlayerLoadStateDidChangeNotification";
 NSString *const IJKMoviePlayerPlaybackDidFinishNotification = @"IJKMoviePlayerPlaybackDidFinishNotification";
 NSString *const IJKMoviePlayerPlaybackStateDidChangeNotification = @"IJKMoviePlayerPlaybackStateDidChangeNotification";
+
+NSString *const IJKMoviePlayerNumberOfBytesTransferredNotification = @"IJKMoviePlayerNumberOfBytesTransferredNotification";
