@@ -81,8 +81,6 @@ IJK_EXTERN NSString *const IJKMoviePlayerLoadStateDidChangeNotification;
 IJK_EXTERN NSString *const IJKMoviePlayerPlaybackDidFinishNotification;
 IJK_EXTERN NSString *const IJKMoviePlayerPlaybackStateDidChangeNotification;
 
-IJK_EXTERN NSString *const IJKMoviePlayerNumberOfBytesTransferredNotification;
-
 @end
 
 #pragma mark IJKMediaResource
