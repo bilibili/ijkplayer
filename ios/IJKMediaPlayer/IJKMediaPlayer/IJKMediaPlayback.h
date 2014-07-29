@@ -51,6 +51,8 @@
 
 @property(nonatomic, readonly) CGSize naturalSize;
 
+@property(nonatomic, readonly) int64_t numberOfBytesTransferred;
+
 // deprecated, for MPMoviePlayerController compatiable
 // no effect for IJKFFMoviePlayerController
 - (UIImage *)thumbnailImageAtTime:(NSTimeInterval)playbackTime timeOption:(MPMovieTimeOption)option;

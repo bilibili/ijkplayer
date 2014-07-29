@@ -59,6 +59,8 @@
 @synthesize playableDuration;
 @synthesize bufferingProgress = _bufferingProgress;
 
+@synthesize numberOfBytesTransferred = _numberOfBytesTransferred;
+
 @synthesize isPreparedToPlay = _isPreparedToPlay;
 @synthesize playbackState = _playbackState;
 @synthesize loadState = _loadState;
