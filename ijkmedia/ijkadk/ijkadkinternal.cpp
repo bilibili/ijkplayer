@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadkinternal.h
+ * ijkadkinternal.cpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,32 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADKINTERNAL_H
-#define IJKADK__IJKADKINTERNAL_H
+#include "ijkadkinternal.hpp"
+#include "ijkadk.h"
 
-#include <stdint.h>
-#include <jni.h>
-#include "ijkutil/ijkutil.h"
-
-
-#define IJKADK_FIND_JAVA_CLASS(env__, var__, classsign__) \
-    do { \
-    	var__ = (*env__)->FindClass(env__, classsign__); \
-        if (!(var__)) { \
-            ALOGE("FindClass failed: %s", classsign__); \
-            return -1; \
-        } \
-    } while(0);
-
-
-#define IJKADK_FIND_JAVA_METHOD(env__, var__, clazz__, funcsign__, retsign__) \
-    do { \
-	    (var__) = (*env__)->GetMethodID((env__), (clazz__), (funcsign__), (retsign__)); \
-	    if (!(var__)) { \
-	    	ALOGE("GetMethodID failed: %s", funcsign__); \
-            return -1; \
-	    } \
-	} while(0);
-
-
-#endif /* IJKADK__IJKADKINTERNAL_H */
+using namespace ijkadk;

@@ -376,6 +376,12 @@ IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz, jobject name, jobject 
     IjkMediaPlayer_release(env, thiz);
 }
 
+static void
+IjkMediaPlayer_setLogEnabled(JNIEnv *env, jobject thiz, jboolean enabled)
+{
+    ijklog_set_enabled(enabled);
+}
+
 static int
 _onNativeControlResolveSegmentConcat(JNIEnv *env, jobject weak_thiz, int type, void *data, size_t data_size)
 {
@@ -597,6 +603,8 @@ static JNINativeMethod g_methods[] = {
     { "native_init",        "()V",      (void *) IjkMediaPlayer_native_init },
     { "native_setup",       "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_setup },
     { "native_finalize",    "()V",      (void *) IjkMediaPlayer_native_finalize },
+
+    { "setLogEnabled",      "(Z)V",     (void *) IjkMediaPlayer_setLogEnabled },
 
     { "_setAvFormatOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvFormatOption },
     { "_setAvCodecOption",  "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvCodecOption },

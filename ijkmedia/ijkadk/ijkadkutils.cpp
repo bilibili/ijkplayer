@@ -1,8 +1,8 @@
 /*****************************************************************************
- * loghelper.c
+ * ijkadkutils.cpp
  *****************************************************************************
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,16 +21,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "loghelp.h"
+#include "ijkadkutils.h"
 
-int g_ijk_log_enabled = 0;
+#include "ijkadk_android_media_MediaCodec.hpp"
+#include "ijkadk_java_lang_String.hpp"
+#include "ijkadk_java_nio_ByteBuffer.hpp"
 
-void ijklog_set_enabled(int enabled)
+void ijkadk_global_init(JNIEnv *env)
 {
-    g_ijk_log_enabled = enabled;
-}
-
-int ijklog_get_enabled()
-{
-    return g_ijk_log_enabled;
+    ijkadk::android::media::MediaCodec::loadClass(env);
+    ijkadk::java::lang::String::loadClass(env);
+    ijkadk::java::nio::ByteBuffer::loadClass(env);
 }

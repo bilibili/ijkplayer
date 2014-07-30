@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk_android_os_bundle.h
+ * ijkadkobject.cpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,34 +21,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADK_ANDROID_OS_BUNDLE_H
-#define IJKADK__IJKADK_ANDROID_OS_BUNDLE_H
+#include "ijkadkobject.hpp"
+#include "ijkadkutils.h"
 
-#include <stdint.h>
-#include <jni.h>
+#include "ijkadkinternal.hpp"
 
+using namespace ::ijkadk;
 
-// load_class
-int ijkadk_android_os_Bundle__loadClass(JNIEnv *env);
+ADKObject::~ADKObject()
+{
+    if (mThiz) {
+        JNIEnv *env = getJNIEnv();
+        env->DeleteGlobalRef(mThiz);
+        mThiz = NULL;
+    }
+}
 
+void ADKObject::init(jobject thiz)
+{
+    // only called once
+    IJKADK_VALIDATE(!mThiz);
 
-typedef struct ijkBundle ijkBundle;
+    JNIEnv *env = getJNIEnv();
 
+    if (thiz) {
+        mThiz = env->NewGlobalRef(thiz);
+    }
+}
 
-ijkBundle *
-ijkBundle_init(JNIEnv *env, jobject java_bundle /* = NULL */ );
-void
-ijkBundle_destroyP(JNIEnv *env, ijkBundle **p_bundle);
-
-void
-ijkBundle_putInt(JNIEnv *env, ijkBundle *bundle, const char *key, int value);
-int
-ijkBundle_getInt(JNIEnv *env, ijkBundle *bundle, const char *key, int default_value);
-
-void
-ijkBundle_putString(JNIEnv *env, ijkBundle *bundle, const char *key, const char *value);
-const char *
-ijkBundle_getString(JNIEnv *env, ijkBundle *bundle, const char *key);
-
-
-#endif /* IJKADK__IJKADK_ANDROID_OS_BUNDLE_H */
+JNIEnv *ADKObject::getJNIEnv()
+{
+    return ijkadk_get_env();
+}

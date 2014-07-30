@@ -1,8 +1,8 @@
 /*****************************************************************************
- * loghelper.c
+ * ijkadkutils.h
  *****************************************************************************
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,16 +21,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "loghelp.h"
+#ifndef IJKADK__IJKADKUTILS_H
+#define IJKADK__IJKADKUTILS_H
 
-int g_ijk_log_enabled = 0;
+#include <stdint.h>
+#include <jni.h>
 
-void ijklog_set_enabled(int enabled)
-{
-    g_ijk_log_enabled = enabled;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void    ijkadk_global_init(JNIEnv *env);
+
+JavaVM *ijkadk_get_jvm();
+jint    ijkadk_setup_thread_env(JNIEnv **p_env);
+JNIEnv *ijkadk_get_env();
+
+#ifdef __cplusplus
 }
+#endif
 
-int ijklog_get_enabled()
-{
-    return g_ijk_log_enabled;
-}
+#endif /* IJKADK__IJKADKUTILS_H */

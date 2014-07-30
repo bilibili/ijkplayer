@@ -5,9 +5,9 @@ ndk-build
 cd -
 
 cd ijkmediaplayer-armv5/jni
-ndk-build
+# ndk-build
 cd -
 
 cd ijkmediaplayer-x86/jni
-ndk-build
+# ndk-build
 cd -

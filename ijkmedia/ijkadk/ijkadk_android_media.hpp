@@ -1,8 +1,8 @@
 /*****************************************************************************
- * loghelper.c
+ * ijkadk_android_media.hpp
  *****************************************************************************
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,16 +21,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "loghelp.h"
+#ifndef IJKADK__IJKADK_ANDROID_MEDIA_HPP
+#define IJKADK__IJKADK_ANDROID_MEDIA_HPP
 
-int g_ijk_log_enabled = 0;
+#include "ijkadk_android_media_MediaCodec.hpp"
 
-void ijklog_set_enabled(int enabled)
-{
-    g_ijk_log_enabled = enabled;
+namespace ijkadk {
+namespace android {
+namespace media {
+class MediaCodec;
+}
+}
 }
 
-int ijklog_get_enabled()
-{
-    return g_ijk_log_enabled;
-}
+#endif /* IJKADK__IJKADK_ANDROID_MEDIA_HPP */
+

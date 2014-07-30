@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk.c
+ * ijkadk_android_media_MediaCodec_BufferInfo.cpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,9 +21,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijkadk.h"
+#include "ijkadk_android_media_MediaCodec_BufferInfo.hpp"
 
-void ijkadk_global_init(JNIEnv *env)
+#include "ijkadk_java_lang_String.hpp"
+#include "ijkadkutils.h"
+
+using namespace ::ijkadk;
+using namespace ::ijkadk::android::media;
+using namespace ::ijkadk::java::lang;
+
+typedef struct BufferInfoClass
 {
-    ijkadk_android_os_Bundle__loadClass(env);
+    jclass      clazz;
+} BufferInfoClass;
+static BufferInfoClass gClazz;
+
+int BufferInfo::loadClass(JNIEnv *env)
+{
+    ADKJniClassLoadHelper helper(env);
+    gClazz.clazz                = helper.findClassAsGlobalRef("Landroid/media/MediaCodec;");
+
+    return helper.getIntResult();
 }

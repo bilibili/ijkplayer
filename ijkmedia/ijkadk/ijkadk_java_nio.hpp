@@ -1,8 +1,8 @@
 /*****************************************************************************
- * loghelper.c
+ * ijkadk_java_nio.hpp
  *****************************************************************************
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,16 +21,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "loghelp.h"
+#ifndef IJKADK__IJKADK_JAVA_NIO_HPP
+#define IJKADK__IJKADK_JAVA_NIO_HPP
 
-int g_ijk_log_enabled = 0;
+#include "ijkadk_java_nio_ByteBuffer.hpp"
 
-void ijklog_set_enabled(int enabled)
-{
-    g_ijk_log_enabled = enabled;
+namespace ijkadk {
+namespace java {
+namespace nio {
+class ByteBuffer;
+}
+}
 }
 
-int ijklog_get_enabled()
-{
-    return g_ijk_log_enabled;
-}
+#endif /* IJKADK__IJKADK_JAVA_NIO_HPP */
+

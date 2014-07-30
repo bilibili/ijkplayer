@@ -1,8 +1,8 @@
 /*****************************************************************************
- * loghelper.c
+ * ijkadk_java_nio_ByteBuffer.cpp
  *****************************************************************************
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,16 +21,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "loghelp.h"
+#include "ijkadk_java_nio_ByteBuffer.hpp"
 
-int g_ijk_log_enabled = 0;
+using namespace ::ijkadk::java::nio;
 
-void ijklog_set_enabled(int enabled)
+typedef struct ByteBufferClass
 {
-    g_ijk_log_enabled = enabled;
-}
+    jclass      clazz;
+} ByteBufferClass;
+static ByteBufferClass gClazz;
 
-int ijklog_get_enabled()
+int ByteBuffer::loadClass(JNIEnv *env)
 {
-    return g_ijk_log_enabled;
+    ADKJniClassLoadHelper helper(env);
+    gClazz.clazz = helper.findClassAsGlobalRef("Ljava/nio/ByteBuffer;");
+
+    return helper.getIntResult();
 }

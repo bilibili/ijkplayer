@@ -48,7 +48,7 @@ LOCAL_SRC_FILES += android/ijksdl_aout_android_audiotrack.c
 LOCAL_SRC_FILES += android/ijksdl_vout_android_nativewindow.c
 LOCAL_SRC_FILES += android/ijksdl_vout_android_surface.c
 
-LOCAL_SHARED_LIBRARIES := ijkffmpeg ijkutil
+LOCAL_SHARED_LIBRARIES := ijkffmpeg ijkutil ijkadk
 LOCAL_STATIC_LIBRARIES := cpufeatures yuv_static
 
 LOCAL_MODULE := ijksdl

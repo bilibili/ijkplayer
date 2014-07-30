@@ -1,8 +1,8 @@
 /*****************************************************************************
- * loghelper.c
+ * ijkadk_android_media_MediaCodec_BufferInfo.hpp
  *****************************************************************************
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -20,17 +20,40 @@
  * License along with ijkPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+ 
+#ifndef IJKADK__IJKADK_ANDROID_MEDIA_MEDIACODEC_BUFFERINFO_HPP
+#define IJKADK__IJKADK_ANDROID_MEDIA_MEDIACODEC_BUFFERINFO_HPP
 
-#include "loghelp.h"
+#include "ijkadkobject.hpp"
+#include "ijkadk_java_lang.hpp"
+#include "ijkadk_java_nio.hpp"
+#include <vector>
 
-int g_ijk_log_enabled = 0;
+namespace ijkadk {
+namespace android {
+namespace media {
+namespace MediaCodec_ {
 
-void ijklog_set_enabled(int enabled)
+using namespace ::std;
+using namespace ::ijkadk::java::lang;
+using namespace ::ijkadk::java::nio;
+
+// API-16
+class BufferInfo: public ::ijkadk::ADKObject
 {
-    g_ijk_log_enabled = enabled;
-}
+public:
+    ADK_OBJ_BEGIN(BufferInfo);
+    ADK_OBJ_END();
 
-int ijklog_get_enabled()
-{
-    return g_ijk_log_enabled;
-}
+public:
+
+public:
+    static int loadClass(JNIEnv *env);
+};
+
+} // end ::ijkadk::android::media::MediaCodec_
+} // end ::ijkadk::android::media
+} // end ::ijkadk::android
+} // end ::ijkadk
+
+#endif /* IJKADK__IJKADK_ANDROID_MEDIA_MEDIACODEC_BUFFERINFO_HPP */

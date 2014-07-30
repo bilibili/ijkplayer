@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijkadk.h
+ * ijkadk_java_lang_String.hpp
  *****************************************************************************
  *
  * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,9 +21,45 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADK_H
-#define IJKADK__IJKADK_H
+#ifndef IJKADK__IJKADK_JAVA_LANG_STRING_HPP
+#define IJKADK__IJKADK_JAVA_LANG_STRING_HPP
 
-#include "ijkadkutils.h"
+#include "ijkadkobject.hpp"
 
-#endif /* IJKADK__IJKADK_H */
+namespace ijkadk {
+namespace java {
+namespace lang {
+
+class String: public ::ijkadk::ADKObject
+{
+public:
+    ADK_OBJ_BEGIN(String);
+    ADK_OBJ_END();
+
+protected:
+    String():mStringUTFChars(NULL) {;}
+    ~String();
+
+public:
+    static ADKPtr<String> createWithUTFChars(const char *utfChars);
+
+    jstring     getThiz() {return (jstring)ADKObject::getThiz();}
+    const char *getUTFChars();
+
+private:
+    const char *mStringUTFChars;
+
+public:
+    static int loadClass(JNIEnv *env);
+};
+
+} // end ::ijkadk::java::lang
+} // end ::ijkadk::java
+} // end ::ijkadk
+
+inline ijkadk::ADKPtr<ijkadk::java::lang::String> ADKString(const char *utfChars)
+{
+    return ijkadk::java::lang::String::createWithUTFChars(utfChars);
+}
+
+#endif /* IJKADK__IJKADK_JAVA_LANG_STRING_HPP */
