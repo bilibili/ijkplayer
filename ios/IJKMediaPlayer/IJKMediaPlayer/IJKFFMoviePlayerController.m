@@ -78,7 +78,7 @@
 #define FFP_IO_STAT_STEP (50 * 1024)
 
 // as an example
-static void IJKFFIOStatCallback(const char *url, int type, int bytes)
+void IJKFFIOStatDebugCallback(const char *url, int type, int bytes)
 {
     static int64_t s_ff_io_stat_check_points = 0;
     static int64_t s_ff_io_stat_bytes = 0;
@@ -101,7 +101,7 @@ static void IJKFFIOStatCallback(const char *url, int type, int bytes)
 
 void IJKFFIOStatRegister(void (*cb)(const char *url, int type, int bytes))
 {
-    ijkmp_io_stat_register(IJKFFIOStatCallback);
+    ijkmp_io_stat_register(cb);
 }
 
 - (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
@@ -121,7 +121,6 @@ void IJKFFIOStatRegister(void (*cb)(const char *url, int type, int bytes))
     self = [super init];
     if (self) {
         ijkmp_global_init();
-        ijkmp_io_stat_register(IJKFFIOStatCallback);
 
         // init fields
         _controlStyle = MPMovieControlStyleNone;

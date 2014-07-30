@@ -42,3 +42,4 @@
 
 #define IJK_FF_IO_TYPE_READ (1)
 void IJKFFIOStatRegister(void (*cb)(const char *url, int type, int bytes));
+void IJKFFIOStatDebugCallback(const char *url, int type, int bytes);
