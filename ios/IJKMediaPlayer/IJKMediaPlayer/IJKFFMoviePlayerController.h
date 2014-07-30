@@ -39,3 +39,6 @@
 - (BOOL)isPlaying;
 
 @end
+
+#define IJK_FF_IO_TYPE_READ (1)
+void IJKFFIOStatRegister(void (*cb)(const char *url, int type, int bytes));

@@ -75,6 +75,35 @@
 @synthesize initialPlaybackTime = _initialPlaybackTime;
 @synthesize endPlaybackTime = _endPlaybackTime;
 
+#define FFP_IO_STAT_STEP (50 * 1024)
+
+// as an example
+static void IJKFFIOStatCallback(const char *url, int type, int bytes)
+{
+    static int64_t s_ff_io_stat_check_points = 0;
+    static int64_t s_ff_io_stat_bytes = 0;
+    if (!url)
+        return;
+
+    if (type != IJKMP_IO_STAT_READ)
+        return;
+
+    if (!av_strstart(url, "tcp:", NULL))
+        return;
+
+    s_ff_io_stat_bytes += bytes;
+    if (s_ff_io_stat_bytes < s_ff_io_stat_check_points ||
+        s_ff_io_stat_bytes > s_ff_io_stat_check_points + FFP_IO_STAT_STEP) {
+        s_ff_io_stat_check_points = s_ff_io_stat_bytes;
+        NSLog(@"io-stat: %s, +%d = %"PRId64, url, bytes, s_ff_io_stat_bytes);
+    }
+}
+
+void IJKFFIOStatRegister(void (*cb)(const char *url, int type, int bytes))
+{
+    ijkmp_io_stat_register(IJKFFIOStatCallback);
+}
+
 - (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
 {
     return [self initWithContentURL:aUrl
@@ -92,6 +121,7 @@
     self = [super init];
     if (self) {
         ijkmp_global_init();
+        ijkmp_io_stat_register(IJKFFIOStatCallback);
 
         // init fields
         _controlStyle = MPMovieControlStyleNone;
@@ -633,3 +663,4 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 }
 
 @end
+

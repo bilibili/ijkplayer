@@ -138,8 +138,15 @@ typedef struct SDL_Vout SDL_Vout;
  */
 #define MP_STATE_END                9
 
- void           ijkmp_global_init();
- void           ijkmp_global_uninit();
+
+
+#define IJKMP_IO_STAT_READ 1
+
+
+
+void            ijkmp_global_init();
+void            ijkmp_global_uninit();
+void            ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes));
 
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*));

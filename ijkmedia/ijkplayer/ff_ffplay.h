@@ -30,6 +30,7 @@
 
 void      ffp_global_init();
 void      ffp_global_uninit();
+void      ffp_io_stat_register(void (*cb)(const char *url, int type, int bytes));
 
 FFPlayer *ffp_create();
 void      ffp_destroy(FFPlayer *ffp);
