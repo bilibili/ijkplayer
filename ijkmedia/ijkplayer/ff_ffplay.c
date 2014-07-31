@@ -1980,7 +1980,6 @@ static int read_thread(void *arg)
     SDL_mutex *wait_mutex = SDL_CreateMutex();
     int last_error = 0;
     int64_t io_counter = 0;
-    int64_t avf_read_bytes = 0;
 
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
