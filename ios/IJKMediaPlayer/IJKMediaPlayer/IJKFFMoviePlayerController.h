@@ -38,6 +38,8 @@
 - (void)stop;
 - (BOOL)isPlaying;
 
+- (void)setPauseInBackground:(BOOL)pause;
+
 @end
 
 #define IJK_FF_IO_TYPE_READ (1)

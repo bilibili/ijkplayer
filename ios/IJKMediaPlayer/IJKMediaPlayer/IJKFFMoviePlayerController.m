@@ -49,6 +49,7 @@
     NSInteger _bufferingPosition;
 
     BOOL _keepScreenOnWhilePlaying;
+    BOOL _pauseInBackground;
 
     NSMutableArray *_registeredNotifications;
 }
@@ -162,6 +163,7 @@ void IJKFFIOStatRegister(void (*cb)(const char *url, int type, int bytes))
         _keepScreenOnWhilePlaying = YES;
         [self setScreenOn:YES];
 
+        _pauseInBackground = YES;
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
     }
@@ -226,6 +228,11 @@ void IJKFFIOStatRegister(void (*cb)(const char *url, int type, int bytes))
         return NO;
 
     return ijkmp_is_playing(_mediaPlayer);
+}
+
+- (void)setPauseInBackground:(BOOL)pause
+{
+    _pauseInBackground = pause;
 }
 
 - (void)shutdown
@@ -641,7 +648,9 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 {
     NSLog(@"IJKFFMoviePlayerController:applicationWillResignActive: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self pause];
+        if (_pauseInBackground) {
+            [self pause];
+        }
     });
 }
 
@@ -649,7 +658,9 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 {
     NSLog(@"IJKFFMoviePlayerController:applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self pause];
+        if (_pauseInBackground) {
+            [self pause];
+        }
     });
 }
 
@@ -657,7 +668,9 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 {
     NSLog(@"IJKFFMoviePlayerController:applicationWillTerminate: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self pause];
+        if (_pauseInBackground) {
+            [self pause];
+        }
     });
 }
 
