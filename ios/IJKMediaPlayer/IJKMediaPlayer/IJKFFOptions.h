@@ -32,6 +32,7 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 
 @property(nonatomic) int frameBufferCount;
 @property(nonatomic) int maxFps;
+@property(nonatomic) BOOL pauseInBackground;
 
 @property(nonatomic) int64_t timeout; ///< read/write timeout, -1 for infinite, in microseconds
 

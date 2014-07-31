@@ -158,12 +158,12 @@ void IJKFFIOStatRegister(void (*cb)(const char *url, int type, int bytes))
 
         // apply ffmpeg options
         [options applyTo:_mediaPlayer];
+        _pauseInBackground = options.pauseInBackground;
 
         // init extra
         _keepScreenOnWhilePlaying = YES;
         [self setScreenOn:YES];
 
-        _pauseInBackground = YES;
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
     }

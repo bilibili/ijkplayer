@@ -18,8 +18,9 @@
     options.skipLoopFilter  = IJK_AVDISCARD_ALL;
     options.skipFrame       = IJK_AVDISCARD_NONREF;
 
-    options.frameBufferCount = 3;
-    options.maxFps           = 30;
+    options.frameBufferCount  = 3;
+    options.maxFps            = 30;
+    options.pauseInBackground = YES;
 
     options.timeout         = -1;
 
