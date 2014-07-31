@@ -34,7 +34,6 @@
 #include "libavutil/opt.h"
 #include "libswresample/swresample.h"
 
-#include "libavformat/ijkavfmsg.h"
 #include "ijksdl/ijksdl.h"
 #include "ijkutil/ijkutil.h"
 
