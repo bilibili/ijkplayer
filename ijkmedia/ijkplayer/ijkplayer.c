@@ -77,7 +77,9 @@ void ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes))
     ffp_io_stat_register(cb);
 }
 
-void ijkmp_io_stat_complete_register(void (*cb)(const char *url, int64_t read_bytes, int64_t total_size, int64_t elpased_time))
+void ijkmp_io_stat_complete_register(void (*cb)(const char *url,
+                                                int64_t read_bytes, int64_t total_size,
+                                                int64_t elpased_time, int64_t total_duration))
 {
     ffp_io_stat_complete_register(cb);
 }
