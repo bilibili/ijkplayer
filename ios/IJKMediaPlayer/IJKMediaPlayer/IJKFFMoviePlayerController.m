@@ -89,20 +89,37 @@ void IJKFFIOStatDebugCallback(const char *url, int type, int bytes)
     if (type != IJKMP_IO_STAT_READ)
         return;
 
-    if (!av_strstart(url, "tcp:", NULL))
+    if (!av_strstart(url, "http:", NULL))
         return;
 
     s_ff_io_stat_bytes += bytes;
     if (s_ff_io_stat_bytes < s_ff_io_stat_check_points ||
         s_ff_io_stat_bytes > s_ff_io_stat_check_points + FFP_IO_STAT_STEP) {
         s_ff_io_stat_check_points = s_ff_io_stat_bytes;
-        NSLog(@"io-stat: %s, +%d = %"PRId64, url, bytes, s_ff_io_stat_bytes);
+        NSLog(@"io-stat: %s, +%d = %"PRId64"\n", url, bytes, s_ff_io_stat_bytes);
     }
 }
 
 void IJKFFIOStatRegister(void (*cb)(const char *url, int type, int bytes))
 {
     ijkmp_io_stat_register(cb);
+}
+
+void IJKFFIOStatCompleteDebugCallback(const char *url, int64_t read_bytes, int64_t total_size, int64_t elpased_time)
+{
+    if (!url)
+        return;
+
+    if (!av_strstart(url, "http:", NULL))
+        return;
+
+    NSLog(@"io-stat-complete: %s, %"PRId64"/%"PRId64", %"PRId64"\n",
+          url, read_bytes, total_size, elpased_time);
+}
+
+void IJKFFIOStatCompleteRegister(void (*cb)(const char *url, int64_t read_bytes, int64_t total_size, int64_t elpased_time))
+{
+    ijkmp_io_stat_complete_register(cb);
 }
 
 - (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
@@ -122,6 +139,9 @@ void IJKFFIOStatRegister(void (*cb)(const char *url, int type, int bytes))
     self = [super init];
     if (self) {
         ijkmp_global_init();
+
+        // IJKFFIOStatRegister(IJKFFIOStatDebugCallback);
+        // IJKFFIOStatCompleteRegister(IJKFFIOStatCompleteDebugCallback);
 
         // init fields
         _controlStyle = MPMovieControlStyleNone;
