@@ -2861,7 +2861,7 @@ void ffp_check_buffering_l(FFPlayer *ffp)
             int audio_cached_percent = (int)av_rescale(audio_cached_duration, 1005, hwm_in_ms * 10);
             ALOGE("audio cache=%%%d (%d/%d) (%d/%d)\n", audio_cached_percent,
                   (int)audio_cached_duration, hwm_in_ms,
-                  is->videoq.size, hwm_in_bytes);
+                  is->audioq.size, hwm_in_bytes);
 #endif
         }
 
