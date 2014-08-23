@@ -140,6 +140,18 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (aUrl == nil)
         return nil;
 
+    return [self initWithContentURLString:[aUrl absoluteString]
+                              withOptions:options
+                      withSegmentResolver:segmentResolver];
+}
+
+- (id)initWithContentURLString:(NSString *)aUrlString
+                   withOptions:(IJKFFOptions *)options
+           withSegmentResolver:(id<IJKMediaSegmentResolver>)segmentResolver
+{
+    if (aUrlString == nil)
+        return nil;
+
     self = [super init];
     if (self) {
         ijkmp_global_init();
@@ -157,7 +169,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         _endPlaybackTime = 0;
 
         // init media resource
-        _ffMrl = [[IJKFFMrl alloc] initWithMrl:[aUrl absoluteString]];
+        _ffMrl = [[IJKFFMrl alloc] initWithMrl:aUrlString];
         _segmentResolver = segmentResolver;
 
         // init player
