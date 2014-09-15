@@ -14,12 +14,15 @@ sh $TOOLS/pull-repo-base.sh $IJK_OPENSSL_UPSTREAM $IJK_OPENSSL_LOCAL_REPO
 function pull_fork()
 {
     echo "== pull openssl fork $1 =="
-    sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK android/openssl-$1 ${IJK_FFMPEG_LOCAL_REPO}
-    cd android/openssl-$1
+    sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK ios/openssl-$1 ${IJK_FFMPEG_LOCAL_REPO}
+    cd ios/openssl-$1
     git checkout ${IJK_FFMPEG_COMMIT}
     cd -
 }
 
-pull_fork "armv7a"
-pull_fork "armv5"
-pull_fork "x86"
+pull_fork "armv7"
+pull_fork "armv7s"
+pull_fork "arm64"
+pull_fork "i386"
+pull_fork "x86_64"
+
