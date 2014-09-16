@@ -1,6 +1,7 @@
 tag <next>:
 --------------------------------
 player: fix crash on invalid audio
+android: support build with ndk-r10
 
 tag n0.1.3
 --------------------------------
