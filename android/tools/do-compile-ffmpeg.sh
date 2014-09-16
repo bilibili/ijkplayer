@@ -27,7 +27,7 @@ fi
 # try to detect NDK version
 FF_NDK_REL=$(grep -o '^r[0-9]*.*' $ANDROID_NDK/RELEASE.TXT 2>/dev/null|cut -b2-)
 case "$FF_NDK_REL" in
-    9?*)
+    9*|10*)
         # we don't use 4.4.3 because it doesn't handle threads correctly.
         if test -d ${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.8
         # if gcc 4.8 is present, it's there for all the archs (x86, mips, arm)
