@@ -101,7 +101,6 @@ echo "--------------------"
 export PATH=$FF_TOOLCHAIN_PATH/bin:$PATH
 
 export COMMON_FF_CFG_FLAGS=
-# source $FF_BUILD_ROOT/../tools/ffmpeg-common-profiles.sh
 
 FF_CFG_FLAGS="$FF_CFG_FLAGS $COMMON_FF_CFG_FLAGS"
 
@@ -143,6 +142,8 @@ echo "--------------------"
 echo "\n--------------------"
 echo "[*] Finished"
 echo "--------------------"
+echo "# to continue to build openssl, run script below,"
+echo "sh compile-openssl.sh "
 echo "# to continue to build ffmpeg, run script below,"
 echo "sh compile-ffmpeg.sh "
 echo "# to continue to build ijkplayer, run script below,"
