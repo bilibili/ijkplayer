@@ -67,9 +67,9 @@ elif [ "$FF_TARGET" = "all" ]; then
     done
 
     do_lipo_all
-elif [ "$FF_TARGET" == "check" ]; then
+elif [ "$FF_TARGET" = "check" ]; then
     echo_archs
-elif [ "$FF_TARGET" == "clean" ]; then
+elif [ "$FF_TARGET" = "clean" ]; then
     echo_archs
     for ARCH in $FF_ALL_ARCHS
     do
