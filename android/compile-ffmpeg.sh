@@ -44,7 +44,7 @@ elif [ "$FF_TARGET" == "clean" ]; then
     rm -rf ./build/ffmpeg-*
 else
     echo "Usage:"
-    echo "  compile-ffmpeg.sh arm|armv7a|x86"
+    echo "  compile-ffmpeg.sh armv5|armv7a|x86"
     echo "  compile-ffmpeg.sh all"
     echo "  compile-ffmpeg.sh clean"
     echo "  compile-ffmpeg.sh check"
