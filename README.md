@@ -6,13 +6,13 @@ ijkplayer
 
 ### My Build Enviroment
 - Common
- - Mac OS X 10.9.3
+ - Mac OS X 10.9.4
 - Android
  - [ADT v22.6.2-1085508](http://developer.android.com/sdk/index.html)
  - [NDK r9d](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
- - Xcode 5.0.2 (with iOS SDK 7)
  - Xcode 5.1 (can not build arm64 for some xcrun bug for now, http://llvm.org/bugs/show_bug.cgi?id=19179)
+ - Xcode 5.1.1
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
  - brew install git
@@ -48,6 +48,19 @@ ijkplayer
 - obsolete platforms (Android: API-8 and below; iOS: below 5.1.1)
 - obsolete cpu: ARMv5, ARMv6, MIPS (I don't even have these types of devices…)
 - native subtitle render
+
+### Before Build
+- If you prefer more codec/format
+```
+ln -fs config/module-default.sh config/module.sh
+```
+
+- If you prefer less codec/format for smaller binary size (by default)
+```
+ln -fs config/module-lite.sh config/module.sh
+```
+
+- If you'd like to share your config, pull request is welcome.
 
 ### Build Android
 - Latest tag
@@ -90,7 +103,7 @@ cd android
 # import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
 ```
 
-### iOS
+### Build iOS
 - Latest tag
 
 ```
@@ -122,6 +135,12 @@ cd ios
 # import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
 # open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
 ```
+
+### Links
+- [FFmpeg_b4a](http://www.basic4ppc.com/android/forum/threads/ffmpeg_b4a-a-ffmpeg-library-for-b4a-decoding-streaming.44476/)
+- 中文
+ - [ijkplayer学习系列之环境搭建 2013-11-23](http://blog.csdn.net/nfer_zhuang/article/details/16905755)
+ - [Ubuntu 14.04 下编译 ijkplayer Android 2014-08-01](http://xqq.0ginr.com)
 
 ### License
 
