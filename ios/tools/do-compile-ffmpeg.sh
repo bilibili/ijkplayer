@@ -52,13 +52,14 @@ FFMPEG_CFG_FLAGS=
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $COMMON_FF_CFG_FLAGS"
 
 # Optimization options (experts only):
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv5te"
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv6"
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv6t2"
+# FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv5te"
+# FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv6"
+# FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv6t2"
 
 # Advanced options (experts only):
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-cross-compile"
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-symver"
+# --disable-symver may indicate a bug
+# FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-symver"
 
 # Developer options (useful when working on FFmpeg itself):
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-stripping"

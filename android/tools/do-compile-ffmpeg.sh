@@ -226,7 +226,7 @@ FF_CFG_FLAGS="$FF_CFG_FLAGS --cross-prefix=${FF_CROSS_PREFIX}-"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-cross-compile"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --target-os=linux"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-pic"
-FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-symver"
+# FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-symver"
 
 # Optimization options (experts only):
 FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-asm"
