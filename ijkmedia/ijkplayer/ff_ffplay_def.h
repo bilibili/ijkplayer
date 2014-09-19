@@ -44,12 +44,13 @@
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 50000
 
-/* SDL audio buffer size, in samples. Should be small to have precise
-   A/V sync as SDL does not have hardware buffer fullness info. */
-#define SDL_AUDIO_BUFFER_SIZE 1024
+/* Minimum SDL audio buffer size, in samples. */
+#define SDL_AUDIO_MIN_BUFFER_SIZE 512
+/* Calculate actual buffer size keeping in mind not cause too frequent audio callbacks */
+#define SDL_AUDIO_MAX_CALLBACKS_PER_SEC 30
 
 /* no AV sync correction is done if below the minimum AV sync threshold */
-#define AV_SYNC_THRESHOLD_MIN 0.01
+#define AV_SYNC_THRESHOLD_MIN 0.04
 /* AV sync correction is done if above the maximum AV sync threshold */
 #define AV_SYNC_THRESHOLD_MAX 0.1
 /* If a frame duration is longer than this, it will not be duplicated to compensate AV sync */
@@ -197,7 +198,7 @@ typedef struct VideoState {
     PacketQueue audioq;
     int64_t audioq_duration;
     int audio_hw_buf_size;
-    uint8_t silence_buf[SDL_AUDIO_BUFFER_SIZE];
+    uint8_t silence_buf[SDL_AUDIO_MIN_BUFFER_SIZE];
     uint8_t *audio_buf;
     uint8_t *audio_buf1;
     unsigned int audio_buf_size; /* in bytes */
@@ -255,7 +256,7 @@ typedef struct VideoState {
     int64_t video_current_pos;      // current displayed file pos
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
     VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE_MAX];
-    int pictq_size, pictq_rindex, pictq_windex;
+    int pictq_size, pictq_rindex, pictq_windex, pictq_rindex_shown;
     int pictq_capacity;
     SDL_mutex *pictq_mutex;
     SDL_cond *pictq_cond;
@@ -271,6 +272,7 @@ typedef struct VideoState {
     int step;
 
 #if CONFIG_AVFILTER
+    int vfilter_idx;
     AVFilterContext *in_video_filter;   // the first filter in the video chain
     AVFilterContext *out_video_filter;  // the last filter in the video chain
     AVFilterContext *in_audio_filter;   // the first filter in the audio chain
@@ -324,7 +326,6 @@ static int workaround_bugs = 1;
 static int fast = 0;
 static int genpts = 0;
 static int lowres = 0;
-static int error_concealment = 3;
 static int decoder_reorder_pts = -1;
 static int autoexit;
 static int exit_on_keydown;
@@ -340,9 +341,11 @@ double rdftspeed = 0.02;
 static int64_t cursor_last_shown;
 static int cursor_hidden = 0;
 #if CONFIG_AVFILTER
-static char *vfilters = NULL;
+static const char **vfilters_list = NULL;
+static int nb_vfilters = 0;
 static char *afilters = NULL;
 #endif
+static int autorotate = 1;
 
 /* current context */
 static int is_full_screen;
@@ -383,8 +386,8 @@ typedef struct FFPlayer {
     int fs_screen_height;
     int default_width;
     int default_height;
-    int screen_width = 0;
-    int screen_height = 0;
+    int screen_width;
+    int screen_height;
 #endif
     int audio_disable;
     int video_disable;
@@ -402,7 +405,6 @@ typedef struct FFPlayer {
     int fast;
     int genpts;
     int lowres;
-    int error_concealment;
     int decoder_reorder_pts;
     int autoexit;
 #ifdef FFP_MERGE
@@ -421,12 +423,14 @@ typedef struct FFPlayer {
     double rdftspeed;
 #ifdef FFP_MERGE
     int64_t cursor_last_shown;
-    int cursor_hidden = 0;
+    int cursor_hidden;
 #endif
 #if CONFIG_AVFILTER
-    char *vfilters;
+    const char **vfilters_list;
+    int nb_vfilters;
     char *afilters;
 #endif
+    int autorotate;
 
     int sws_flags;
 
@@ -504,7 +508,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->fast                   = 1;
     ffp->genpts                 = 0;
     ffp->lowres                 = 0;
-    ffp->error_concealment      = 3;
     ffp->decoder_reorder_pts    = -1;
     ffp->autoexit               = 0;
     ffp->loop                   = 1;
@@ -515,9 +518,11 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     av_freep(&ffp->video_codec_name);
     ffp->rdftspeed              = 0.02;
 #if CONFIG_AVFILTER
-    ffp->vfilters               = NULL;
+    ffp->vfilters_list          = NULL;
+    ffp->nb_vfilters            = 0;
     ffp->afilters               = NULL;
 #endif
+    ffp->autorotate             = 1;
 
     // ffp->sws_flags              = SWS_BICUBIC;
     ffp->sws_flags              = SWS_FAST_BILINEAR;
