@@ -38,15 +38,9 @@
 @dynamic playbackState;
 @dynamic loadState;
 
-@dynamic naturalSize;
-
 @dynamic controlStyle;
 @dynamic scalingMode;
 @dynamic shouldAutoplay;
-@dynamic useApplicationAudioSession;
-@dynamic currentPlaybackRate;
-@dynamic initialPlaybackTime;
-@dynamic endPlaybackTime;
 @synthesize numberOfBytesTransferred = _numberOfBytesTransferred;
 
 - (id)initWithContentURL:(NSURL *)aUrl

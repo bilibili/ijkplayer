@@ -49,8 +49,6 @@
 @property(nonatomic, readonly)  MPMoviePlaybackState playbackState;
 @property(nonatomic, readonly)  MPMovieLoadState loadState;
 
-@property(nonatomic, readonly) CGSize naturalSize;
-
 @property(nonatomic, readonly) int64_t numberOfBytesTransferred;
 
 // deprecated, for MPMoviePlayerController compatiable
@@ -62,10 +60,6 @@
 @property(nonatomic) MPMovieControlStyle controlStyle;
 @property(nonatomic) MPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;
-@property(nonatomic) BOOL useApplicationAudioSession;
-@property(nonatomic) float currentPlaybackRate;
-@property(nonatomic) NSTimeInterval initialPlaybackTime;
-@property(nonatomic) NSTimeInterval endPlaybackTime;
 
 #pragma mark Notifications
 
