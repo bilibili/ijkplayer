@@ -31,4 +31,13 @@
 + (NSString*)createTempFileNameInDirectory: (NSString*)aDirectory
                                 withPrefix: (NSString*)aPrefix;
 
++ (NSError*)createErrorWithDomain: (NSString*)domain
+                             code: (NSInteger)code
+                      description: (NSString*)description
+                           reason: (NSString*)reason;
+
++ (void)kvoQuietlyRemoveObserver:(NSObject *)anObserver
+                      forKeyPath:(NSString *)keyPath
+                      fromObject:(NSObject *)object;
+
 @end

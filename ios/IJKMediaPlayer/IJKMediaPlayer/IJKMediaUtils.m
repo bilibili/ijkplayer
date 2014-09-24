@@ -50,4 +50,39 @@
     return [NSString stringWithCString:filename encoding:NSASCIIStringEncoding];
 }
 
++ (NSError*)createErrorWithDomain: (NSString*)domain
+                             code: (NSInteger)code
+                      description: (NSString*)description
+                           reason: (NSString*)reason
+{
+    /* Generate an error describing the failure. */
+    if (description == nil)
+        description = @"";
+    if (reason == nil)
+        reason = @"";
+
+    NSString *localizedDescription = NSLocalizedString(description, description);
+    NSString *localizedFailureReason = NSLocalizedString(reason, reason);
+    NSDictionary *errorDict = [NSDictionary dictionaryWithObjectsAndKeys:
+                               localizedDescription, NSLocalizedDescriptionKey,
+                               localizedFailureReason, NSLocalizedFailureReasonErrorKey,
+                               nil];
+    NSError *error = [NSError errorWithDomain:domain
+                                         code:0
+                                     userInfo:errorDict];
+    return error;
+}
+
++ (void)kvoQuietlyRemoveObserver:(NSObject *)anObserver
+                      forKeyPath:(NSString *)keyPath
+                      fromObject:(NSObject *)object
+{
+    @try {
+        [object removeObserver:anObserver forKeyPath:@"status"];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"dup remove observer\n");
+    }
+}
+
 @end

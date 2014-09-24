@@ -418,7 +418,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
             [self setScreenOn:NO];
 
             [[NSNotificationCenter defaultCenter]
-             postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:self];
+             postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification
+             object:self];
 
             [[NSNotificationCenter defaultCenter]
                 postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
@@ -447,12 +448,13 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
             [self setScreenOn:NO];
 
             [[NSNotificationCenter defaultCenter]
-             postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification object:self];
+             postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification
+             object:self];
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
              object:self
-             userInfo:@{MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError)}];
+             userInfo:@{MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackEnded)}];
             break;
         }
         case FFP_MSG_VIDEO_SIZE_CHANGED:
