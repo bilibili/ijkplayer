@@ -278,19 +278,19 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     [self setScreenOn:NO];
 
-    [self performSelectorInBackground:@selector(shupdownWaitStop:) withObject:self];
+    [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
 }
 
-- (void)shupdownWaitStop:(IJKFFMoviePlayerController *) mySelf
+- (void)shutdownWaitStop:(IJKFFMoviePlayerController *) mySelf
 {
     if (!_mediaPlayer)
         return;
 
     ijkmp_stop(_mediaPlayer);
-    [self performSelectorOnMainThread:@selector(shupdownClose:) withObject:self waitUntilDone:YES];
+    [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
 }
 
-- (void)shupdownClose:(IJKFFMoviePlayerController *) mySelf
+- (void)shutdownClose:(IJKFFMoviePlayerController *) mySelf
 {
     if (!_mediaPlayer)
         return;
