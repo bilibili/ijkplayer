@@ -2,6 +2,8 @@ tag <next>:
 --------------------------------
 player: fix crash on invalid audio
 android: support build with ndk-r10
+ios: add IJKAVMoviePlayerController based on AVPlayer API
+ios: remove some unused interface
 
 tag n0.1.3
 --------------------------------
