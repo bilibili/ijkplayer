@@ -360,8 +360,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (NSTimeInterval)playableDuration
 {
-    // return self.currentPlaybackTime + ((NSTimeInterval)_bufferingTime) / 1000;
-    return ((NSTimeInterval)_bufferingPosition) / 1000;
+    if (!_mediaPlayer)
+        return 0.0f;
+
+    NSTimeInterval ret = ijkmp_get_playable_duration(_mediaPlayer);
+    return ret / 1000;
 }
 
 - (void)setScalingMode: (MPMovieScalingMode) aScalingMode

@@ -466,6 +466,7 @@ typedef struct FFPlayer {
     int last_buffered_time_percentage;
     int last_buffered_size_percentage;
     int last_buffered_percent;
+    int64_t playable_duration_ms;
 
     int pictq_capacity;
     int max_fps;
@@ -551,6 +552,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->last_buffered_time_percentage  = -1;
     ffp->last_buffered_size_percentage  = -1;
     ffp->last_buffered_percent          = -1;
+    ffp->playable_duration_ms           = 0;
 
     ffp->pictq_capacity                 = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT;
     ffp->max_fps                        = VIDEO_MAX_FPS_DEFAULT;

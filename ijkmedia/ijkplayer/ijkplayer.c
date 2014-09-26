@@ -526,6 +526,20 @@ long ijkmp_get_duration(IjkMediaPlayer *mp)
     return retval;
 }
 
+static long ijkmp_get_playable_duration_l(IjkMediaPlayer *mp)
+{
+    return ffp_get_playable_duration_l(mp->ffplayer);
+}
+
+long ijkmp_get_playable_duration(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    long retval = ijkmp_get_playable_duration_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
+}
+
 void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
 {
     void *prev_weak_thiz = mp->weak_thiz;
