@@ -119,7 +119,9 @@
         return;
 
     _isPaused = YES;
-    AudioSessionSetActive(false);
+    // Delay > 1 seconds on ios8
+    // Maybe we don't need this call in pause
+    // AudioSessionSetActive(false);
     OSStatus status = AudioQueuePause(_audioQueueRef);
     if (status != noErr)
         NSLog(@"AudioQueue: AudioQueuePause failed (%d)\n", (int)status);
