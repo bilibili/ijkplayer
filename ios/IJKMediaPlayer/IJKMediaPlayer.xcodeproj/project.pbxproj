@@ -682,7 +682,7 @@
 		E6903EB117EAF6C500CFD954 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = bilibili;
 			};
 			buildConfigurationList = E6903EB417EAF6C500CFD954 /* Build configuration list for PBXProject "IJKMediaPlayer" */;
@@ -829,10 +829,6 @@
 		E6903EC817EAF6C500CFD954 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv7,
-					armv7s,
-				);
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				DSTROOT = /tmp/IJKMediaPlayer.dst;
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -856,10 +852,6 @@
 		E6903EC917EAF6C500CFD954 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv7,
-					armv7s,
-				);
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				DSTROOT = /tmp/IJKMediaPlayer.dst;
 				GCC_C_LANGUAGE_STANDARD = c11;
