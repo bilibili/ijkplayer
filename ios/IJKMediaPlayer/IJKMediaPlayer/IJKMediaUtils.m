@@ -73,16 +73,4 @@
     return error;
 }
 
-+ (void)kvoQuietlyRemoveObserver:(NSObject *)anObserver
-                      forKeyPath:(NSString *)keyPath
-                      fromObject:(NSObject *)object
-{
-    @try {
-        [object removeObserver:anObserver forKeyPath:@"status"];
-    }
-    @catch (NSException *exception) {
-        NSLog(@"dup remove observer\n");
-    }
-}
-
 @end

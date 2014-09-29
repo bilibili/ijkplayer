@@ -36,8 +36,4 @@
                       description: (NSString*)description
                            reason: (NSString*)reason;
 
-+ (void)kvoQuietlyRemoveObserver:(NSObject *)anObserver
-                      forKeyPath:(NSString *)keyPath
-                      fromObject:(NSObject *)object;
-
 @end

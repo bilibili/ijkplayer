@@ -72,6 +72,7 @@
 #import "IJKAudioKit.h"
 #import "IJKMediaModule.h"
 #import "IJKMediaUtils.h"
+#import "IJKKVOController.h"
 #import <AVFoundation/AVFoundation.h>
 
 static NSString *kErrorDomain = @"IJKAVMoviePlayer";
@@ -106,7 +107,10 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     AVPlayerItem    *_playerItem;
     AVPlayer        *_player;
     IJKAVPlayerLayerView * _avView;
-    
+
+    IJKKVOController *_playerKVO;
+    IJKKVOController *_playerItemKVO;
+
 	id _timeObserver;
 
     BOOL _isSeeking;
@@ -224,42 +228,6 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     return _player.rate >= 0.00001f;
 }
 
-- (void)removeObserversFromPlayerItem:(AVPlayerItem*)playerItem
-{
-    if (playerItem == nil)
-        return;
-
-    [IJKMediaUtils kvoQuietlyRemoveObserver:self
-                                 forKeyPath:@"status"
-                                 fromObject:playerItem];
-    [IJKMediaUtils kvoQuietlyRemoveObserver:self
-                                 forKeyPath:@"loadedTimeRanges"
-                                 fromObject:playerItem];
-    [IJKMediaUtils kvoQuietlyRemoveObserver:self
-                                 forKeyPath:@"playbackLikelyToKeepUp"
-                                 fromObject:playerItem];
-    [IJKMediaUtils kvoQuietlyRemoveObserver:self
-                                 forKeyPath:@"playbackBufferFull"
-                                 fromObject:playerItem];
-    [IJKMediaUtils kvoQuietlyRemoveObserver:self
-                                 forKeyPath:@"playbackBufferEmpty"
-                                 fromObject:playerItem];
-
-    [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:nil
-                                                  object:playerItem];
-}
-
-- (void)removeObserversFromPlayer:(AVPlayer*)player
-{
-    if (player == nil)
-        return;
-
-    [player removeObserver:self forKeyPath:@"currentItem"];
-    [player removeObserver:self forKeyPath:@"rate"];
-}
-
-
 - (void)shutdown
 {
     [self stop];
@@ -268,7 +236,13 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         [_playerItem cancelPendingSeeks];
     }
 
-    [self removeObserversFromPlayerItem:_playerItem];
+    [_playerItemKVO safelyRemoveAllObservers];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:nil
+                                                  object:_playerItem];
+
+    [_playerKVO safelyRemoveAllObservers];
+
     [self unregisterApplicationObservers];
 
     if (_avView != nil) {
@@ -406,36 +380,40 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 	/* At this point we're ready to set up for playback of the asset. */
     
     /* Stop observing our prior AVPlayerItem, if we have one. */
-    [self removeObserversFromPlayerItem:_playerItem];
+    [_playerItemKVO safelyRemoveAllObservers];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:nil
+                                                  object:_playerItem];
 
     /* Create a new instance of AVPlayerItem from the now successfully loaded AVAsset. */
     _playerItem = [AVPlayerItem playerItemWithAsset:asset];
+    _playerItemKVO = [[IJKKVOController alloc] initWithTarget:_playerItem];
 
     /* Observe the player item "status" key to determine when it is ready to play. */
-    [_playerItem addObserver:self
-                  forKeyPath:@"status"
-                     options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                     context:KVO_AVPlayerItem_state];
+    [_playerItemKVO safelyAddObserver:self
+                           forKeyPath:@"status"
+                              options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                              context:KVO_AVPlayerItem_state];
 
-    [_playerItem addObserver:self
-                  forKeyPath:@"loadedTimeRanges"
-                     options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                     context:KVO_AVPlayerItem_loadedTimeRanges];
+    [_playerItemKVO safelyAddObserver:self
+                           forKeyPath:@"loadedTimeRanges"
+                              options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                              context:KVO_AVPlayerItem_loadedTimeRanges];
 
-    [_playerItem addObserver:self
-                  forKeyPath:@"playbackLikelyToKeepUp"
-                     options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                     context:KVO_AVPlayerItem_playbackLikelyToKeepUp];
+    [_playerItemKVO safelyAddObserver:self
+                           forKeyPath:@"playbackLikelyToKeepUp"
+                              options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                              context:KVO_AVPlayerItem_playbackLikelyToKeepUp];
 
-    [_playerItem addObserver:self
-                  forKeyPath:@"playbackBufferEmpty"
-                     options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                     context:KVO_AVPlayerItem_playbackBufferEmpty];
+    [_playerItemKVO safelyAddObserver:self
+                           forKeyPath:@"playbackBufferEmpty"
+                              options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                              context:KVO_AVPlayerItem_playbackBufferEmpty];
 
-    [_playerItem addObserver:self
-                  forKeyPath:@"playbackBufferFull"
-                     options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                     context:KVO_AVPlayerItem_playbackBufferFull];
+    [_playerItemKVO safelyAddObserver:self
+                           forKeyPath:@"playbackBufferFull"
+                              options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                              context:KVO_AVPlayerItem_playbackBufferFull];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(playerItemDidReachEnd:)
@@ -454,20 +432,21 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     {
         /* Get a new AVPlayer initialized to play the specified player item. */
         _player = [AVPlayer playerWithPlayerItem:_playerItem];
+        _playerKVO = [[IJKKVOController alloc] initWithTarget:_player];
 
         /* Observe the AVPlayer "currentItem" property to find out when any
          AVPlayer replaceCurrentItemWithPlayerItem: replacement will/did
          occur.*/
-        [_player addObserver:self
-                      forKeyPath:@"currentItem"
-                         options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                         context:KVO_AVPlayer_currentItem];
+        [_playerKVO safelyAddObserver:self
+                           forKeyPath:@"currentItem"
+                              options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                              context:KVO_AVPlayer_currentItem];
 
         /* Observe the AVPlayer "rate" property to update the scrubber control. */
-        [_player addObserver:self
-                  forKeyPath:@"rate"
-                     options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                     context:KVO_AVPlayer_rate];
+        [_playerKVO safelyAddObserver:self
+                           forKeyPath:@"rate"
+                              options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                              context:KVO_AVPlayer_rate];
     }
 
     /* Make our new AVPlayerItem the AVPlayer's current item. */
