@@ -32,6 +32,10 @@
              withOptions:(IJKFFOptions *)options
      withSegmentResolver:(id<IJKMediaSegmentResolver>)segmentResolver;
 
+- (id)initWithContentURLString:(NSString *)aUrlString
+                   withOptions:(IJKFFOptions *)options
+           withSegmentResolver:(id<IJKMediaSegmentResolver>)segmentResolver;
+
 - (void)prepareToPlay;
 - (void)play;
 - (void)pause;

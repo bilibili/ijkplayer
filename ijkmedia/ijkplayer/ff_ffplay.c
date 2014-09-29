@@ -2816,6 +2816,15 @@ long ffp_get_duration_l(FFPlayer *ffp)
     return (long)adjust_duration;
 }
 
+long ffp_get_playable_duration_l(FFPlayer *ffp)
+{
+    assert(ffp);
+    if (!ffp)
+        return 0;
+
+    return (long)ffp->playable_duration_ms;
+}
+
 void ffp_toggle_buffering_l(FFPlayer *ffp, int buffering_on)
 {
     VideoState *is = ffp->is;
@@ -2888,6 +2897,8 @@ void ffp_check_buffering_l(FFPlayer *ffp)
 
         if (cached_duration_in_ms >= 0) {
             buf_time_position = ffp_get_current_position_l(ffp) + cached_duration_in_ms;
+            ffp->playable_duration_ms = buf_time_position;
+
             buf_time_percent = (int)av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
             if (buf_time_percent <= 100 && abs(ffp->last_buffered_time_percentage - buf_time_percent) >= FFP_BUF_MSG_PERIOD) {
 #ifdef FFP_SHOW_DEMUX_CACHE
