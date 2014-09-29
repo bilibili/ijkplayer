@@ -267,10 +267,12 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     [self didPlaybackStateChange];
     [self didLoadStateChange];
 
+    [_player pause];
     [_player seekToTime:CMTimeMakeWithSeconds(aCurrentPlaybackTime, NSEC_PER_SEC)
       completionHandler:^(BOOL finished) {
           dispatch_async(dispatch_get_main_queue(), ^{
               _isSeeking = NO;
+              [_player play];
 
               [self didPlaybackStateChange];
               [self didLoadStateChange];
@@ -327,11 +329,17 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     if (_player == nil)
         return MPMovieLoadStateUnknown;
 
+    if (_isSeeking)
+        return MPMovieLoadStateStalled;
+
     AVPlayerItem *playerItem = [_player currentItem];
     if (playerItem == nil)
         return MPMovieLoadStateUnknown;
 
     if ([playerItem isPlaybackBufferFull]) {
+        if ([playerItem isPlaybackLikelyToKeepUp]) {
+            return MPMovieLoadStatePlayable | MPMovieLoadStatePlaythroughOK;
+        }
         return MPMovieLoadStatePlayable;
     } else if ([playerItem isPlaybackLikelyToKeepUp]) {
         return MPMovieLoadStatePlaythroughOK;
