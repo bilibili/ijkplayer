@@ -11,8 +11,7 @@ ijkplayer
  - [ADT v22.6.2-1085508](http://developer.android.com/sdk/index.html)
  - [NDK r9d](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
- - Xcode 5.1 (can not build arm64 for some xcrun bug for now, http://llvm.org/bugs/show_bug.cgi?id=19179)
- - Xcode 5.1.1
+ - Xcode 6.0.1
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
  - brew install git
@@ -31,11 +30,11 @@ ijkplayer
  - video output: NativeWindow
  - audio output: AudioTrack
 - iOS
- - platform: iOS 5.1.1~7.0.x
+ - platform: iOS 5.1.1~8.0.x
  - cpu: ARMv7, ARMv7s, ARM64, i386, x86_64
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
  - video-output: OpenGL ES 2.0 (I420/YV12 shaders)
- - audio-output: CoreAudio
+ - audio-output: AudioQueue, AudioUnit
 
 ### TODO
 - Android
