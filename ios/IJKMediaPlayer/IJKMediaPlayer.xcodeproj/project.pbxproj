@@ -106,7 +106,6 @@
 		E67C4E0419D15B3200415CEE /* IJKAVPlayerLayerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKAVPlayerLayerView.m; path = IJKMediaPlayer/IJKAVPlayerLayerView.m; sourceTree = "<group>"; };
 		E67C4E0619D15EEA00415CEE /* IJKAVMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKAVMoviePlayerController.h; path = IJKMediaPlayer/IJKAVMoviePlayerController.h; sourceTree = "<group>"; };
 		E67C4E0719D15EEA00415CEE /* IJKAVMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKAVMoviePlayerController.m; path = IJKMediaPlayer/IJKAVMoviePlayerController.m; sourceTree = "<group>"; };
-		E6850E7A195D6ABF00550718 /* ijkavfmsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkavfmsg.h; sourceTree = "<group>"; };
 		E6903EB917EAF6C500CFD954 /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libIJKMediaPlayer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6903EC017EAF6C500CFD954 /* IJKMediaPlayer-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "IJKMediaPlayer-Prefix.pch"; sourceTree = "<group>"; };
 		E6903EC117EAF6C500CFD954 /* IJKMediaPlayback.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = IJKMediaPlayback.h; path = IJKMediaPlayer/IJKMediaPlayback.h; sourceTree = "<group>"; };
@@ -414,7 +413,6 @@
 			children = (
 				E6903F8317EAFC2C00CFD954 /* avformat.h */,
 				E6903F8417EAFC2C00CFD954 /* avio.h */,
-				E6850E7A195D6ABF00550718 /* ijkavfmsg.h */,
 				E6903F8517EAFC2C00CFD954 /* version.h */,
 			);
 			path = libavformat;
