@@ -1,3 +1,5 @@
+Add play HTTPs link lib base on Version1.0.1.
+
 ijkplayer
 =========
 - Video player based on [ffplay](http://ffmpeg.org)

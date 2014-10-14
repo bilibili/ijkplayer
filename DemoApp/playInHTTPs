@@ -1,0 +1,31 @@
+DemoAPP folder include libs and demo app. 
+
+
+ijkplayer github: https://github.com/bbcallen/ijkplayer
+openssl 1.0.1g github: https://github.com/devpack/openssl-android
+
+Build ijkplayer with openssl:
+1.主要步驟為:
+git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-stable
+cd ijkplayer-android-stable
+git checkout -B stable n0.1.1
+
+./init-android.sh
+
+cd android
+./compile-ffmpeg.sh
+./compile-ijk.sh
+
+cd ijkmediaplayer/jni
+ndk-build
+
+# import android/ijkmediaplayer for MediaPlayer-like interface (recommended)
+# import android/ijkmediawidget for VideoView-like interface (based on Vitamio UI)
+# import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
+2.修改compile-ffmpeg.sh加入openssl的路徑(可参考附件)
+
+
+直接使用ijkplayer:
+1.將DemoApp路徑下的project直接import
+2.ijkmediaplayer和ijkmediawidget為library
+3.ijkmediademo為執行程式
