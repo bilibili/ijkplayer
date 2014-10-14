@@ -503,7 +503,22 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
                 return;
 
             case MEDIA_BUFFERING_UPDATE:
-                player.notifyOnBufferingUpdate(msg.arg1);
+                long bufferPosition = msg.arg1;
+                if (bufferPosition < 0) {
+                    bufferPosition = 0;
+                }
+
+                long percent = 0;
+                long duration = player.getDuration();
+                if (duration > 0) {
+                    percent = bufferPosition * 100 / duration;
+                }
+                if (percent >= 100) {
+                    percent = 100;
+                }
+
+                // DebugLog.efmt(TAG, "Buffer (%d%%) %d/%d",  percent, bufferPosition, duration);
+                player.notifyOnBufferingUpdate((int)percent);
                 return;
 
             case MEDIA_SEEK_COMPLETE:
