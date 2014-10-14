@@ -40,8 +40,9 @@
 #define DEFAULT_MAX_HIGH_WATER_MARK_IN_MS       (5 * 1000)
 
 #define BUFFERING_CHECK_PER_BYTES               (512)
+#define BUFFERING_CHECK_PER_MILLISECONDS        (500)
 
-#define MAX_QUEUE_SIZE (15 * 1024 * 1024)
+#define MAX_QUEUE_SIZE (10 * 1024 * 1024)
 #define MIN_FRAMES 50000
 
 /* Minimum SDL audio buffer size, in samples. */
@@ -467,9 +468,6 @@ typedef struct FFPlayer {
     int max_high_water_mark_in_ms;
     int current_high_water_mark_in_ms;
 
-    int last_buffered_time_percentage;
-    int last_buffered_size_percentage;
-    int last_buffered_percent;
     int64_t playable_duration_ms;
 
     int pictq_capacity;
@@ -554,9 +552,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->max_high_water_mark_in_ms      = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS;
     ffp->current_high_water_mark_in_ms  = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
 
-    ffp->last_buffered_time_percentage  = -1;
-    ffp->last_buffered_size_percentage  = -1;
-    ffp->last_buffered_percent          = -1;
     ffp->playable_duration_ms           = 0;
 
     ffp->pictq_capacity                 = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT;

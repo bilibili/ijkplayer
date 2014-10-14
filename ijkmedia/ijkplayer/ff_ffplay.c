@@ -48,6 +48,9 @@
 #define FFP_SHOW_BUF_POS
 // #define FFP_SHOW_PKT_RECYCLE
 
+// #define FFP_NOTIFY_BUF_TIME
+// #define FFP_NOTIFY_BUF_BYTES
+
 #define FFP_IO_STAT_STEP (50 * 1024)
 
 static int ffp_format_control_message(struct AVFormatContext *s, int type,
@@ -2025,7 +2028,8 @@ static int read_thread(void *arg)
     int orig_nb_streams;
     SDL_mutex *wait_mutex = SDL_CreateMutex();
     int last_error = 0;
-    int64_t io_counter = 0;
+    int64_t prev_io_tick_counter = 0;
+    int64_t io_tick_counter = SDL_GetTickHR();
 
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
@@ -2381,7 +2385,6 @@ static int read_thread(void *arg)
             SDL_UnlockMutex(wait_mutex);
             continue;
         }
-        io_counter += pkt->size;
         /* check if packet is in play range specified by user, then queue, otherwise discard */
         stream_start_time = ic->streams[pkt->stream_index]->start_time;
         pkt_in_play_range = ffp->duration == AV_NOPTS_VALUE ||
@@ -2402,8 +2405,9 @@ static int read_thread(void *arg)
             av_free_packet(pkt);
         }
 
-        if (io_counter > BUFFERING_CHECK_PER_BYTES) {
-            io_counter = 0;
+        io_tick_counter = SDL_GetTickHR();
+        if (abs(io_tick_counter - prev_io_tick_counter) > BUFFERING_CHECK_PER_MILLISECONDS) {
+            prev_io_tick_counter = io_tick_counter;
             ffp_check_buffering_l(ffp);
         }
     }
@@ -2955,26 +2959,24 @@ void ffp_check_buffering_l(FFPlayer *ffp)
             ffp->playable_duration_ms = buf_time_position;
 
             buf_time_percent = (int)av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
-            if (buf_time_percent <= 100 && abs(ffp->last_buffered_time_percentage - buf_time_percent) >= FFP_BUF_MSG_PERIOD) {
 #ifdef FFP_SHOW_DEMUX_CACHE
-                ALOGE("time cache=%%%d (%d/%d)\n", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
+            ALOGE("time cache=%%%d (%d/%d)\n", buf_time_percent, cached_duration_in_ms, hwm_in_ms);
 #endif
-                ffp->last_buffered_time_percentage = buf_time_percent;
-                ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_duration_in_ms, hwm_in_ms);
-            }
+#ifdef FFP_NOTIFY_BUF_TIME
+            ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_TIME_UPDATE, cached_duration_in_ms, hwm_in_ms);
+#endif
         }
     }
 
     int cached_size = is->audioq.size + is->videoq.size;
     if (hwm_in_bytes > 0) {
         buf_size_percent = (int)av_rescale(cached_size, 1005, hwm_in_bytes * 10);
-        if (buf_size_percent <= 100 && abs(ffp->last_buffered_size_percentage - buf_size_percent) >= FFP_BUF_MSG_PERIOD) {
 #ifdef FFP_SHOW_DEMUX_CACHE
-            ALOGE("size cache=%%%d (%d/%d)\n", buf_size_percent, cached_size, hwm_in_bytes);
+        ALOGE("size cache=%%%d (%d/%d)\n", buf_size_percent, cached_size, hwm_in_bytes);
 #endif
-            ffp->last_buffered_size_percentage = buf_size_percent;
-            ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_BYTES_UPDATE, cached_size, hwm_in_bytes);
-        }
+#ifdef FFP_NOTIFY_BUF_BYTES
+        ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_BYTES_UPDATE, cached_size, hwm_in_bytes);
+#endif
     }
 
     int buf_percent = -1;
@@ -2993,13 +2995,10 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         buf_percent = FFMIN(buf_time_percent, buf_size_percent);
     }
     if (buf_percent) {
-        if (buf_percent <= 100 && abs(ffp->last_buffered_percent - buf_percent) >= FFP_BUF_MSG_PERIOD) {
-            ffp->last_buffered_percent = buf_percent;
 #ifdef FFP_SHOW_BUF_POS
-            ALOGE("buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
+        ALOGE("buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
 #endif
-            ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_UPDATE, (int)buf_time_position, buf_percent);
-        }
+        ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_UPDATE, (int)buf_time_position, buf_percent);
     }
 
     if (need_start_buffering) {
