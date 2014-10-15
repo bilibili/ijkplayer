@@ -63,7 +63,16 @@
 
 - (id)initWithContentURLString:(NSString *)aUrl
 {
-    self = [self initWithContentURL:[NSURL URLWithString:aUrl]];
+    NSURL *url;
+    if ([aUrl rangeOfString:@"/"].location == 0) {
+        //本地
+        url = [NSURL fileURLWithPath:aUrl];
+    }
+    else {
+        url = [NSURL URLWithString:aUrl];
+    }
+
+    self = [self initWithContentURL:url];
     if (self) {
 
     }
