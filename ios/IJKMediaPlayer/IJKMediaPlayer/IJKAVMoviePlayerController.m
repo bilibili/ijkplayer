@@ -188,6 +188,15 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     return self;
 }
 
+- (id)initWithContentURLString:(NSString *)aUrl
+{
+    self = [self initWithContentURL:[NSURL URLWithString:aUrl]];
+    if (self != nil) {
+        
+    }
+    return self;
+}
+
 - (void)setScreenOn: (BOOL)on
 {
     [IJKMediaModule sharedModule].mediaModuleIdleTimerDisabled = on;
