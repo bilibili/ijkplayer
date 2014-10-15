@@ -61,6 +61,15 @@
     return self;
 }
 
+- (id)initWithContentURLString:(NSString *)aUrl
+{
+    self = [self initWithContentURL:[NSURL URLWithString:aUrl]];
+    if (self) {
+
+    }
+    return self;
+}
+
 - (void)dealloc
 {
     [self IJK_removeMovieNotificationObservers];

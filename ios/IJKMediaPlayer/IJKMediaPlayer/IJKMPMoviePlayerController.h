@@ -25,5 +25,6 @@
 @interface IJKMPMoviePlayerController : MPMoviePlayerController <IJKMediaPlayback>
 
 - (id)initWithContentURL:(NSURL *)aUrl;
+- (id)initWithContentURLString:(NSString *)aUrl;
 
 @end
