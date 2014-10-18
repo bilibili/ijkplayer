@@ -162,7 +162,6 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         _playUrl = aUrl;
 
         _avView = [[IJKAVPlayerLayerView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-        [_avView setVideoFillMode:AVLayerVideoGravityResizeAspect];
         self.view = _avView;
 
         // TODO:
@@ -752,7 +751,6 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         else /* Replacement of player currentItem has occurred */
         {
             [_avView setPlayer:_player];
-            [_avView setVideoFillMode:AVLayerVideoGravityResizeAspect];
 
             [self didPlaybackStateChange];
             [self didLoadStateChange];
