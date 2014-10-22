@@ -580,6 +580,10 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     dispatch_async(dispatch_get_main_queue(), ^{
         [self didPlaybackStateChange];
         [self didLoadStateChange];
+        
+        if (blockError == nil) {
+            blockError = [[NSError alloc] init];
+        }
 
         [[NSNotificationCenter defaultCenter]
          postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
