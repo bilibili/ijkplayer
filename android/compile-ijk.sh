@@ -47,16 +47,13 @@ do_ndk_build () {
 
 
 case "$REQUEST_TARGET" in
-    armv7a)
+    "")
+        do_ndk_build armv7a;
+    ;;
+    armv5|armv7a|x86)
         do_ndk_build $REQUEST_TARGET;
     ;;
-    armv5)
-        do_ndk_build $REQUEST_TARGET;
-    ;;
-    x86)
-        do_ndk_build $REQUEST_TARGET;
-    ;;
-    ""|all)
+    all)
         for ABI in $ALL_ABI
         do
             do_ndk_build "$ABI";
