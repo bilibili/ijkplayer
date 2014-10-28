@@ -70,12 +70,15 @@
 #import "IJKAVPlayerLayerView.h"
 #import <AVFoundation/AVFoundation.h>
 
-@implementation IJKAVPlayerLayerView
+@implementation IJKAVPlayerLayerView {
+    NSString* _videoFillMode;
+}
 
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
+        _videoFillMode = @"AVLayerVideoGravityResizeAspect";
         // Initialization code
     }
     return self;
@@ -83,25 +86,28 @@
 
 + (Class)layerClass
 {
-	return [AVPlayerLayer class];
+    return [AVPlayerLayer class];
 }
 
 - (AVPlayer*)player
 {
-	return [(AVPlayerLayer*)[self layer] player];
+    return [(AVPlayerLayer*)[self layer] player];
 }
 
 - (void)setPlayer:(AVPlayer*)player
 {
-	[(AVPlayerLayer*)[self layer] setPlayer:player];
+    [(AVPlayerLayer*)[self layer] setPlayer:player];
+    [self setVideoFillMode:_videoFillMode];
 }
 
 /* Specifies how the video is displayed within a player layer’s bounds.
  (AVLayerVideoGravityResizeAspect is default) */
 - (void)setVideoFillMode:(NSString *)fillMode
 {
-	AVPlayerLayer *playerLayer = (AVPlayerLayer*)[self layer];
-	playerLayer.videoGravity = fillMode;
+    _videoFillMode = fillMode;
+
+    AVPlayerLayer *playerLayer = (AVPlayerLayer*)[self layer];
+    playerLayer.videoGravity = fillMode;
 }
 
 - (void)setContentMode:(UIViewContentMode)contentMode

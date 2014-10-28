@@ -15,14 +15,54 @@
 # limitations under the License.
 #
 
-cd ijkmediaplayer/jni
-ndk-build
-cd -
+if [ -z "$ANDROID_NDK" -o -z "$ANDROID_NDK" ]; then
+    echo "You must define ANDROID_NDK, ANDROID_SDK before starting."
+    echo "They must point to your NDK and SDK directories.\n"
+    exit 1
+fi
 
-cd ijkmediaplayer-armv5/jni
-ndk-build
-cd -
+REQUEST_TARGET=$1
+ALL_ABI="armv5 armv7a x86"
 
-cd ijkmediaplayer-x86/jni
-ndk-build
-cd -
+do_ndk_build () {
+    PARAM_TARGET=$1
+    case "$PARAM_TARGET" in
+        armv7a)
+            cd ijkmediaplayer/jni
+            $ANDROID_NDK/ndk-build
+            cd -
+        ;;
+        armv5)
+            cd ijkmediaplayer-armv5/jni
+            $ANDROID_NDK/ndk-build
+            cd -
+        ;;
+        x86)
+            cd ijkmediaplayer-x86/jni
+            $ANDROID_NDK/ndk-build
+            cd -
+        ;;
+    esac
+}
+
+
+case "$REQUEST_TARGET" in
+    "")
+        do_ndk_build armv7a;
+    ;;
+    armv5|armv7a|x86)
+        do_ndk_build $REQUEST_TARGET;
+    ;;
+    all)
+        for ABI in $ALL_ABI
+        do
+            do_ndk_build "$ABI";
+        done
+    ;;
+    *)
+        echo "Usage:"
+        echo "  compile-ijk.sh armv5|armv7a|x86"
+        echo "  compile-ijk.sh all"
+    ;;
+esac
+

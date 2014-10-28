@@ -489,7 +489,7 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
     jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: message_loop_n: null weak_thiz", LABEL_RETURN);
 
-    while (true) {
+    while (1) {
         AVMessage msg;
 
         int retval = ijkmp_get_msg(mp, &msg, 1);

@@ -67,7 +67,7 @@ ln -fs config/module-lite.sh config/module.sh
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-stable
 cd ijkplayer-android-stable
-git checkout -B latest n0.1.3
+git checkout -B latest n0.2.0
 
 ./init-android.sh
 
@@ -108,7 +108,7 @@ cd android
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-stable
 cd ijkplayer-ios-stable
-git checkout -B latest n0.1.3
+git checkout -B latest n0.2.0
 
 ./init-ios.sh
 
