@@ -760,6 +760,7 @@
 				ARCHS = (
 					armv7,
 					armv7s,
+					arm64,
 				);
 				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -802,6 +803,7 @@
 				ARCHS = (
 					armv7,
 					armv7s,
+					arm64,
 				);
 				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
