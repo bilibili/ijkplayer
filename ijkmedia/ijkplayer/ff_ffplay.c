@@ -288,9 +288,8 @@ static void decoder_init(Decoder *d, AVCodecContext *avctx, PacketQueue *queue, 
     d->start_pts = AV_NOPTS_VALUE;
 }
 
-static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, void *fframe) {
+static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSubtitle *sub) {
     int got_frame = 0;
-    AVFrame *frame = fframe;
 
     d->flushed = 0;
 
@@ -1138,7 +1137,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
     VideoState *is = ffp->is;
     int got_picture;
 
-    if ((got_picture = decoder_decode_frame(ffp, &is->viddec, frame)) < 0)
+    if ((got_picture = decoder_decode_frame(ffp, &is->viddec, frame, NULL)) < 0)
         return -1;
 
     if (got_picture) {
@@ -1717,7 +1716,7 @@ static int audio_decode_frame(FFPlayer *ffp)
             return resampled_data_size;
         }
 
-        if ((got_frame = decoder_decode_frame(ffp, &is->auddec, is->frame)) < 0)
+        if ((got_frame = decoder_decode_frame(ffp, &is->auddec, is->frame, NULL)) < 0)
             return -1;
 
         if (is->auddec.flushed)
