@@ -105,32 +105,15 @@ typedef struct PacketQueue {
 } PacketQueue;
 
 // #define VIDEO_PICTURE_QUEUE_SIZE 3
-#define VIDEO_PICTURE_QUEUE_SIZE (is->pictq_capacity)
+#define VIDEO_PICTURE_QUEUE_SIZE 3
 #define VIDEO_PICTURE_QUEUE_SIZE_MIN        (3)
 #define VIDEO_PICTURE_QUEUE_SIZE_MAX        (24)
 #define VIDEO_PICTURE_QUEUE_SIZE_DEFAULT    (VIDEO_PICTURE_QUEUE_SIZE_MIN)
-#define SUBPICTURE_QUEUE_SIZE 4
+#define SUBPICTURE_QUEUE_SIZE 16
+
+#define FRAME_QUEUE_SIZE FFMAX(VIDEO_PICTURE_QUEUE_SIZE, SUBPICTURE_QUEUE_SIZE)
 
 #define VIDEO_MAX_FPS_DEFAULT 30
-
-typedef struct VideoPicture {
-    double pts;             // presentation timestamp for this picture
-    double duration;        // estimated duration based on frame rate
-    int64_t pos;            // byte position in file
-    SDL_VoutOverlay *bmp;
-    int width, height; /* source height & width */
-    int allocated;
-    int reallocate;
-    int serial;
-
-    AVRational sar;
-} VideoPicture;
-
-typedef struct SubPicture {
-    double pts; /* presentation time stamp for this picture */
-    AVSubtitle sub;
-    int serial;
-} SubPicture;
 
 typedef struct AudioParams {
     int freq;
@@ -150,6 +133,35 @@ typedef struct Clock {
     int paused;
     int *queue_serial;    /* pointer to the current packet queue serial, used for obsolete clock detection */
 } Clock;
+
+/* Common struct for handling all types of decoded data and allocated render buffers. */
+typedef struct Frame {
+    AVFrame *frame;
+    AVSubtitle sub;
+    int serial;
+    double pts;           /* presentation timestamp for the frame */
+    double duration;      /* estimated duration of the frame */
+    int64_t pos;          /* byte position of the frame in the input file */
+    SDL_VoutOverlay *bmp;
+    int allocated;
+    int reallocate;
+    int width;
+    int height;
+    AVRational sar;
+} Frame;
+
+typedef struct FrameQueue {
+    Frame queue[FRAME_QUEUE_SIZE];
+    int rindex;
+    int windex;
+    int size;
+    int max_size;
+    int keep_last;
+    int rindex_shown;
+    SDL_mutex *mutex;
+    SDL_cond *cond;
+    PacketQueue *pktq;
+} FrameQueue;
 
 enum {
     AV_SYNC_AUDIO_MASTER, /* default choice */
@@ -184,6 +196,11 @@ typedef struct VideoState {
     Clock audclk;
     Clock vidclk;
     Clock extclk;
+
+    FrameQueue pictq;
+#ifdef FFP_MERGE
+    FrameQueue subpq;
+#endif
 
     int audio_stream;
 
@@ -241,10 +258,6 @@ typedef struct VideoState {
     int subtitle_stream;
     AVStream *subtitle_st;
     PacketQueue subtitleq;
-    SubPicture subpq[SUBPICTURE_QUEUE_SIZE];
-    int subpq_size, subpq_rindex, subpq_windex;
-    SDL_mutex *subpq_mutex;
-    SDL_cond *subpq_cond;
 #endif
 
     double frame_timer;
@@ -256,11 +269,6 @@ typedef struct VideoState {
     int64_t videoq_duration;
     int64_t video_current_pos;      // current displayed file pos
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
-    VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE_MAX];
-    int pictq_size, pictq_rindex, pictq_windex, pictq_rindex_shown;
-    int pictq_capacity;
-    SDL_mutex *pictq_mutex;
-    SDL_cond *pictq_cond;
 #if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;
 #endif

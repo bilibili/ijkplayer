@@ -64,7 +64,7 @@ static AVPacket flush_pkt;
 // FFP_MERGE: cmp_audio_fmts
 // FFP_MERGE: get_valid_channel_layout
 
-static int packet_queue_put(PacketQueue *q, AVPacket *pkt);
+static void free_picture(Frame *vp);
 
 static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
 {
@@ -279,6 +279,120 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
     return 1;
 }
 
+static void frame_queue_unref_item(Frame *vp)
+{
+    av_frame_unref(vp->frame);
+#ifdef FFP_MERGE
+    avsubtitle_free(&vp->sub);
+#endif
+}
+
+static int frame_queue_init(FrameQueue *f, PacketQueue *pktq, int max_size, int keep_last)
+{
+    int i;
+    memset(f, 0, sizeof(FrameQueue));
+    if (!(f->mutex = SDL_CreateMutex()))
+        return AVERROR(ENOMEM);
+    if (!(f->cond = SDL_CreateCond()))
+        return AVERROR(ENOMEM);
+    f->pktq = pktq;
+    f->max_size = FFMIN(max_size, FRAME_QUEUE_SIZE);
+    f->keep_last = !!keep_last;
+    for (i = 0; i < f->max_size; i++)
+        if (!(f->queue[i].frame = av_frame_alloc()))
+            return AVERROR(ENOMEM);
+    return 0;
+}
+
+static void frame_queue_destory(FrameQueue *f)
+{
+    int i;
+    for (i = 0; i < f->max_size; i++) {
+        Frame *vp = &f->queue[i];
+        frame_queue_unref_item(vp);
+        av_frame_free(&vp->frame);
+        free_picture(vp);
+    }
+    SDL_DestroyMutex(f->mutex);
+    SDL_DestroyCond(f->cond);
+}
+
+static void frame_queue_signal(FrameQueue *f)
+{
+    SDL_LockMutex(f->mutex);
+    SDL_CondSignal(f->cond);
+    SDL_UnlockMutex(f->mutex);
+}
+
+static Frame *frame_queue_peek(FrameQueue *f)
+{
+    return &f->queue[(f->rindex + f->rindex_shown) % f->max_size];
+}
+
+static Frame *frame_queue_peek_next(FrameQueue *f)
+{
+    return &f->queue[(f->rindex + f->rindex_shown + 1) % f->max_size];
+}
+
+static Frame *frame_queue_peek_last(FrameQueue *f)
+{
+    return &f->queue[f->rindex];
+}
+
+static Frame *frame_queue_peek_writable(FrameQueue *f)
+{
+    /* wait until we have space to put a new frame */
+    SDL_LockMutex(f->mutex);
+    while (f->size >= f->max_size &&
+           !f->pktq->abort_request) {
+        SDL_CondWait(f->cond, f->mutex);
+    }
+    SDL_UnlockMutex(f->mutex);
+
+    if (f->pktq->abort_request)
+        return NULL;
+
+    return &f->queue[f->windex];
+}
+
+static void frame_queue_push(FrameQueue *f)
+{
+    if (++f->windex == f->max_size)
+        f->windex = 0;
+    SDL_LockMutex(f->mutex);
+    f->size++;
+    SDL_UnlockMutex(f->mutex);
+}
+
+static void frame_queue_next(FrameQueue *f)
+{
+    if (f->keep_last && !f->rindex_shown) {
+        f->rindex_shown = 1;
+        return;
+    }
+    frame_queue_unref_item(&f->queue[f->rindex]);
+    if (++f->rindex == f->max_size)
+        f->rindex = 0;
+    SDL_LockMutex(f->mutex);
+    f->size--;
+    SDL_CondSignal(f->cond);
+    SDL_UnlockMutex(f->mutex);
+}
+
+/* jump back to the previous frame if available by resetting rindex_shown */
+static int frame_queue_prev(FrameQueue *f)
+{
+    int ret = f->rindex_shown;
+    f->rindex_shown = 0;
+    return ret;
+}
+
+/* return the number of undisplayed frames in the queue */
+static int frame_queue_nb_remaining(FrameQueue *f)
+{
+    return f->size - f->rindex_shown;
+}
+
 // FFP_MERGE: fill_rectangle
 // FFP_MERGE: fill_border
 // FFP_MERGE: ALPHA_BLEND
@@ -288,7 +402,7 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
 // FFP_MERGE: BPP
 // FFP_MERGE: blend_subrect
 
-static void free_picture(VideoPicture *vp)
+static void free_picture(Frame *vp)
 {
     if (vp->bmp) {
         SDL_VoutFreeYUVOverlay(vp->bmp);
@@ -296,7 +410,6 @@ static void free_picture(VideoPicture *vp)
     }
 }
 
-// FFP_MERGE: free_subpicture
 // FFP_MERGE: calculate_display_rect
 // FFP_MERGE: video_image_display
 
@@ -307,9 +420,9 @@ static int64_t g_fps_total_time = 0;
 static void video_image_display2(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
-    VideoPicture *vp;
+    Frame *vp;
 
-    vp = &is->pictq[(is->pictq_rindex + is->pictq_rindex_shown) % VIDEO_PICTURE_QUEUE_SIZE];
+    vp = frame_queue_peek(&is->pictq);
     if (vp->bmp) {
 #ifdef FFP_SHOW_FPS
         int64_t start = SDL_GetTickHR();
@@ -338,10 +451,8 @@ static void video_image_display2(FFPlayer *ffp)
 // FFP_MERGE: compute_mod
 // FFP_MERGE: video_audio_display
 
-static void stream_close(FFPlayer *ffp)
+static void stream_close(VideoState *is)
 {
-    VideoState *is = ffp->is;
-    int i;
     /* XXX: use a special url_shutdown call to abort parse cleanly */
     is->abort_request = 1;
     packet_queue_abort(&is->videoq);
@@ -358,14 +469,8 @@ static void stream_close(FFPlayer *ffp)
 #endif
 
     /* free all pictures */
-    for (i = 0; i < VIDEO_PICTURE_QUEUE_SIZE; i++)
-        free_picture(&is->pictq[i]);
-#ifdef FFP_MERGE
-    for (i = 0; i < SUBPICTURE_QUEUE_SIZE; i++)
-        free_subpicture(&is->subpq[i]);
-#endif
-    SDL_DestroyMutex(is->pictq_mutex);
-    SDL_DestroyCond(is->pictq_cond);
+    frame_queue_destory(&is->pictq);
+    frame_queue_destory(&is->pictq);
 #ifdef FFP_MERGE
     SDL_DestroyMutex(is->subpq_mutex);
     SDL_DestroyCond(is->subpq_cond);
@@ -595,7 +700,7 @@ static double compute_target_delay(double delay, VideoState *is)
     return delay;
 }
 
-static double vp_duration(VideoState *is, VideoPicture *vp, VideoPicture *nextvp) {
+static double vp_duration(VideoState *is, Frame *vp, Frame *nextvp) {
     if (vp->serial == nextvp->serial) {
         double duration = nextvp->pts - vp->pts;
         if (isnan(duration) || duration <= 0 || duration > is->max_frame_duration)
@@ -605,34 +710,6 @@ static double vp_duration(VideoState *is, VideoPicture *vp, VideoPicture *nextvp
     } else {
         return 0.0;
     }
-}
-
-/* return the number of undisplayed pictures in the queue */
-static int pictq_nb_remaining(VideoState *is) {
-    return is->pictq_size - is->pictq_rindex_shown;
-}
-
-/* jump back to the previous picture if available by resetting rindex_shown */
-static int pictq_prev_picture(VideoState *is) {
-    int ret = is->pictq_rindex_shown;
-    is->pictq_rindex_shown = 0;
-    return ret;
-}
-
-static void pictq_next_picture(VideoState *is) {
-    if (!is->pictq_rindex_shown) {
-        is->pictq_rindex_shown = 1;
-        return;
-    }
-
-    /* update queue size and signal for next picture */
-    if (++is->pictq_rindex == VIDEO_PICTURE_QUEUE_SIZE)
-        is->pictq_rindex = 0;
-
-    SDL_LockMutex(is->pictq_mutex);
-    is->pictq_size--;
-    SDL_CondSignal(is->pictq_cond);
-    SDL_UnlockMutex(is->pictq_mutex);
 }
 
 static void update_video_pts(VideoState *is, double pts, int64_t pos, int serial) {
@@ -650,7 +727,7 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
     double time;
 
 #ifdef FFP_MERGE
-    SubPicture *sp, *sp2;
+    Frame *sp, *sp2;
 #endif
 
     if (!is->paused && get_master_sync_type(is) == AV_SYNC_EXTERNAL_CLOCK && is->realtime)
@@ -668,20 +745,20 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
     if (is->video_st) {
         int redisplay = 0;
         if (is->force_refresh)
-            redisplay = pictq_prev_picture(is);
+            redisplay = frame_queue_prev(&is->pictq);
 retry:
-        if (pictq_nb_remaining(is) == 0) {
+        if (frame_queue_nb_remaining(&is->pictq) == 0) {
             // nothing to do, no picture to display in the queue
         } else {
             double last_duration, duration, delay;
-            VideoPicture *vp, *lastvp;
+            Frame *vp, *lastvp;
 
             /* dequeue the picture */
-            lastvp = &is->pictq[is->pictq_rindex];
-            vp = &is->pictq[(is->pictq_rindex + is->pictq_rindex_shown) % VIDEO_PICTURE_QUEUE_SIZE];
+            lastvp = frame_queue_peek_last(&is->pictq);
+            vp = frame_queue_peek(&is->pictq);
 
             if (vp->serial != is->videoq.serial) {
-                pictq_next_picture(is);
+                frame_queue_next(&is->pictq);
                 is->video_current_pos = -1;
                 redisplay = 0;
                 goto retry;
@@ -712,18 +789,18 @@ retry:
             if (delay > 0 && time - is->frame_timer > AV_SYNC_THRESHOLD_MAX)
                 is->frame_timer = time;
 
-            SDL_LockMutex(is->pictq_mutex);
+            SDL_LockMutex(is->pictq.mutex);
             if (!redisplay && !isnan(vp->pts))
                 update_video_pts(is, vp->pts, vp->pos, vp->serial);
-            SDL_UnlockMutex(is->pictq_mutex);
+            SDL_UnlockMutex(is->pictq.mutex);
 
-            if (pictq_nb_remaining(is) > 1) {
-                VideoPicture *nextvp = &is->pictq[(is->pictq_rindex + is->pictq_rindex_shown + 1) % VIDEO_PICTURE_QUEUE_SIZE];
+            if (frame_queue_nb_remaining(&is->pictq) > 1) {
+                Frame *nextvp = frame_queue_peek_next(&is->pictq);
                 duration = vp_duration(is, vp, nextvp);
                 if(!is->step && (redisplay || ffp->framedrop > 0 || (ffp->framedrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) && time > is->frame_timer + duration) {
                     if (!redisplay)
                         is->frame_drops_late++;
-                    pictq_next_picture(is);
+                    frame_queue_next(&is->pictq);
                     redisplay = 0;
                     goto retry;
                 }
@@ -736,7 +813,7 @@ display:
             if (!ffp->display_disable && is->show_mode == SHOW_MODE_VIDEO)
                 video_display2(ffp);
 
-            pictq_next_picture(is);
+            frame_queue_next(&is->pictq);
 
             SDL_LockMutex(ffp->is->play_mutex);
             if (is->step) {
@@ -799,12 +876,12 @@ display:
 static void alloc_picture(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
-    VideoPicture *vp;
+    Frame *vp;
 #ifdef FFP_MERGE
     int64_t bufferdiff;
 #endif
 
-    vp = &is->pictq[is->pictq_windex];
+    vp = &is->pictq.queue[is->pictq.windex];
 
     free_picture(vp);
 
@@ -831,10 +908,10 @@ static void alloc_picture(FFPlayer *ffp)
         free_picture(vp);
     }
 
-    SDL_LockMutex(is->pictq_mutex);
+    SDL_LockMutex(is->pictq.mutex);
     vp->allocated = 1;
-    SDL_CondSignal(is->pictq_cond);
-    SDL_UnlockMutex(is->pictq_mutex);
+    SDL_CondSignal(is->pictq.cond);
+    SDL_UnlockMutex(is->pictq.mutex);
 }
 
 #ifdef FFP_MERGE
@@ -860,27 +937,15 @@ static void duplicate_right_border_pixels(SDL_Overlay *bmp) {
 static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial)
 {
     VideoState *is = ffp->is;
-    VideoPicture *vp;
+    Frame *vp;
 
 #if defined(DEBUG_SYNC) && 0
     printf("frame_type=%c pts=%0.3f\n",
            av_get_picture_type_char(src_frame->pict_type), pts);
 #endif
 
-    /* wait until we have space to put a new picture */
-    SDL_LockMutex(is->pictq_mutex);
-
-    /* keep the last already displayed picture in the queue */
-    while (is->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE - 1 &&
-           !is->videoq.abort_request) {
-        SDL_CondWait(is->pictq_cond, is->pictq_mutex);
-    }
-    SDL_UnlockMutex(is->pictq_mutex);
-
-    if (is->videoq.abort_request)
+    if (!(vp = frame_queue_peek_writable(&is->pictq)))
         return -1;
-
-    vp = &is->pictq[is->pictq_windex];
 
     vp->sar = src_frame->sample_aspect_ratio;
 
@@ -924,11 +989,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         vp->serial = serial;
 
         /* now we can update the picture count */
-        if (++is->pictq_windex == VIDEO_PICTURE_QUEUE_SIZE)
-            is->pictq_windex = 0;
-        SDL_LockMutex(is->pictq_mutex);
-        is->pictq_size++;
-        SDL_UnlockMutex(is->pictq_mutex);
+        frame_queue_push(&is->pictq);
     }
     return 0;
 }
@@ -1958,9 +2019,7 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
 
         /* note: we also signal this mutex to make sure we deblock the
            video thread in all cases */
-        SDL_LockMutex(is->pictq_mutex);
-        SDL_CondSignal(is->pictq_cond);
-        SDL_UnlockMutex(is->pictq_mutex);
+        frame_queue_signal(&is->pictq);
 
         SDL_WaitThread(is->video_tid, NULL);
 
@@ -2318,7 +2377,7 @@ static int read_thread(void *arg)
         }
         if ((!is->paused || completed) &&
             (!is->audio_st || is->audio_finished == is->audioq.serial) &&
-            (!is->video_st || (is->video_finished == is->videoq.serial && pictq_nb_remaining(is) == 0))) {
+            (!is->video_st || (is->video_finished == is->videoq.serial && frame_queue_nb_remaining(&is->pictq) == 0))) {
             if (ffp->loop != 1 && (!ffp->loop || --ffp->loop)) {
                 stream_seek(is, ffp->start_time != AV_NOPTS_VALUE ? ffp->start_time : 0, 0, 0);
             } else if (ffp->autoexit) {
@@ -2406,7 +2465,7 @@ static int read_thread(void *arg)
         }
 
         io_tick_counter = SDL_GetTickHR();
-        if (abs(io_tick_counter - prev_io_tick_counter) > BUFFERING_CHECK_PER_MILLISECONDS) {
+        if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
             prev_io_tick_counter = io_tick_counter;
             ffp_check_buffering_l(ffp);
         }
@@ -2454,13 +2513,11 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->xleft   = 0;
 
     /* start video display */
-    is->pictq_mutex = SDL_CreateMutex();
-    is->pictq_cond  = SDL_CreateCond();
-    is->pictq_capacity = ffp->pictq_capacity;
-
+    if (frame_queue_init(&is->pictq, &is->videoq, VIDEO_PICTURE_QUEUE_SIZE, 1) < 0)
+        goto fail;
 #ifdef FFP_MERGE
-    is->subpq_mutex = SDL_CreateMutex();
-    is->subpq_cond  = SDL_CreateCond();
+    if (frame_queue_init(&is->subpq, &is->subtitleq, SUBPICTURE_QUEUE_SIZE, 0) < 0)
+        goto fail;
 #endif
 
     packet_queue_init(&is->videoq);
@@ -2489,9 +2546,11 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
 
     is->read_tid = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp, "ff_read");
     if (!is->read_tid) {
+fail:
         is->abort_request = true;
-        SDL_WaitThread(is->video_refresh_tid, NULL);
-        av_freep(&ffp->is);
+        if (is->video_refresh_tid)
+            SDL_WaitThread(is->video_refresh_tid, NULL);
+        stream_close(is);
         return NULL;
     }
     return is;
@@ -2649,7 +2708,7 @@ void ffp_destroy(FFPlayer *ffp)
 
     if (ffp && ffp->is) {
         av_log(NULL, AV_LOG_WARNING, "ffp_destroy_ffplayer: force stream_close()");
-        stream_close(ffp);
+        stream_close(ffp->is);
         ffp->is = NULL;
     }
 
@@ -2798,7 +2857,7 @@ int ffp_wait_stop_l(FFPlayer *ffp)
 
     if (ffp->is) {
         ffp_stop_l(ffp);
-        stream_close(ffp);
+        stream_close(ffp->is);
         ffp->is = NULL;
     }
     return 0;
