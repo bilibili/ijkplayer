@@ -2657,7 +2657,7 @@ static int lockmgr(void **mtx, enum AVLockOp op)
 
 static bool g_ffmpeg_global_inited = false;
 
-static void ffp_log_callback_help(void *ptr, int level, const char *fmt, va_list vl)
+static void ffp_log_callback_brief(void *ptr, int level, const char *fmt, va_list vl)
 {
     int ffplv = IJK_LOG_VERBOSE;
     if (level <= AV_LOG_ERROR)
@@ -2673,6 +2673,20 @@ static void ffp_log_callback_help(void *ptr, int level, const char *fmt, va_list
 
     if (level <= AV_LOG_INFO)
         VLOG(ffplv, IJK_LOG_TAG, fmt, vl);
+}
+
+static void ffp_log_callback_report(void *ptr, int level, const char *fmt, va_list vl)
+{
+    va_list vl2;
+    char line[1024];
+    static int print_prefix = 1;
+
+    va_copy(vl2, vl);
+    av_log_default_callback(ptr, level, fmt, vl);
+    av_log_format_line(ptr, level, fmt, vl2, line, sizeof(line), &print_prefix);
+    va_end(vl2);
+
+    ALOG(ffplv, IJK_LOG_TAG, "%s", line);
 }
 
 void ffp_global_init()
@@ -2692,7 +2706,8 @@ void ffp_global_init()
     avformat_network_init();
 
     av_lockmgr_register(lockmgr);
-    av_log_set_callback(ffp_log_callback_help);
+    av_log_set_callback(ffp_log_callback_brief);
+//    av_log_set_callback(ffp_log_callback_report);
 
     av_init_packet(&flush_pkt);
     flush_pkt.data = (uint8_t *)&flush_pkt;
