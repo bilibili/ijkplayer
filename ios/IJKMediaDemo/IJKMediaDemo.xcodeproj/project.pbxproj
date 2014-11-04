@@ -256,7 +256,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = IJK;
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = bilibili;
 			};
 			buildConfigurationList = E6903EF717EAF70200CFD954 /* Build configuration list for PBXProject "IJKMediaDemo" */;
@@ -357,6 +357,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
+					arm64,
 					armv7,
 					armv7s,
 				);
@@ -393,6 +394,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
+					arm64,
 					armv7,
 					armv7s,
 				);
