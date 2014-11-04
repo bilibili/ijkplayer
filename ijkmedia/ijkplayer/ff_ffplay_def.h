@@ -179,6 +179,10 @@ typedef struct Decoder {
     int flushed;
     int packet_pending;
     SDL_cond *empty_queue_cond;
+    int64_t start_pts;
+    AVRational start_pts_tb;
+    int64_t next_pts;
+    AVRational next_pts_tb;
 } Decoder;
 
 typedef struct VideoState {
@@ -250,7 +254,6 @@ typedef struct VideoState {
     int frame_drops_early;
     int frame_drops_late;
     AVFrame *frame;
-    int64_t audio_frame_next_pts;
 
     enum ShowMode {
         SHOW_MODE_NONE = -1, SHOW_MODE_VIDEO = 0, SHOW_MODE_WAVES, SHOW_MODE_RDFT, SHOW_MODE_NB

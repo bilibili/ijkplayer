@@ -285,10 +285,12 @@ static void decoder_init(Decoder *d, AVCodecContext *avctx, PacketQueue *queue, 
     d->avctx = avctx;
     d->queue = queue;
     d->empty_queue_cond = empty_queue_cond;
+    d->start_pts = AV_NOPTS_VALUE;
 }
 
 static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, void *fframe) {
     int got_frame = 0;
+    AVFrame *frame = fframe;
 
     d->flushed = 0;
 
@@ -309,6 +311,8 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, void *fframe) {
                     avcodec_flush_buffers(d->avctx);
                     d->finished = 0;
                     d->flushed = 1;
+                    d->next_pts = d->start_pts;
+                    d->next_pts_tb = d->start_pts_tb;
                 }
             } while (pkt.data == flush_pkt.data || d->queue->serial != d->pkt_serial);
             av_free_packet(&d->pkt);
@@ -321,7 +325,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, void *fframe) {
 #ifdef FFP_SHOW_VDPS
                 int64_t start = SDL_GetTickHR();
 #endif
-                ret = avcodec_decode_video2(d->avctx, fframe, &got_frame, &d->pkt_temp);
+                ret = avcodec_decode_video2(d->avctx, frame, &got_frame, &d->pkt_temp);
 #ifdef FFP_SHOW_VDPS
                 {
                     int64_t dur = SDL_GetTickHR() - start;
@@ -343,9 +347,31 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, void *fframe) {
                     }
                 }
 #endif
+                if (got_frame) {
+                    if (ffp->decoder_reorder_pts == -1) {
+                        frame->pts = av_frame_get_best_effort_timestamp(frame);
+                    } else if (ffp->decoder_reorder_pts) {
+                        frame->pts = frame->pkt_pts;
+                    } else {
+                        frame->pts = frame->pkt_dts;
+                    }
+                }
                 break;
             case AVMEDIA_TYPE_AUDIO:
-                ret = avcodec_decode_audio4(d->avctx, fframe, &got_frame, &d->pkt_temp);
+                ret = avcodec_decode_audio4(d->avctx, frame, &got_frame, &d->pkt_temp);
+                if (got_frame) {
+                    AVRational tb = (AVRational){1, frame->sample_rate};
+                    if (frame->pts != AV_NOPTS_VALUE)
+                        frame->pts = av_rescale_q(frame->pts, d->avctx->time_base, tb);
+                    else if (frame->pkt_pts != AV_NOPTS_VALUE)
+                        frame->pts = av_rescale_q(frame->pkt_pts, d->avctx->pkt_timebase, tb);
+                    else if (d->next_pts != AV_NOPTS_VALUE)
+                        frame->pts = av_rescale_q(d->next_pts, d->next_pts_tb, tb);
+                    if (frame->pts != AV_NOPTS_VALUE) {
+                        d->next_pts = frame->pts + frame->nb_samples;
+                        d->next_pts_tb = tb;
+                    }
+                }
                 break;
             // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
             default:
@@ -1118,14 +1144,6 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
     if (got_picture) {
         double dpts = NAN;
 
-        if (ffp->decoder_reorder_pts == -1) {
-            frame->pts = av_frame_get_best_effort_timestamp(frame);
-        } else if (ffp->decoder_reorder_pts) {
-            frame->pts = frame->pkt_pts;
-        } else {
-            frame->pts = frame->pkt_dts;
-        }
-
         if (frame->pts != AV_NOPTS_VALUE)
             dpts = av_q2d(is->video_st->time_base) * frame->pts;
 
@@ -1533,7 +1551,6 @@ static int synchronize_audio(VideoState *is, int nb_samples)
 static int audio_decode_frame(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
-    AVCodecContext *dec = is->audio_st->codec;
     int data_size, resampled_data_size;
     int64_t dec_channel_layout;
     int got_frame = 0;
@@ -1564,19 +1581,6 @@ static int audio_decode_frame(FFPlayer *ffp)
                 got_frame = 0;
 
                 tb = (AVRational){1, is->frame->sample_rate};
-                if (is->frame->pts != AV_NOPTS_VALUE)
-                    is->frame->pts = av_rescale_q(is->frame->pts, dec->time_base, tb);
-                else if (is->frame->pkt_pts != AV_NOPTS_VALUE)
-                    is->frame->pts = av_rescale_q(is->frame->pkt_pts, is->audio_st->time_base, tb);
-                else if (is->audio_frame_next_pts != AV_NOPTS_VALUE)
-#if CONFIG_AVFILTER
-                    is->frame->pts = av_rescale_q(is->audio_frame_next_pts, (AVRational){1, is->audio_filter_src.freq}, tb);
-#else
-                    is->frame->pts = av_rescale_q(is->audio_frame_next_pts, (AVRational){1, is->audio_src.freq}, tb);
-#endif
-
-                if (is->frame->pts != AV_NOPTS_VALUE)
-                    is->audio_frame_next_pts = is->frame->pts + is->frame->nb_samples;
 
 #if CONFIG_AVFILTER
                 dec_channel_layout = get_valid_channel_layout(is->frame->channel_layout, av_frame_get_channels(is->frame));
@@ -1716,13 +1720,8 @@ static int audio_decode_frame(FFPlayer *ffp)
         if ((got_frame = decoder_decode_frame(ffp, &is->auddec, is->frame)) < 0)
             return -1;
 
-        if (is->auddec.flushed) {
-            avcodec_flush_buffers(dec);
+        if (is->auddec.flushed)
             is->audio_buf_frames_pending = 0;
-            is->audio_frame_next_pts = AV_NOPTS_VALUE;
-            if ((is->ic->iformat->flags & (AVFMT_NOBINSEARCH | AVFMT_NOGENSEARCH | AVFMT_NO_BYTE_SEEK)) && !is->ic->iformat->read_seek)
-                is->audio_frame_next_pts = is->audio_st->start_time;
-        }
     }
     return -1;
 }
@@ -1964,6 +1963,10 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         packet_queue_start(&is->audioq);
         decoder_init(&is->auddec, avctx, &is->audioq, is->continue_read_thread);
+        if ((is->ic->iformat->flags & (AVFMT_NOBINSEARCH | AVFMT_NOGENSEARCH | AVFMT_NO_BYTE_SEEK)) && !is->ic->iformat->read_seek) {
+            is->auddec.start_pts = is->audio_st->start_time;
+            is->auddec.start_pts_tb = is->audio_st->time_base;
+        }
         SDL_AoutPauseAudio(ffp->aout, 0);
         break;
     case AVMEDIA_TYPE_VIDEO:
