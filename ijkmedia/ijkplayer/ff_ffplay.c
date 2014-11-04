@@ -1864,7 +1864,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     AVDictionaryEntry *t = NULL;
     int sample_rate, nb_channels;
     int64_t channel_layout;
-    int ret;
+    int ret = 0;
     int stream_lowres = ffp->lowres;
 
     if (stream_index < 0 || stream_index >= ic->nb_streams)
@@ -1911,12 +1911,14 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         av_dict_set_int(&opts, "lowres", stream_lowres, 0);
     if (avctx->codec_type == AVMEDIA_TYPE_VIDEO || avctx->codec_type == AVMEDIA_TYPE_AUDIO)
         av_dict_set(&opts, "refcounted_frames", "1", 0);
-    if (avcodec_open2(avctx, codec, &opts) < 0)
-        return -1;
+    if ((ret = avcodec_open2(avctx, codec, &opts)) < 0) {
+        goto fail;
+    }
     if ((t = av_dict_get(opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
         av_log(NULL, AV_LOG_ERROR, "Option %s not found.\n", t->key);
 #ifdef FFP_MERGE
-        return AVERROR_OPTION_NOT_FOUND;
+        ret = AVERROR_OPTION_NOT_FOUND;
+        goto fail;
 #endif
     }
 
@@ -1932,7 +1934,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
             is->audio_filter_src.channel_layout = get_valid_channel_layout(avctx->channel_layout, avctx->channels);
             is->audio_filter_src.fmt            = avctx->sample_fmt;
             if ((ret = configure_audio_filters(is, afilters, 0)) < 0)
-                return ret;
+                goto fail;
             link = is->out_audio_filter->inputs[0];
             sample_rate    = link->sample_rate;
             nb_channels    = link->channels;
@@ -1946,7 +1948,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         /* prepare audio output */
         if ((ret = audio_open(ffp, channel_layout, nb_channels, sample_rate, &is->audio_tgt)) < 0)
-            return ret;
+            goto fail;
         is->audio_hw_buf_size = ret;
         is->audio_src = is->audio_tgt;
         is->audio_buf_size  = 0;
@@ -2009,7 +2011,10 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     default:
         break;
     }
-    return 0;
+fail:
+    av_dict_free(&opts);
+
+    return ret;
 }
 
 static void stream_component_close(FFPlayer *ffp, int stream_index)
