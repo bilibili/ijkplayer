@@ -830,8 +830,10 @@ static double compute_target_delay(double delay, VideoState *is)
         }
     }
 
+#ifdef FFP_SHOW_AUDIO_DELAY
     av_dlog(NULL, "video: delay=%0.3f A-V=%f\n",
             delay, -diff);
+#endif
 
     return delay;
 }
