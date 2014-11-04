@@ -267,7 +267,6 @@ typedef struct VideoState {
     AVStream *video_st;
     PacketQueue videoq;
     int64_t videoq_duration;
-    int64_t video_current_pos;      // current displayed file pos
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
 #if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;

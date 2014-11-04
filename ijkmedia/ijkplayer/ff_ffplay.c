@@ -393,6 +393,16 @@ static int frame_queue_nb_remaining(FrameQueue *f)
     return f->size - f->rindex_shown;
 }
 
+/* return last shown position */
+static int64_t frame_queue_last_pos(FrameQueue *f)
+{
+    Frame *fp = &f->queue[f->rindex];
+    if (f->rindex_shown && fp->serial == f->pktq->serial)
+        return fp->pos;
+    else
+        return -1;
+}
+
 // FFP_MERGE: fill_rectangle
 // FFP_MERGE: fill_border
 // FFP_MERGE: ALPHA_BLEND
@@ -716,7 +726,6 @@ static void update_video_pts(VideoState *is, double pts, int64_t pos, int serial
     /* update current video pts */
     set_clock(&is->vidclk, pts, serial);
     sync_clock_to_slave(&is->extclk, &is->vidclk);
-    is->video_current_pos = pos;
 }
 
 /* called to display each frame */
@@ -759,7 +768,6 @@ retry:
 
             if (vp->serial != is->videoq.serial) {
                 frame_queue_next(&is->pictq);
-                is->video_current_pos = -1;
                 redisplay = 0;
                 goto retry;
             }
