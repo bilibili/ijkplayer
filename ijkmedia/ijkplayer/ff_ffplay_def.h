@@ -169,6 +169,18 @@ enum {
     AV_SYNC_EXTERNAL_CLOCK, /* synchronize to an external clock */
 };
 
+typedef struct Decoder {
+    AVPacket pkt;
+    AVPacket pkt_temp;
+    PacketQueue *queue;
+    AVCodecContext *avctx;
+    int pkt_serial;
+    int finished;
+    int flushed;
+    int packet_pending;
+    SDL_cond *empty_queue_cond;
+} Decoder;
+
 typedef struct VideoState {
     SDL_Thread *read_tid;
     SDL_Thread _read_tid;
@@ -190,8 +202,6 @@ typedef struct VideoState {
 #endif
     AVFormatContext *ic;
     int realtime;
-    int audio_finished;
-    int video_finished;
 
     Clock audclk;
     Clock vidclk;
@@ -200,6 +210,12 @@ typedef struct VideoState {
     FrameQueue pictq;
 #ifdef FFP_MERGE
     FrameQueue subpq;
+#endif
+
+    Decoder auddec;
+    Decoder viddec;
+#ifdef FFP_MERGE
+    Decoder subdec;
 #endif
 
     int audio_stream;
@@ -224,9 +240,6 @@ typedef struct VideoState {
     int audio_buf_index; /* in bytes */
     int audio_write_buf_size;
     int audio_buf_frames_pending;
-    AVPacket audio_pkt_temp;
-    AVPacket audio_pkt;
-    int audio_pkt_temp_serial;
     int audio_last_serial;
     struct AudioParams audio_src;
 #if CONFIG_AVFILTER
