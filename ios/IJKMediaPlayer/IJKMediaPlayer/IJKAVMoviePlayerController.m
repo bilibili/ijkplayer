@@ -558,7 +558,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         if (self.bufferingProgress > 100) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (self.bufferingProgress > 100) {
-                    _player.rate = 1.0f;
+//                    _player.rate = 1.0f;
                 }
             });
         }
