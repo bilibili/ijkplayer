@@ -346,7 +346,6 @@ static int show_status = 1;
 static int av_sync_type = AV_SYNC_AUDIO_MASTER;
 static int64_t start_time = AV_NOPTS_VALUE;
 static int64_t duration = AV_NOPTS_VALUE;
-static int workaround_bugs = 1;
 static int fast = 0;
 static int genpts = 0;
 static int lowres = 0;
@@ -425,7 +424,6 @@ typedef struct FFPlayer {
     int av_sync_type;
     int64_t start_time;
     int64_t duration;
-    int workaround_bugs;
     int fast;
     int genpts;
     int lowres;
@@ -525,7 +523,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->av_sync_type           = AV_SYNC_AUDIO_MASTER;
     ffp->start_time             = AV_NOPTS_VALUE;
     ffp->duration               = AV_NOPTS_VALUE;
-    ffp->workaround_bugs        = 1;
     ffp->fast                   = 1;
     ffp->genpts                 = 0;
     ffp->lowres                 = 0;
