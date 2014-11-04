@@ -1397,9 +1397,6 @@ static int video_thread(void *arg)
 #endif
 
     for (;;) {
-        while (is->paused && !is->videoq.abort_request)
-            SDL_Delay(10);
-
         ret = get_video_frame(ffp, frame);
         if (ret < 0)
             goto the_end;
