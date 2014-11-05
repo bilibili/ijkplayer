@@ -71,6 +71,10 @@ void ijkmp_global_uninit()
     ffp_global_uninit();
 }
 
+void ijkmp_global_set_log_report(int use_report)
+{
+    ffp_global_set_log_report(use_report);
+}
 
 void ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes))
 {

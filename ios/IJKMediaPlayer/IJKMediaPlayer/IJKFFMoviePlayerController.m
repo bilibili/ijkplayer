@@ -261,6 +261,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     _pauseInBackground = pause;
 }
 
++ (void)setLogReport:(BOOL)preferLogReport
+{
+    ijkmp_global_set_log_report(preferLogReport ? 1 : 0);
+}
+
 - (void)shutdown
 {
     if (!_mediaPlayer)

@@ -44,6 +44,8 @@
 
 - (void)setPauseInBackground:(BOOL)pause;
 
++ (void)setLogReport:(BOOL)preferLogReport;
+
 @end
 
 #define IJK_FF_IO_TYPE_READ (1)

@@ -2658,6 +2658,7 @@ static int lockmgr(void **mtx, enum AVLockOp op)
  ****************************************************************************/
 
 static bool g_ffmpeg_global_inited = false;
+static bool g_ffmpeg_global_use_log_report = false;
 
 static void ffp_log_callback_brief(void *ptr, int level, const char *fmt, va_list vl)
 {
@@ -2720,8 +2721,11 @@ void ffp_global_init()
     avformat_network_init();
 
     av_lockmgr_register(lockmgr);
-//    av_log_set_callback(ffp_log_callback_brief);
-    av_log_set_callback(ffp_log_callback_report);
+    if (g_ffmpeg_global_use_log_report) {
+        av_log_set_callback(ffp_log_callback_report);
+    } else {
+        av_log_set_callback(ffp_log_callback_brief);
+    }
 
     av_init_packet(&flush_pkt);
     flush_pkt.data = (uint8_t *)&flush_pkt;
@@ -2743,6 +2747,16 @@ void ffp_global_uninit()
     avformat_network_deinit();
 
     g_ffmpeg_global_inited = false;
+}
+
+void ffp_global_set_log_report(int use_report)
+{
+    g_ffmpeg_global_use_log_report = use_report;
+    if (use_report) {
+        av_log_set_callback(ffp_log_callback_report);
+    } else {
+        av_log_set_callback(ffp_log_callback_brief);
+    }
 }
 
 void ffp_io_stat_register(void (*cb)(const char *url, int type, int bytes))

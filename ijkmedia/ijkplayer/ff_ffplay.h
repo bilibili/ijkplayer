@@ -30,6 +30,7 @@
 
 void      ffp_global_init();
 void      ffp_global_uninit();
+void      ffp_global_set_log_report(int use_report);
 void      ffp_io_stat_register(void (*cb)(const char *url, int type, int bytes));
 void      ffp_io_stat_complete_register(void (*cb)(const char *url,
                                                    int64_t read_bytes, int64_t total_size,

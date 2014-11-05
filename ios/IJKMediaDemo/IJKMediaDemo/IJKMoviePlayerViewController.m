@@ -39,11 +39,9 @@
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
     [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
 
-    // NSURL *theMovieURL = [NSURL URLWithString:@"rtsp://l.m.cztv.com:554/hdmi/hntv1hd.stream"];
-    // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115151121.hlv?KID=sina,viask&Expires=1380297600&ssig=SjfwCmaiLe"];
-    // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115279108.hlv?KID=sina,viask&Expires=1380297600&ssig=KpcdjFjrhW"];
-    NSURL *theMovieURL = [NSURL URLWithString:@"http://main.gslb.ku6.com/s0/8TB4LuyxYUrZXt6z/1287229516641/eba316981ad6d370d2fe6d6513347666/1412822149101/v426/0/4/8WaVhPqDSgmUICwLruXaTwA.f4v?stype=mp4"];
+    NSURL *theMovieURL = [NSURL URLWithString:@"http://wshdl.acgvideo.com/live/live_5099_3038_d0ffe541.flv"];
 
+    [IJKFFMoviePlayerController setLogReport:YES];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
