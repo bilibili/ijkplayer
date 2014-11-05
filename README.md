@@ -61,9 +61,9 @@ ln -fs config/module-lite.sh config/module.sh
 
 - For Ubuntu/Debian users.
 ```
+# choose [No] to use bash
 sudo dpkg-reconfigure dash
 ```
-choose [No] to use bash
 
 - If you'd like to share your config, pull request is welcome.
 
