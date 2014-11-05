@@ -2679,6 +2679,18 @@ static void ffp_log_callback_brief(void *ptr, int level, const char *fmt, va_lis
 
 static void ffp_log_callback_report(void *ptr, int level, const char *fmt, va_list vl)
 {
+    int ffplv = IJK_LOG_VERBOSE;
+    if (level <= AV_LOG_ERROR)
+        ffplv = IJK_LOG_ERROR;
+    else if (level <= AV_LOG_WARNING)
+        ffplv = IJK_LOG_WARN;
+    else if (level <= AV_LOG_INFO)
+        ffplv = IJK_LOG_INFO;
+    else if (level <= AV_LOG_VERBOSE)
+        ffplv = IJK_LOG_VERBOSE;
+    else
+        ffplv = IJK_LOG_DEBUG;
+
     va_list vl2;
     char line[1024];
     static int print_prefix = 1;
@@ -2708,8 +2720,8 @@ void ffp_global_init()
     avformat_network_init();
 
     av_lockmgr_register(lockmgr);
-    av_log_set_callback(ffp_log_callback_brief);
-//    av_log_set_callback(ffp_log_callback_report);
+//    av_log_set_callback(ffp_log_callback_brief);
+    av_log_set_callback(ffp_log_callback_report);
 
     av_init_packet(&flush_pkt);
     flush_pkt.data = (uint8_t *)&flush_pkt;
