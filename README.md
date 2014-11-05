@@ -59,6 +59,12 @@ ln -fs config/module-default.sh config/module.sh
 ln -fs config/module-lite.sh config/module.sh
 ```
 
+- For Ubuntu/Debian users.
+```
+sudo dpkg-reconfigure dash
+```
+choose [No] to use bash
+
 - If you'd like to share your config, pull request is welcome.
 
 ### Build Android
