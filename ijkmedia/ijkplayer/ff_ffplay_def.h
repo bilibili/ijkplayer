@@ -43,7 +43,7 @@
 #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
 
 #define MAX_QUEUE_SIZE (10 * 1024 * 1024)
-#define MIN_FRAMES 50000
+#define MIN_FRAMES 5
 
 /* Minimum SDL audio buffer size, in samples. */
 #define SDL_AUDIO_MIN_BUFFER_SIZE 512
@@ -105,13 +105,12 @@ typedef struct PacketQueue {
 } PacketQueue;
 
 // #define VIDEO_PICTURE_QUEUE_SIZE 3
-#define VIDEO_PICTURE_QUEUE_SIZE 3
 #define VIDEO_PICTURE_QUEUE_SIZE_MIN        (3)
-#define VIDEO_PICTURE_QUEUE_SIZE_MAX        (24)
+#define VIDEO_PICTURE_QUEUE_SIZE_MAX        (16)
 #define VIDEO_PICTURE_QUEUE_SIZE_DEFAULT    (VIDEO_PICTURE_QUEUE_SIZE_MIN)
 #define SUBPICTURE_QUEUE_SIZE 16
 
-#define FRAME_QUEUE_SIZE FFMAX(VIDEO_PICTURE_QUEUE_SIZE, SUBPICTURE_QUEUE_SIZE)
+#define FRAME_QUEUE_SIZE FFMAX(VIDEO_PICTURE_QUEUE_SIZE_MAX, SUBPICTURE_QUEUE_SIZE)
 
 #define VIDEO_MAX_FPS_DEFAULT 30
 
@@ -491,7 +490,7 @@ typedef struct FFPlayer {
 
     int64_t playable_duration_ms;
 
-    int pictq_capacity;
+    int pictq_size;
     int max_fps;
 
     ijk_format_control_message format_control_message;
@@ -574,7 +573,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->playable_duration_ms           = 0;
 
-    ffp->pictq_capacity                 = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT;
+    ffp->pictq_size                     = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT;
     ffp->max_fps                        = VIDEO_MAX_FPS_DEFAULT;
 
     ffp->format_control_message = NULL;

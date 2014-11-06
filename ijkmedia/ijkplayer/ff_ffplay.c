@@ -2551,7 +2551,7 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is->xleft   = 0;
 
     /* start video display */
-    if (frame_queue_init(&is->pictq, &is->videoq, VIDEO_PICTURE_QUEUE_SIZE, 1) < 0)
+    if (frame_queue_init(&is->pictq, &is->videoq, ffp->pictq_size, 1) < 0)
         goto fail;
 #ifdef FFP_MERGE
     if (frame_queue_init(&is->subpq, &is->subtitleq, SUBPICTURE_QUEUE_SIZE, 0) < 0)
@@ -2857,7 +2857,7 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
 
 void ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count)
 {
-    ffp->pictq_capacity = frame_count;
+    ffp->pictq_size = frame_count;
 }
 
 void ffp_set_max_fps(FFPlayer *ffp, int max_fps)
