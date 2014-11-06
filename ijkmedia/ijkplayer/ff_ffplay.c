@@ -53,6 +53,11 @@
 
 #define FFP_IO_STAT_STEP (50 * 1024)
 
+#ifdef FFP_SHOW_VDPS
+static int g_vdps_counter = 0;
+static int64_t g_vdps_total_time = 0;
+#endif
+
 static int ffp_format_control_message(struct AVFormatContext *s, int type,
                                       void *data, size_t data_size);
 
@@ -320,30 +325,28 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
         }
 
         switch (d->avctx->codec_type) {
-            case AVMEDIA_TYPE_VIDEO:
+            case AVMEDIA_TYPE_VIDEO: {
 #ifdef FFP_SHOW_VDPS
                 int64_t start = SDL_GetTickHR();
 #endif
                 ret = avcodec_decode_video2(d->avctx, frame, &got_frame, &d->pkt_temp);
 #ifdef FFP_SHOW_VDPS
-                {
-                    int64_t dur = SDL_GetTickHR() - start;
-                    g_vdps_total_time += dur;
-                    g_vdps_counter++;
-                    int64_t avg_frame_time = 0;
-                    if (g_vdps_counter > 0)
-                        avg_frame_time = g_vdps_total_time / g_vdps_counter;
-                    double fps = 0;
-                    if (avg_frame_time > 0)
-                        fps = 1.0f / avg_frame_time * 1000;
-                    if (dur >= 30) {
-                        ALOGE("vdps: [%f][%d] %"PRId64" ms/frame, vdps=%f, +%"PRId64"\n",
-                              frame->pts, g_vdps_counter, (int64_t)avg_frame_time, fps, dur);
-                    }
-                    if (g_vdps_total_time >= FFP_XPS_PERIOD) {
-                        g_vdps_total_time -= avg_frame_time;
-                        g_vdps_counter--;
-                    }
+                int64_t dur = SDL_GetTickHR() - start;
+                g_vdps_total_time += dur;
+                g_vdps_counter++;
+                int64_t avg_frame_time = 0;
+                if (g_vdps_counter > 0)
+                    avg_frame_time = g_vdps_total_time / g_vdps_counter;
+                double fps = 0;
+                if (avg_frame_time > 0)
+                    fps = 1.0f / avg_frame_time * 1000;
+                if (dur >= 30) {
+                    ALOGE("vdps: [%f][%d] %"PRId64" ms/frame, vdps=%f, +%"PRId64"\n",
+                          frame->pts, g_vdps_counter, (int64_t)avg_frame_time, fps, dur);
+                }
+                if (g_vdps_total_time >= FFP_XPS_PERIOD) {
+                    g_vdps_total_time -= avg_frame_time;
+                    g_vdps_counter--;
                 }
 #endif
                 if (got_frame) {
@@ -354,6 +357,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                     } else {
                         frame->pts = frame->pkt_dts;
                     }
+                }
                 }
                 break;
             case AVMEDIA_TYPE_AUDIO:
@@ -1128,10 +1132,6 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
     return 0;
 }
 
-#ifdef FFP_SHOW_VDPS
-static int g_vdps_counter = 0;
-static int64_t g_vdps_total_time = 0;
-#endif
 static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
 {
     VideoState *is = ffp->is;
