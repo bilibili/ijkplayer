@@ -606,10 +606,8 @@ static void stream_close(VideoState *is)
 
     /* free all pictures */
     frame_queue_destory(&is->pictq);
-    frame_queue_destory(&is->pictq);
 #ifdef FFP_MERGE
-    SDL_DestroyMutex(is->subpq_mutex);
-    SDL_DestroyCond(is->subpq_cond);
+    frame_queue_destory(&is->subpq);
 #endif
     SDL_DestroyCond(is->continue_read_thread);
     SDL_DestroyMutex(is->play_mutex);
