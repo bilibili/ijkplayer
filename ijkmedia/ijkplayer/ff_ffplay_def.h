@@ -43,7 +43,7 @@
 #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
 
 #define MAX_QUEUE_SIZE (10 * 1024 * 1024)
-#define MIN_FRAMES 5
+#define MIN_FRAMES 50000
 
 /* Minimum SDL audio buffer size, in samples. */
 #define SDL_AUDIO_MIN_BUFFER_SIZE 512
