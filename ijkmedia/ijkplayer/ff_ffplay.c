@@ -524,6 +524,7 @@ static int frame_queue_nb_remaining(FrameQueue *f)
 }
 
 /* return last shown position */
+#ifdef FFP_MERGE
 static int64_t frame_queue_last_pos(FrameQueue *f)
 {
     Frame *fp = &f->queue[f->rindex];
@@ -532,6 +533,7 @@ static int64_t frame_queue_last_pos(FrameQueue *f)
     else
         return -1;
 }
+#endif
 
 // FFP_MERGE: fill_rectangle
 // FFP_MERGE: fill_border
@@ -1552,7 +1554,7 @@ static int audio_decode_frame(FFPlayer *ffp)
     int got_frame = 0;
     av_unused double audio_clock0;
     int wanted_nb_samples;
-    AVRational tb;
+    AVRational tb = {0, 0};
 #if CONFIG_AVFILTER
     int ret;
     int reconfigure;
