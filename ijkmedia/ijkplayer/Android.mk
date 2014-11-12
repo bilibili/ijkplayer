@@ -21,7 +21,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 # -mfloat-abi=soft is a workaround for FP register corruption on Exynos 4210
-# http://www.spinics.net/lists/arm-kernel/msg368418.html
+# http://www.spinics.net/lists/arm-kernel/msg368417.html
 LOCAL_CFLAGS += -mfloat-abi=soft
 LOCAL_CFLAGS += -std=c99
 LOCAL_LDLIBS += -llog -landroid
