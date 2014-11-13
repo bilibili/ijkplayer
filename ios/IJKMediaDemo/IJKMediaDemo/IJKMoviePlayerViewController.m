@@ -122,11 +122,11 @@
     MPMovieLoadState loadState = _player.loadState;
 
     if ((loadState & MPMovieLoadStatePlaythroughOK) != 0) {
-        NSLog(@"loadStateDidChange: MPMovieLoadStatePlaythroughOK: %d\n", loadState);
+        NSLog(@"loadStateDidChange: MPMovieLoadStatePlaythroughOK: %d\n", (int)loadState);
     } else if ((loadState & MPMovieLoadStateStalled) != 0) {
-        NSLog(@"loadStateDidChange: MPMovieLoadStateStalled: %d\n", loadState);
+        NSLog(@"loadStateDidChange: MPMovieLoadStateStalled: %d\n", (int)loadState);
     } else {
-        NSLog(@"loadStateDidChange: ???: %d\n", loadState);
+        NSLog(@"loadStateDidChange: ???: %d\n", (int)loadState);
     }
 }
 
