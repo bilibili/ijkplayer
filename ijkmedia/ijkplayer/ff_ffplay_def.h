@@ -109,8 +109,8 @@ typedef struct PacketQueue {
 #define VIDEO_PICTURE_QUEUE_SIZE_MAX        (16)
 #define VIDEO_PICTURE_QUEUE_SIZE_DEFAULT    (VIDEO_PICTURE_QUEUE_SIZE_MIN)
 #define SUBPICTURE_QUEUE_SIZE 16
-
-#define FRAME_QUEUE_SIZE FFMAX(VIDEO_PICTURE_QUEUE_SIZE_MAX, SUBPICTURE_QUEUE_SIZE)
+#define SAMPLE_QUEUE_SIZE 9
+#define FRAME_QUEUE_SIZE FFMAX(SAMPLE_QUEUE_SIZE, FFMAX(VIDEO_PICTURE_QUEUE_SIZE_MAX, SUBPICTURE_QUEUE_SIZE))
 
 #define VIDEO_MAX_FPS_DEFAULT 30
 
@@ -189,6 +189,8 @@ typedef struct VideoState {
     SDL_Thread _read_tid;
     SDL_Thread *video_tid;
     SDL_Thread _video_tid;
+    SDL_Thread *audio_tid;
+    SDL_Thread _audio_tid;
     AVInputFormat *iformat;
     int no_background;
     int abort_request;
@@ -214,6 +216,7 @@ typedef struct VideoState {
 #ifdef FFP_MERGE
     FrameQueue subpq;
 #endif
+    FrameQueue sampq;
 
     Decoder auddec;
     Decoder viddec;
@@ -242,8 +245,6 @@ typedef struct VideoState {
     unsigned int audio_buf1_size;
     int audio_buf_index; /* in bytes */
     int audio_write_buf_size;
-    int audio_buf_frames_pending;
-    int audio_last_serial;
     struct AudioParams audio_src;
 #if CONFIG_AVFILTER
     struct AudioParams audio_filter_src;
@@ -252,7 +253,6 @@ typedef struct VideoState {
     struct SwrContext *swr_ctx;
     int frame_drops_early;
     int frame_drops_late;
-    AVFrame *frame;
 
     enum ShowMode {
         SHOW_MODE_NONE = -1, SHOW_MODE_VIDEO = 0, SHOW_MODE_WAVES, SHOW_MODE_RDFT, SHOW_MODE_NB
