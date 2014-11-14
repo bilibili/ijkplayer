@@ -2065,8 +2065,8 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
     case AVMEDIA_TYPE_AUDIO:
         packet_queue_abort(&is->audioq);
 
-        SDL_AoutCloseAudio(ffp->aout);
         frame_queue_signal(&is->sampq);
+        SDL_AoutCloseAudio(ffp->aout);
         SDL_WaitThread(is->audio_tid, NULL);
 
         decoder_destroy(&is->auddec);
