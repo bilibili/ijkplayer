@@ -2483,25 +2483,28 @@ static int read_thread(void *arg)
                 }
             }
         }
-        if (eof) {
-            if (is->video_stream >= 0)
-                packet_queue_put_nullpacket(&is->videoq, is->video_stream);
-            if (is->audio_stream >= 0)
-                packet_queue_put_nullpacket(&is->audioq, is->audio_stream);
-#ifdef FFP_MERGE
-            if (is->subtitle_stream >= 0)
-                packet_queue_put_nullpacket(&is->subtitleq, is->subtitle_stream);
-#endif
-            ffp_toggle_buffering(ffp, 0);
-            SDL_Delay(1000);
-            eof=0;
-            continue;
-        }
         ret = av_read_frame(ic, pkt);
         if (ret < 0) {
-            if (ret == AVERROR_EOF || avio_feof(ic->pb))
+            if ((ret == AVERROR_EOF || avio_feof(ic->pb)) && !eof) {
+                if (is->video_stream >= 0)
+                    packet_queue_put_nullpacket(&is->videoq, is->video_stream);
+                if (is->audio_stream >= 0)
+                    packet_queue_put_nullpacket(&is->audioq, is->audio_stream);
+#ifdef FFP_MERGE
+                if (is->subtitle_stream >= 0)
+                    packet_queue_put_nullpacket(&is->subtitleq, is->subtitle_stream);
+#endif
                 eof = 1;
+            }
             if (ic->pb && ic->pb->error) {
+                if (is->video_stream >= 0)
+                    packet_queue_put_nullpacket(&is->videoq, is->video_stream);
+                if (is->audio_stream >= 0)
+                    packet_queue_put_nullpacket(&is->audioq, is->audio_stream);
+#ifdef FFP_MERGE
+                if (is->subtitle_stream >= 0)
+                    packet_queue_put_nullpacket(&is->subtitleq, is->subtitle_stream);
+#endif
                 eof = 1;
                 ffp->error = ic->pb->error;
                 ALOGE("av_read_frame error: %x(%c,%c,%c,%c)\n", ffp->error,
@@ -2513,10 +2516,16 @@ static int read_thread(void *arg)
             } else {
                 ffp->error = 0;
             }
+            if (eof) {
+                ffp_toggle_buffering(ffp, 0);
+                SDL_Delay(1000);
+            }
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
             SDL_UnlockMutex(wait_mutex);
             continue;
+        } else {
+            eof = 0;
         }
         /* check if packet is in play range specified by user, then queue, otherwise discard */
         stream_start_time = ic->streams[pkt->stream_index]->start_time;
