@@ -50,6 +50,14 @@ void SDL_DestroyMutex(SDL_mutex *mutex)
     }
 }
 
+void SDL_DestroyMutexP(SDL_mutex **mutex)
+{
+    if (mutex) {
+        SDL_DestroyMutex(*mutex);
+        *mutex = NULL;
+    }
+}
+
 int SDL_LockMutex(SDL_mutex *mutex)
 {
     assert(mutex);
