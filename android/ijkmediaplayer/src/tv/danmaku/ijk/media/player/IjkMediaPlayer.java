@@ -444,6 +444,10 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         _setAvCodecOption(name, value);
     }
 
+    public void setSwScaleOption(String name, String value) {
+        _setSwScaleOption(name, value);
+    }
+
     /**
      * @param chromaFourCC
      *      AvFourCC.SDL_FCC_RV16
@@ -466,6 +470,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     private native void _setAvFormatOption(String name, String value);
     private native void _setAvCodecOption(String name, String value);
+    private native void _setSwScaleOption(String name, String value);
     private native void _setOverlayFormat(int chromaFourCC);
     private native void _setFrameDrop(int frameDrop);
 
