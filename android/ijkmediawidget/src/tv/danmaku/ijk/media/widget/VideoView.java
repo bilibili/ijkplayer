@@ -244,6 +244,9 @@ public class VideoView extends SurfaceView implements
                 ijkMediaPlayer = new IjkMediaPlayer();
                 ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
                 ijkMediaPlayer.setOverlayFormat(AvFourCC.SDL_FCC_RV32);
+
+                ijkMediaPlayer.setAvCodecOption("skip_loop_filter", "48");
+                ijkMediaPlayer.setFrameDrop(12);
             }
             mMediaPlayer = ijkMediaPlayer;
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
