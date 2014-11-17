@@ -349,6 +349,19 @@ IjkMediaPlayer_setOverlayFormat(JNIEnv *env, jobject thiz, jint chromaFourCC)
 }
 
 static void
+IjkMediaPlayer_setFrameDrop(JNIEnv *env, jobject thiz, jint frameDrop)
+{
+    MPTRACE("IjkMediaPlayer_setFrameDrop");
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setFrameDrop: null mp", LABEL_RETURN);
+
+    ijkmp_set_framedrop(mp, frameDrop);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
 IjkMediaPlayer_native_init(JNIEnv *env)
 {
     MPTRACE("IjkMediaPlayer_native_init");
@@ -601,6 +614,7 @@ static JNINativeMethod g_methods[] = {
     { "_setAvFormatOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvFormatOption },
     { "_setAvCodecOption",  "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvCodecOption },
     { "_setOverlayFormat",  "(I)V",                                    (void *) IjkMediaPlayer_setOverlayFormat },
+    { "_setFrameDrop",      "(I)V",                                    (void *) IjkMediaPlayer_setFrameDrop },
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)

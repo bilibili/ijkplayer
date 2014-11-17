@@ -454,9 +454,20 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         _setOverlayFormat(chromaFourCC);
     }
 
+    /**
+     * @param frameDrop
+     *      =0 do not drop any frame
+     *      <0 drop as many frames as possible
+     *      >0 display 1 frame per `frameDrop` continuous dropped frames, 
+     */
+    public void setFrameDrop(int frameDrop) {
+        _setFrameDrop(frameDrop);
+    }
+
     private native void _setAvFormatOption(String name, String value);
     private native void _setAvCodecOption(String name, String value);
     private native void _setOverlayFormat(int chromaFourCC);
+    private native void _setFrameDrop(int frameDrop);
 
     @Override
     public void setAudioStreamType(int streamtype) {
