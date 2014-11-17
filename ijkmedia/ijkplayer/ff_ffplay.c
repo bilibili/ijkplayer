@@ -1176,8 +1176,13 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
                     is->viddec.pkt_serial == is->vidclk.serial &&
                     is->videoq.nb_packets) {
                     is->frame_drops_early++;
-                    av_frame_unref(frame);
-                    got_picture = 0;
+                    is->continuous_frame_drops_early++;
+                    if (is->continuous_frame_drops_early > ffp->framedrop) {
+                        is->continuous_frame_drops_early = 0;
+                    } else {
+                        av_frame_unref(frame);
+                        got_picture = 0;
+                    }
                 }
             }
         }
@@ -2917,6 +2922,11 @@ void ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count)
 void ffp_set_max_fps(FFPlayer *ffp, int max_fps)
 {
     ffp->max_fps = max_fps;
+}
+
+void ffp_set_framedrop(FFPlayer *ffp, int framedrop)
+{
+    ffp->framedrop = framedrop;
 }
 
 int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)

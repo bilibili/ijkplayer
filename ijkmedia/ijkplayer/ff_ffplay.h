@@ -49,6 +49,7 @@ void      ffp_set_sws_option(FFPlayer *ffp, const char *name, const char *value)
 void      ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc);
 void      ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count);
 void      ffp_set_max_fps(FFPlayer *ffp, int max_fps);
+void      ffp_set_framedrop(FFPlayer *ffp, int framedrop);
 
 /* playback controll */
 int       ffp_prepare_async_l(FFPlayer *ffp, const char *file_name);
