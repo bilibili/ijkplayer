@@ -25,7 +25,7 @@ FF_TARGET=$1
 set -e
 set +x
 
-FF_ALL_ARCHS="armv5 armv7a x86"
+FF_ALL_ARCHS="armv5 armv7a x86 arm64-v8a"
 
 echo_archs() {
     echo "===================="
@@ -41,7 +41,7 @@ case "$FF_TARGET" in
         echo_archs
         sh tools/do-compile-ffmpeg.sh armv7a
     ;;
-    armv5|armv7a|x86)
+    armv5|armv7a|x86|arm64-v8a)
         echo_archs
         sh tools/do-compile-ffmpeg.sh $FF_TARGET
     ;;
@@ -65,7 +65,7 @@ case "$FF_TARGET" in
     ;;
     *)
         echo "Usage:"
-        echo "  compile-ffmpeg.sh armv5|armv7a|x86"
+        echo "  compile-ffmpeg.sh armv5|armv7a|x86|arm64-v8a"
         echo "  compile-ffmpeg.sh all"
         echo "  compile-ffmpeg.sh clean"
         echo "  compile-ffmpeg.sh check"

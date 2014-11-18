@@ -62,6 +62,7 @@ esac
 FF_BUILD_ROOT=`pwd`
 FF_ANDROID_PLATFORM=android-9
 FF_GCC_VER=4.8
+FF_GCC_64_VER=4.9
 
 
 
@@ -125,6 +126,23 @@ elif [ "$FF_ARCH" == "x86" ]; then
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
 
     FF_ASM_OBJ_DIR="libavutil/x86/*.o libavcodec/x86/*.o libswresample/x86/*.o libswscale/x86/*.o"
+
+elif [ "$FF_ARCH" == "arm64-v8a" ]; then
+    FF_ANDROID_PLATFORM=android-21
+
+    FF_BUILD_NAME=ffmpeg-arm64-v8a
+    FF_BUILD_NAME_OPENSSL=openssl-arm64-v8a
+    FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
+
+    FF_CROSS_PREFIX=aarch64-linux-android
+    FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_64_VER}
+
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --arch=aarch64 --enable-yasm"
+
+    FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS"
+    FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
+
+    FF_ASM_OBJ_DIR="libavutil/aarch64/*.o libavcodec/aarch64/*.o libswresample/aarch64/*.o libavcodec/neon/*.o"
 
 else
     echo "unknown architecture $FF_ARCH";
