@@ -20,6 +20,7 @@
 
     options.frameBufferCount  = 3;
     options.maxFps            = 30;
+    options.frameDrop         = 0;
     options.pauseInBackground = YES;
 
     options.timeout         = -1;
@@ -40,6 +41,7 @@
 
     ijkmp_set_picture_queue_capicity(mediaPlayer, _frameBufferCount);
     ijkmp_set_max_fps(mediaPlayer, _maxFps);
+    ijkmp_set_framedrop(mediaPlayer, _frameDrop);
 
     if (self.timeout > 0) {
         [self setFormatOption:@"timeout"
