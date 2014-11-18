@@ -250,11 +250,13 @@ int jniThrowRuntimeException(C_JNIEnv* env, const char* msg) {
     return jniThrowException(env, "java/lang/RuntimeException", msg);
 }
 
+#if 0
 int jniThrowIOException(C_JNIEnv* env, int errnum) {
     char buffer[80];
     const char* message = jniStrError(errnum, buffer, sizeof(buffer));
     return jniThrowException(env, "java/io/IOException", message);
 }
+#endif
 
 void jniLogException(C_JNIEnv* env, int priority, const char* tag, jthrowable exception) {
     JNIEnv* e = reinterpret_cast<JNIEnv*>(env);
@@ -285,6 +287,7 @@ void jniLogException(C_JNIEnv* env, int priority, const char* tag, jthrowable ex
     }
 }
 
+#if 0
 const char* jniStrError(int errnum, char* buf, size_t buflen) {
     // Note: glibc has a nonstandard strerror_r that returns char* rather than POSIX's int.
     // char *strerror_r(int errnum, char *buf, size_t n);
@@ -305,6 +308,7 @@ const char* jniStrError(int errnum, char* buf, size_t buflen) {
         return ret;
     }
 }
+#endif
 
 static struct CachedFields {
     jclass fileDescriptorClass;
