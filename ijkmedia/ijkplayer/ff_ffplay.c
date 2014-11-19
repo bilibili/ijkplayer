@@ -3198,7 +3198,7 @@ void ffp_check_buffering_l(FFPlayer *ffp)
     }
     if (buf_percent) {
 #ifdef FFP_SHOW_BUF_POS
-        ALOGE("buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
+        ALOGD("buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
 #endif
         ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_UPDATE, (int)buf_time_position, buf_percent);
     }
