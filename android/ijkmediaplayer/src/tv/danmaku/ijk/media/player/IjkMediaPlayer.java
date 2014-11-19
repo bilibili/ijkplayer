@@ -96,7 +96,6 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             if (!mIsLibLoaded) {
                 libLoader.loadLibrary("ijkffmpeg");
                 libLoader.loadLibrary("ijkutil");
-                libLoader.loadLibrary("ijkadk");
                 libLoader.loadLibrary("ijksdl");
                 libLoader.loadLibrary("ijkplayer");
                 mIsLibLoaded = true;
