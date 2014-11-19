@@ -53,7 +53,7 @@ case "$FF_NDK_REL" in
             exit 1
         fi
     ;;
-    7|8|*)
+    *)
         echo "You need the NDKr9 or later"
         exit 1
     ;;
