@@ -584,7 +584,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         [self didLoadStateChange];
         
         if (blockError == nil) {
-            blockError = [[NSError alloc] init];
+            blockError = [[NSError alloc] initWithDomain:@"" code:0 userInfo:nil];
         }
 
         [[NSNotificationCenter defaultCenter]
