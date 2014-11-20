@@ -523,7 +523,7 @@ inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1
 
 static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
 {
-    jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL);
+    jobject weak_thiz = (jobject) ijkmp_get_weak_thiz(mp);
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: message_loop_n: null weak_thiz", LABEL_RETURN);
 
     while (1) {
@@ -590,6 +590,7 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
     }
 
     LABEL_RETURN:
+	weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL);
     (*env)->DeleteGlobalRef(env, weak_thiz);
 }
 
