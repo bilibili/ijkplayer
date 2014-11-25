@@ -24,14 +24,14 @@
  File: AVPlayerDemoPlaybackViewController.m
  Abstract: UIViewController managing a playback view, thumbnail view, and associated playback UI.
  Version: 1.3
-
+ 
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
-
+ 
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -47,13 +47,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
-
+ 
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
-
+ 
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -62,9 +62,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
+ 
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
-
+ 
  */
 
 #import "IJKAVMoviePlayerController.h"
@@ -113,26 +113,26 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     AVPlayerItem    *_playerItem;
     AVPlayer        *_player;
     IJKAVPlayerLayerView * _avView;
-
+    
     IJKKVOController *_playerKVO;
     IJKKVOController *_playerItemKVO;
-
+    
     id _timeObserver;
-
+    
     // while AVPlayer is prerolling, it could resume itself.
     // foring start could
     BOOL _isPrerolling;
-
+    
     BOOL _isSeeking;
     BOOL _isError;
     BOOL _isCompleted;
-
+    
     BOOL _pauseInBackground;
-
+    
     BOOL _playbackLikelyToKeeyUp;
     BOOL _playbackBufferEmpty;
     BOOL _playbackBufferFull;
-
+    
     NSMutableArray *_registeredNotifications;
 }
 
@@ -158,29 +158,29 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         self.controlStyle = MPMovieControlStyleNone;
         self.scalingMode = MPMovieScalingModeAspectFit;
         self.shouldAutoplay = NO;
-
+        
         _playUrl = aUrl;
-
+        
         _avView = [[IJKAVPlayerLayerView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
         self.view = _avView;
-
+        
         // TODO:
         [[IJKAudioKit sharedInstance] setupAudioSession:self];
-
+        
         _isPrerolling   = NO;
-
+        
         _isSeeking      = NO;
         _isError        = NO;
         _isCompleted    = NO;
         self.bufferingProgress  = 0;
-
+        
         _playbackLikelyToKeeyUp = NO;
         _playbackBufferEmpty    = YES;
         _playbackBufferFull     = NO;
-
+        
         // init extra
         [self setScreenOn:YES];
-
+        
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
     }
@@ -219,7 +219,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:_playUrl options:nil];
     NSArray *requestedKeys = @[@"playable"];
-
+    
     _playAsset = asset;
     [asset loadValuesAsynchronouslyForKeys:requestedKeys
                          completionHandler:^{
@@ -236,7 +236,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         _isCompleted = NO;
         [_player seekToTime:kCMTimeZero];
     }
-
+    
     [_player play];
 }
 
@@ -268,24 +268,24 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 - (void)shutdown
 {
     [self stop];
-
+    
     if (_playerItem != nil) {
         [_playerItem cancelPendingSeeks];
     }
-
+    
     [_playerItemKVO safelyRemoveAllObservers];
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:nil
                                                   object:_playerItem];
-
+    
     [_playerKVO safelyRemoveAllObservers];
-
+    
     [self unregisterApplicationObservers];
-
+    
     if (_avView != nil) {
         [_avView setPlayer:nil];
     }
-
+    
     self.view = nil;
 }
 
@@ -298,30 +298,30 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 {
     if (!_player)
         return;
-
+    
     _isSeeking = YES;
-
+    
     [self didPlaybackStateChange];
     [self didLoadStateChange];
-
+    
     [_player pause];
     [_player seekToTime:CMTimeMakeWithSeconds(aCurrentPlaybackTime, NSEC_PER_SEC)
       completionHandler:^(BOOL finished) {
           dispatch_async(dispatch_get_main_queue(), ^{
               _isSeeking = NO;
               [_player play];
-
+              
               [self didPlaybackStateChange];
               [self didLoadStateChange];
           });
-    }];
+      }];
 }
 
 - (NSTimeInterval)currentPlaybackTime
 {
     if (!_player)
         return 0.0f;
-
+    
     return CMTimeGetSeconds([_player currentTime]);
 }
 
@@ -329,7 +329,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 {
     if (_player == nil)
         return 0;
-
+    
     AVPlayerItem *playerItem = [_player currentItem];
     if (playerItem == nil)
         return 0;
@@ -345,8 +345,8 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 - (MPMoviePlaybackState)playbackState
 {
     if (!_player)
-        return NO;
-
+        return MPMoviePlaybackStateStopped;
+    
     MPMoviePlaybackState mpState = MPMoviePlaybackStateStopped;
     if (_isCompleted) {
         mpState = MPMoviePlaybackStateStopped;
@@ -357,7 +357,6 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     } else {
         mpState = MPMoviePlaybackStatePaused;
     }
-
     return mpState;
 }
 
@@ -365,14 +364,14 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 {
     if (_player == nil)
         return MPMovieLoadStateUnknown;
-
+    
     if (_isSeeking)
         return MPMovieLoadStateStalled;
-
+    
     AVPlayerItem *playerItem = [_player currentItem];
     if (playerItem == nil)
         return MPMovieLoadStateUnknown;
-
+    
     if (_player != nil && _player.rate > kMinPlayingRate) {
         NSLog(@"loadState: playing");
         return MPMovieLoadStatePlayable | MPMovieLoadStatePlaythroughOK;
@@ -421,68 +420,68 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         NSError *assetCannotBePlayedError = [NSError errorWithDomain:@"AVMoviePlayer"
                                                                 code:0
                                                             userInfo:nil];
-
+        
         [self assetFailedToPrepareForPlayback:assetCannotBePlayedError];
         return;
     }
     
     /* At this point we're ready to set up for playback of the asset. */
-
+    
     /* Stop observing our prior AVPlayerItem, if we have one. */
     [_playerItemKVO safelyRemoveAllObservers];
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:nil
                                                   object:_playerItem];
-
+    
     /* Create a new instance of AVPlayerItem from the now successfully loaded AVAsset. */
     _playerItem = [AVPlayerItem playerItemWithAsset:asset];
     _playerItemKVO = [[IJKKVOController alloc] initWithTarget:_playerItem];
-
+    
     /* Observe the player item "status" key to determine when it is ready to play. */
     [_playerItemKVO safelyAddObserver:self
                            forKeyPath:@"status"
                               options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
                               context:KVO_AVPlayerItem_state];
-
+    
     [_playerItemKVO safelyAddObserver:self
                            forKeyPath:@"loadedTimeRanges"
                               options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
                               context:KVO_AVPlayerItem_loadedTimeRanges];
-
+    
     [_playerItemKVO safelyAddObserver:self
                            forKeyPath:@"playbackLikelyToKeepUp"
                               options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
                               context:KVO_AVPlayerItem_playbackLikelyToKeepUp];
-
+    
     [_playerItemKVO safelyAddObserver:self
                            forKeyPath:@"playbackBufferEmpty"
                               options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
                               context:KVO_AVPlayerItem_playbackBufferEmpty];
-
+    
     [_playerItemKVO safelyAddObserver:self
                            forKeyPath:@"playbackBufferFull"
                               options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
                               context:KVO_AVPlayerItem_playbackBufferFull];
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(playerItemDidReachEnd:)
                                                  name:AVPlayerItemDidPlayToEndTimeNotification
                                                object:_playerItem];
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(playerItemFailedToPlayToEndTime:)
                                                  name:AVPlayerItemFailedToPlayToEndTimeNotification
                                                object:_playerItem];
-
+    
     _isCompleted = NO;
-
+    
     /* Create new player, if we don't already have one. */
     if (!_player)
     {
         /* Get a new AVPlayer initialized to play the specified player item. */
         _player = [AVPlayer playerWithPlayerItem:_playerItem];
         _playerKVO = [[IJKKVOController alloc] initWithTarget:_player];
-
+        
         /* Observe the AVPlayer "currentItem" property to find out when any
          AVPlayer replaceCurrentItemWithPlayerItem: replacement will/did
          occur.*/
@@ -490,44 +489,48 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
                            forKeyPath:@"currentItem"
                               options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
                               context:KVO_AVPlayer_currentItem];
-
+        
         /* Observe the AVPlayer "rate" property to update the scrubber control. */
         [_playerKVO safelyAddObserver:self
                            forKeyPath:@"rate"
                               options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
                               context:KVO_AVPlayer_rate];
     }
-
+    
     /* Make our new AVPlayerItem the AVPlayer's current item. */
     if (_player.currentItem != _playerItem)
     {
         /* Replace the player item with a new player item. The item replacement occurs
          asynchronously; observe the currentItem property to find out when the
          replacement will/did occur
-
+         
          If needed, configure player item here (example: adding outputs, setting text style rules,
          selecting media options) before associating it with a player
          */
         [_player replaceCurrentItemWithPlayerItem:_playerItem];
-
+        
         // TODO: notify state change
     }
-
+    
     // TODO: set time to 0;
 }
 
 - (void)didPlaybackStateChange
 {
-    [[NSNotificationCenter defaultCenter]
-     postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification
-     object:self];
+    if (_playbackState != self.playbackState) {
+        _playbackState = self.playbackState;
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification
+         object:self];
+    }
+    
 }
 
 - (void)fetchLoadStateFromItem:(AVPlayerItem*)playerItem
 {
     if (playerItem == nil)
         return;
-
+    
     _playbackLikelyToKeeyUp = playerItem.isPlaybackLikelyToKeepUp;
     _playbackBufferEmpty    = playerItem.isPlaybackBufferEmpty;
     _playbackBufferFull     = playerItem.isPlaybackBufferFull;
@@ -539,7 +542,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     // which may cause AVPlayer get into wrong state
     //
     // Rely on AVPlayer's auto resume.
-
+    
     [[NSNotificationCenter defaultCenter]
      postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
      object:self];
@@ -550,23 +553,23 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     NSTimeInterval currentPlaybackTime = self.currentPlaybackTime;
     int playableDurationMilli    = (int)(self.playableDuration * 1000);
     int currentPlaybackTimeMilli = (int)(currentPlaybackTime * 1000);
-
+    
     int bufferedDurationMilli = playableDurationMilli - currentPlaybackTimeMilli;
     if (bufferedDurationMilli > 0) {
         self.bufferingProgress = bufferedDurationMilli * 100 / kMaxHighWaterMarkMilli;
-
+        
         if (self.bufferingProgress > 100) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (self.bufferingProgress > 100) {
                     if ([self isPlaying]) {
-                       _player.rate = 1.0f;
+                        _player.rate = 1.0f;
                     }
                 }
             });
         }
-
+        
     }
-
+    
     NSLog(@"KVO_AVPlayerItem_loadedTimeRanges: %d / %d\n",
           bufferedDurationMilli,
           (int)kMaxHighWaterMarkMilli);
@@ -575,18 +578,18 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 - (void)onError:(NSError *)error
 {
     _isError = YES;
-
+    
     __block NSError *blockError = error;
-
+    
     NSLog(@"AVPlayer: onError\n");
     dispatch_async(dispatch_get_main_queue(), ^{
         [self didPlaybackStateChange];
         [self didLoadStateChange];
         
         if (blockError == nil) {
-            blockError = [[NSError alloc] initWithDomain:@"" code:0 userInfo:nil];
+            blockError = [[NSError alloc] init];
         }
-
+        
         [[NSNotificationCenter defaultCenter]
          postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
          object:self
@@ -610,11 +613,11 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
     _isCompleted = YES;
-
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         [self didPlaybackStateChange];
         [self didLoadStateChange];
-
+        
         [[NSNotificationCenter defaultCenter]
          postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
          object:self
@@ -644,14 +647,14 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
                  it has not tried to load new media resources for playback */
             }
                 break;
-
+                
             case AVPlayerItemStatusReadyToPlay:
             {
                 /* Once the AVPlayerItem becomes ready to play, i.e.
                  [playerItem status] == AVPlayerItemStatusReadyToPlay,
                  its duration can be fetched from the item. */
                 [_avView setPlayer:_player];
-
+                
                 self.isPreparedToPlay = YES;
                 AVPlayerItem *playerItem = (AVPlayerItem *)object;
                 NSTimeInterval duration = CMTimeGetSeconds(playerItem.duration);
@@ -659,13 +662,13 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
                     self.duration = 0.0f;
                 else
                     self.duration = duration;
-
+                
                 [[NSNotificationCenter defaultCenter]
                  postNotificationName:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification
                  object:self];
             }
                 break;
-
+                
             case AVPlayerItemStatusFailed:
             {
                 AVPlayerItem *playerItem = (AVPlayerItem *)object;
@@ -673,7 +676,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
             }
                 break;
         }
-
+        
         [self didPlaybackStateChange];
         [self didLoadStateChange];
     }
@@ -683,10 +686,10 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         if (_player != nil && playerItem.status == AVPlayerItemStatusReadyToPlay) {
             NSArray *timeRangeArray = playerItem.loadedTimeRanges;
             CMTime currentTime = [_player currentTime];
-
+            
             __block BOOL foundRange = NO;
             __block CMTimeRange aTimeRange;
-
+            
             [timeRangeArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
                 aTimeRange = [[timeRangeArray objectAtIndex:0] CMTimeRangeValue];
                 if(CMTimeRangeContainsTime(aTimeRange, currentTime)) {
@@ -694,7 +697,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
                     foundRange = YES;
                 }
             }];
-
+            
             if (foundRange) {
                 CMTime maxTime = CMTimeRangeGetEnd(aTimeRange);
                 NSTimeInterval playableDuration = CMTimeGetSeconds(maxTime);
@@ -745,7 +748,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
          Called when the AVPlayer replaceCurrentItemWithPlayerItem:
          replacement will/did occur. */
         AVPlayerItem *newPlayerItem = [change objectForKey:NSKeyValueChangeNewKey];
-
+        
         /* Is the new player item null? */
         if (newPlayerItem == (id)[NSNull null])
         {
@@ -757,7 +760,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         else /* Replacement of player currentItem has occurred */
         {
             [_avView setPlayer:_player];
-
+            
             [self didPlaybackStateChange];
             [self didLoadStateChange];
         }
@@ -878,5 +881,5 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         }
     });
 }
-                                        
+
 @end
