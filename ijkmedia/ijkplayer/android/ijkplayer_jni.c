@@ -251,6 +251,9 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
     // explicit shutdown mp, in case it is not the last mp-ref here
     ijkmp_android_set_surface(env, mp, NULL);
     ijkmp_shutdown(mp);
+	//only delete weak_thiz at release
+	jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL);
+    (*env)->DeleteGlobalRef(env, weak_thiz);
     jni_set_media_player(env, thiz, NULL);
 
     ijkmp_dec_ref_p(&mp);
@@ -524,7 +527,7 @@ inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1
 static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
 {
     jobject weak_thiz = (jobject) ijkmp_get_weak_thiz(mp);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: message_loop_n: null weak_thiz", LABEL_RETURN);
+    JNI_CHECK_GOTO(weak_thiz, env, NULL, "mpjni: message_loop_n: null weak_thiz", LABEL_RETURN);
 
     while (1) {
         AVMessage msg;
@@ -590,8 +593,7 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
     }
 
     LABEL_RETURN:
-	weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL);
-    (*env)->DeleteGlobalRef(env, weak_thiz);
+	;
 }
 
 static int message_loop(void *arg)
