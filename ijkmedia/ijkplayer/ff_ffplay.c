@@ -2582,8 +2582,9 @@ static int read_thread(void *arg)
     if (is->subtitle_stream >= 0)
         stream_component_close(ffp, is->subtitle_stream);
 #endif
-    if (is->ic) {
+    if (ic) {
         avformat_close_input(&is->ic);
+        is->ic = NULL;
     }
 
     if (!ffp->prepared || !is->abort_request) {

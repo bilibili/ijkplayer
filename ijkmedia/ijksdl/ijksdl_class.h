@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl.h
+ * ijksdl_class.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,19 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_H
-#define IJKSDL__IJKSDL_H
+#ifndef IJKSDL__IJKSDL_CLASS_H
+#define IJKSDL__IJKSDL_CLASS_H
 
-#include "ijksdl_audio.h"
-#include "ijksdl_aout.h"
-#include "ijksdl_class.h"
-#include "ijksdl_error.h"
-#include "ijksdl_mutex.h"
-#include "ijksdl_thread.h"
-#include "ijksdl_timer.h"
-#include "ijksdl_video.h"
-#include "ijksdl_vout.h"
-
-#include "ffmpeg/ijksdl_vout_overlay_ffmpeg.h"
+typedef struct SDL_Class {
+    const char *name;
+} SDL_Class;
 
 #endif
