@@ -64,6 +64,7 @@ public class VideoView extends SurfaceView implements
 
     private Uri mUri;
     private long mDuration;
+    private String mUserAgent;
 
     private static final int STATE_ERROR = -1;
     private static final int STATE_IDLE = 0;
@@ -216,6 +217,10 @@ public class VideoView extends SurfaceView implements
         invalidate();
     }
 
+    public void setUserAgent(String ua) {
+    	mUserAgent = ua;
+    }
+    
     public void stopPlayback() {
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
@@ -247,6 +252,9 @@ public class VideoView extends SurfaceView implements
 
                 ijkMediaPlayer.setAvCodecOption("skip_loop_filter", "48");
                 ijkMediaPlayer.setFrameDrop(12);
+                if (mUserAgent != null) {
+                    ijkMediaPlayer.setAvFormatOption("user_agent", mUserAgent);
+                }
             }
             mMediaPlayer = ijkMediaPlayer;
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
