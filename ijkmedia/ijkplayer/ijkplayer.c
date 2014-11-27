@@ -555,6 +555,11 @@ long ijkmp_get_playable_duration(IjkMediaPlayer *mp)
     return retval;
 }
 
+void *ijkmp_get_weak_thiz(IjkMediaPlayer *mp)
+{
+    return mp->weak_thiz;
+}
+
 void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
 {
     void *prev_weak_thiz = mp->weak_thiz;
