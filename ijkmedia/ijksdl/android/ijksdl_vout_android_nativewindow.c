@@ -31,10 +31,6 @@
 #include "../ffmpeg/ijksdl_vout_overlay_ffmpeg.h"
 #include "android_nativewindow.h"
 
-typedef struct SDL_VoutSurface_Opaque {
-    SDL_Vout *vout;
-} SDL_VoutSurface_Opaque;
-
 typedef struct SDL_Vout_Opaque {
     ANativeWindow *native_window;
 } SDL_Vout_Opaque;
