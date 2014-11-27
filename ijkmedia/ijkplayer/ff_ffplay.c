@@ -45,7 +45,7 @@
 // #define FFP_SHOW_VDPS
 // #define FFP_SHOW_AUDIO_DELAY
 // #define FFP_SHOW_DEMUX_CACHE
-#define FFP_SHOW_BUF_POS
+// #define FFP_SHOW_BUF_POS
 // #define FFP_SHOW_PKT_RECYCLE
 
 // #define FFP_NOTIFY_BUF_TIME
