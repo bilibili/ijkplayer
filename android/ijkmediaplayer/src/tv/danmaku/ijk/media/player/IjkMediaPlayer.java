@@ -542,7 +542,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             case MEDIA_SET_VIDEO_SIZE:
                 player.mVideoWidth = msg.arg1;
                 player.mVideoHeight = msg.arg2;
-                player.notifyOnVideoSizeChanged(msg.arg1, msg.arg2,
+                player.notifyOnVideoSizeChanged(player.mVideoWidth, player.mVideoHeight,
                         player.mVideoSarNum, player.mVideoSarDen);
                 return;
 
@@ -571,7 +571,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             case MEDIA_SET_VIDEO_SAR:
                 player.mVideoSarNum = msg.arg1;
                 player.mVideoSarDen = msg.arg2;
-                player.notifyOnVideoSizeChanged(msg.arg1, msg.arg2,
+                player.notifyOnVideoSizeChanged(player.mVideoWidth, player.mVideoHeight,
                         player.mVideoSarNum, player.mVideoSarDen);
                 break;
 
