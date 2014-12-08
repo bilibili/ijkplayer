@@ -377,6 +377,7 @@ void sdl_audiotrack_free(JNIEnv *env, SDL_AndroidAudioTrack* atrack)
     atrack->buffer_capacity = 0;
 
     if (atrack->thiz) {
+        sdl_audiotrack_release(env, atrack);
         (*env)->DeleteGlobalRef(env, atrack->thiz);
         atrack->thiz = NULL;
     }
