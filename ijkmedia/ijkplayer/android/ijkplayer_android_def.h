@@ -130,4 +130,12 @@ enum media_info_type {
     MEDIA_INFO_TIMED_TEXT_ERROR = 900,
 };
 
+typedef struct ijkmp_mediacodecinfo_context
+{
+    char mime_type[128];    //< in
+    int  profile;           //< in
+    int  level;             //< in
+    char codec_name[128];   //< out
+} ijkmp_mediacodecinfo_context;
+
 #endif

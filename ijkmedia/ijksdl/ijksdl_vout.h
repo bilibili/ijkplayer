@@ -25,6 +25,7 @@
 #define IJKSDL__IJKSDL_VOUT_H
 
 #include "ijksdl_stdinc.h"
+#include "ijksdl_class.h"
 #include "ijksdl_mutex.h"
 #include "ijksdl_video.h"
 
@@ -38,10 +39,12 @@ typedef struct SDL_VoutOverlay {
     Uint16 *pitches; /**< in bytes, Read-only */
     Uint8 **pixels; /**< Read-write */
 
-    void *opaque;
-    void (*free_l)(SDL_VoutOverlay *overlay);
-    int (*lock)(SDL_VoutOverlay *overlay);
-    int (*unlock)(SDL_VoutOverlay *overlay);
+    SDL_Class               *opaque_class;
+    SDL_VoutOverlay_Opaque  *opaque;
+    void                    (*free_l)(SDL_VoutOverlay *overlay);
+    int                     (*lock)(SDL_VoutOverlay *overlay);
+    int                     (*unlock)(SDL_VoutOverlay *overlay);
+    void                    (*unref)(SDL_VoutOverlay *overlay);
 } SDL_VoutOverlay;
 
 typedef struct SDL_Vout_Opaque SDL_Vout_Opaque;
@@ -49,6 +52,7 @@ typedef struct SDL_Vout SDL_Vout;
 typedef struct SDL_Vout {
     SDL_mutex *mutex;
 
+    SDL_Class       *opaque_class;
     SDL_Vout_Opaque *opaque;
     SDL_VoutOverlay *(*create_overlay)(int width, int height, Uint32 format, SDL_Vout *vout);
     void (*free_l)(SDL_Vout *vout);
@@ -63,5 +67,6 @@ SDL_VoutOverlay *SDL_Vout_CreateOverlay(int width, int height, Uint32 format, SD
 int SDL_VoutLockYUVOverlay(SDL_VoutOverlay *overlay);
 int SDL_VoutUnlockYUVOverlay(SDL_VoutOverlay *overlay);
 void SDL_VoutFreeYUVOverlay(SDL_VoutOverlay *overlay);
+void SDL_VoutUnrefYUVOverlay(SDL_VoutOverlay *overlay);
 
 #endif

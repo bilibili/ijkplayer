@@ -42,11 +42,17 @@ LOCAL_SRC_FILES += ffmpeg/ijksdl_vout_overlay_ffmpeg.c
 LOCAL_SRC_FILES += ffmpeg/abi_all/image_convert.c
 
 LOCAL_SRC_FILES += android/android_audiotrack.c
+LOCAL_SRC_FILES += android/android_bytebuffer.c
 LOCAL_SRC_FILES += android/android_nativewindow.c
 LOCAL_SRC_FILES += android/ijksdl_android_jni.c
 LOCAL_SRC_FILES += android/ijksdl_aout_android_audiotrack.c
+LOCAL_SRC_FILES += android/ijksdl_codec_android_mediacodec_java.c
+LOCAL_SRC_FILES += android/ijksdl_codec_android_mediacodec.c
+LOCAL_SRC_FILES += android/ijksdl_codec_android_mediaformat_java.c
+LOCAL_SRC_FILES += android/ijksdl_codec_android_mediaformat.c
 LOCAL_SRC_FILES += android/ijksdl_vout_android_nativewindow.c
 LOCAL_SRC_FILES += android/ijksdl_vout_android_surface.c
+LOCAL_SRC_FILES += android/ijksdl_vout_overlay_android_mediacodec.c
 
 LOCAL_SHARED_LIBRARIES := ijkffmpeg ijkutil
 LOCAL_STATIC_LIBRARIES := cpufeatures yuv_static

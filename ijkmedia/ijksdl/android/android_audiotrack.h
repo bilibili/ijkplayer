@@ -29,7 +29,7 @@
 #include "../ijksdl_audio.h"
 #include "../ijksdl_aout.h"
 
-typedef struct SDL_AndroidAudioTrack_Spec {
+typedef struct SDL_Android_AudioTrack_Spec {
     enum StreamType {
         STREAM_VOICE_CALL = 0,
         STREAM_SYSTEM = 1,
@@ -77,26 +77,26 @@ typedef struct SDL_AndroidAudioTrack_Spec {
 
     // extra field
     int sdl_samples;
-} SDL_AndroidAudioTrack_Spec;
+} SDL_Android_AudioTrack_Spec;
 
-typedef struct SDL_AndroidAudioTrack SDL_AndroidAudioTrack;
+typedef struct SDL_Android_AudioTrack SDL_Android_AudioTrack;
 
-int sdl_audiotrack_global_init(JNIEnv *env);
+int SDL_Android_AudioTrack_global_init(JNIEnv *env);
 
-SDL_AndroidAudioTrack *sdl_audiotrack_new_from_spec(JNIEnv *env, SDL_AndroidAudioTrack_Spec *spec);
-SDL_AndroidAudioTrack *sdl_audiotrack_new_from_sdl_spec(JNIEnv *env, SDL_AudioSpec *sdl_spec);
-void sdl_audiotrack_free(JNIEnv *env, SDL_AndroidAudioTrack* atrack);
+SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_spec(JNIEnv *env, SDL_Android_AudioTrack_Spec *spec);
+SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_sdl_spec(JNIEnv *env, SDL_AudioSpec *sdl_spec);
+void SDL_Android_AudioTrack_free(JNIEnv *env, SDL_Android_AudioTrack* atrack);
 
-void sdl_audiotrack_get_target_spec(SDL_AndroidAudioTrack* atrack, SDL_AudioSpec *spec);
-int sdl_audiotrack_get_min_buffer_size(SDL_AndroidAudioTrack* atrack);
+void SDL_Android_AudioTrack_get_target_spec(SDL_Android_AudioTrack* atrack, SDL_AudioSpec *spec);
+int SDL_Android_AudioTrack_get_min_buffer_size(SDL_Android_AudioTrack* atrack);
 
-void sdl_audiotrack_play(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
-void sdl_audiotrack_pause(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
-void sdl_audiotrack_flush(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
-void sdl_audiotrack_set_volume(JNIEnv *env, SDL_AndroidAudioTrack *atrack, float left_volume, float right_volume);
-void sdl_audiotrack_stop(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
-void sdl_audiotrack_release(JNIEnv *env, SDL_AndroidAudioTrack *atrack);
-int sdl_audiotrack_reserve_buffer(JNIEnv *env, SDL_AndroidAudioTrack *atrack, int len);
-int sdl_audiotrack_write_byte(JNIEnv *env, SDL_AndroidAudioTrack *atrack, uint8_t *data, int len);
+void SDL_Android_AudioTrack_play(JNIEnv *env, SDL_Android_AudioTrack *atrack);
+void SDL_Android_AudioTrack_pause(JNIEnv *env, SDL_Android_AudioTrack *atrack);
+void SDL_Android_AudioTrack_flush(JNIEnv *env, SDL_Android_AudioTrack *atrack);
+void SDL_Android_AudioTrack_set_volume(JNIEnv *env, SDL_Android_AudioTrack *atrack, float left_volume, float right_volume);
+void SDL_Android_AudioTrack_stop(JNIEnv *env, SDL_Android_AudioTrack *atrack);
+void SDL_Android_AudioTrack_release(JNIEnv *env, SDL_Android_AudioTrack *atrack);
+int SDL_Android_AudioTrack_reserve_buffer(JNIEnv *env, SDL_Android_AudioTrack *atrack, int len);
+int SDL_Android_AudioTrack_write_byte(JNIEnv *env, SDL_Android_AudioTrack *atrack, uint8_t *data, int len);
 
 #endif

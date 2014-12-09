@@ -26,18 +26,25 @@
 #include <assert.h>
 #include <android/native_window.h>
 #include "ijkutil/ijkutil.h"
+#include "ijksdl_vout_overlay_android_mediacodec.h"
+#include "android_nativewindow.h"
 #include "../ijksdl_vout.h"
 #include "../ijksdl_vout_internal.h"
 #include "../ffmpeg/ijksdl_vout_overlay_ffmpeg.h"
-#include "android_nativewindow.h"
 
 typedef struct SDL_Vout_Opaque {
-    ANativeWindow *native_window;
+    ANativeWindow   *native_window;
+    SDL_AMediaCodec *weak_acodec;
 } SDL_Vout_Opaque;
 
 static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, Uint32 format, SDL_Vout *vout)
 {
-    return SDL_VoutFFmpeg_CreateOverlay(width, height, format, vout);
+    switch (format) {
+    case SDL_FCC__AMC:
+        return SDL_VoutAMediaCodec_CreateOverlay(width, height, format, vout);
+    default:
+        return SDL_VoutFFmpeg_CreateOverlay(width, height, format, vout);
+    }
 }
 
 static SDL_VoutOverlay *vout_create_overlay(int width, int height, Uint32 format, SDL_Vout *vout)
@@ -84,7 +91,12 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         return -1;
     }
 
-    return sdl_native_window_display_l(native_window, overlay);
+    switch(overlay->format) {
+    case SDL_FCC__AMC:
+        return SDL_VoutOverlayAMediaCodec_releaseFrame(overlay, NULL, true);
+    default:
+        return SDL_Android_NativeWindow_display_l(native_window, overlay);
+    }
 }
 
 static int voud_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
@@ -95,6 +107,10 @@ static int voud_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     return retval;
 }
 
+static SDL_Class g_nativewindow_class = {
+    .name = "ANativeWindow_Vout",
+};
+
 SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
 {
     SDL_Vout *vout = SDL_Vout_CreateInternal(sizeof(SDL_Vout_Opaque));
@@ -104,8 +120,9 @@ SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
     SDL_Vout_Opaque *opaque = vout->opaque;
     opaque->native_window = NULL;
 
-    vout->create_overlay = vout_create_overlay;
-    vout->free_l = vout_free_l;
+    vout->opaque_class    = &g_nativewindow_class;
+    vout->create_overlay  = vout_create_overlay;
+    vout->free_l          = vout_free_l;
     vout->display_overlay = voud_display_overlay;
 
     return vout;
@@ -131,5 +148,13 @@ void SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_windo
 {
     SDL_LockMutex(vout->mutex);
     SDL_VoutAndroid_SetNativeWindow_l(vout, native_window);
+    SDL_UnlockMutex(vout->mutex);
+}
+
+void SDL_VoutAndroid_setAMediaCodec(SDL_Vout *vout, SDL_AMediaCodec *acodec)
+{
+    SDL_LockMutex(vout->mutex);
+    SDL_Vout_Opaque *opaque = vout->opaque;
+    opaque->weak_acodec = acodec;
     SDL_UnlockMutex(vout->mutex);
 }
