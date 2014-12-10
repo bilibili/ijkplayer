@@ -20,6 +20,11 @@
 		E6716E4E1807EA5000B3FBC1 /* IJKFFMrl.m in Sources */ = {isa = PBXBuildFile; fileRef = E6716E4D1807EA5000B3FBC1 /* IJKFFMrl.m */; };
 		E672D6F318D3445100C51FF9 /* IJKMediaModule.m in Sources */ = {isa = PBXBuildFile; fileRef = E672D6F218D3445100C51FF9 /* IJKMediaModule.m */; };
 		E672D6F418D345C100C51FF9 /* IJKMediaModule.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E672D6F118D3445100C51FF9 /* IJKMediaModule.h */; };
+		E67B91AF1A3801DB00717EA9 /* ff_ffpipeline.c in Sources */ = {isa = PBXBuildFile; fileRef = E67B91AB1A3801DB00717EA9 /* ff_ffpipeline.c */; };
+		E67B91B01A3801DB00717EA9 /* ff_ffpipenode.c in Sources */ = {isa = PBXBuildFile; fileRef = E67B91AD1A3801DB00717EA9 /* ff_ffpipenode.c */; };
+		E67B91B81A3801E600717EA9 /* ffpipeline_ffplay.c in Sources */ = {isa = PBXBuildFile; fileRef = E67B91B21A3801E600717EA9 /* ffpipeline_ffplay.c */; };
+		E67B91B91A3801E600717EA9 /* ffpipenode_ffplay_vdec.c in Sources */ = {isa = PBXBuildFile; fileRef = E67B91B41A3801E600717EA9 /* ffpipenode_ffplay_vdec.c */; };
+		E67B91BA1A3801E600717EA9 /* ffpipenode_ffplay_vout.c in Sources */ = {isa = PBXBuildFile; fileRef = E67B91B61A3801E600717EA9 /* ffpipenode_ffplay_vout.c */; };
 		E67C4E0519D15B3200415CEE /* IJKAVPlayerLayerView.m in Sources */ = {isa = PBXBuildFile; fileRef = E67C4E0419D15B3200415CEE /* IJKAVPlayerLayerView.m */; };
 		E67C4E0819D15EEA00415CEE /* IJKAVMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E67C4E0719D15EEA00415CEE /* IJKAVMoviePlayerController.m */; };
 		E67C4E0A19D2BFF100415CEE /* IJKAVMoviePlayerController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E67C4E0619D15EEA00415CEE /* IJKAVMoviePlayerController.h */; };
@@ -102,6 +107,16 @@
 		E6716E4D1807EA5000B3FBC1 /* IJKFFMrl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFMrl.m; sourceTree = "<group>"; };
 		E672D6F118D3445100C51FF9 /* IJKMediaModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaModule.h; path = IJKMediaPlayer/IJKMediaModule.h; sourceTree = "<group>"; };
 		E672D6F218D3445100C51FF9 /* IJKMediaModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMediaModule.m; path = IJKMediaPlayer/IJKMediaModule.m; sourceTree = "<group>"; };
+		E67B91AB1A3801DB00717EA9 /* ff_ffpipeline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_ffpipeline.c; sourceTree = "<group>"; };
+		E67B91AC1A3801DB00717EA9 /* ff_ffpipeline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffpipeline.h; sourceTree = "<group>"; };
+		E67B91AD1A3801DB00717EA9 /* ff_ffpipenode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_ffpipenode.c; sourceTree = "<group>"; };
+		E67B91AE1A3801DB00717EA9 /* ff_ffpipenode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffpipenode.h; sourceTree = "<group>"; };
+		E67B91B21A3801E600717EA9 /* ffpipeline_ffplay.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ffpipeline_ffplay.c; sourceTree = "<group>"; };
+		E67B91B31A3801E600717EA9 /* ffpipeline_ffplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffpipeline_ffplay.h; sourceTree = "<group>"; };
+		E67B91B41A3801E600717EA9 /* ffpipenode_ffplay_vdec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ffpipenode_ffplay_vdec.c; sourceTree = "<group>"; };
+		E67B91B51A3801E600717EA9 /* ffpipenode_ffplay_vdec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffpipenode_ffplay_vdec.h; sourceTree = "<group>"; };
+		E67B91B61A3801E600717EA9 /* ffpipenode_ffplay_vout.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ffpipenode_ffplay_vout.c; sourceTree = "<group>"; };
+		E67B91B71A3801E600717EA9 /* ffpipenode_ffplay_vout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffpipenode_ffplay_vout.h; sourceTree = "<group>"; };
 		E67C4E0319D15B3200415CEE /* IJKAVPlayerLayerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKAVPlayerLayerView.h; path = IJKMediaPlayer/IJKAVPlayerLayerView.h; sourceTree = "<group>"; };
 		E67C4E0419D15B3200415CEE /* IJKAVPlayerLayerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKAVPlayerLayerView.m; path = IJKMediaPlayer/IJKAVPlayerLayerView.m; sourceTree = "<group>"; };
 		E67C4E0619D15EEA00415CEE /* IJKAVMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKAVMoviePlayerController.h; path = IJKMediaPlayer/IJKAVMoviePlayerController.h; sourceTree = "<group>"; };
@@ -306,6 +321,19 @@
 			);
 			name = ios;
 			path = ../../ios/IJKMediaPlayer/IJKMediaPlayer;
+			sourceTree = "<group>";
+		};
+		E67B91B11A3801E600717EA9 /* pipeline */ = {
+			isa = PBXGroup;
+			children = (
+				E67B91B21A3801E600717EA9 /* ffpipeline_ffplay.c */,
+				E67B91B31A3801E600717EA9 /* ffpipeline_ffplay.h */,
+				E67B91B41A3801E600717EA9 /* ffpipenode_ffplay_vdec.c */,
+				E67B91B51A3801E600717EA9 /* ffpipenode_ffplay_vdec.h */,
+				E67B91B61A3801E600717EA9 /* ffpipenode_ffplay_vout.c */,
+				E67B91B71A3801E600717EA9 /* ffpipenode_ffplay_vout.h */,
+			);
+			path = pipeline;
 			sourceTree = "<group>";
 		};
 		E67C4E0219D15B0600415CEE /* IJKAVMoviePlayerController */ = {
@@ -521,20 +549,25 @@
 		E6903FCE17EAFC6100CFD954 /* ijkplayer */ = {
 			isa = PBXGroup;
 			children = (
-				E66F8DF817EFEC1300354D80 /* ios */,
 				E6903FD517EAFC6100CFD954 /* ff_cmdutils.c */,
 				E6903FD617EAFC6100CFD954 /* ff_cmdutils.h */,
 				E6903FD717EAFC6100CFD954 /* ff_fferror.h */,
 				E6903FD817EAFC6100CFD954 /* ff_ffinc.h */,
-				E6903FD917EAFC6100CFD954 /* ff_ffmsg.h */,
 				E6903FDA17EAFC6100CFD954 /* ff_ffmsg_queue.h */,
-				E6903FDB17EAFC6100CFD954 /* ff_ffplay.c */,
-				E6903FDC17EAFC6100CFD954 /* ff_ffplay.h */,
+				E6903FD917EAFC6100CFD954 /* ff_ffmsg.h */,
+				E67B91AB1A3801DB00717EA9 /* ff_ffpipeline.c */,
+				E67B91AC1A3801DB00717EA9 /* ff_ffpipeline.h */,
+				E67B91AD1A3801DB00717EA9 /* ff_ffpipenode.c */,
+				E67B91AE1A3801DB00717EA9 /* ff_ffpipenode.h */,
 				E6903FDD17EAFC6100CFD954 /* ff_ffplay_config.h */,
 				E6903FDE17EAFC6100CFD954 /* ff_ffplay_def.h */,
+				E6903FDB17EAFC6100CFD954 /* ff_ffplay.c */,
+				E6903FDC17EAFC6100CFD954 /* ff_ffplay.h */,
+				E66F8DEE17EFEA9400354D80 /* ijkplayer_internal.h */,
 				E66F8DEF17EFEA9400354D80 /* ijkplayer.c */,
 				E66F8DF017EFEA9400354D80 /* ijkplayer.h */,
-				E66F8DEE17EFEA9400354D80 /* ijkplayer_internal.h */,
+				E66F8DF817EFEC1300354D80 /* ios */,
+				E67B91B11A3801E600717EA9 /* pipeline */,
 			);
 			path = ijkplayer;
 			sourceTree = "<group>";
@@ -723,6 +756,9 @@
 				E690403117EAFC6100CFD954 /* ijksdl_stdinc.c in Sources */,
 				E6EE92BC1878230C009EAB56 /* IJKSDLGLRenderI420.m in Sources */,
 				E690403217EAFC6100CFD954 /* ijksdl_thread.c in Sources */,
+				E67B91AF1A3801DB00717EA9 /* ff_ffpipeline.c in Sources */,
+				E67B91B01A3801DB00717EA9 /* ff_ffpipenode.c in Sources */,
+				E67B91B81A3801E600717EA9 /* ffpipeline_ffplay.c in Sources */,
 				E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */,
 				E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */,
 				E6EE92B91878230C009EAB56 /* ijksdl_thread_ios.m in Sources */,
@@ -730,6 +766,7 @@
 				E67C4E0819D15EEA00415CEE /* IJKAVMoviePlayerController.m in Sources */,
 				E6EE92B81878230C009EAB56 /* ijksdl_aout_ios_audiounit.m in Sources */,
 				E6EE92C21878236A009EAB56 /* IJKSDLAudioQueueController.m in Sources */,
+				E67B91BA1A3801E600717EA9 /* ffpipenode_ffplay_vout.c in Sources */,
 				E66F8DE717EFD9C300354D80 /* IJKFFMoviePlayerController.m in Sources */,
 				E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */,
 				E6EE92BB1878230C009EAB56 /* IJKSDLAudioUnitController.m in Sources */,
@@ -746,6 +783,7 @@
 				E6EE92BA1878230C009EAB56 /* ijksdl_vout_ios_gles2.m in Sources */,
 				E6716E4B1807E5FC00B3FBC1 /* IJKMediaUtils.m in Sources */,
 				E6716E4E1807EA5000B3FBC1 /* IJKFFMrl.m in Sources */,
+				E67B91B91A3801E600717EA9 /* ffpipenode_ffplay_vdec.c in Sources */,
 				E62139BE180FA89B00553533 /* IJKFFOptions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
