@@ -22,6 +22,7 @@
  */
 
 #include "ff_ffpipenode.h"
+#include <stdlib.h>
 
 IJKFF_Pipenode *ffpipenode_alloc(size_t opaque_size)
 {

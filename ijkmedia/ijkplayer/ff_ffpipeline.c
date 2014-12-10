@@ -20,7 +20,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
- #include "ff_ffpipeline.h"
+#include "ff_ffpipeline.h"
+#include <stdlib.h>
+#include <string.h>
 
 IJKFF_Pipeline *ffpipeline_alloc(SDL_Class *opaque_class, size_t opaque_size)
 {
