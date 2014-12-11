@@ -6,12 +6,12 @@ ijkplayer
 
 ### My Build Enviroment
 - Common
- - Mac OS X 10.9.4
+ - Mac OS X 10.9.5
 - Android
- - [ADT v22.6.2-1085508](http://developer.android.com/sdk/index.html)
- - [NDK r9d](http://developer.android.com/tools/sdk/ndk/index.html)
+ - [ADT v23.0.4-1468518](http://developer.android.com/sdk/index.html)
+ - [NDK r10c](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
- - Xcode 6.0.1
+ - Xcode 6.1.0
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
  - brew install git
@@ -24,21 +24,20 @@ ijkplayer
  - remove rarely used ffmpeg components to reduce binary size [config/module-lite.sh](config/module-lite.sh)
  - workaround for some buggy online video.
 - Android
- - platform: API 9~19
+ - platform: API 9~21
  - cpu: ARMv7a, x86, ARMv5 (not tested on real devices)
  - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - video output: NativeWindow
  - audio output: AudioTrack
+ - hw decoder: MediaCodec
 - iOS
- - platform: iOS 5.1.1~8.0.x
+ - platform: iOS 5.1.1~8.1.x
  - cpu: ARMv7, ARMv7s, ARM64, i386, x86_64
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
  - video-output: OpenGL ES 2.0 (I420/YV12 shaders)
  - audio-output: AudioQueue, AudioUnit
 
 ### TODO
-- Android
- - hw-accelerator: HW decode
 - iOS
  - api: AVFoundation-like
  - hw-accelerator: HW decode
@@ -73,7 +72,7 @@ sudo dpkg-reconfigure dash
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-stable
 cd ijkplayer-android-stable
-git checkout -B latest n0.2.0
+git checkout -B latest n0.2.1
 
 ./init-android.sh
 
@@ -114,7 +113,7 @@ cd android
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-stable
 cd ijkplayer-ios-stable
-git checkout -B latest n0.2.0
+git checkout -B latest n0.2.1
 
 ./init-ios.sh
 

@@ -1,6 +1,6 @@
-tag <next>:
+tag n0.2.1:
 --------------------------------
-android: add MediaCodec support (API 16+)
+android: support MediaCodec (API 16+)
 
 tag n0.2.0
 --------------------------------
