@@ -46,6 +46,7 @@ ijkplayer
 - obsolete platforms (Android: API-8 and below; iOS: below 5.1.1)
 - obsolete cpu: ARMv5, ARMv6, MIPS (I don't even have these types of devices…)
 - native subtitle render
+- cygwin compatibility
 
 ### Before Build
 - If you prefer more codec/format
