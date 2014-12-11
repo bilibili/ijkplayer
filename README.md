@@ -67,30 +67,12 @@ sudo dpkg-reconfigure dash
 - If you'd like to share your config, pull request is welcome.
 
 ### Build Android
-- Latest tag
-
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-stable
 cd ijkplayer-android-stable
 git checkout -B latest n0.2.1
-
-./init-android.sh
-
-cd android
-./compile-ffmpeg.sh
-./compile-ijk.sh
-
-# import android/ijkmediaplayer for MediaPlayer-like interface (recommended)
-# import android/ijkmediawidget for VideoView-like interface (based on Vitamio UI)
-# import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
-```
-
-- Unstable
-
-```
-git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-master
-cd ijkplayer-android-master
-git checkout master
+# or for master
+# git checkout master
 
 ./init-android.sh
 
@@ -107,13 +89,14 @@ cd android
 # import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
 ```
 
-### Build iOS
-- Latest tag
 
+### Build iOS
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-stable
 cd ijkplayer-ios-stable
 git checkout -B latest n0.2.1
+# or for master
+# git checkout master
 
 ./init-ios.sh
 
@@ -124,21 +107,6 @@ cd ios
 # open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
 ```
 
-- Unstable
-
-```
-git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-master
-cd ijkplayer-ios-master
-git checkout master
-
-./init-ios.sh
-
-cd ios
-./compile-ffmpeg.sh all
-
-# import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
-# open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
-```
 
 ### Links
 - [FFmpeg_b4a](http://www.basic4ppc.com/android/forum/threads/ffmpeg_b4a-a-ffmpeg-library-for-b4a-decoding-streaming.44476/)
