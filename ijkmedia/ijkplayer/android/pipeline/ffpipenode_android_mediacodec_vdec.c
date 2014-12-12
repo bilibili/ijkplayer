@@ -89,7 +89,7 @@ typedef struct IJKFF_Pipenode_Opaque {
     bool                      quirk_reconfigure_with_new_codec;
 } IJKFF_Pipenode_Opaque;
 
-static SDL_AMediaCodec *create_codec(JNIEnv *env, IJKFF_Pipenode *node)
+static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
 {
     IJKFF_Pipenode_Opaque        *opaque   = node->opaque;
     IJKFF_Pipeline               *pipeline = opaque->pipeline;
@@ -141,7 +141,7 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
             if (SDL_AMediaCodec_isStarted(opaque->acodec))
                 SDL_AMediaCodec_stop(opaque->acodec);
         } else {
-            opaque->acodec = create_codec(env, node);
+            opaque->acodec = create_codec_l(env, node);
             if (!opaque->acodec) {
                 ALOGE("%s:open_video_decoder: create_codec failed\n", __func__);
                 ret = -1;
@@ -845,7 +845,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         goto fail;
     }
 
-    opaque->acodec = create_codec(env, node);
+    opaque->acodec = create_codec_l(env, node);
     if (!opaque->acodec) {
         ALOGE("%s:open_video_decoder: SDL_AMediaCodecJava_createDecoderByType(%s) failed\n", __func__, opaque->mcc.mime_type);
         goto fail;
