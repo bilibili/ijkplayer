@@ -595,7 +595,6 @@ fail:
 static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count)
 {
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
-    FFPlayer              *ffp      = opaque->ffp;
     int                    ret      = 0;
     SDL_AMediaCodecBufferInfo bufferInfo;
     ssize_t                   output_buffer_index = 0;
