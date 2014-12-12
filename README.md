@@ -51,11 +51,13 @@ ijkplayer
 ### Before Build
 - If you prefer more codec/format
 ```
+rm config/module.sh
 ln -fs config/module-default.sh config/module.sh
 ```
 
 - If you prefer less codec/format for smaller binary size (by default)
 ```
+rm config/module.sh
 ln -fs config/module-lite.sh config/module.sh
 ```
 
