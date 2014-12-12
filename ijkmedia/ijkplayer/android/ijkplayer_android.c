@@ -94,20 +94,20 @@ void ijkmp_android_set_volume(JNIEnv *env, IjkMediaPlayer *mp, float left, float
     MPTRACE("ijkmp_android_set_volume(%f, %f)=void", left, right);
 }
 
-void ijkmp_android_set_mediacodec_callback(IjkMediaPlayer *mp, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque)
+void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque)
 {
     if (!mp)
         return;
 
-    MPTRACE("ijkmp_android_set_mediacodec_callback()");
+    MPTRACE("ijkmp_android_set_mediacodec_select_callback()");
     pthread_mutex_lock(&mp->mutex);
 
     if (mp && mp->ffplayer && mp->ffplayer->pipeline) {
-        ffpipeline_set_mediacodec_callback(mp->ffplayer->pipeline, callback, opaque);
+        ffpipeline_set_mediacodec_select_callback(mp->ffplayer->pipeline, callback, opaque);
     }
 
     pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_android_set_mediacodec_callback()=void");
+    MPTRACE("ijkmp_android_set_mediacodec_select_callback()=void");
 }
 
 void ijkmp_android_set_mediacodec_enabled(IjkMediaPlayer *mp, bool enabled)

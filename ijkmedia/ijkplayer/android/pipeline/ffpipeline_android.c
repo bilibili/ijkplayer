@@ -38,8 +38,8 @@ typedef struct IJKFF_Pipeline_Opaque {
     jobject        jsurface;
     volatile bool  is_surface_need_reconfigure;
 
-    bool         (*mediacodec_callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc);
-    void          *mediacodec_callback_opaque;
+    bool         (*mediacodec_select_callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc);
+    void          *mediacodec_select_callback_opaque;
     bool           mediacodec_enabled;
 
     SDL_Vout      *weak_vout;
@@ -195,14 +195,14 @@ void ffpipeline_set_surface_need_reconfigure(IJKFF_Pipeline* pipeline, bool need
     pipeline->opaque->is_surface_need_reconfigure = need_reconfigure;
 }
 
-void ffpipeline_set_mediacodec_callback(IJKFF_Pipeline* pipeline, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque)
+void ffpipeline_set_mediacodec_select_callback(IJKFF_Pipeline* pipeline, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque)
 {
     ALOGD("%s\n", __func__);
     if (!check_ffpipeline(pipeline, __func__))
         return;
 
-    pipeline->opaque->mediacodec_callback        = callback;
-    pipeline->opaque->mediacodec_callback_opaque = opaque;
+    pipeline->opaque->mediacodec_select_callback        = callback;
+    pipeline->opaque->mediacodec_select_callback_opaque = opaque;
 }
 
 void ffpipeline_set_mediacodec_enabled(IJKFF_Pipeline* pipeline, bool enabled)
@@ -220,8 +220,8 @@ bool ffpipeline_select_mediacodec(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo
     if (!check_ffpipeline(pipeline, __func__))
         return false;
 
-    if (!mcc || !pipeline->opaque->mediacodec_callback)
+    if (!mcc || !pipeline->opaque->mediacodec_select_callback)
         return false;
 
-    return pipeline->opaque->mediacodec_callback(pipeline->opaque->mediacodec_callback_opaque, mcc);
+    return pipeline->opaque->mediacodec_select_callback(pipeline->opaque->mediacodec_select_callback_opaque, mcc);
 }

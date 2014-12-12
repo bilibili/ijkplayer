@@ -49,17 +49,17 @@ typedef struct player_fields_t {
 
     jfieldID surface_texture;
 
-    jmethodID postEventFromNative;
-    jmethodID onSelectCodec;
-    jmethodID onControlResolveSegmentCount;
-    jmethodID onControlResolveSegmentUrl;
-    jmethodID onControlResolveSegmentOfflineMrl;
-    jmethodID onControlResolveSegmentDuration;
+    jmethodID jmid_postEventFromNative;
+    jmethodID jmid_onSelectCodec;
+    jmethodID jmid_onControlResolveSegmentCount;
+    jmethodID jmid_onControlResolveSegmentUrl;
+    jmethodID jmid_onControlResolveSegmentOfflineMrl;
+    jmethodID jmid_onControlResolveSegmentDuration;
 } player_fields_t;
 static player_fields_t g_clazz;
 
 static int format_control_message(void *opaque, int type, void *data, size_t data_size);
-static bool mediacodec_callback(void *opaque, ijkmp_mediacodecinfo_context *mcc);
+static bool mediacodec_select_callback(void *opaque, ijkmp_mediacodecinfo_context *mcc);
 
 static IjkMediaPlayer *jni_get_media_player(JNIEnv* env, jobject thiz)
 {
@@ -419,7 +419,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
     jni_set_media_player(env, thiz, mp);
     ijkmp_set_weak_thiz(mp, (*env)->NewGlobalRef(env, weak_this));
     ijkmp_set_format_callback(mp, format_control_message, (*env)->NewGlobalRef(env, weak_this));
-    ijkmp_android_set_mediacodec_callback(mp, mediacodec_callback, (*env)->NewGlobalRef(env, weak_this));
+    ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, (*env)->NewGlobalRef(env, weak_this));
 
     LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
@@ -440,7 +440,7 @@ _onNativeControlResolveSegmentConcat(JNIEnv *env, jobject weak_thiz, int type, v
 
     IJKFormatSegmentConcatContext *fsc_concat = (IJKFormatSegmentConcatContext *)data;
 
-    jint count = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.onControlResolveSegmentCount, weak_thiz);
+    jint count = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentCount, weak_thiz);
     if (count <= 0)
         return -1;
 
@@ -456,9 +456,9 @@ _onNativeControlResolveSegment(JNIEnv *env, jobject weak_thiz, int type, void *d
 
     IJKFormatSegmentContext *fsc = (IJKFormatSegmentContext *)data;
 
-    jint duration = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.onControlResolveSegmentDuration, weak_thiz, fsc->position);
+    jint duration = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentDuration, weak_thiz, fsc->position);
 
-    jstring url = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.onControlResolveSegmentUrl, weak_thiz, fsc->position);
+    jstring url = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentUrl, weak_thiz, fsc->position);
     if (url == NULL)
         return -1;
 
@@ -485,9 +485,9 @@ _onNativeControlResolveSegmentOffline(JNIEnv *env, jobject weak_thiz, int type, 
         return -1;
 
     IJKFormatSegmentContext *fsc = (IJKFormatSegmentContext *)data;
-    jint duration = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.onControlResolveSegmentDuration, weak_thiz, fsc->position);
+    jint duration = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentDuration, weak_thiz, fsc->position);
 
-    jstring mrl = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.onControlResolveSegmentOfflineMrl, weak_thiz, fsc->position);
+    jstring mrl = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentOfflineMrl, weak_thiz, fsc->position);
     if (mrl == NULL)
         return -1;
 
@@ -533,7 +533,7 @@ format_control_message(void *opaque, int type, void *data, size_t data_size)
     return -1;
 }
 
-static bool mediacodec_callback(void *opaque, ijkmp_mediacodecinfo_context *mcc)
+static bool mediacodec_select_callback(void *opaque, ijkmp_mediacodecinfo_context *mcc)
 {
     JNIEnv     *env         = NULL;
     jobject     jmime       = NULL;
@@ -552,7 +552,7 @@ static bool mediacodec_callback(void *opaque, ijkmp_mediacodecinfo_context *mcc)
         goto fail;
     }
 
-    jcodec_name = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.onSelectCodec, weak_this, jmime, mcc->profile, mcc->level);
+    jcodec_name = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.jmid_onSelectCodec, weak_this, jmime, mcc->profile, mcc->level);
     if (SDL_JNI_CatchException(env) || !jcodec_name) {
         goto fail;
     }
@@ -579,7 +579,7 @@ fail:
 inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2)
 {
     // MPTRACE("post_event(%p, %p, %d, %d, %d)", (void*)env, (void*) weak_this, what, arg1, arg2);
-    (*env)->CallStaticVoidMethod(env, g_clazz.clazz, g_clazz.postEventFromNative, weak_this, what, arg1, arg2, NULL);
+    (*env)->CallStaticVoidMethod(env, g_clazz.clazz, g_clazz.jmid_postEventFromNative, weak_this, what, arg1, arg2, NULL);
     // MPTRACE("post_event()=void");
 }
 
@@ -724,32 +724,29 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     IJK_CHECK_RET(clazz, -1, "missing %s", JNI_CLASS_IJKPLAYER);
 
     // FindClass returns LocalReference
-    g_clazz.clazz = (*env)->NewGlobalRef(env, clazz);
-    IJK_CHECK_RET(g_clazz.clazz, -1, "%s NewGlobalRef failed", JNI_CLASS_IJKPLAYER);
-    (*env)->DeleteLocalRef(env, clazz);
-
+    IJK_FIND_JAVA_CLASS(env, g_clazz.clazz, JNI_CLASS_IJKPLAYER);
     (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
 
     g_clazz.mNativeMediaPlayer = (*env)->GetFieldID(env, g_clazz.clazz, "mNativeMediaPlayer", "J");
     IJK_CHECK_RET(g_clazz.mNativeMediaPlayer, -1, "missing mNativeMediaPlayer");
 
-    g_clazz.postEventFromNative = (*env)->GetStaticMethodID(env, g_clazz.clazz, "postEventFromNative", "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    IJK_CHECK_RET(g_clazz.postEventFromNative, -1, "missing postEventFromNative");
+    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_postEventFromNative, g_clazz.clazz,
+        "postEventFromNative",  "(Ljava/lang/Object;IIILjava/lang/Object;)V");
 
-    g_clazz.onSelectCodec = (*env)->GetStaticMethodID(env, g_clazz.clazz, "onSelectCodec", "(Ljava/lang/Object;Ljava/lang/String;II)Ljava/lang/String;");
-    IJK_CHECK_RET(g_clazz.onSelectCodec, -1, "missing onSelectCodec");
+    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onSelectCodec, g_clazz.clazz,
+        "onSelectCodec",        "(Ljava/lang/Object;Ljava/lang/String;II)Ljava/lang/String;");
 
-    g_clazz.onControlResolveSegmentCount = (*env)->GetStaticMethodID(env, g_clazz.clazz, "onControlResolveSegmentCount", "(Ljava/lang/Object;)I");
-    IJK_CHECK_RET(g_clazz.onControlResolveSegmentCount, -1, "missing onControlResolveSegmentCount");
+    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onControlResolveSegmentCount, g_clazz.clazz,
+        "onControlResolveSegmentCount",         "(Ljava/lang/Object;)I");
 
-    g_clazz.onControlResolveSegmentDuration = (*env)->GetStaticMethodID(env, g_clazz.clazz, "onControlResolveSegmentDuration", "(Ljava/lang/Object;I)I");
-    IJK_CHECK_RET(g_clazz.onControlResolveSegmentDuration, -1, "missing onControlResolveSegmentDuration");
+    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onControlResolveSegmentDuration, g_clazz.clazz,
+        "onControlResolveSegmentDuration",      "(Ljava/lang/Object;I)I");
 
-    g_clazz.onControlResolveSegmentUrl = (*env)->GetStaticMethodID(env, g_clazz.clazz, "onControlResolveSegmentUrl", "(Ljava/lang/Object;I)Ljava/lang/String;");
-    IJK_CHECK_RET(g_clazz.onControlResolveSegmentUrl, -1, "missing onControlResolveSegmentUrl");
+    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onControlResolveSegmentUrl, g_clazz.clazz,
+        "onControlResolveSegmentUrl",           "(Ljava/lang/Object;I)Ljava/lang/String;");
 
-    g_clazz.onControlResolveSegmentOfflineMrl = (*env)->GetStaticMethodID(env, g_clazz.clazz, "onControlResolveSegmentOfflineMrl", "(Ljava/lang/Object;I)Ljava/lang/String;");
-    IJK_CHECK_RET(g_clazz.onControlResolveSegmentUrl, -1, "missing onControlResolveSegmentOfflineMrl");
+    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onControlResolveSegmentOfflineMrl, g_clazz.clazz,
+        "onControlResolveSegmentOfflineMrl",    "(Ljava/lang/Object;I)Ljava/lang/String;");
 
     ijkmp_global_init();
 
