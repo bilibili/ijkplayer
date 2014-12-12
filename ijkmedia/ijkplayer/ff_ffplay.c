@@ -2002,6 +2002,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         /* prepare audio output */
         if ((ret = audio_open(ffp, channel_layout, nb_channels, sample_rate, &is->audio_tgt)) < 0)
             goto fail;
+        ffp_set_audio_codec_info(ffp, AVCODEC_MODULE_NAME, avcodec_get_name(avctx->codec_id));
         is->audio_hw_buf_size = ret;
         is->audio_src = is->audio_tgt;
         is->audio_buf_size  = 0;
@@ -2955,6 +2956,34 @@ void ffp_set_framedrop(FFPlayer *ffp, int framedrop)
     ffp->framedrop = framedrop;
 }
 
+int ffp_get_video_codec_info(FFPlayer *ffp, char **codec_info)
+{
+    if (!codec_info)
+        return -1;
+
+    // FIXME: not thread-safe
+    if (ffp->video_codec_info) {
+        *codec_info = strdup(ffp->video_codec_info);
+    } else {
+        *codec_info = NULL;
+    }
+    return 0;
+}
+
+int ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info)
+{
+    if (!codec_info)
+        return -1;
+
+    // FIXME: not thread-safe
+    if (ffp->audio_codec_info) {
+        *codec_info = strdup(ffp->audio_codec_info);
+    } else {
+        *codec_info = NULL;
+    }
+    return 0;
+}
+
 int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
 {
     assert(ffp);
@@ -3310,6 +3339,20 @@ int ffp_video_thread(FFPlayer *ffp)
 int ffp_video_refresh_thread(FFPlayer *ffp)
 {
     return ffplay_video_refresh_thread(ffp);
+}
+
+void ffp_set_video_codec_info(FFPlayer *ffp, const char *module, const char *codec)
+{
+    av_freep(&ffp->video_codec_info);
+    ffp->video_codec_info = av_asprintf("%s, %s", module ? module : "", codec ? codec : "");
+    ALOGI("VideoCodec: %s", ffp->video_codec_info);
+}
+
+void ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *codec)
+{
+    av_freep(&ffp->audio_codec_info);
+    ffp->audio_codec_info = av_asprintf("%s, %s", module ? module : "", codec ? codec : "");
+    ALOGI("AudioCodec: %s", ffp->audio_codec_info);
 }
 
 static int ffp_format_control_message(struct AVFormatContext *s, int type,

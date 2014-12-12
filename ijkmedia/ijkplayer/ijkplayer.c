@@ -205,6 +205,30 @@ void ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop)
     MPTRACE("ijkmp_set_framedrop()=void\n");
 }
 
+int ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info)
+{
+    assert(mp);
+
+    MPTRACE("%s\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    int ret = ffp_get_video_codec_info(mp->ffplayer, codec_info);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+    return ret;
+}
+
+int ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info)
+{
+    assert(mp);
+
+    MPTRACE("%s\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    int ret = ffp_get_audio_codec_info(mp->ffplayer, codec_info);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+    return ret;
+}
+
 void ijkmp_shutdown_l(IjkMediaPlayer *mp)
 {
     assert(mp);

@@ -903,6 +903,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         ALOGE("no buffer(%d)\n", opaque->avctx->extradata_size);
     }
 
+    ffp_set_video_codec_info(ffp, MEDIACODEC_MODULE_NAME, opaque->mcc.codec_name);
     return node;
 fail:
     ffpipenode_free_p(&node);

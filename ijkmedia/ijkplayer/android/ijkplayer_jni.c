@@ -403,6 +403,52 @@ LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
+static jstring
+IjkMediaPlayer_getVideoCodecInfo(JNIEnv *env, jobject thiz)
+{
+    MPTRACE("%s", __func__);
+    jstring jcodec_info = NULL;
+    int     ret = 0;
+    char   *codec_info = NULL;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: getVideoCodecInfo: null mp", LABEL_RETURN);
+
+    ret = ijkmp_get_video_codec_info(mp, &codec_info);
+    if (ret < 0 || !codec_info)
+        goto LABEL_RETURN;
+
+    jcodec_info = (*env)->NewStringUTF(env, codec_info);
+LABEL_RETURN:
+    if (codec_info)
+        free(codec_info);
+
+    ijkmp_dec_ref_p(&mp);
+    return jcodec_info;
+}
+
+static jstring
+IjkMediaPlayer_getAudioCodecInfo(JNIEnv *env, jobject thiz)
+{
+    MPTRACE("%s", __func__);
+    jstring jcodec_info = NULL;
+    int     ret = 0;
+    char   *codec_info = NULL;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: getAudioCodecInfo: null mp", LABEL_RETURN);
+
+    ret = ijkmp_get_audio_codec_info(mp, &codec_info);
+    if (ret < 0 || !codec_info)
+        goto LABEL_RETURN;
+
+    jcodec_info = (*env)->NewStringUTF(env, codec_info);
+LABEL_RETURN:
+    if (codec_info)
+        free(codec_info);
+
+    ijkmp_dec_ref_p(&mp);
+    return jcodec_info;
+}
+
 static void
 IjkMediaPlayer_native_init(JNIEnv *env)
 {
@@ -705,6 +751,9 @@ static JNINativeMethod g_methods[] = {
     { "_setOverlayFormat",      "(I)V",                                    (void *) IjkMediaPlayer_setOverlayFormat },
     { "_setFrameDrop",          "(I)V",                                    (void *) IjkMediaPlayer_setFrameDrop },
     { "_setMediaCodecEnabled",  "(Z)V",                                    (void *) IjkMediaPlayer_setMediaCodecEnabled },
+
+    { "_getVideoCodecInfo",     "()Ljava/lang/String;",                    (void *) IjkMediaPlayer_getVideoCodecInfo },
+    { "_getAudioCodecInfo",     "()Ljava/lang/String;",                    (void *) IjkMediaPlayer_getAudioCodecInfo },
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)

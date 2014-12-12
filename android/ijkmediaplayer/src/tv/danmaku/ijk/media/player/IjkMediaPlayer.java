@@ -428,14 +428,35 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     public MediaInfo getMediaInfo() {
         MediaInfo mediaInfo = new MediaInfo();
 
-        mediaInfo.mVideoDecoder = "ijkmedia";
-        mediaInfo.mVideoDecoderImpl = "SW";
+        String videoCodecInfo = _getVideoCodecInfo();
+        if (!TextUtils.isEmpty(videoCodecInfo)) {
+            String nodes[] = videoCodecInfo.split(",");
+            if (nodes.length >= 2) {
+                mediaInfo.mVideoDecoder = nodes[0];
+                mediaInfo.mVideoDecoderImpl = nodes[1];
+            } else if (nodes.length >= 1) {
+                mediaInfo.mVideoDecoder = nodes[0];
+                mediaInfo.mVideoDecoderImpl = "";
+            }
+        }
 
-        mediaInfo.mAudioDecoder = "ijkmedia";
-        mediaInfo.mAudioDecoderImpl = "SW";
+        String audioCodecInfo = _getAudioCodecInfo();
+        if (!TextUtils.isEmpty(audioCodecInfo)) {
+            String nodes[] = audioCodecInfo.split(",");
+            if (nodes.length >= 2) {
+                mediaInfo.mAudioDecoder = nodes[0];
+                mediaInfo.mAudioDecoderImpl = nodes[1];
+            } else if (nodes.length >= 1) {
+                mediaInfo.mAudioDecoder = nodes[0];
+                mediaInfo.mAudioDecoderImpl = "";
+            }
+        }
 
         return mediaInfo;
     }
+
+    private native String _getVideoCodecInfo();
+    private native String _getAudioCodecInfo();
 
     public void setAvOption(AvFormatOption option) {
         setAvFormatOption(option.getName(), option.getValue());
