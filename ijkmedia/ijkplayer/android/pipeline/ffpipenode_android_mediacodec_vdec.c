@@ -83,6 +83,7 @@ typedef struct IJKFF_Pipenode_Opaque {
     int                       fake_pictq_serial;
     PacketQueue               fake_pictq;
 
+    int                       input_packet_count;
     int                       input_error_count;
     int                       output_error_count;
 
@@ -363,7 +364,11 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 opaque->acodec_flush_request = true;
                 SDL_LockMutex(opaque->acodec_mutex);
                 if (SDL_AMediaCodec_isStarted(opaque->acodec)) {
-                    SDL_AMediaCodec_flush(opaque->acodec);
+                    if (opaque->input_packet_count > 0) {
+                        // flush empty queue cause error on OMX.SEC.AVC.Decoder (Nexus S)
+                        SDL_AMediaCodec_flush(opaque->acodec);
+                        opaque->input_packet_count = 0;
+                    }
                     // If codec is configured in synchronous mode, codec will resume automatically
                     // SDL_AMediaCodec_start(opaque->acodec);
                 }
@@ -537,6 +542,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             goto fail;
         }
         // ALOGE("%s: queue %d/%d", __func__, (int)copy_size, (int)input_buffer_size);
+        opaque->input_packet_count++;
         if (enqueue_count)
             ++*enqueue_count;
 
