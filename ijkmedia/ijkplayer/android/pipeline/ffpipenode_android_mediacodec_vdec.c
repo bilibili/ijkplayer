@@ -110,9 +110,13 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
         acodec = SDL_AMediaCodecJava_createDecoderByType(env, mcc->mime_type);
 
     if (acodec) {
+        // QUIRK: always recreate MediaCodec for reconfigure
+        opaque->quirk_reconfigure_with_new_codec = true;
+        /*-
         if (0 == strncasecmp(mcc->codec_name, "OMX.TI.DUCATI1.", 15)) {
             opaque->quirk_reconfigure_with_new_codec = true;
         }
+        */
     }
 
     return acodec;
@@ -134,13 +138,17 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
 
     // need lock
     if (SDL_AMediaCodec_isConfigured(opaque->acodec)) {
-        if (opaque->quirk_reconfigure_with_new_codec) {
-            ALOGI("quirk: reconfigure with new codec");
-            SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
+        if (opaque->acodec) {
+            if (SDL_AMediaCodec_isStarted(opaque->acodec)) {
+                SDL_AMediaCodec_stop(opaque->acodec);
+            }
+            if (opaque->quirk_reconfigure_with_new_codec) {
+                ALOGI("quirk: reconfigure with new codec");
+                SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
+            }
         }
         if (opaque->acodec) {
-            if (SDL_AMediaCodec_isStarted(opaque->acodec))
-                SDL_AMediaCodec_stop(opaque->acodec);
+            // do nothing
         } else {
             opaque->acodec = create_codec_l(env, node);
             if (!opaque->acodec) {
@@ -595,6 +603,7 @@ static int enqueue_thread_func(void *arg)
     ret = 0;
 fail:
     ffp_packet_queue_abort(&opaque->fake_pictq);
+    ALOGI("MediaCodec: %s: exit: %d", __func__, ret);
     return ret;
 }
 
@@ -788,6 +797,7 @@ fail:
         SDL_AMediaCodec_stop(opaque->acodec);
     SDL_WaitThread(opaque->enqueue_thread, NULL);
     SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
+    ALOGI("MediaCodec: %s: exit: %d", __func__, ret);
     return ret;
 #if 0
 fallback_to_ffplay:
