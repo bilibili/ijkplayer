@@ -46,7 +46,8 @@ public class IjkMediaCodecInfo {
             // unknown codec in qualcomm SoC
             rank = RANK_NO_SENSE;
         } else if (name.startsWith("omx.mtk.")) {
-            // MTK only works on 4.3 and above
+            // 1. MTK only works on 4.3 and above
+            // 2. MTK works on MIUI 6 (4.2.1)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2)
                 rank = RANK_NO_SENSE;
             else
