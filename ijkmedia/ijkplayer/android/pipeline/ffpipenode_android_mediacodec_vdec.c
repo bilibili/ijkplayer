@@ -106,8 +106,10 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
         }
     }
 
+#if 0
     if (!acodec)
         acodec = SDL_AMediaCodecJava_createDecoderByType(env, mcc->mime_type);
+#endif
 
     if (acodec) {
         // QUIRK: always recreate MediaCodec for reconfigure
