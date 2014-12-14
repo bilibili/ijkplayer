@@ -25,6 +25,42 @@
 #include <assert.h>
 #include "ijkutil/ijkutil.h"
 
+#if 0
+typedef struct SDL_OMX_Meta {
+    const char *name;
+}SDL_OMX_Meta;
+
+static const SDL_OMX_Meta g_omx_meta_list[] = {
+    {
+        "OMX.Nvidia.h264.decode",
+        // Nvidia Tegra3
+        //      Nexus 7 (2012)
+        // Nvidia Tegra K1
+        //      Nexus 9
+    },
+    {
+        "OMX.Intel.hw_vd.h264",
+        // Atom Z3735
+        //      Teclast X98 Air
+    },
+    {
+        "OMX.Intel.VideoDecoder.AVC",
+        // Atom Z2560
+        //      Dell Venue 7 3730
+    },
+    {
+        "OMX.SEC.AVC.Decoder",
+        // Exynos 3110
+        //      Nexus S
+    },
+    {
+        "OMX.TI.DUCATI1.VIDEO.DECODER",
+        // TI OMAP4460
+        //      Galaxy Nexus
+    },
+};
+#endif
+
 // FIXME: release SDL_AMediaCodec
 sdl_amedia_status_t SDL_AMediaCodec_delete(SDL_AMediaCodec* acodec)
 {
