@@ -633,21 +633,24 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
         SDL_AMediaFormat_deleteP(&opaque->output_aformat);
         opaque->output_aformat = SDL_AMediaCodec_getOutputFormat(opaque->acodec);
         if (opaque->output_aformat) {
-            int width  = 0;
-            int height = 0;
+            int width        = 0;
+            int height       = 0;
+            int color_format = 0;
 
             SDL_AMediaFormat_getInt32(opaque->output_aformat, "width",  &width);
             SDL_AMediaFormat_getInt32(opaque->output_aformat, "height", &height);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "color-format", &color_format);
 
-            if (width > 0 && height > 0) {
-                // TI decoder could crash after reconfigure
-                // ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, width, height);
-                // opaque->frame_width  = width;
-                // opaque->frame_height = height;
-                ALOGE("AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED: width(%d), height(%d)\n", width, height);
-            } else {
-                ALOGE("AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED: invalid width(%d), height(%d)\n", width, height);
-            }
+            // TI decoder could crash after reconfigure
+            // ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, width, height);
+            // opaque->frame_width  = width;
+            // opaque->frame_height = height;
+            ALOGI(
+                "AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n"
+                "    width(%d), height(%d)\n"
+                "    color-format: %s(0x%x)\n",
+                width, height,
+                SDL_AMediaCodec_getColorFormatName(color_format), color_format);
         }
         // continue;
     } else if (output_buffer_index == AMEDIACODEC__INFO_TRY_AGAIN_LATER) {

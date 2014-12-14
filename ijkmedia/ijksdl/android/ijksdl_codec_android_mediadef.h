@@ -125,6 +125,157 @@ enum {
     AMEDIACODEC__UNKNOWN_ERROR               = -1000,
 };
 
+enum {
+    AMEDIACODEC__OMX_COLOR_FormatMonochrome              = 1,
+    AMEDIACODEC__OMX_COLOR_Format8bitRGB332              = 2,
+    AMEDIACODEC__OMX_COLOR_Format12bitRGB444             = 3,
+    AMEDIACODEC__OMX_COLOR_Format16bitARGB4444           = 4,
+    AMEDIACODEC__OMX_COLOR_Format16bitARGB1555           = 5,
+    AMEDIACODEC__OMX_COLOR_Format16bitRGB565             = 6,
+    AMEDIACODEC__OMX_COLOR_Format16bitBGR565             = 7,
+    AMEDIACODEC__OMX_COLOR_Format18bitRGB666             = 8,
+    AMEDIACODEC__OMX_COLOR_Format18bitARGB1665           = 9,
+    AMEDIACODEC__OMX_COLOR_Format19bitARGB1666           = 10,
+    AMEDIACODEC__OMX_COLOR_Format24bitRGB888             = 11,
+    AMEDIACODEC__OMX_COLOR_Format24bitBGR888             = 12,
+    AMEDIACODEC__OMX_COLOR_Format24bitARGB1887           = 13,
+    AMEDIACODEC__OMX_COLOR_Format25bitARGB1888           = 14,
+    AMEDIACODEC__OMX_COLOR_Format32bitBGRA8888           = 15,
+    AMEDIACODEC__OMX_COLOR_Format32bitARGB8888           = 16,
+    AMEDIACODEC__OMX_COLOR_FormatYUV411Planar            = 17,
+    AMEDIACODEC__OMX_COLOR_FormatYUV411PackedPlanar      = 18,
+    AMEDIACODEC__OMX_COLOR_FormatYUV420Planar            = 19,
+    AMEDIACODEC__OMX_COLOR_FormatYUV420PackedPlanar      = 20,
+    AMEDIACODEC__OMX_COLOR_FormatYUV420SemiPlanar        = 21,
+    AMEDIACODEC__OMX_COLOR_FormatYUV422Planar            = 22,
+    AMEDIACODEC__OMX_COLOR_FormatYUV422PackedPlanar      = 23,
+    AMEDIACODEC__OMX_COLOR_FormatYUV422SemiPlanar        = 24,
+    AMEDIACODEC__OMX_COLOR_FormatYCbYCr                  = 25,
+    AMEDIACODEC__OMX_COLOR_FormatYCrYCb                  = 26,
+    AMEDIACODEC__OMX_COLOR_FormatCbYCrY                  = 27,
+    AMEDIACODEC__OMX_COLOR_FormatCrYCbY                  = 28,
+    AMEDIACODEC__OMX_COLOR_FormatYUV444Interleaved       = 29,
+    AMEDIACODEC__OMX_COLOR_FormatRawBayer8bit            = 30,
+    AMEDIACODEC__OMX_COLOR_FormatRawBayer10bit           = 31,
+    AMEDIACODEC__OMX_COLOR_FormatRawBayer8bitcompressed  = 32,
+    AMEDIACODEC__OMX_COLOR_FormatL2                      = 33,
+    AMEDIACODEC__OMX_COLOR_FormatL4                      = 34,
+    AMEDIACODEC__OMX_COLOR_FormatL8                      = 35,
+    AMEDIACODEC__OMX_COLOR_FormatL16                     = 36,
+    AMEDIACODEC__OMX_COLOR_FormatL24                     = 37,
+    AMEDIACODEC__OMX_COLOR_FormatL32                     = 38,
+    AMEDIACODEC__OMX_COLOR_FormatYUV420PackedSemiPlanar  = 39,
+    AMEDIACODEC__OMX_COLOR_FormatYUV422PackedSemiPlanar  = 40,
+    AMEDIACODEC__OMX_COLOR_Format18BitBGR666             = 41,
+    AMEDIACODEC__OMX_COLOR_Format24BitARGB6666           = 42,
+    AMEDIACODEC__OMX_COLOR_Format24BitABGR6666           = 43,
+
+    AMEDIACODEC__OMX_COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100,
+    AMEDIACODEC__OMX_COLOR_FormatSurface                   = 0x7F000789,
+    AMEDIACODEC__OMX_COLOR_QCOM_FormatYUV420SemiPlanar     = 0x7fa30c00,
+};
+
+static const char *SDL_AMediaCodec_getColorFormatName(int colorFormat)
+{
+    switch (colorFormat) {
+    case AMEDIACODEC__OMX_COLOR_FormatMonochrome:
+        return "Format8bitRGB332";
+    case AMEDIACODEC__OMX_COLOR_Format8bitRGB332:
+        return "Format8bitRGB332";
+    case AMEDIACODEC__OMX_COLOR_Format12bitRGB444:
+        return "Format12bitRGB444";
+    case AMEDIACODEC__OMX_COLOR_Format16bitARGB4444:
+        return "Format16bitARGB4444";
+    case AMEDIACODEC__OMX_COLOR_Format16bitARGB1555:
+        return "Format16bitARGB1555";
+    case AMEDIACODEC__OMX_COLOR_Format16bitRGB565:
+        return "Format16bitRGB565";
+    case AMEDIACODEC__OMX_COLOR_Format16bitBGR565:
+        return "Format16bitBGR565";
+    case AMEDIACODEC__OMX_COLOR_Format18bitRGB666:
+        return "Format18bitRGB666";
+    case AMEDIACODEC__OMX_COLOR_Format18bitARGB1665:
+        return "Format18bitARGB1665";
+    case AMEDIACODEC__OMX_COLOR_Format19bitARGB1666:
+        return "Format19bitARGB1666";
+    case AMEDIACODEC__OMX_COLOR_Format24bitRGB888:
+        return "Format24bitRGB888";
+    case AMEDIACODEC__OMX_COLOR_Format24bitBGR888:
+        return "Format24bitBGR888";
+    case AMEDIACODEC__OMX_COLOR_Format24bitARGB1887:
+        return "Format24bitARGB1887";
+    case AMEDIACODEC__OMX_COLOR_Format25bitARGB1888:
+        return "Format25bitARGB1888";
+    case AMEDIACODEC__OMX_COLOR_Format32bitBGRA8888:
+        return "Format32bitBGRA8888";
+    case AMEDIACODEC__OMX_COLOR_Format32bitARGB8888:
+        return "Format32bitARGB8888";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV411Planar:
+        return "FormatYUV411Planar";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV411PackedPlanar:
+        return "FormatYUV411PackedPlanar";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV420Planar:
+        return "FormatYUV420Planar";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV420PackedPlanar:
+        return "FormatYUV420PackedPlanar";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV420SemiPlanar:
+        return "FormatYUV420SemiPlanar";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV422Planar:
+        return "FormatYUV422Planar";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV422PackedPlanar:
+        return "FormatYUV422PackedPlanar";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV422SemiPlanar:
+        return "FormatYUV422SemiPlanar";
+    case AMEDIACODEC__OMX_COLOR_FormatYCbYCr:
+        return "FormatYCbYCr";
+    case AMEDIACODEC__OMX_COLOR_FormatYCrYCb:
+        return "FormatYCrYCb";
+    case AMEDIACODEC__OMX_COLOR_FormatCbYCrY:
+        return "FormatCbYCrY";
+    case AMEDIACODEC__OMX_COLOR_FormatCrYCbY:
+        return "FormatCrYCbY";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV444Interleaved:
+        return "FormatYUV444Interleaved";
+    case AMEDIACODEC__OMX_COLOR_FormatRawBayer8bit:
+        return "FormatRawBayer8bit";
+    case AMEDIACODEC__OMX_COLOR_FormatRawBayer10bit:
+        return "FormatRawBayer10bit";
+    case AMEDIACODEC__OMX_COLOR_FormatRawBayer8bitcompressed:
+        return "FormatRawBayer8bitcompressed";
+    case AMEDIACODEC__OMX_COLOR_FormatL2:
+        return "FormatL2";
+    case AMEDIACODEC__OMX_COLOR_FormatL4:
+        return "FormatL4";
+    case AMEDIACODEC__OMX_COLOR_FormatL8:
+        return "FormatL8";
+    case AMEDIACODEC__OMX_COLOR_FormatL16:
+        return "FormatL16";
+    case AMEDIACODEC__OMX_COLOR_FormatL24:
+        return "FormatL24";
+    case AMEDIACODEC__OMX_COLOR_FormatL32:
+        return "FormatL32";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV420PackedSemiPlanar:
+        return "FormatYUV420PackedSemiPlanar";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV422PackedSemiPlanar:
+        return "FormatYUV422PackedSemiPlanar";
+    case AMEDIACODEC__OMX_COLOR_Format18BitBGR666:
+        return "Format18BitBGR666";
+    case AMEDIACODEC__OMX_COLOR_Format24BitARGB6666:
+        return "Format24BitARGB6666";
+    case AMEDIACODEC__OMX_COLOR_Format24BitABGR6666:
+        return "Format24BitABGR6666";
+
+    case AMEDIACODEC__OMX_COLOR_TI_FormatYUV420PackedSemiPlanar:
+        return "TI_FormatYUV420PackedSemiPlanar";
+    case AMEDIACODEC__OMX_COLOR_FormatSurface:
+        return "FormatSurface";
+    case AMEDIACODEC__OMX_COLOR_QCOM_FormatYUV420SemiPlanar:
+        return "FormatYUV420SemiPlanar";
+    default:
+        return "FormatUnknown";
+    }
+}
+
 //#define AMCTRACE ALOGI
 #define AMCTRACE(...)
 
