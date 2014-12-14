@@ -175,7 +175,7 @@ enum {
     AMEDIACODEC__OMX_COLOR_QCOM_FormatYUV420SemiPlanar     = 0x7fa30c00,
 };
 
-static const char *SDL_AMediaCodec_getColorFormatName(int colorFormat)
+inline static const char *SDL_AMediaCodec_getColorFormatName(int colorFormat)
 {
     switch (colorFormat) {
     case AMEDIACODEC__OMX_COLOR_FormatMonochrome:

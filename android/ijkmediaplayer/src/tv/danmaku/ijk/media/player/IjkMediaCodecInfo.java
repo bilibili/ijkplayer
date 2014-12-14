@@ -1,5 +1,6 @@
 package tv.danmaku.ijk.media.player;
 
+import java.util.HashMap;
 import java.util.Locale;
 
 import android.media.MediaCodecInfo;
@@ -22,6 +23,39 @@ public class IjkMediaCodecInfo {
     public MediaCodecInfo mCodecInfo;
     public int mRank = 0;
 
+    private static HashMap<String, Integer> sKnownCodecList;
+
+    private static synchronized HashMap<String, Integer> getKnownCodecList() {
+        if (sKnownCodecList != null)
+            return sKnownCodecList;
+
+        sKnownCodecList = new HashMap<String, Integer>();
+
+        // Nvidia Tegra3
+        //      Nexus 7 (2012)
+        // Nvidia Tegra K1
+        //      Nexus 9
+        sKnownCodecList.put("OMX.Nvidia.h264.decode".toLowerCase(), RANK_TESTED);
+
+        // Atom Z3735
+        //      Teclast X98 Air
+        sKnownCodecList.put("OMX.Intel.hw_vd.h264".toLowerCase(), RANK_TESTED + 1);
+
+        // Atom Z2560
+        //      Dell Venue 7 3730
+        sKnownCodecList.put("OMX.Intel.VideoDecoder.AVC".toLowerCase(), RANK_TESTED);
+
+        // Exynos 3110
+        //      Nexus S
+        sKnownCodecList.put("OMX.SEC.AVC.Decoder".toLowerCase(), RANK_TESTED);
+
+        // TI OMAP4460
+        //      Galaxy Nexus
+        sKnownCodecList.put("OMX.TI.DUCATI1.VIDEO.DECODER".toLowerCase(), RANK_TESTED);
+
+        return sKnownCodecList;
+    }
+
     public static IjkMediaCodecInfo setupCandidate(MediaCodecInfo codecInfo) {
         if (codecInfo == null)
             return null;
@@ -36,11 +70,11 @@ public class IjkMediaCodecInfo {
             rank = RANK_NON_STANDARD;
         } else if (name.startsWith("omx.pv")) {
             rank = RANK_SOFTWARE;
-        } else if (name.startsWith("omx.google")) {
+        } else if (name.startsWith("omx.google.")) {
             rank = RANK_SOFTWARE;
-        } else if (name.startsWith("omx.ffmpeg")) {
+        } else if (name.startsWith("omx.ffmpeg.")) {
             rank = RANK_SOFTWARE;
-        } else if (name.startsWith("omx.avcodec")) {
+        } else if (name.startsWith("omx.avcodec.")) {
             rank = RANK_SOFTWARE;
         } else if (name.startsWith("omx.ittiam.")) {
             // unknown codec in qualcomm SoC
@@ -51,9 +85,13 @@ public class IjkMediaCodecInfo {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2)
                 rank = RANK_NO_SENSE;
             else
-                rank = RANK_ACCETABLE;
+                rank = RANK_TESTED;
         } else {
-            rank = RANK_ACCETABLE;
+            Integer knownRank = getKnownCodecList().get(name);
+            if (knownRank != null)
+                rank = knownRank;
+            else
+                rank = RANK_ACCETABLE;
         }
 
         IjkMediaCodecInfo candidate = new IjkMediaCodecInfo();
