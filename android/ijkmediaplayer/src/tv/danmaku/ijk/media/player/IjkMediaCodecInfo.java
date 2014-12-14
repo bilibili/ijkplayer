@@ -14,15 +14,17 @@ import android.util.Log;
 public class IjkMediaCodecInfo {
     private final static String TAG = "IjkMediaCodecInfo";
 
-    public static int RANK_MAX = 100;
-    public static int RANK_TESTED = 70;
-    public static int RANK_ACCETABLE = 60;
-    public static int RANK_SOFTWARE = 20;
-    public static int RANK_NON_STANDARD = 10;
+    public static int RANK_MAX = 1000;
+    public static int RANK_TESTED = 800;
+    public static int RANK_ACCEPTABLE = 700;
+    public static int RANK_LAST_CHANCE = 600;
+    public static int RANK_SOFTWARE = 200;
+    public static int RANK_NON_STANDARD = 100;
     public static int RANK_NO_SENSE = 0;
 
     public MediaCodecInfo mCodecInfo;
     public int mRank = 0;
+    public String mMimeType;
 
     private static Map<String, Integer> sKnownCodecList;
 
@@ -71,7 +73,7 @@ public class IjkMediaCodecInfo {
         return sKnownCodecList;
     }
 
-    public static IjkMediaCodecInfo setupCandidate(MediaCodecInfo codecInfo) {
+    public static IjkMediaCodecInfo setupCandidate(MediaCodecInfo codecInfo, String mimeType) {
         if (codecInfo == null)
             return null;
 
@@ -103,15 +105,25 @@ public class IjkMediaCodecInfo {
                 rank = RANK_TESTED;
         } else {
             Integer knownRank = getKnownCodecList().get(name);
-            if (knownRank != null)
+            if (knownRank != null) {
                 rank = knownRank;
-            else
-                rank = RANK_ACCETABLE;
+            } else {
+                try {
+                    CodecCapabilities cap = codecInfo.getCapabilitiesForType(mimeType);
+                    if (cap != null)
+                        rank = RANK_ACCEPTABLE;
+                    else
+                        rank = RANK_LAST_CHANCE;
+                } catch (Throwable e) {
+                    rank = RANK_LAST_CHANCE;
+                }
+            }
         }
 
         IjkMediaCodecInfo candidate = new IjkMediaCodecInfo();
         candidate.mCodecInfo = codecInfo;
         candidate.mRank = rank;
+        candidate.mMimeType = mimeType;
         return candidate;
     }
 

@@ -795,7 +795,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
                     if (!type.equalsIgnoreCase(mimeType))
                         continue;
 
-                    IjkMediaCodecInfo candidate = IjkMediaCodecInfo.setupCandidate(codecInfo);
+                    IjkMediaCodecInfo candidate = IjkMediaCodecInfo.setupCandidate(codecInfo, mimeType);
                     if (candidate == null)
                         continue;
 
@@ -813,7 +813,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             if (bestCodec == null || bestCodec.mCodecInfo == null)
                 return null;
 
-            if (bestCodec.mRank < IjkMediaCodecInfo.RANK_ACCETABLE) {
+            if (bestCodec.mRank < IjkMediaCodecInfo.RANK_LAST_CHANCE) {
                 Log.w(TAG, String.format(Locale.US, "unaccetable codec: %s", bestCodec.mCodecInfo.getName()));
                 return null;
             }
