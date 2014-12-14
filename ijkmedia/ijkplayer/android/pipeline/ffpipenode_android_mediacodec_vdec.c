@@ -636,10 +636,23 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
             int width        = 0;
             int height       = 0;
             int color_format = 0;
+            int stride       = 0;
+            int slice_height = 0;
+            int crop_left    = 0;
+            int crop_top     = 0;
+            int crop_right   = 0;
+            int crop_bottom  = 0;
 
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "width",  &width);
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "height", &height);
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "color-format", &color_format);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "width",          &width);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "height",         &height);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "color-format",   &color_format);
+
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "stride",         &stride);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "slice-height",   &slice_height);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-left",      &crop_left);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-top",       &crop_top);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-right",     &crop_right);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-bottom",    &crop_bottom);
 
             // TI decoder could crash after reconfigure
             // ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, width, height);
@@ -647,10 +660,17 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
             // opaque->frame_height = height;
             ALOGI(
                 "AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n"
-                "    width(%d), height(%d)\n"
-                "    color-format: %s(0x%x)\n",
+                "    width-height: (%d x %d)\n"
+                "    color-format: (%s: 0x%x)\n"
+                "    stride:       (%d)"
+                "    slice-height: (%d)"
+                "    crop:         (%d, %d, %d, %d)"
+                ,
                 width, height,
-                SDL_AMediaCodec_getColorFormatName(color_format), color_format);
+                SDL_AMediaCodec_getColorFormatName(color_format), color_format,
+                stride,
+                slice_height,
+                crop_left, crop_top, crop_right, crop_bottom);
         }
         // continue;
     } else if (output_buffer_index == AMEDIACODEC__INFO_TRY_AGAIN_LATER) {
