@@ -1,7 +1,8 @@
 package tv.danmaku.ijk.media.player;
 
-import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecInfo.CodecCapabilities;
@@ -23,35 +24,49 @@ public class IjkMediaCodecInfo {
     public MediaCodecInfo mCodecInfo;
     public int mRank = 0;
 
-    private static HashMap<String, Integer> sKnownCodecList;
+    private static Map<String, Integer> sKnownCodecList;
 
-    private static synchronized HashMap<String, Integer> getKnownCodecList() {
+    private static synchronized Map<String, Integer> getKnownCodecList() {
         if (sKnownCodecList != null)
             return sKnownCodecList;
 
-        sKnownCodecList = new HashMap<String, Integer>();
+        sKnownCodecList = new TreeMap<String, Integer>(String.CASE_INSENSITIVE_ORDER);
 
-        // Nvidia Tegra3
-        //      Nexus 7 (2012)
-        // Nvidia Tegra K1
-        //      Nexus 9
+        // ----- Nvidia -----
+        //      Tegra3
+        //          Nexus 7 (2012)
+        //      Tegra K1
+        //          Nexus 9
         sKnownCodecList.put("OMX.Nvidia.h264.decode".toLowerCase(), RANK_TESTED);
 
-        // Atom Z3735
-        //      Teclast X98 Air
+        // ----- Intel -----
+        //      Atom Z3735
+        //          Teclast X98 Air
         sKnownCodecList.put("OMX.Intel.hw_vd.h264".toLowerCase(), RANK_TESTED + 1);
-
-        // Atom Z2560
-        //      Dell Venue 7 3730
+        //      Atom Z2560
+        //          Dell Venue 7 3730
         sKnownCodecList.put("OMX.Intel.VideoDecoder.AVC".toLowerCase(), RANK_TESTED);
 
-        // Exynos 3110
-        //      Nexus S
+        // ----- Qualcomm -----
+        //      MSM8260
+        //          Xiaomi MI 1S
+        sKnownCodecList.put("OMX.qcom.video.decoder.avc".toLowerCase(), RANK_TESTED);
+        sKnownCodecList.put("OMX.ittiam.video.decoder.avc".toLowerCase(), RANK_NO_SENSE);
+
+        // ----- Samsung -----
+        //      Exynos 3110
+        //          Nexus S
         sKnownCodecList.put("OMX.SEC.AVC.Decoder".toLowerCase(), RANK_TESTED);
 
-        // TI OMAP4460
-        //      Galaxy Nexus
+        // ----- TI -----
+        //      TI OMAP4460
+        //          Galaxy Nexus
         sKnownCodecList.put("OMX.TI.DUCATI1.VIDEO.DECODER".toLowerCase(), RANK_TESTED);
+
+        // ---------------
+        // Useless codec
+        // ----- google -----
+        sKnownCodecList.put("OMX.google.h264.decoder".toLowerCase(), RANK_SOFTWARE);
 
         return sKnownCodecList;
     }
