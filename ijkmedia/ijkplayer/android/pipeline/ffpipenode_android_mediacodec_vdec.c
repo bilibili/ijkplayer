@@ -41,8 +41,6 @@
 
 #define MAX_FAKE_FRAMES (2)
 
-#define AMC_FAKE_DECODE_RATE_MILLI  (REFRESH_RATE * 1000)
-
 typedef struct IJKFF_Pipenode_Opaque {
     FFPlayer                 *ffp;
     IJKFF_Pipeline           *pipeline;
@@ -528,7 +526,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
 
         // no need to decode without surface
         if (!opaque->jsurface) {
-            ret = amc_decode_picture_fake(node, AMC_FAKE_DECODE_RATE_MILLI);
+            ret = amc_decode_picture_fake(node, 1000);
             goto fail;
         }
 
@@ -539,7 +537,8 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 ret = 0;
                 goto fail;
             } else {
-                ret = amc_decode_picture_fake(node, AMC_FAKE_DECODE_RATE_MILLI);
+                // exception
+                ret = amc_decode_picture_fake(node, 1000);
                 goto fail;
             }
         } else {
