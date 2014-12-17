@@ -685,9 +685,9 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                 "AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n"
                 "    width-height: (%d x %d)\n"
                 "    color-format: (%s: 0x%x)\n"
-                "    stride:       (%d)"
-                "    slice-height: (%d)"
-                "    crop:         (%d, %d, %d, %d)"
+                "    stride:       (%d)\n"
+                "    slice-height: (%d)\n"
+                "    crop:         (%d, %d, %d, %d)\n"
                 ,
                 width, height,
                 SDL_AMediaCodec_getColorFormatName(color_format), color_format,
