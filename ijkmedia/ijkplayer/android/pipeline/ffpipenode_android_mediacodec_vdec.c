@@ -494,7 +494,6 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
         size_t   input_buffer_size  = 0;
         size_t   copy_size          = 0;
         int64_t  time_stamp         = 0;
-        bool     need_fake_decode   = false;
 
         // reconfigure surface if surface changed
         // NULL surface cause no display
