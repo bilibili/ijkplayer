@@ -163,11 +163,15 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
     {
         jobject prev_surface = opaque->jsurface;
 
-        if (surface != prev_surface) {
-            if (surface)
+        if ((surface == prev_surface) ||
+            (surface && prev_surface && (*env)->IsSameObject(env, surface, prev_surface))) {
+            // same object, no need to reconfigure
+        } else {
+            if (surface) {
                 opaque->jsurface = (*env)->NewGlobalRef(env, surface);
-            else
+            } else {
                 opaque->jsurface = NULL;
+            }
             opaque->is_surface_need_reconfigure = true;
 
             SDL_JNI_DeleteGlobalRefP(env, &prev_surface);
