@@ -39,7 +39,9 @@
 #define AMC_INPUT_TIMEOUT_US  (1000000)
 #define AMC_OUTPUT_TIMEOUT_US (1000000)
 
-#define MAX_FAKE_FRAMES (5)
+#define MAX_FAKE_FRAMES (2)
+
+#define AMC_FAKE_DECODE_RATE_MILLI  (REFRESH_RATE * 1000)
 
 typedef struct IJKFF_Pipenode_Opaque {
     FFPlayer                 *ffp;
@@ -338,6 +340,36 @@ static int amc_queue_picture_fake(IJKFF_Pipenode *node, AVPacket *pkt)
     return amc_queue_picture_buffer(node, -1, &buffer_info);
 }
 
+static int amc_decode_picture_fake(IJKFF_Pipenode *node, uint32_t timeout_milli)
+{
+    IJKFF_Pipenode_Opaque *opaque   = node->opaque;
+    FFPlayer              *ffp      = opaque->ffp;
+    VideoState            *is       = ffp->is;
+    Decoder               *d        = &is->viddec;
+    int                    ret      = 0;
+
+    PacketQueue *q = &opaque->fake_pictq;
+    SDL_LockMutex(q->mutex);
+    if (!q->abort_request && q->nb_packets > MAX_FAKE_FRAMES) {
+        SDL_CondWaitTimeout(q->cond, q->mutex, timeout_milli);
+    }
+    SDL_UnlockMutex(q->mutex);
+
+    if (q->abort_request) {
+        ret = -1;
+        goto fail;
+    } else {
+        ffp_packet_queue_put(&opaque->fake_pictq, &d->pkt);
+        av_init_packet(&d->pkt); // avoid duplicated free on packet
+        d->packet_pending = 0;
+        ret = 0;
+        goto fail;
+    }
+
+fail:
+    return ret;
+}
+
 static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *enqueue_count)
 {
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
@@ -462,6 +494,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
         size_t   input_buffer_size  = 0;
         size_t   copy_size          = 0;
         int64_t  time_stamp         = 0;
+        bool     need_fake_decode   = false;
 
         // reconfigure surface if surface changed
         // NULL surface cause no display
@@ -494,6 +527,12 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             }
         }
 
+        // no need to decode without surface
+        if (!opaque->jsurface) {
+            ret = amc_decode_picture_fake(node, AMC_FAKE_DECODE_RATE_MILLI);
+            goto fail;
+        }
+
         input_buffer_index = SDL_AMediaCodec_dequeueInputBuffer(opaque->acodec, timeUs);
         if (input_buffer_index < 0) {
             if (SDL_AMediaCodec_isInputBuffersValid(opaque->acodec)) {
@@ -501,24 +540,8 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 ret = 0;
                 goto fail;
             } else {
-                // enqueue packet as a fake picture
-                PacketQueue *q = &opaque->fake_pictq;
-                SDL_LockMutex(q->mutex);
-                if (!q->abort_request && q->nb_packets > MAX_FAKE_FRAMES) {
-                    SDL_CondWaitTimeout(q->cond, q->mutex, 1000);
-                }
-                SDL_UnlockMutex(q->mutex);
-
-                if (q->abort_request) {
-                    ret = -1;
-                    goto fail;
-                } else {
-                    ffp_packet_queue_put(&opaque->fake_pictq, &d->pkt);
-                    av_init_packet(&d->pkt); // avoid duplicated free on packet
-                    d->packet_pending = 0;
-                    ret = 0;
-                    goto fail;
-                }
+                ret = amc_decode_picture_fake(node, AMC_FAKE_DECODE_RATE_MILLI);
+                goto fail;
             }
         } else {
             // remove all fake pictures
