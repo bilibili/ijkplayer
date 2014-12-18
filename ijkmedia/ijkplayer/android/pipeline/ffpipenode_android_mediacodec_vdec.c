@@ -808,13 +808,6 @@ static int func_run_sync(IJKFF_Pipenode *node)
     opaque->frame_width  = opaque->avctx->width;
     opaque->frame_height = opaque->avctx->height;
 
-    ffpipeline_set_surface_need_reconfigure(opaque->pipeline, true);
-    ret = reconfigure_codec_l(env, node);
-    if (ret != 0) {
-        ALOGE("%s: reconfigure_codec failed\n", __func__);
-        goto fail;
-    }
-
     opaque->enqueue_thread = SDL_CreateThreadEx(&opaque->_enqueue_thread, enqueue_thread_func, node, "amediacodec_input_thread");
     if (!opaque->enqueue_thread) {
         ALOGE("%s: SDL_CreateThreadEx failed\n", __func__);
@@ -842,7 +835,6 @@ fail:
     if (opaque->acodec)
         SDL_AMediaCodec_stop(opaque->acodec);
     SDL_WaitThread(opaque->enqueue_thread, NULL);
-    SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
     ALOGI("MediaCodec: %s: exit: %d", __func__, ret);
     return ret;
 #if 0
@@ -868,6 +860,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     VideoState            *is     = ffp->is;
     IJKFF_Pipenode_Opaque *opaque = node->opaque;
     JNIEnv                *env    = NULL;
+    int                    ret    = 0;
 
     node->func_destroy  = func_destroy;
     node->func_run_sync = func_run_sync;
@@ -905,14 +898,6 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         ALOGE("%s:open_video_decoder: SDL_CreateCond() failed\n", __func__);
         goto fail;
     }
-
-    opaque->acodec = create_codec_l(env, node);
-    if (!opaque->acodec) {
-        ALOGE("%s:open_video_decoder: SDL_AMediaCodecJava_createDecoderByType(%s) failed\n", __func__, opaque->mcc.mime_type);
-        goto fail;
-    }
-    assert(opaque->weak_vout);
-    SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, opaque->acodec);
 
     ALOGI("AMediaFormat: %s, %dx%d\n", opaque->mcc.mime_type, opaque->avctx->width, opaque->avctx->height);
     opaque->input_aformat = SDL_AMediaFormatJava_createVideoFormat(env, opaque->mcc.mime_type, opaque->avctx->width, opaque->avctx->height);
@@ -964,6 +949,10 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     } else {
         ALOGE("no buffer(%d)\n", opaque->avctx->extradata_size);
     }
+
+    ret = reconfigure_codec_l(env, node);
+    if (ret != 0)
+        goto fail;
 
     ffp_set_video_codec_info(ffp, MEDIACODEC_MODULE_NAME, opaque->mcc.codec_name);
     return node;
