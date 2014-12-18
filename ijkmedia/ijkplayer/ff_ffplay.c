@@ -1591,10 +1591,11 @@ static int ffplay_video_thread(void *arg)
 static int video_thread(void *arg)
 {
     FFPlayer *ffp = (FFPlayer *)arg;
+    int       ret = 0;
 
-    IJKFF_Pipenode *node = ffpipeline_open_video_decoder(ffp->pipeline, ffp);
-    int ret = ffpipenode_run_sync(node);
-    ffpipenode_free_p(&node);
+    if (ffp->node_vdec) {
+        ret = ffpipenode_run_sync(ffp->node_vdec);
+    }
     return ret;
 }
 
@@ -2033,6 +2034,9 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         packet_queue_start(&is->videoq);
         decoder_init(&is->viddec, avctx, &is->videoq, is->continue_read_thread);
+        ffp->node_vdec = ffpipeline_open_video_decoder(ffp->pipeline, ffp);
+        if (!ffp->node_vdec)
+            goto fail;
         is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp, "ff_video_dec");
         is->queue_attachments_req = 1;
 
@@ -2878,6 +2882,7 @@ void ffp_destroy(FFPlayer *ffp)
 
     SDL_VoutFreeP(&ffp->vout);
     SDL_AoutFreeP(&ffp->aout);
+    ffpipenode_free_p(&ffp->node_vdec);
     ffpipeline_free_p(&ffp->pipeline);
     ffp_reset_internal(ffp);
 

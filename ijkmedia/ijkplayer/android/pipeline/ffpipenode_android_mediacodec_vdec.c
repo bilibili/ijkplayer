@@ -138,7 +138,15 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
     opaque->jsurface = ffpipeline_get_surface_as_global_ref(env, pipeline);
     SDL_JNI_DeleteGlobalRefP(env, &prev_jsurface);
 
-    // need lock
+    if (!opaque->acodec) {
+        opaque->acodec = create_codec_l(env, node);
+        if (!opaque->acodec) {
+            ALOGE("%s:open_video_decoder: create_codec failed\n", __func__);
+            ret = -1;
+            goto fail;
+        }
+    }
+
     if (SDL_AMediaCodec_isConfigured(opaque->acodec)) {
         if (opaque->acodec) {
             if (SDL_AMediaCodec_isStarted(opaque->acodec)) {
@@ -147,16 +155,6 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
             if (opaque->quirk_reconfigure_with_new_codec) {
                 ALOGI("quirk: reconfigure with new codec");
                 SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
-            }
-        }
-        if (opaque->acodec) {
-            // do nothing
-        } else {
-            opaque->acodec = create_codec_l(env, node);
-            if (!opaque->acodec) {
-                ALOGE("%s:open_video_decoder: create_codec failed\n", __func__);
-                ret = -1;
-                goto fail;
             }
         }
 

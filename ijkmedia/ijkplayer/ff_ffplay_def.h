@@ -28,6 +28,7 @@
 #include "ff_ffinc.h"
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
+#include "ff_ffpipenode.h"
 
 #define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
 
@@ -474,6 +475,7 @@ typedef struct FFPlayer {
     SDL_Aout *aout;
     SDL_Vout *vout;
     IJKFF_Pipeline *pipeline;
+    IJKFF_Pipenode *node_vdec;
     int sar_num;
     int sar_den;
 
@@ -560,6 +562,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->aout                   = NULL; /* reset outside */
     ffp->vout                   = NULL; /* reset outside */
     ffp->pipeline               = NULL;
+    ffp->node_vdec              = NULL;
     ffp->sar_num                = 0;
     ffp->sar_den                = 0;
 
