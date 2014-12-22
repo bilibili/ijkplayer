@@ -96,6 +96,8 @@ public class IjkMediaCodecInfo {
             rank = RANK_SOFTWARE;
         } else if (name.startsWith("omx.ffmpeg.")) {
             rank = RANK_SOFTWARE;
+        } else if (name.startsWith("omx.k3.ffmpeg.")) {
+            rank = RANK_SOFTWARE;
         } else if (name.startsWith("omx.avcodec.")) {
             rank = RANK_SOFTWARE;
         } else if (name.startsWith("omx.ittiam.")) {
