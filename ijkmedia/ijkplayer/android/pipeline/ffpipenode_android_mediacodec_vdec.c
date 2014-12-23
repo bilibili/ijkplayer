@@ -41,6 +41,12 @@
 
 #define MAX_FAKE_FRAMES (2)
 
+typedef struct AMC_Buf_Out {
+    int port;
+    SDL_AMediaCodecBufferInfo info;
+    double pts;
+} AMC_Buf_Out;
+
 typedef struct IJKFF_Pipenode_Opaque {
     FFPlayer                 *ffp;
     IJKFF_Pipeline           *pipeline;
@@ -88,6 +94,11 @@ typedef struct IJKFF_Pipenode_Opaque {
     int                       output_error_count;
 
     bool                      quirk_reconfigure_with_new_codec;
+
+    int                       n_buf_out;
+    AMC_Buf_Out               *amc_buf_out;
+    int                       off_buf_out;
+    double                    last_queued_pts;
 } IJKFF_Pipenode_Opaque;
 
 static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
@@ -118,6 +129,12 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
             opaque->quirk_reconfigure_with_new_codec = true;
         }
         */
+        /* delaying output makes it possible to correct frame order, hopefully */
+        if (0 == strncasecmp(mcc->codec_name, "OMX.TI.DUCATI1.", 15)) {
+            /* this is the only acceptable value on Nexus S */
+            opaque->n_buf_out = 1;
+            ALOGD("using buffered output for %s", mcc->codec_name);
+        }
     }
 
     return acodec;
@@ -633,6 +650,36 @@ fail:
     return ret;
 }
 
+static double pts_from_buffer_info(IJKFF_Pipenode *node, SDL_AMediaCodecBufferInfo *buffer_info)
+{
+    IJKFF_Pipenode_Opaque *opaque     = node->opaque;
+    FFPlayer              *ffp        = opaque->ffp;
+    VideoState            *is         = ffp->is;
+    AVRational             tb         = is->video_st->time_base;
+    int64_t amc_pts = av_rescale_q(buffer_info->presentationTimeUs, AV_TIME_BASE_Q, is->video_st->time_base);
+    double pts = amc_pts < 0 ? NAN : amc_pts * av_q2d(tb);
+
+    return pts;
+}
+
+/* it's OK here */
+static void sort_amc_buf_out(AMC_Buf_Out *buf_out, int size) {
+    AMC_Buf_Out *a, *b, tmp;
+    int i, j;
+
+    for (i = 0; i < size; i++) {
+        for (j = i + 1; j < size; j++) {
+            a = buf_out + i;
+            b = buf_out + j;
+            if (a->pts < b->pts) {
+                tmp = *a;
+                *a = *b;
+                *b = tmp;
+            }
+        }
+    }
+}
+
 static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count)
 {
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
@@ -733,9 +780,65 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
         if (dequeue_count)
             ++*dequeue_count;
 
-        ret = amc_queue_picture_buffer(node, output_buffer_index, &bufferInfo);
+        if (opaque->n_buf_out) {
+            AMC_Buf_Out *buf_out;
+
+            if (opaque->off_buf_out < opaque->n_buf_out) {
+                ALOGD("filling buffer... %d", opaque->off_buf_out);
+                buf_out = &opaque->amc_buf_out[opaque->off_buf_out++];
+                buf_out->port = output_buffer_index;
+                buf_out->info = bufferInfo;
+                buf_out->pts = pts_from_buffer_info(node, &bufferInfo);
+                sort_amc_buf_out(opaque->amc_buf_out, opaque->off_buf_out);
+            } else {
+                double pts;
+
+                pts = pts_from_buffer_info(node, &bufferInfo);
+                if (opaque->last_queued_pts != AV_NOPTS_VALUE &&
+                    pts < opaque->last_queued_pts) {
+                    ALOGE("early picture, drop!");
+                    SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
+                    goto done;
+                }
+                /* already sorted */
+                buf_out = &opaque->amc_buf_out[opaque->off_buf_out - 1];
+                /* new picture is the most aged, send now */
+                if (pts < buf_out->pts) {
+                    ret = amc_queue_picture_buffer(node, output_buffer_index, &bufferInfo);
+                    opaque->last_queued_pts = pts;
+                    // ALOGD("pts = %f", pts);
+                } else {
+                    int i;
+
+                    /* find one to send */
+                    for (i = opaque->off_buf_out - 1; i >= 0; i--) {
+                        buf_out = &opaque->amc_buf_out[i];
+                        if (pts > buf_out->pts) {
+                            ret = amc_queue_picture_buffer(node, buf_out->port, &buf_out->info);
+                            opaque->last_queued_pts = buf_out->pts;
+                            // ALOGD("pts = %f", buf_out->pts);
+                            /* replace for sort later */
+                            buf_out->port = output_buffer_index;
+                            buf_out->info = bufferInfo;
+                            buf_out->pts = pts_from_buffer_info(node, &bufferInfo);
+                            sort_amc_buf_out(opaque->amc_buf_out, opaque->n_buf_out);
+                            break;
+                        }
+                    }
+                    /* need to discard current buffer */
+                    if (i < 0) {
+                        ALOGE("buffer too small, drop picture!");
+                        SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
+                        goto done;
+                    }
+                }
+            }
+        } else {
+            ret = amc_queue_picture_buffer(node, output_buffer_index, &bufferInfo);
+        }
     }
 
+done:
     ret = 0;
 fail:
     return ret;
@@ -837,6 +940,21 @@ static int func_run_sync(IJKFF_Pipenode *node)
 
 fail:
     ffp_packet_queue_abort(&opaque->fake_pictq);
+    if (opaque->n_buf_out) {
+        int i;
+
+        if (opaque->acodec) {
+            for (i = 0; i < opaque->n_buf_out; i++) {
+                if (opaque->amc_buf_out[i].pts != AV_NOPTS_VALUE)
+                    SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, opaque->amc_buf_out[i].port, false);
+            }
+        }
+        free(opaque->amc_buf_out);
+        opaque->n_buf_out = 0;
+        opaque->amc_buf_out = NULL;
+        opaque->off_buf_out = 0;
+        opaque->last_queued_pts = AV_NOPTS_VALUE;
+    }
     if (opaque->acodec)
         SDL_AMediaCodec_stop(opaque->acodec);
     SDL_WaitThread(opaque->enqueue_thread, NULL);
@@ -960,6 +1078,17 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         goto fail;
 
     ffp_set_video_codec_info(ffp, MEDIACODEC_MODULE_NAME, opaque->mcc.codec_name);
+
+    opaque->off_buf_out = 0;
+    if (opaque->n_buf_out) {
+        int i;
+
+        opaque->amc_buf_out = calloc(opaque->n_buf_out, sizeof(*opaque->amc_buf_out));
+        assert(opaque->amc_buf_out != NULL);
+        for (i = 0; i < opaque->n_buf_out; i++)
+            opaque->amc_buf_out[i].pts = AV_NOPTS_VALUE;
+    }
+
     return node;
 fail:
     ffpipenode_free_p(&node);
