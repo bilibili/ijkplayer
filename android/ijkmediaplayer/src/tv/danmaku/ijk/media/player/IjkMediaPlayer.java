@@ -29,6 +29,7 @@ import tv.danmaku.ijk.media.player.annotations.CalledByNative;
 import tv.danmaku.ijk.media.player.option.AvFormatOption;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.media.MediaCodecInfo;
@@ -767,6 +768,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     public static class DefaultMediaCodecSelector implements OnMediaCodecSelectListener {
         public static DefaultMediaCodecSelector sInstance = new DefaultMediaCodecSelector();
 
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         public String onMediaCodecSelect(IMediaPlayer mp, String mimeType, int profile, int level) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
                 return null;
