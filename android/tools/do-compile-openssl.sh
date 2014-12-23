@@ -73,7 +73,7 @@ FF_EXTRA_CFLAGS=
 FF_EXTRA_LDFLAGS=
 
 #----- armv7a begin -----
-if [ "$FF_ARCH" == "armv7a" ]; then
+if [ "$FF_ARCH" = "armv7a" ]; then
     FF_BUILD_NAME=openssl-armv7a
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 	
@@ -82,7 +82,7 @@ if [ "$FF_ARCH" == "armv7a" ]; then
 
     FF_PLATFORM_CFG_FLAGS="android-armv7"
 
-elif [ "$FF_ARCH" == "armv5" ]; then
+elif [ "$FF_ARCH" = "armv5" ]; then
     FF_BUILD_NAME=openssl-armv5
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 	
@@ -91,7 +91,7 @@ elif [ "$FF_ARCH" == "armv5" ]; then
 
     FF_PLATFORM_CFG_FLAGS="android"
 
-elif [ "$FF_ARCH" == "x86" ]; then
+elif [ "$FF_ARCH" = "x86" ]; then
     FF_BUILD_NAME=openssl-x86
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 	
@@ -119,7 +119,7 @@ echo "[*] make NDK standalone toolchain"
 echo "--------------------"
 UNAMES=$(uname -s)
 FF_MAKE_TOOLCHAIN_FLAGS="--install-dir=$FF_TOOLCHAIN_PATH"
-if [ "$UNAMES" == "Darwin" ]; then
+if [ "$UNAMES" = "Darwin" ]; then
     echo "build on darwin-x86_64"
     FF_MAKE_TOOLCHAIN_FLAGS="$FF_MAKE_TOOLCHAIN_FLAGS --system=darwin-x86_64"
     FF_MAKE_FLAG=-j`sysctl -n machdep.cpu.thread_count`
@@ -129,7 +129,7 @@ FF_MAKEFLAGS=
 if which nproc >/dev/null
 then
     FF_MAKEFLAGS=-j`nproc`
-elif [ "$UNAMES" == "Darwin" ] && which sysctl >/dev/null
+elif [ "$UNAMES" = "Darwin" ] && which sysctl >/dev/null
 then
     FF_MAKEFLAGS=-j`sysctl -n machdep.cpu.thread_count`
 fi
