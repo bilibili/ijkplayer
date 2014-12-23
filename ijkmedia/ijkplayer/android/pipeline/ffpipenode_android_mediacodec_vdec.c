@@ -372,6 +372,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
     IJKFF_Pipeline        *pipeline = opaque->pipeline;
     VideoState            *is       = ffp->is;
     Decoder               *d        = &is->viddec;
+    PacketQueue           *q        = d->queue;
     sdl_amedia_status_t    amc_ret  = 0;
     int                    ret      = 0;
 
@@ -511,7 +512,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             }
 
             SDL_LockMutex(opaque->acodec_first_dequeue_output_mutex);
-            while (!is->abort_request &&
+            while (!q->abort_request &&
                 !opaque->acodec_reconfigure_request &&
                 !opaque->acodec_flush_request &&
                 opaque->acodec_first_dequeue_output_request) {
@@ -519,7 +520,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             }
             SDL_UnlockMutex(opaque->acodec_first_dequeue_output_mutex);
 
-            if (is->abort_request || opaque->acodec_reconfigure_request || opaque->acodec_flush_request) {
+            if (q->abort_request || opaque->acodec_reconfigure_request || opaque->acodec_flush_request) {
                 ret = 0;
                 goto fail;
             }
@@ -609,6 +610,8 @@ static int enqueue_thread_func(void *arg)
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
     FFPlayer              *ffp      = opaque->ffp;
     VideoState            *is       = ffp->is;
+    Decoder               *d        = &is->viddec;
+    PacketQueue           *q        = d->queue;
     int                    ret      = -1;
     int                    dequeue_count = 0;
 
@@ -617,7 +620,7 @@ static int enqueue_thread_func(void *arg)
         goto fail;
     }
 
-    while (!is->abort_request) {
+    while (!q->abort_request) {
         ret = feed_input_buffer(env, node, AMC_INPUT_TIMEOUT_US, &dequeue_count);
         if (ret != 0) {
             goto fail;
@@ -700,14 +703,14 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
         // continue;
     } else if (output_buffer_index < 0) {
         // enqueue packet as a fake picture
-        PacketQueue *q = &opaque->fake_pictq;
-        SDL_LockMutex(q->mutex);
-        if (!q->abort_request && q->nb_packets <= 0) {
-            SDL_CondWaitTimeout(q->cond, q->mutex, 1000);
+        PacketQueue *fake_q = &opaque->fake_pictq;
+        SDL_LockMutex(fake_q->mutex);
+        if (!fake_q->abort_request && fake_q->nb_packets <= 0) {
+            SDL_CondWaitTimeout(fake_q->cond, fake_q->mutex, 1000);
         }
-        SDL_UnlockMutex(q->mutex);
+        SDL_UnlockMutex(fake_q->mutex);
 
-        if (q->abort_request) {
+        if (fake_q->abort_request) {
             ret = -1;
             goto fail;
         } else {
@@ -794,6 +797,8 @@ static int func_run_sync(IJKFF_Pipenode *node)
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
     FFPlayer              *ffp      = opaque->ffp;
     VideoState            *is       = ffp->is;
+    Decoder               *d        = &is->viddec;
+    PacketQueue           *q        = d->queue;
     int                    ret      = 0;
     int                    dequeue_count = 0;
 
@@ -816,7 +821,7 @@ static int func_run_sync(IJKFF_Pipenode *node)
         goto fail;
     }
 
-    while (!is->abort_request) {
+    while (!q->abort_request) {
         int64_t timeUs = opaque->acodec_first_dequeue_output_request ? 0 : AMC_OUTPUT_TIMEOUT_US;
         ret = drain_output_buffer(env, node, timeUs, &dequeue_count);
         if (opaque->acodec_first_dequeue_output_request) {
