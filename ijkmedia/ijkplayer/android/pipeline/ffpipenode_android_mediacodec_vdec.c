@@ -446,6 +446,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
 
         AMCTRACE("bsfc->filter(%d): %p[%d] -> %p[%d]", d->bfsc_ret, d->pkt.data, (int)d->pkt.size, d->pkt_temp.data, (int)d->pkt_temp.size);
 #else
+#if 0
         AMCTRACE("raw [%d][%d] %02x%02x%02x%02x%02x%02x%02x%02x", (int)d->pkt_temp.size,
             (int)opaque->nal_size,
             d->pkt_temp.data[0],
@@ -456,6 +457,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             d->pkt_temp.data[5],
             d->pkt_temp.data[6],
             d->pkt_temp.data[7]);
+#endif
         convert_h264_to_annexb(d->pkt_temp.data, d->pkt_temp.size, opaque->nal_size, &convert_state);
         int64_t time_stamp = d->pkt_temp.pts;
         if (!time_stamp && d->pkt_temp.dts)
@@ -465,6 +467,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
         } else {
             time_stamp = 0;
         }
+#if 0
         AMCTRACE("input[%d][%d][%lld,%lld (%d, %d) -> %lld] %02x%02x%02x%02x%02x%02x%02x%02x", (int)d->pkt_temp.size,
             (int)opaque->nal_size,
             (int64_t)d->pkt_temp.pts,
@@ -480,6 +483,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             d->pkt_temp.data[5],
             d->pkt_temp.data[6],
             d->pkt_temp.data[7]);
+#endif
 #endif
     }
 
