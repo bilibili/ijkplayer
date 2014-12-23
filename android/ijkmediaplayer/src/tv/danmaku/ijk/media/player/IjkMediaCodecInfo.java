@@ -4,6 +4,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
+import android.annotation.TargetApi;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecInfo.CodecCapabilities;
 import android.media.MediaCodecInfo.CodecProfileLevel;
@@ -39,42 +40,46 @@ public class IjkMediaCodecInfo {
         //          Nexus 7 (2012)
         //      Tegra K1
         //          Nexus 9
-        sKnownCodecList.put("OMX.Nvidia.h264.decode".toLowerCase(), RANK_TESTED);
+        sKnownCodecList.put("OMX.Nvidia.h264.decode", RANK_TESTED);
 
         // ----- Intel -----
         //      Atom Z3735
         //          Teclast X98 Air
-        sKnownCodecList.put("OMX.Intel.hw_vd.h264".toLowerCase(), RANK_TESTED + 1);
+        sKnownCodecList.put("OMX.Intel.hw_vd.h264", RANK_TESTED + 1);
         //      Atom Z2560
         //          Dell Venue 7 3730
-        sKnownCodecList.put("OMX.Intel.VideoDecoder.AVC".toLowerCase(), RANK_TESTED);
+        sKnownCodecList.put("OMX.Intel.VideoDecoder.AVC", RANK_TESTED);
 
         // ----- Qualcomm -----
         //      MSM8260
         //          Xiaomi MI 1S
-        sKnownCodecList.put("OMX.qcom.video.decoder.avc".toLowerCase(), RANK_TESTED);
-        sKnownCodecList.put("OMX.ittiam.video.decoder.avc".toLowerCase(), RANK_NO_SENSE);
+        sKnownCodecList.put("OMX.qcom.video.decoder.avc", RANK_TESTED);
+        sKnownCodecList.put("OMX.ittiam.video.decoder.avc", RANK_NO_SENSE);
 
         // ----- Samsung -----
         //      Exynos 3110
         //          Nexus S
-        sKnownCodecList.put("OMX.SEC.AVC.Decoder".toLowerCase(), RANK_TESTED);
+        sKnownCodecList.put("OMX.SEC.AVC.Decoder", RANK_TESTED);
 
         // ----- TI -----
         //      TI OMAP4460
         //          Galaxy Nexus
-        sKnownCodecList.put("OMX.TI.DUCATI1.VIDEO.DECODER".toLowerCase(), RANK_TESTED);
+        sKnownCodecList.put("OMX.TI.DUCATI1.VIDEO.DECODER", RANK_TESTED);
 
         // ---------------
         // Useless codec
         // ----- google -----
-        sKnownCodecList.put("OMX.google.h264.decoder".toLowerCase(), RANK_SOFTWARE);
+        sKnownCodecList.put("OMX.google.h264.decoder", RANK_SOFTWARE);
+        // ----- huawei k920 -----
+        sKnownCodecList.put("OMX.k3.ffmpeg.decoder", RANK_SOFTWARE);
+        sKnownCodecList.put("OMX.ffmpeg.video.decoder", RANK_SOFTWARE);
 
         return sKnownCodecList;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public static IjkMediaCodecInfo setupCandidate(MediaCodecInfo codecInfo, String mimeType) {
-        if (codecInfo == null)
+        if (codecInfo == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
             return null;
 
         String name = codecInfo.getName();
@@ -127,7 +132,11 @@ public class IjkMediaCodecInfo {
         return candidate;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void dumpProfileLevels(String mimeType) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
+            return;
+
         try {
             CodecCapabilities caps = mCodecInfo
                     .getCapabilitiesForType(mimeType);
