@@ -26,6 +26,7 @@
 #include <sys/system_properties.h>
 #include "ijksdl_inc_internal_android.h"
 #include "android_audiotrack.h"
+#include "android_build.h"
 #include "android_bytebuffer.h"
 #include "ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl_codec_android_mediacodec_java.h"
@@ -146,11 +147,21 @@ int SDL_Android_GetApiLevel()
     if (SDK_INT > 0)
         return SDK_INT;
 
+    JNIEnv *env = NULL;
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("SDL_Android_GetApiLevel: SetupThreadEnv failed");
+        return 0;
+    }
+
+    SDK_INT = ASDK_Build_VERSION__SDK_INT(env);
+    return SDK_INT;
+#if 0
     char value[PROP_VALUE_MAX];
     memset(value, 0, sizeof(value));
     __system_property_get("ro.build.version.sdk", value);
     SDK_INT = atoi(value);
     return SDK_INT;
+#endif
 }
 
 
@@ -163,6 +174,9 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) {
         return -1;
     }
+
+    retval = ASDK_Build__loadClass(env);
+    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
 
     retval = SDL_Android_AudioTrack_global_init(env);
     JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);

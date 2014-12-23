@@ -92,7 +92,7 @@ int     SDL_Android_GetApiLevel();
     do { \
         (var__) = (*env__)->GetStaticMethodID((env__), (clazz__), (name__), (sign__)); \
         if (SDL_JNI_CatchException(env) || !(var__)) { \
-            ALOGE("GetMethodID failed: %s", name__); \
+            ALOGE("GetStaticMethodID failed: %s", name__); \
             return -1; \
         } \
     } while(0);
@@ -102,6 +102,15 @@ int     SDL_Android_GetApiLevel();
         (var__) = (*env__)->GetFieldID((env__), (clazz__), (name__), (sign__)); \
         if (SDL_JNI_CatchException(env) || !(var__)) { \
             ALOGE("GetFieldID failed: %s", name__); \
+            return -1; \
+        } \
+    } while(0);
+
+#define IJK_FIND_JAVA_STATIC_FIELD(env__, var__, clazz__, name__, sign__) \
+    do { \
+        (var__) = (*env__)->GetStaticFieldID((env__), (clazz__), (name__), (sign__)); \
+        if (SDL_JNI_CatchException(env) || !(var__)) { \
+            ALOGE("GetStaticFieldID failed: %s", name__); \
             return -1; \
         } \
     } while(0);

@@ -85,6 +85,7 @@ static SDL_AMediaCodec_BufferInfo_fields_t g_clazz_BufferInfo;
 int SDL_AMediaCodecJava__loadClass(JNIEnv *env)
 {
     jint sdk_int = SDL_Android_GetApiLevel();
+    ALOGI("MediaCodec: API-%d\n", sdk_int);
     if (sdk_int < IJK_API_16_JELLY_BEAN) {
         return 0;
     }
