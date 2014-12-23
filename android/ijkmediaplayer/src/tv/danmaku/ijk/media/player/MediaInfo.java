@@ -17,6 +17,8 @@
 package tv.danmaku.ijk.media.player;
 
 public class MediaInfo {
+    public String mMediaPlayerName;
+
     public String mVideoDecoder;
     public String mVideoDecoderImpl;
 

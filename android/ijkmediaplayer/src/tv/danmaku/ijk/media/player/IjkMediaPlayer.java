@@ -428,6 +428,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     @Override
     public MediaInfo getMediaInfo() {
         MediaInfo mediaInfo = new MediaInfo();
+        mediaInfo.mMediaPlayerName = "ijkplayer";
 
         String videoCodecInfo = _getVideoCodecInfo();
         if (!TextUtils.isEmpty(videoCodecInfo)) {
