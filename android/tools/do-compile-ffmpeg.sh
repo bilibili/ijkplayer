@@ -219,7 +219,7 @@ FF_CFLAGS="-O3 -Wall -pipe \
 #FF_CFLAGS="$FF_CFLAGS -finline-limit=300"
 
 export COMMON_FF_CFG_FLAGS=
-source $FF_BUILD_ROOT/../config/module.sh
+$FF_BUILD_ROOT/../config/module.sh
 
 
 #--------------------
@@ -288,7 +288,7 @@ $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack 
     $FF_DEP_LIBS \
     -o $FF_PREFIX/libijkffmpeg.so
 
-function mysedi() {
+mysedi() {
     f=$1
     exp=$2
     n=`basename $f`
