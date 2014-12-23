@@ -126,6 +126,12 @@ enum {
 };
 
 enum {
+    AMEDIACODEC__BUFFER_FLAG_KEY_FRAME       = 0x01,
+    AMEDIACODEC__BUFFER_FLAG_CODEC_CONFIG    = 0x02,
+    AMEDIACODEC__BUFFER_FLAG_END_OF_STREAM   = 0x04,
+};
+
+enum {
     AMEDIACODEC__OMX_COLOR_FormatMonochrome              = 1,
     AMEDIACODEC__OMX_COLOR_Format8bitRGB332              = 2,
     AMEDIACODEC__OMX_COLOR_Format12bitRGB444             = 3,
