@@ -375,6 +375,11 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
     PacketQueue           *q        = d->queue;
     sdl_amedia_status_t    amc_ret  = 0;
     int                    ret      = 0;
+    ssize_t  input_buffer_index = 0;
+    uint8_t* input_buffer_ptr   = NULL;
+    size_t   input_buffer_size  = 0;
+    size_t   copy_size          = 0;
+    int64_t  time_stamp         = 0;
 
     if (enqueue_count)
         *enqueue_count = 0;
@@ -489,12 +494,6 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
     }
 
     if (d->pkt_temp.data) {
-        ssize_t  input_buffer_index = 0;
-        uint8_t* input_buffer_ptr   = NULL;
-        size_t   input_buffer_size  = 0;
-        size_t   copy_size          = 0;
-        int64_t  time_stamp         = 0;
-
         // reconfigure surface if surface changed
         // NULL surface cause no display
         if (ffpipeline_is_surface_need_reconfigure(pipeline)) {
@@ -578,24 +577,24 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
         opaque->input_packet_count++;
         if (enqueue_count)
             ++*enqueue_count;
+    }
 
-        if (input_buffer_size < 0) {
-            d->packet_pending = 0;
+    if (input_buffer_size < 0) {
+        d->packet_pending = 0;
+    } else {
+        d->pkt_temp.dts =
+        d->pkt_temp.pts = AV_NOPTS_VALUE;
+        if (d->pkt_temp.data) {
+            d->pkt_temp.data += copy_size;
+            d->pkt_temp.size -= copy_size;
+            if (d->pkt_temp.size <= 0)
+                d->packet_pending = 0;
         } else {
-            d->pkt_temp.dts =
-            d->pkt_temp.pts = AV_NOPTS_VALUE;
-            if (d->pkt_temp.data) {
-                d->pkt_temp.data += copy_size;
-                d->pkt_temp.size -= copy_size;
-                if (d->pkt_temp.size <= 0)
-                    d->packet_pending = 0;
-            } else {
-                // FIXME: detect if decode finished
-                // if (!got_frame) {
-                    d->packet_pending = 0;
-                    d->finished = d->pkt_serial;
-                // }
-            }
+            // FIXME: detect if decode finished
+            // if (!got_frame) {
+                d->packet_pending = 0;
+                d->finished = d->pkt_serial;
+            // }
         }
     }
 
