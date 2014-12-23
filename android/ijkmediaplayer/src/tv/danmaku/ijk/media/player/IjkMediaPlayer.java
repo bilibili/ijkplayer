@@ -769,6 +769,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     public static class DefaultMediaCodecSelector implements OnMediaCodecSelectListener {
         public static DefaultMediaCodecSelector sInstance = new DefaultMediaCodecSelector();
 
+        @SuppressWarnings("deprecation")
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         public String onMediaCodecSelect(IMediaPlayer mp, String mimeType, int profile, int level) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
