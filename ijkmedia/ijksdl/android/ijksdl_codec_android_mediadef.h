@@ -177,8 +177,18 @@ enum {
     AMEDIACODEC__OMX_COLOR_Format24BitABGR6666           = 43,
 
     AMEDIACODEC__OMX_COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100,
-    AMEDIACODEC__OMX_COLOR_FormatSurface                   = 0x7F000789,
+    AMEDIACODEC__OMX_COLOR_FormatSurface                   = 0x7f000789,
+    AMEDIACODEC__OMX_COLOR_FormatYUV420Flexible            = 0x7f420888,
     AMEDIACODEC__OMX_COLOR_QCOM_FormatYUV420SemiPlanar     = 0x7fa30c00,
+
+    // from framework/native OMX_IVCommon.h
+    _AMEDIACODEC__OMX_COLOR_FormatAndroidOpaque                             = 0x7F000789,
+    _AMEDIACODEC__OMX_COLOR_FormatYUV420Flexible                            = 0x7F420888,
+    _AMEDIACODEC__OMX_TI_COLOR_FormatYUV420PackedSemiPlanar                 = 0x7F000100,
+    _AMEDIACODEC__OMX_QCOM_COLOR_FormatYVU420SemiPlanar                     = 0x7FA30C00,
+    _AMEDIACODEC__OMX_QCOM_COLOR_FormatYUV420PackedSemiPlanar64x32Tile2m8ka = 0x7FA30C03,
+    _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12Tiled                             = 0x7FC00002,
+    _AMEDIACODEC__OMX_QCOM_COLOR_FormatYUV420PackedSemiPlanar32m            = 0x7FA30C04,
 };
 
 inline static const char *SDL_AMediaCodec_getColorFormatName(int colorFormat)
@@ -277,6 +287,23 @@ inline static const char *SDL_AMediaCodec_getColorFormatName(int colorFormat)
         return "FormatSurface";
     case AMEDIACODEC__OMX_COLOR_QCOM_FormatYUV420SemiPlanar:
         return "FormatYUV420SemiPlanar";
+    case AMEDIACODEC__OMX_COLOR_QCOM_FormatYUV420SemiPlanar:
+        return "QCOM_FormatYUV420SemiPlanar";
+
+    case _AMEDIACODEC__OMX_COLOR_FormatAndroidOpaque:
+        return "FormatAndroidOpaque";
+    case _AMEDIACODEC__OMX_COLOR_FormatYUV420Flexible:
+        return "FormatYUV420Flexible";
+    case _AMEDIACODEC__OMX_TI_COLOR_FormatYUV420PackedSemiPlanar:
+        return "TI_FormatYUV420PackedSemiPlanar";
+    case _AMEDIACODEC__OMX_QCOM_COLOR_FormatYVU420SemiPlanar:
+        return "QCOM_FormatYVU420SemiPlanar";
+    case _AMEDIACODEC__OMX_QCOM_COLOR_FormatYUV420PackedSemiPlanar64x32Tile2m8ka:
+        return "QCOM_FormatYUV420PackedSemiPlanar64x32Tile2m8ka";
+    case _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12Tiled:
+        return "SEC_FormatNV12Tiled";
+    case _AMEDIACODEC__OMX_QCOM_COLOR_FormatYUV420PackedSemiPlanar32m:
+        return "QCOM_FormatYUV420PackedSemiPlanar32m";
     default:
         return "FormatUnknown";
     }
