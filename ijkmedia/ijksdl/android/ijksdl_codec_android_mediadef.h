@@ -285,11 +285,13 @@ inline static const char *SDL_AMediaCodec_getColorFormatName(int colorFormat)
         return "TI_FormatYUV420PackedSemiPlanar";
     case AMEDIACODEC__OMX_COLOR_FormatSurface:
         return "FormatSurface";
-    case AMEDIACODEC__OMX_COLOR_QCOM_FormatYUV420SemiPlanar:
-        return "FormatYUV420SemiPlanar";
+    case AMEDIACODEC__OMX_COLOR_FormatYUV420Flexible:
+        return "FormatYUV420Flexible";
     case AMEDIACODEC__OMX_COLOR_QCOM_FormatYUV420SemiPlanar:
         return "QCOM_FormatYUV420SemiPlanar";
 
+#if 0
+        // duplicated
     case _AMEDIACODEC__OMX_COLOR_FormatAndroidOpaque:
         return "FormatAndroidOpaque";
     case _AMEDIACODEC__OMX_COLOR_FormatYUV420Flexible:
@@ -298,6 +300,7 @@ inline static const char *SDL_AMediaCodec_getColorFormatName(int colorFormat)
         return "TI_FormatYUV420PackedSemiPlanar";
     case _AMEDIACODEC__OMX_QCOM_COLOR_FormatYVU420SemiPlanar:
         return "QCOM_FormatYVU420SemiPlanar";
+#endif
     case _AMEDIACODEC__OMX_QCOM_COLOR_FormatYUV420PackedSemiPlanar64x32Tile2m8ka:
         return "QCOM_FormatYUV420PackedSemiPlanar64x32Tile2m8ka";
     case _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12Tiled:
