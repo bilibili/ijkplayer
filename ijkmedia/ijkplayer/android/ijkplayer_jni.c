@@ -26,6 +26,7 @@
 #include <jni.h>
 #include "ijkutil/ijkutil.h"
 #include "../ff_ffplay.h"
+#include "ffmpeg_api_jni.h"
 #include "ijkplayer_android_def.h"
 #include "ijkplayer_android.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
@@ -781,9 +782,6 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
     pthread_mutex_init(&g_clazz.mutex, NULL);
 
-    clazz = (*env)->FindClass(env, JNI_CLASS_IJKPLAYER);
-    IJK_CHECK_RET(clazz, -1, "missing %s", JNI_CLASS_IJKPLAYER);
-
     // FindClass returns LocalReference
     IJK_FIND_JAVA_CLASS(env, g_clazz.clazz, JNI_CLASS_IJKPLAYER);
     (*env)->RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods));
@@ -810,6 +808,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
         "onControlResolveSegmentOfflineMrl",    "(Ljava/lang/Object;I)Ljava/lang/String;");
 
     ijkmp_global_init();
+
+    FFmpegApi_global_init(env);
 
     return JNI_VERSION_1_4;
 }

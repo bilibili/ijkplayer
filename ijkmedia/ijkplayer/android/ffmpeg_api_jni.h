@@ -1,8 +1,7 @@
 /*
- * ff_ffinc.h
- *      ffmpeg headers
+ * ffmpeg_api_jni.h
  *
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,23 +20,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef FFPLAY__FF_FFINC_H
-#define FFPLAY__FF_FFINC_H
+#ifndef IJKPLAYER_ANDROID__FFMPEG_API_JNI_H
 
-#include <stdbool.h>
-#include <assert.h>
-#include "libavutil/avstring.h"
-#include "libavutil/time.h"
-#include "libavformat/avformat.h"
-#include "libavcodec/avfft.h"
-#include "libswscale/swscale.h"
-#include "libavutil/base64.h"
-#include "libavutil/opt.h"
-#include "libswresample/swresample.h"
+#include <jni.h>
 
-#include "ijksdl/ijksdl.h"
-#include "ijkutil/ijkutil.h"
-
-typedef int (*ijk_format_control_message)(void *opaque, int type, void *data, size_t data_size);
+int FFmpegApi_global_init(JNIEnv *env);
 
 #endif
