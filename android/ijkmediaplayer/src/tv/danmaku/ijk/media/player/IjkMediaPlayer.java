@@ -507,6 +507,12 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     private native void _setFrameDrop(int frameDrop);
     private native void _setMediaCodecEnabled(boolean enabled);
 
+    public static String getColorFormatName(int mediaCodecColorFormat) {
+        return _getColorFormatName(mediaCodecColorFormat);
+    }
+
+    private static native final String _getColorFormatName(int mediaCodecColorFormat);
+
     @Override
     public void setAudioStreamType(int streamtype) {
         // do nothing

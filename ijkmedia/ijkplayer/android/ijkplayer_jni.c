@@ -29,6 +29,7 @@
 #include "ijkplayer_android_def.h"
 #include "ijkplayer_android.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
+#include "ijksdl/android/ijksdl_codec_android_mediadef.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
@@ -404,6 +405,16 @@ LABEL_RETURN:
 }
 
 static jstring
+IjkMediaPlayer_getColorFormatName(JNIEnv *env, jclass clazz, jint mediaCodecColorFormat)
+{
+    const char *codec_name = SDL_AMediaCodec_getColorFormatName(mediaCodecColorFormat);
+    if (!codec_name)
+        return NULL;
+
+    return (*env)->NewStringUTF(env, codec_name);
+}
+
+static jstring
 IjkMediaPlayer_getVideoCodecInfo(JNIEnv *env, jobject thiz)
 {
     MPTRACE("%s", __func__);
@@ -752,6 +763,7 @@ static JNINativeMethod g_methods[] = {
     { "_setFrameDrop",          "(I)V",                                    (void *) IjkMediaPlayer_setFrameDrop },
     { "_setMediaCodecEnabled",  "(Z)V",                                    (void *) IjkMediaPlayer_setMediaCodecEnabled },
 
+    { "_getColorFormatName",    "(I)Ljava/lang/String;",                   (void *) IjkMediaPlayer_getColorFormatName },
     { "_getVideoCodecInfo",     "()Ljava/lang/String;",                    (void *) IjkMediaPlayer_getVideoCodecInfo },
     { "_getAudioCodecInfo",     "()Ljava/lang/String;",                    (void *) IjkMediaPlayer_getAudioCodecInfo },
 };
