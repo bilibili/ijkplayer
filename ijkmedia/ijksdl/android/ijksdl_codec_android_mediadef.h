@@ -189,6 +189,18 @@ enum {
     _AMEDIACODEC__OMX_QCOM_COLOR_FormatYUV420PackedSemiPlanar64x32Tile2m8ka = 0x7FA30C03,
     _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12Tiled                             = 0x7FC00002,
     _AMEDIACODEC__OMX_QCOM_COLOR_FormatYUV420PackedSemiPlanar32m            = 0x7FA30C04,
+
+    // from hardware samsung_slsi
+    _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12TPhysicalAddress  = 0x7F000001,
+    _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12LPhysicalAddress  = 0x7F000002,
+    _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12LVirtualAddress   = 0x7F000003,
+    _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12Tiled             = 0x7FC00002,
+    _AMEDIACODEC__OMX_SEC_COLOR_FormatNV21LPhysicalAddress  = 0x7F000010,
+    _AMEDIACODEC__OMX_SEC_COLOR_FormatNV21Linear            = 0x7F000011,
+
+    // from hardware intel
+    _AMEDIACODEC__OMX_INTEL_COLOR_FormatYUV420PackedSemiPlanar              = 0x7FA00E00,
+    _AMEDIACODEC__OMX_INTEL_COLOR_FormatYUV420PackedSemiPlanar_Tiled        = 0x7FA00F00,
 };
 
 inline static const char *SDL_AMediaCodec_getColorFormatName(int colorFormat)
@@ -290,6 +302,7 @@ inline static const char *SDL_AMediaCodec_getColorFormatName(int colorFormat)
     case AMEDIACODEC__OMX_COLOR_QCOM_FormatYUV420SemiPlanar:
         return "QCOM_FormatYUV420SemiPlanar";
 
+        // from framework/native OMX_IVCommon.h
 #if 0
         // duplicated
     case _AMEDIACODEC__OMX_COLOR_FormatAndroidOpaque:
@@ -307,6 +320,26 @@ inline static const char *SDL_AMediaCodec_getColorFormatName(int colorFormat)
         return "SEC_FormatNV12Tiled";
     case _AMEDIACODEC__OMX_QCOM_COLOR_FormatYUV420PackedSemiPlanar32m:
         return "QCOM_FormatYUV420PackedSemiPlanar32m";
+
+        // from hardware samsung_slsi
+    case _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12TPhysicalAddress:
+        return "SEC_FormatNV12TPhysicalAddress";
+    case _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12LPhysicalAddress:
+        return "SEC_FormatNV12LPhysicalAddress";
+    case _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12LVirtualAddress:
+        return "SEC_FormatNV12LVirtualAddress";
+    case _AMEDIACODEC__OMX_SEC_COLOR_FormatNV12Tiled:
+        return "SEC_FormatNV12Tiled";
+    case _AMEDIACODEC__OMX_SEC_COLOR_FormatNV21LPhysicalAddress:
+        return "SEC_FormatNV21LPhysicalAddress";
+    case _AMEDIACODEC__OMX_SEC_COLOR_FormatNV21Linear:
+        return "SEC_FormatNV21Linear";
+
+        // from hardware intel
+    case _AMEDIACODEC__OMX_INTEL_COLOR_FormatYUV420PackedSemiPlanar:
+        return "INTEL_FormatYUV420PackedSemiPlanar";
+    case _AMEDIACODEC__OMX_INTEL_COLOR_FormatYUV420PackedSemiPlanar_Tiled:
+        return "INTEL_FormatYUV420PackedSemiPlanar_Tiled";
     default:
         return "FormatUnknown";
     }
