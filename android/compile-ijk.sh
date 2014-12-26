@@ -42,6 +42,11 @@ do_ndk_build () {
             $ANDROID_NDK/ndk-build
             cd -
         ;;
+        arm64-v8a)
+            cd ijkmediaplayer-arm64-v8a/jni
+            $ANDROID_NDK/ndk-build
+            cd -
+        ;;
     esac
 }
 
@@ -50,7 +55,7 @@ case "$REQUEST_TARGET" in
     "")
         do_ndk_build armv7a;
     ;;
-    armv5|armv7a|x86)
+    armv5|armv7a|x86|arm64-v8a)
         do_ndk_build $REQUEST_TARGET;
     ;;
     all)
@@ -61,7 +66,7 @@ case "$REQUEST_TARGET" in
     ;;
     *)
         echo "Usage:"
-        echo "  compile-ijk.sh armv5|armv7a|x86"
+        echo "  compile-ijk.sh armv5|armv7a|x86|arm64-v8a"
         echo "  compile-ijk.sh all"
     ;;
 esac
