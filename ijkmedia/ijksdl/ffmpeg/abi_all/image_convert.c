@@ -30,9 +30,6 @@ int ijk_image_convert(int width, int height,
     enum AVPixelFormat src_format, const uint8_t **src_data, int *src_linesize)
 {
 #if defined(__ANDROID__)
-#if defined(__LP64__)
-	return -1;
-#else
     switch (src_format) {
         case AV_PIX_FMT_YUV420P:
         case AV_PIX_FMT_YUVJ420P: // FIXME: 9 not equal to AV_PIX_FMT_YUV420P, but a workaround
@@ -58,7 +55,6 @@ int ijk_image_convert(int width, int height,
         default:
             break;
     }
-#endif
 #endif
     return -1;
 }
