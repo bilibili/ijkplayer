@@ -46,7 +46,12 @@ do_lipo () {
     LIPO_FLAGS=
     for ARCH in $FF_ALL_ARCHS
     do
-        LIPO_FLAGS="$LIPO_FLAGS $UNI_BUILD_ROOT/build/ffmpeg-$ARCH/output/lib/$LIB_FILE"
+        ARCH_LIB_FILE="$UNI_BUILD_ROOT/build/ffmpeg-$ARCH/output/lib/$LIB_FILE"
+        if [ -f "$ARCH_LIB_FILE" ]; then
+            LIPO_FLAGS="$LIPO_FLAGS $ARCH_LIB_FILE"
+        else
+            echo "skip $LIB_FILE of $ARCH";
+        fi
     done
 
     xcrun lipo -create $LIPO_FLAGS -output $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
@@ -68,9 +73,11 @@ do_lipo_all () {
 if [ "$FF_TARGET" = "armv7" -o "$FF_TARGET" = "armv7s" -o "$FF_TARGET" = "arm64" ]; then
     echo_archs
     sh tools/do-compile-ffmpeg.sh $FF_TARGET
+    do_lipo_all
 elif [ "$FF_TARGET" = "i386" -o "$FF_TARGET" = "x86_64" ]; then
     echo_archs
     sh tools/do-compile-ffmpeg.sh $FF_TARGET
+    do_lipo_all
 elif [ "$FF_TARGET" = "lipo" ]; then
     echo_archs
     do_lipo_all
