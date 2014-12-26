@@ -18,7 +18,7 @@
 
 IJK_LIBYUV_UPSTREAM=https://github.com/bbcallen/libyuv.git
 IJK_LIBYUV_FORK=https://github.com/bbcallen/libyuv.git
-IJK_LIBYUV_COMMIT=master
+IJK_LIBYUV_COMMIT=ijk-r0.2.1-dev
 IJK_LIBYUV_LOCAL_REPO=extra/libyuv
 
 set -e
