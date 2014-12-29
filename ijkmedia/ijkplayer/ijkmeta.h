@@ -73,7 +73,7 @@ void ijkmeta_set_string_l(IjkMediaMeta *meta, const char *name, const char *valu
 void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic);
 
 // must be freed with free();
-char         *ijkmeta_get_string_l(IjkMediaMeta *meta, const char *name);
+const char   *ijkmeta_get_string_l(IjkMediaMeta *meta, const char *name);
 int64_t       ijkmeta_get_int64_l(IjkMediaMeta *meta, const char *name, int64_t defaultValue);
 size_t        ijkmeta_get_children_count_l(IjkMediaMeta *meta);
 // do not free

@@ -252,9 +252,9 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
     }
 }
 
-char *ijkmeta_get_string_l(IjkMediaMeta *meta, const char *name)
+const char *ijkmeta_get_string_l(IjkMediaMeta *meta, const char *name)
 {
-    if (!meta || meta->dict)
+    if (!meta || !meta->dict)
         return NULL;
 
     AVDictionaryEntry *entry = av_dict_get(meta->dict, name, NULL, 0);
@@ -266,7 +266,7 @@ char *ijkmeta_get_string_l(IjkMediaMeta *meta, const char *name)
 
 int64_t ijkmeta_get_int64_l(IjkMediaMeta *meta, const char *name, int64_t defaultValue)
 {
-    if (!meta || meta->dict)
+    if (!meta || !meta->dict)
         return defaultValue;
 
     AVDictionaryEntry *entry = av_dict_get(meta->dict, name, NULL, 0);
@@ -278,7 +278,7 @@ int64_t ijkmeta_get_int64_l(IjkMediaMeta *meta, const char *name, int64_t defaul
 
 size_t ijkmeta_get_children_count_l(IjkMediaMeta *meta)
 {
-    if (!meta || meta->children)
+    if (!meta || !meta->children)
         return 0;
 
     return meta->children_count;

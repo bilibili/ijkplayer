@@ -2320,9 +2320,9 @@ static int read_thread(void *arg)
 #endif
     av_dump_format(ic, 0, is->filename, 0);
     ijkmeta_set_avformat_context_l(ffp->meta, ic);
-    if (st_index[AVMEDIA_TYPE_VIDEO] > 0)
+    if (st_index[AVMEDIA_TYPE_VIDEO] >= 0)
         ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_VIDEO_STREAM, st_index[AVMEDIA_TYPE_VIDEO]);
-    if (st_index[AVMEDIA_TYPE_AUDIO] > 0)
+    if (st_index[AVMEDIA_TYPE_AUDIO] >= 0)
         ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_AUDIO_STREAM, st_index[AVMEDIA_TYPE_AUDIO]);
 
     is->show_mode = ffp->show_mode;
