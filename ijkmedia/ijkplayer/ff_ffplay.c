@@ -2751,7 +2751,7 @@ static bool g_ffmpeg_global_use_log_report = false;
 
 static void ffp_log_callback_brief(void *ptr, int level, const char *fmt, va_list vl)
 {
-    int ffplv = IJK_LOG_VERBOSE;
+    int ffplv __unused = IJK_LOG_VERBOSE;
     if (level <= AV_LOG_ERROR)
         ffplv = IJK_LOG_ERROR;
     else if (level <= AV_LOG_WARNING)
@@ -2769,7 +2769,7 @@ static void ffp_log_callback_brief(void *ptr, int level, const char *fmt, va_lis
 
 static void ffp_log_callback_report(void *ptr, int level, const char *fmt, va_list vl)
 {
-    int ffplv = IJK_LOG_VERBOSE;
+    int ffplv __unused = IJK_LOG_VERBOSE;
     if (level <= AV_LOG_ERROR)
         ffplv = IJK_LOG_ERROR;
     else if (level <= AV_LOG_WARNING)
