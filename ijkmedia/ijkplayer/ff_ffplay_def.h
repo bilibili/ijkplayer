@@ -394,6 +394,7 @@ static SDL_Surface *screen;
  ****************************************************************************/
 
 /* ffplayer */
+typedef struct IjkMediaMeta IjkMediaMeta;
 typedef struct IJKFF_Pipeline IJKFF_Pipeline;
 typedef struct FFPlayer {
     /* ffplay context */
@@ -504,6 +505,8 @@ typedef struct FFPlayer {
     int pictq_size;
     int max_fps;
 
+    IjkMediaMeta *meta;
+
     ijk_format_control_message format_control_message;
     void *format_control_opaque;
 } FFPlayer;
@@ -593,6 +596,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->format_control_message = NULL;
     ffp->format_control_opaque  = NULL;
+
+    ffp->meta = NULL;
 
     msg_queue_flush(&ffp->msg_queue);
 }

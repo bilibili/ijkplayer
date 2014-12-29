@@ -28,6 +28,7 @@
 #include "ff_fferror.h"
 #include "ff_ffpipeline.h"
 #include "ff_ffpipenode.h"
+#include "ijkmeta.h"
 
 // FIXME: 9 work around NDKr8e or gcc4.7 bug
 // isnan() may not recognize some double NAN, so we test both double and float
@@ -2318,6 +2319,11 @@ static int read_thread(void *arg)
                                 NULL, 0);
 #endif
     av_dump_format(ic, 0, is->filename, 0);
+    ijkmeta_set_avformat_context_l(ffp->meta, ic);
+    if (st_index[AVMEDIA_TYPE_VIDEO] > 0)
+        ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_VIDEO_STREAM, st_index[AVMEDIA_TYPE_VIDEO]);
+    if (st_index[AVMEDIA_TYPE_AUDIO] > 0)
+        ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_AUDIO_STREAM, st_index[AVMEDIA_TYPE_AUDIO]);
 
     is->show_mode = ffp->show_mode;
 #ifdef FFP_MERGE // bbc: dunno if we need this
@@ -2868,6 +2874,7 @@ FFPlayer *ffp_create()
 
     msg_queue_init(&ffp->msg_queue);
     ffp_reset_internal(ffp);
+    ffp->meta = ijkmeta_create();
     return ffp;
 }
 
@@ -2889,6 +2896,8 @@ void ffp_destroy(FFPlayer *ffp)
     ffp_reset_internal(ffp);
 
     msg_queue_destroy(&ffp->msg_queue);
+
+    ijkmeta_destroy_p(&ffp->meta);
 
     av_free(ffp);
 }
@@ -3360,6 +3369,14 @@ void ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *cod
     av_freep(&ffp->audio_codec_info);
     ffp->audio_codec_info = av_asprintf("%s, %s", module ? module : "", codec ? codec : "");
     ALOGI("AudioCodec: %s", ffp->audio_codec_info);
+}
+
+IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
+{
+    if (!ffp)
+        return NULL;
+
+    return ffp->meta;
 }
 
 static int ffp_format_control_message(struct AVFormatContext *s, int type,

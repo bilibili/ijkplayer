@@ -27,6 +27,7 @@
 #include "ff_ffmsg_queue.h"
 
 #include "ijkutil/ijkutil.h"
+#include "ijkmeta.h"
 
 #ifndef MPTRACE
 #define MPTRACE ALOGW
@@ -165,6 +166,9 @@ void            ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop);
 
 int             ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info);
 int             ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info);
+
+// must be freed with free();
+IjkMediaMeta   *ijkmp_get_meta_l(IjkMediaPlayer *mp);
 
 // preferred to be called explicity, can be called multiple times
 // NOTE: ijkmp_shutdown may block thread
