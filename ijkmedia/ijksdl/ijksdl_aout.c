@@ -89,8 +89,9 @@ double SDL_AoutGetLatencySeconds(SDL_Aout *aout)
 
 void SDL_AoutSetDefaultLatencySeconds(SDL_Aout *aout, double latency)
 {
-    if (aout && aout->func_set_default_latency_seconds)
-        aout->func_set_default_latency_seconds(aout, latency);
-
-    aout->minimal_latency_seconds = latency;
+    if (aout) {
+        if (aout->func_set_default_latency_seconds)
+            aout->func_set_default_latency_seconds(aout, latency);
+        aout->minimal_latency_seconds = latency;
+    }
 }
