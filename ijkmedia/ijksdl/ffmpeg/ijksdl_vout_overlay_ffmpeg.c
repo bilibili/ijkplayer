@@ -155,6 +155,7 @@ static SDL_Class g_vout_overlay_ffmpeg_class = {
     .name = "FFmpegVoutOverlay",
 };
 
+#ifndef __clang_analyzer__
 SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *display)
 {
     SDLTRACE("SDL_VoutFFmpeg_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, dp=%p)\n",
@@ -243,6 +244,7 @@ fail:
     overlay_free_l(overlay);
     return NULL;
 }
+#endif//__clang_analyzer__
 
 int SDL_VoutFFmpeg_ConvertFrame(
     SDL_VoutOverlay *overlay, AVFrame *frame,
