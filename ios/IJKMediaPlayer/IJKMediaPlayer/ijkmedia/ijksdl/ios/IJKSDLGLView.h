@@ -33,6 +33,7 @@
 
 - (UIImage*) snapshot;
 
-@property(nonatomic,strong) NSLock *appActivityLock;
+@property(nonatomic,strong) NSLock  *appActivityLock;
+@property(nonatomic)        CGFloat  fps;
 
 @end

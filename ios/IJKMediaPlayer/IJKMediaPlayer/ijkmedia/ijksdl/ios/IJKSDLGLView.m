@@ -27,6 +27,7 @@
 #import "IJKSDLGLRender.h"
 #import "IJKSDLGLRenderI420.h"
 #import "IJKSDLGLRenderRV24.h"
+#include "ijksdl/ijksdl_timer.h"
 
 #define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
 #define SYSTEM_VERSION_GREATER_THAN(v)              ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
@@ -170,10 +171,9 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     int             _rightPaddingPixels;
     GLfloat         _rightPadding;
     int             _bytesPerPixel;
-    CGFloat         _fps;
     int             _frameCount;
     
-    NSTimeInterval  _lastFrameTime;
+    int64_t         _lastFrameTime;
 
     id<IJKSDLGLRender> _renderer;
 
@@ -566,18 +566,17 @@ exit:
 
         glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
         [_context presentRenderbuffer:GL_RENDERBUFFER];
-        NSTimeInterval thisFrameTime = [NSDate timeIntervalSinceReferenceDate];
-        
-        double d = fabs(thisFrameTime - _lastFrameTime);
-        if (d >= 3.f) {
-            
-            _fps = _frameCount / d;
+
+        int64_t current = (int64_t)SDL_GetTickHR();
+        int64_t delta   = (current > _lastFrameTime) ? current - _lastFrameTime : 0;
+        if (delta <= 0) {
+            _lastFrameTime = current;
+        } else if (delta >= 1000) {
+            _fps = ((CGFloat)_frameCount) * 1000 / delta;
             _frameCount = 0;
-            _lastFrameTime = [NSDate timeIntervalSinceReferenceDate];
-            NSLog(@"fps = %f",_fps);
-        }
-        else {
-            _frameCount ++;
+            _lastFrameTime = current;
+        } else {
+            _frameCount++;
         }
     }
 
