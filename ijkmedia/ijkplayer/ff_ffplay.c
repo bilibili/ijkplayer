@@ -989,7 +989,7 @@ display:
     if (ffp->show_status) {
         static int64_t last_time;
         int64_t cur_time;
-        int aqsize, vqsize, sqsize;
+        int aqsize, vqsize, sqsize __unused;
         double av_diff;
 
         cur_time = av_gettime_relative();
@@ -1807,8 +1807,8 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
             // ALOGE("aout_cb: flush\n");
             is->audio_buf_index = is->audio_buf_size;
             memset(stream, 0, len);
-            stream += len;
-            len = 0;
+            // stream += len;
+            // len = 0;
             SDL_AoutFlushAudio(ffp->aout);
             break;
         }
