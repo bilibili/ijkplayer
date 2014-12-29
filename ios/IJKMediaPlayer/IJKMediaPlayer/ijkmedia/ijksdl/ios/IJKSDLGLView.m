@@ -170,6 +170,10 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     int             _rightPaddingPixels;
     GLfloat         _rightPadding;
     int             _bytesPerPixel;
+    CGFloat         _fps;
+    int             _frameCount;
+    
+    NSTimeInterval  _lastFrameTime;
 
     id<IJKSDLGLRender> _renderer;
 
@@ -582,6 +586,19 @@ exit:
 
         glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
         [_context presentRenderbuffer:GL_RENDERBUFFER];
+        NSTimeInterval thisFrameTime = [NSDate timeIntervalSinceReferenceDate];
+        
+        double d = fabs(thisFrameTime - _lastFrameTime);
+        if (d >= 3.f) {
+            
+            _fps = _frameCount / d;
+            _frameCount = 0;
+            _lastFrameTime = [NSDate timeIntervalSinceReferenceDate];
+            NSLog(@"fps = %f",_fps);
+        }
+        else {
+            _frameCount ++;
+        }
     }
 
     // Detach context before leaving display, to avoid multiple thread issues.
