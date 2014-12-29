@@ -22,7 +22,7 @@
 
 #import <Foundation/Foundation.h>
 #include "ijkplayer/ios/ijkplayer_ios.h"
-
+#include "ijkplayer/ijkmeta.h"
 
 
 struct IJKSize {

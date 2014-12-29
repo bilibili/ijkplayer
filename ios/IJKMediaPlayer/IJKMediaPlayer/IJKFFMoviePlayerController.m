@@ -30,6 +30,11 @@
 #include "string.h"
 
 @interface IJKFFMoviePlayerController() <IJKAudioSessionDelegate>
+
+@property(nonatomic, readonly) NSDictionary *mediaMeta;
+@property(nonatomic, readonly) NSDictionary *videoMeta;
+@property(nonatomic, readonly) NSDictionary *audioMeta;
+
 @end
 
 @implementation IJKFFMoviePlayerController {
@@ -69,6 +74,10 @@
 @synthesize controlStyle = _controlStyle;
 @synthesize scalingMode = _scalingMode;
 @synthesize shouldAutoplay = _shouldAutoplay;
+
+@synthesize mediaMeta = _mediaMeta;
+@synthesize videoMeta = _videoMeta;
+@synthesize audioMeta = _audioMeta;
 
 #define FFP_IO_STAT_STEP (50 * 1024)
 
@@ -161,6 +170,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init media resource
         _ffMrl = [[IJKFFMrl alloc] initWithMrl:aUrlString];
         _segmentResolver = segmentResolver;
+        _mediaMeta = [[NSDictionary alloc] init];
 
         // init player
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
@@ -410,6 +420,23 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     return nil;
 }
 
+inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *rawMeta, const char *name, NSString *defaultValue)
+{
+    if (!meta || !rawMeta || !name)
+        return;
+
+    NSString *key = [NSString stringWithUTF8String:name];
+    char *value = ijkmeta_get_string_l(rawMeta, name);
+    if (value) {
+        [meta setObject:[NSString stringWithUTF8String:value] forKey:key];
+        free(value);
+    } else if (defaultValue){
+        [meta setObject:defaultValue forKey:key];
+    } else {
+        [meta removeObjectForKey:key];
+    }
+}
+
 - (void)postEvent: (IJKFFMoviePlayerMessage *)msg
 {
     if (!msg)
@@ -436,8 +463,84 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
                     @"error": @(avmsg->arg1)}];
             break;
         }
-        case FFP_MSG_PREPARED:
+        case FFP_MSG_PREPARED: {
             NSLog(@"FFP_MSG_PREPARED:");
+
+            IjkMediaMeta *rawMeta = ijkmp_get_meta_l(_mediaPlayer);
+            if (rawMeta) {
+                ijkmeta_lock(rawMeta);
+
+                NSMutableDictionary *newMediaMeta = [[NSMutableDictionary alloc] init];
+
+                fillMetaInternal(newMediaMeta, rawMeta, IJKM_KEY_FORMAT, nil);
+                fillMetaInternal(newMediaMeta, rawMeta, IJKM_KEY_DURATION_US, nil);
+                fillMetaInternal(newMediaMeta, rawMeta, IJKM_KEY_START_US, nil);
+                fillMetaInternal(newMediaMeta, rawMeta, IJKM_KEY_BITRATE, nil);
+
+                fillMetaInternal(newMediaMeta, rawMeta, IJKM_KEY_VIDEO_STREAM, @"-1");
+                fillMetaInternal(newMediaMeta, rawMeta, IJKM_KEY_AUDIO_STREAM, @"-1");
+
+                int64_t video_stream = ijkmeta_get_int64_l(rawMeta, IJKM_KEY_VIDEO_STREAM, -1);
+                int64_t audio_stream = ijkmeta_get_int64_l(rawMeta, IJKM_KEY_AUDIO_STREAM, -1);
+
+                NSMutableArray *streams = [[NSMutableArray alloc] init];
+
+                size_t count = ijkmeta_get_children_count_l(rawMeta);
+                for(size_t i = 0; i < count; ++i) {
+                    IjkMediaMeta *streamRawMeta = ijkmeta_get_child_l(rawMeta, i);
+                    NSMutableDictionary *streamMeta = [[NSMutableDictionary alloc] init];
+
+                    if (streamRawMeta) {
+                        fillMetaInternal(streamMeta, streamRawMeta, IJKM_KEY_TYPE, k_IJKM_VAL_TYPE__UNKNOWN);
+                        char *type = ijkmeta_get_string_l(rawMeta, IJKM_KEY_TYPE);
+                        if (type) {
+                            fillMetaInternal(streamMeta, streamRawMeta, IJKM_KEY_CODEC_NAME, @"");
+                            fillMetaInternal(streamMeta, streamRawMeta, IJKM_KEY_CODEC_PROFILE, @"");
+
+                            if (0 == strcmp(type, IJKM_VAL_TYPE__VIDEO)) {
+                                fillMetaInternal(streamMeta, rawMeta, IJKM_KEY_WIDTH, @"");
+                                fillMetaInternal(streamMeta, rawMeta, IJKM_KEY_HEIGHT, @"");
+                                fillMetaInternal(streamMeta, rawMeta, IJKM_KEY_FPS_NUM, @"");
+                                fillMetaInternal(streamMeta, rawMeta, IJKM_KEY_FPS_DEN, @"");
+                                fillMetaInternal(streamMeta, rawMeta, IJKM_KEY_TBR_NUM, @"");
+                                fillMetaInternal(streamMeta, rawMeta, IJKM_KEY_TBR_DEN, @"");
+                                fillMetaInternal(streamMeta, rawMeta, IJKM_KEY_SAR_NUM, @"");
+                                fillMetaInternal(streamMeta, rawMeta, IJKM_KEY_SAR_DEN, @"");
+
+                                if (video_stream > 0 && video_stream == i) {
+                                    _videoMeta = streamMeta;
+
+                                    int64_t fps_num = ijkmeta_get_int64_l(rawMeta, IJKM_KEY_FPS_NUM, 0);
+                                    int64_t fps_den = ijkmeta_get_int64_l(rawMeta, IJKM_KEY_FPS_DEN, 0);
+                                    if (fps_num > 0 && fps_den > 0) {
+                                        _fpsInMeta = ((CGFloat)(fps_num)) / fps_den;
+                                        NSLog(@"fps in meta %f\n", _fpsInMeta);
+                                    }
+                                }
+
+                            } else if (0 == strcmp(type, IJKM_VAL_TYPE__AUDIO)) {
+                                fillMetaInternal(streamMeta, rawMeta, IJKM_KEY_SAMPLE_RATE, @"");
+                                fillMetaInternal(streamMeta, rawMeta, IJKM_KEY_CHANNEL_LAYOUT, @"");
+
+                                if (audio_stream > 0 && audio_stream == i) {
+                                    _audioMeta = streamMeta;
+                                }
+
+                            } else {
+
+                            }
+                            free(type);
+                        }
+                    }
+
+                    [streams addObject:streamMeta];
+                }
+
+                [newMediaMeta setObject:streams forKey:kk_IJKM_KEY_STREAMS];
+
+                ijkmeta_unlock(rawMeta);
+                _mediaMeta = newMediaMeta;
+            }
 
             _isPreparedToPlay = YES;
 
@@ -450,6 +553,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
              object:self];
 
             break;
+        }
         case FFP_MSG_COMPLETED: {
 
             [self setScreenOn:NO];
