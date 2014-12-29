@@ -71,6 +71,8 @@
 #define SDL_FCC_RV24    SDL_FOURCC('R', 'V', '2', '4')    /**< bpp=24, RGBX8888 */
 #define SDL_FCC_RV32    SDL_FOURCC('R', 'V', '3', '2')    /**< bpp=24, RGBX8888 */
 
+#define SDL_FCC__AMC    SDL_FOURCC('_', 'A', 'M', 'C')    /**< android media codec */
+
 // undefine
 #define SDL_FCC_UNDF    SDL_FOURCC('U', 'N', 'D', 'F')    /**< undefined */
 

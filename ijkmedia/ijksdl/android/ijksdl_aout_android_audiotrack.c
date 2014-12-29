@@ -42,7 +42,7 @@ typedef struct SDL_Aout_Opaque {
     SDL_mutex *wakeup_mutex;
 
     SDL_AudioSpec spec;
-    SDL_AndroidAudioTrack* atrack;
+    SDL_Android_AudioTrack* atrack;
     uint8_t *buffer;
     int buffer_size;
 
@@ -61,7 +61,7 @@ typedef struct SDL_Aout_Opaque {
 int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
-    SDL_AndroidAudioTrack *atrack = opaque->atrack;
+    SDL_Android_AudioTrack *atrack = opaque->atrack;
     SDL_AudioCallback audio_cblk = opaque->spec.callback;
     void *userdata = opaque->spec.userdata;
     uint8_t *buffer = opaque->buffer;
@@ -73,45 +73,45 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
     if (!opaque->abort_request && !opaque->pause_on)
-        sdl_audiotrack_play(env, atrack);
+        SDL_Android_AudioTrack_play(env, atrack);
 
     while (!opaque->abort_request) {
         SDL_LockMutex(opaque->wakeup_mutex);
         if (!opaque->abort_request && opaque->pause_on) {
-            sdl_audiotrack_pause(env, atrack);
+            SDL_Android_AudioTrack_pause(env, atrack);
             while (!opaque->abort_request && opaque->pause_on) {
                 SDL_CondWaitTimeout(opaque->wakeup_cond, opaque->wakeup_mutex, 1000);
             }
             if (!opaque->abort_request && !opaque->pause_on)
-                sdl_audiotrack_play(env, atrack);
+                SDL_Android_AudioTrack_play(env, atrack);
         }
         if (opaque->need_flush) {
             opaque->need_flush = 0;
-            sdl_audiotrack_flush(env, atrack);
+            SDL_Android_AudioTrack_flush(env, atrack);
         }
         if (opaque->need_set_volume) {
             opaque->need_set_volume = 0;
-            sdl_audiotrack_set_volume(env, atrack, opaque->left_volume, opaque->right_volume);
+            SDL_Android_AudioTrack_set_volume(env, atrack, opaque->left_volume, opaque->right_volume);
         }
         SDL_UnlockMutex(opaque->wakeup_mutex);
 
         audio_cblk(userdata, buffer, copy_size);
         if (opaque->need_flush) {
-            sdl_audiotrack_flush(env, atrack);
+            SDL_Android_AudioTrack_flush(env, atrack);
             opaque->need_flush = false;
         }
 
         if (opaque->need_flush) {
             opaque->need_flush = 0;
-            sdl_audiotrack_flush(env, atrack);
+            SDL_Android_AudioTrack_flush(env, atrack);
         } else {
-            sdl_audiotrack_write_byte(env, atrack, buffer, copy_size);
+            SDL_Android_AudioTrack_write_byte(env, atrack, buffer, copy_size);
         }
 
         // TODO: 1 if callback return -1 or 0
     }
 
-    sdl_audiotrack_free(env, atrack);
+    SDL_Android_AudioTrack_free(env, atrack);
     return 0;
 }
 
@@ -121,7 +121,7 @@ int aout_thread(void *arg)
     // SDL_Aout_Opaque *opaque = aout->opaque;
     JNIEnv *env = NULL;
 
-    if (JNI_OK != SDL_AndroidJni_SetupThreadEnv(&env)) {
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
         ALOGE("aout_thread: SDL_AndroidJni_SetupEnv: failed");
         return -1;
     }
@@ -135,16 +135,16 @@ int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_A
     SDL_Aout_Opaque *opaque = aout->opaque;
 
     opaque->spec = *desired;
-    opaque->atrack = sdl_audiotrack_new_from_sdl_spec(env, desired);
+    opaque->atrack = SDL_Android_AudioTrack_new_from_sdl_spec(env, desired);
     if (!opaque->atrack) {
         ALOGE("aout_open_audio_n: failed to new AudioTrcak()");
         return -1;
     }
 
-    opaque->buffer_size = sdl_audiotrack_get_min_buffer_size(opaque->atrack);
+    opaque->buffer_size = SDL_Android_AudioTrack_get_min_buffer_size(opaque->atrack);
     if (opaque->buffer_size <= 0) {
         ALOGE("aout_open_audio_n: failed to getMinBufferSize()");
-        sdl_audiotrack_free(env, opaque->atrack);
+        SDL_Android_AudioTrack_free(env, opaque->atrack);
         opaque->atrack = NULL;
         return -1;
     }
@@ -152,13 +152,13 @@ int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_A
     opaque->buffer = malloc(opaque->buffer_size);
     if (!opaque->buffer) {
         ALOGE("aout_open_audio_n: failed to allocate buffer");
-        sdl_audiotrack_free(env, opaque->atrack);
+        SDL_Android_AudioTrack_free(env, opaque->atrack);
         opaque->atrack = NULL;
         return -1;
     }
 
     if (obtained) {
-        sdl_audiotrack_get_target_spec(opaque->atrack, obtained);
+        SDL_Android_AudioTrack_get_target_spec(opaque->atrack, obtained);
         SDLTRACE("audio target format fmt:0x%x, channel:0x%x", (int)obtained->format, (int)obtained->channels);
     }
 
@@ -167,7 +167,7 @@ int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_A
     opaque->audio_tid = SDL_CreateThreadEx(&opaque->_audio_tid, aout_thread, aout, "ff_aout_android");
     if (!opaque->audio_tid) {
         ALOGE("aout_open_audio_n: failed to create audio thread");
-        sdl_audiotrack_free(env, opaque->atrack);
+        SDL_Android_AudioTrack_free(env, opaque->atrack);
         opaque->atrack = NULL;
         return -1;
     }
@@ -179,7 +179,7 @@ int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtai
 {
     // SDL_Aout_Opaque *opaque = aout->opaque;
     JNIEnv *env = NULL;
-    if (JNI_OK != SDL_AndroidJni_SetupThreadEnv(&env)) {
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
         ALOGE("aout_open_audio: AttachCurrentThread: failed");
         return -1;
     }

@@ -51,6 +51,9 @@ void      ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count);
 void      ffp_set_max_fps(FFPlayer *ffp, int max_fps);
 void      ffp_set_framedrop(FFPlayer *ffp, int framedrop);
 
+int       ffp_get_video_codec_info(FFPlayer *ffp, char **codec_info);
+int       ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info);
+
 /* playback controll */
 int       ffp_prepare_async_l(FFPlayer *ffp, const char *file_name);
 int       ffp_start_from_l(FFPlayer *ffp, long msec);
@@ -66,8 +69,27 @@ long      ffp_get_duration_l(FFPlayer *ffp);
 long      ffp_get_playable_duration_l(FFPlayer *ffp);
 
 /* for internal usage */
+void      ffp_packet_queue_init(PacketQueue *q);
+void      ffp_packet_queue_destroy(PacketQueue *q);
+void      ffp_packet_queue_abort(PacketQueue *q);
+void      ffp_packet_queue_start(PacketQueue *q);
+void      ffp_packet_queue_flush(PacketQueue *q);
+int       ffp_packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial);
+int       ffp_packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket *pkt, int *serial, int *finished);
+int       ffp_packet_queue_put(PacketQueue *q, AVPacket *pkt);
+bool      ffp_is_flush_packet(AVPacket *pkt);
+
+Frame    *ffp_frame_queue_peek_writable(FrameQueue *f);
+void      ffp_frame_queue_push(FrameQueue *f);
+
 void      ffp_toggle_buffering_l(FFPlayer *ffp, int start_buffering);
 void      ffp_toggle_buffering(FFPlayer *ffp, int start_buffering);
 void      ffp_check_buffering_l(FFPlayer *ffp);
+
+int       ffp_video_thread(FFPlayer *ffp);
+int       ffp_video_refresh_thread(FFPlayer *ffp);
+
+void      ffp_set_video_codec_info(FFPlayer *ffp, const char *module, const char *codec);
+void      ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *codec);
 
 #endif

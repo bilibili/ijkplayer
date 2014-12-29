@@ -20,19 +20,27 @@ package tv.danmaku.ijk.media.player;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.Locale;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
 import tv.danmaku.ijk.media.player.annotations.CalledByNative;
 import tv.danmaku.ijk.media.player.option.AvFormatOption;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -420,15 +428,37 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     @Override
     public MediaInfo getMediaInfo() {
         MediaInfo mediaInfo = new MediaInfo();
+        mediaInfo.mMediaPlayerName = "ijkplayer";
 
-        mediaInfo.mVideoDecoder = "ijkmedia";
-        mediaInfo.mVideoDecoderImpl = "SW";
+        String videoCodecInfo = _getVideoCodecInfo();
+        if (!TextUtils.isEmpty(videoCodecInfo)) {
+            String nodes[] = videoCodecInfo.split(",");
+            if (nodes.length >= 2) {
+                mediaInfo.mVideoDecoder = nodes[0];
+                mediaInfo.mVideoDecoderImpl = nodes[1];
+            } else if (nodes.length >= 1) {
+                mediaInfo.mVideoDecoder = nodes[0];
+                mediaInfo.mVideoDecoderImpl = "";
+            }
+        }
 
-        mediaInfo.mAudioDecoder = "ijkmedia";
-        mediaInfo.mAudioDecoderImpl = "SW";
+        String audioCodecInfo = _getAudioCodecInfo();
+        if (!TextUtils.isEmpty(audioCodecInfo)) {
+            String nodes[] = audioCodecInfo.split(",");
+            if (nodes.length >= 2) {
+                mediaInfo.mAudioDecoder = nodes[0];
+                mediaInfo.mAudioDecoderImpl = nodes[1];
+            } else if (nodes.length >= 1) {
+                mediaInfo.mAudioDecoder = nodes[0];
+                mediaInfo.mAudioDecoderImpl = "";
+            }
+        }
 
         return mediaInfo;
     }
+
+    private native String _getVideoCodecInfo();
+    private native String _getAudioCodecInfo();
 
     public void setAvOption(AvFormatOption option) {
         setAvFormatOption(option.getName(), option.getValue());
@@ -466,11 +496,22 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         _setFrameDrop(frameDrop);
     }
 
+    public void setMediaCodecEnabled(boolean enabled) {
+        _setMediaCodecEnabled(enabled);
+    }
+
     private native void _setAvFormatOption(String name, String value);
     private native void _setAvCodecOption(String name, String value);
     private native void _setSwScaleOption(String name, String value);
     private native void _setOverlayFormat(int chromaFourCC);
     private native void _setFrameDrop(int frameDrop);
+    private native void _setMediaCodecEnabled(boolean enabled);
+
+    public static String getColorFormatName(int mediaCodecColorFormat) {
+        return _getColorFormatName(mediaCodecColorFormat);
+    }
+
+    private static native final String _getColorFormatName(int mediaCodecColorFormat);
 
     @Override
     public void setAudioStreamType(int streamtype) {
@@ -542,7 +583,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             case MEDIA_SET_VIDEO_SIZE:
                 player.mVideoWidth = msg.arg1;
                 player.mVideoHeight = msg.arg2;
-                player.notifyOnVideoSizeChanged(msg.arg1, msg.arg2,
+                player.notifyOnVideoSizeChanged(player.mVideoWidth, player.mVideoHeight,
                         player.mVideoSarNum, player.mVideoSarDen);
                 return;
 
@@ -571,7 +612,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             case MEDIA_SET_VIDEO_SAR:
                 player.mVideoSarNum = msg.arg1;
                 player.mVideoSarDen = msg.arg2;
-                player.notifyOnVideoSizeChanged(msg.arg1, msg.arg2,
+                player.notifyOnVideoSizeChanged(player.mVideoWidth, player.mVideoHeight,
                         player.mVideoSarNum, player.mVideoSarDen);
                 break;
 
@@ -698,5 +739,97 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             return -1;
         
         return listener.onControlResolveSegmentDuration(segment);
+    }
+
+    public static interface OnMediaCodecSelectListener {
+        public String onMediaCodecSelect(IMediaPlayer mp, String mimeType, int profile, int level);
+    }
+    private OnMediaCodecSelectListener mOnMediaCodecSelectListener;
+    public void setOnMediaCodecSelectListener(OnMediaCodecSelectListener listener) {
+        mOnMediaCodecSelectListener = listener;
+    }
+
+    public void resetListeners() {
+        super.resetListeners();
+        mOnMediaCodecSelectListener = null;
+    }
+
+    @CalledByNative
+    private static String onSelectCodec(Object weakThiz, String mimeType, int profile, int level) {
+        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
+            return null;
+
+        @SuppressWarnings("unchecked")
+        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
+        IjkMediaPlayer player = weakPlayer.get();
+        if (player == null)
+            return null;
+
+        OnMediaCodecSelectListener listener = player.mOnMediaCodecSelectListener;
+        if (listener == null)
+            listener = DefaultMediaCodecSelector.sInstance;
+
+        return listener.onMediaCodecSelect(player, mimeType, profile, level);
+    }
+
+    public static class DefaultMediaCodecSelector implements OnMediaCodecSelectListener {
+        public static DefaultMediaCodecSelector sInstance = new DefaultMediaCodecSelector();
+
+        @SuppressWarnings("deprecation")
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+        public String onMediaCodecSelect(IMediaPlayer mp, String mimeType, int profile, int level) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
+                return null;
+
+            if (TextUtils.isEmpty(mimeType))
+                return null;
+
+            Log.i(TAG, String.format(Locale.US, "onSelectCodec: mime=%s, profile=%d, level=%d", mimeType, profile, level));
+            TreeMap<Integer, IjkMediaCodecInfo> candidateCodecList = new TreeMap<Integer, IjkMediaCodecInfo>(); 
+            int numCodecs = MediaCodecList.getCodecCount();
+            for (int i = 0; i < numCodecs; i++) {
+                MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
+                Log.d(TAG, String.format(Locale.US, "  found codec: %s", codecInfo.getName()));
+                if (codecInfo.isEncoder())
+                    continue;
+
+                String[] types = codecInfo.getSupportedTypes();
+                if (types == null)
+                    continue;
+
+                for(String type: types) {
+                    if (TextUtils.isEmpty(type))
+                        continue;
+
+                    Log.d(TAG, String.format(Locale.US, "    mime: %s", type));
+                    if (!type.equalsIgnoreCase(mimeType))
+                        continue;
+
+                    IjkMediaCodecInfo candidate = IjkMediaCodecInfo.setupCandidate(codecInfo, mimeType);
+                    if (candidate == null)
+                        continue;
+
+                    candidateCodecList.put(candidate.mRank, candidate);
+                    Log.i(TAG, String.format(Locale.US, "candidate codec: %s rank=%d", codecInfo.getName(), candidate.mRank));
+                    candidate.dumpProfileLevels(mimeType);
+                }
+            }
+
+            Entry<Integer, IjkMediaCodecInfo> bestEntry = candidateCodecList.lastEntry();
+            if (bestEntry == null)
+                return null;
+
+            IjkMediaCodecInfo bestCodec = bestEntry.getValue();
+            if (bestCodec == null || bestCodec.mCodecInfo == null)
+                return null;
+
+            if (bestCodec.mRank < IjkMediaCodecInfo.RANK_LAST_CHANCE) {
+                Log.w(TAG, String.format(Locale.US, "unaccetable codec: %s", bestCodec.mCodecInfo.getName()));
+                return null;
+            }
+
+            Log.i(TAG, String.format(Locale.US, "selected codec: %s rank=%d", bestCodec.mCodecInfo.getName(), bestCodec.mRank));
+            return bestCodec.mCodecInfo.getName();
+        }
     }
 }

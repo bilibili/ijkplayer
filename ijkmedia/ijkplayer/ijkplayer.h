@@ -163,6 +163,9 @@ void            ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_c
 void            ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps);
 void            ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop);
 
+int             ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info);
+int             ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info);
+
 // preferred to be called explicity, can be called multiple times
 // NOTE: ijkmp_shutdown may block thread
 void            ijkmp_shutdown(IjkMediaPlayer *mp);
@@ -186,6 +189,7 @@ long            ijkmp_get_current_position(IjkMediaPlayer *mp);
 long            ijkmp_get_duration(IjkMediaPlayer *mp);
 long            ijkmp_get_playable_duration(IjkMediaPlayer *mp);
 
+void           *ijkmp_get_weak_thiz(IjkMediaPlayer *mp);
 void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 
 /* return < 0 if aborted, 0 if no packet and > 0 if packet.  */

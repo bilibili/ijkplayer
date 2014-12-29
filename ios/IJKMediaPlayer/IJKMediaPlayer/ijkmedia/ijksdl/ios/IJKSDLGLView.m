@@ -194,7 +194,7 @@ enum {
 	return [CAEAGLLayer class];
 }
 
-- (id) initWithFrame:(CGRect)frame withChroma:(int)chroma
+- (id) initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
@@ -213,23 +213,6 @@ enum {
             scaleFactor = 1.0f;
 
         [eaglLayer setContentsScale:scaleFactor];
-
-        switch (chroma) {
-            case SDL_FCC_I420:
-                NSLog(@"OK use I420 GL renderer");
-                _frameChroma = SDL_FCC_I420;
-                _renderer = [[IJKSDLGLRenderI420 alloc] init];
-                _bytesPerPixel = 1;
-                break;
-            case SDL_FCC_RV24:
-                NSLog(@"OK use RV24 GL renderer");
-                _frameChroma = SDL_FCC_RV24;
-                _renderer = [[IJKSDLGLRenderRV24 alloc] init];
-                _bytesPerPixel = 3;
-                break;
-            default:
-                NSLog(@"unknown chroma %d\n", chroma);
-        }
 
         _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
 
@@ -260,13 +243,6 @@ enum {
         GLenum glError = glGetError();
         if (GL_NO_ERROR != glError) {
             NSLog(@"failed to setup GL %x\n", glError);
-            if ([EAGLContext currentContext] == _context)
-                [EAGLContext setCurrentContext:nil];
-            self = nil;
-            return nil;
-        }
-
-        if (![self loadShaders]) {
             if ([EAGLContext currentContext] == _context)
                 [EAGLContext setCurrentContext:nil];
             self = nil;
@@ -512,17 +488,19 @@ exit:
 
 - (void)displayInternal: (SDL_VoutOverlay *) overlay
 {
-    if (![self setupDisplay:overlay]) {
-        NSLog(@"IJKSDLGLView: setupDisplay failed\n");
-        return;
-    }
-
     if (_context == nil) {
         NSLog(@"IJKSDLGLView: nil EAGLContext\n");
         return;
     }
 
     [EAGLContext setCurrentContext:_context];
+
+    if (![self setupDisplay:overlay]) {
+        if ([EAGLContext currentContext] == _context)
+            [EAGLContext setCurrentContext:nil];
+        NSLog(@"IJKSDLGLView: setupDisplay failed\n");
+        return;
+    }
 
     if (overlay->pitches[0] / _bytesPerPixel > _frameWidth) {
         _rightPaddingPixels = overlay->pitches[0] / _bytesPerPixel - _frameWidth;
@@ -578,6 +556,8 @@ exit:
         if (!validateProgram(_program))
         {
             NSLog(@"Failed to validate program");
+            if ([EAGLContext currentContext] == _context)
+                [EAGLContext setCurrentContext:nil];
             return;
         }
 #endif

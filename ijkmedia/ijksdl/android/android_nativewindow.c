@@ -199,22 +199,22 @@ AndroidHalFourccDescriptor *native_window_get_desc(int fourcc_or_hal)
     return NULL;
 }
 
-int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *overlay)
+int SDL_Android_NativeWindow_display_l(ANativeWindow *native_window, SDL_VoutOverlay *overlay)
 {
     int retval;
 
     if (!native_window) {
-        ALOGE("sdl_native_window_display_l: NULL native_window");
+        ALOGE("SDL_Android_NativeWindow_display_l: NULL native_window");
         return -1;
     }
 
     if (!overlay) {
-        ALOGE("sdl_native_window_display_l: NULL overlay");
+        ALOGE("SDL_Android_NativeWindow_display_l: NULL overlay");
         return -1;
     }
 
     if (overlay->w <= 0 || overlay->h <= 0) {
-        ALOGE("sdl_native_window_display_l: invalid overlay dimensions(%d, %d)", overlay->w, overlay->h);
+        ALOGE("SDL_Android_NativeWindow_display_l: invalid overlay dimensions(%d, %d)", overlay->w, overlay->h);
         return -1;
     }
 
@@ -226,13 +226,13 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
 
     AndroidHalFourccDescriptor *voutDesc = native_window_get_desc(curr_format);
     if (!voutDesc) {
-        ALOGE("sdl_native_window_display_l: unknown hal format: %d", curr_format);
+        ALOGE("SDL_Android_NativeWindow_display_l: unknown hal format: %d", curr_format);
         return -1;
     }
 
     AndroidHalFourccDescriptor *overlayDesc = native_window_get_desc(overlay->format);
     if (!overlayDesc) {
-        ALOGE("sdl_native_window_display_l: unknown overlay format: %d", overlay->format);
+        ALOGE("SDL_Android_NativeWindow_display_l: unknown overlay format: %d", overlay->format);
         return -1;
     }
 
@@ -242,7 +242,7 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
             buff_w, buff_h, (char*) &overlay->format, overlay->format);
         retval = ANativeWindow_setBuffersGeometry(native_window, buff_w, buff_h, overlayDesc->hal_format);
         if (retval < 0) {
-            ALOGE("sdl_native_window_display_l: ANativeWindow_setBuffersGeometry: failed %d", retval);
+            ALOGE("SDL_Android_NativeWindow_display_l: ANativeWindow_setBuffersGeometry: failed %d", retval);
             return retval;
         }
     }
@@ -250,7 +250,7 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
     ANativeWindow_Buffer out_buffer;
     retval = ANativeWindow_lock(native_window, &out_buffer, NULL);
     if (retval < 0) {
-        ALOGE("sdl_native_window_display_l: ANativeWindow_lock: failed %d", retval);
+        ALOGE("SDL_Android_NativeWindow_display_l: ANativeWindow_lock: failed %d", retval);
         return retval;
     }
 
@@ -273,7 +273,7 @@ int sdl_native_window_display_l(ANativeWindow *native_window, SDL_VoutOverlay *o
 
     retval = ANativeWindow_unlockAndPost(native_window);
     if (retval < 0) {
-        ALOGE("sdl_native_window_display_l: ANativeWindow_unlockAndPost: failed %d", retval);
+        ALOGE("SDL_Android_NativeWindow_display_l: ANativeWindow_unlockAndPost: failed %d", retval);
         return retval;
     }
 

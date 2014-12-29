@@ -24,9 +24,11 @@
 #ifndef FFPLAY__FF_FFPLAY_DEF_H
 #define FFPLAY__FF_FFPLAY_DEF_H
 
+#include <stdbool.h>
 #include "ff_ffinc.h"
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
+#include "ff_ffpipenode.h"
 
 #define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
 
@@ -177,6 +179,9 @@ typedef struct Decoder {
     int finished;
     int flushed;
     int packet_pending;
+    int bfsc_ret;
+    uint8_t *bfsc_data;
+
     SDL_cond *empty_queue_cond;
     int64_t start_pts;
     AVRational start_pts_tb;
@@ -389,6 +394,7 @@ static SDL_Surface *screen;
  ****************************************************************************/
 
 /* ffplayer */
+typedef struct IJKFF_Pipeline IJKFF_Pipeline;
 typedef struct FFPlayer {
     /* ffplay context */
     VideoState *is;
@@ -468,9 +474,13 @@ typedef struct FFPlayer {
     /* extra fields */
     SDL_Aout *aout;
     SDL_Vout *vout;
+    IJKFF_Pipeline *pipeline;
+    IJKFF_Pipenode *node_vdec;
     int sar_num;
     int sar_den;
 
+    char *video_codec_info;
+    char *audio_codec_info;
     Uint32 overlay_format;
 
     int last_error;
@@ -551,9 +561,13 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     /* extra fields */
     ffp->aout                   = NULL; /* reset outside */
     ffp->vout                   = NULL; /* reset outside */
+    ffp->pipeline               = NULL;
+    ffp->node_vdec              = NULL;
     ffp->sar_num                = 0;
     ffp->sar_den                = 0;
 
+    av_freep(&ffp->video_codec_info);
+    av_freep(&ffp->audio_codec_info);
     // ffp->overlay_format         = SDL_FCC_YV12;
     ffp->overlay_format         = SDL_FCC_RV32;
     // ffp->overlay_format         = SDL_FCC_RV16;
@@ -600,5 +614,8 @@ inline static void ffp_remove_msg(FFPlayer *ffp, int what) {
 }
 
 #define FFTRACE ALOGW
+
+#define AVCODEC_MODULE_NAME    "avcodec"
+#define MEDIACODEC_MODULE_NAME "MediaCodec"
 
 #endif

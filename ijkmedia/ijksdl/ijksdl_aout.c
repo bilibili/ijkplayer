@@ -75,3 +75,22 @@ void SDL_AoutFreeP(SDL_Aout **paout)
     SDL_AoutFree(*paout);
     *paout = NULL;
 }
+
+double SDL_AoutGetLatencySeconds(SDL_Aout *aout)
+{
+    if (!aout)
+        return 0;
+
+    if (aout->func_get_latency_seconds)
+        return aout->func_get_latency_seconds(aout);
+
+    return aout->minimal_latency_seconds;
+}
+
+void SDL_AoutSetDefaultLatencySeconds(SDL_Aout *aout, double latency)
+{
+    if (aout && aout->func_set_default_latency_seconds)
+        aout->func_set_default_latency_seconds(aout, latency);
+
+    aout->minimal_latency_seconds = latency;
+}

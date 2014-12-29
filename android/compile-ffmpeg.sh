@@ -26,12 +26,14 @@ set -e
 set +x
 
 FF_ALL_ARCHS="armv5 armv7a x86 arm64-v8a"
+FF_ACT_ARCHS="armv5 armv7a x86"
 
 echo_archs() {
     echo "===================="
     echo "[*] check archs"
     echo "===================="
     echo "FF_ALL_ARCHS = $FF_ALL_ARCHS"
+    echo "FF_ACT_ARCHS = $FF_ACT_ARCHS"
     echo ""
 }
 
@@ -47,7 +49,7 @@ case "$FF_TARGET" in
     ;;
     all)
         echo_archs
-        for ARCH in $FF_ALL_ARCHS
+        for ARCH in $FF_ACT_ARCHS
         do
             sh tools/do-compile-ffmpeg.sh $ARCH
         done

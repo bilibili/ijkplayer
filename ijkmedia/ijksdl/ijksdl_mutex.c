@@ -99,6 +99,15 @@ void SDL_DestroyCond(SDL_cond *cond)
     }
 }
 
+void SDL_DestroyCondP(SDL_cond **cond)
+{
+
+    if (cond) {
+        SDL_DestroyCond(*cond);
+        *cond = NULL;
+    }
+}
+
 int SDL_CondSignal(SDL_cond *cond)
 {
     assert(cond);

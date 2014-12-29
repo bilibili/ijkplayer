@@ -24,6 +24,7 @@
     options.pauseInBackground = YES;
 
     options.timeout         = -1;
+    options.userAgent = @"";
 
     return options;
 }
@@ -47,6 +48,9 @@
         [self setFormatOption:@"timeout"
                     withInt64:self.timeout
                            to:mediaPlayer];
+    }
+    if ([self.userAgent isEqualToString:@""] == NO) {
+        [self setFormatOption:@"user-agent" withString:self.userAgent to:mediaPlayer];
     }
 }
 
@@ -92,6 +96,16 @@
                            [optionName UTF8String],
                            [[NSString stringWithFormat:@"%lld", value] UTF8String]);
 }
+
+- (void)setFormatOption:(NSString *)optionName
+              withString:(NSString*)value
+                     to:(IjkMediaPlayer *)mediaPlayer
+{
+    ijkmp_set_format_option(mediaPlayer,
+                            [optionName UTF8String],
+                            [value UTF8String]);
+}
+
 
 - (void)setCodecOption:(NSString *)optionName
              withInt64:(int64_t)value

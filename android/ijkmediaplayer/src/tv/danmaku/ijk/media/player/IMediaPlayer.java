@@ -18,7 +18,6 @@ package tv.danmaku.ijk.media.player;
 
 import java.io.IOException;
 
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
@@ -110,15 +109,15 @@ public interface IMediaPlayer {
      * Listeners
      */
     public static interface OnPreparedListener {
-        void onPrepared(IMediaPlayer mp);
+        public void onPrepared(IMediaPlayer mp);
     }
 
     public static interface OnCompletionListener {
-        void onCompletion(IMediaPlayer mp);
+        public void onCompletion(IMediaPlayer mp);
     }
 
     public static interface OnBufferingUpdateListener {
-        void onBufferingUpdate(IMediaPlayer mp, int percent);
+        public void onBufferingUpdate(IMediaPlayer mp, int percent);
     }
 
     public static interface OnSeekCompleteListener {
@@ -131,11 +130,11 @@ public interface IMediaPlayer {
     }
 
     public static interface OnErrorListener {
-        boolean onError(IMediaPlayer mp, int what, int extra);
+        public boolean onError(IMediaPlayer mp, int what, int extra);
     }
 
     public static interface OnInfoListener {
-        boolean onInfo(IMediaPlayer mp, int what, int extra);
+        public boolean onInfo(IMediaPlayer mp, int what, int extra);
     }
 
     /*--------------------
