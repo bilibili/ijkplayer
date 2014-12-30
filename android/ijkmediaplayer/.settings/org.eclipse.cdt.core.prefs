@@ -1,4 +1,9 @@
 eclipse.preferences.version=1
+environment/project/com.android.toolchain.gcc.1255826610/ANDROID_NDK/delimiter=\:
+environment/project/com.android.toolchain.gcc.1255826610/ANDROID_NDK/operation=replace
+environment/project/com.android.toolchain.gcc.1255826610/ANDROID_NDK/value=/opt/android/android-ndk
+environment/project/com.android.toolchain.gcc.1255826610/append=true
+environment/project/com.android.toolchain.gcc.1255826610/appendContributed=true
 org.eclipse.cdt.core.formatter.alignment_for_arguments_in_method_invocation=16
 org.eclipse.cdt.core.formatter.alignment_for_assignment=16
 org.eclipse.cdt.core.formatter.alignment_for_base_clause_in_type_declaration=0
