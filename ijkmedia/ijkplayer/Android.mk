@@ -36,6 +36,7 @@ LOCAL_SRC_FILES += ff_cmdutils.c
 LOCAL_SRC_FILES += ff_ffplay.c
 LOCAL_SRC_FILES += ff_ffpipeline.c
 LOCAL_SRC_FILES += ff_ffpipenode.c
+LOCAL_SRC_FILES += ijkmeta.c
 LOCAL_SRC_FILES += ijkplayer.c
 
 LOCAL_SRC_FILES += pipeline/ffpipeline_ffplay.c
