@@ -42,6 +42,7 @@
     id<IJKMediaSegmentResolver> _segmentResolver;
 
     IjkMediaPlayer *_mediaPlayer;
+    IJKSDLGLView *_glView;
     IJKFFMoviePlayerMessagePool *_msgPool;
 
     NSInteger _videoWidth;
@@ -182,10 +183,10 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init video sink
 //        int chroma = SDL_FCC_RV24;
         int chroma = SDL_FCC_I420;
-        IJKSDLGLView *glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-        self->_view = glView;
+        _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        _view   = _glView;
 
-        ijkmp_ios_set_glview(_mediaPlayer, glView);
+        ijkmp_ios_set_glview(_mediaPlayer, _glView);
         ijkmp_set_overlay_format(_mediaPlayer, chroma);
 
         // init audio sink
@@ -418,6 +419,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     }
 
     return nil;
+}
+
+- (CGFloat)fpsAtOutput
+{
+    return _glView.fps;
 }
 
 inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *rawMeta, const char *name, NSString *defaultValue)

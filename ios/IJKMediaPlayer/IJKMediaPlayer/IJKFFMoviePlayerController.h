@@ -78,6 +78,7 @@
 + (void)setLogReport:(BOOL)preferLogReport;
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
+@property(nonatomic, readonly) CGFloat fpsAtOutput;
 
 @end
 
