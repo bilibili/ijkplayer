@@ -35,6 +35,7 @@ import android.graphics.SurfaceTexture;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -454,6 +455,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             }
         }
 
+        mediaInfo.mExtra = _getMediaMeta();
         return mediaInfo;
     }
 
@@ -506,6 +508,11 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     private native void _setOverlayFormat(int chromaFourCC);
     private native void _setFrameDrop(int frameDrop);
     private native void _setMediaCodecEnabled(boolean enabled);
+
+    public Bundle getMediaMeta() {
+        return _getMediaMeta();
+    }
+    private native Bundle _getMediaMeta();
 
     public static String getColorFormatName(int mediaCodecColorFormat) {
         return _getColorFormatName(mediaCodecColorFormat);

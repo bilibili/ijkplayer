@@ -1,5 +1,5 @@
 /*****************************************************************************
- * android_build.c
+ * android_arraylist.h
  *****************************************************************************
  *
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,33 +21,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "android_build.h"
+#ifndef IJKSDL_ANDROID__ANDROID_ARRAYLIST_H
+#define IJKSDL_ANDROID__ANDROID_ARRAYLIST_H
 
-#include "ijksdl_android_jni.h"
+#include "ijksdl_inc_internal_android.h"
 
-typedef struct ASDK_Build_VERSION_fields_t {
-    jclass clazz;
+int ASDK_ArrayList__loadClass(JNIEnv *env);
 
-    jfieldID jfid_SDK_INT;
-} ASDK_Build_VERSION_fields_t;
-static ASDK_Build_VERSION_fields_t g_clazz_VERSION;
+jobject  ASDK_ArrayList__init(JNIEnv *env);
+jboolean ASDK_ArrayList__add(JNIEnv *env, jobject thiz, jobject elem);
 
-int ASDK_Build__loadClass(JNIEnv *env)
-{
-    IJK_FIND_JAVA_CLASS( env, g_clazz_VERSION.clazz, "android/os/Build$VERSION");
-
-    IJK_FIND_JAVA_STATIC_FIELD(env, g_clazz_VERSION.jfid_SDK_INT,   g_clazz_VERSION.clazz,
-        "SDK_INT",   "I");
-
-    return 0;
-}
-
-int ASDK_Build_VERSION__SDK_INT(JNIEnv *env)
-{
-    jint sdk_int = (*env)->GetStaticIntField(env, g_clazz_VERSION.clazz, g_clazz_VERSION.jfid_SDK_INT);
-    if (SDL_JNI_RethrowException(env)) {
-        return 0;
-    }
-
-    return sdk_int;
-}
+#endif

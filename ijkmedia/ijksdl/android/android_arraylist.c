@@ -1,5 +1,5 @@
 /*****************************************************************************
- * android_build.c
+ * android_arraylist.c
  *****************************************************************************
  *
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
@@ -21,33 +21,50 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "android_build.h"
+#include "android_arraylist.h"
 
 #include "ijksdl_android_jni.h"
 
-typedef struct ASDK_Build_VERSION_fields_t {
+typedef struct ASDK_ArrayList_fields_t {
     jclass clazz;
 
-    jfieldID jfid_SDK_INT;
-} ASDK_Build_VERSION_fields_t;
-static ASDK_Build_VERSION_fields_t g_clazz_VERSION;
+    jmethodID jmid_init;
+    jmethodID jmid_add;
+} ASDK_ArrayList_fields_t;
+static ASDK_ArrayList_fields_t g_clazz;
 
-int ASDK_Build__loadClass(JNIEnv *env)
+int ASDK_ArrayList__loadClass(JNIEnv *env)
 {
-    IJK_FIND_JAVA_CLASS( env, g_clazz_VERSION.clazz, "android/os/Build$VERSION");
+    IJK_FIND_JAVA_CLASS( env, g_clazz.clazz, "java/util/ArrayList");
 
-    IJK_FIND_JAVA_STATIC_FIELD(env, g_clazz_VERSION.jfid_SDK_INT,   g_clazz_VERSION.clazz,
-        "SDK_INT",   "I");
+    IJK_FIND_JAVA_METHOD(env, g_clazz.jmid_init,    g_clazz.clazz,
+        "<init>",                   "()V");
+    IJK_FIND_JAVA_METHOD(env, g_clazz.jmid_add,     g_clazz.clazz,
+        "add",                      "(Ljava/lang/Object;)Z");
 
     return 0;
 }
 
-int ASDK_Build_VERSION__SDK_INT(JNIEnv *env)
+jobject ASDK_ArrayList__init(JNIEnv *env)
 {
-    jint sdk_int = (*env)->GetStaticIntField(env, g_clazz_VERSION.clazz, g_clazz_VERSION.jfid_SDK_INT);
-    if (SDL_JNI_RethrowException(env)) {
-        return 0;
+    jobject local_ref = (*env)->NewObject(env, g_clazz.clazz, g_clazz.jmid_init);
+    if (SDL_JNI_RethrowException(env) || local_ref) {
+        return NULL;
     }
 
-    return sdk_int;
+    return local_ref;
 }
+
+jboolean ASDK_ArrayList__add(JNIEnv *env, jobject thiz, jobject elem)
+{
+    jboolean ret = (*env)->CallBooleanMethod(env, thiz, g_clazz.jmid_add, elem);
+    if (SDL_JNI_RethrowException(env)) {
+        ret = JNI_FALSE;
+        goto fail;
+    }
+
+    ret = JNI_TRUE;
+fail:
+    return ret;
+}
+
