@@ -48,7 +48,7 @@ int ASDK_ArrayList__loadClass(JNIEnv *env)
 jobject ASDK_ArrayList__init(JNIEnv *env)
 {
     jobject local_ref = (*env)->NewObject(env, g_clazz.clazz, g_clazz.jmid_init);
-    if (SDL_JNI_RethrowException(env) || local_ref) {
+    if (SDL_JNI_RethrowException(env) || !local_ref) {
         return NULL;
     }
 

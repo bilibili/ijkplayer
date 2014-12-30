@@ -52,7 +52,7 @@ int ASDK_Bundle__loadClass(JNIEnv *env)
 jobject ASDK_Bundle__init(JNIEnv *env)
 {
     jobject local_ref = (*env)->NewObject(env, g_clazz.clazz, g_clazz.jmid_init);
-    if (SDL_JNI_RethrowException(env) || local_ref) {
+    if (SDL_JNI_RethrowException(env) || !local_ref) {
         return NULL;
     }
 
@@ -66,13 +66,13 @@ void ASDK_Bundle__putString_c(JNIEnv *env, jobject thiz, const char *key, const 
     jstring jvalue = NULL;
 
     jkey = (*env)->NewStringUTF(env, key);
-    if (SDL_JNI_RethrowException(env) || jkey) {
+    if (SDL_JNI_RethrowException(env) || !jkey) {
         goto fail;
     }
 
     if (value) {
         jvalue = (*env)->NewStringUTF(env, value);
-        if (SDL_JNI_RethrowException(env) || jvalue) {
+        if (SDL_JNI_RethrowException(env) || !jvalue) {
             goto fail;
         }
     }
@@ -94,11 +94,11 @@ void ASDK_Bundle__putParcelableArrayList_c(JNIEnv *env, jobject thiz, const char
     jstring jkey = NULL;
 
     jkey = (*env)->NewStringUTF(env, key);
-    if (SDL_JNI_RethrowException(env) || jkey) {
+    if (SDL_JNI_RethrowException(env) || !jkey) {
         goto fail;
     }
 
-    (*env)->CallVoidMethod(env, thiz, g_clazz.jmid_putParcelableArrayList, key, value);
+    (*env)->CallVoidMethod(env, thiz, g_clazz.jmid_putParcelableArrayList, jkey, value);
     if (SDL_JNI_RethrowException(env)) {
         goto fail;
     }

@@ -455,7 +455,11 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             }
         }
 
-        mediaInfo.mExtra = _getMediaMeta();
+        try {
+            mediaInfo.mMeta = IjkMediaMeta.parse(_getMediaMeta());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         return mediaInfo;
     }
 

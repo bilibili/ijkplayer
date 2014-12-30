@@ -16,8 +16,6 @@
 
 package tv.danmaku.ijk.media.player;
 
-import android.os.Bundle;
-
 public class MediaInfo {
     public String mMediaPlayerName;
 
@@ -27,5 +25,5 @@ public class MediaInfo {
     public String mAudioDecoder;
     public String mAudioDecoderImpl;
 
-    public Bundle mExtra;
+    public IjkMediaMeta mMeta;
 }

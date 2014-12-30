@@ -237,12 +237,12 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
 
                     if (avctx->sample_rate)
                         ijkmeta_set_int64_l(stream_meta, IJKM_KEY_SAMPLE_RATE, avctx->sample_rate);
+                    if (avctx->channel_layout)
+                        ijkmeta_set_int64_l(stream_meta, IJKM_KEY_CHANNEL_LAYOUT, avctx->channel_layout);
                     break;
                 }
                 default: {
                     ijkmeta_set_string_l(stream_meta, IJKM_KEY_TYPE, IJKM_VAL_TYPE__UNKNOWN);
-
-                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_CHANNEL_LAYOUT, avctx->channel_layout);
                     break;
                 }
             }
