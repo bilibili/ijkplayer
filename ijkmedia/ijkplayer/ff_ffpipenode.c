@@ -69,6 +69,7 @@ void ffpipenode_free_p(IJKFF_Pipenode **node)
         return;
 
     ffpipenode_free(*node);
+    *node = NULL;
 }
 
 int ffpipenode_run_sync(IJKFF_Pipenode *node)
