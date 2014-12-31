@@ -279,6 +279,8 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 
     IjkMediaPlayer_release(env, thiz);
     IjkMediaPlayer_native_setup(env, thiz, weak_thiz);
+
+    ijkmp_dec_ref_p(&mp);
 }
 
 static void
