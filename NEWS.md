@@ -1,3 +1,12 @@
+tag next
+--------------------------------
+
+tag n0.2.2:
+--------------------------------
+ffmpeg: switch to ffmpeg n2.5
+android: fix leak in jni
+player: retrieve media informations
+
 tag n0.2.1:
 --------------------------------
 android: support MediaCodec (API 16+)

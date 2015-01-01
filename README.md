@@ -73,7 +73,7 @@ sudo dpkg-reconfigure dash
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest n0.2.1
+git checkout -B latest n0.2.2
 # or for master
 # git checkout master
 
@@ -97,7 +97,7 @@ cd android
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
-git checkout -B latest n0.2.1
+git checkout -B latest n0.2.2
 # or for master
 # git checkout master
 
