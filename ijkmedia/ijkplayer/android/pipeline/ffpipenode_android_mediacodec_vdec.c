@@ -436,7 +436,6 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 SDL_CondSignal(opaque->acodec_cond);
                 SDL_UnlockMutex(opaque->acodec_mutex);
                 d->finished = 0;
-                d->flushed = 1;
                 d->next_pts = d->start_pts;
                 d->next_pts_tb = d->start_pts_tb;
             }

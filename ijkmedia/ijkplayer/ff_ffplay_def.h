@@ -177,7 +177,6 @@ typedef struct Decoder {
     AVCodecContext *avctx;
     int pkt_serial;
     int finished;
-    int flushed;
     int packet_pending;
     int bfsc_ret;
     uint8_t *bfsc_data;
