@@ -2280,7 +2280,14 @@ static int read_thread(void *arg)
     int h264_stream_count = 0;
     int first_h264_stream = -1;
     for (i = 0; i < ic->nb_streams; i++) {
-        ic->streams[i]->discard = AVDISCARD_ALL;
+        AVStream *st = ic->streams[i];
+        enum AVMediaType type = st->codec->codec_type;
+        st->discard = AVDISCARD_ALL;
+        if (ffp->wanted_stream_spec[type] && st_index[type] == -1)
+            if (avformat_match_stream_specifier(ic, st, ffp->wanted_stream_spec[type]) > 0)
+                st_index[type] = i;
+
+        // choose first h264
         AVCodecContext *codec = ic->streams[i]->codec;
         if (codec->codec_type == AVMEDIA_TYPE_VIDEO) {
             video_stream_count++;
@@ -2291,25 +2298,25 @@ static int read_thread(void *arg)
             }
         }
     }
-    if (video_stream_count > 1 && ffp->wanted_stream[AVMEDIA_TYPE_VIDEO] < 0) {
-        ffp->wanted_stream[AVMEDIA_TYPE_VIDEO] = first_h264_stream;
+    if (video_stream_count > 1 && st_index[AVMEDIA_TYPE_VIDEO] < 0) {
+        st_index[AVMEDIA_TYPE_VIDEO] = first_h264_stream;
         av_log(NULL, AV_LOG_WARNING, "multiple video stream found, prefer first h264 stream: %d\n", first_h264_stream);
     }
     if (!ffp->video_disable)
         st_index[AVMEDIA_TYPE_VIDEO] =
             av_find_best_stream(ic, AVMEDIA_TYPE_VIDEO,
-                                ffp->wanted_stream[AVMEDIA_TYPE_VIDEO], -1, NULL, 0);
+                                st_index[AVMEDIA_TYPE_VIDEO], -1, NULL, 0);
     if (!ffp->audio_disable)
         st_index[AVMEDIA_TYPE_AUDIO] =
             av_find_best_stream(ic, AVMEDIA_TYPE_AUDIO,
-                                ffp->wanted_stream[AVMEDIA_TYPE_AUDIO],
+                                st_index[AVMEDIA_TYPE_AUDIO],
                                 st_index[AVMEDIA_TYPE_VIDEO],
                                 NULL, 0);
 #ifdef FFP_MERGE
     if (!ffp->video_disable && !ffp->subtitle_disable)
         st_index[AVMEDIA_TYPE_SUBTITLE] =
             av_find_best_stream(ic, AVMEDIA_TYPE_SUBTITLE,
-                                ffp->wanted_stream[AVMEDIA_TYPE_SUBTITLE],
+                                st_index[AVMEDIA_TYPE_SUBTITLE],
                                 (st_index[AVMEDIA_TYPE_AUDIO] >= 0 ?
                                  st_index[AVMEDIA_TYPE_AUDIO] :
                                  st_index[AVMEDIA_TYPE_VIDEO]),
