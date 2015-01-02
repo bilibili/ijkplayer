@@ -1,5 +1,5 @@
 /*****************************************************************************
- * ijksdl_android.h
+ * ijksdl_aout_android_opensles.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,15 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL_ANDROID__IJKSDL_ANDROID_H
-#define IJKSDL_ANDROID__IJKSDL_ANDROID_H
+#ifndef IJKSDL_ANDROID__IJKSDL_AOUT_ANDROID_OPENSLES_H
+#define IJKSDL_ANDROID__IJKSDL_AOUT_ANDROID_OPENSLES_H
 
-#include "../ijksdl.h"
+#include "../ijksdl_aout.h"
 
-#include "ijksdl_aout_android_audiotrack.h"
-#include "ijksdl_aout_android_opensles.h"
-
-#include "ijksdl_vout_android_nativewindow.h"
-#include "ijksdl_vout_android_surface.h"
+SDL_Aout *SDL_AoutAndroid_CreateForOpenSLES();
 
 #endif

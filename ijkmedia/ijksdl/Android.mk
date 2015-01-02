@@ -20,7 +20,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_CFLAGS += -std=c99
-LOCAL_LDLIBS += -llog -landroid
+LOCAL_LDLIBS += -llog -landroid -lOpenSLES
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
@@ -49,6 +49,7 @@ LOCAL_SRC_FILES += android/android_bytebuffer.c
 LOCAL_SRC_FILES += android/android_nativewindow.c
 LOCAL_SRC_FILES += android/ijksdl_android_jni.c
 LOCAL_SRC_FILES += android/ijksdl_aout_android_audiotrack.c
+LOCAL_SRC_FILES += android/ijksdl_aout_android_opensles.c
 LOCAL_SRC_FILES += android/ijksdl_codec_android_mediacodec_java.c
 LOCAL_SRC_FILES += android/ijksdl_codec_android_mediacodec.c
 LOCAL_SRC_FILES += android/ijksdl_codec_android_mediadef.c

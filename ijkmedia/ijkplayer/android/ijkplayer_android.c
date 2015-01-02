@@ -40,6 +40,7 @@ IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*))
     if (!mp->ffplayer->vout)
         goto fail;
 
+    //mp->ffplayer->aout = SDL_AoutAndroid_CreateForOpenSLES();
     mp->ffplayer->aout = SDL_AoutAndroid_CreateForAudioTrack();
     if (!mp->ffplayer->aout)
         goto fail;
