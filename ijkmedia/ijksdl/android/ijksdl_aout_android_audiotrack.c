@@ -58,7 +58,7 @@ typedef struct SDL_Aout_Opaque {
     SDL_Thread _audio_tid;
 } SDL_Aout_Opaque;
 
-int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
+static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
     SDL_Android_AudioTrack *atrack = opaque->atrack;
@@ -115,7 +115,7 @@ int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
     return 0;
 }
 
-int aout_thread(void *arg)
+static int aout_thread(void *arg)
 {
     SDL_Aout *aout = arg;
     // SDL_Aout_Opaque *opaque = aout->opaque;
@@ -129,7 +129,7 @@ int aout_thread(void *arg)
     return aout_thread_n(env, aout);
 }
 
-int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
+static int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
     assert(desired);
     SDL_Aout_Opaque *opaque = aout->opaque;
@@ -175,7 +175,7 @@ int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_A
     return 0;
 }
 
-int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
+static int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
     // SDL_Aout_Opaque *opaque = aout->opaque;
     JNIEnv *env = NULL;
@@ -187,7 +187,7 @@ int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtai
     return aout_open_audio_n(env, aout, desired, obtained);
 }
 
-void aout_pause_audio(SDL_Aout *aout, int pause_on)
+static void aout_pause_audio(SDL_Aout *aout, int pause_on)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
 
@@ -199,7 +199,7 @@ void aout_pause_audio(SDL_Aout *aout, int pause_on)
     SDL_UnlockMutex(opaque->wakeup_mutex);
 }
 
-void aout_flush_audio(SDL_Aout *aout)
+static void aout_flush_audio(SDL_Aout *aout)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
     SDL_LockMutex(opaque->wakeup_mutex);
@@ -209,7 +209,7 @@ void aout_flush_audio(SDL_Aout *aout)
     SDL_UnlockMutex(opaque->wakeup_mutex);
 }
 
-void aout_set_volume(SDL_Aout *aout, float left_volume, float right_volume)
+static void aout_set_volume(SDL_Aout *aout, float left_volume, float right_volume)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
     SDL_LockMutex(opaque->wakeup_mutex);
@@ -221,7 +221,7 @@ void aout_set_volume(SDL_Aout *aout, float left_volume, float right_volume)
     SDL_UnlockMutex(opaque->wakeup_mutex);
 }
 
-void aout_close_audio(SDL_Aout *aout)
+static void aout_close_audio(SDL_Aout *aout)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
 
@@ -235,7 +235,7 @@ void aout_close_audio(SDL_Aout *aout)
     opaque->audio_tid = NULL;
 }
 
-void aout_free_l(SDL_Aout *aout)
+static void aout_free_l(SDL_Aout *aout)
 {
     if (!aout)
         return;
