@@ -196,7 +196,6 @@ typedef struct VideoState {
     SDL_Thread *audio_tid;
     SDL_Thread _audio_tid;
     AVInputFormat *iformat;
-    int no_background;
     int abort_request;
     int force_refresh;
     int paused;
