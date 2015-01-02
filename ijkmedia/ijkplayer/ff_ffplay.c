@@ -2276,6 +2276,9 @@ static int read_thread(void *arg)
 
     is->realtime = is_realtime(ic);
 
+    if (true || ffp->show_status)
+        av_dump_format(ic, 0, is->filename, 0);
+
     int video_stream_count = 0;
     int h264_stream_count = 0;
     int first_h264_stream = -1;
@@ -2322,7 +2325,6 @@ static int read_thread(void *arg)
                                  st_index[AVMEDIA_TYPE_VIDEO]),
                                 NULL, 0);
 #endif
-    av_dump_format(ic, 0, is->filename, 0);
     ijkmeta_set_avformat_context_l(ffp->meta, ic);
     if (st_index[AVMEDIA_TYPE_VIDEO] >= 0)
         ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_VIDEO_STREAM, st_index[AVMEDIA_TYPE_VIDEO]);
