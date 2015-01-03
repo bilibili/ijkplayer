@@ -100,11 +100,14 @@ static int aout_thread_n(SDL_Aout *aout)
     SLAndroidSimpleBufferQueueItf  slBufferQueueItf = opaque->slBufferQueueItf;
     SDL_AudioCallback              audio_cblk       = opaque->spec.callback;
     void                          *userdata         = opaque->spec.userdata;
+    uint8_t                       *next_buffer      = NULL;
+    int                            next_buffer_index = 0;
+    size_t                         bytes_per_buffer = opaque->bytes_per_buffer;
 
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
     if (!opaque->abort_request && !opaque->pause_on)
-        (*opaque->slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_PLAYING);
+        (*slPlayItf)->SetPlayState(slPlayItf, SL_PLAYSTATE_PLAYING);
 
     while (!opaque->abort_request) {
         SLAndroidSimpleBufferQueueState slState = {0};
@@ -119,10 +122,10 @@ static int aout_thread_n(SDL_Aout *aout)
         if (!opaque->abort_request && (opaque->pause_on || slState.count >= OPENSLES_BUFFERS)) {
             while (!opaque->abort_request && (opaque->pause_on || slState.count >= OPENSLES_BUFFERS)) {
                 if (!opaque->pause_on) {
-                    (*slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_PLAYING);
+                    (*slPlayItf)->SetPlayState(slPlayItf, SL_PLAYSTATE_PLAYING);
                 }
                 SDL_CondWaitTimeout(opaque->wakeup_cond, opaque->wakeup_mutex, 1000);
-                slRet = (*slBufferQueueItf)->GetState(slBufferQueueItf, &slState);
+                SLresult slRet = (*slBufferQueueItf)->GetState(slBufferQueueItf, &slState);
                 if (slRet != SL_RESULT_SUCCESS) {
                     ALOGE("%s: slBufferQueueItf->GetState() failed\n", __func__);
                     SDL_UnlockMutex(opaque->wakeup_mutex);
@@ -130,16 +133,16 @@ static int aout_thread_n(SDL_Aout *aout)
             }
             if (!opaque->abort_request) {
                 if (opaque->pause_on) {
-                    (*slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_PAUSED);
+                    (*slPlayItf)->SetPlayState(slPlayItf, SL_PLAYSTATE_PAUSED);
                     continue;
                 } else {
-                    (*slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_PLAYING);
+                    (*slPlayItf)->SetPlayState(slPlayItf, SL_PLAYSTATE_PLAYING);
                 }
             }
         }
         if (opaque->need_flush) {
             opaque->need_flush = 0;
-            (*slBufferQueueItf)->Clear(opaque->slBufferQueueItf);
+            (*slBufferQueueItf)->Clear(slBufferQueueItf);
         }
 #if 0
         if (opaque->need_set_volume) {
@@ -149,18 +152,20 @@ static int aout_thread_n(SDL_Aout *aout)
 #endif
         SDL_UnlockMutex(opaque->wakeup_mutex);
 
-        audio_cblk(userdata, opaque->buffer, opaque->bytes_per_buffer);
+        next_buffer = opaque->buffer + next_buffer_index * bytes_per_buffer;
+        next_buffer_index = (next_buffer_index + 1) % OPENSLES_BUFFERS;
+        audio_cblk(userdata, next_buffer, bytes_per_buffer);
         if (opaque->need_flush) {
-            (*slBufferQueueItf)->Clear(opaque->slBufferQueueItf);
+            (*slBufferQueueItf)->Clear(slBufferQueueItf);
             opaque->need_flush = false;
         }
 
         if (opaque->need_flush) {
             ALOGE("flush");
             opaque->need_flush = 0;
-            (*slBufferQueueItf)->Clear(opaque->slBufferQueueItf);
+            (*slBufferQueueItf)->Clear(slBufferQueueItf);
         } else {
-            slRet = (*slBufferQueueItf)->Enqueue(slBufferQueueItf, opaque->buffer, opaque->buffer_capacity);
+            slRet = (*slBufferQueueItf)->Enqueue(slBufferQueueItf, next_buffer, bytes_per_buffer);
             if (slRet == SL_RESULT_SUCCESS) {
                 // do nothing
             } else if (slRet == SL_RESULT_BUFFER_INSUFFICIENT) {
@@ -316,7 +321,7 @@ static int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec
     opaque->milli_per_buffer  = OPENSLES_BUFLEN;
     opaque->frames_per_buffer = opaque->milli_per_buffer * desired->freq / 1000;
     opaque->bytes_per_buffer  = opaque->bytes_per_frame * opaque->frames_per_buffer;
-    opaque->buffer_capacity   = opaque->bytes_per_buffer;
+    opaque->buffer_capacity   = OPENSLES_BUFFERS * opaque->bytes_per_buffer;
     ALOGI("OpenSL-ES: bytes_per_frame  = %d\n", (int)opaque->bytes_per_frame);
     ALOGI("OpenSL-ES: milli_per_buffer = %d\n", (int)opaque->milli_per_buffer);
     ALOGI("OpenSL-ES: frame_per_buffer = %d\n", (int)opaque->frames_per_buffer);
@@ -330,7 +335,7 @@ static int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec
     // enqueue empty buffer to start play
     memset(opaque->buffer, 0, opaque->buffer_capacity);
     for(int i = 0; i < OPENSLES_BUFFERS; ++i) {
-        ret = (*opaque->slBufferQueueItf)->Enqueue(opaque->slBufferQueueItf, opaque->buffer, opaque->buffer_capacity);
+        ret = (*opaque->slBufferQueueItf)->Enqueue(opaque->slBufferQueueItf, opaque->buffer + i * opaque->bytes_per_buffer, opaque->bytes_per_buffer);
         CHECK_OPENSL_ERROR(ret, "%s: slBufferQueueItf->Enqueue(000...) failed", __func__);
     }
 
