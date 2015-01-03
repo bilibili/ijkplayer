@@ -66,6 +66,10 @@ typedef struct SDL_Aout_Opaque {
     SLVolumeItf                     slVolumeItf;
     SLPlayItf                       slPlayItf;
 
+    volatile bool  need_set_volume;
+    volatile float left_volume;
+    volatile float right_volume;
+
     volatile bool  abort_request;
     volatile bool  pause_on;
     volatile bool  need_flush;
@@ -93,11 +97,25 @@ typedef struct SDL_Aout_Opaque {
         } \
     } while (0)
 
+static inline SLmillibel android_amplification_to_sles(float volumeLevel) {
+    // FIXME use the FX Framework conversions
+    if (volumeLevel < 0.00000001)
+        return SL_MILLIBEL_MIN;
+
+    SLmillibel mb = lroundf(2000.f * log10f(volumeLevel));
+    if (mb < SL_MILLIBEL_MIN)
+        mb = SL_MILLIBEL_MIN;
+    else if (mb > 0)
+        mb = 0; /* maximum supported level could be higher: GetMaxVolumeLevel */
+    return mb;
+}
+
 static int aout_thread_n(SDL_Aout *aout)
 {
     SDL_Aout_Opaque               *opaque           = aout->opaque;
     SLPlayItf                      slPlayItf        = opaque->slPlayItf;
     SLAndroidSimpleBufferQueueItf  slBufferQueueItf = opaque->slBufferQueueItf;
+    SLVolumeItf                    slVolumeItf      = opaque->slVolumeItf;
     SDL_AudioCallback              audio_cblk       = opaque->spec.callback;
     void                          *userdata         = opaque->spec.userdata;
     uint8_t                       *next_buffer      = NULL;
@@ -150,6 +168,16 @@ static int aout_thread_n(SDL_Aout *aout)
             // FIXME: set volume here
         }
 #endif
+        if (opaque->need_set_volume) {
+            opaque->need_set_volume = 0;
+            SLmillibel level = android_amplification_to_sles((opaque->left_volume + opaque->right_volume) / 2);
+            ALOGI("slVolumeItf->SetVolumeLevel((%f, %f) -> %d)\n", opaque->left_volume, opaque->right_volume, (int)level);
+            slRet = (*slVolumeItf)->SetVolumeLevel(slVolumeItf, level);
+            if (slRet != SL_RESULT_SUCCESS) {
+                ALOGE("slVolumeItf->SetVolumeLevel failed %d\n", slRet);
+                // just ignore error
+            }
+        }
         SDL_UnlockMutex(opaque->wakeup_mutex);
 
         next_buffer = opaque->buffer + next_buffer_index * bytes_per_buffer;
@@ -375,6 +403,18 @@ static void aout_flush_audio(SDL_Aout *aout)
     SDL_UnlockMutex(opaque->wakeup_mutex);
 }
 
+static void aout_set_volume(SDL_Aout *aout, float left_volume, float right_volume)
+{
+    SDL_Aout_Opaque *opaque = aout->opaque;
+    SDL_LockMutex(opaque->wakeup_mutex);
+    ALOGI("aout_set_volume(%f, %f)", left_volume, right_volume);
+    opaque->left_volume = left_volume;
+    opaque->right_volume = right_volume;
+    opaque->need_set_volume = 1;
+    SDL_CondSignal(opaque->wakeup_cond);
+    SDL_UnlockMutex(opaque->wakeup_mutex);
+}
+
 static double aout_get_latency_seconds(SDL_Aout *aout)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
@@ -431,6 +471,7 @@ SDL_Aout *SDL_AoutAndroid_CreateForOpenSLES()
     aout->pause_audio = aout_pause_audio;
     aout->flush_audio = aout_flush_audio;
     aout->close_audio = aout_close_audio;
+    aout->set_volume  = aout_set_volume;
     aout->func_get_latency_seconds = aout_get_latency_seconds;
 
     return aout;
