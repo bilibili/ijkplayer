@@ -37,6 +37,10 @@
 #define SDLTRACE(...)
 #endif
 
+static SDL_Class g_audiotrack_class = {
+    .name = "AudioTrack",
+};
+
 typedef struct SDL_Aout_Opaque {
     SDL_cond *wakeup_cond;
     SDL_mutex *wakeup_mutex;
@@ -262,17 +266,26 @@ SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack()
         return NULL;
 
     SDL_Aout_Opaque *opaque = aout->opaque;
-    opaque->wakeup_cond = SDL_CreateCond();
+    opaque->wakeup_cond  = SDL_CreateCond();
     opaque->wakeup_mutex = SDL_CreateMutex();
 
-    aout->free_l = aout_free_l;
-    aout->open_audio = aout_open_audio;
-    aout->pause_audio = aout_pause_audio;
-    aout->flush_audio = aout_flush_audio;
-    aout->set_volume = aout_set_volume;
-    aout->close_audio = aout_close_audio;
+    aout->opaque_class = &g_audiotrack_class;
+    aout->free_l       = aout_free_l;
+    aout->open_audio   = aout_open_audio;
+    aout->pause_audio  = aout_pause_audio;
+    aout->flush_audio  = aout_flush_audio;
+    aout->set_volume   = aout_set_volume;
+    aout->close_audio  = aout_close_audio;
 
     return aout;
+}
+
+bool SDL_AoutAndroid_IsObjectOfAudioTrack(SDL_Aout *aout)
+{
+    if (aout)
+        return false;
+
+    return aout->opaque_class == &g_audiotrack_class;
 }
 
 void SDL_Init_AoutAndroid(JNIEnv *env)

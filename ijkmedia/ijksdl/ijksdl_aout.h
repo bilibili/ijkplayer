@@ -25,6 +25,7 @@
 #define IJKSDL__IJKSDL_AOUT_H
 
 #include "ijksdl_audio.h"
+#include "ijksdl_class.h"
 #include "ijksdl_mutex.h"
 
 typedef struct SDL_Aout_Opaque SDL_Aout_Opaque;
@@ -33,6 +34,7 @@ typedef struct SDL_Aout {
     SDL_mutex *mutex;
     double     minimal_latency_seconds;
 
+    SDL_Class       *opaque_class;
     SDL_Aout_Opaque *opaque;
     void (*free_l)(SDL_Aout *vout);
     int (*open_audio)(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained);

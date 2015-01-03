@@ -506,12 +506,17 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         _setMediaCodecEnabled(enabled);
     }
 
+    public void setOpenSLESEnabled(boolean enabled) {
+        _setOpenSLESEnabled(enabled);
+    }
+
     private native void _setAvFormatOption(String name, String value);
     private native void _setAvCodecOption(String name, String value);
     private native void _setSwScaleOption(String name, String value);
     private native void _setOverlayFormat(int chromaFourCC);
     private native void _setFrameDrop(int frameDrop);
     private native void _setMediaCodecEnabled(boolean enabled);
+    private native void _setOpenSLESEnabled(boolean enabled);
 
     public Bundle getMediaMeta() {
         return _getMediaMeta();

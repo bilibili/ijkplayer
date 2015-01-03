@@ -40,6 +40,10 @@
 #define OPENSLES_BUFFERS 255 /* maximum number of buffers */
 #define OPENSLES_BUFLEN  10 /* ms */
 
+static SDL_Class g_opensles_class = {
+    .name = "OpenSLES",
+};
+
 typedef struct SDL_Aout_Opaque {
     SDL_mutex  *mutex;
 
@@ -466,16 +470,25 @@ SDL_Aout *SDL_AoutAndroid_CreateForOpenSLES()
     ret = (*slOutputMixObject)->Realize(slOutputMixObject, SL_BOOLEAN_FALSE);
     CHECK_OPENSL_ERROR(ret, "%s: slOutputMixObject->Realize() failed", __func__);
 
-    aout->free_l      = aout_free_l;
-    aout->open_audio  = aout_open_audio;
-    aout->pause_audio = aout_pause_audio;
-    aout->flush_audio = aout_flush_audio;
-    aout->close_audio = aout_close_audio;
-    aout->set_volume  = aout_set_volume;
+    aout->free_l       = aout_free_l;
+    aout->opaque_class = &g_opensles_class;
+    aout->open_audio   = aout_open_audio;
+    aout->pause_audio  = aout_pause_audio;
+    aout->flush_audio  = aout_flush_audio;
+    aout->close_audio  = aout_close_audio;
+    aout->set_volume   = aout_set_volume;
     aout->func_get_latency_seconds = aout_get_latency_seconds;
 
     return aout;
 fail:
     aout_free_l(aout);
     return NULL;
+}
+
+bool SDL_AoutAndroid_IsObjectOfOpenSLES(SDL_Aout *aout)
+{
+    if (aout)
+        return false;
+
+    return aout->opaque_class == &g_opensles_class;
 }
