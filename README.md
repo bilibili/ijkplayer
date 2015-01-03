@@ -28,7 +28,7 @@ ijkplayer
  - cpu: ARMv7a, x86, ARMv5 (not tested on real devices)
  - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - video output: NativeWindow
- - audio output: AudioTrack
+ - audio output: OpenSL ES, AudioTrack
  - hw decoder: MediaCodec
 - iOS
  - platform: iOS 5.1.1~8.1.x
