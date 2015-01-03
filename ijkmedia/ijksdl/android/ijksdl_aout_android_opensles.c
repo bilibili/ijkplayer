@@ -52,8 +52,9 @@ typedef struct SDL_Aout_Opaque {
     SDL_AudioSpec    spec;
     SLDataFormat_PCM format_pcm;
     int              bytes_per_frame;
-    int              frame_per_copy;
-    int              bytes_per_copy;
+    int              milli_per_buffer;
+    int              frames_per_buffer;
+    int              bytes_per_buffer;
 
     SLObjectItf                     slObject;
     SLEngineItf                     slEngine;
@@ -99,7 +100,6 @@ static int aout_thread_n(SDL_Aout *aout)
     SLAndroidSimpleBufferQueueItf  slBufferQueueItf = opaque->slBufferQueueItf;
     SDL_AudioCallback              audio_cblk       = opaque->spec.callback;
     void                          *userdata         = opaque->spec.userdata;
-    uint8_t                       *buffer           = opaque->buffer;
 
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
@@ -117,8 +117,10 @@ static int aout_thread_n(SDL_Aout *aout)
 
         SDL_LockMutex(opaque->wakeup_mutex);
         if (!opaque->abort_request && (opaque->pause_on || slState.count >= OPENSLES_BUFFERS)) {
-            (*slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_PAUSED);
             while (!opaque->abort_request && (opaque->pause_on || slState.count >= OPENSLES_BUFFERS)) {
+                if (!opaque->pause_on) {
+                    (*slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_PLAYING);
+                }
                 SDL_CondWaitTimeout(opaque->wakeup_cond, opaque->wakeup_mutex, 1000);
                 slRet = (*slBufferQueueItf)->GetState(slBufferQueueItf, &slState);
                 if (slRet != SL_RESULT_SUCCESS) {
@@ -147,13 +149,14 @@ static int aout_thread_n(SDL_Aout *aout)
 #endif
         SDL_UnlockMutex(opaque->wakeup_mutex);
 
-        audio_cblk(userdata, opaque->buffer, opaque->buffer_capacity);
+        audio_cblk(userdata, opaque->buffer, opaque->bytes_per_buffer);
         if (opaque->need_flush) {
             (*slBufferQueueItf)->Clear(opaque->slBufferQueueItf);
             opaque->need_flush = false;
         }
 
         if (opaque->need_flush) {
+            ALOGE("flush");
             opaque->need_flush = 0;
             (*slBufferQueueItf)->Clear(opaque->slBufferQueueItf);
         } else {
@@ -164,7 +167,7 @@ static int aout_thread_n(SDL_Aout *aout)
                 // don't retry, just pass through
                 ALOGE("SL_RESULT_BUFFER_INSUFFICIENT\n");
             } else {
-                ALOGE("slBufferQueueItf->Enqueue() = %d\n", slRet);
+                ALOGE("slBufferQueueItf->Enqueue() = %d\n", (int)slRet);
                 break;
             }
         }
@@ -191,7 +194,6 @@ static void aout_opensles_callback(SLAndroidSimpleBufferQueueItf caller, void *p
         opaque->is_running = true;
         SDL_CondSignal(opaque->wakeup_cond);
         SDL_UnlockMutex(opaque->wakeup_mutex);
-        // ALOGI("callback: %d", value + 1);
     }
 }
 
@@ -310,14 +312,16 @@ static int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec
     // ret = (*opaque->slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_PLAYING);
     // CHECK_OPENSL_ERROR(ret, "%s: slBufferQueueItf->slPlayItf() failed", __func__);
 
-    opaque->bytes_per_frame = desired->channels * format_pcm->bitsPerSample / 8;
-    opaque->frame_per_copy  = desired->freq / 100; // 10 ms per copy
-    opaque->bytes_per_copy  = opaque->bytes_per_frame * opaque->frame_per_copy;
-    opaque->buffer_capacity = opaque->bytes_per_copy;
-    ALOGI("OpenSL-ES: frame_per_copy  = %d\n", (int)opaque->frame_per_copy);
-    ALOGI("OpenSL-ES: bytes_per_frame = %d\n", (int)opaque->bytes_per_frame);
-    ALOGI("OpenSL-ES: bytes_per_copy  = %d\n", (int)opaque->bytes_per_copy);
-    ALOGI("OpenSL-ES: buffer_capacity = %d\n", (int)opaque->buffer_capacity);
+    opaque->bytes_per_frame   = desired->channels * format_pcm->bitsPerSample / 8;
+    opaque->milli_per_buffer  = OPENSLES_BUFLEN;
+    opaque->frames_per_buffer = opaque->milli_per_buffer * desired->freq / 1000;
+    opaque->bytes_per_buffer  = opaque->bytes_per_frame * opaque->frames_per_buffer;
+    opaque->buffer_capacity   = opaque->bytes_per_buffer;
+    ALOGI("OpenSL-ES: bytes_per_frame  = %d\n", (int)opaque->bytes_per_frame);
+    ALOGI("OpenSL-ES: milli_per_buffer = %d\n", (int)opaque->milli_per_buffer);
+    ALOGI("OpenSL-ES: frame_per_buffer = %d\n", (int)opaque->frames_per_buffer);
+    ALOGI("OpenSL-ES: bytes_per_buffer = %d\n", (int)opaque->bytes_per_buffer);
+    ALOGI("OpenSL-ES: buffer_capacity  = %d\n", (int)opaque->buffer_capacity);
     opaque->buffer          = malloc(opaque->buffer_capacity);
     CHECK_COND_ERROR(opaque->buffer, "%s: failed to alloc buffer", __func__);
 
@@ -366,6 +370,21 @@ static void aout_flush_audio(SDL_Aout *aout)
     SDL_UnlockMutex(opaque->wakeup_mutex);
 }
 
+static double aout_get_latency_seconds(SDL_Aout *aout)
+{
+    SDL_Aout_Opaque *opaque = aout->opaque;
+
+    SLAndroidSimpleBufferQueueState state = {0};
+    SLresult slRet = (*opaque->slBufferQueueItf)->GetState(opaque->slBufferQueueItf, &state);
+    if (slRet != SL_RESULT_SUCCESS) {
+        ALOGE("%s failed\n", __func__);
+        return ((double)opaque->milli_per_buffer) * OPENSLES_BUFFERS / 1000;
+    }
+
+    double latency = ((double)opaque->milli_per_buffer) * state.count / 1000;
+    return latency;
+}
+
 SDL_Aout *SDL_AoutAndroid_CreateForOpenSLES()
 {
     SDLTRACE("%s\n", __func__);
@@ -402,11 +421,12 @@ SDL_Aout *SDL_AoutAndroid_CreateForOpenSLES()
     ret = (*slOutputMixObject)->Realize(slOutputMixObject, SL_BOOLEAN_FALSE);
     CHECK_OPENSL_ERROR(ret, "%s: slOutputMixObject->Realize() failed", __func__);
 
-    aout->free_l = aout_free_l;
-    aout->open_audio = aout_open_audio;
+    aout->free_l      = aout_free_l;
+    aout->open_audio  = aout_open_audio;
     aout->pause_audio = aout_pause_audio;
     aout->flush_audio = aout_flush_audio;
     aout->close_audio = aout_close_audio;
+    aout->func_get_latency_seconds = aout_get_latency_seconds;
 
     return aout;
 fail:
