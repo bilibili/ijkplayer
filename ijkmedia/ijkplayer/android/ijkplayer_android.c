@@ -138,12 +138,14 @@ void ijkmp_android_set_opensles_enabled(IjkMediaPlayer *mp, bool enabled)
     if (mp) {
         if (enabled) {
             if (!SDL_AoutAndroid_IsObjectOfOpenSLES(mp->ffplayer->aout)) {
-                ALOGI("recreat aout for OpenSL ES\n");
+                ALOGI("recreate aout for OpenSL ES\n");
+                SDL_AoutFreeP(&mp->ffplayer->aout);
                 mp->ffplayer->aout = SDL_AoutAndroid_CreateForOpenSLES();
             }
         } else {
             if (!SDL_AoutAndroid_IsObjectOfAudioTrack(mp->ffplayer->aout)) {
-                ALOGI("recreat aout for AudioTrack\n");
+                ALOGI("recreate aout for AudioTrack\n");
+                SDL_AoutFreeP(&mp->ffplayer->aout);
                 mp->ffplayer->aout = SDL_AoutAndroid_CreateForAudioTrack();
             }
         }
