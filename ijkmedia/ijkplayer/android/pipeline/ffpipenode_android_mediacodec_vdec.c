@@ -783,7 +783,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
             AMC_Buf_Out *buf_out;
 
             if (opaque->off_buf_out < opaque->n_buf_out) {
-                ALOGD("filling buffer... %d", opaque->off_buf_out);
+                // ALOGD("filling buffer... %d", opaque->off_buf_out);
                 buf_out = &opaque->amc_buf_out[opaque->off_buf_out++];
                 buf_out->port = output_buffer_index;
                 buf_out->info = bufferInfo;
@@ -826,7 +826,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                     }
                     /* need to discard current buffer */
                     if (i < 0) {
-                        ALOGE("buffer too small, drop picture!");
+                        // ALOGE("buffer too small, drop picture!");
                         SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
                         goto done;
                     }
