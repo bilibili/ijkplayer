@@ -60,6 +60,9 @@ public class IjkMediaCodecInfo {
         //      Exynos 3110
         //          Nexus S
         sKnownCodecList.put("OMX.SEC.AVC.Decoder", RANK_TESTED);
+        // OMX.SEC.avcdec doesn't reorder output pictures on GT-9100
+        sKnownCodecList.put("OMX.SEC.avc.dec", RANK_TESTED - 1);
+        sKnownCodecList.put("OMX.SEC.avcdec", RANK_TESTED - 2);
 
         // ----- TI -----
         //      TI OMAP4460
