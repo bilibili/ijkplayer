@@ -45,8 +45,6 @@ static SDL_Class g_opensles_class = {
 };
 
 typedef struct SDL_Aout_Opaque {
-    SDL_mutex  *mutex;
-
     SDL_cond   *wakeup_cond;
     SDL_mutex  *wakeup_mutex;
 
@@ -249,6 +247,8 @@ static void aout_close_audio(SDL_Aout *aout)
     SDL_WaitThread(opaque->audio_tid, NULL);
     opaque->audio_tid = NULL;
 
+    freep(&opaque->buffer);
+
     (*opaque->slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_STOPPED);
     (*opaque->slBufferQueueItf)->Clear(opaque->slBufferQueueItf);
 
@@ -276,6 +276,9 @@ static void aout_free_l(SDL_Aout *aout)
     opaque->slEngine = NULL;
     (*opaque->slObject)->Destroy(opaque->slObject);
     opaque->slObject = NULL;
+
+    SDL_DestroyCondP(&opaque->wakeup_cond);
+    SDL_DestroyCondP(&opaque->wakeup_mutex);
 
     SDL_Aout_FreeInternal(aout);
 }
