@@ -84,11 +84,12 @@ typedef struct SDL_Android_AudioTrack SDL_Android_AudioTrack;
 int SDL_Android_AudioTrack_global_init(JNIEnv *env);
 
 SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_spec(JNIEnv *env, SDL_Android_AudioTrack_Spec *spec);
-SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_sdl_spec(JNIEnv *env, SDL_AudioSpec *sdl_spec);
+SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_sdl_spec(JNIEnv *env, const SDL_AudioSpec *sdl_spec);
 void SDL_Android_AudioTrack_free(JNIEnv *env, SDL_Android_AudioTrack* atrack);
 
 void SDL_Android_AudioTrack_get_target_spec(SDL_Android_AudioTrack* atrack, SDL_AudioSpec *spec);
 int SDL_Android_AudioTrack_get_min_buffer_size(SDL_Android_AudioTrack* atrack);
+int audiotrack_get_native_output_sample_rate(JNIEnv *env/* = NULL */);
 
 void SDL_Android_AudioTrack_play(JNIEnv *env, SDL_Android_AudioTrack *atrack);
 void SDL_Android_AudioTrack_pause(JNIEnv *env, SDL_Android_AudioTrack *atrack);

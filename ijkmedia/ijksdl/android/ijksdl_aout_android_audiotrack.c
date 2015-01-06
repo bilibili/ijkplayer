@@ -109,7 +109,10 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
             opaque->need_flush = 0;
             SDL_Android_AudioTrack_flush(env, atrack);
         } else {
-            SDL_Android_AudioTrack_write_byte(env, atrack, buffer, copy_size);
+            int written = SDL_Android_AudioTrack_write_byte(env, atrack, buffer, copy_size);
+            if (written != copy_size) {
+                ALOGW("AudioTrack: not all data copied %d/%d", (int)written, (int)copy_size);
+            }
         }
 
         // TODO: 1 if callback return -1 or 0
@@ -133,7 +136,7 @@ static int aout_thread(void *arg)
     return aout_thread_n(env, aout);
 }
 
-static int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
+static int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
     assert(desired);
     SDL_Aout_Opaque *opaque = aout->opaque;
@@ -179,7 +182,7 @@ static int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, SDL_AudioSpec *desired
     return 0;
 }
 
-static int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
+static int aout_open_audio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
     // SDL_Aout_Opaque *opaque = aout->opaque;
     JNIEnv *env = NULL;

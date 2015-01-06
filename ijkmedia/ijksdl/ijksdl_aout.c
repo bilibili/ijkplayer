@@ -24,7 +24,7 @@
 #include "ijksdl_aout.h"
 #include <stdlib.h>
 
-int SDL_AoutOpenAudio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
+int SDL_AoutOpenAudio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
     if (aout && desired && aout->open_audio)
         return aout->open_audio(aout, desired, obtained);

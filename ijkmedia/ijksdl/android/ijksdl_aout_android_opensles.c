@@ -31,6 +31,7 @@
 #include "../ijksdl_thread.h"
 #include "../ijksdl_aout_internal.h"
 #include "ijksdl_android_jni.h"
+#include "android_audiotrack.h"
 
 #ifdef SDLTRACE
 #undef SDLTRACE
@@ -295,7 +296,7 @@ static void aout_free_l(SDL_Aout *aout)
     SDL_Aout_FreeInternal(aout);
 }
 
-static int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
+static int aout_open_audio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
     SDLTRACE("%s\n", __func__);
     assert(desired);
@@ -313,9 +314,27 @@ static int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec
         OPENSLES_BUFFERS
     };
 
+    int native_sample_rate = audiotrack_get_native_output_sample_rate(NULL);
+    ALOGI("OpenSL-ES: native sample rate %d Hz\n", native_sample_rate);
+
     CHECK_COND_ERROR((desired->format == AUDIO_S16SYS), "%s: not AUDIO_S16SYS", __func__);
     CHECK_COND_ERROR((desired->channels == 2), "%s: not 2 channel", __func__);
     CHECK_COND_ERROR((desired->freq >= 8000 && desired->freq <= 48000), "%s: unsupport freq %d Hz", __func__, desired->freq);
+    if (SDL_Android_GetApiLevel() < IJK_API_21_LOLLIPOP &&
+        native_sample_rate > 0 &&
+        desired->freq < native_sample_rate) {
+        // Don't try to play back a sample rate higher than the native one,
+        // since OpenSL ES will try to use the fast path, which AudioFlinger
+        // will reject (fast path can't do resampling), and will end up with
+        // too small buffers for the resampling. See http://b.android.com/59453
+        // for details. This bug is still present in 4.4. If it is fixed later
+        // this workaround could be made conditional.
+        //
+        // by VLC/android_opensles.c
+        ALOGW("OpenSL-ES: force resample %d to native sample rate %d\n", format_pcm->samplesPerSec / 1000, native_sample_rate);
+        format_pcm->samplesPerSec = native_sample_rate * 1000;
+    }
+
     format_pcm->formatType       = SL_DATAFORMAT_PCM;
     format_pcm->numChannels      = desired->channels;
     format_pcm->samplesPerSec    = desired->freq * 1000; // milli Hz
@@ -364,18 +383,18 @@ static int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec
     // ret = (*opaque->slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_PLAYING);
     // CHECK_OPENSL_ERROR(ret, "%s: slBufferQueueItf->slPlayItf() failed", __func__);
 
-    opaque->bytes_per_frame   = desired->channels * format_pcm->bitsPerSample / 8;
+    opaque->bytes_per_frame   = format_pcm->numChannels * format_pcm->bitsPerSample / 8;
     opaque->milli_per_buffer  = OPENSLES_BUFLEN;
-    opaque->frames_per_buffer = opaque->milli_per_buffer * desired->freq / 1000;
+    opaque->frames_per_buffer = opaque->milli_per_buffer * format_pcm->samplesPerSec / 1000000; // samplesPerSec is in milli
     opaque->bytes_per_buffer  = opaque->bytes_per_frame * opaque->frames_per_buffer;
     opaque->buffer_capacity   = OPENSLES_BUFFERS * opaque->bytes_per_buffer;
-    ALOGI("OpenSL-ES: bytes_per_frame  = %d\n", (int)opaque->bytes_per_frame);
-    ALOGI("OpenSL-ES: milli_per_buffer = %d\n", (int)opaque->milli_per_buffer);
-    ALOGI("OpenSL-ES: frame_per_buffer = %d\n", (int)opaque->frames_per_buffer);
-    ALOGI("OpenSL-ES: bytes_per_buffer = %d\n", (int)opaque->bytes_per_buffer);
-    ALOGI("OpenSL-ES: buffer_capacity  = %d\n", (int)opaque->buffer_capacity);
+    ALOGI("OpenSL-ES: bytes_per_frame  = %d bytes\n",  (int)opaque->bytes_per_frame);
+    ALOGI("OpenSL-ES: milli_per_buffer = %d ms\n",     (int)opaque->milli_per_buffer);
+    ALOGI("OpenSL-ES: frame_per_buffer = %d frames\n", (int)opaque->frames_per_buffer);
+    ALOGI("OpenSL-ES: bytes_per_buffer = %d bytes\n",  (int)opaque->bytes_per_buffer);
+    ALOGI("OpenSL-ES: buffer_capacity  = %d bytes\n",  (int)opaque->buffer_capacity);
     opaque->buffer          = malloc(opaque->buffer_capacity);
-    CHECK_COND_ERROR(opaque->buffer, "%s: failed to alloc buffer", __func__);
+    CHECK_COND_ERROR(opaque->buffer, "%s: failed to alloc buffer %d\n", __func__, (int)opaque->buffer_capacity);
 
     // (*opaque->slPlayItf)->SetPositionUpdatePeriod(opaque->slPlayItf, 1000);
 
@@ -391,9 +410,11 @@ static int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec
     opaque->audio_tid = SDL_CreateThreadEx(&opaque->_audio_tid, aout_thread, aout, "ff_aout_opensles");
     CHECK_COND_ERROR(opaque->audio_tid, "%s: failed to SDL_CreateThreadEx", __func__);
 
-    desired->size = opaque->buffer_capacity;
-    if (obtained)
-        *obtained = *desired;
+    if (obtained) {
+        *obtained      = *desired;
+        obtained->size = opaque->buffer_capacity;
+        obtained->freq = format_pcm->samplesPerSec / 1000;
+    }
 
     return opaque->buffer_capacity;
 fail:

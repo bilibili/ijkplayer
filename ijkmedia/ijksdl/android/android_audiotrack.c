@@ -24,6 +24,7 @@
 #include "android_audiotrack.h"
 
 #include <assert.h>
+#include "ijksdl_android_jni.h"
 #include "ijkutil/ijkutil.h"
 #include "../ijksdl_inc_internal.h"
 #include "../ijksdl_audio.h"
@@ -235,8 +236,15 @@ static float audiotrack_get_min_volume(JNIEnv *env)
 }
 
 #define STREAM_MUSIC 3
-static int audiotrack_get_native_output_sample_rate(JNIEnv *env)
+int audiotrack_get_native_output_sample_rate(JNIEnv *env)
 {
+    if (!env) {
+        if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+            ALOGE("%s: SetupThreadEnv failed", __func__);
+            return -1;
+        }
+    }
+
     SDLTRACE("audiotrack_get_native_output_sample_rate");
     int retval = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.getNativeOutputSampleRate, STREAM_MUSIC);
     if ((*env)->ExceptionCheck(env)) {
@@ -356,7 +364,7 @@ SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_spec(JNIEnv *env, SDL_An
     return atrack;
 }
 
-SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_sdl_spec(JNIEnv *env, SDL_AudioSpec *sdl_spec)
+SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_sdl_spec(JNIEnv *env, const SDL_AudioSpec *sdl_spec)
 {
     SDL_Android_AudioTrack_Spec atrack_spec;
 
