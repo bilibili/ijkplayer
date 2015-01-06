@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 #include <assert.h>
+#include <math.h>
 #include <jni.h>
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
@@ -176,7 +177,7 @@ static int aout_thread_n(SDL_Aout *aout)
             ALOGI("slVolumeItf->SetVolumeLevel((%f, %f) -> %d)\n", opaque->left_volume, opaque->right_volume, (int)level);
             slRet = (*slVolumeItf)->SetVolumeLevel(slVolumeItf, level);
             if (slRet != SL_RESULT_SUCCESS) {
-                ALOGE("slVolumeItf->SetVolumeLevel failed %d\n", slRet);
+                ALOGE("slVolumeItf->SetVolumeLevel failed %d\n", (int)slRet);
                 // just ignore error
             }
         }
@@ -236,7 +237,7 @@ static void aout_close_audio(SDL_Aout *aout)
 {
     SDLTRACE("aout_close_audio()\n");
     SDL_Aout_Opaque *opaque = aout->opaque;
-    if (!opaque->slPlayerObject)
+    if (!opaque)
         return;
 
     SDL_LockMutex(opaque->wakeup_mutex);
@@ -247,17 +248,24 @@ static void aout_close_audio(SDL_Aout *aout)
     SDL_WaitThread(opaque->audio_tid, NULL);
     opaque->audio_tid = NULL;
 
-    freep(&opaque->buffer);
+    freep((void **)&opaque->buffer);
 
-    (*opaque->slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_STOPPED);
-    (*opaque->slBufferQueueItf)->Clear(opaque->slBufferQueueItf);
+    if (opaque->slPlayItf)
+        (*opaque->slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_STOPPED);
+    if (opaque->slBufferQueueItf)
+        (*opaque->slBufferQueueItf)->Clear(opaque->slBufferQueueItf);
 
-    opaque->slBufferQueueItf = NULL;
-    opaque->slVolumeItf      = NULL;
-    opaque->slPlayItf        = NULL;
+    if (opaque->slBufferQueueItf)
+        opaque->slBufferQueueItf = NULL;
+    if (opaque->slVolumeItf)
+        opaque->slVolumeItf      = NULL;
+    if (opaque->slPlayItf)
+        opaque->slPlayItf        = NULL;
 
-    (*opaque->slPlayerObject)->Destroy(opaque->slPlayerObject);
-    opaque->slPlayerObject = NULL;
+    if (opaque->slPlayerObject) {
+        (*opaque->slPlayerObject)->Destroy(opaque->slPlayerObject);
+        opaque->slPlayerObject = NULL;
+    }
 }
 
 static void aout_free_l(SDL_Aout *aout)
@@ -270,15 +278,19 @@ static void aout_free_l(SDL_Aout *aout)
 
     SDL_Aout_Opaque *opaque = aout->opaque;
 
-    (*opaque->slOutputMixObject)->Destroy(opaque->slOutputMixObject);
-    opaque->slOutputMixObject = NULL;
+    if (opaque->slOutputMixObject) {
+        (*opaque->slOutputMixObject)->Destroy(opaque->slOutputMixObject);
+        opaque->slOutputMixObject = NULL;
+    }
 
     opaque->slEngine = NULL;
-    (*opaque->slObject)->Destroy(opaque->slObject);
-    opaque->slObject = NULL;
+    if (opaque->slObject) {
+        (*opaque->slObject)->Destroy(opaque->slObject);
+        opaque->slObject = NULL;
+    }
 
     SDL_DestroyCondP(&opaque->wakeup_cond);
-    SDL_DestroyCondP(&opaque->wakeup_mutex);
+    SDL_DestroyMutexP(&opaque->wakeup_mutex);
 
     SDL_Aout_FreeInternal(aout);
 }
