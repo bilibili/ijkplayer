@@ -391,6 +391,7 @@ static int aout_open_audio(SDL_Aout *aout, SDL_AudioSpec *desired, SDL_AudioSpec
     opaque->audio_tid = SDL_CreateThreadEx(&opaque->_audio_tid, aout_thread, aout, "ff_aout_opensles");
     CHECK_COND_ERROR(opaque->audio_tid, "%s: failed to SDL_CreateThreadEx", __func__);
 
+    desired->size = opaque->buffer_capacity;
     if (obtained)
         *obtained = *desired;
 
