@@ -270,7 +270,7 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
         if (new_packet < 0)
             return -1;
         else if (new_packet == 0) {
-            if (!*finished)
+            if (q->is_buffer_indicator && !*finished)
                 ffp_toggle_buffering(ffp, 1);
             new_packet = packet_queue_get(q, pkt, 1, serial);
             if (new_packet < 0)
@@ -2366,6 +2366,15 @@ static int read_thread(void *arg)
         ret = -1;
         goto fail;
     }
+    if (is->audio_stream >= 0) {
+        is->audioq.is_buffer_indicator = 1;
+        is->buffer_indicator_queue = &is->audioq;
+    } else if (is->video_stream >= 0) {
+        is->videoq.is_buffer_indicator = 1;
+        is->buffer_indicator_queue = &is->videoq;
+    } else {
+        assert("invalid streams");
+    }
 
     if (ffp->infinite_buffer < 0 && is->realtime)
         ffp->infinite_buffer = 1;
@@ -3254,7 +3263,7 @@ void ffp_check_buffering_l(FFPlayer *ffp)
     int need_start_buffering  = 0;
     int audio_time_base_valid = is->audio_st && is->audio_st->time_base.den > 0 && is->audio_st->time_base.num > 0;
     int video_time_base_valid = is->video_st && is->video_st->time_base.den > 0 && is->video_st->time_base.num > 0;
-    int64_t buf_time_position        = -1;
+    int64_t buf_time_position = -1;
     if (hwm_in_ms > 0) {
         int     cached_duration_in_ms = -1;
         int64_t audio_cached_duration = -1;
@@ -3349,7 +3358,10 @@ void ffp_check_buffering_l(FFPlayer *ffp)
             hwm_in_ms = ffp->max_high_water_mark_in_ms;
 
         ffp->current_high_water_mark_in_ms = hwm_in_ms;
-        ffp_toggle_buffering(ffp, 0);
+
+        if (is->buffer_indicator_queue && is->buffer_indicator_queue->nb_packets > 0) {
+            ffp_toggle_buffering(ffp, 0);
+        }
     }
 }
 

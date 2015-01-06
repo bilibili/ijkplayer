@@ -104,6 +104,8 @@ typedef struct PacketQueue {
     MyAVPacketList *recycle_pkt;
     int recycle_count;
     int alloc_count;
+
+    int is_buffer_indicator;
 } PacketQueue;
 
 // #define VIDEO_PICTURE_QUEUE_SIZE 3
@@ -322,6 +324,8 @@ typedef struct VideoState {
     int dropping_frame;
     int is_video_high_fps; // above 30fps
     int is_video_high_res; // above 1080p
+
+    PacketQueue *buffer_indicator_queue;
 } VideoState;
 
 /* options specified by the user */
