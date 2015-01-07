@@ -27,6 +27,7 @@
 #import "IJKSDLGLRender.h"
 #import "IJKSDLGLRenderI420.h"
 #import "IJKSDLGLRenderRV24.h"
+#import "IJKSDLGLRenderNV12.h"
 #include "ijksdl/ijksdl_timer.h"
 
 #define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
@@ -353,6 +354,11 @@ enum {
     if (_renderer == nil) {
         if (overlay == nil) {
             return NO;
+        } else if (overlay->format == SDL_FCC_NV12) {
+            _frameChroma = overlay->format;
+            _renderer = [[IJKSDLGLRenderNV12 alloc] init];
+            _bytesPerPixel = 1;
+            NSLog(@"OK use NV12 GL renderer");
         } else if (overlay->format == SDL_FCC_I420) {
             _frameChroma = overlay->format;
             _renderer = [[IJKSDLGLRenderI420 alloc] init];
