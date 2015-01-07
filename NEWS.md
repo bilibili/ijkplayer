@@ -1,6 +1,7 @@
 tag next
 --------------------------------
 android: support OpenSL ES
+ios: support NV12 Render
 
 tag n0.2.2:
 --------------------------------

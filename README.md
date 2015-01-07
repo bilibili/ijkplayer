@@ -34,7 +34,7 @@ ijkplayer
  - platform: iOS 5.1.1~8.1.x
  - cpu: ARMv7, ARMv7s, ARM64, i386, x86_64
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
- - video-output: OpenGL ES 2.0 (I420/YV12 shaders)
+ - video-output: OpenGL ES 2.0 (I420/YV12/NV12 shaders)
  - audio-output: AudioQueue, AudioUnit
 
 ### TODO
