@@ -152,14 +152,12 @@ static int aout_thread_n(SDL_Aout *aout)
                     ALOGE("%s: slBufferQueueItf->GetState() failed\n", __func__);
                     SDL_UnlockMutex(opaque->wakeup_mutex);
                 }
-            }
-            if (!opaque->abort_request) {
-                if (opaque->pause_on) {
+
+                if (opaque->pause_on)
                     (*slPlayItf)->SetPlayState(slPlayItf, SL_PLAYSTATE_PAUSED);
-                    continue;
-                } else {
-                    (*slPlayItf)->SetPlayState(slPlayItf, SL_PLAYSTATE_PLAYING);
-                }
+            }
+            if (!opaque->abort_request && !opaque->pause_on) {
+                (*slPlayItf)->SetPlayState(slPlayItf, SL_PLAYSTATE_PLAYING);
             }
         }
         if (opaque->need_flush) {
