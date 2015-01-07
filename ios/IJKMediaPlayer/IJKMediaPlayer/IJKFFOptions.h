@@ -30,10 +30,12 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 @property(nonatomic) IJKAVDiscard skipLoopFilter;
 @property(nonatomic) IJKAVDiscard skipFrame;
 
-@property(nonatomic) int frameBufferCount;
-@property(nonatomic) int maxFps;
-@property(nonatomic) int frameDrop;
-@property(nonatomic) BOOL pauseInBackground;
+@property(nonatomic) int    frameBufferCount;
+@property(nonatomic) int    maxFps;
+@property(nonatomic) int    frameDrop;
+@property(nonatomic) BOOL   pauseInBackground;
+@property(nonatomic) BOOL   videotoolboxEnabled;
+@property(nonatomic) int    frameMaxWidth;
 
 @property(nonatomic, strong) NSString* userAgent;
 

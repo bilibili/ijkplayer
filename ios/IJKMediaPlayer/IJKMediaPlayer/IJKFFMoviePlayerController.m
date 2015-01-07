@@ -440,7 +440,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
     const char *value = ijkmeta_get_string_l(rawMeta, name);
     if (value) {
         [meta setObject:[NSString stringWithUTF8String:value] forKey:key];
-    } else if (defaultValue){
+    } else if (defaultValue) {
         [meta setObject:defaultValue forKey:key];
     } else {
         [meta removeObjectForKey:key];

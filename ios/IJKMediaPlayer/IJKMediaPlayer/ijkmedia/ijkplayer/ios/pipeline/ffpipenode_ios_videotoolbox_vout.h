@@ -1,5 +1,5 @@
 /*
- * IJKSDLGLRenderNV12.h
+ * ffpipenode_ios_videotoolbox_vout.h
  *
  * Copyright (c) 2014 Zhou Quan <zhouqicy@gmail.com>
  *
@@ -20,9 +20,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <Foundation/Foundation.h>
-#import "IJKSDLGLRender.h"
+#ifndef FFPLAY__FF_FFPIPENODE_IOS_VIDEOTOOLBOX_VOUT_H
+#define FFPLAY__FF_FFPIPENODE_IOS_VIDEOTOOLBOX_VOUT_H
 
-@interface IJKSDLGLRenderNV12 : NSObject<IJKSDLGLRender>
+#include "ijkplayer/ff_ffpipenode.h"
 
-@end
+typedef struct FFPlayer FFPlayer;
+
+IJKFF_Pipenode *ffpipenode_create_video_output_from_ios_videotoolbox(FFPlayer *ffp);
+
+#endif

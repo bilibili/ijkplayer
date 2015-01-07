@@ -1,9 +1,7 @@
 /*
  * IJKSDLGLRenderNV12.m
  *
- * Copyright (c) 2014 Zhou Quan <bbcallen@gmail.com>
- *
- * based on https://github.com/kolyvan/kxmovie
+ * Copyright (c) 2014 Zhou Quan <zhouqicy@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -55,9 +53,9 @@ static NSString *const g_nv12FragmentShaderString = IJK_SHADER_STRING
 
 // BT.709, which is the standard for HDTV.
 static const GLfloat kColorConversion709[] = {
-    1.164,  1.164, 1.164,
-    0.0, -0.213, 2.112,
-    1.793, -0.533,   0.0,
+    1.164,  1.164,  1.164,
+    0.0,   -0.213,  2.112,
+    1.793, -0.533,  0.0,
 };
 
 
@@ -92,6 +90,11 @@ static const GLfloat kColorConversion709[] = {
     assert(overlay->planes);
     assert(overlay->format == SDL_FCC_NV12);
     assert(overlay->planes == 2);
+
+    if (overlay->pixels[0] == NULL || overlay->pixels[1] == NULL)
+    {
+        return;
+    }
 
     const NSUInteger frameHeight = overlay->h;
 

@@ -1,5 +1,5 @@
 /*
- * IJKSDLGLRenderNV12.h
+ * ffpipeline_ios.h
  *
  * Copyright (c) 2014 Zhou Quan <zhouqicy@gmail.com>
  *
@@ -20,9 +20,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <Foundation/Foundation.h>
-#import "IJKSDLGLRender.h"
+#ifndef FFPLAY__FF_FFPIPELINE_IOS_H
+#define FFPLAY__FF_FFPIPELINE_IOS_H
 
-@interface IJKSDLGLRenderNV12 : NSObject<IJKSDLGLRender>
+#include "ijkplayer/ff_ffpipeline.h"
 
-@end
+typedef struct FFPlayer       FFPlayer;
+typedef struct IJKFF_Pipeline IJKFF_Pipeline;
+
+IJKFF_Pipeline *ffpipeline_create_from_ios(FFPlayer *ffp);
+void ffpipeline_ios_set_frame_max_width(IJKFF_Pipeline *pipeline, int width);
+int  ffpipeline_ios_get_frame_max_width(IJKFF_Pipeline *pipeline);
+void ffpipeline_ios_set_videotoolbox_enabled(IJKFF_Pipeline *pipeline, int enabled);
+
+#endif

@@ -1,0 +1,185 @@
+/*
+ * ffpipenode_ios_videotoolbox_vdec.m
+ *
+ * Copyright (c) 2014 Zhou Quan <zhouqicy@gmail.com>
+ *
+ * This file is part of ijkPlayer.
+ *
+ * ijkPlayer is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * ijkPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with ijkPlayer; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+#include "ffpipenode_ios_videotoolbox_vdec.h"
+#include "IJKVideoToolBox.h"
+#include "ijksdl_vout_overlay_videotoolbox.h"
+#include "ijkplayer/ff_ffpipeline.h"
+#include "ijkplayer/ff_ffpipenode.h"
+#include "ijkplayer/ff_ffplay.h"
+#include "ijksdl_mutex.h"
+#include "ijksdl_vout_ios_gles2.h"
+
+typedef struct IJKFF_Pipenode_Opaque {
+    IJKFF_Pipeline           *pipeline;
+    FFPlayer                 *ffp;
+    Decoder                  *decoder;
+    VideoToolBoxContext      *context;
+    AVCodecContext           *avctx; // not own
+    SDL_Thread*              video_fill_thread;
+    SDL_Thread              _video_fill_thread;
+} IJKFF_Pipenode_Opaque;
+
+
+
+int decoder_decode_frame_videotoolbox(VideoToolBoxContext* context) {
+
+    FFPlayer *ffp = context->ffp;
+    VideoState *is = ffp->is;
+    Decoder *d = &is->viddec;
+    int got_frame = 0;
+    do {
+        int ret = -1;
+        if (is->abort_request || d->queue->abort_request) {
+            return -1;
+        }
+
+        if (!d->packet_pending || d->queue->serial != d->pkt_serial) {
+            AVPacket pkt;
+            do {
+                if (d->queue->nb_packets == 0)
+                    SDL_CondSignal(d->empty_queue_cond);
+                if (ffp_packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0)
+                    return -1;
+                if (ffp_is_flush_packet(&pkt)) {
+                    avcodec_flush_buffers(d->avctx);
+                    context->refresh_request = true;
+
+                    d->finished = 0;
+                    d->next_pts = d->start_pts;
+                    d->next_pts_tb = d->start_pts_tb;
+                }
+            } while (ffp_is_flush_packet(&pkt) || d->queue->serial != d->pkt_serial);
+            av_free_packet(&d->pkt);
+            d->pkt_temp = d->pkt = pkt;
+            d->packet_pending = 1;
+        }
+
+        ret = videotoolbox_decode_video(context, d->avctx, &d->pkt_temp, &got_frame);
+        if (ret < 0) {
+            d->packet_pending = 0;
+        } else {
+            d->pkt_temp.dts =
+            d->pkt_temp.pts = AV_NOPTS_VALUE;
+            if (d->pkt_temp.data) {
+                if (d->avctx->codec_type != AVMEDIA_TYPE_AUDIO)
+                    ret = d->pkt_temp.size;
+                d->pkt_temp.data += ret;
+                d->pkt_temp.size -= ret;
+                if (d->pkt_temp.size <= 0)
+                    d->packet_pending = 0;
+            } else {
+                if (!got_frame) {
+                    d->packet_pending = 0;
+                    d->finished = d->pkt_serial;
+                }
+            }
+        }
+    } while (!got_frame && !d->finished);
+    return got_frame;
+}
+
+int videotoolbox_video_thread(void *arg)
+{
+    IJKFF_Pipenode_Opaque* opaque = (IJKFF_Pipenode_Opaque*) arg;
+    FFPlayer *ffp = opaque->ffp;
+    VideoState *is = ffp->is;
+    Decoder   *d = &is->viddec;
+    int ret = 0;
+    opaque->context->ffp = ffp;
+
+    for (;;) {
+
+        if (is->abort_request || d->queue->abort_request) {
+            return -1;
+        }
+        @autoreleasepool {
+            ret = decoder_decode_frame_videotoolbox(opaque->context);
+        }
+        if (ret < 0)
+            goto the_end;
+        if (!ret)
+            continue;
+
+        if (ret < 0)
+            goto the_end;
+    }
+the_end:
+    return 0;
+}
+
+
+
+static void func_destroy(IJKFF_Pipenode *node)
+{
+    ALOGI("pipeline!!! destory!!!!!\n %d", (int)node);
+    if (!node || !node->opaque)
+        return;
+    IJKFF_Pipenode_Opaque *opaque = node->opaque;
+    if (opaque->context) {
+        dealloc_videotoolbox(opaque->context);
+    }
+}
+
+static int func_run_sync(IJKFF_Pipenode *node)
+{
+    IJKFF_Pipenode_Opaque *opaque = node->opaque;
+    return videotoolbox_video_thread(opaque);
+}
+
+
+
+IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ios_videotoolbox(FFPlayer *ffp)
+{
+    if (!ffp || !ffp->is)
+        return NULL;
+
+    IJKFF_Pipenode *node = ffpipenode_alloc(sizeof(IJKFF_Pipenode_Opaque));
+    if (!node)
+        return node;
+    memset(node, sizeof(IJKFF_Pipenode), 0);
+
+    VideoState            *is         = ffp->is;
+    IJKFF_Pipenode_Opaque *opaque     = node->opaque;
+    node->func_destroy  = func_destroy;
+    node->func_run_sync = func_run_sync;
+    opaque->ffp         = ffp;
+    opaque->decoder     = &is->viddec;
+    opaque->avctx = opaque->decoder->avctx;
+    switch (opaque->avctx->codec_id) {
+    case AV_CODEC_ID_H264:
+        opaque->context = init_videotoolbox(ffp, opaque->avctx);
+        break;
+    default:
+        ALOGI("Videotoolbox-pipeline:open_video_decoder: not H264\n");
+        goto fail;
+    }
+    if (opaque->context == NULL) {
+        ALOGE("could not init video tool box decoder !!!");
+        goto fail;
+    }
+    return node;
+
+fail:
+    ffpipenode_free_p(&node);
+    return NULL;
+}

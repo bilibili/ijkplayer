@@ -39,7 +39,7 @@
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
     [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
 
-    NSURL *theMovieURL = [NSURL URLWithString:@"http://wshdl.acgvideo.com/live/live_5099_3038_d0ffe541.flv"];
+    NSURL *theMovieURL = [NSURL URLWithString:@"http://vhotwsh.video.qq.com/flv/32/146/r0015d10iwu.p203.1.mp4?vkey=68023055CEC9CC9E1D988B0E71E4B58C38B0374F1CB9805F4A1901D8E87B42137DD9680CF88D3685C3A59F030BAE55AA2E7238551DCB6BFF&fmt=sd&type=mp4"];
 
     [IJKFFMoviePlayerController setLogReport:YES];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
