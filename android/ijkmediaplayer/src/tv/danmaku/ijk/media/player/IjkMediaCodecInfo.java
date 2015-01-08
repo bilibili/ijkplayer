@@ -63,6 +63,7 @@ public class IjkMediaCodecInfo {
         // OMX.SEC.avcdec doesn't reorder output pictures on GT-9100
         sKnownCodecList.put("OMX.SEC.avc.dec", RANK_TESTED - 1);
         sKnownCodecList.put("OMX.SEC.avcdec", RANK_TESTED - 2);
+        sKnownCodecList.put("OMX.SEC.avc.sw.dec", RANK_SOFTWARE);
 
         // ----- TI -----
         //      TI OMAP4460
