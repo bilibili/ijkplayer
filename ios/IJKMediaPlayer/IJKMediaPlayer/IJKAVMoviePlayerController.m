@@ -150,6 +150,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 @synthesize controlStyle                = _controlStyle;
 @synthesize scalingMode                 = _scalingMode;
 @synthesize shouldAutoplay              = _shouldAutoplay;
+@synthesize isDanmakuMediaAirPlay       = _isDanmakuMediaAirPlay;
 
 - (id)initWithContentURL:(NSURL *)aUrl
 {
@@ -840,6 +841,38 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
                                                         name:name
                                                       object:nil];
     }
+}
+
+-(BOOL)allowsMediaAirPlay
+{
+    if (!_player)
+        return NO;
+    return [_player allowsAirPlayVideo];
+}
+
+-(void)setAllowsMediaAirPlay:(BOOL)b
+{
+    if (!_player)
+        return;
+    [_player setAllowsAirPlayVideo:b];
+}
+
+-(BOOL)airPlayMediaActive
+{
+    if (!_player)
+        return NO;
+
+    return _player.airPlayVideoActive || self.isDanmakuMediaAirPlay;
+}
+
+-(BOOL)isDanmakuMediaAirPlay
+{
+    return _isDanmakuMediaAirPlay;
+}
+
+-(void)setIsDanmakuMediaAirPlay:(BOOL)isDanmakuMediaAirPlay
+{
+    _isDanmakuMediaAirPlay = isDanmakuMediaAirPlay;
 }
 
 - (void)applicationWillEnterForeground

@@ -80,6 +80,11 @@
 @synthesize videoMeta = _videoMeta;
 @synthesize audioMeta = _audioMeta;
 
+@synthesize allowsMediaAirPlay = _allowsMediaAirPlay;
+@synthesize airPlayMediaActive = _airPlayMediaActive;
+
+@synthesize isDanmakuMediaAirPlay = _isDanmakuMediaAirPlay;
+
 #define FFP_IO_STAT_STEP (50 * 1024)
 
 // as an example
@@ -730,6 +735,40 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 - (void)ijkAudioEndInterruption
 {
     [self pause];
+}
+
+#pragma mark Airplay
+
+-(BOOL)allowsMediaAirPlay
+{
+    if (!self)
+        return NO;
+    return _allowsMediaAirPlay;
+}
+
+-(void)setAllowsMediaAirPlay:(BOOL)b
+{
+    if (!self)
+        return;
+    _allowsMediaAirPlay = b;
+}
+
+-(BOOL)airPlayMediaActive
+{
+    if (!self)
+        return NO;
+    
+    return self.airPlayMediaActive;
+}
+
+-(BOOL)isDanmakuMediaAirPlay
+{
+    return _isDanmakuMediaAirPlay;
+}
+
+-(void)setIsDanmakuMediaAirPlay:(BOOL)isDanmakuMediaAirPlay
+{
+    _isDanmakuMediaAirPlay = isDanmakuMediaAirPlay;
 }
 
 #pragma mark app state changed

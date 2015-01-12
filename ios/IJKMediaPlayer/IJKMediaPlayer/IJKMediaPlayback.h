@@ -51,11 +51,15 @@
 
 @property(nonatomic, readonly) int64_t numberOfBytesTransferred;
 
-- (UIImage *)thumbnailImageAtCurrentTime;
-
 @property(nonatomic) MPMovieControlStyle controlStyle;
 @property(nonatomic) MPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;
+
+@property (nonatomic) BOOL allowsMediaAirPlay;
+@property (nonatomic) BOOL isDanmakuMediaAirPlay;
+@property (nonatomic, readonly) BOOL airPlayMediaActive;
+
+- (UIImage *)thumbnailImageAtCurrentTime;
 
 #pragma mark Notifications
 

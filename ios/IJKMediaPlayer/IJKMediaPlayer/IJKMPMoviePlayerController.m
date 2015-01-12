@@ -41,6 +41,8 @@
 @dynamic controlStyle;
 @dynamic scalingMode;
 @dynamic shouldAutoplay;
+@synthesize isDanmakuMediaAirPlay = _isDanmakuMediaAirPlay;
+
 @synthesize numberOfBytesTransferred = _numberOfBytesTransferred;
 
 - (id)initWithContentURL:(NSURL *)aUrl
@@ -50,7 +52,6 @@
         self.controlStyle = MPMovieControlStyleNone;
         self.scalingMode = MPMovieScalingModeAspectFit;
         self.shouldAutoplay = YES;
-
         [self IJK_installMovieNotificationObservers];
 
         self.useApplicationAudioSession = YES;
@@ -113,6 +114,38 @@
 - (UIImage *)thumbnailImageAtCurrentTime
 {
     return [super thumbnailImageAtTime:self.currentPlaybackTime timeOption:MPMovieTimeOptionExact];
+}
+
+-(BOOL)allowsMediaAirPlay
+{
+    if (!self)
+        return NO;
+    return [self allowsAirPlay];
+}
+
+-(void)setAllowsMediaAirPlay:(BOOL)b
+{
+    if (!self)
+        return;
+    [self setAllowsAirPlay:b];
+}
+
+-(BOOL)airPlayMediaActive
+{
+    if (!self)
+        return NO;
+    
+    return self.airPlayVideoActive || self.isDanmakuMediaAirPlay;
+}
+
+-(BOOL)isDanmakuMediaAirPlay
+{
+    return _isDanmakuMediaAirPlay;
+}
+
+-(void)setIsDanmakuMediaAirPlay:(BOOL)isDanmakuMediaAirPlay
+{
+    _isDanmakuMediaAirPlay = isDanmakuMediaAirPlay;
 }
 
 #pragma mark Movie Notification Handlers
