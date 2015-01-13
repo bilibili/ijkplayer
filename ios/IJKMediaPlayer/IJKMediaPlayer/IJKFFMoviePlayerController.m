@@ -757,8 +757,10 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 {
     if (!self)
         return NO;
-    
-    return self.airPlayMediaActive;
+    if (_isDanmakuMediaAirPlay) {
+        return YES;
+    }
+    return NO;
 }
 
 -(BOOL)isDanmakuMediaAirPlay
@@ -769,6 +771,7 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 -(void)setIsDanmakuMediaAirPlay:(BOOL)isDanmakuMediaAirPlay
 {
     _isDanmakuMediaAirPlay = isDanmakuMediaAirPlay;
+     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:nil userInfo:nil];
 }
 
 #pragma mark app state changed

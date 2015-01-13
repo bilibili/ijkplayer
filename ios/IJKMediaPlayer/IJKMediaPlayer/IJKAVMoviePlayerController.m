@@ -87,6 +87,7 @@ static const NSInteger kEC_PlayerItemCancelled      = 5002;
 
 static void *KVO_AVPlayer_rate          = &KVO_AVPlayer_rate;
 static void *KVO_AVPlayer_currentItem   = &KVO_AVPlayer_currentItem;
+static void *KVO_AVPlayer_airplay   = &KVO_AVPlayer_airplay;
 
 static void *KVO_AVPlayerItem_state                     = &KVO_AVPlayerItem_state;
 static void *KVO_AVPlayerItem_loadedTimeRanges          = &KVO_AVPlayerItem_loadedTimeRanges;
@@ -496,6 +497,11 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
                            forKeyPath:@"rate"
                               options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
                               context:KVO_AVPlayer_rate];
+        
+        [_playerKVO safelyAddObserver:self
+                           forKeyPath:@"airPlayVideoActive"
+                              options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                              context:KVO_AVPlayer_airplay];
     }
     
     /* Make our new AVPlayerItem the AVPlayer's current item. */
@@ -766,6 +772,10 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
             [self didLoadStateChange];
         }
     }
+    else if (context == KVO_AVPlayer_airplay)
+    {
+         [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:nil userInfo:nil];
+    }
     else
     {
         [super observeValueForKeyPath:path ofObject:object change:change context:context];
@@ -832,6 +842,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
                                                  name:UIApplicationWillTerminateNotification
                                                object:nil];
     [_registeredNotifications addObject:UIApplicationWillTerminateNotification];
+
 }
 
 - (void)unregisterApplicationObservers
@@ -873,6 +884,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 -(void)setIsDanmakuMediaAirPlay:(BOOL)isDanmakuMediaAirPlay
 {
     _isDanmakuMediaAirPlay = isDanmakuMediaAirPlay;
+    [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:nil userInfo:nil];
 }
 
 - (void)applicationWillEnterForeground

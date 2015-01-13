@@ -146,6 +146,7 @@
 -(void)setIsDanmakuMediaAirPlay:(BOOL)isDanmakuMediaAirPlay
 {
     _isDanmakuMediaAirPlay = isDanmakuMediaAirPlay;
+    [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:nil userInfo:nil];
 }
 
 #pragma mark Movie Notification Handlers
@@ -172,6 +173,11 @@
                                              selector:@selector(IJK_dispatchMPMoviePlayerPlaybackStateDidChangeNotification:)
                                                  name:MPMoviePlayerPlaybackStateDidChangeNotification
                                                object:self];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(IJK_dispatchMoviePlayerIsAirPlayVideoActiveDidChangeNotification:)
+                                                 name:MPMoviePlayerIsAirPlayVideoActiveDidChangeNotification
+                                               object:self];
 }
 
 - (void)IJK_removeMovieNotificationObservers
@@ -181,6 +187,7 @@
     [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerLoadStateDidChangeNotification object:self];
     [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:self];
     [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerPlaybackStateDidChangeNotification object:self];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:self];
 }
 
 - (void)IJK_dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:(NSNotification*)notification
@@ -201,6 +208,11 @@
 - (void)IJK_dispatchMPMoviePlayerPlaybackStateDidChangeNotification:(NSNotification*)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification object:notification.object userInfo:notification.userInfo];
+}
+
+- (void)IJK_dispatchMoviePlayerIsAirPlayVideoActiveDidChangeNotification:(NSNotification*)notification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:notification.object userInfo:notification.userInfo];
 }
 
 #pragma mark IJKAudioSessionDelegate
