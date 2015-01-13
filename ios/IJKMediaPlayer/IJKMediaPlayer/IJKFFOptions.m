@@ -23,7 +23,7 @@
     options.frameDrop         = 0;
     options.pauseInBackground = YES;
 
-    options.timeout         = -1;
+    options.timeout           = 30 * 1000 * 1000; // 30 seconds
     options.userAgent = @"";
 
     return options;
