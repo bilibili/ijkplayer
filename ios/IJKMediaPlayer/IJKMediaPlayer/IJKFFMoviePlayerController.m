@@ -771,6 +771,15 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 -(void)setIsDanmakuMediaAirPlay:(BOOL)isDanmakuMediaAirPlay
 {
     _isDanmakuMediaAirPlay = isDanmakuMediaAirPlay;
+    if (_isDanmakuMediaAirPlay) {
+        _glView.scaleFactor = 1.f;
+    }
+    else {
+        CGFloat scale = [[UIScreen mainScreen] scale];
+        if (scale < 1.0f)
+            scale = 1.0f;
+        _glView.scaleFactor = scale;
+    }
      [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:nil userInfo:nil];
 }
 
