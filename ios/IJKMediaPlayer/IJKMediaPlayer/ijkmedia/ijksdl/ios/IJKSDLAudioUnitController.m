@@ -31,7 +31,7 @@
     BOOL _isPaused;
 }
 
-- (id)initWithAudioSpec:(SDL_AudioSpec *)aSpec
+- (id)initWithAudioSpec:(const SDL_AudioSpec *)aSpec
 {
     self = [super init];
     if (self) {

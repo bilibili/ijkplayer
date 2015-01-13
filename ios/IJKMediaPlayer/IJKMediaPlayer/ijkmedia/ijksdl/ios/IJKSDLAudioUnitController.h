@@ -28,7 +28,7 @@
 
 @interface IJKSDLAudioUnitController : NSObject
 
-- (id)initWithAudioSpec:(SDL_AudioSpec *)aSpec;
+- (id)initWithAudioSpec:(const SDL_AudioSpec *)aSpec;
 
 - (void)play;
 - (void)pause;
