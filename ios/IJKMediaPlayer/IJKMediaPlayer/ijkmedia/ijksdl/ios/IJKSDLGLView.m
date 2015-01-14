@@ -212,7 +212,7 @@ enum {
                                         nil];
 
         _scaleFactor = [[UIScreen mainScreen] scale];
-        if (_scaleFactor < 1.0f)
+        if (_scaleFactor < 0.1f)
             _scaleFactor = 1.0f;
         _prevScaleFactor = _scaleFactor;
 

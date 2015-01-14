@@ -772,11 +772,11 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 {
     _isDanmakuMediaAirPlay = isDanmakuMediaAirPlay;
     if (_isDanmakuMediaAirPlay) {
-        _glView.scaleFactor = 1.f;
+        _glView.scaleFactor = 1.0f;
     }
     else {
         CGFloat scale = [[UIScreen mainScreen] scale];
-        if (scale < 1.0f)
+        if (scale < 0.1f)
             scale = 1.0f;
         _glView.scaleFactor = scale;
     }
