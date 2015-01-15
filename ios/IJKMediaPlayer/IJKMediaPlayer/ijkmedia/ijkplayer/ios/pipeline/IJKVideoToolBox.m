@@ -500,7 +500,7 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         pts = dts;
     }
 
-    decoderFlags = 0;
+    decoderFlags = kVTDecodeFrame_EnableAsynchronousDecompression;
 
     if (dts < 0 || pts < 0) {
         goto failed;
