@@ -152,7 +152,9 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ios_videotoolbox(FFPlayer *
 {
     if (!ffp || !ffp->is)
         return NULL;
-
+    if ([[[UIDevice currentDevice] systemVersion] floatValue]  < 8.0){
+        return NULL;
+    }
     IJKFF_Pipenode *node = ffpipenode_alloc(sizeof(IJKFF_Pipenode_Opaque));
     if (!node)
         return node;

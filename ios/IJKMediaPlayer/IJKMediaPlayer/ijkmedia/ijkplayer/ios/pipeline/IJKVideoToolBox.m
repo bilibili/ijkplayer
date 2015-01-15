@@ -366,7 +366,9 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
                 duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0);
                 pts = (videotoolbox_pts == AV_NOPTS_VALUE) ? NAN : videotoolbox_pts * av_q2d(tb);
 
-                vtb_queue_picture(ctx->ffp, &picture, pts, duration, 0,  ctx->ffp->is->viddec.pkt_serial);
+                if (0 != vtb_queue_picture(ctx->ffp, &picture, pts, duration, 0,  ctx->ffp->is->viddec.pkt_serial)){
+                    CVBufferRelease(picture.cvBufferRef);
+                }
                 SortQueuePop(ctx);
             } else {
                 ALOGI("Get Picture failure!!!\n");
