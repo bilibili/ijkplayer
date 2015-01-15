@@ -200,8 +200,6 @@ static int vtb_queue_picture(
         /* update the bitmap content */
         SDL_VoutUnlockYUVOverlay(vp->bmp);
 
-        CVBufferRelease(picture->cvBufferRef);
-
         vp->pts = pts;
         vp->duration = duration;
         vp->pos = pos;
@@ -213,28 +211,30 @@ static int vtb_queue_picture(
 
 
 
-static CFDictionaryRef CreateDictionaryWithPkt(double time, double dts, double pts)
+static CFDictionaryRef CreateDictionaryWithPkt(double time, double dts, double pts,double pkt_serial)
 {
-    CFStringRef key[3] = {
+    CFStringRef key[4] = {
         CFSTR("PKT_SORT"),
         CFSTR("PKT_DTS"),
-        CFSTR("PKT_PTS")
+        CFSTR("PKT_PTS"),
+        CFSTR("PKT_SERIAL")
     };
-    CFNumberRef value[3];
+    CFNumberRef value[4];
     CFDictionaryRef display_time;
 
     value[0] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &time);
     value[1] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &dts);
     value[2] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &pts);
+    value[3] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &pkt_serial);
 
     display_time = CFDictionaryCreate(
-                                      kCFAllocatorDefault, (const void **)&key, (const void **)&value, 3,
+                                      kCFAllocatorDefault, (const void **)&key, (const void **)&value, 4,
                                       &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 
     CFRelease(value[0]);
     CFRelease(value[1]);
     CFRelease(value[2]);
-
+    CFRelease(value[3]);
     return display_time;
 }
 
@@ -245,10 +245,11 @@ static void GetPktTSFromRef(CFDictionaryRef inFrameInfoDictionary, sort_queue *f
     frame->sort = -1.0;
     frame->dts = NOPTS_VAL;
     frame->pts = NOPTS_VAL;
+    frame->serial = NOPTS_VAL;
     if (inFrameInfoDictionary == NULL)
         return;
 
-    CFNumberRef value[3];
+    CFNumberRef value[4];
 
     value[0] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_SORT"));
     if (value[0])
@@ -259,9 +260,14 @@ static void GetPktTSFromRef(CFDictionaryRef inFrameInfoDictionary, sort_queue *f
     value[2] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_PTS"));
     if (value[2])
         CFNumberGetValue(value[2], kCFNumberDoubleType, &frame->pts);
-
+    value[3] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_SERIAL"));
+    if (value[3])
+        CFNumberGetValue(value[3], kCFNumberDoubleType, &frame->serial);
     return;
 }
+
+
+
 
 void VTDecoderCallback(void *decompressionOutputRefCon,
                        void *sourceFrameRefCon,
@@ -272,35 +278,47 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
                        CMTime presentationDuration)
 {
     @autoreleasepool {
-        VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
 
         if (status != 0) {
             ALOGI("decode callback  %d \n", (int)status);
             return;
         }
+        sort_queue *newFrame = (sort_queue*)malloc(sizeof(sort_queue));
+        newFrame->nextframe = NULL;
+        VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
+        GetPktTSFromRef(sourceFrameRefCon, newFrame);
+        CFRelease(sourceFrameRefCon);
+        if (newFrame->serial != ctx->serial) {
+            goto failed;
+        }
+
         if (imageBuffer == NULL) {
             ALOGI("imageBuffer null\n");
-            return;
+            goto failed;
         }
+
+
         OSType format_type = CVPixelBufferGetPixelFormatType(imageBuffer);
         if (format_type != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) {
             ALOGI("format_type error \n");
-            return;
+            goto failed;
         }
         if (kVTDecodeInfo_FrameDropped & infoFlags) {
             ALOGI("droped\n");
-            return;
+            goto failed;
         }
+
+
 
         if (ctx->refresh_request) {
             while (ctx->m_queue_depth > 0) {
                 SortQueuePop(ctx);
             }
+            ctx->serial += 1;
             ctx->refresh_request = false;
         }
 
-        sort_queue *newFrame = (sort_queue*)malloc(sizeof(sort_queue));
-        newFrame->nextframe = NULL;
+
 
         if (CVPixelBufferIsPlanar(imageBuffer)) {
             newFrame->width  = CVPixelBufferGetWidthOfPlane(imageBuffer, 0);
@@ -312,8 +330,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
 
         newFrame->pixel_buffer_ref = CVBufferRetain(imageBuffer);
-        GetPktTSFromRef(sourceFrameRefCon, newFrame);
-        CFRelease(sourceFrameRefCon);
+
 
         if ((newFrame->pts != NOPTS_VAL) || (newFrame->dts != NOPTS_VAL)) {
             if (newFrame->pts == NOPTS_VAL)
@@ -366,17 +383,21 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
                 duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0);
                 pts = (videotoolbox_pts == AV_NOPTS_VALUE) ? NAN : videotoolbox_pts * av_q2d(tb);
 
-                if (0 != vtb_queue_picture(ctx->ffp, &picture, pts, duration, 0,  ctx->ffp->is->viddec.pkt_serial)){
-                    CVBufferRelease(picture.cvBufferRef);
-                }
+                vtb_queue_picture(ctx->ffp, &picture, pts, duration, 0,  ctx->ffp->is->viddec.pkt_serial);
+                CVBufferRelease(picture.cvBufferRef);
+
                 SortQueuePop(ctx);
             } else {
                 ALOGI("Get Picture failure!!!\n");
             }
 
         }
-
-
+        return;
+        failed:
+            if (newFrame) {
+                free(newFrame);
+            }
+        return;
     }
 }
 
@@ -453,7 +474,7 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         goto failed;
     }
 
-    frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts);
+    frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts,context->serial);
 
     if (context->m_convert_bytestream) {
         ALOGI("the buffer should m_convert_byte\n");
@@ -657,6 +678,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     context_vtb->refresh_request = false;
     context_vtb->m_max_ref_frames = 0;
     context_vtb->ffp = ffp;
+    context_vtb->serial = 0;
 
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:
