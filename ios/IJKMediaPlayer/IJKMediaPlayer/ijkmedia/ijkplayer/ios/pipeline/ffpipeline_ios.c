@@ -30,6 +30,7 @@ typedef struct IJKFF_Pipeline_Opaque {
     FFPlayer    *ffp;
     int          m_max_frame_width;
     int          m_videotoolbox_enable;
+    bool         is_videotoolbox_open;
 } IJKFF_Pipeline_Opaque;
 
 static void func_destroy(IJKFF_Pipeline *pipeline)
@@ -66,7 +67,11 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
     if (node == NULL) {
         ALOGE("vtb fail!!! switch to ffmpeg decode!!!! \n");
         node = ffpipenode_create_video_decoder_from_ffplay(ffp);
+        opaque->is_videotoolbox_open = false;
+    } else {
+        opaque->is_videotoolbox_open = true;
     }
+    ffp_notify_msg2(ffp, FFP_MSG_VIDEO_DECODER_OPEN, opaque->is_videotoolbox_open);
     return node;
 }
 

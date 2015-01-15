@@ -74,6 +74,7 @@
 - (BOOL)isPlaying;
 
 - (void)setPauseInBackground:(BOOL)pause;
+- (BOOL)isVideoToolboxOpen;
 
 + (void)setLogReport:(BOOL)preferLogReport;
 

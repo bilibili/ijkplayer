@@ -115,3 +115,22 @@ void ijkmp_ios_set_videotoolbox_enabled(IjkMediaPlayer *mp, BOOL enabled)
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("%s enable(EnableFlag=%d)\n", __func__, enabled);
 }
+
+bool ijkmp_ios_is_videotoolbox_open_l(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    assert(mp->ffplayer);
+
+    return false;
+}
+
+bool ijkmp_ios_is_videotoolbox_open(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    MPTRACE("%s()\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    bool ret = ijkmp_ios_is_videotoolbox_open_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=%d\n", __func__, ret ? 1 : 0);
+    return ret;
+}
