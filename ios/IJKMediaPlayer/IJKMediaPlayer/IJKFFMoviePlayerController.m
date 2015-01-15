@@ -282,7 +282,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (!_mediaPlayer)
         return NO;
 
-    return ijkmp_ios_is_videotoolbox_open(_mediaPlayer) != false;
+    return _isVideoToolboxOpen;
 }
 
 + (void)setLogReport:(BOOL)preferLogReport
