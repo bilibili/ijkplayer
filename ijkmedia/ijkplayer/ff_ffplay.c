@@ -3403,7 +3403,7 @@ static int ffp_format_control_message(struct AVFormatContext *s, int type,
     if (s == NULL)
         return -1;
 
-    FFPlayer *ffp = (FFPlayer *)s->opaque;
+    FFPlayer *ffp = (FFPlayer *)av_format_get_opaque(s);
     if (ffp == NULL)
         return -1;
 
