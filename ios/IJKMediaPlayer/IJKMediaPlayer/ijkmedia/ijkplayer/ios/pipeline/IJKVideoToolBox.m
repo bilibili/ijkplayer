@@ -278,18 +278,20 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
                        CMTime presentationDuration)
 {
     @autoreleasepool {
+
+        if (status != 0) {
+            ALOGI("decode callback  %d \n", (int)status);
+            if (sourceFrameRefCon) {
+                CVBufferRelease(imageBuffer);
+            }
+            return;
+        }
         VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
         sort_queue *newFrame = (sort_queue*)malloc(sizeof(sort_queue));
         newFrame->nextframe = NULL;
         GetPktTSFromRef(sourceFrameRefCon, newFrame);
         ctx->last_sort = newFrame->sort;
         CFRelease(sourceFrameRefCon);
-        if (status != 0) {
-            ALOGI("decode callback  %d \n", (int)status);
-            ALOGI("Signal: status\n");
-            goto failed;
-        }
-
         if (newFrame->serial != ctx->serial) {
             goto failed;
         }
@@ -395,20 +397,12 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
         }
     successed:
-        //ALOGI("Signal: %lf\n", newFrame->pts);
-        SDL_LockMutex(ctx->decode_mutex);
-        SDL_CondSignal(ctx->decode_cond);
-        SDL_UnlockMutex(ctx->decode_mutex);
-
         return;
     failed:
         ALOGI("FailedSignal: %lf\n", newFrame->pts);
         if (newFrame) {
             free(newFrame);
         }
-        SDL_LockMutex(ctx->decode_mutex);
-        SDL_CondSignal(ctx->decode_cond);
-        SDL_UnlockMutex(ctx->decode_mutex);
         return;
     }
 }
@@ -533,13 +527,7 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         pts = dts;
     }
 
-    decoderFlags = kVTDecodeFrame_EnableAsynchronousDecompression;
-
-    if (dts < 0 || pts < 0) {
-        goto failed;
-    }
-
-
+    decoderFlags = 0;
 
     //ALOGI("Decode before \n!!!!!!!");
     status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoderFlags, (void*)frame_info, 0);
@@ -558,20 +546,16 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
             context->refresh_request = true;
             CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
         }
+        status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoderFlags, (void*)frame_info, 0);
         if (status != 0) {
             goto failed;
         }
     }
 
 
-    status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+    //status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
 
-    //ALOGI("Wait : %lf \n",pts);
-    if ((sort_time - context->m_sort_time_offset) != context->last_sort) {
-        SDL_LockMutex(context->decode_mutex);
-        SDL_CondWait(context->decode_cond, context->decode_mutex);
-        SDL_UnlockMutex(context->decode_mutex);
-    }
+
     if (status != 0) {
         goto failed;
     }
@@ -582,7 +566,6 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
     if (demux_size) {
         av_free(demux_buff);
     }
-
     *got_picture_ptr = 1;
     return 0;
 failed:
@@ -700,8 +683,6 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     context_vtb->m_max_ref_frames = 0;
     context_vtb->ffp = ffp;
     context_vtb->serial = 0;
-    context_vtb->decode_mutex = SDL_CreateMutex();
-    context_vtb->decode_cond  = SDL_CreateCond();
     context_vtb->last_sort = 0;
 
     switch (profile) {
