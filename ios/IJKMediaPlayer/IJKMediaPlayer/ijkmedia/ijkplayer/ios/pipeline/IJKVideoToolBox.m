@@ -533,14 +533,6 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         pts = dts;
     }
 
-    decoderFlags = kVTDecodeFrame_EnableAsynchronousDecompression;
-
-    if (dts < 0 || pts < 0) {
-        goto failed;
-    }
-
-
-
     //ALOGI("Decode before \n!!!!!!!");
     status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoderFlags, (void*)frame_info, 0);
     //ALOGI("Decode after \n!!!!!!!");
@@ -567,7 +559,7 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
     status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
 
     //ALOGI("Wait : %lf \n",pts);
-    if ((sort_time - context->m_sort_time_offset) != context->last_sort) {
+    if ((sort_time - context->m_sort_time_offset) > context->last_sort) {
         SDL_LockMutex(context->decode_mutex);
         SDL_CondWait(context->decode_cond, context->decode_mutex);
         SDL_UnlockMutex(context->decode_mutex);
