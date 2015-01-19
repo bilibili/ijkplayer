@@ -752,6 +752,9 @@ static void check_external_clock_speed(VideoState *is) {
    }
 }
 
+
+
+
 /* seek in the stream */
 static void stream_seek(VideoState *is, int64_t pos, int64_t rel, int seek_by_bytes)
 {
@@ -3411,4 +3414,7 @@ static int ffp_format_control_message(struct AVFormatContext *s, int type,
         return -1;
 
     return ffp->format_control_message(ffp->format_control_opaque, type, data, data_size);
+}
+void ffp_stream_seek(VideoState *is, int64_t pos, int64_t rel, int seek_by_bytes) {
+    stream_seek(is, pos, rel, seek_by_bytes);
 }

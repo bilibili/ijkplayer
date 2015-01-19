@@ -486,6 +486,31 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         goto failed;
     }
 
+    if (avpkt->flags == 1)
+    {
+        context->last_keyframe_pts = avpkt->pts;
+    }
+
+    if (context->refresh_session) {
+        if (avpkt->flags == 0) {
+            ALOGI("drop avpkt \n");
+            goto failed;
+        } else
+        {
+            ALOGI("last_keyframe_pts %lld \n",context->last_keyframe_pts);
+
+            if(context->m_vt_session) {
+                VTDecompressionSessionInvalidate(context->m_vt_session);
+                CFRelease(context->m_vt_session);
+            }
+            while (context->m_queue_depth > 0) {
+                SortQueuePop(context);
+            }
+            CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
+            //ffp_stream_seek(context->ffp->is, context->last_keyframe_pts, 0, 0);
+            context->refresh_session = false;
+        }
+    }
     frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts,context->serial);
 
     if (context->m_convert_bytestream) {
@@ -540,15 +565,7 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
     if (status != 0) {
         ALOGE("status %d \n", (int)status);
         if (status == kVTInvalidSessionErr) {
-            if(context->m_vt_session) {
-                VTDecompressionSessionInvalidate(context->m_vt_session);
-                CFRelease(context->m_vt_session);
-            }
-            while (context->m_queue_depth > 0) {
-                SortQueuePop(context);
-            }
-            context->refresh_request = true;
-            CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
+            context->refresh_session = true;
         }
         if (status != 0) {
             goto failed;
@@ -689,6 +706,8 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     context_vtb->m_convert_bytestream = false;
     context_vtb->m_convert_3byteTo4byteNALSize = false;
     context_vtb->refresh_request = false;
+    context_vtb->refresh_session = false;
+    context_vtb->last_keyframe_pts = 0;
     context_vtb->m_max_ref_frames = 0;
     context_vtb->ffp = ffp;
     context_vtb->serial = 0;

@@ -78,6 +78,7 @@ int       ffp_packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *se
 int       ffp_packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket *pkt, int *serial, int *finished);
 int       ffp_packet_queue_put(PacketQueue *q, AVPacket *pkt);
 bool      ffp_is_flush_packet(AVPacket *pkt);
+void      ffp_stream_seek(VideoState *is, int64_t pos, int64_t rel, int seek_by_bytes);
 
 Frame    *ffp_frame_queue_peek_writable(FrameQueue *f);
 void      ffp_frame_queue_push(FrameQueue *f);

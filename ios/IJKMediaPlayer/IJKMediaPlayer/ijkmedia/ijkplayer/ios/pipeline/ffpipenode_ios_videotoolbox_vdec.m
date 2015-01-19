@@ -63,17 +63,19 @@ int decoder_decode_frame_videotoolbox(VideoToolBoxContext* context) {
                 if (ffp_is_flush_packet(&pkt)) {
                     avcodec_flush_buffers(d->avctx);
                     context->refresh_request = true;
-
                     d->finished = 0;
+                   // context->last_keyframe_pts = d->pkt.pts;
+                     ALOGI("flushed last keyframe pts %lld \n",d->pkt.pts);
                     d->next_pts = d->start_pts;
                     d->next_pts_tb = d->start_pts_tb;
                 }
             } while (ffp_is_flush_packet(&pkt) || d->queue->serial != d->pkt_serial);
+
             av_free_packet(&d->pkt);
             d->pkt_temp = d->pkt = pkt;
             d->packet_pending = 1;
         }
-
+       // ALOGI("pkt %d \n",d->pkt_temp.flags);
         ret = videotoolbox_decode_video(context, d->avctx, &d->pkt_temp, &got_frame);
         if (ret < 0) {
             d->packet_pending = 0;
