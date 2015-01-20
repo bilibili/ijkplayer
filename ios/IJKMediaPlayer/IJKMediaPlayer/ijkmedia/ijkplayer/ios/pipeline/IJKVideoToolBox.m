@@ -322,6 +322,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
 
 
+
         if (CVPixelBufferIsPlanar(imageBuffer)) {
             newFrame->width  = CVPixelBufferGetWidthOfPlane(imageBuffer, 0);
             newFrame->height = CVPixelBufferGetHeightOfPlane(imageBuffer, 0);
@@ -332,13 +333,10 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
 
         newFrame->pixel_buffer_ref = CVBufferRetain(imageBuffer);
-
-
-        if ((newFrame->pts != NOPTS_VAL) || (newFrame->dts != NOPTS_VAL)) {
-            if (newFrame->pts == NOPTS_VAL)
-                newFrame->sort = newFrame->dts;
-            else
-                newFrame->sort = newFrame->pts;
+        if (newFrame->pts != AV_NOPTS_VALUE) {
+            newFrame->sort = newFrame->pts;
+        } else {
+            newFrame->sort = newFrame->dts;
         }
         pthread_mutex_lock(&ctx->m_queue_mutex);
         volatile sort_queue *queueWalker = ctx->m_sort_queue;
@@ -360,10 +358,9 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         }
         ctx->m_queue_depth++;
         pthread_mutex_unlock(&ctx->m_queue_mutex);
-        // ALOGI("%lf %lf %lf \n", newFrame->sort,newFrame->pts, newFrame->dts);
 
-        // ALOGI("display queue deep %d\n", ctx->m_queue_depth);
-
+        //ALOGI("%lf %lf %lf \n", newFrame->sort,newFrame->pts, newFrame->dts);
+        //ALOGI("display queue deep %d\n", ctx->m_queue_depth);
 
         VTBPicture picture;
         if (ctx->ffp->is == NULL || ctx->ffp->is->abort_request || ctx->ffp->is->viddec.queue->abort_request) {
@@ -467,7 +464,7 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height, CMFor
 int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
 {
     if (!avpkt || !avpkt->data) {
-        return -1;
+        return 0;
     }
     OSStatus status                 = 0;
     double sort_time                = GetSystemTime();
