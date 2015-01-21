@@ -75,7 +75,7 @@ int decoder_decode_frame_videotoolbox(VideoToolBoxContext* context) {
             d->pkt_temp = d->pkt = pkt;
             d->packet_pending = 1;
         }
-       // ALOGI("pkt %d \n",d->pkt_temp.flags);
+
         ret = videotoolbox_decode_video(context, d->avctx, &d->pkt_temp, &got_frame);
         if (ret < 0) {
             d->packet_pending = 0;

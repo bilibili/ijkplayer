@@ -61,6 +61,7 @@ typedef struct VideoToolBoxContext {
     int                         width;
     int                         height;
     volatile bool               refresh_request;
+    volatile bool               new_seg_flag;
     int64_t                     last_keyframe_pts;
     volatile bool               refresh_session;
     SDL_mutex                  *decode_mutex;

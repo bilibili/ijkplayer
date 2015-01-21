@@ -266,7 +266,27 @@ static void GetPktTSFromRef(CFDictionaryRef inFrameInfoDictionary, sort_queue *f
     return;
 }
 
+void QueuePicture(VideoToolBoxContext* ctx) {
+    VTBPicture picture;
+    if (true == GetVTBPicture(ctx, &picture)) {
+        double pts;
+        double duration;
+        int64_t vtb_pts_us = (int64_t)picture.pts;
+        int64_t videotoolbox_pts = vtb_pts_us;
 
+        AVRational tb = ctx->ffp->is->video_st->time_base;
+        AVRational frame_rate = av_guess_frame_rate(ctx->ffp->is->ic, ctx->ffp->is->video_st, NULL);
+        duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0);
+        pts = (videotoolbox_pts == AV_NOPTS_VALUE) ? NAN : videotoolbox_pts * av_q2d(tb);
+
+        vtb_queue_picture(ctx->ffp, &picture, pts, duration, 0,  ctx->ffp->is->viddec.pkt_serial);
+        CVBufferRelease(picture.cvBufferRef);
+
+        SortQueuePop(ctx);
+    } else {
+        ALOGI("Get Picture failure!!!\n");
+    }
+}
 
 
 void VTDecoderCallback(void *decompressionOutputRefCon,
@@ -320,7 +340,13 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             ctx->refresh_request = false;
         }
 
-
+        if (ctx->new_seg_flag) {
+            ALOGI("new seg process!!!!");
+            while (ctx->m_queue_depth > 0) {
+                QueuePicture(ctx);
+            }
+            ctx->new_seg_flag = false;
+        }
 
 
         if (CVPixelBufferIsPlanar(imageBuffer)) {
@@ -362,7 +388,6 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         //ALOGI("%lf %lf %lf \n", newFrame->sort,newFrame->pts, newFrame->dts);
         //ALOGI("display queue deep %d\n", ctx->m_queue_depth);
 
-        VTBPicture picture;
         if (ctx->ffp->is == NULL || ctx->ffp->is->abort_request || ctx->ffp->is->viddec.queue->abort_request) {
             while (ctx->m_queue_depth > 0) {
                 SortQueuePop(ctx);
@@ -371,25 +396,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         }
         //ALOGI("depth %d  %d\n", ctx->m_queue_depth, ctx->m_max_ref_frames);
         if ((ctx->m_queue_depth > ctx->m_max_ref_frames)) {
-            if (true == GetVTBPicture(ctx, &picture)) {
-                double pts;
-                double duration;
-                int64_t vtb_pts_us = (int64_t)picture.pts;
-                int64_t videotoolbox_pts = vtb_pts_us;
-
-                AVRational tb = ctx->ffp->is->video_st->time_base;
-                AVRational frame_rate = av_guess_frame_rate(ctx->ffp->is->ic, ctx->ffp->is->video_st, NULL);
-                duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0);
-                pts = (videotoolbox_pts == AV_NOPTS_VALUE) ? NAN : videotoolbox_pts * av_q2d(tb);
-
-                vtb_queue_picture(ctx->ffp, &picture, pts, duration, 0,  ctx->ffp->is->viddec.pkt_serial);
-                CVBufferRelease(picture.cvBufferRef);
-
-                SortQueuePop(ctx);
-            } else {
-                ALOGI("Get Picture failure!!!\n");
-            }
-
+            QueuePicture(ctx);
         }
     successed:
         //ALOGI("Signal: %lf\n", newFrame->pts);
@@ -508,6 +515,10 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
             context->refresh_session = false;
         }
     }
+    if (pts == AV_NOPTS_VALUE) {
+        pts = dts;
+    }
+
     frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts,context->serial);
 
     if (context->m_convert_bytestream) {
@@ -551,8 +562,8 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         goto failed;
     }
 
-    if (pts == 0) {
-        pts = dts;
+    if (avpkt->flags & AV_PKT_FLAG_NEW_SEG) {
+        context->new_seg_flag = true;
     }
 
     //ALOGI("Decode before \n!!!!!!!");
@@ -703,6 +714,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     context_vtb->m_convert_bytestream = false;
     context_vtb->m_convert_3byteTo4byteNALSize = false;
     context_vtb->refresh_request = false;
+    context_vtb->new_seg_flag = false;
     context_vtb->refresh_session = false;
     context_vtb->last_keyframe_pts = 0;
     context_vtb->m_max_ref_frames = 0;
