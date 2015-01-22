@@ -43,6 +43,7 @@ public class IjkMediaCodecInfo {
         // Tegra K1
         // Nexus 9
         sKnownCodecList.put("OMX.Nvidia.h264.decode", RANK_TESTED);
+        sKnownCodecList.put("OMX.Nvidia.h264.decode.secure", RANK_SECURE);
 
         // ----- Intel -----
         // Atom Z3735
@@ -94,10 +95,6 @@ public class IjkMediaCodecInfo {
 
         // Really ?
         sKnownCodecList.remove("OMX.bluestacks.hw.decoder");
-
-        // ---------------
-        // Secure codec
-        sKnownCodecList.put("OMX.Nvidia.h264.decode.secure", RANK_SECURE);
 
         // ---------------
         // Useless codec
