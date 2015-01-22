@@ -224,19 +224,14 @@ int SDL_Android_NativeWindow_display_l(ANativeWindow *native_window, SDL_VoutOve
     int buff_w = IJKALIGN(overlay->w, 2);
     int buff_h = IJKALIGN(overlay->h, 2);
 
-    AndroidHalFourccDescriptor *voutDesc = native_window_get_desc(curr_format);
-    if (!voutDesc) {
-        ALOGE("SDL_Android_NativeWindow_display_l: unknown hal format: %d", curr_format);
-        return -1;
-    }
-
     AndroidHalFourccDescriptor *overlayDesc = native_window_get_desc(overlay->format);
     if (!overlayDesc) {
         ALOGE("SDL_Android_NativeWindow_display_l: unknown overlay format: %d", overlay->format);
         return -1;
     }
 
-    if (voutDesc->hal_format != overlayDesc->hal_format) {
+    AndroidHalFourccDescriptor *voutDesc = native_window_get_desc(curr_format);
+    if (!voutDesc || voutDesc->hal_format != overlayDesc->hal_format) {
         ALOGD("ANativeWindow_setBuffersGeometry: w=%d, h=%d, f=%.4s(0x%x) => w=%d, h=%d, f=%.4s(0x%x)",
             curr_w, curr_h, (char*) &curr_format, curr_format,
             buff_w, buff_h, (char*) &overlay->format, overlay->format);
