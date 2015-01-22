@@ -476,7 +476,6 @@ static void empty_avpackets(VideoToolBoxContext* ctx) {
     long total_size = 0;
     for (int i = 0;i < ctx->m_packet_deep; i++) {
         total_size += ctx->packets[i].size;
-        free(ctx->packets[i].data);
         av_free_packet(&ctx->packets[i]);
     }
     ALOGI("\n deep %d  size %ld \n",ctx->m_packet_deep,total_size);
@@ -489,7 +488,6 @@ static void duplicate_avpacket(VideoToolBoxContext* ctx,const AVPacket* pkt) {
         empty_avpackets(ctx);
     }
     AVPacket* pkt_queue = &ctx->packets[ctx->m_packet_deep];
-    av_init_packet(pkt_queue);
     av_new_packet(pkt_queue, pkt->size);
     pkt_queue->pts = pkt->pts;
     pkt_queue->dts = pkt->dts;
@@ -498,10 +496,7 @@ static void duplicate_avpacket(VideoToolBoxContext* ctx,const AVPacket* pkt) {
     pkt_queue->stream_index = pkt->stream_index;
     pkt_queue->flags = pkt->flags;
     pkt_queue->convergence_duration = pkt->convergence_duration;
-    pkt_queue->data = malloc(pkt->size);
     memcpy(pkt_queue->data, pkt->data, pkt->size);
-    //pkt_queue->size = pkt->size;
-    //av_dup_packet(pkt_queue);
     ctx->m_packet_deep += 1;
 }
 
@@ -529,7 +524,10 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         goto failed;
     }
 
-
+    if (context->refresh_session) {
+        decoderFlags |= kVTDecodeFrame_DoNotOutputFrame;
+        ALOGI("flag :%d", decoderFlags);
+    }
 
     if (pts == AV_NOPTS_VALUE) {
         pts = dts;
@@ -609,7 +607,6 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         SDL_UnlockMutex(context->decode_mutex);
     }
     if (status != 0) {
-        ALOGI("status %d \n",status);
         goto failed;
     }
 
@@ -654,9 +651,6 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
 
         for (int i = 0; i < context->m_packet_deep; i++) {
-            if ((context->m_packet_deep - i) <= 5) {
-                context->refresh_session = false;
-            }
             videotoolbox_decode_video_internal(context, avctx, &context->packets[i], got_picture_ptr);
         }
         context->refresh_session = false;
