@@ -309,9 +309,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             ALOGI("Signal: status\n");
             goto failed;
         }
-        if (ctx->m_sort_queue && newFrame->pts < ctx->m_sort_queue->pts) {
-            goto failed;
-        }
+
 
         if (ctx->refresh_session) {
             goto failed;
@@ -355,6 +353,9 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             ctx->new_seg_flag = false;
         }
 
+        if (ctx->m_sort_queue && newFrame->pts < ctx->m_sort_queue->pts) {
+            goto failed;
+        }
 
         if (CVPixelBufferIsPlanar(imageBuffer)) {
             newFrame->width  = CVPixelBufferGetWidthOfPlane(imageBuffer, 0);
