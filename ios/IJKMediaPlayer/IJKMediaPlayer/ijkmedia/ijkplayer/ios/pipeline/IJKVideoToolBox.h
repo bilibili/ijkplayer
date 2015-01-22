@@ -31,7 +31,7 @@
 #include "ff_ffmsg.h"
 #include "ff_ffplay.h"
 
-
+#define MAX_PACKETS_CACHE_QUEUE_DEEP 250
 
 typedef struct VTBPicture {
     double              pts;
@@ -79,7 +79,7 @@ typedef struct VideoToolBoxContext {
     bool                        m_convert_3byteTo4byteNALSize;
     double                      serial;
     volatile double             last_sort;
-    AVPacket                    packets[200];
+    AVPacket                    packets[MAX_PACKETS_CACHE_QUEUE_DEEP];
     int                         m_packet_deep;
 } VideoToolBoxContext ;
 

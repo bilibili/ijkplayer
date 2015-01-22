@@ -309,6 +309,9 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             ALOGI("Signal: status\n");
             goto failed;
         }
+        if (ctx->m_sort_queue && newFrame->pts < ctx->m_sort_queue->pts) {
+            goto failed;
+        }
 
         if (ctx->refresh_session) {
             goto failed;
@@ -484,7 +487,8 @@ static void empty_avpackets(VideoToolBoxContext* ctx) {
 }
 
 static void duplicate_avpacket(VideoToolBoxContext* ctx,const AVPacket* pkt) {
-    if (ctx->m_packet_deep == 200) {
+    if (ctx->m_packet_deep >= (sizeof(ctx->packets)/sizeof(AVPacket))) {
+        ALOGI("packets full !!!!!!! \n");
         empty_avpackets(ctx);
     }
     AVPacket* pkt_queue = &ctx->packets[ctx->m_packet_deep];
@@ -526,7 +530,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     if (context->refresh_session) {
         decoderFlags |= kVTDecodeFrame_DoNotOutputFrame;
-        ALOGI("flag :%d", decoderFlags);
+        ALOGI("flag :%d flag %d \n", decoderFlags,avpkt->flags);
     }
 
     if (pts == AV_NOPTS_VALUE) {
@@ -635,7 +639,7 @@ failed:
 
 int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
 {
-    if (avpkt->flags == 1) {
+    if (avpkt->flags & 1) {
         empty_avpackets(context);
     }
     duplicate_avpacket(context, avpkt);
@@ -649,12 +653,15 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         }
 
         CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
-
-        for (int i = 0; i < context->m_packet_deep; i++) {
-            videotoolbox_decode_video_internal(context, avctx, &context->packets[i], got_picture_ptr);
+        ALOGI("video frame deep : %d \n", context->m_packet_deep);
+        if (context->packets[0].flags & 1) {
+            for (int i = 0; i < context->m_packet_deep; i++) {
+                videotoolbox_decode_video_internal(context, avctx, &context->packets[i], got_picture_ptr);
+            }
+        } else {
+            ALOGE("first flag is not 1!!!! \n");
         }
         context->refresh_session = false;
-
     }
     return videotoolbox_decode_video_internal(context, avctx, avpkt, got_picture_ptr);
 }
