@@ -240,6 +240,11 @@ int SDL_Android_NativeWindow_display_l(ANativeWindow *native_window, SDL_VoutOve
             ALOGE("SDL_Android_NativeWindow_display_l: ANativeWindow_setBuffersGeometry: failed %d", retval);
             return retval;
         }
+
+        if (!voutDesc) {
+            ALOGE("SDL_Android_NativeWindow_display_l: unknown hal format %d", curr_format);
+            return -1;
+        }
     }
 
     ANativeWindow_Buffer out_buffer;
