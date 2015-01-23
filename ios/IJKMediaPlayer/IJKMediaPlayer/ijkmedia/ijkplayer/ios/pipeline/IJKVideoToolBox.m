@@ -476,42 +476,10 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height, CMFor
     CFRelease(destinationPixelBufferAttributes);
 }
 
-static void empty_avpackets(VideoToolBoxContext* ctx) {
-    long total_size = 0;
-    for (int i = 0;i < ctx->m_packet_deep; i++) {
-        total_size += ctx->packets[i].size;
-        av_free_packet(&ctx->packets[i]);
-    }
-    ALOGI("\n deep %d  size %ld \n",ctx->m_packet_deep,total_size);
-    memset(ctx->packets,0,sizeof(ctx->packets));
-    ctx->m_packet_deep = 0;
-}
-
-static void duplicate_avpacket(VideoToolBoxContext* ctx,const AVPacket* pkt) {
-    if (ctx->m_packet_deep >= (sizeof(ctx->packets)/sizeof(AVPacket))) {
-        ALOGI("packets full !!!!!!! \n");
-        empty_avpackets(ctx);
-    }
-    AVPacket* pkt_queue = &ctx->packets[ctx->m_packet_deep];
-    av_new_packet(pkt_queue, pkt->size);
-    pkt_queue->pts = pkt->pts;
-    pkt_queue->dts = pkt->dts;
-    pkt_queue->pos = pkt->pos;
-    pkt_queue->duration = pkt->duration;
-    pkt_queue->stream_index = pkt->stream_index;
-    pkt_queue->flags = pkt->flags;
-    pkt_queue->convergence_duration = pkt->convergence_duration;
-    memcpy(pkt_queue->data, pkt->data, pkt->size);
-    ctx->m_packet_deep += 1;
-}
-
 
 
 int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
 {
-    if (!avpkt || !avpkt->data) {
-        return 0;
-    }
     OSStatus status                 = 0;
     double sort_time                = GetSystemTime();
     uint32_t decoderFlags           = 0;
@@ -640,29 +608,23 @@ failed:
 
 int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
 {
-    if (avpkt->flags & 1) {
-        empty_avpackets(context);
+    if (!avpkt || !avpkt->data) {
+        return 0;
     }
-    duplicate_avpacket(context, avpkt);
-
     if (context->refresh_session) {
-        ALOGI("last_keyframe_pts %lld \n",context->last_keyframe_pts);
-
-        if(context->m_vt_session) {
-            VTDecompressionSessionInvalidate(context->m_vt_session);
-            CFRelease(context->m_vt_session);
-        }
-
-        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
-        ALOGI("video frame deep : %d \n", context->m_packet_deep);
-        if (context->packets[0].flags & 1) {
-            for (int i = 0; i < context->m_packet_deep; i++) {
-                videotoolbox_decode_video_internal(context, avctx, &context->packets[i], got_picture_ptr);
-            }
+        if ((avpkt->flags & 1) == 0) {
+            return -1;
         } else {
-            ALOGE("first flag is not 1!!!! \n");
+            if(context->m_vt_session) {
+                VTDecompressionSessionInvalidate(context->m_vt_session);
+                CFRelease(context->m_vt_session);
+            }
+
+            CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
+            context->refresh_session = false;
+            context->last_keyframe_pts = avpkt->pts;
+            ALOGI("last_keyframe_pts %lld \n",context->last_keyframe_pts);
         }
-        context->refresh_session = false;
     }
     return videotoolbox_decode_video_internal(context, avctx, avpkt, got_picture_ptr);
 }
@@ -740,10 +702,6 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
         SortQueuePop(context);
     }
 
-    if (context) {
-        empty_avpackets(context);
-    }
-
     if (context && context->m_vt_session) {
         VTDecompressionSessionInvalidate(context->m_vt_session);
         CFRelease(context->m_vt_session);
@@ -781,7 +739,6 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     context_vtb->decode_mutex = SDL_CreateMutex();
     context_vtb->decode_cond  = SDL_CreateCond();
     context_vtb->last_sort = 0;
-    context_vtb->m_packet_deep = 0;
 
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:

@@ -79,8 +79,6 @@ typedef struct VideoToolBoxContext {
     bool                        m_convert_3byteTo4byteNALSize;
     double                      serial;
     volatile double             last_sort;
-    AVPacket                    packets[MAX_PACKETS_CACHE_QUEUE_DEEP];
-    int                         m_packet_deep;
 } VideoToolBoxContext ;
 
 
