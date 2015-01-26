@@ -335,16 +335,6 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             goto failed;
         }
 
-
-
-        if (ctx->refresh_request) {
-            while (ctx->m_queue_depth > 0) {
-                SortQueuePop(ctx);
-            }
-            ctx->serial += 1;
-            ctx->refresh_request = false;
-        }
-
         if (ctx->new_seg_flag) {
             ALOGI("new seg process!!!!");
             while (ctx->m_queue_depth > 0) {
@@ -500,6 +490,13 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     if (context->refresh_session) {
         decoderFlags |= kVTDecodeFrame_DoNotOutputFrame;
         ALOGI("flag :%d flag %d \n", decoderFlags,avpkt->flags);
+    }
+
+    if (context->refresh_request) {
+        while (context->m_queue_depth > 0) {
+            SortQueuePop(context);
+        }
+        context->refresh_request = false;
     }
 
     if (pts == AV_NOPTS_VALUE) {

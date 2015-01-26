@@ -63,6 +63,7 @@ int decoder_decode_frame_videotoolbox(VideoToolBoxContext* context) {
                 if (ffp_is_flush_packet(&pkt)) {
                     avcodec_flush_buffers(d->avctx);
                     context->refresh_request = true;
+                    context->serial += 1;
                     d->finished = 0;
                    // context->last_keyframe_pts = d->pkt.pts;
                      ALOGI("flushed last keyframe pts %lld \n",d->pkt.pts);
