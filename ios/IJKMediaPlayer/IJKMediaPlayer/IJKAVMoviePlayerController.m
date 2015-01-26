@@ -192,6 +192,9 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 - (id)initWithContentURLString:(NSString *)aUrl
 {
     NSURL *url;
+    if (aUrl == nil) {
+        aUrl = @"";
+    }
     if ([aUrl rangeOfString:@"/"].location == 0) {
         //本地
         url = [NSURL fileURLWithPath:aUrl];
