@@ -493,9 +493,17 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     }
 
     if (context->refresh_request) {
+
         while (context->m_queue_depth > 0) {
             SortQueuePop(context);
         }
+
+        if(context->m_vt_session) {
+            VTDecompressionSessionInvalidate(context->m_vt_session);
+            CFRelease(context->m_vt_session);
+        }
+
+        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
         context->refresh_request = false;
     }
 
