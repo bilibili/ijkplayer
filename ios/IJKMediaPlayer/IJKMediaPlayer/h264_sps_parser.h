@@ -37,6 +37,27 @@
 (((const uint8_t*)(x))[2] <<  8) |        \
 ((const uint8_t*)(x))[3])
 
+
+/* NAL unit types */
+enum {
+    NAL_SLICE           = 1,
+    NAL_DPA             = 2,
+    NAL_DPB             = 3,
+    NAL_DPC             = 4,
+    NAL_IDR_SLICE       = 5,
+    NAL_SEI             = 6,
+    NAL_SPS             = 7,
+    NAL_PPS             = 8,
+    NAL_AUD             = 9,
+    NAL_END_SEQUENCE    = 10,
+    NAL_END_STREAM      = 11,
+    NAL_FILLER_DATA     = 12,
+    NAL_SPS_EXT         = 13,
+    NAL_AUXILIARY_SLICE = 19,
+    NAL_FF_IGNORE       = 0xff0f001,
+};
+
+
 typedef struct
 {
     const uint8_t *data;
@@ -256,5 +277,35 @@ bool validate_avcC_spc(uint8_t *extradata, uint32_t extrasize, int32_t *max_ref_
         return false;
     return true;
 }
+
+
+
+
+
+/**
+ * Parse NAL units of found picture and decode some basic information.
+ *
+ * @param s parser context.
+ * @param avctx codec context.
+ * @param buf buffer with field/frame data.
+ * @param buf_size size of the buffer.
+ */
+static inline int ff_get_nal_units_type(const uint8_t * const data, int size)
+{
+    return   data[4] & 0x1f;
+}
+
+static bool ff_avpacket_is_idr(const AVPacket* pkt) {
+
+    int state = ff_get_nal_units_type(pkt->data, pkt->size);
+    if (state == NAL_IDR_SLICE) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
+
+
 
 #endif

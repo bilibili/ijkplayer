@@ -616,8 +616,17 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
     if (!avpkt || !avpkt->data) {
         return 0;
     }
+    static int i = 0;
+    if (ff_avpacket_is_idr(avpkt) == true) {
+        ALOGI("\n log IDR!!!! %d \n",i);
+        i = 0;
+    } else {
+        i++;
+    }
+
+
     if (context->refresh_session) {
-        if ((avpkt->flags & 1) == 0) {
+        if (ff_avpacket_is_idr(avpkt) == false) {
             return -1;
         } else {
             if(context->m_vt_session) {

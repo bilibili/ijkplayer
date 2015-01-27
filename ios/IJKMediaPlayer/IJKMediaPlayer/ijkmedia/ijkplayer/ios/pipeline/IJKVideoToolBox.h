@@ -31,7 +31,8 @@
 #include "ff_ffmsg.h"
 #include "ff_ffplay.h"
 
-#define MAX_PACKETS_CACHE_QUEUE_DEEP 250
+
+#define MAX_PKT_QUEUE_DEEP 700
 
 typedef struct VTBPicture {
     double              pts;
@@ -57,7 +58,6 @@ typedef struct sort_queue {
 
 typedef struct VideoToolBoxContext {
     FFPlayer                   *ffp;
-    AVCodecContext              video_dec_ctx;
     int                         width;
     int                         height;
     volatile bool               refresh_request;
