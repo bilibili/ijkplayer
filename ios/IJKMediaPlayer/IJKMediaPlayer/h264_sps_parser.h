@@ -297,7 +297,11 @@ static inline int ff_get_nal_units_type(const uint8_t * const data, int size)
 
 static bool ff_avpacket_is_idr(const AVPacket* pkt) {
 
-    int state = ff_get_nal_units_type(pkt->data, pkt->size);
+    int state = -1;
+
+    if (pkt->data && pkt->size >= 5) {
+        state = ff_get_nal_units_type(pkt->data, pkt->size);
+    }
     if (state == NAL_IDR_SLICE) {
         return true;
     } else {
