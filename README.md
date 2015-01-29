@@ -52,13 +52,13 @@ ijkplayer
 - If you prefer more codec/format
 ```
 rm config/module.sh
-ln -fs config/module-default.sh config/module.sh
+ln -s config/module-default.sh config/module.sh
 ```
 
 - If you prefer less codec/format for smaller binary size (by default)
 ```
 rm config/module.sh
-ln -fs config/module-lite.sh config/module.sh
+ln -s config/module-lite.sh config/module.sh
 ```
 
 - For Ubuntu/Debian users.
@@ -80,6 +80,7 @@ git checkout -B latest n0.2.2
 ./init-android.sh
 
 cd android
+./compile-ffmpeg.sh clean
 ./compile-ffmpeg.sh
 ./compile-ijk.sh
 
@@ -104,6 +105,7 @@ git checkout -B latest n0.2.2
 ./init-ios.sh
 
 cd ios
+./compile-ffmpeg.sh clean
 ./compile-ffmpeg.sh all
 
 # import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
