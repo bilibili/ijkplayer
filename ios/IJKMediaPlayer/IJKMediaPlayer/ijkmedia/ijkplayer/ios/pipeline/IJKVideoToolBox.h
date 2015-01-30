@@ -32,7 +32,7 @@
 #include "ff_ffplay.h"
 
 
-#define MAX_PKT_QUEUE_DEEP 700
+#define MAX_PKT_QUEUE_DEEP 350
 
 typedef struct VTBPicture {
     double              pts;
@@ -64,6 +64,7 @@ typedef struct VideoToolBoxContext {
     volatile bool               new_seg_flag;
     int64_t                     last_keyframe_pts;
     volatile bool               refresh_session;
+    volatile bool               recovery_drop_packet;
     SDL_mutex                  *decode_mutex;
     SDL_cond                   *decode_cond;
     VTDecompressionSessionRef   m_vt_session;
@@ -79,6 +80,8 @@ typedef struct VideoToolBoxContext {
     bool                        m_convert_3byteTo4byteNALSize;
     double                      serial;
     volatile double             last_sort;
+    int                         m_buffer_deep;
+    AVPacket                    m_buffer_packet[MAX_PKT_QUEUE_DEEP];
 } VideoToolBoxContext ;
 
 

@@ -310,6 +310,18 @@ static bool ff_avpacket_is_idr(const AVPacket* pkt) {
 
 }
 
+static bool ff_avpacket_is_first_packet(AVPacket* pkt) {
+    int state = -1;
 
+    if (pkt->data && pkt->size >= 5) {
+        state = ff_get_nal_units_type(pkt->data, pkt->size);
+    }
+
+    if (state == NAL_SEI && pkt->dts == 0 && (pkt->flags & AV_PKT_FLAG_KEY)) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 #endif

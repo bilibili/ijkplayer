@@ -34,8 +34,7 @@
 
 #define IJK_VTB_FCC_AVC    SDL_FOURCC('C', 'c', 'v', 'a')
 #define IJK_VTB_FCC_ESD    SDL_FOURCC('s', 'd', 's', 'e')
-#define kVTFormatH264      SDL_FOURCC('1', 'c', 'v', 'a')
-#define NOPTS_VAL (-1LL<<52)
+#define IJK_VTB_FCC_AVC1   SDL_FOURCC('1', 'c', 'v', 'a')
 
 
 static double GetSystemTime()
@@ -243,9 +242,9 @@ static CFDictionaryRef CreateDictionaryWithPkt(double time, double dts, double p
 static void GetPktTSFromRef(CFDictionaryRef inFrameInfoDictionary, sort_queue *frame)
 {
     frame->sort = -1.0;
-    frame->dts = NOPTS_VAL;
-    frame->pts = NOPTS_VAL;
-    frame->serial = NOPTS_VAL;
+    frame->dts = AV_NOPTS_VALUE;
+    frame->pts = AV_NOPTS_VALUE;
+    frame->serial = AV_NOPTS_VALUE;
     if (inFrameInfoDictionary == NULL)
         return;
 
@@ -265,6 +264,7 @@ static void GetPktTSFromRef(CFDictionaryRef inFrameInfoDictionary, sort_queue *f
         CFNumberGetValue(value[3], kCFNumberDoubleType, &frame->serial);
     return;
 }
+
 
 void QueuePicture(VideoToolBoxContext* ctx) {
     VTBPicture picture;
@@ -608,6 +608,31 @@ failed:
     return -1;
 }
 
+static inline void ResetPktBuffer(VideoToolBoxContext* context) {
+    for (int i = 0 ; i < context->m_buffer_deep; i++) {
+        av_free_packet(&context->m_buffer_packet[i]);
+    }
+    context->m_buffer_deep = 0;
+    memset(context->m_buffer_packet, 0, sizeof(context->m_buffer_packet));
+}
+
+static inline void DuplicatePkt(VideoToolBoxContext* context, const AVPacket* pkt) {
+    if (context->m_buffer_deep >= MAX_PKT_QUEUE_DEEP) {
+        ResetPktBuffer(context);
+    }
+    AVPacket* avpkt = &context->m_buffer_packet[context->m_buffer_deep];
+    av_new_packet(avpkt, pkt->size);
+    avpkt->flags        = pkt->flags;
+    avpkt->pts          = pkt->pts;
+    avpkt->dts          = pkt->dts;
+    avpkt->duration     = pkt->duration;
+    avpkt->pos          = pkt->pos;
+    avpkt->size         = pkt->size;
+    avpkt->stream_index = pkt->stream_index;
+    avpkt->convergence_duration = pkt->convergence_duration;
+    memcpy(avpkt->data, pkt->data, pkt->size);
+    context->m_buffer_deep++;
+}
 
 
 
@@ -616,29 +641,39 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
     if (!avpkt || !avpkt->data) {
         return 0;
     }
-    static int i = 0;
+
     if (ff_avpacket_is_idr(avpkt) == true) {
-        ALOGI("\n log IDR!!!! %d \n",i);
-        i = 0;
-    } else {
-        i++;
+        ResetPktBuffer(context);
+        context->recovery_drop_packet = false;
+    }
+    if (context->recovery_drop_packet == true) {
+        return -1;
     }
 
+    DuplicatePkt(context, avpkt);
 
     if (context->refresh_session) {
-        if (ff_avpacket_is_idr(avpkt) == false) {
-            return -1;
-        } else {
-            if(context->m_vt_session) {
-                VTDecompressionSessionInvalidate(context->m_vt_session);
-                CFRelease(context->m_vt_session);
-            }
-
-            CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
-            context->refresh_session = false;
-            context->last_keyframe_pts = avpkt->pts;
-            ALOGI("last_keyframe_pts %lld \n",context->last_keyframe_pts);
+        int ret = 0;
+        if (context->m_vt_session) {
+            VTDecompressionSessionInvalidate(context->m_vt_session);
+            CFRelease(context->m_vt_session);
         }
+
+        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
+
+        if ((context->m_buffer_deep > 0) &&
+            (ff_avpacket_is_idr(&context->m_buffer_packet[0]) == true || ff_avpacket_is_first_packet(&context->m_buffer_packet[0]) == true)) {
+            for (int i = 0; i < context->m_buffer_deep; i++) {
+                AVPacket* pkt = &context->m_buffer_packet[i];
+                ret = videotoolbox_decode_video_internal(context, avctx, pkt, got_picture_ptr);
+            }
+        } else {
+            context->recovery_drop_packet = true;
+            ret = -1;
+            ALOGE("recovery error!!!!\n");
+        }
+        context->refresh_session = false;
+        return ret;
     }
     return videotoolbox_decode_video_internal(context, avctx, avpkt, got_picture_ptr);
 }
@@ -715,7 +750,9 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
     while (context && context->m_queue_depth > 0) {
         SortQueuePop(context);
     }
-
+    if (context) {
+        ResetPktBuffer(context);
+    }
     if (context && context->m_vt_session) {
         VTDecompressionSessionInvalidate(context->m_vt_session);
         CFRelease(context->m_vt_session);
@@ -745,6 +782,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     context_vtb->m_convert_3byteTo4byteNALSize = false;
     context_vtb->refresh_request = false;
     context_vtb->new_seg_flag = false;
+    context_vtb->recovery_drop_packet = false;
     context_vtb->refresh_session = false;
     context_vtb->last_keyframe_pts = 0;
     context_vtb->m_max_ref_frames = 0;
@@ -753,6 +791,8 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     context_vtb->decode_mutex = SDL_CreateMutex();
     context_vtb->decode_cond  = SDL_CreateCond();
     context_vtb->last_sort = 0;
+    context_vtb->m_buffer_deep = 0;
+    memset(context_vtb->m_buffer_packet, 0, sizeof(context_vtb->m_buffer_packet));
 
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:
@@ -795,8 +835,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
                     context_vtb->m_convert_3byteTo4byteNALSize = true;
                 }
 
-
-                context_vtb->m_fmt_desc = CreateFormatDescriptionFromCodecData(kVTFormatH264, width, height, extradata, extrasize,  IJK_VTB_FCC_AVC);
+                context_vtb->m_fmt_desc = CreateFormatDescriptionFromCodecData(IJK_VTB_FCC_AVC1, width, height, extradata, extrasize,  IJK_VTB_FCC_AVC);
 
                 ALOGI("%s - using avcC atom of size(%d), ref_frames(%d)", __FUNCTION__, extrasize, context_vtb->m_max_ref_frames);
             } else {
@@ -818,7 +857,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
                             goto failed;
                         }
 
-                        context_vtb->m_fmt_desc = CreateFormatDescriptionFromCodecData(kVTFormatH264, width, height, extradata, extrasize, IJK_VTB_FCC_AVC);
+                        context_vtb->m_fmt_desc = CreateFormatDescriptionFromCodecData(IJK_VTB_FCC_AVC1, width, height, extradata, extrasize, IJK_VTB_FCC_AVC);
 
                         av_free(extradata);
                     } else {

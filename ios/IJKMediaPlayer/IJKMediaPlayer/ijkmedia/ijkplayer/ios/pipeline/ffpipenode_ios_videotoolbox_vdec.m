@@ -140,6 +140,8 @@ static void func_destroy(IJKFF_Pipenode *node)
     IJKFF_Pipenode_Opaque *opaque = node->opaque;
     if (opaque->context) {
         dealloc_videotoolbox(opaque->context);
+        free(opaque->context);
+        opaque->context = NULL;
     }
 }
 
