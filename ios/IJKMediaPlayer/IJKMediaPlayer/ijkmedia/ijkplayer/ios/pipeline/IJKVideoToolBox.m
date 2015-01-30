@@ -821,7 +821,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
             if (extradata[0] == 1) {
                 if (!validate_avcC_spc(extradata, extrasize, &context_vtb->m_max_ref_frames, &sps_level, &sps_profile)) {
-                    goto failed;
+                    //goto failed;
                 }
                 if (level == 0 && sps_level > 0)
                     level = sps_level;
