@@ -305,17 +305,19 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         return;
     
     _isSeeking = YES;
-    
     [self didPlaybackStateChange];
     [self didLoadStateChange];
+    if (_isPrerolling) {
+        [_player pause];
+    }
     
-    [_player pause];
     [_player seekToTime:CMTimeMakeWithSeconds(aCurrentPlaybackTime, NSEC_PER_SEC)
       completionHandler:^(BOOL finished) {
           dispatch_async(dispatch_get_main_queue(), ^{
               _isSeeking = NO;
-              [_player play];
-              
+              if (_isPrerolling) {
+                  [_player play];
+              }
               [self didPlaybackStateChange];
               [self didLoadStateChange];
           });
