@@ -399,20 +399,12 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             QueuePicture(ctx);
         }
     successed:
-        //ALOGI("Signal: %lf\n", newFrame->pts);
-        SDL_LockMutex(ctx->decode_mutex);
-        SDL_CondSignal(ctx->decode_cond);
-        SDL_UnlockMutex(ctx->decode_mutex);
-
         return;
     failed:
         ALOGI("FailedSignal: %lf\n", newFrame->pts);
         if (newFrame) {
             free(newFrame);
         }
-        SDL_LockMutex(ctx->decode_mutex);
-        SDL_CondSignal(ctx->decode_cond);
-        SDL_UnlockMutex(ctx->decode_mutex);
         return;
     }
 }
@@ -585,9 +577,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     //ALOGI("Wait : %lf \n",pts);
     if ((sort_time - context->m_sort_time_offset) > context->last_sort) {
-//        SDL_LockMutex(context->decode_mutex);
-//        SDL_CondWait(context->decode_cond, context->decode_mutex);
-//        SDL_UnlockMutex(context->decode_mutex);
+
     }
     if (status != 0) {
         goto failed;
@@ -795,8 +785,6 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     context_vtb->m_max_ref_frames = 0;
     context_vtb->ffp = ffp;
     context_vtb->serial = 0;
-    context_vtb->decode_mutex = SDL_CreateMutex();
-    context_vtb->decode_cond  = SDL_CreateCond();
     context_vtb->last_sort = 0;
     context_vtb->m_buffer_deep = 0;
     memset(context_vtb->m_buffer_packet, 0, sizeof(context_vtb->m_buffer_packet));
