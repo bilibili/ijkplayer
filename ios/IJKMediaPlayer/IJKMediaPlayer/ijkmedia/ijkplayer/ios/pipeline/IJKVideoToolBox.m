@@ -299,6 +299,9 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 {
     @autoreleasepool {
         VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
+        if (!ctx || ctx->dealloced == true) {
+            return;
+        }
         sort_queue *newFrame = (sort_queue*)malloc(sizeof(sort_queue));
         newFrame->nextframe = NULL;
         GetPktTSFromRef(sourceFrameRefCon, newFrame);
@@ -309,7 +312,6 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             ALOGI("Signal: status\n");
             goto failed;
         }
-
 
         if (ctx->refresh_session) {
             goto failed;
@@ -472,7 +474,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 {
     OSStatus status                 = 0;
     double sort_time                = GetSystemTime();
-    uint32_t decoderFlags           = kVTDecodeFrame_EnableAsynchronousDecompression;
+    uint32_t decoderFlags           = 0;
     CFDictionaryRef frame_info      = NULL;;
     CMSampleBufferRef sample_buff   = NULL;
     AVIOContext *pb                 = NULL;
@@ -753,12 +755,13 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
     while (context && context->m_queue_depth > 0) {
         SortQueuePop(context);
     }
-    if (context) {
-        ResetPktBuffer(context);
-    }
     if (context && context->m_vt_session) {
         VTDecompressionSessionInvalidate(context->m_vt_session);
         CFRelease(context->m_vt_session);
+    }
+    if (context) {
+        ResetPktBuffer(context);
+        context->dealloced = true;
     }
 }
 
@@ -787,6 +790,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     context_vtb->new_seg_flag = false;
     context_vtb->recovery_drop_packet = false;
     context_vtb->refresh_session = false;
+    context_vtb->dealloced = false;
     context_vtb->last_keyframe_pts = 0;
     context_vtb->m_max_ref_frames = 0;
     context_vtb->ffp = ffp;
