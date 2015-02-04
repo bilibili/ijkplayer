@@ -281,47 +281,37 @@ bool validate_avcC_spc(uint8_t *extradata, uint32_t extrasize, int32_t *max_ref_
 
 
 
-
-/**
- * Parse NAL units of found picture and decode some basic information.
- *
- * @param s parser context.
- * @param avctx codec context.
- * @param buf buffer with field/frame data.
- * @param buf_size size of the buffer.
- */
-static inline int ff_get_nal_units_type(const uint8_t * const data, int size)
-{
+static inline int ff_get_nal_units_type(const uint8_t * const data) {
     return   data[4] & 0x1f;
 }
+
+static uint32_t bytesToInt(uint8_t* src) {
+    uint32_t value;
+    value = (uint32_t)((src[0] & 0xFF)<<24|(src[1]&0xFF)<<16|(src[2]&0xFF)<<8|(src[3]&0xFF));
+    return value;
+}
+
+
 
 static bool ff_avpacket_is_idr(const AVPacket* pkt) {
 
     int state = -1;
 
     if (pkt->data && pkt->size >= 5) {
-        state = ff_get_nal_units_type(pkt->data, pkt->size);
+        int offset = 0;
+        while (offset <= pkt->size) {
+            void* nal_start = pkt->data+offset;
+            state = ff_get_nal_units_type(nal_start);
+            if (state == NAL_IDR_SLICE) {
+                return true;
+            }
+            //            ALOGI("offset %d \n", bytesToInt(nal_start));
+            offset+=(bytesToInt(nal_start) + 4);
+        }
     }
-    if (state == NAL_IDR_SLICE) {
-        return true;
-    } else {
-        return false;
-    }
-
+    return false;
 }
 
-static bool ff_avpacket_is_first_packet(AVPacket* pkt) {
-    int state = -1;
 
-    if (pkt->data && pkt->size >= 5) {
-        state = ff_get_nal_units_type(pkt->data, pkt->size);
-    }
-
-    if (state == NAL_SEI && pkt->dts == 0 && (pkt->flags & AV_PKT_FLAG_KEY)) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
 #endif

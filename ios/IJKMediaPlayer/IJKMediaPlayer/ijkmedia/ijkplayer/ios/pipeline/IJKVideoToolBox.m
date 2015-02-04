@@ -657,7 +657,7 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
 
         if ((context->m_buffer_deep > 0) &&
-            (ff_avpacket_is_idr(&context->m_buffer_packet[0]) == true || ff_avpacket_is_first_packet(&context->m_buffer_packet[0]) == true)) {
+            ff_avpacket_is_idr(&context->m_buffer_packet[0]) == true ) {
             for (int i = 0; i < context->m_buffer_deep; i++) {
                 AVPacket* pkt = &context->m_buffer_packet[i];
                 ret = videotoolbox_decode_video_internal(context, avctx, pkt, got_picture_ptr);
