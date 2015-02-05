@@ -2541,6 +2541,9 @@ static int read_thread(void *arg)
         }
         ret = av_read_frame(ic, pkt);
         if (ret < 0) {
+            if (ret == AVERROR_INVALIDDATA && (pkt->flags & AV_PKT_FLAG_MP4_PF)) {
+                ffp_seek_to_l(ffp, ffp_get_current_position_l(ffp));
+            }
             if ((ret == AVERROR_EOF || avio_feof(ic->pb)) && !eof) {
                 if (is->video_stream >= 0)
                     packet_queue_put_nullpacket(&is->videoq, is->video_stream);

@@ -62,6 +62,7 @@ typedef struct VideoToolBoxContext {
     int                         height;
     volatile bool               refresh_request;
     volatile bool               new_seg_flag;
+    volatile bool               idr_based_identified;
     int64_t                     last_keyframe_pts;
     volatile bool               refresh_session;
     volatile bool               recovery_drop_packet;
