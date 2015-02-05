@@ -807,7 +807,7 @@ static void toggle_pause_l(FFPlayer *ffp, int pause_on)
     // ALOGE("toggle_pause_l\n");
     VideoState *is = ffp->is;
     is->pause_req = pause_on;
-    ffp->auto_start = !pause_on;
+    ffp->auto_resume = !pause_on;
     stream_update_pause_l(ffp);
     is->step = 0;
 }
@@ -2386,9 +2386,9 @@ static int read_thread(void *arg)
         ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
         ffp_notify_msg3(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
     }
-    if (ffp->auto_start) {
+    if (ffp->auto_resume) {
         ffp_notify_msg1(ffp, FFP_REQ_START);
-        ffp->auto_start = 0;
+        ffp->auto_resume = 0;
     }
 
     for (;;) {
@@ -2456,11 +2456,11 @@ static int read_thread(void *arg)
 #endif
             completed = 0;
             SDL_LockMutex(ffp->is->play_mutex);
-            if (ffp->auto_start) {
-                // ALOGE("seek: auto_start\n");
+            if (ffp->auto_resume) {
+                // ALOGE("seek: auto_resume\n");
                 is->pause_req = 0;
                 is->buffering_on = 1;
-                ffp->auto_start = 0;
+                ffp->auto_resume = 0;
                 stream_update_pause_l(ffp);
             }
             if (is->pause_req)
@@ -2525,7 +2525,7 @@ static int read_thread(void *arg)
                         continue;
                 } else {
                     completed = 1;
-                    ffp->auto_start = 0;
+                    ffp->auto_resume = 0;
 
                     // TODO: 0 it's a bit early to notify complete here
                     ALOGE("ffp_toggle_buffering: completed: (error=%d)\n", ffp->error);
@@ -3042,7 +3042,7 @@ int ffp_start_from_l(FFPlayer *ffp, long msec)
     if (!is)
         return EIJK_NULL_IS_PTR;
 
-    ffp->auto_start = 1;
+    ffp->auto_resume = 1;
     ffp_toggle_buffering(ffp, 1);
     ffp_seek_to_l(ffp, msec);
     return 0;

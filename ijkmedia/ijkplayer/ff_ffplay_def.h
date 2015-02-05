@@ -484,7 +484,7 @@ typedef struct FFPlayer {
 
     int last_error;
     int prepared;
-    int auto_start;
+    int auto_resume;
     int error;
     int error_count;
 
@@ -573,7 +573,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->last_error             = 0;
     ffp->prepared               = 0;
-    ffp->auto_start             = 0;
+    ffp->auto_resume            = 0;
     ffp->error                  = 0;
     ffp->error_count            = 0;
 
