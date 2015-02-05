@@ -2,6 +2,7 @@ tag next
 --------------------------------
 android: support OpenSL ES
 ios: support NV12 Render
+ios: support VideoToolBox
 
 tag n0.2.2:
 --------------------------------
