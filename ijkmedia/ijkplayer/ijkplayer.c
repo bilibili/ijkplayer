@@ -205,6 +205,17 @@ void ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop)
     MPTRACE("ijkmp_set_framedrop()=void\n");
 }
 
+void ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepared)
+{
+    assert(mp);
+
+    MPTRACE("ijkmp_set_auto_play_on_prepared(%d)\n", auto_play_on_prepared);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_auto_play_on_prepared(mp->ffplayer, auto_play_on_prepared);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_set_auto_play_on_prepared()=void\n");
+}
+
 int ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info)
 {
     assert(mp);
@@ -621,6 +632,9 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             } else {
                 // FIXME: 1: onError() ?
                 ALOGE("FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING\n");
+            }
+            if (ffp_is_paused_l(mp->ffplayer)) {
+                ijkmp_change_state_l(mp, MP_STATE_PAUSED);
             }
             pthread_mutex_unlock(&mp->mutex);
             break;

@@ -487,6 +487,7 @@ typedef struct FFPlayer {
     int auto_resume;
     int error;
     int error_count;
+    int auto_play_on_prepared;
 
     MessageQueue msg_queue;
 
@@ -576,6 +577,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->auto_resume            = 0;
     ffp->error                  = 0;
     ffp->error_count            = 0;
+    ffp->auto_play_on_prepared  = 1;
 
     ffp->max_buffer_size                = MAX_QUEUE_SIZE;
     ffp->high_water_mark_in_bytes       = DEFAULT_HIGH_WATER_MARK_IN_BYTES;

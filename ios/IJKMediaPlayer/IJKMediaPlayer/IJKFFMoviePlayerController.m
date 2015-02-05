@@ -172,7 +172,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init fields
         _controlStyle = MPMovieControlStyleNone;
         _scalingMode = MPMovieScalingModeAspectFit;
-        _shouldAutoplay = NO;
+        _shouldAutoplay = YES;
 
         // init media resource
         _ffMrl = [[IJKFFMrl alloc] initWithMrl:aUrlString];
@@ -185,6 +185,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
         ijkmp_set_format_callback(_mediaPlayer, format_control_message, (__bridge void *) self);
+        ijkmp_set_auto_play_on_prepared(_mediaPlayer, _shouldAutoplay);
 
         // init video sink
 //        int chroma = SDL_FCC_RV24;
@@ -222,6 +223,21 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 {
     [_ffMrl removeTempFiles];
     [self unregisterApplicationObservers];
+}
+
+- (void)setShouldAutoplay:(BOOL)shouldAutoplay
+{
+    _shouldAutoplay = shouldAutoplay;
+
+    if (!_mediaPlayer)
+        return;
+
+    ijkmp_set_auto_play_on_prepared(_mediaPlayer, shouldAutoplay);
+}
+
+- (BOOL)shouldAutoplay
+{
+    return _shouldAutoplay;
 }
 
 - (void)prepareToPlay

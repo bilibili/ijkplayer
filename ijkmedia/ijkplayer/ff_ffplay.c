@@ -2379,12 +2379,19 @@ static int read_thread(void *arg)
     if (ffp->infinite_buffer < 0 && is->realtime)
         ffp->infinite_buffer = 1;
 
+    if (!ffp->auto_play_on_prepared)
+        toggle_pause(ffp, 1);
     ffp->prepared = true;
     ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
     if (is->video_st && is->video_st->codec) {
         AVCodecContext *avctx = is->video_st->codec;
         ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
         ffp_notify_msg3(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
+    }
+    if (!ffp->auto_play_on_prepared) {
+        while (is->paused && !is->abort_request) {
+            SDL_Delay(100);
+        }
     }
     if (ffp->auto_resume) {
         ffp_notify_msg1(ffp, FFP_REQ_START);
@@ -2990,6 +2997,11 @@ void ffp_set_framedrop(FFPlayer *ffp, int framedrop)
     ffp->framedrop = framedrop;
 }
 
+void ffp_set_auto_play_on_prepared(FFPlayer *ffp, int auto_play_on_prepared)
+{
+    ffp->auto_play_on_prepared = auto_play_on_prepared;
+}
+
 int ffp_get_video_codec_info(FFPlayer *ffp, char **codec_info)
 {
     if (!codec_info)
@@ -3070,6 +3082,16 @@ int ffp_pause_l(FFPlayer *ffp)
 
     toggle_pause(ffp, 1);
     return 0;
+}
+
+int ffp_is_paused_l(FFPlayer *ffp)
+{
+    assert(ffp);
+    VideoState *is = ffp->is;
+    if (!is)
+        return 1;
+
+    return is->paused;
 }
 
 int ffp_stop_l(FFPlayer *ffp)
