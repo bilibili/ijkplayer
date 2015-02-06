@@ -992,6 +992,16 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     opaque->weak_vout   = vout;
 
     opaque->avctx = opaque->decoder->avctx;
+    switch (opaque->avctx->profile) {
+        case FF_PROFILE_H264_HIGH_10:
+        case FF_PROFILE_H264_HIGH_10_INTRA:
+        case FF_PROFILE_H264_HIGH_422:
+        case FF_PROFILE_H264_HIGH_422_INTRA:
+        case FF_PROFILE_H264_HIGH_444_PREDICTIVE:
+        case FF_PROFILE_H264_HIGH_444_INTRA:
+        case FF_PROFILE_H264_CAVLC_444:
+            goto fail;
+    }
     switch (opaque->avctx->codec_id) {
     case AV_CODEC_ID_H264:
         strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_AVC);
