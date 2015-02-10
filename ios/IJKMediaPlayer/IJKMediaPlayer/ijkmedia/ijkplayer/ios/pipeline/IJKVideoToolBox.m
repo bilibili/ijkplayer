@@ -466,7 +466,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 {
     OSStatus status                 = 0;
     double sort_time                = GetSystemTime();
-    uint32_t decoderFlags           = kVTDecodeFrame_EnableAsynchronousDecompression;
+    uint32_t decoderFlags           = 0;
     CFDictionaryRef frame_info      = NULL;;
     CMSampleBufferRef sample_buff   = NULL;
     AVIOContext *pb                 = NULL;
@@ -746,13 +746,12 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
 
 void dealloc_videotoolbox(VideoToolBoxContext* context)
 {
-    if (context && context->m_vt_session) {
-        VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-        VTDecompressionSessionInvalidate(context->m_vt_session);
-        CFRelease(context->m_vt_session);
-    }
     while (context && context->m_queue_depth > 0) {
         SortQueuePop(context);
+    }
+    if (context && context->m_vt_session) {
+        VTDecompressionSessionInvalidate(context->m_vt_session);
+        CFRelease(context->m_vt_session);
     }
     if (context) {
         ResetPktBuffer(context);
