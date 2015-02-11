@@ -881,6 +881,30 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     return _player.airPlayVideoActive || self.isDanmakuMediaAirPlay;
 }
 
+- (void)setScalingMode: (MPMovieScalingMode) aScalingMode
+{
+    MPMovieScalingMode newScalingMode = aScalingMode;
+    switch (aScalingMode) {
+        case MPMovieScalingModeNone:
+            [_view setContentMode:UIViewContentModeCenter];
+            break;
+        case MPMovieScalingModeAspectFit:
+            [_view setContentMode:UIViewContentModeScaleAspectFit];
+            break;
+        case MPMovieScalingModeAspectFill:
+            [_view setContentMode:UIViewContentModeScaleAspectFill];
+            break;
+        case MPMovieScalingModeFill:
+            [_view setContentMode:UIViewContentModeScaleToFill];
+            break;
+        default:
+            newScalingMode = _scalingMode;
+    }
+    
+    _scalingMode = newScalingMode;
+}
+
+
 -(BOOL)isDanmakuMediaAirPlay
 {
     return _isDanmakuMediaAirPlay;
