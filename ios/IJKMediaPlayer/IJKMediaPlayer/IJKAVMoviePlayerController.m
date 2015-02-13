@@ -153,6 +153,8 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 @synthesize shouldAutoplay              = _shouldAutoplay;
 @synthesize isDanmakuMediaAirPlay       = _isDanmakuMediaAirPlay;
 
+static IJKAVMoviePlayerController* instance;
+
 - (id)initWithContentURL:(NSURL *)aUrl
 {
     self = [super init];
@@ -187,6 +189,16 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         [self registerApplicationObservers];
     }
     return self;
+}
+
++ (id)getInstance:(NSString *)aUrl
+{
+    if (instance == nil) {
+        instance = [[IJKAVMoviePlayerController alloc] initWithContentURLString:aUrl];
+    } else {
+        instance = [instance initWithContentURLString:aUrl];
+    }
+    return instance;
 }
 
 - (id)initWithContentURLString:(NSString *)aUrl
