@@ -6,13 +6,12 @@ ijkplayer
 
 ### My Build Enviroment
 - Common
- - Mac OS X 10.9.3
+ - Mac OS X 10.9.5
 - Android
- - [ADT v22.6.2-1085508](http://developer.android.com/sdk/index.html)
- - [NDK r9d](http://developer.android.com/tools/sdk/ndk/index.html)
+ - [ADT v23.0.4-1468518](http://developer.android.com/sdk/index.html)
+ - [NDK r10c](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
- - Xcode 5.0.2 (with iOS SDK 7)
- - Xcode 5.1 (can not build arm64 for some xcrun bug for now, http://llvm.org/bugs/show_bug.cgi?id=19179)
+ - Xcode 6.1.0
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
  - brew install git
@@ -25,21 +24,20 @@ ijkplayer
  - remove rarely used ffmpeg components to reduce binary size [config/module-lite.sh](config/module-lite.sh)
  - workaround for some buggy online video.
 - Android
- - platform: API 9~19
+ - platform: API 9~21
  - cpu: ARMv7a, x86, ARMv5 (not tested on real devices)
  - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - video output: NativeWindow
- - audio output: AudioTrack
+ - audio output: OpenSL ES, AudioTrack
+ - hw decoder: MediaCodec
 - iOS
- - platform: iOS 5.1.1~7.0.x
+ - platform: iOS 5.1.1~8.1.x
  - cpu: ARMv7, ARMv7s, ARM64, i386, x86_64
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
- - video-output: OpenGL ES 2.0 (I420/YV12 shaders)
- - audio-output: CoreAudio
+ - video-output: OpenGL ES 2.0 (I420/YV12/NV12 shaders)
+ - audio-output: AudioQueue, AudioUnit
 
 ### TODO
-- Android
- - hw-accelerator: HW decode
 - iOS
  - api: AVFoundation-like
  - hw-accelerator: HW decode
@@ -48,36 +46,41 @@ ijkplayer
 - obsolete platforms (Android: API-8 and below; iOS: below 5.1.1)
 - obsolete cpu: ARMv5, ARMv6, MIPS (I don't even have these types of devices…)
 - native subtitle render
+- cygwin compatibility
+
+### Before Build
+- If you prefer more codec/format
+```
+rm config/module.sh
+ln -s config/module-default.sh config/module.sh
+```
+
+- If you prefer less codec/format for smaller binary size (by default)
+```
+rm config/module.sh
+ln -s config/module-lite.sh config/module.sh
+```
+
+- For Ubuntu/Debian users.
+```
+# choose [No] to use bash
+sudo dpkg-reconfigure dash
+```
+
+- If you'd like to share your config, pull request is welcome.
 
 ### Build Android
-- Latest tag
-
 ```
-git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-stable
-cd ijkplayer-android-stable
-git checkout -B latest n0.1.3
+git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android
+cd ijkplayer-android
+git checkout -B latest n0.2.2
+# or for master
+# git checkout master
 
 ./init-android.sh
 
 cd android
-./compile-ffmpeg.sh
-./compile-ijk.sh
-
-# import android/ijkmediaplayer for MediaPlayer-like interface (recommended)
-# import android/ijkmediawidget for VideoView-like interface (based on Vitamio UI)
-# import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
-```
-
-- Unstable
-
-```
-git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android-master
-cd ijkplayer-android-master
-git checkout master
-
-./init-android.sh
-
-cd android
+./compile-ffmpeg.sh clean
 ./compile-ffmpeg.sh
 ./compile-ijk.sh
 
@@ -90,38 +93,31 @@ cd android
 # import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
 ```
 
-### iOS
-- Latest tag
 
+### Build iOS
 ```
-git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-stable
-cd ijkplayer-ios-stable
-git checkout -B latest n0.1.3
+git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios
+cd ijkplayer-ios
+git checkout -B latest n0.2.2
+# or for master
+# git checkout master
 
 ./init-ios.sh
 
 cd ios
+./compile-ffmpeg.sh clean
 ./compile-ffmpeg.sh all
 
 # import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
 # open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
 ```
 
-- Unstable
 
-```
-git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-ios-master
-cd ijkplayer-ios-master
-git checkout master
-
-./init-ios.sh
-
-cd ios
-./compile-ffmpeg.sh all
-
-# import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
-# open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
-```
+### Links
+- [FFmpeg_b4a](http://www.basic4ppc.com/android/forum/threads/ffmpeg_b4a-a-ffmpeg-library-for-b4a-decoding-streaming.44476/)
+- 中文
+ - [ijkplayer学习系列之环境搭建 2013-11-23](http://blog.csdn.net/nfer_zhuang/article/details/16905755)
+ - [Ubuntu 14.04 下编译 ijkplayer Android 2014-08-01](http://xqq.0ginr.com/ijkplayer-build/#more-134)
 
 ### License
 

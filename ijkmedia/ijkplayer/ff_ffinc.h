@@ -31,6 +31,7 @@
 #include "libavformat/avformat.h"
 #include "libavcodec/avfft.h"
 #include "libswscale/swscale.h"
+#include "libavutil/base64.h"
 #include "libavutil/opt.h"
 #include "libswresample/swresample.h"
 

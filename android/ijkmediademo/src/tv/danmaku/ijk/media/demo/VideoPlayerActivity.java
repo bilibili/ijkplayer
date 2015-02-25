@@ -34,70 +34,12 @@ public class VideoPlayerActivity extends Activity {
 
 	private String mVideoPath;
 
-	/*-
-	mVideoPath = "http://v.iask.com/v_play_ipad.php?vid=99979978";
-	mVideoPath = "http://gslb.bestvcdn.com/gslb/url/Bestv/live/live/kknews/workflow1.m3u8";
-	mVideoPath = "http://iosvideo.kankanews.com/2012/07/20/h264_450k_mp4_SHYiShu201207…67640_aac.ssm/h264_450k_mp4_SHYiShu20120720210930854798181167640_aac.m3u8";
-	mVideoPath = "http://video1.kksmg.com/rendition/201302/88000/39/104342962523078658/104342967891787778/r104342967891787778.m3u8";
-	mVideoPath = "http://video1.kksmg.com/rendition/201305/88000/a2/110409765426823170/110409776432677378/r110409776432677378.m3u8";
-	mVideoPath = "http://gslb.coop.letv.com/movie/A51456D18B8BB6865ADBA0EE972B0B7F-situoke.mp4?tag=ios";
-	mVideoPath = "http://gslb.bestvcdn.com/gslb/url/Bestv/live/live/kknews/workflow1.m3u8";        
-	mVideoPath = "http://gslb.tv.sohu.com/live?cid=12&type=hls";
-
-	// EXTINF floating-point
-	mVideoPath = "http://v.youku.com/player/getM3U8/vid/XNTY1ODE5NjMy/type//v.m3u8";
-
-	// buffering immediately after prepared
-	mVideoPath = "http://meta.video.qiyi.com/380/56070c92f215c514e17fd04b07e22e27.m3u8";
-
-	// 3gp seek around
-	mVideoPath = "http://v.cctv.com/flash/mp4video28/TMS/2013/05/06/265114d5f2e641278098503f1676d017_h264418000nero_aac32-1.mp4";
-
-	// slow vod
-	mVideoPath = "http://wtv.v.iask.com/player/index_vod_ios.meta?record_id=201304295369";
-	mVideoPath = "http://mtv.v.iask.com/manifest/201304295369_450.m3u8"
-
-	// youku insane discontinuity time
-	mVideoPath = "http://v.youku.com/player/getM3U8/vid/XNTc4NjA0MzIw/type/flv/ts/useKeyFrame/0/v.m3u8";
-
-	// gzip
-	mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/07/12/h264_450k_mp4_fc398b217ff9f93ef8fb0ea939c86766_ncd.mp4.m3u8";
-
-	// invalid variant
-	mVideoPath = "http://64k.kankanews.com/hls-smgvod/2013/06/30/f969bb5169365989b2e9bace44353a2b.m3u8";
-
-	// segment 404
-	mVideoPath = "http://live.gslb.letv.com/gslb?stream_id=btv6_800&tag=live&ext=m3u8"
-
-	// 720p sina
-	mVideoPath = "http://edge.v.iask.com/101692214.hlv?KID=sina,viask&Expires=1374249600&ssig=8dvnUJ%2Fb2n"
-
-	// 1080p sina
-	mVideoPath = "http://edge.v.iask.com/44897225.hlv?KID=sina,viask&Expires=1374249600&ssig=QRllIFSYp0"
-	
-	// progress
-	mVideoPath = "http://113.142.44.44/e0012jy0ana.m3u8?type=m3u8&srctype=mp4&srcname=e0012jy0ana.mp4&fc=0&sha=82e0d6adb6e697d1821abbbacb766373afa26ff4&vkey=OAz_lwrlhx0tqBefQmHnxKTm8PqvrJCl5iJtLhVtSj6hla57btxiuw"
-
-	// 96kHz av799077
-	mVideoPath = "http://bili-test.u.qiniudn.com/aac-96khz.flv"
-
-	// 2kHz
-	mVideoPath = "http://people.videolan.org/~funman/bouteille.wav"
-	
-	// https not support
-	mVideoPath = "https://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8"
-
-	// https support
-	mVideoPath = "https://devimages.apple.com.edgekey.net/iphone/samples/bipbop/gear1/prog_index.m3u8";
-
-	 */
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_player);
 
-		mVideoPath = "http://live.gslb.letv.com/gslb?stream_id=btv6_800&tag=live&ext=m3u8";
+		mVideoPath = "/sdcard/download/720.flv";
 
 		Intent intent = getIntent();
 		String intentAction = intent.getAction();

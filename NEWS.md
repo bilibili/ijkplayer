@@ -1,6 +1,27 @@
-tag <next>:
+tag next
+--------------------------------
+android: support OpenSL ES
+ios: support NV12 Render
+
+tag n0.2.2:
+--------------------------------
+ffmpeg: switch to ffmpeg n2.5
+android: fix leak in jni
+player: retrieve media informations
+
+tag n0.2.1:
+--------------------------------
+android: support MediaCodec (API 16+)
+
+tag n0.2.0
 --------------------------------
 player: fix crash on invalid audio
+android: support build with ndk-r10
+ios: add IJKAVMoviePlayerController based on AVPlayer API
+ios: remove some unused interface
+ios8: fix latency of aout_pause_audio()
+ios8: upgrade project
+ffmpeg: switch to ffmpeg n2.4
 
 tag n0.1.3
 --------------------------------

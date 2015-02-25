@@ -23,6 +23,7 @@
 
 #include "ijksdl_vout_overlay_ffmpeg.h"
 
+#include <stdbool.h>
 #include <assert.h>
 #include "../ijksdl_stdinc.h"
 #include "../ijksdl_mutex.h"
@@ -150,6 +151,11 @@ static int overlay_unlock(SDL_VoutOverlay *overlay)
     return SDL_UnlockMutex(opaque->mutex);
 }
 
+static SDL_Class g_vout_overlay_ffmpeg_class = {
+    .name = "FFmpegVoutOverlay",
+};
+
+#ifndef __clang_analyzer__
 SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *display)
 {
     SDLTRACE("SDL_VoutFFmpeg_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, dp=%p)\n",
@@ -161,11 +167,17 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     }
 
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
-    overlay->format = format;
-    overlay->pitches = opaque->pitches;
-    overlay->pixels = opaque->pixels;
-    overlay->w = width;
-    overlay->h = height;
+    opaque->mutex         = SDL_CreateMutex();
+
+    overlay->opaque_class = &g_vout_overlay_ffmpeg_class;
+    overlay->format       = format;
+    overlay->pitches      = opaque->pitches;
+    overlay->pixels       = opaque->pixels;
+    overlay->w            = width;
+    overlay->h            = height;
+    overlay->free_l       = overlay_free_l;
+    overlay->lock         = overlay_lock;
+    overlay->unlock       = overlay_unlock;
 
     enum AVPixelFormat ff_format = AV_PIX_FMT_NONE;
     int buf_width = width;
@@ -224,19 +236,15 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         ALOGE("overlay->opaque->frame allocation failed\n");
         goto fail;
     }
-    opaque->mutex = SDL_CreateMutex();
     overlay_fill(overlay, opaque->managed_frame, opaque->planes);
-
-    overlay->free_l = overlay_free_l;
-    overlay->lock = overlay_lock;
-    overlay->unlock = overlay_unlock;
 
     return overlay;
 
-    fail:
+fail:
     overlay_free_l(overlay);
     return NULL;
 }
+#endif//__clang_analyzer__
 
 int SDL_VoutFFmpeg_ConvertFrame(
     SDL_VoutOverlay *overlay, AVFrame *frame,

@@ -1,4 +1,19 @@
 #! /usr/bin/env bash
+#
+# Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 # This script is based on projects below
 # https://github.com/kolyvan/kxmovie
@@ -37,13 +52,14 @@ FFMPEG_CFG_FLAGS=
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $COMMON_FF_CFG_FLAGS"
 
 # Optimization options (experts only):
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv5te"
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv6"
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv6t2"
+# FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv5te"
+# FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv6"
+# FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-armv6t2"
 
 # Advanced options (experts only):
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-cross-compile"
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-symver"
+# --disable-symver may indicate a bug
+# FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-symver"
 
 # Developer options (useful when working on FFmpeg itself):
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-stripping"
@@ -90,27 +106,27 @@ FF_XCRUN_PLATFORM="iPhoneOS"
 FF_XCRUN_OSVERSION=
 FF_GASPP_EXPORT=
 
-if [ "$FF_ARCH" == "i386" ]; then
+if [ "$FF_ARCH" = "i386" ]; then
     FF_BUILD_NAME="ffmpeg-i386"
     FF_XCRUN_PLATFORM="iPhoneSimulator"
     FF_XCRUN_OSVERSION="-mios-simulator-version-min=5.1.1"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_SIMULATOR"
-elif [ "$FF_ARCH" == "x86_64" ]; then
+elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_BUILD_NAME="ffmpeg-x86_64"
     FF_XCRUN_PLATFORM="iPhoneSimulator"
     FF_XCRUN_OSVERSION="-mios-simulator-version-min=7.0"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_SIMULATOR"
-elif [ "$FF_ARCH" == "armv7" ]; then
+elif [ "$FF_ARCH" = "armv7" ]; then
     FF_BUILD_NAME="ffmpeg-armv7"
     FF_XCRUN_OSVERSION="-miphoneos-version-min=5.1.1"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
 #    FFMPEG_CFG_CPU="--cpu=cortex-a8"
-elif [ "$FF_ARCH" == "armv7s" ]; then
+elif [ "$FF_ARCH" = "armv7s" ]; then
     FF_BUILD_NAME="ffmpeg-armv7s"
     FFMPEG_CFG_CPU="--cpu=swift"
     FF_XCRUN_OSVERSION="-miphoneos-version-min=5.1.1"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
-elif [ "$FF_ARCH" == "arm64" ]; then
+elif [ "$FF_ARCH" = "arm64" ]; then
     FF_BUILD_NAME="ffmpeg-arm64"
     FF_XCRUN_OSVERSION="-miphoneos-version-min=5.1.1"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"

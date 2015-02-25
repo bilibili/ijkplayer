@@ -20,9 +20,11 @@
 
     options.frameBufferCount  = 3;
     options.maxFps            = 30;
+    options.frameDrop         = 0;
     options.pauseInBackground = YES;
 
     options.timeout         = -1;
+    options.userAgent = @"";
 
     return options;
 }
@@ -40,11 +42,15 @@
 
     ijkmp_set_picture_queue_capicity(mediaPlayer, _frameBufferCount);
     ijkmp_set_max_fps(mediaPlayer, _maxFps);
+    ijkmp_set_framedrop(mediaPlayer, _frameDrop);
 
     if (self.timeout > 0) {
         [self setFormatOption:@"timeout"
                     withInt64:self.timeout
                            to:mediaPlayer];
+    }
+    if ([self.userAgent isEqualToString:@""] == NO) {
+        [self setFormatOption:@"user-agent" withString:self.userAgent to:mediaPlayer];
     }
 }
 
@@ -90,6 +96,16 @@
                            [optionName UTF8String],
                            [[NSString stringWithFormat:@"%lld", value] UTF8String]);
 }
+
+- (void)setFormatOption:(NSString *)optionName
+              withString:(NSString*)value
+                     to:(IjkMediaPlayer *)mediaPlayer
+{
+    ijkmp_set_format_option(mediaPlayer,
+                            [optionName UTF8String],
+                            [value UTF8String]);
+}
+
 
 - (void)setCodecOption:(NSString *)optionName
              withInt64:(int64_t)value

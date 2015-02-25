@@ -38,15 +38,9 @@
 @dynamic playbackState;
 @dynamic loadState;
 
-@dynamic naturalSize;
-
 @dynamic controlStyle;
 @dynamic scalingMode;
 @dynamic shouldAutoplay;
-@dynamic useApplicationAudioSession;
-@dynamic currentPlaybackRate;
-@dynamic initialPlaybackTime;
-@dynamic endPlaybackTime;
 @synthesize numberOfBytesTransferred = _numberOfBytesTransferred;
 
 - (id)initWithContentURL:(NSURL *)aUrl
@@ -63,6 +57,24 @@
         [[IJKAudioKit sharedInstance] setupAudioSession:self];
 
         _bufferingProgress = -1;
+    }
+    return self;
+}
+
+- (id)initWithContentURLString:(NSString *)aUrl
+{
+    NSURL *url;
+    if ([aUrl rangeOfString:@"/"].location == 0) {
+        //本地
+        url = [NSURL fileURLWithPath:aUrl];
+    }
+    else {
+        url = [NSURL URLWithString:aUrl];
+    }
+
+    self = [self initWithContentURL:url];
+    if (self) {
+
     }
     return self;
 }

@@ -150,7 +150,9 @@
         return;
 
     _isPaused = YES;
-    AudioSessionSetActive(false);
+    // Delay > 1 seconds on ios8
+    // Maybe we don't need this call in pause
+    // AudioSessionSetActive(false);
     OSStatus status = AudioOutputUnitStop(_auUnit);
     if (status != noErr)
         ALOGE("AudioUnit: failed to stop AudioUnit (%d)", (int)status);

@@ -23,6 +23,37 @@
 #import "IJKMediaPlayback.h"
 #import "IJKFFOptions.h"
 
+// media meta
+#define k_IJKM_KEY_FORMAT         @"format"
+#define k_IJKM_KEY_DURATION_US    @"duration_us"
+#define k_IJKM_KEY_START_US       @"start_us"
+#define k_IJKM_KEY_BITRATE        @"bitrate"
+
+// stream meta
+#define k_IJKM_KEY_TYPE           @"type"
+#define k_IJKM_VAL_TYPE__VIDEO    @"video"
+#define k_IJKM_VAL_TYPE__AUDIO    @"audio"
+#define k_IJKM_VAL_TYPE__UNKNOWN  @"unknown"
+
+#define k_IJKM_KEY_CODEC_NAME      @"codec_name"
+#define k_IJKM_KEY_CODEC_PROFILE   @"codec_profile"
+#define k_IJKM_KEY_CODEC_LONG_NAME @"codec_long_name"
+
+// stream: video
+#define k_IJKM_KEY_WIDTH          @"width"
+#define k_IJKM_KEY_HEIGHT         @"height"
+#define k_IJKM_KEY_FPS_NUM        @"fps_num"
+#define k_IJKM_KEY_FPS_DEN        @"fps_den"
+#define k_IJKM_KEY_TBR_NUM        @"tbr_num"
+#define k_IJKM_KEY_TBR_DEN        @"tbr_den"
+#define k_IJKM_KEY_SAR_NUM        @"sar_num"
+#define k_IJKM_KEY_SAR_DEN        @"sar_den"
+// stream: audio
+#define k_IJKM_KEY_SAMPLE_RATE    @"sample_rate"
+#define k_IJKM_KEY_CHANNEL_LAYOUT @"channel_layout"
+
+#define kk_IJKM_KEY_STREAMS       @"streams"
+
 @interface IJKFFMoviePlayerController : NSObject <IJKMediaPlayback>
 
 - (id)initWithContentURL:(NSURL *)aUrl
@@ -43,6 +74,11 @@
 - (BOOL)isPlaying;
 
 - (void)setPauseInBackground:(BOOL)pause;
+
++ (void)setLogReport:(BOOL)preferLogReport;
+
+@property(nonatomic, readonly) CGFloat fpsInMeta;
+@property(nonatomic, readonly) CGFloat fpsAtOutput;
 
 @end
 

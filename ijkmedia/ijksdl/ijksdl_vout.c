@@ -93,3 +93,9 @@ void SDL_VoutFreeYUVOverlay(SDL_VoutOverlay *overlay)
         free(overlay);
     }
 }
+
+void SDL_VoutUnrefYUVOverlay(SDL_VoutOverlay *overlay)
+{
+    if (overlay && overlay->unref)
+        overlay->unref(overlay);
+}

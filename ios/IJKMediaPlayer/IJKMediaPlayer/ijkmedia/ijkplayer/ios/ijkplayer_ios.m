@@ -29,6 +29,7 @@
 #include "ijkplayer/ff_fferror.h"
 #include "ijkplayer/ff_ffplay.h"
 #include "ijkplayer/ijkplayer_internal.h"
+#include "ijkplayer/pipeline/ffpipeline_ffplay.h"
 
 IjkMediaPlayer *ijkmp_ios_create(int (*msg_loop)(void*))
 {
@@ -42,6 +43,10 @@ IjkMediaPlayer *ijkmp_ios_create(int (*msg_loop)(void*))
 
     mp->ffplayer->aout = SDL_AoutIos_CreateForAudioUnit();
     if (!mp->ffplayer->vout)
+        goto fail;
+
+    mp->ffplayer->pipeline = ffpipeline_create_from_ffplay(mp->ffplayer);
+    if (!mp->ffplayer->pipeline)
         goto fail;
 
     return mp;

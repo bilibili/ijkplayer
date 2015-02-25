@@ -7,10 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E60E8C2919EF70BB005B5B6E /* CoreMedia.framework */; };
 		E60FFBE418BF695700825D7F /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6D74F2E18A5F94B00165BFD /* libIJKMediaPlayer.a */; };
 		E612EAE517F7E0F800BEE660 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E612EAE417F7E0F800BEE660 /* MediaPlayer.framework */; };
 		E6166C9C17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch in Resources */ = {isa = PBXBuildFile; fileRef = E6166C9B17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch */; };
-		E63FC28A17F04C48003551EB /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC28917F04C48003551EB /* CoreAudio.framework */; };
+		E61B45AE19EF7021002792EC /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E61B45AD19EF7021002792EC /* AVFoundation.framework */; };
 		E63FC29117F04C83003551EB /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC28F17F04C83003551EB /* AudioToolbox.framework */; };
 		E63FC29617F060A7003551EB /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC29517F060A7003551EB /* libz.dylib */; };
 		E63FC29A17F062E8003551EB /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E63FC29917F062E8003551EB /* libbz2.dylib */; };
@@ -29,7 +30,6 @@
 		E66F8DE317EEF73600354D80 /* btn_player_play.png in Resources */ = {isa = PBXBuildFile; fileRef = E66F8DDF17EEF73500354D80 /* btn_player_play.png */; };
 		E66F8DE417EEF73600354D80 /* btn_player_play@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E66F8DE017EEF73500354D80 /* btn_player_play@2x.png */; };
 		E6903F0017EAF70200CFD954 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6903EFF17EAF70200CFD954 /* UIKit.framework */; };
-		E6903F0217EAF70200CFD954 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6903F0117EAF70200CFD954 /* Foundation.framework */; };
 		E6903F0A17EAF70200CFD954 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E6903F0817EAF70200CFD954 /* InfoPlist.strings */; };
 		E6903F0C17EAF70200CFD954 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E6903F0B17EAF70200CFD954 /* main.m */; };
 		E6903F1017EAF70200CFD954 /* IJKAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E6903F0F17EAF70200CFD954 /* IJKAppDelegate.m */; };
@@ -58,16 +58,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E60E8C2719EF70A7005B5B6E /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		E60E8C2919EF70BB005B5B6E /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		E612EAE417F7E0F800BEE660 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		E6166C9B17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "IJKMediaDemo-Prefix.pch"; sourceTree = "<group>"; };
+		E61B45AD19EF7021002792EC /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		E63FC27817F032FD003551EB /* IJKCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKCommon.h; sourceTree = "<group>"; };
-		E63FC28917F04C48003551EB /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		E63FC28F17F04C83003551EB /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		E63FC29517F060A7003551EB /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		E63FC29917F062E8003551EB /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
 		E63FC2B317F172E9003551EB /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		E63FC2B717F17362003551EB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		E64D4F4B1938CC9400F1C75D /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		E64D4F4D1938CCCC00F1C75D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		E66F8DC917EEDD8B00354D80 /* IJKMediaControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKMediaControl.h; sourceTree = "<group>"; };
 		E66F8DCA17EEDD8B00354D80 /* IJKMediaControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKMediaControl.m; sourceTree = "<group>"; };
@@ -83,7 +84,6 @@
 		E66F8DE017EEF73500354D80 /* btn_player_play@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "btn_player_play@2x.png"; path = "resources/btn_player_play@2x.png"; sourceTree = "<group>"; };
 		E6903EFC17EAF70200CFD954 /* IJKMediaDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IJKMediaDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6903EFF17EAF70200CFD954 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		E6903F0117EAF70200CFD954 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E6903F0717EAF70200CFD954 /* IJKMediaDemo-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "IJKMediaDemo-Info.plist"; sourceTree = "<group>"; };
 		E6903F0917EAF70200CFD954 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		E6903F0B17EAF70200CFD954 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -103,15 +103,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */,
+				E61B45AE19EF7021002792EC /* AVFoundation.framework in Frameworks */,
 				E60FFBE418BF695700825D7F /* libIJKMediaPlayer.a in Frameworks */,
 				E64D4F4F1938CD2100F1C75D /* QuartzCore.framework in Frameworks */,
 				E64D4F4E1938CCCC00F1C75D /* CoreGraphics.framework in Frameworks */,
 				E612EAE517F7E0F800BEE660 /* MediaPlayer.framework in Frameworks */,
 				E63FC2B417F172EA003551EB /* OpenGLES.framework in Frameworks */,
 				E63FC29117F04C83003551EB /* AudioToolbox.framework in Frameworks */,
-				E63FC28A17F04C48003551EB /* CoreAudio.framework in Frameworks */,
 				E6903F0017EAF70200CFD954 /* UIKit.framework in Frameworks */,
-				E6903F0217EAF70200CFD954 /* Foundation.framework in Frameworks */,
 				E63FC29617F060A7003551EB /* libz.dylib in Frameworks */,
 				E63FC29A17F062E8003551EB /* libbz2.dylib in Frameworks */,
 			);
@@ -166,17 +166,17 @@
 		E6903EFE17EAF70200CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				E64D4F4D1938CCCC00F1C75D /* CoreGraphics.framework */,
-				E64D4F4B1938CC9400F1C75D /* CoreImage.framework */,
-				E612EAE417F7E0F800BEE660 /* MediaPlayer.framework */,
-				E63FC2B717F17362003551EB /* QuartzCore.framework */,
-				E63FC2B317F172E9003551EB /* OpenGLES.framework */,
-				E63FC28F17F04C83003551EB /* AudioToolbox.framework */,
-				E63FC28917F04C48003551EB /* CoreAudio.framework */,
-				E6903F0117EAF70200CFD954 /* Foundation.framework */,
-				E6903EFF17EAF70200CFD954 /* UIKit.framework */,
-				E63FC29517F060A7003551EB /* libz.dylib */,
 				E63FC29917F062E8003551EB /* libbz2.dylib */,
+				E63FC29517F060A7003551EB /* libz.dylib */,
+				E63FC28F17F04C83003551EB /* AudioToolbox.framework */,
+				E61B45AD19EF7021002792EC /* AVFoundation.framework */,
+				E60E8C2719EF70A7005B5B6E /* CoreAudio.framework */,
+				E64D4F4D1938CCCC00F1C75D /* CoreGraphics.framework */,
+				E60E8C2919EF70BB005B5B6E /* CoreMedia.framework */,
+				E612EAE417F7E0F800BEE660 /* MediaPlayer.framework */,
+				E63FC2B317F172E9003551EB /* OpenGLES.framework */,
+				E63FC2B717F17362003551EB /* QuartzCore.framework */,
+				E6903EFF17EAF70200CFD954 /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -256,7 +256,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = IJK;
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = bilibili;
 			};
 			buildConfigurationList = E6903EF717EAF70200CFD954 /* Build configuration list for PBXProject "IJKMediaDemo" */;
@@ -356,10 +356,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv7s,
-					armv7,
-				);
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -392,10 +388,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv7s,
-					armv7,
-				);
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -421,10 +413,6 @@
 		E6903F1A17EAF70200CFD954 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv7s,
-					armv7,
-				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
@@ -439,10 +427,6 @@
 		E6903F1B17EAF70200CFD954 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv7s,
-					armv7,
-				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";

@@ -8,6 +8,7 @@ ios/openssl-*
 extra
 .DS_Store
 android/ijkmediaplayer/.settings/*
+android/ijkmediaplayer-x86/.settings/*
 android/ijkmediawidget/.settings/*
 ijkmedia/ijkyuv/
 
@@ -30,3 +31,7 @@ obj/
 # Local configuration file (sdk path, etc)
 local.properties
 
+# Android Studio
+.idea
+.gradle
+build/

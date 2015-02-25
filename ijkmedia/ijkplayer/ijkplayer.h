@@ -27,6 +27,7 @@
 #include "ff_ffmsg_queue.h"
 
 #include "ijkutil/ijkutil.h"
+#include "ijkmeta.h"
 
 #ifndef MPTRACE
 #define MPTRACE ALOGW
@@ -146,6 +147,7 @@ typedef struct SDL_Vout SDL_Vout;
 
 void            ijkmp_global_init();
 void            ijkmp_global_uninit();
+void            ijkmp_global_set_log_report(int use_report);
 void            ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes));
 void            ijkmp_io_stat_complete_register(void (*cb)(const char *url,
                                                            int64_t read_bytes, int64_t total_size,
@@ -160,6 +162,13 @@ void            ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const
 void            ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc);
 void            ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count);
 void            ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps);
+void            ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop);
+
+int             ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info);
+int             ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info);
+
+// must be freed with free();
+IjkMediaMeta   *ijkmp_get_meta_l(IjkMediaPlayer *mp);
 
 // preferred to be called explicity, can be called multiple times
 // NOTE: ijkmp_shutdown may block thread
@@ -182,7 +191,9 @@ int             ijkmp_get_state(IjkMediaPlayer *mp);
 bool            ijkmp_is_playing(IjkMediaPlayer *mp);
 long            ijkmp_get_current_position(IjkMediaPlayer *mp);
 long            ijkmp_get_duration(IjkMediaPlayer *mp);
+long            ijkmp_get_playable_duration(IjkMediaPlayer *mp);
 
+void           *ijkmp_get_weak_thiz(IjkMediaPlayer *mp);
 void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 
 /* return < 0 if aborted, 0 if no packet and > 0 if packet.  */

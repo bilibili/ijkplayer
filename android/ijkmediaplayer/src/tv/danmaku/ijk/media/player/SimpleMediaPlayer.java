@@ -61,7 +61,7 @@ public abstract class SimpleMediaPlayer extends BaseMediaPlayer implements
         mOnInfoListener = listener;
     }
 
-    public final void resetListeners() {
+    public void resetListeners() {
         mOnPreparedListener = null;
         mOnBufferingUpdateListener = null;
         mOnCompletionListener = null;

@@ -1,8 +1,8 @@
 /*****************************************************************************
- * ijkadk.h
+ * android_bytebuffer.h
  *****************************************************************************
  *
- * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,14 +21,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADK_H
-#define IJKADK__IJKADK_H
+#ifndef IJKSDL_ANDROID__ANDROID_BYTEBUFFER_H
+#define IJKSDL_ANDROID__ANDROID_BYTEBUFFER_H
 
-#include <stdint.h>
-#include <jni.h>
+#include "ijksdl_inc_internal_android.h"
 
-#include "ijkadk_android_os_bundle.h"
+int     ASDK_ByteBuffer__loadClass(JNIEnv *env);
+jlong   ASDK_ByteBuffer__getDirectBufferCapacity(JNIEnv *env, jobject byte_buffer);
+void   *ASDK_ByteBuffer__getDirectBufferAddress(JNIEnv *env, jobject byte_buffer);
+void    ASDK_ByteBuffer__setDataLimited(JNIEnv *env, jobject byte_buffer, void* data, size_t size);
 
-void ijkadk_global_init(JNIEnv *env);
+jobject ASDK_ByteBuffer_allocateDirect(JNIEnv *env, jint capacity);
+jobject ASDK_ByteBuffer_allocateDirectAsGlobalRef(JNIEnv *env, jint capacity);
+jobject ASDK_ByteBuffer_limit(JNIEnv *env, jobject byte_buffer, jint newLimit);
 
-#endif /* IJKADK__IJKADK_H */
+#endif

@@ -1,4 +1,9 @@
 eclipse.preferences.version=1
+environment/project/com.android.toolchain.gcc.1255826610/ANDROID_NDK/delimiter=\:
+environment/project/com.android.toolchain.gcc.1255826610/ANDROID_NDK/operation=replace
+environment/project/com.android.toolchain.gcc.1255826610/ANDROID_NDK/value=/opt/android/android-ndk
+environment/project/com.android.toolchain.gcc.1255826610/append=true
+environment/project/com.android.toolchain.gcc.1255826610/appendContributed=true
 org.eclipse.cdt.core.formatter.alignment_for_arguments_in_method_invocation=16
 org.eclipse.cdt.core.formatter.alignment_for_assignment=16
 org.eclipse.cdt.core.formatter.alignment_for_base_clause_in_type_declaration=0
@@ -23,6 +28,7 @@ org.eclipse.cdt.core.formatter.brace_position_for_namespace_declaration=end_of_l
 org.eclipse.cdt.core.formatter.brace_position_for_switch=end_of_line
 org.eclipse.cdt.core.formatter.brace_position_for_type_declaration=end_of_line
 org.eclipse.cdt.core.formatter.comment.min_distance_between_code_and_line_comment=1
+org.eclipse.cdt.core.formatter.comment.never_indent_line_comments_on_first_column=true
 org.eclipse.cdt.core.formatter.comment.preserve_white_space_between_code_and_line_comments=true
 org.eclipse.cdt.core.formatter.compact_else_if=true
 org.eclipse.cdt.core.formatter.continuation_indentation=1

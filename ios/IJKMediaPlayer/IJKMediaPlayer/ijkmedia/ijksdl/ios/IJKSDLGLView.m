@@ -27,6 +27,8 @@
 #import "IJKSDLGLRender.h"
 #import "IJKSDLGLRenderI420.h"
 #import "IJKSDLGLRenderRV24.h"
+#import "IJKSDLGLRenderNV12.h"
+#include "ijksdl/ijksdl_timer.h"
 
 #define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
 #define SYSTEM_VERSION_GREATER_THAN(v)              ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
@@ -170,6 +172,9 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     int             _rightPaddingPixels;
     GLfloat         _rightPadding;
     int             _bytesPerPixel;
+    int             _frameCount;
+    
+    int64_t         _lastFrameTime;
 
     id<IJKSDLGLRender> _renderer;
 
@@ -190,7 +195,7 @@ enum {
 	return [CAEAGLLayer class];
 }
 
-- (id) initWithFrame:(CGRect)frame withChroma:(int)chroma
+- (id) initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
@@ -209,23 +214,6 @@ enum {
             scaleFactor = 1.0f;
 
         [eaglLayer setContentsScale:scaleFactor];
-
-        switch (chroma) {
-            case SDL_FCC_I420:
-                NSLog(@"OK use I420 GL renderer");
-                _frameChroma = SDL_FCC_I420;
-                _renderer = [[IJKSDLGLRenderI420 alloc] init];
-                _bytesPerPixel = 1;
-                break;
-            case SDL_FCC_RV24:
-                NSLog(@"OK use RV24 GL renderer");
-                _frameChroma = SDL_FCC_RV24;
-                _renderer = [[IJKSDLGLRenderRV24 alloc] init];
-                _bytesPerPixel = 3;
-                break;
-            default:
-                NSLog(@"unknown chroma %d\n", chroma);
-        }
 
         _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
 
@@ -256,13 +244,6 @@ enum {
         GLenum glError = glGetError();
         if (GL_NO_ERROR != glError) {
             NSLog(@"failed to setup GL %x\n", glError);
-            if ([EAGLContext currentContext] == _context)
-                [EAGLContext setCurrentContext:nil];
-            self = nil;
-            return nil;
-        }
-
-        if (![self loadShaders]) {
             if ([EAGLContext currentContext] == _context)
                 [EAGLContext setCurrentContext:nil];
             self = nil;
@@ -373,6 +354,11 @@ enum {
     if (_renderer == nil) {
         if (overlay == nil) {
             return NO;
+        } else if (overlay->format == SDL_FCC_NV12) {
+            _frameChroma = overlay->format;
+            _renderer = [[IJKSDLGLRenderNV12 alloc] init];
+            _bytesPerPixel = 1;
+            NSLog(@"OK use NV12 GL renderer");
         } else if (overlay->format == SDL_FCC_I420) {
             _frameChroma = overlay->format;
             _renderer = [[IJKSDLGLRenderI420 alloc] init];
@@ -508,17 +494,19 @@ exit:
 
 - (void)displayInternal: (SDL_VoutOverlay *) overlay
 {
-    if (![self setupDisplay:overlay]) {
-        NSLog(@"IJKSDLGLView: setupDisplay failed\n");
-        return;
-    }
-
     if (_context == nil) {
         NSLog(@"IJKSDLGLView: nil EAGLContext\n");
         return;
     }
 
     [EAGLContext setCurrentContext:_context];
+
+    if (![self setupDisplay:overlay]) {
+        if ([EAGLContext currentContext] == _context)
+            [EAGLContext setCurrentContext:nil];
+        NSLog(@"IJKSDLGLView: setupDisplay failed\n");
+        return;
+    }
 
     if (overlay->pitches[0] / _bytesPerPixel > _frameWidth) {
         _rightPaddingPixels = overlay->pitches[0] / _bytesPerPixel - _frameWidth;
@@ -574,6 +562,8 @@ exit:
         if (!validateProgram(_program))
         {
             NSLog(@"Failed to validate program");
+            if ([EAGLContext currentContext] == _context)
+                [EAGLContext setCurrentContext:nil];
             return;
         }
 #endif
@@ -582,6 +572,18 @@ exit:
 
         glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
         [_context presentRenderbuffer:GL_RENDERBUFFER];
+
+        int64_t current = (int64_t)SDL_GetTickHR();
+        int64_t delta   = (current > _lastFrameTime) ? current - _lastFrameTime : 0;
+        if (delta <= 0) {
+            _lastFrameTime = current;
+        } else if (delta >= 1000) {
+            _fps = ((CGFloat)_frameCount) * 1000 / delta;
+            _frameCount = 0;
+            _lastFrameTime = current;
+        } else {
+            _frameCount++;
+        }
     }
 
     // Detach context before leaving display, to avoid multiple thread issues.
@@ -762,7 +764,7 @@ exit:
 
     // Read pixel data from the framebuffer
     glPixelStorei(GL_PACK_ALIGNMENT, 4);
-    glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glReadPixels((int)x, (int)y, (int)width, (int)height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     // Create a CGImage with the pixel data
     // If your OpenGL ES content is opaque, use kCGImageAlphaNoneSkipLast to ignore the alpha channel

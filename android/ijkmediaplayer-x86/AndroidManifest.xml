@@ -2,7 +2,6 @@
     package="tv.danmaku.ijk.media.libx86" >
 
     <uses-sdk
-        android:minSdkVersion="9"
-        android:targetSdkVersion="19" />
+        android:minSdkVersion="9" />
 
 </manifest>

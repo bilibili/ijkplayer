@@ -1,8 +1,8 @@
 /*****************************************************************************
- * ijkadk.c
+ * android_bundle.h
  *****************************************************************************
  *
- * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,9 +21,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "ijkadk.h"
+#ifndef IJKSDL_ANDROID__ANDROID_BUNDLE_H
+#define IJKSDL_ANDROID__ANDROID_BUNDLE_H
 
-void ijkadk_global_init(JNIEnv *env)
-{
-    ijkadk_android_os_Bundle__loadClass(env);
-}
+#include "ijksdl_inc_internal_android.h"
+
+int ASDK_Bundle__loadClass(JNIEnv *env);
+
+jobject ASDK_Bundle__init(JNIEnv *env);
+void    ASDK_Bundle__putString_c(JNIEnv *env, jobject thiz, const char *key, const char *value);
+void    ASDK_Bundle__putParcelableArrayList_c(JNIEnv *env, jobject thiz, const char *key, jobject value);
+
+#endif

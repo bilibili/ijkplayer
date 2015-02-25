@@ -1,8 +1,8 @@
 /*****************************************************************************
- * ijkadk_android_os_bundle.h
+ * ijksdl_codec_android_mediaformat_java.h
  *****************************************************************************
  *
- * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,34 +21,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADK_ANDROID_OS_BUNDLE_H
-#define IJKADK__IJKADK_ANDROID_OS_BUNDLE_H
+#ifndef IJKSDL_ANDROID__ANDROID_CODEC_ANDROID_MEDIAFORMAT_JAVA_H
+#define IJKSDL_ANDROID__ANDROID_CODEC_ANDROID_MEDIAFORMAT_JAVA_H
 
-#include <stdint.h>
-#include <jni.h>
+#include "ijksdl_codec_android_mediaformat.h"
 
+int SDL_AMediaFormatJava__loadClass(JNIEnv *env);
 
-// load_class
-int ijkadk_android_os_Bundle__loadClass(JNIEnv *env);
+SDL_AMediaFormat *SDL_AMediaFormatJava_new(JNIEnv *env);
+SDL_AMediaFormat *SDL_AMediaFormatJava_init(JNIEnv *env, jobject android_format);
+SDL_AMediaFormat *SDL_AMediaFormatJava_createVideoFormat(JNIEnv *env, const char *mime, int width, int height);
+jobject           SDL_AMediaFormatJava_getObject(JNIEnv *env, const SDL_AMediaFormat *thiz);
 
+#endif
 
-typedef struct ijkBundle ijkBundle;
-
-
-ijkBundle *
-ijkBundle_init(JNIEnv *env, jobject java_bundle /* = NULL */ );
-void
-ijkBundle_destroyP(JNIEnv *env, ijkBundle **p_bundle);
-
-void
-ijkBundle_putInt(JNIEnv *env, ijkBundle *bundle, const char *key, int value);
-int
-ijkBundle_getInt(JNIEnv *env, ijkBundle *bundle, const char *key, int default_value);
-
-void
-ijkBundle_putString(JNIEnv *env, ijkBundle *bundle, const char *key, const char *value);
-const char *
-ijkBundle_getString(JNIEnv *env, ijkBundle *bundle, const char *key);
-
-
-#endif /* IJKADK__IJKADK_ANDROID_OS_BUNDLE_H */

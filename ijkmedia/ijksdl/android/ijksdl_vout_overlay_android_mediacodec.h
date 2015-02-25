@@ -1,8 +1,8 @@
 /*****************************************************************************
- * ijkadkinternal.h
+ * ijksdl_vout_overlay_android_mediacodec.h
  *****************************************************************************
  *
- * copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,32 +21,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKADK__IJKADKINTERNAL_H
-#define IJKADK__IJKADKINTERNAL_H
+#ifndef IJKSDL_ANDROID__IJKSDL_VOUT_OVERLAY_ANDROID_MEDIACODEC_H
+#define IJKSDL_ANDROID__IJKSDL_VOUT_OVERLAY_ANDROID_MEDIACODEC_H
 
-#include <stdint.h>
-#include <jni.h>
-#include "ijkutil/ijkutil.h"
+#include "../ijksdl_stdinc.h"
+#include "../ijksdl_vout.h"
 
+typedef struct SDL_AMediaCodec           SDL_AMediaCodec;
+typedef struct SDL_AMediaCodecBufferInfo SDL_AMediaCodecBufferInfo;
 
-#define IJKADK_FIND_JAVA_CLASS(env__, var__, classsign__) \
-    do { \
-    	var__ = (*env__)->FindClass(env__, classsign__); \
-        if (!(var__)) { \
-            ALOGE("FindClass failed: %s", classsign__); \
-            return -1; \
-        } \
-    } while(0);
+SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout);
 
+bool SDL_VoutOverlayAMediaCodec_isKindOf(SDL_VoutOverlay *overlay);
+int  SDL_VoutOverlayAMediaCodec_attachFrame(
+     SDL_VoutOverlay *overlay,
+     SDL_AMediaCodec *acodec,
+     int output_buffer_index,
+     SDL_AMediaCodecBufferInfo *buffer_info);
+int  SDL_VoutOverlayAMediaCodec_releaseFrame(SDL_VoutOverlay *overlay, SDL_AMediaCodec *acodec, bool render);
 
-#define IJKADK_FIND_JAVA_METHOD(env__, var__, clazz__, funcsign__, retsign__) \
-    do { \
-	    (var__) = (*env__)->GetMethodID((env__), (clazz__), (funcsign__), (retsign__)); \
-	    if (!(var__)) { \
-	    	ALOGE("GetMethodID failed: %s", funcsign__); \
-            return -1; \
-	    } \
-	} while(0);
-
-
-#endif /* IJKADK__IJKADKINTERNAL_H */
+#endif

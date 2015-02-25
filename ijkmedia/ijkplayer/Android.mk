@@ -20,6 +20,11 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
+# -mfloat-abi=soft is a workaround for FP register corruption on Exynos 4210
+# http://www.spinics.net/lists/arm-kernel/msg368417.html
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+LOCAL_CFLAGS += -mfloat-abi=soft
+endif
 LOCAL_CFLAGS += -std=c99
 LOCAL_LDLIBS += -llog -landroid
 
@@ -29,12 +34,24 @@ LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 
 LOCAL_SRC_FILES += ff_cmdutils.c
 LOCAL_SRC_FILES += ff_ffplay.c
+LOCAL_SRC_FILES += ff_ffpipeline.c
+LOCAL_SRC_FILES += ff_ffpipenode.c
+LOCAL_SRC_FILES += ijkmeta.c
 LOCAL_SRC_FILES += ijkplayer.c
 
+LOCAL_SRC_FILES += pipeline/ffpipeline_ffplay.c
+LOCAL_SRC_FILES += pipeline/ffpipenode_ffplay_vdec.c
+LOCAL_SRC_FILES += pipeline/ffpipenode_ffplay_vout.c
+
+LOCAL_SRC_FILES += android/ffmpeg_api_jni.c
 LOCAL_SRC_FILES += android/ijkplayer_android.c
 LOCAL_SRC_FILES += android/ijkplayer_jni.c
 
-LOCAL_SHARED_LIBRARIES := ijkffmpeg ijkutil ijksdl ijkadk
+LOCAL_SRC_FILES += android/pipeline/ffpipeline_android.c
+LOCAL_SRC_FILES += android/pipeline/ffpipenode_android_mediacodec_vdec.c
+LOCAL_SRC_FILES += android/pipeline/ffpipenode_android_mediacodec_vout.c
+
+LOCAL_SHARED_LIBRARIES := ijkffmpeg ijkutil ijksdl
 
 LOCAL_MODULE := ijkplayer
 include $(BUILD_SHARED_LIBRARY)

@@ -18,37 +18,15 @@
 
 LOCAL_PATH := $(call my-dir)
 
-
-#--------------------
-# C files
-#--------------------
-include $(CLEAR_VARS)
-LOCAL_CFLAGS += -std=c99
-
-LOCAL_SRC_FILES += android/loghelp.c
-
-LOCAL_MODULE := ijkutil_c
-include $(BUILD_STATIC_LIBRARY)
-
-
-#--------------------
-# CPP files: android
-#--------------------
-include $(CLEAR_VARS)
-LOCAL_SRC_FILES += android/jnihelp.cpp
-
-LOCAL_MODULE := ijkutil_android_cpp
-include $(BUILD_STATIC_LIBRARY)
-
-
 #--------------------
 # so
 #--------------------
 include $(CLEAR_VARS)
+LOCAL_CFLAGS += -std=c99
 LOCAL_LDLIBS += -llog
 
-LOCAL_STATIC_LIBRARIES := ijkutil_c
-LOCAL_WHOLE_STATIC_LIBRARIES := ijkutil_android_cpp
+LOCAL_SRC_FILES += android/loghelp.c
+LOCAL_SRC_FILES += android/jnihelp.c
 
 LOCAL_MODULE := ijkutil
 include $(BUILD_SHARED_LIBRARY)

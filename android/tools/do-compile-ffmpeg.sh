@@ -1,4 +1,19 @@
 #! /usr/bin/env bash
+#
+# Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 # This script is based on projects below
 # https://github.com/yixia/FFmpeg-Android
@@ -27,7 +42,7 @@ fi
 # try to detect NDK version
 FF_NDK_REL=$(grep -o '^r[0-9]*.*' $ANDROID_NDK/RELEASE.TXT 2>/dev/null|cut -b2-)
 case "$FF_NDK_REL" in
-    9?*)
+    9*|10*)
         # we don't use 4.4.3 because it doesn't handle threads correctly.
         if test -d ${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.8
         # if gcc 4.8 is present, it's there for all the archs (x86, mips, arm)
@@ -38,7 +53,7 @@ case "$FF_NDK_REL" in
             exit 1
         fi
     ;;
-    7|8|*)
+    *)
         echo "You need the NDKr9 or later"
         exit 1
     ;;
@@ -47,6 +62,7 @@ esac
 FF_BUILD_ROOT=`pwd`
 FF_ANDROID_PLATFORM=android-9
 FF_GCC_VER=4.8
+FF_GCC_64_VER=4.9
 
 
 
@@ -64,7 +80,7 @@ FF_DEP_LIBS=
 FF_ASM_OBJ_DIR=
 
 #----- armv7a begin -----
-if [ "$FF_ARCH" == "armv7a" ]; then
+if [ "$FF_ARCH" = "armv7a" ]; then
     FF_BUILD_NAME=ffmpeg-armv7a
     FF_BUILD_NAME_OPENSSL=openssl-armv7a
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
@@ -81,7 +97,7 @@ if [ "$FF_ARCH" == "armv7a" ]; then
 
     FF_ASM_OBJ_DIR="libavutil/arm/*.o libavcodec/arm/*.o libswresample/arm/*.o"
 
-elif [ "$FF_ARCH" == "armv5" ]; then
+elif [ "$FF_ARCH" = "armv5" ]; then
     FF_BUILD_NAME=ffmpeg-armv5
     FF_BUILD_NAME_OPENSSL=openssl-armv5
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
@@ -96,7 +112,7 @@ elif [ "$FF_ARCH" == "armv5" ]; then
 
     FF_ASM_OBJ_DIR="libavutil/arm/*.o libavcodec/arm/*.o libswresample/arm/*.o"
 
-elif [ "$FF_ARCH" == "x86" ]; then
+elif [ "$FF_ARCH" = "x86" ]; then
     FF_BUILD_NAME=ffmpeg-x86
     FF_BUILD_NAME_OPENSSL=openssl-x86
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
@@ -110,6 +126,23 @@ elif [ "$FF_ARCH" == "x86" ]; then
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
 
     FF_ASM_OBJ_DIR="libavutil/x86/*.o libavcodec/x86/*.o libswresample/x86/*.o libswscale/x86/*.o"
+
+elif [ "$FF_ARCH" = "arm64-v8a" ]; then
+    FF_ANDROID_PLATFORM=android-21
+
+    FF_BUILD_NAME=ffmpeg-arm64-v8a
+    FF_BUILD_NAME_OPENSSL=openssl-arm64-v8a
+    FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
+
+    FF_CROSS_PREFIX=aarch64-linux-android
+    FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_64_VER}
+
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --arch=aarch64 --enable-yasm"
+
+    FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS"
+    FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
+
+    FF_ASM_OBJ_DIR="libavutil/aarch64/*.o libavcodec/aarch64/*.o libswresample/aarch64/*.o libavcodec/neon/*.o"
 
 else
     echo "unknown architecture $FF_ARCH";
@@ -134,7 +167,7 @@ UNAMES=$(uname -s)
 UNAMESM=$(uname -sm)
 echo "build on $UNAMESM"
 FF_MAKE_TOOLCHAIN_FLAGS="--install-dir=$FF_TOOLCHAIN_PATH"
-if [ "$UNAMES" == "Darwin" ]; then
+if [ "$UNAMES" = "Darwin" ]; then
     FF_MAKE_TOOLCHAIN_FLAGS="$FF_MAKE_TOOLCHAIN_FLAGS --system=darwin-x86_64"
     FF_MAKE_FLAG=-j`sysctl -n machdep.cpu.thread_count`
 fi
@@ -143,7 +176,7 @@ FF_MAKEFLAGS=
 if which nproc >/dev/null
 then
     FF_MAKEFLAGS=-j`nproc`
-elif [ "$UNAMES" == "Darwin" ] && which sysctl >/dev/null
+elif [ "$UNAMES" = "Darwin" ] && which sysctl >/dev/null
 then
     FF_MAKEFLAGS=-j`sysctl -n machdep.cpu.thread_count`
 fi
@@ -186,7 +219,7 @@ FF_CFLAGS="-O3 -Wall -pipe \
 #FF_CFLAGS="$FF_CFLAGS -finline-limit=300"
 
 export COMMON_FF_CFG_FLAGS=
-source $FF_BUILD_ROOT/../config/module.sh
+. $FF_BUILD_ROOT/../config/module.sh
 
 
 #--------------------
@@ -211,7 +244,7 @@ FF_CFG_FLAGS="$FF_CFG_FLAGS --cross-prefix=${FF_CROSS_PREFIX}-"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-cross-compile"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --target-os=linux"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-pic"
-FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-symver"
+# FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-symver"
 
 # Optimization options (experts only):
 FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-asm"
@@ -227,7 +260,7 @@ if [ -f "./config.h" ]; then
 else
     ./configure $FF_CFG_FLAGS \
         --extra-cflags="$FF_CFLAGS $FF_EXTRA_CFLAGS" \
-        --extra-ldflags="$FF_EXTRA_LDFLAGS"
+        --extra-ldflags="$FF_DEP_LIBS $FF_EXTRA_LDFLAGS"
     make clean
 fi
 
@@ -255,7 +288,7 @@ $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack 
     $FF_DEP_LIBS \
     -o $FF_PREFIX/libijkffmpeg.so
 
-function mysedi() {
+mysedi() {
     f=$1
     exp=$2
     n=`basename $f`

@@ -40,7 +40,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -64,6 +64,7 @@ public class VideoView extends SurfaceView implements
 
     private Uri mUri;
     private long mDuration;
+    private String mUserAgent;
 
     private static final int STATE_ERROR = -1;
     private static final int STATE_IDLE = 0;
@@ -144,8 +145,8 @@ public class VideoView extends SurfaceView implements
      */
     public void setVideoLayout(int layout) {
         LayoutParams lp = getLayoutParams();
-        DisplayMetrics disp = mContext.getResources().getDisplayMetrics();
-        int windowWidth = disp.widthPixels, windowHeight = disp.heightPixels;
+        Pair<Integer, Integer> res  = ScreenResolution.getResolution(mContext);
+        int windowWidth = res.first.intValue(), windowHeight = res.second.intValue();
         float windowRatio = windowWidth / (float) windowHeight;
         int sarNum = mVideoSarNum;
         int sarDen = mVideoSarDen;
@@ -180,8 +181,8 @@ public class VideoView extends SurfaceView implements
                     mVideoWidth, mVideoHeight, videoRatio, mVideoSarNum,
                     mVideoSarDen, mSurfaceWidth, mSurfaceHeight, lp.width,
                     lp.height, windowWidth, windowHeight, windowRatio);
-            mVideoLayout = layout;
         }
+        mVideoLayout = layout;
     }
 
     private void initVideoView(Context ctx) {
@@ -216,6 +217,10 @@ public class VideoView extends SurfaceView implements
         invalidate();
     }
 
+    public void setUserAgent(String ua) {
+    	mUserAgent = ua;
+    }
+    
     public void stopPlayback() {
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
@@ -244,6 +249,12 @@ public class VideoView extends SurfaceView implements
                 ijkMediaPlayer = new IjkMediaPlayer();
                 ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
                 ijkMediaPlayer.setOverlayFormat(AvFourCC.SDL_FCC_RV32);
+
+                ijkMediaPlayer.setAvCodecOption("skip_loop_filter", "48");
+                ijkMediaPlayer.setFrameDrop(12);
+                if (mUserAgent != null) {
+                    ijkMediaPlayer.setAvFormatOption("user_agent", mUserAgent);
+                }
             }
             mMediaPlayer = ijkMediaPlayer;
             mMediaPlayer.setOnPreparedListener(mPreparedListener);

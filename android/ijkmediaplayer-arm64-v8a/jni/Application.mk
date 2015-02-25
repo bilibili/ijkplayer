@@ -1,4 +1,4 @@
-# copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+# copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
 #
 # This file is part of ijkPlayer.
 #
@@ -16,22 +16,14 @@
 # License along with ijkPlayer; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-LOCAL_PATH := $(call my-dir)
+APP_OPTIM := release
+APP_PLATFORM := android-21
+APP_ABI := arm64-v8a
+NDK_TOOLCHAIN_VERSION=4.9
+APP_PIE := false
 
-
-include $(CLEAR_VARS)
-LOCAL_CFLAGS += -std=c99
-LOCAL_LDLIBS += -llog -landroid
-
-LOCAL_C_INCLUDES += $(LOCAL_PATH)
-LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
-
-
-LOCAL_SRC_FILES += ijkadk_android_os_bundle.c
-LOCAL_SRC_FILES += ijkadk.c
-
-
-LOCAL_SHARED_LIBRARIES := ijkutil
-
-LOCAL_MODULE := ijkadk
-include $(BUILD_SHARED_LIBRARY)
+APP_CFLAGS := -O3 -Wall -pipe \
+    -ffast-math \
+    -fstrict-aliasing -Werror=strict-aliasing \
+    -Wno-psabi -Wa,--noexecstack \
+    -DANDROID -DNDEBUG

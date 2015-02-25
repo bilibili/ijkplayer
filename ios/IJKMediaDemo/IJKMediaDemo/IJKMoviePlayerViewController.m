@@ -39,11 +39,9 @@
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
     [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
 
-    // NSURL *theMovieURL = [NSURL URLWithString:@"rtsp://l.m.cztv.com:554/hdmi/hntv1hd.stream"];
-    // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115151121.hlv?KID=sina,viask&Expires=1380297600&ssig=SjfwCmaiLe"];
-    // NSURL *theMovieURL = [NSURL URLWithString:@"http://edge.v.iask.com/115279108.hlv?KID=sina,viask&Expires=1380297600&ssig=KpcdjFjrhW"];
-    NSURL *theMovieURL = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"];
+    NSURL *theMovieURL = [NSURL URLWithString:@"http://wshdl.acgvideo.com/live/live_5099_3038_d0ffe541.flv"];
 
+    [IJKFFMoviePlayerController setLogReport:YES];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
@@ -124,11 +122,11 @@
     MPMovieLoadState loadState = _player.loadState;
 
     if ((loadState & MPMovieLoadStatePlaythroughOK) != 0) {
-        NSLog(@"loadStateDidChange: MPMovieLoadStatePlaythroughOK: %d\n", loadState);
+        NSLog(@"loadStateDidChange: MPMovieLoadStatePlaythroughOK: %d\n", (int)loadState);
     } else if ((loadState & MPMovieLoadStateStalled) != 0) {
-        NSLog(@"loadStateDidChange: MPMovieLoadStateStalled: %d\n", loadState);
+        NSLog(@"loadStateDidChange: MPMovieLoadStateStalled: %d\n", (int)loadState);
     } else {
-        NSLog(@"loadStateDidChange: ???: %d\n", loadState);
+        NSLog(@"loadStateDidChange: ???: %d\n", (int)loadState);
     }
 }
 

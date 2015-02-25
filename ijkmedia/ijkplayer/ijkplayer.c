@@ -71,6 +71,10 @@ void ijkmp_global_uninit()
     ffp_global_uninit();
 }
 
+void ijkmp_global_set_log_report(int use_report)
+{
+    ffp_global_set_log_report(use_report);
+}
 
 void ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes))
 {
@@ -188,6 +192,51 @@ void ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps)
     ffp_set_max_fps(mp->ffplayer, max_fps);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_set_max_fp()=void\n");
+}
+
+void ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop)
+{
+    assert(mp);
+
+    MPTRACE("ijkmp_set_framedrop(%d)\n", framedrop);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_framedrop(mp->ffplayer, framedrop);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_set_framedrop()=void\n");
+}
+
+int ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info)
+{
+    assert(mp);
+
+    MPTRACE("%s\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    int ret = ffp_get_video_codec_info(mp->ffplayer, codec_info);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+    return ret;
+}
+
+int ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info)
+{
+    assert(mp);
+
+    MPTRACE("%s\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    int ret = ffp_get_audio_codec_info(mp->ffplayer, codec_info);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+    return ret;
+}
+
+IjkMediaMeta *ijkmp_get_meta_l(IjkMediaPlayer *mp)
+{
+    assert(mp);
+
+    MPTRACE("%s\n", __func__);
+    IjkMediaMeta *ret = ffp_get_meta_l(mp->ffplayer);
+    MPTRACE("%s()=void\n", __func__);
+    return ret;
 }
 
 void ijkmp_shutdown_l(IjkMediaPlayer *mp)
@@ -524,6 +573,25 @@ long ijkmp_get_duration(IjkMediaPlayer *mp)
     long retval = ijkmp_get_duration_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     return retval;
+}
+
+static long ijkmp_get_playable_duration_l(IjkMediaPlayer *mp)
+{
+    return ffp_get_playable_duration_l(mp->ffplayer);
+}
+
+long ijkmp_get_playable_duration(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    long retval = ijkmp_get_playable_duration_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
+}
+
+void *ijkmp_get_weak_thiz(IjkMediaPlayer *mp)
+{
+    return mp->weak_thiz;
 }
 
 void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)

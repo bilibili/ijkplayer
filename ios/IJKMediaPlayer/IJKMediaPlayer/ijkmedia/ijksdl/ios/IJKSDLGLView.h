@@ -28,12 +28,12 @@
 
 @interface IJKSDLGLView : UIView
 
-- (id) initWithFrame:(CGRect)frame
-          withChroma:(int)chroma;
+- (id) initWithFrame:(CGRect)frame;
 - (void) display: (SDL_VoutOverlay *) overlay;
 
 - (UIImage*) snapshot;
 
-@property(nonatomic,strong) NSLock *appActivityLock;
+@property(nonatomic,strong) NSLock  *appActivityLock;
+@property(nonatomic)        CGFloat  fps;
 
 @end

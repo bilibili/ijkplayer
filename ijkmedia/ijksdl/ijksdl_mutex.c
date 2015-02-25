@@ -50,6 +50,14 @@ void SDL_DestroyMutex(SDL_mutex *mutex)
     }
 }
 
+void SDL_DestroyMutexP(SDL_mutex **mutex)
+{
+    if (mutex) {
+        SDL_DestroyMutex(*mutex);
+        *mutex = NULL;
+    }
+}
+
 int SDL_LockMutex(SDL_mutex *mutex)
 {
     assert(mutex);
@@ -88,6 +96,15 @@ void SDL_DestroyCond(SDL_cond *cond)
     if (cond) {
         pthread_cond_destroy(&cond->id);
         free(cond);
+    }
+}
+
+void SDL_DestroyCondP(SDL_cond **cond)
+{
+
+    if (cond) {
+        SDL_DestroyCond(*cond);
+        *cond = NULL;
     }
 }
 

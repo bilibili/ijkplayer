@@ -57,10 +57,10 @@
     NSInteger intDuration = duration + 0.5;
     NSInteger intPosition = position + 0.5;
 
-    self.currentTimeLabel.text = [NSString stringWithFormat:@"%02d:%02d", intPosition / 60, intPosition % 60];
+    self.currentTimeLabel.text = [NSString stringWithFormat:@"%02d:%02d", (int)(intPosition / 60), (int)(intPosition % 60)];
 
     if (intDuration > 0) {
-        self.totalDurationLabel.text = [NSString stringWithFormat:@"%02d:%02d", intDuration / 60, intDuration % 60];
+        self.totalDurationLabel.text = [NSString stringWithFormat:@"%02d:%02d", (int)(intDuration / 60), (int)(intDuration % 60)];
         self.mediaProgressSlider.value = position;
         self.mediaProgressSlider.maximumValue = duration;
     } else {

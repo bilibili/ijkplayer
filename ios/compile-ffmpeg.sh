@@ -1,4 +1,19 @@
 #! /usr/bin/env bash
+#
+# Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 #----------
 # modify for your build tool
@@ -31,7 +46,12 @@ do_lipo () {
     LIPO_FLAGS=
     for ARCH in $FF_ALL_ARCHS
     do
-        LIPO_FLAGS="$LIPO_FLAGS $UNI_BUILD_ROOT/build/ffmpeg-$ARCH/output/lib/$LIB_FILE"
+        ARCH_LIB_FILE="$UNI_BUILD_ROOT/build/ffmpeg-$ARCH/output/lib/$LIB_FILE"
+        if [ -f "$ARCH_LIB_FILE" ]; then
+            LIPO_FLAGS="$LIPO_FLAGS $ARCH_LIB_FILE"
+        else
+            echo "skip $LIB_FILE of $ARCH";
+        fi
     done
 
     xcrun lipo -create $LIPO_FLAGS -output $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
@@ -53,9 +73,11 @@ do_lipo_all () {
 if [ "$FF_TARGET" = "armv7" -o "$FF_TARGET" = "armv7s" -o "$FF_TARGET" = "arm64" ]; then
     echo_archs
     sh tools/do-compile-ffmpeg.sh $FF_TARGET
+    do_lipo_all
 elif [ "$FF_TARGET" = "i386" -o "$FF_TARGET" = "x86_64" ]; then
     echo_archs
     sh tools/do-compile-ffmpeg.sh $FF_TARGET
+    do_lipo_all
 elif [ "$FF_TARGET" = "lipo" ]; then
     echo_archs
     do_lipo_all
@@ -67,9 +89,9 @@ elif [ "$FF_TARGET" = "all" ]; then
     done
 
     do_lipo_all
-elif [ "$FF_TARGET" == "check" ]; then
+elif [ "$FF_TARGET" = "check" ]; then
     echo_archs
-elif [ "$FF_TARGET" == "clean" ]; then
+elif [ "$FF_TARGET" = "clean" ]; then
     echo_archs
     for ARCH in $FF_ALL_ARCHS
     do

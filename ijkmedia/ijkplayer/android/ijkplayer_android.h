@@ -24,13 +24,22 @@
 #define IJKPLAYER_ANDROID__IJKPLAYER_ANDROID_H
 
 #include <jni.h>
+#include "ijkplayer_android_def.h"
 #include "../ijkplayer.h"
+
+typedef struct ijkmp_android_media_format_context {
+    const char *mime_type;
+    int         profile;
+    int         level;
+} ijkmp_android_media_format_context;
 
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*));
 
-void            ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface);
-
-void            ijkmp_android_set_volume(JNIEnv *env, IjkMediaPlayer *mp, float left, float right);
+void ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface);
+void ijkmp_android_set_volume(JNIEnv *env, IjkMediaPlayer *mp, float left, float right);
+void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque);
+void ijkmp_android_set_mediacodec_enabled(IjkMediaPlayer *mp, bool enabled);
+void ijkmp_android_set_opensles_enabled(IjkMediaPlayer *mp, bool enabled);
 
 #endif
