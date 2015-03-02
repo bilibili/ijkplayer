@@ -127,6 +127,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     BOOL _isSeeking;
     BOOL _isError;
     BOOL _isCompleted;
+    BOOL _isShutdown;
     
     BOOL _pauseInBackground;
     
@@ -284,6 +285,7 @@ static IJKAVMoviePlayerController* instance;
 
 - (void)shutdown
 {
+    _isShutdown = YES;
     [self stop];
     
     if (_playerItem != nil) {
@@ -414,6 +416,9 @@ static IJKAVMoviePlayerController* instance;
 
 - (void)didPrepareToPlayAsset:(AVURLAsset *)asset withKeys:(NSArray *)requestedKeys
 {
+    if (_isShutdown)
+        return;
+
     /* Make sure that the value of each key has loaded successfully. */
     for (NSString *thisKey in requestedKeys)
     {
@@ -626,16 +631,25 @@ static IJKAVMoviePlayerController* instance;
 
 - (void)assetFailedToPrepareForPlayback:(NSError *)error
 {
+    if (_isShutdown)
+        return;
+
     [self onError:error];
 }
 
 - (void)playerItemFailedToPlayToEndTime:(NSNotification *)notification
 {
+    if (_isShutdown)
+        return;
+
     [self onError:[notification.userInfo objectForKey:@"error"]];
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
+    if (_isShutdown)
+        return;
+
     _isCompleted = YES;
     
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -659,6 +673,9 @@ static IJKAVMoviePlayerController* instance;
                         change:(NSDictionary*)change
                        context:(void*)context
 {
+    if (_isShutdown)
+        return;
+
     if (context == KVO_AVPlayerItem_state)
     {
         /* AVPlayerItem "status" property value observer. */
