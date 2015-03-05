@@ -80,9 +80,17 @@ git checkout -B latest n0.2.2
 ./init-android.sh
 
 cd android
-./compile-ffmpeg.sh clean
-./compile-ffmpeg.sh
-./compile-ijk.sh
+
+# run gradle build scripts, eg:
+./gradlew assembleDebug
+
+# or just import project 'android/build.gradle' to Android Studio
+# and add property 'ANDROID_NDK' in <rootProject>/gradle.properties
+
+# or run shell build scripts:
+# ./compile-ffmpeg.sh clean
+# ./compile-ffmpeg.sh
+# ./compile-ijk.sh
 
 # or Add Native Support in eclipse
 # cd ijkmediaplayer
@@ -91,7 +99,10 @@ cd android
 # import android/ijkmediaplayer for MediaPlayer-like interface (recommended)
 # import android/ijkmediawidget for VideoView-like interface (based on Vitamio UI)
 # import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
+
 ```
+
+
 
 
 ### Build iOS

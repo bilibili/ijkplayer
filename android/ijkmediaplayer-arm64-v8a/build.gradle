@@ -1,8 +1,4 @@
-apply plugin: 'android-library'
-
-dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
-}
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 21
@@ -32,3 +28,4 @@ android {
         release.setRoot('build-types/release')
     }
 }
+apply from: rootProject.file('gradle/compile-ijkplayer.gradle')
