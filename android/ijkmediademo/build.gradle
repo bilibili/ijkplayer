@@ -1,11 +1,10 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':ijkmediawidget')
     compile project(':ijkmediaplayer')
-    compile project(':ijkmediawidget')
-    compile project(':ijkmediaplayer')
+//    compile project(':ijkmediaplayer-x86')
 }
 
 android {
@@ -16,11 +15,8 @@ android {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
-            resources.srcDirs = ['src']
-            aidl.srcDirs = ['src']
-            renderscript.srcDirs = ['src']
             res.srcDirs = ['res']
-            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
         }
 
         // Move the tests to tests/java, tests/res, etc...
@@ -34,5 +30,9 @@ android {
         // by a similar customization.
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
+    }
+
+    lintOptions{
+        abortOnError false
     }
 }

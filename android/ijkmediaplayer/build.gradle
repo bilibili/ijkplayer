@@ -1,8 +1,4 @@
-apply plugin: 'android-library'
-
-dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
-}
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 19
@@ -12,11 +8,7 @@ android {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
-            resources.srcDirs = ['src']
-            aidl.srcDirs = ['src']
-            renderscript.srcDirs = ['src']
-            res.srcDirs = ['res']
-            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
         }
 
         // Move the tests to tests/java, tests/res, etc...
@@ -32,3 +24,4 @@ android {
         release.setRoot('build-types/release')
     }
 }
+apply from: rootProject.file('gradle/compile-ijkplayer.gradle')
