@@ -164,6 +164,7 @@ void            ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_c
 void            ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps);
 void            ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop);
 void            ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepared);
+void            ijkmp_set_max_buffer_size(IjkMediaPlayer *mp, int max_buffer_size);
 
 int             ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info);
 int             ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info);

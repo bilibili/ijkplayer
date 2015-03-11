@@ -75,6 +75,7 @@
 
 - (void)setPauseInBackground:(BOOL)pause;
 - (BOOL)isVideoToolboxOpen;
+- (void)setMaxBufferSize:(int)maxBufferSize; // -1 for default size
 
 + (void)setLogReport:(BOOL)preferLogReport;
 

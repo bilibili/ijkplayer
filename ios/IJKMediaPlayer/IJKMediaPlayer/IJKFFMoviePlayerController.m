@@ -301,6 +301,14 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     return _isVideoToolboxOpen;
 }
 
+- (void)setMaxBufferSize:(int)maxBufferSize
+{
+    if (!_mediaPlayer)
+        return;
+
+    ijkmp_set_max_buffer_size(_mediaPlayer, maxBufferSize);
+}
+
 + (void)setLogReport:(BOOL)preferLogReport
 {
     ijkmp_global_set_log_report(preferLogReport ? 1 : 0);

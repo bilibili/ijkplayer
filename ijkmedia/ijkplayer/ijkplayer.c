@@ -216,6 +216,17 @@ void ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepar
     MPTRACE("ijkmp_set_auto_play_on_prepared()=void\n");
 }
 
+void ijkmp_set_max_buffer_size(IjkMediaPlayer *mp, int max_buffer_size)
+{
+    assert(mp);
+
+    MPTRACE("%s(%d)\n", __func__, max_buffer_size);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_max_buffer_size(mp->ffplayer, max_buffer_size);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+}
+
 int ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info)
 {
     assert(mp);

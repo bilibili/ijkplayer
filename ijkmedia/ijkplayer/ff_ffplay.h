@@ -51,6 +51,7 @@ void      ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count);
 void      ffp_set_max_fps(FFPlayer *ffp, int max_fps);
 void      ffp_set_framedrop(FFPlayer *ffp, int framedrop);
 void      ffp_set_auto_play_on_prepared(FFPlayer *ffp, int auto_play_on_prepared);
+void      ffp_set_max_buffer_size(FFPlayer *ffp, int max_buffer_size);
 
 int       ffp_get_video_codec_info(FFPlayer *ffp, char **codec_info);
 int       ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info);

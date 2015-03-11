@@ -3002,6 +3002,14 @@ void ffp_set_auto_play_on_prepared(FFPlayer *ffp, int auto_play_on_prepared)
     ffp->auto_play_on_prepared = auto_play_on_prepared;
 }
 
+void ffp_set_max_buffer_size(FFPlayer *ffp, int max_buffer_size)
+{
+    if (max_buffer_size < 0 || max_buffer_size > MAX_QUEUE_SIZE)
+        ffp->max_buffer_size = MAX_QUEUE_SIZE;
+    else
+        ffp->max_buffer_size = max_buffer_size;
+}
+
 int ffp_get_video_codec_info(FFPlayer *ffp, char **codec_info)
 {
     if (!codec_info)
