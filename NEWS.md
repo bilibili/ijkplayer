@@ -1,5 +1,8 @@
 tag next
 --------------------------------
+
+tag k0.2.3
+--------------------------------
 android: support OpenSL ES
 ios: support NV12 Render
 ios: support VideoToolBox
