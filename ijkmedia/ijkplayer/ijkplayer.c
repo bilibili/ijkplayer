@@ -101,7 +101,7 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
         goto fail;
 
     mp->ffplayer = ffp_create();
-    if (!mp)
+    if (!mp->ffplayer)
         goto fail;
 
     mp->msg_loop = msg_loop;
