@@ -117,6 +117,7 @@ void ijkmeta_append_child_l(IjkMediaMeta *meta, IjkMediaMeta *child)
         if (!new_children)
             return;
 
+        memcpy(new_children, meta->children, new_capacity * sizeof(IjkMediaMeta *));
         free(meta->children);
         meta->children          = new_children;
         meta->children_capacity = new_capacity;
