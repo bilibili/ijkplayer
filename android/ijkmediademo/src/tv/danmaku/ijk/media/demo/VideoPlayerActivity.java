@@ -16,51 +16,43 @@
 
 package tv.danmaku.ijk.media.demo;
 
-import java.io.File;
-
-import tv.danmaku.ijk.media.widget.MediaController;
-import tv.danmaku.ijk.media.widget.VideoView;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.view.View;
 
+import tv.danmaku.ijk.media.widget.MediaController;
+import tv.danmaku.ijk.media.widget.VideoView;
+
 public class VideoPlayerActivity extends Activity {
-	private VideoView mVideoView;
-	private View mBufferingIndicator;
-	private MediaController mMediaController;
+    private VideoView mVideoView;
+    private View mBufferingIndicator;
+    private MediaController mMediaController;
 
-	private String mVideoPath;
+    private String mVideoPath;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_player);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_player);
 
-		mVideoPath = "/sdcard/download/720.flv";
+        mVideoPath = getIntent().getStringExtra("videoPath");
 
-		Intent intent = getIntent();
-		String intentAction = intent.getAction();
-		if (!TextUtils.isEmpty(intentAction)
-				&& intentAction.equals(Intent.ACTION_VIEW)) {
-			mVideoPath = intent.getDataString();
-		}
+        Intent intent = getIntent();
+        String intentAction = intent.getAction();
+        if (!TextUtils.isEmpty(intentAction) && intentAction.equals(Intent.ACTION_VIEW)) {
+            mVideoPath = intent.getDataString();
+        }
 
-		if (TextUtils.isEmpty(mVideoPath)) {
-			mVideoPath = new File(Environment.getExternalStorageDirectory(),
-					"download/test.mp4").getAbsolutePath();
-		}
+        mBufferingIndicator = findViewById(R.id.buffering_indicator);
+        mMediaController = new MediaController(this);
 
-		mBufferingIndicator = findViewById(R.id.buffering_indicator);
-		mMediaController = new MediaController(this);
-
-		mVideoView = (VideoView) findViewById(R.id.video_view);
-		mVideoView.setMediaController(mMediaController);
-		mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
-		mVideoView.setVideoPath(mVideoPath);
-		mVideoView.requestFocus();
-		mVideoView.start();
-	}
+        mVideoView = (VideoView) findViewById(R.id.video_view);
+        mVideoView.setMediaController(mMediaController);
+        mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
+        mVideoView.setVideoPath(mVideoPath);
+        mVideoView.requestFocus();
+        mVideoView.start();
+    }
 }
