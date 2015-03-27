@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+
+    <style name="Base.TextAppearance.AppCompat" parent="android:TextAppearance.Material" />
+
+    <style name="Base.TextAppearance.AppCompat.Display4" parent="android:TextAppearance.Material.Display4" />
+
+    <style name="Base.TextAppearance.AppCompat.Display3" parent="android:TextAppearance.Material.Display3" />
+
+    <style name="Base.TextAppearance.AppCompat.Display2" parent="android:TextAppearance.Material.Display2" />
+
+    <style name="Base.TextAppearance.AppCompat.Display1" parent="android:TextAppearance.Material.Display1" />
+
+    <style name="Base.TextAppearance.AppCompat.Headline" parent="android:TextAppearance.Material.Headline" />
+
+    <style name="Base.TextAppearance.AppCompat.Title" parent="android:TextAppearance.Material.Title" />
+
+    <style name="Base.TextAppearance.AppCompat.Subhead" parent="android:TextAppearance.Material.Subhead" />
+
+    <style name="Base.TextAppearance.AppCompat.Body2" parent="android:TextAppearance.Material.Body2" />
+
+    <style name="Base.TextAppearance.AppCompat.Body1" parent="android:TextAppearance.Material.Body1" />
+
+    <style name="Base.TextAppearance.AppCompat.Caption" parent="android:TextAppearance.Material.Caption" />
+
+    <style name="Base.TextAppearance.AppCompat.Menu" parent="android:TextAppearance.Material.Menu" />
+
+    <!-- Now deprecated styles -->
+
+    <style name="Base.TextAppearance.AppCompat.Inverse" parent="android:TextAppearance.Material.Inverse" />
+
+    <style name="Base.TextAppearance.AppCompat.Large" parent="android:TextAppearance.Material.Large" />
+
+    <style name="Base.TextAppearance.AppCompat.Large.Inverse" parent="android:TextAppearance.Material.Large.Inverse" />
+
+    <style name="Base.TextAppearance.AppCompat.Medium" parent="android:TextAppearance.Material.Medium" />
+
+    <style name="Base.TextAppearance.AppCompat.Medium.Inverse" parent="android:TextAppearance.Material.Medium.Inverse" />
+
+    <style name="Base.TextAppearance.AppCompat.Small" parent="android:TextAppearance.Material.Small" />
+
+    <style name="Base.TextAppearance.AppCompat.Small.Inverse" parent="android:TextAppearance.Material.Small.Inverse" />
+
+    <style name="Base.TextAppearance.AppCompat.Button" parent="android:TextAppearance.Material.Button" />
+
+    <style name="Base.TextAppearance.AppCompat.Widget.Switch" parent="android:TextAppearance.Material.Button" />
+
+</resources>
