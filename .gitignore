@@ -10,6 +10,9 @@ extra
 android/ijkmediaplayer/.settings/*
 android/ijkmediaplayer-x86/.settings/*
 android/ijkmediawidget/.settings/*
+android/ijkmediaplayer-armv5/.settings/
+android/contrib/appcompat/.settings/
+android/ijkmediademo/lint.xml
 ijkmedia/ijkyuv/
 
 # built application files

@@ -52,13 +52,13 @@ ijkplayer
 - If you prefer more codec/format
 ```
 rm config/module.sh
-ln -fs config/module-default.sh config/module.sh
+ln -s config/module-default.sh config/module.sh
 ```
 
 - If you prefer less codec/format for smaller binary size (by default)
 ```
 rm config/module.sh
-ln -fs config/module-lite.sh config/module.sh
+ln -s config/module-lite.sh config/module.sh
 ```
 
 - For Ubuntu/Debian users.
@@ -80,8 +80,17 @@ git checkout -B latest k0.2.3
 ./init-android.sh
 
 cd android
-./compile-ffmpeg.sh
-./compile-ijk.sh
+
+# run gradle build scripts, eg:
+./gradlew assembleDebug
+
+# or just import project 'android/build.gradle' to Android Studio
+# and add property 'ANDROID_NDK' in <rootProject>/gradle.properties
+
+# or run shell build scripts:
+# ./compile-ffmpeg.sh clean
+# ./compile-ffmpeg.sh
+# ./compile-ijk.sh
 
 # or Add Native Support in eclipse
 # cd ijkmediaplayer
@@ -90,7 +99,10 @@ cd android
 # import android/ijkmediaplayer for MediaPlayer-like interface (recommended)
 # import android/ijkmediawidget for VideoView-like interface (based on Vitamio UI)
 # import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
+
 ```
+
+
 
 
 ### Build iOS
@@ -104,6 +116,7 @@ git checkout -B latest k0.2.3
 ./init-ios.sh
 
 cd ios
+./compile-ffmpeg.sh clean
 ./compile-ffmpeg.sh all
 
 # import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)

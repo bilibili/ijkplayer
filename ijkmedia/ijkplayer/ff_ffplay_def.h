@@ -296,7 +296,7 @@ typedef struct VideoState {
     SDL_Rect last_display_rect;
 #endif
 
-    char filename[1024];
+    char filename[4096];
     int width, height, xleft, ytop;
     int step;
 

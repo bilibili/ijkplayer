@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2012 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <!-- Label for the "Done" button on the far left of action mode toolbars. -->
+    <string name="abc_action_mode_done">Done</string>
+    <!-- Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] -->
+    <string name="abc_action_bar_home_description">Navigate home</string>
+    <!-- Content description for the action bar "up" affordance. [CHAR LIMIT=NONE] -->
+    <string name="abc_action_bar_up_description">Navigate up</string>
+    <!-- Content description for the action menu overflow button. [CHAR LIMIT=NONE] -->
+    <string name="abc_action_menu_overflow_description">More options</string>
+
+    <!-- Content description for the Toolbar icon used to collapse an expanded action mode. [CHAR LIMIT=NONE] -->
+    <string name="abc_toolbar_collapse_description">Collapse</string>
+
+    <!-- Formatting string for describing the action bar's title/home/up affordance.
+         This is a single tappable "button" that includes the app icon, the Up indicator
+         (usually a "<" chevron) and the window title text.
+         %1$s is the title. %2$s is the description of what tapping/clicking the whole
+         thing is going to do. -->
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <!-- Just like action_bar_home_description_format, but this one will be used
+         if the window is also providing subtitle text.
+         %1$s is the title. %2$s is the subtitle. %3$s is the description of what
+         tapping/clicking the whole thing is going to do. -->
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+
+    <!-- SearchView accessibility description for search button [CHAR LIMIT=NONE] -->
+    <string name="abc_searchview_description_search">Search</string>
+    <!-- SearchView accessibility description for search text field [CHAR LIMIT=NONE] -->
+    <string name="abc_searchview_description_query">Search query</string>
+    <!-- SearchView accessibility description for clear button [CHAR LIMIT=NONE] -->
+    <string name="abc_searchview_description_clear">Clear query</string>
+    <!-- SearchView accessibility description for submit button [CHAR LIMIT=NONE] -->
+    <string name="abc_searchview_description_submit">Submit query</string>
+    <!-- SearchView accessibility description for voice button [CHAR LIMIT=NONE] -->
+    <string name="abc_searchview_description_voice">Voice search</string>
+
+    <!-- ActivityChooserView - accessibility support -->
+    <!-- Description of the shwoing of a popup window with activities to choose from. [CHAR LIMIT=NONE] -->
+    <string name="abc_activitychooserview_choose_application">Choose an app</string>
+    <!-- Title for a button to expand the list of activities in ActivityChooserView [CHAR LIMIT=25] -->
+    <string name="abc_activity_chooser_view_see_all">See all</string>
+    <!-- Description of a share target (both in the list of such or the default share button) in a ShareActionProvider (share UI). [CHAR LIMIT=NONE] -->
+    <string name="abc_shareactionprovider_share_with_application">Share with %s</string>
+    <!-- Description of the choose target button in a ShareActionProvider (share UI). [CHAR LIMIT=NONE] -->
+    <string name="abc_shareactionprovider_share_with">Share with</string>
+
+</resources>

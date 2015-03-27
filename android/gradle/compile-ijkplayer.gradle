@@ -1,0 +1,117 @@
+/*
+ * Copyright (c) 2015. Yrom
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+def TASK_GROUP = 'Build ijkplayer'
+def FF_ALL_ARCHES = ['armv5', 'armv7a', 'x86', 'arm64-v8a']
+def LIB_NAMES = ['armeabi-v5', 'armeabi-v7a', 'x86', 'armeabi-v8a']
+def FF_COMPILE_PREFIX = 'compileFFmpeg'
+def BUILD_LIBS_PREFIX = 'compileLibs'
+
+def String getAndroidNdkDir(){
+    String path = hasProperty('ANDROID_NDK')? ANDROID_NDK : System.env.ANDROID_NDK
+    def ndkDir = file(path)
+    if(!ndkDir.exists())
+        throw new FileNotFoundException("The ANDROID_NDK is not found: ${ndkDir}")
+    return ndkDir.absolutePath
+}
+
+afterEvaluate { project->
+    if(!plugins.hasPlugin('com.android.library')){
+        logger.log(LogLevel.WARN, 'Must apply this script to android library project.')
+        return
+    }
+    def ndkDir = getAndroidNdkDir();
+    if(!ndkDir) {
+        logger.log(LogLevel.WARN, 'You must define ANDROID_NDK in System env or gradle.properties before build.')
+        return
+    }
+    def matcher = java.util.regex.Pattern.compile("ijkmediaplayer(?:-(\\S+))?").matcher(name)
+    if(matcher.find()){
+        tasks.addRule("Pattern: $FF_COMPILE_PREFIX<ARCH>") { String taskName ->
+            if(taskName.startsWith(FF_COMPILE_PREFIX)) {
+                def arch = taskName - FF_COMPILE_PREFIX
+                arch = arch ? arch.toLowerCase() : 'armv7a'
+                task(taskName, group: TASK_GROUP, description: "Compile ffmpeg-${arch}", type: Exec) {
+                    def outputFile = new File(rootProject.buildDir, "ffmpeg-${arch}/output/libijkffmpeg.so")
+                    outputs.upToDateWhen { return outputFile.exists()}
+                    workingDir = rootProject.rootDir.absolutePath
+                    environment.ANDROID_SDK = android.sdkDirectory
+                    environment.ANDROID_NDK = getAndroidNdkDir()
+                    commandLine 'sh', 'tools/do-compile-ffmpeg.sh', arch
+                }
+            }
+        }
+
+        tasks.addRule("Pattern: ${BUILD_LIBS_PREFIX}<ABI>") { String taskName ->
+            if(taskName.startsWith(BUILD_LIBS_PREFIX)) {
+                def abi = taskName - BUILD_LIBS_PREFIX
+                abi = abi ? abi.toLowerCase() : 'armv7a'
+                if (FF_ALL_ARCHES.indexOf(abi) >= 0) {
+                    def abiName = LIB_NAMES[FF_ALL_ARCHES.indexOf(abi)]
+                    def libs = new File(project.file('libs'), abiName)
+                    def task = task(taskName,
+                            group: TASK_GROUP,
+                            description: "Build ijkplayer for abi ${abiName}",
+                            type: Exec) {
+                        environment.ANDROID_SDK = android.sdkDirectory
+                        environment.ANDROID_NDK = getAndroidNdkDir()
+                        def exec = new File(file(environment.ANDROID_NDK), 'ndk-build')
+                        if(!exec.canExecute()){
+                            throw new StopExecutionException("The command \'ndk-build\' cannot be executed: $exec")
+                        }
+                        workingDir = project.file('jni').absolutePath
+                        inputs.source workingDir
+                        outputs.upToDateWhen { return libs.exists()}
+                        executable = exec.absolutePath
+                    }
+                    task.dependsOn FF_COMPILE_PREFIX + abi.capitalize()
+
+                } else {
+                    throw new GradleException("Wrong argument for <ABI>: ${abi}")
+                }
+            }
+        }
+
+        def abi = matcher.group(1)
+        abi = abi ?: 'armv7a'
+        def buildTask = BUILD_LIBS_PREFIX+abi.capitalize()
+        def buildLibsTask = tasks.create("compile${name.capitalize()}JniLibs", new Action<Task>() {
+            @Override
+            public void execute(Task task) {
+                task.description = "Build jni libs for the subproject ${name}."
+                task.group = TASK_GROUP
+                task.dependsOn buildTask
+            }
+        })
+        android.libraryVariants.each{ variant ->
+            variant.ndkCompile.dependsOn(buildLibsTask)
+        }
+        def cleanTask = tasks.create(name:"cleanFFmpeg${abi.capitalize()}",
+                group: TASK_GROUP,
+                description:"Clean ffmpeg-${abi} outputs") << {
+                exec {
+                    def name = "ffmpeg-$abi"
+                    commandLine = ['sh', '-c', "cd $name && git clean -xdf && cd -"]
+                    def output = new File(rootProject.buildDir, "${name}/output")
+                    println "removing dir: $output"
+                    commandLine = ['sh', '-c', "rm -rf ${output.absolutePath}"]
+                }
+        }
+        println "Added task ${buildTask}, ${cleanTask.name} to project:${name}"
+        tasks.clean.dependsOn cleanTask
+    }
+
+}

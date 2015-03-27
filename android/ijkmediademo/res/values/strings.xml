@@ -6,5 +6,6 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
     <string name="buffering">buffering</string>
-    
+    <string name="sort">Sort</string>
+
 </resources>
