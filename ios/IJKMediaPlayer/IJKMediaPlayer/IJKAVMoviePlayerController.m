@@ -315,7 +315,6 @@ static IJKAVMoviePlayerController* instance;
     CMTime time = CMTimeMakeWithSeconds(self.currentPlaybackTime, 1);
     CMTime actualTime;
     CGImageRef cgImage = [imageGenerator copyCGImageAtTime:time actualTime:&actualTime error:&error];
-    CMTimeShow(actualTime);
     UIImage *image = [UIImage imageWithCGImage:cgImage];
     return image;
 }
