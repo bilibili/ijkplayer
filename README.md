@@ -70,6 +70,8 @@ sudo dpkg-reconfigure dash
 - If you'd like to share your config, pull request is welcome.
 
 ### Build Android
+#### Build latest stable version
+
 ```
 git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
@@ -81,16 +83,9 @@ git checkout -B latest k0.2.3
 
 cd android
 
-# run gradle build scripts, eg:
-./gradlew assembleDebug
-
-# or just import project 'android/build.gradle' to Android Studio
-# and add property 'ANDROID_NDK' in <rootProject>/gradle.properties
-
-# or run shell build scripts:
-# ./compile-ffmpeg.sh clean
-# ./compile-ffmpeg.sh
-# ./compile-ijk.sh
+./compile-ffmpeg.sh clean
+./compile-ffmpeg.sh
+./compile-ijk.sh
 
 # or Add Native Support in eclipse
 # cd ijkmediaplayer
@@ -102,8 +97,22 @@ cd android
 
 ```
 
+#### Build development version
 
+```
+git clone https://github.com/bbcallen/ijkplayer.git ijkplayer-android
+cd ijkplayer-android
+git checkout master
 
+./init-android.sh
+
+cd android
+# add property ANDROID_NDK to gradle.properties
+
+./gradlew cleanFFmpeg buildJniLibs
+# or import project via Android Studio
+
+```
 
 ### Build iOS
 ```
