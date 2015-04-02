@@ -27,6 +27,8 @@
     options.userAgent               = @"";
     options.videotoolboxEnabled     = YES;
     options.frameMaxWidth           = 960;
+    options.auto_reconnect          = YES;
+    options.timeout                 = 20000;
 
 
     return options;
@@ -49,12 +51,16 @@
     ijkmp_ios_set_videotoolbox_enabled(mediaPlayer, _videotoolboxEnabled);
     ijkmp_ios_set_frame_max_width(mediaPlayer, _frameMaxWidth);
 
+    if (self.auto_reconnect == YES) {
+        [self setFormatOption:@"reconnect" withInt64:1 to:mediaPlayer];
+    }
 
     if (self.timeout > 0) {
         [self setFormatOption:@"timeout"
                     withInt64:self.timeout
                            to:mediaPlayer];
     }
+
     if ([self.userAgent isEqualToString:@""] == NO) {
         [self setFormatOption:@"user-agent" withString:self.userAgent to:mediaPlayer];
     }
