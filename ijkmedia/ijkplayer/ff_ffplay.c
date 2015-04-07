@@ -771,7 +771,7 @@ static void stream_toggle_pause_l(FFPlayer *ffp, int pause_on)
 {
     VideoState *is = ffp->is;
     if (is->paused && !pause_on) {
-        is->frame_timer += av_gettime_relative() / 1000000.0 + is->vidclk.pts_drift - is->vidclk.pts;
+        is->frame_timer += av_gettime_relative() / 1000000.0 - is->vidclk.last_updated;
 
 #ifdef FFP_MERGE
         if (is->read_pause_return != AVERROR(ENOSYS)) {
