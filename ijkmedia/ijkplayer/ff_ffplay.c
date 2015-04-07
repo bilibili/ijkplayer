@@ -1522,6 +1522,9 @@ static int ffplay_video_thread(void *arg)
     enum AVPixelFormat last_format = -2;
     int last_serial = -1;
     int last_vfilter_idx = 0;
+    if (!graph)
+        return AVERROR(ENOMEM);
+
 #endif
 
     if (!frame)
