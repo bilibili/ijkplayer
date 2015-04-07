@@ -1976,6 +1976,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 #endif
     }
 
+    is->eof = 0;
     ic->streams[stream_index]->discard = AVDISCARD_DEFAULT;
     switch (avctx->codec_type) {
     case AVMEDIA_TYPE_AUDIO:
@@ -2175,7 +2176,6 @@ static int read_thread(void *arg)
     int err, i, ret __unused;
     int st_index[AVMEDIA_TYPE_NB];
     AVPacket pkt1, *pkt = &pkt1;
-    int eof = 0;
     int64_t stream_start_time;
     int completed = 0;
     int pkt_in_play_range = 0;
@@ -2195,6 +2195,7 @@ static int read_thread(void *arg)
 #ifdef FFP_MERGE
     is->last_subtitle_stream = is->subtitle_stream = -1;
 #endif
+    is->eof = 0;
 
     ic = avformat_alloc_context();
     ic->interrupt_callback.callback = decode_interrupt_cb;
@@ -2457,7 +2458,7 @@ static int read_thread(void *arg)
             ffp->current_high_water_mark_in_ms = ffp->start_high_water_mark_in_ms;
             is->seek_req = 0;
             is->queue_attachments_req = 1;
-            eof = 0;
+            is->eof = 0;
 #ifdef FFP_MERGE
             if (is->paused)
                 step_to_next_frame(is);
@@ -2503,7 +2504,7 @@ static int read_thread(void *arg)
 #else
                 ))) {
 #endif
-            if (!eof) {
+            if (!is->eof) {
                 // ALOGE("ffp_toggle_buffering: full\n");
                 ffp_toggle_buffering(ffp, 0);
             }
@@ -2552,7 +2553,7 @@ static int read_thread(void *arg)
             if (ret == AVERROR_INVALIDDATA && (pkt->flags & AV_PKT_FLAG_MP4_PF)) {
                 ffp_seek_to_l(ffp, ffp_get_current_position_l(ffp));
             }
-            if ((ret == AVERROR_EOF || avio_feof(ic->pb)) && !eof) {
+            if ((ret == AVERROR_EOF || avio_feof(ic->pb)) && !is->eof) {
                 if (is->video_stream >= 0)
                     packet_queue_put_nullpacket(&is->videoq, is->video_stream);
                 if (is->audio_stream >= 0)
@@ -2561,7 +2562,7 @@ static int read_thread(void *arg)
                 if (is->subtitle_stream >= 0)
                     packet_queue_put_nullpacket(&is->subtitleq, is->subtitle_stream);
 #endif
-                eof = 1;
+                is->eof = 1;
             }
             if (ic->pb && ic->pb->error) {
                 if (is->video_stream >= 0)
@@ -2572,7 +2573,7 @@ static int read_thread(void *arg)
                 if (is->subtitle_stream >= 0)
                     packet_queue_put_nullpacket(&is->subtitleq, is->subtitle_stream);
 #endif
-                eof = 1;
+                is->eof = 1;
                 ffp->error = ic->pb->error;
                 ALOGE("av_read_frame error: %x(%c,%c,%c,%c)\n", ffp->error,
                       (char) (0xff & (ffp->error >> 24)),
@@ -2583,7 +2584,7 @@ static int read_thread(void *arg)
             } else {
                 ffp->error = 0;
             }
-            if (eof) {
+            if (is->eof) {
                 ffp_toggle_buffering(ffp, 0);
                 SDL_Delay(1000);
             }
@@ -2592,7 +2593,7 @@ static int read_thread(void *arg)
             SDL_UnlockMutex(wait_mutex);
             continue;
         } else {
-            eof = 0;
+            is->eof = 0;
         }
         /* check if packet is in play range specified by user, then queue, otherwise discard */
         stream_start_time = ic->streams[pkt->stream_index]->start_time;

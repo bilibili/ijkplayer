@@ -295,6 +295,7 @@ typedef struct VideoState {
 #ifdef FFP_MERGE
     SDL_Rect last_display_rect;
 #endif
+    int eof;
 
     char filename[4096];
     int width, height, xleft, ytop;
