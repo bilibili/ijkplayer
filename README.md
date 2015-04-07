@@ -32,7 +32,7 @@ ijkplayer
  - hw decoder: MediaCodec
 - iOS
  - platform: iOS 5.1.1~8.1.x
- - cpu: ARMv7, ARMv7s, ARM64, i386, x86_64
+ - cpu: ARMv7, ARM64, i386, x86_64, (armv7s is obselete)
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
  - video-output: OpenGL ES 2.0 (I420/YV12/NV12 shaders)
  - audio-output: AudioQueue, AudioUnit

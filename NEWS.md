@@ -1,5 +1,6 @@
 tag next
 --------------------------------
+ios: remove armv7s build from default
 
 tag k0.2.3
 --------------------------------
