@@ -50,8 +50,10 @@
     ijkmp_ios_set_videotoolbox_enabled(mediaPlayer, _videotoolboxEnabled);
     ijkmp_ios_set_frame_max_width(mediaPlayer, _frameMaxWidth);
 
-    if (self.auto_reconnect == YES) {
+    if (self.auto_reconnect == NO) {
         [self setFormatOption:@"reconnect" withInt64:1 to:mediaPlayer];
+    } else {
+        [self setFormatOption:@"reconnect" withInt64:0 to:mediaPlayer];
     }
 
     if (self.timeout > 0) {
