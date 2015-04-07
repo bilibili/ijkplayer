@@ -1524,6 +1524,9 @@ static int ffplay_video_thread(void *arg)
     int last_vfilter_idx = 0;
 #endif
 
+    if (!frame)
+        return AVERROR(ENOMEM);
+
     for (;;) {
         ret = get_video_frame(ffp, frame);
         if (ret < 0)
