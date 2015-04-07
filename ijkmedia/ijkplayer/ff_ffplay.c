@@ -553,6 +553,15 @@ static int64_t frame_queue_last_pos(FrameQueue *f)
 }
 #endif
 
+static void decoder_abort(Decoder *d, FrameQueue *fq)
+{
+    packet_queue_abort(d->queue);
+    frame_queue_signal(fq);
+    SDL_WaitThread(d->decoder_tid, NULL);
+    d->decoder_tid = NULL;
+    packet_queue_flush(d->queue);
+}
+
 // FFP_MERGE: fill_rectangle
 // FFP_MERGE: fill_border
 // FFP_MERGE: ALPHA_BLEND
@@ -1488,6 +1497,12 @@ static int audio_thread(void *arg)
     return ret;
 }
 
+static void decoder_start(Decoder *d, int (*fn)(void *), void *arg, const char *name)
+{
+    packet_queue_start(d->queue);
+    d->decoder_tid = SDL_CreateThreadEx(&d->_decoder_tid, fn, arg, name);
+}
+
 static int ffplay_video_thread(void *arg)
 {
     FFPlayer *ffp = arg;
@@ -2020,25 +2035,23 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         is->audio_stream = stream_index;
         is->audio_st = ic->streams[stream_index];
 
-        packet_queue_start(&is->audioq);
         decoder_init(&is->auddec, avctx, &is->audioq, is->continue_read_thread);
         if ((is->ic->iformat->flags & (AVFMT_NOBINSEARCH | AVFMT_NOGENSEARCH | AVFMT_NO_BYTE_SEEK)) && !is->ic->iformat->read_seek) {
             is->auddec.start_pts = is->audio_st->start_time;
             is->auddec.start_pts_tb = is->audio_st->time_base;
         }
-        is->audio_tid = SDL_CreateThreadEx(&is->_audio_tid, audio_thread, ffp, "ff_audio_dec");
+        decoder_start(&is->auddec, audio_thread, ffp, "ff_audio_dec");
         SDL_AoutPauseAudio(ffp->aout, 0);
         break;
     case AVMEDIA_TYPE_VIDEO:
         is->video_stream = stream_index;
         is->video_st = ic->streams[stream_index];
 
-        packet_queue_start(&is->videoq);
         decoder_init(&is->viddec, avctx, &is->videoq, is->continue_read_thread);
         ffp->node_vdec = ffpipeline_open_video_decoder(ffp->pipeline, ffp);
         if (!ffp->node_vdec)
             goto fail;
-        is->video_tid = SDL_CreateThreadEx(&is->_video_tid, video_thread, ffp, "ff_video_dec");
+        decoder_start(&is->viddec, video_thread, ffp, "ff_video_dec");
         is->queue_attachments_req = 1;
 
         if(is->video_st->avg_frame_rate.den && is->video_st->avg_frame_rate.num) {
@@ -2089,14 +2102,10 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
 
     switch (avctx->codec_type) {
     case AVMEDIA_TYPE_AUDIO:
-        packet_queue_abort(&is->audioq);
-
-        frame_queue_signal(&is->sampq);
+        decoder_abort(&is->auddec, &is->sampq);
         SDL_AoutCloseAudio(ffp->aout);
-        SDL_WaitThread(is->audio_tid, NULL);
 
         decoder_destroy(&is->auddec);
-        packet_queue_flush(&is->audioq);
         swr_free(&is->swr_ctx);
         av_freep(&is->audio_buf1);
         is->audio_buf1_size = 0;
@@ -2112,16 +2121,8 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
 #endif
         break;
     case AVMEDIA_TYPE_VIDEO:
-        packet_queue_abort(&is->videoq);
-
-        /* note: we also signal this mutex to make sure we deblock the
-           video thread in all cases */
-        frame_queue_signal(&is->pictq);
-
-        SDL_WaitThread(is->video_tid, NULL);
-
+        decoder_abort(&is->viddec, &is->pictq);
         decoder_destroy(&is->viddec);
-        packet_queue_flush(&is->videoq);
         break;
     // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
     default:

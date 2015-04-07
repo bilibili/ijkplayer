@@ -188,15 +188,13 @@ typedef struct Decoder {
     AVRational start_pts_tb;
     int64_t next_pts;
     AVRational next_pts_tb;
+    SDL_Thread *decoder_tid;
+    SDL_Thread _decoder_tid;
 } Decoder;
 
 typedef struct VideoState {
     SDL_Thread *read_tid;
     SDL_Thread _read_tid;
-    SDL_Thread *video_tid;
-    SDL_Thread _video_tid;
-    SDL_Thread *audio_tid;
-    SDL_Thread _audio_tid;
     AVInputFormat *iformat;
     int abort_request;
     int force_refresh;
@@ -275,7 +273,6 @@ typedef struct VideoState {
     double last_vis_time;
 
 #ifdef FFP_MERGE
-    SDL_Thread *subtitle_tid;
     int subtitle_stream;
     AVStream *subtitle_st;
     PacketQueue subtitleq;
