@@ -20,8 +20,9 @@
 
 FF_ALL_ARCHS_IOS6_SDK="armv7 armv7s i386"
 FF_ALL_ARCHS_IOS7_SDK="armv7 armv7s arm64 i386 x86_64"
+FF_ALL_ARCHS_IOS8_SDK="armv7 arm64 i386 x86_64"
 
-FF_ALL_ARCHS=$FF_ALL_ARCHS_IOS7_SDK
+FF_ALL_ARCHS=$FF_ALL_ARCHS_IOS8_SDK
 
 #----------
 UNI_BUILD_ROOT=`pwd`
@@ -97,9 +98,11 @@ elif [ "$FF_TARGET" = "clean" ]; then
     do
         cd ffmpeg-$ARCH && git clean -xdf && cd -
     done
+    rm -rf build
 else
     echo "Usage:"
-    echo "  compile-ffmpeg.sh armv7|armv7s|arm64|i386|x86_64"
+    echo "  compile-ffmpeg.sh armv7|arm64|i386|x86_64"
+    echo "  compile-ffmpeg.sh armv7s (obselete)"
     echo "  compile-ffmpeg.sh lipo"
     echo "  compile-ffmpeg.sh all"
     echo "  compile-ffmpeg.sh clean"
