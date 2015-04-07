@@ -28,7 +28,6 @@
     options.videotoolboxEnabled     = YES;
     options.frameMaxWidth           = 960;
     options.auto_reconnect          = YES;
-    options.timeout                 = 20000;
 
 
     return options;
