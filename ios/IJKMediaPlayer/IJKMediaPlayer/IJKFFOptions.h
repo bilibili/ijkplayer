@@ -36,7 +36,7 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 @property(nonatomic) BOOL   pauseInBackground;
 @property(nonatomic) BOOL   videotoolboxEnabled;
 @property(nonatomic) int    frameMaxWidth;
-@property(nonatomic) BOOL   auto_reconnect;
+@property(nonatomic) BOOL   autoReconnect;
 
 @property(nonatomic, strong) NSString* userAgent;
 
