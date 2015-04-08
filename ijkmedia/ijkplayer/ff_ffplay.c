@@ -2506,7 +2506,10 @@ static int read_thread(void *arg)
 #ifdef FFP_MERGE
               (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
 #else
-              (is->audioq.size + is->videoq.size > ffp->max_buffer_size
+              (((is->audioq.size + is->videoq.size > ffp->max_buffer_size)
+                 && (is->audioq.nb_packets > 5 || is->audio_stream < 0 || is->audioq.abort_request)
+                 && (is->videoq.nb_packets > 5 || is->video_stream < 0 || is->videoq.abort_request)
+                )
 #endif
             || (   (is->audioq   .nb_packets > MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
                 && (is->videoq   .nb_packets > MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request
@@ -3408,7 +3411,10 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         ffp->current_high_water_mark_in_ms = hwm_in_ms;
 
         if (is->buffer_indicator_queue && is->buffer_indicator_queue->nb_packets > 0) {
-            ffp_toggle_buffering(ffp, 0);
+            if (   (is->audioq.nb_packets > 5 || is->audio_stream < 0 || is->audioq.abort_request)
+                && (is->videoq.nb_packets > 5 || is->video_stream < 0 || is->videoq.abort_request)) {
+                ffp_toggle_buffering(ffp, 0);
+            }
         }
     }
 }
