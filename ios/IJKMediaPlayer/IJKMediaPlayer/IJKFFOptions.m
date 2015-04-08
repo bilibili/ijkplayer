@@ -56,11 +56,13 @@
         [self setFormatOption:@"reconnect" withInt64:0 to:mediaPlayer];
     }
 
+#if 0
     if (self.timeout > 0) {
         [self setFormatOption:@"timeout"
                     withInt64:self.timeout
                            to:mediaPlayer];
     }
+#endif
 
     if ([self.userAgent isEqualToString:@""] == NO) {
         [self setFormatOption:@"user-agent" withString:self.userAgent to:mediaPlayer];
