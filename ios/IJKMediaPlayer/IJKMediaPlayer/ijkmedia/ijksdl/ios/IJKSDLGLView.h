@@ -31,6 +31,8 @@
 - (id) initWithFrame:(CGRect)frame;
 - (void) display: (SDL_VoutOverlay *) overlay;
 
+- (void) display_black_screen;
+
 - (UIImage*) snapshot;
 
 @property(nonatomic,strong) NSLock  *appActivityLock;

@@ -266,6 +266,13 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     return ijkmp_is_playing(_mediaPlayer);
 }
 
+- (void)black_screen
+{
+    if (_glView) {
+        [_glView display_black_screen];
+    }
+}
+
 - (void)setPauseInBackground:(BOOL)pause
 {
     _pauseInBackground = pause;
@@ -292,7 +299,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return;
 
     ijkmp_stop(_mediaPlayer);
-    [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
+//    [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
+    [self shutdownClose:self];
 }
 
 - (void)shutdownClose:(IJKFFMoviePlayerController *) mySelf

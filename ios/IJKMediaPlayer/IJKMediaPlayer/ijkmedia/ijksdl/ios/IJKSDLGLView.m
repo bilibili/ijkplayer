@@ -183,6 +183,8 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     BOOL            _didPaddingChanged;
 
     NSMutableArray *_registeredNotifications;
+    
+    bool is_display_black_screen;
 }
 
 enum {
@@ -275,6 +277,8 @@ enum {
             [EAGLContext setCurrentContext:nil];
 
         [self registerApplicationObservers];
+        
+        is_display_black_screen = false;
     }
 
     return self;
@@ -310,6 +314,9 @@ enum {
 	_context = nil;
 
     [self unregisterApplicationObservers];
+    
+    is_display_black_screen = false;
+
 }
 
 - (void)layoutSubviews
@@ -487,9 +494,41 @@ exit:
         return;
     }
 
-    [self displayInternal:overlay];
+    if (is_display_black_screen) {
+        [self display_black_screen_internal];
+        is_display_black_screen = false;
+    }else{
+        [self displayInternal:overlay];
+    }
 
     [self unlockGLActive];
+}
+
+- (void) display_black_screen_internal
+{
+    if (_context == nil) {
+        NSLog(@"IJKSDLGLView: nil EAGLContext\n");
+        return;
+    }
+    
+    [EAGLContext setCurrentContext:_context];
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    glViewport(0, 0, _backingWidth, _backingHeight);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+    [_context presentRenderbuffer:GL_RENDERBUFFER];
+    
+    // Detach context before leaving display, to avoid multiple thread issues.
+    if ([EAGLContext currentContext] == _context)
+        [EAGLContext setCurrentContext:nil];
+}
+
+- (void) display_black_screen
+{
+    is_display_black_screen = true;
 }
 
 - (void)displayInternal: (SDL_VoutOverlay *) overlay

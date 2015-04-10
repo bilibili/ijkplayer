@@ -39,6 +39,8 @@
 - (BOOL)isPlaying;
 - (void)shutdown;
 
+- (void)black_screen;
+
 @property(nonatomic, readonly)  UIView *view;
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;
 @property(nonatomic, readonly)  NSTimeInterval duration;

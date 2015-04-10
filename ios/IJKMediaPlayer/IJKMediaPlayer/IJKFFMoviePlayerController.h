@@ -75,6 +75,8 @@
 
 - (void)setPauseInBackground:(BOOL)pause;
 
+- (void)black_screen;
+
 + (void)setLogReport:(BOOL)preferLogReport;
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
