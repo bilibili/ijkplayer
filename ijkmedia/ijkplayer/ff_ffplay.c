@@ -1698,7 +1698,7 @@ static int audio_decode_frame(FFPlayer *ffp)
     int wanted_nb_samples;
     Frame *af;
 
-    if (is->paused)
+    if (is->paused || is->step)
         return -1;
 
     do {
