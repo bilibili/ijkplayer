@@ -318,7 +318,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 {
     if (!_mediaPlayer)
         return;
-
+    [self unregisterApplicationObservers];
     [self setScreenOn:NO];
 
     [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
