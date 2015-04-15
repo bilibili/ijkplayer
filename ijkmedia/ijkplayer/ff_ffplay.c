@@ -2458,6 +2458,9 @@ static int read_thread(void *arg)
                 }
 #endif
                 if (is->video_stream >= 0) {
+                    if (ffp->node_vdec) {
+                        ffpipenode_flush(ffp->node_vdec);
+                    }
                     packet_queue_flush(&is->videoq);
                     packet_queue_put(&is->videoq, &flush_pkt);
                 }
