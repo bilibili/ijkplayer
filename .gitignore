@@ -12,6 +12,7 @@ android/ijkmediaplayer-x86/.settings/*
 android/ijkmediaplayer-armv5/.settings/*
 android/ijkmediaplayer-arm64-v8a/.settings/*
 android/ijkmediawidget/.settings/*
+android/ijkmediademo/.settings/*
 android/contrib/appcompat/.settings/
 android/ijkmediademo/lint.xml
 ijkmedia/ijkyuv/
