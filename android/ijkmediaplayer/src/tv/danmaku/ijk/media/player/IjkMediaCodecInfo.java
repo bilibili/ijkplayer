@@ -58,7 +58,6 @@ public class IjkMediaCodecInfo {
         // Xiaomi MI 1S
         sKnownCodecList.put("OMX.qcom.video.decoder.avc", RANK_TESTED);
         sKnownCodecList.put("OMX.ittiam.video.decoder.avc", RANK_NO_SENSE);
-
         // ----- Samsung -----
         // Exynos 3110
         // Nexus S
@@ -76,17 +75,26 @@ public class IjkMediaCodecInfo {
         // Galaxy Nexus
         sKnownCodecList.put("OMX.TI.DUCATI1.VIDEO.DECODER", RANK_TESTED);
 
+        // ------ RockChip ------
+        // Youku TVBox
+        sKnownCodecList.put("OMX.rk.video_decoder.avc", RANK_TESTED);
+
+        // ------ AMLogic -----
+        // MiBox1, 1s, 2
+        sKnownCodecList.put("OMX.amlogic.avc.decoder.awesome", RANK_TESTED);
+
+        // ------ Marvell ------
+        // Lenovo A788t
+        sKnownCodecList.put("OMX.MARVELL.VIDEO.HW.CODA7542DECODER", RANK_TESTED);
+        sKnownCodecList.put("OMX.MARVELL.VIDEO.H264DECODER", RANK_SOFTWARE);
+
         // ----- TODO: need test -----
         sKnownCodecList.remove("OMX.IMG.MSVDX.Decoder.AVC");
         sKnownCodecList.remove("OMX.BRCM.vc4.decoder.avc");
         sKnownCodecList.remove("OMX.brcm.video.h264.hw.decoder");
         sKnownCodecList.remove("OMX.brcm.video.h264.decoder");
         sKnownCodecList.remove("OMX.ST.VFM.H264Dec");
-        sKnownCodecList.remove("OMX.rk.video_decoder.avc");
         sKnownCodecList.remove("OMX.allwinner.video.decoder.avc");
-        sKnownCodecList.remove("OMX.MARVELL.VIDEO.HW.CODA7542DECODER");
-        sKnownCodecList.remove("OMX.MARVELL.VIDEO.H264DECODER");
-        sKnownCodecList.remove("OMX.amlogic.avc.decoder.awesome");
         sKnownCodecList.remove("OMX.MS.AVC.Decoder");
         sKnownCodecList.remove("OMX.hantro.81x0.video.decoder");
         sKnownCodecList.remove("OMX.hisi.video.decoder");
