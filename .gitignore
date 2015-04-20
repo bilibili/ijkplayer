@@ -38,3 +38,5 @@ local.properties
 .idea
 .gradle
 build/
+
+SDK/

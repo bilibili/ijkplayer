@@ -76,6 +76,8 @@
 @synthesize scalingMode = _scalingMode;
 @synthesize shouldAutoplay = _shouldAutoplay;
 
+@synthesize movieSourceType = _movieSourceType;
+
 @synthesize mediaMeta = _mediaMeta;
 @synthesize videoMeta = _videoMeta;
 @synthesize audioMeta = _audioMeta;
@@ -411,6 +413,27 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     }
 
     _scalingMode = newScalingMode;
+}
+
+- (void)setMovieSourceType: (IJKMPMovieSourceType) aMovieSourceType
+{
+    if (!_mediaPlayer) return;
+    
+    IJKMPMovieSourceType newMPMovieSourceType = aMovieSourceType;
+    //0:LIVE 1:VOD
+    switch (aMovieSourceType) {
+        case IJKMPMovieSourceTypeLiveStreaming:
+            ijkmp_set_data_source_type(_mediaPlayer,0);
+            break;
+        case IJKMPMovieSourceTypeOnDemandStreaming:
+            ijkmp_set_data_source_type(_mediaPlayer,1);
+            break;
+
+        default:
+            newMPMovieSourceType = _movieSourceType;
+    }
+    
+    _movieSourceType = newMPMovieSourceType;
 }
 
 // deprecated, for MPMoviePlayerController compatiable

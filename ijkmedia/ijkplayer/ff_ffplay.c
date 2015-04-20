@@ -2160,8 +2160,6 @@ static int is_realtime(AVFormatContext *s)
     if(   !strcmp(s->iformat->name, "rtp")
        || !strcmp(s->iformat->name, "rtsp")
        || !strcmp(s->iformat->name, "sdp")
-       || !strcmp(s->iformat->name, "rtmp")
-       || !strcmp(s->iformat->name, "flv")
     )
         return 1;
 
@@ -2306,7 +2304,11 @@ static int read_thread(void *arg)
         }
     }
 
-    is->realtime = is_realtime(ic);
+    is->realtime = is_realtime(ic) || ffp->data_source_type==0;
+    if(is->realtime)
+    {
+        printf("realtime data source\n");
+    }
 
     if (true || ffp->show_status)
         av_dump_format(ic, 0, is->filename, 0);

@@ -519,6 +519,9 @@ typedef struct FFPlayer {
     // add by william shi
     int stalled_count;
     
+    //0:LIVE 1:VOD
+    int data_source_type;
+    
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));

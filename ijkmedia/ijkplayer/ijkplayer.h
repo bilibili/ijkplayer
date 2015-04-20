@@ -181,6 +181,9 @@ void            ijkmp_inc_ref(IjkMediaPlayer *mp);
 void            ijkmp_dec_ref(IjkMediaPlayer *mp);
 void            ijkmp_dec_ref_p(IjkMediaPlayer **pmp);
 
+//0:LIVE 1:VOD
+void            ijkmp_set_data_source_type(IjkMediaPlayer *mp, int type);
+
 int             ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
 int             ijkmp_prepare_async(IjkMediaPlayer *mp);
 int             ijkmp_start(IjkMediaPlayer *mp);

@@ -24,6 +24,12 @@
 #import <UIKit/UIKit.h>
 #import <MediaPlayer/MediaPlayer.h>
 
+typedef NS_ENUM(NSInteger, IJKMPMovieSourceType) {
+    IJKMPMovieSourceTypeUnknown,
+    IJKMPMovieSourceTypeFile,     // Local or progressively downloaded network content
+    IJKMPMovieSourceTypeLiveStreaming, // Live streaming content
+    IJKMPMovieSourceTypeOnDemandStreaming // on-demand streaming content
+};
 
 @protocol IJKMediaPlayback;
 
@@ -58,6 +64,8 @@
 @property(nonatomic) MPMovieControlStyle controlStyle;
 @property(nonatomic) MPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;
+
+@property(nonatomic) IJKMPMovieSourceType movieSourceType;
 
 #pragma mark Notifications
 

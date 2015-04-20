@@ -103,6 +103,9 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
     mp->ffplayer = ffp_create();
     if (!mp->ffplayer)
         goto fail;
+    
+    // default is VOD mode
+    mp->ffplayer->data_source_type = 1;
 
     mp->msg_loop = msg_loop;
 
@@ -307,6 +310,15 @@ static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
 
     ijkmp_change_state_l(mp, MP_STATE_INITIALIZED);
     return 0;
+}
+
+void ijkmp_set_data_source_type(IjkMediaPlayer *mp, int type)
+{
+    assert(mp);
+
+    pthread_mutex_lock(&mp->mutex);
+    mp->ffplayer->data_source_type = type;
+    pthread_mutex_unlock(&mp->mutex);
 }
 
 int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
