@@ -58,6 +58,7 @@ public class IjkMediaCodecInfo {
         // Xiaomi MI 1S
         sKnownCodecList.put("OMX.qcom.video.decoder.avc", RANK_TESTED);
         sKnownCodecList.put("OMX.ittiam.video.decoder.avc", RANK_NO_SENSE);
+
         // ----- Samsung -----
         // Exynos 3110
         // Nexus S
@@ -69,6 +70,14 @@ public class IjkMediaCodecInfo {
         // Exynos 5 ?
         sKnownCodecList.put("OMX.Exynos.avc.dec", RANK_TESTED);
         sKnownCodecList.put("OMX.Exynos.AVC.Decoder", RANK_TESTED - 1);
+
+        // ------ Huawei hisilicon ------
+        // Kirin 910, Mali 450 MP
+        // Huawei HONOR 3C (H30-L01)
+        sKnownCodecList.put("OMX.k3.video.decoder.avc", RANK_TESTED);
+        // Kirin 920, Mali T624
+        // Huawei HONOR 6
+        sKnownCodecList.put("OMX.IMG.MSVDX.Decoder.AVC", RANK_TESTED);
 
         // ----- TI -----
         // TI OMAP4460
@@ -89,7 +98,6 @@ public class IjkMediaCodecInfo {
         sKnownCodecList.put("OMX.MARVELL.VIDEO.H264DECODER", RANK_SOFTWARE);
 
         // ----- TODO: need test -----
-        sKnownCodecList.remove("OMX.IMG.MSVDX.Decoder.AVC");
         sKnownCodecList.remove("OMX.BRCM.vc4.decoder.avc");
         sKnownCodecList.remove("OMX.brcm.video.h264.hw.decoder");
         sKnownCodecList.remove("OMX.brcm.video.h264.decoder");
