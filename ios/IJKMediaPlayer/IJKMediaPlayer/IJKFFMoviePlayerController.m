@@ -57,7 +57,7 @@
     BOOL _keepScreenOnWhilePlaying;
     BOOL _pauseInBackground;
 
-    NSMutableArray *_registeredNotifications;
+//    NSMutableArray *_registeredNotifications;
 }
 
 @synthesize view = _view;
@@ -200,8 +200,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         _keepScreenOnWhilePlaying = YES;
         [self setScreenOn:YES];
 
-        _registeredNotifications = [[NSMutableArray alloc] init];
-        [self registerApplicationObservers];
+ //        _registeredNotifications = [[NSMutableArray alloc] init];
+ //        [self registerApplicationObservers];
     }
     return self;
 }
@@ -215,7 +215,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 - (void)dealloc
 {
     [_ffMrl removeTempFiles];
-    [self unregisterApplicationObservers];
+//    [self unregisterApplicationObservers];
 }
 
 - (void)prepareToPlay
@@ -737,11 +737,11 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 
 - (void)ijkAudioEndInterruption
 {
-    [self pause];
+    [self play];
 }
 
 #pragma mark app state changed
-
+/*
 - (void)registerApplicationObservers
 {
 
@@ -824,6 +824,6 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
         }
     });
 }
-
+*/
 @end
 

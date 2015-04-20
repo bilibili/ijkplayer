@@ -179,7 +179,7 @@
 
 - (void)ijkAudioEndInterruption
 {
-    [self pause];
+    [self play];
 }
 
 @end

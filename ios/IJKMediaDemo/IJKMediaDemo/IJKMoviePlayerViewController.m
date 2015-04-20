@@ -12,6 +12,16 @@
 #import "IJKMediaPlayer/IJKMediaPlayer.h"
 
 @implementation IJKVideoViewController
+{
+    NSMutableArray *_registeredNotifications;
+}
+
+@synthesize urlString = _urlString;
+
+- (void)setUrlString:(NSString *)URLString
+{
+    _urlString = URLString;
+}
 
 - (id)initView
 {
@@ -39,7 +49,8 @@
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
     [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
 
-    NSURL *theMovieURL = [NSURL URLWithString:@"http://wshdl.acgvideo.com/live/live_5099_3038_d0ffe541.flv"];
+//    NSURL *theMovieURL = [NSURL URLWithString:@"rtmp://pull1.arenazb.hupu.com/test/789"];
+    NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
 
     [IJKFFMoviePlayerController setLogReport:YES];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
@@ -55,13 +66,17 @@
     [self installMovieNotificationObservers];
 
     [self.player prepareToPlay];
-    [self.player play];
+//    [self.player play];
+    
+    [self registerApplicationObservers];
 }
 
 - (void)dealloc
 {
     [self.player shutdown];
     [self removeMovieNotificationObservers];
+    
+    [self unregisterApplicationObservers];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation{
@@ -97,7 +112,9 @@
 
 - (IBAction)onClickBack:(id)sender
 {
-    exit(0);
+//    exit(0);
+    [self.player pause];
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 - (IBAction)onClickPlay:(id)sender
@@ -155,11 +172,16 @@
             NSLog(@"playbackPlayBackDidFinish: ???: %d\n", reason);
             break;
     }
+    
+    [self.player stop];
+    [self.player shutdown];
+    self.player = nil;
 }
 
 - (void)mediaIsPreparedToPlayDidChange:(NSNotification*)notification
 {
     NSLog(@"mediaIsPreparedToPlayDidChange\n");
+    [self.player play];
 }
 
 - (void)moviePlayBackStateDidChange:(NSNotification*)notification
@@ -237,5 +259,114 @@
     [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification object:_player];
     [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMoviePlayerPlaybackStateDidChangeNotification object:_player];
 }
+
+#pragma mark app state changed
+
+- (void)registerApplicationObservers
+{
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillEnterForeground)
+                                                 name:UIApplicationWillEnterForegroundNotification
+                                               object:nil];
+    [_registeredNotifications addObject:UIApplicationWillEnterForegroundNotification];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationDidBecomeActive)
+                                                 name:UIApplicationDidBecomeActiveNotification
+                                               object:nil];
+    [_registeredNotifications addObject:UIApplicationDidBecomeActiveNotification];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillResignActive)
+                                                 name:UIApplicationWillResignActiveNotification
+                                               object:nil];
+    [_registeredNotifications addObject:UIApplicationWillResignActiveNotification];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationDidEnterBackground)
+                                                 name:UIApplicationDidEnterBackgroundNotification
+                                               object:nil];
+    [_registeredNotifications addObject:UIApplicationDidEnterBackgroundNotification];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillTerminate)
+                                                 name:UIApplicationWillTerminateNotification
+                                               object:nil];
+    [_registeredNotifications addObject:UIApplicationWillTerminateNotification];
+}
+
+- (void)unregisterApplicationObservers
+{
+    for (NSString *name in _registeredNotifications) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                        name:name
+                                                      object:nil];
+    }
+}
+
+- (void)applicationWillEnterForeground
+{
+    NSLog(@"applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
+        
+        [IJKFFMoviePlayerController setLogReport:YES];
+        self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
+        self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+        self.player.view.frame = self.view.bounds;
+        
+        self.view.autoresizesSubviews = YES;
+        [self.view addSubview:self.player.view];
+        [self.view addSubview:self.mediaControl];
+        
+        self.mediaControl.delegatePlayer = self.player;
+        
+        [self installMovieNotificationObservers];
+        
+        [self.player prepareToPlay];
+        
+    });
+}
+
+- (void)applicationDidBecomeActive
+{
+    NSLog(@"applicationDidBecomeActive: %d", (int)[UIApplication sharedApplication].applicationState);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.player play];
+    });
+    
+}
+
+- (void)applicationWillResignActive
+{
+    NSLog(@"applicationWillResignActive: %d", (int)[UIApplication sharedApplication].applicationState);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.player pause];
+    });
+}
+
+- (void)applicationDidEnterBackground
+{
+    NSLog(@"applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.player stop];
+        [self.player shutdown];
+        self.player = nil;
+    });
+}
+
+- (void)applicationWillTerminate
+{
+    NSLog(@"applicationWillTerminate: %d", (int)[UIApplication sharedApplication].applicationState);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.player stop];
+        [self.player shutdown];
+        self.player = nil;
+        
+    });
+}
+
 
 @end

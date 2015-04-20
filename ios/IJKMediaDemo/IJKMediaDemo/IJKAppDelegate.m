@@ -7,7 +7,8 @@
 //
 
 #import "IJKAppDelegate.h"
-#import "IJKMoviePlayerViewController.h"
+//#import "IJKMoviePlayerViewController.h"
+#import "MainViewController.h"
 
 @implementation IJKAppDelegate
 
@@ -15,7 +16,9 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
-    self.viewController = [[IJKVideoViewController alloc] initView];
+//    self.viewController = [[IJKVideoViewController alloc] initView];
+//    self.window.rootViewController = self.viewController;
+    self.viewController = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
     self.window.rootViewController = self.viewController;
 
     [self.window makeKeyAndVisible];

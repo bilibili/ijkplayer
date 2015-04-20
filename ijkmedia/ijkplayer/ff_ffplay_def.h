@@ -30,6 +30,10 @@
 #include "ff_ffmsg_queue.h"
 #include "ff_ffpipenode.h"
 
+// add by william
+#define REALTIME_DURATION_LWM 1000
+#define REALTIME_DURATION_HWM 4000
+
 #define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
 
 /*
@@ -46,6 +50,10 @@
 
 #define MAX_QUEUE_SIZE (10 * 1024 * 1024)
 #define MIN_FRAMES 50000
+
+// add by william
+#define REALTIME_MAX_QUEUE_SIZE (1 * 1024 * 1024)
+#define REALTIME_MIN_FRAMES 30
 
 /* Minimum SDL audio buffer size, in samples. */
 #define SDL_AUDIO_MIN_BUFFER_SIZE 512
@@ -507,6 +515,10 @@ typedef struct FFPlayer {
 
     ijk_format_control_message format_control_message;
     void *format_control_opaque;
+    
+    // add by william shi
+    int stalled_count;
+    
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));

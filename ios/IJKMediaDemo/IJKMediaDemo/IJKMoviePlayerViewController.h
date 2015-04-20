@@ -14,6 +14,8 @@
 
 @property(atomic, retain) id<IJKMediaPlayback> player;
 
+- (void)setUrlString:(NSString *)URLString;
+
 - (id)initView;
 
 - (IBAction)onClickMediaControl:(id)sender;
@@ -23,5 +25,6 @@
 - (IBAction)onClickPause:(id)sender;
 
 @property(nonatomic,strong) IBOutlet IJKMediaControl *mediaControl;
+@property(nonatomic,strong) NSString *urlString;
 
 @end

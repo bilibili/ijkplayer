@@ -133,7 +133,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     BOOL _playbackBufferEmpty;
     BOOL _playbackBufferFull;
     
-    NSMutableArray *_registeredNotifications;
+//    NSMutableArray *_registeredNotifications;
 }
 
 @synthesize view                        = _view;
@@ -181,8 +181,8 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         // init extra
         [self setScreenOn:YES];
         
-        _registeredNotifications = [[NSMutableArray alloc] init];
-        [self registerApplicationObservers];
+//        _registeredNotifications = [[NSMutableArray alloc] init];
+//        [self registerApplicationObservers];
     }
     return self;
 }
@@ -280,7 +280,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     
     [_playerKVO safelyRemoveAllObservers];
     
-    [self unregisterApplicationObservers];
+//    [self unregisterApplicationObservers];
     
     if (_avView != nil) {
         [_avView setPlayer:nil];
@@ -794,11 +794,11 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 
 - (void)ijkAudioEndInterruption
 {
-    [self pause];
+    [self play];
 }
 
 #pragma mark app state changed
-
+/*
 - (void)registerApplicationObservers
 {
     
@@ -881,5 +881,5 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         }
     });
 }
-
+*/
 @end

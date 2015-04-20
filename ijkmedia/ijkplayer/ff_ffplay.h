@@ -95,4 +95,8 @@ void      ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char
 // must be freed with free();
 IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp);
 
+int64_t GetNowMs();
+int64_t GetNowUs();
+int64_t systemTime();
+
 #endif
