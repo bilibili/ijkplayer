@@ -2428,8 +2428,6 @@ static int read_thread(void *arg)
     // add by william
     ffp->stalled_count = 0;
     
-    uint64_t play_duration = 0;
-    
     int live_duration_lwm = REALTIME_DURATION_LWM;
     
     // for drop
@@ -2569,10 +2567,8 @@ static int read_thread(void *arg)
             }
             av_now_time = GetNowMs();
             
-//            printf("delay:%lld ms\n",av_now_time-av_begin_time-play_duration);
-            
             //drop all
-            if(av_now_time-av_begin_time>play_duration+REALTIME_DURATION_HWM && av_now_time - av_flush_time>60*1000)
+            if((is->videoq.duration>REALTIME_DURATION_HWM && is->audioq.duration>REALTIME_DURATION_HWM) && av_now_time - av_flush_time>60*1000)
             {
                 if (is->audio_stream >= 0) {
                     packet_queue_flush(&is->audioq);
@@ -2599,7 +2595,7 @@ static int read_thread(void *arg)
             
             drop_audiopacket_timing_now = GetNowMs();
             
-            if(av_now_time-av_begin_time>play_duration+REALTIME_DURATION_HWM/2 && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
+            if((is->videoq.duration>REALTIME_DURATION_HWM/2 && is->audioq.duration>REALTIME_DURATION_HWM/2) && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
             {
                 drop_audiopacket_timing_begin = 0;
                 enable_drop_audiopacket = true;
@@ -2608,19 +2604,12 @@ static int read_thread(void *arg)
         
 //        printf("is->videoq.duration:%lld\n",is->videoq.duration);
 
-        /* if the realtime queue are full, no need to read more */
         if (ffp->infinite_buffer==1 && !is->seek_req && ((is->audioq.duration > live_duration_lwm || is->audio_stream < 0 || is->audioq.abort_request) && (is->videoq.duration > live_duration_lwm || is->video_stream < 0 || is->videoq.abort_request || (is->video_st->disposition & AV_DISPOSITION_ATTACHED_PIC))))
         {
             if (!eof) {
                 // ALOGE("ffp_toggle_buffering: full\n");
                 ffp_toggle_buffering(ffp, 0);
             }
-            
-            /* wait 10 ms */
-            SDL_LockMutex(wait_mutex);
-            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-            SDL_UnlockMutex(wait_mutex);
-            continue;
         }
 
         /* if the queue are full, no need to read more */
@@ -2687,7 +2676,7 @@ static int read_thread(void *arg)
         {
             av_free_packet(pkt);
             
-            printf("enable_drop_audiopacket\n");
+            printf("drop one audiopacket.\n");
             enable_drop_audiopacket = false;
             
             SDL_LockMutex(wait_mutex);
@@ -2738,16 +2727,6 @@ static int read_thread(void *arg)
         } else {
             eof = 0;
         }
-        
-        int64_t tmp_play_duration = pkt->pts-ic->streams[pkt->stream_index]->start_time;
-        if(tmp_play_duration<0) tmp_play_duration = -tmp_play_duration;
-
-        if(play_duration<tmp_play_duration)
-        {
-            play_duration = tmp_play_duration;
-        }
-
-//        printf("play_duration:%lld\n",play_duration);
 
         /* check if packet is in play range specified by user, then queue, otherwise discard */
         stream_start_time = ic->streams[pkt->stream_index]->start_time;
