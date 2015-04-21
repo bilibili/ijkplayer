@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 #
-# Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
+# Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 #
 
 IJK_OPENSSL_UPSTREAM=https://github.com/openssl/openssl
-IJK_OPENSSL_FORK=https://github.com/bbcallen/openssl.git
+IJK_OPENSSL_FORK=https://github.com/Bilibili/openssl.git
 IJK_OPENSSL_COMMIT=OpenSSL_1_0_1i
 IJK_OPENSSL_LOCAL_REPO=extra/openssl
 
