@@ -18,6 +18,7 @@ package tv.danmaku.ijk.media.player;
 
 import java.io.IOException;
 
+import android.R.integer;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
@@ -48,7 +49,7 @@ public interface IMediaPlayer {
     public static final int MEDIA_ERROR_TIMED_OUT = -110;
 
     public abstract void setDisplay(SurfaceHolder sh);
-
+    
     public abstract void setDataSource(String path) throws IOException,
             IllegalArgumentException, SecurityException, IllegalStateException;
 

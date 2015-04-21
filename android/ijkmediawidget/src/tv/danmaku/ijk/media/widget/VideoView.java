@@ -37,6 +37,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.util.AttributeSet;
@@ -143,7 +144,7 @@ public class VideoView extends SurfaceView implements
      * @param aspectRatio
      *            video aspect ratio, will audo detect if 0.
      */
-    public void setVideoLayout(int layout) {
+    public void setVideoLayout(int layout) {/*
         LayoutParams lp = getLayoutParams();
         Pair<Integer, Integer> res  = ScreenResolution.getResolution(mContext);
         int windowWidth = res.first.intValue(), windowHeight = res.second.intValue();
@@ -182,7 +183,7 @@ public class VideoView extends SurfaceView implements
                     mVideoSarDen, mSurfaceWidth, mSurfaceHeight, lp.width,
                     lp.height, windowWidth, windowHeight, windowRatio);
         }
-        mVideoLayout = layout;
+        mVideoLayout = layout;*/
     }
 
     private void initVideoView(Context ctx) {
@@ -247,6 +248,11 @@ public class VideoView extends SurfaceView implements
             IjkMediaPlayer ijkMediaPlayer = null;
             if (mUri != null) {
                 ijkMediaPlayer = new IjkMediaPlayer();
+                if(isMediaCodecEnabled)
+                {
+                	ijkMediaPlayer.setMediaCodecEnabled(true);
+                }
+                ijkMediaPlayer.setDataSourceType(mDataSourceType);
                 ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
                 ijkMediaPlayer.setOverlayFormat(AvFourCC.SDL_FCC_RV32);
 
@@ -326,8 +332,8 @@ public class VideoView extends SurfaceView implements
             mVideoHeight = mp.getVideoHeight();
             mVideoSarNum = sarNum;
             mVideoSarDen = sarDen;
-            if (mVideoWidth != 0 && mVideoHeight != 0)
-                setVideoLayout(mVideoLayout);
+//            if (mVideoWidth != 0 && mVideoHeight != 0)
+//                setVideoLayout(mVideoLayout);
         }
     };
 
@@ -349,7 +355,7 @@ public class VideoView extends SurfaceView implements
             if (seekToPosition != 0)
                 seekTo(seekToPosition);
             if (mVideoWidth != 0 && mVideoHeight != 0) {
-                setVideoLayout(mVideoLayout);
+//                setVideoLayout(mVideoLayout);
                 if (mSurfaceWidth == mVideoWidth
                         && mSurfaceHeight == mVideoHeight) {
                     if (mTargetState == STATE_PLAYING) {
@@ -617,6 +623,13 @@ public class VideoView extends SurfaceView implements
         }
     }
 
+    public void black_screen() {
+    	Canvas canvas = this.getHolder().lockCanvas();
+    	canvas.drawARGB(255, 0, 0, 0);
+    	this.getHolder().unlockCanvasAndPost(canvas);
+    	invalidate();
+    }
+    
     @Override
     public int getDuration() {
         if (isInPlaybackState()) {
@@ -683,5 +696,20 @@ public class VideoView extends SurfaceView implements
 
     public boolean canSeekForward() {
         return mCanSeekForward;
+    }
+    
+    //add by william
+    private int mDataSourceType = LIVE_STREAMING_TYPE;
+    public static final int LIVE_STREAMING_TYPE = 0;
+    public static final int VOD_STREAMING_TYPE = 1;
+    public void setDataSourceType(int type)
+    {
+    	mDataSourceType = type;
+    }
+    
+    private boolean isMediaCodecEnabled = false;
+    public void setMediaCodecEnabled(boolean enable)
+    {
+    	isMediaCodecEnabled = enable;
     }
 }

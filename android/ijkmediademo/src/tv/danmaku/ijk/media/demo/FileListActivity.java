@@ -1,5 +1,5 @@
 package tv.danmaku.ijk.media.demo;
-
+/*
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -130,3 +130,4 @@ public class FileListActivity extends ActionBarActivity implements LoaderManager
         }
     }
 }
+*/

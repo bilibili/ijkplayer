@@ -7,5 +7,8 @@
 
     <string name="buffering">buffering</string>
     <string name="sort">Sort</string>
+    
+    <string name="RtmpAddress1Str">input the rtmp address</string>
+	<string name="StartPlay1Str">Play</string>
 
 </resources>

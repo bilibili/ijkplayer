@@ -5,8 +5,8 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/ijkmediawidget"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/ijkmediaplayer"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/android-support-v7-appcompat"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/android-support-v7-appcompat"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

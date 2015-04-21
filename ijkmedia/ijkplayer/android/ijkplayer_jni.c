@@ -423,6 +423,20 @@ IjkMediaPlayer_setOpenSLESEnabled(JNIEnv *env, jobject thiz, jboolean enabled)
     ijkmp_dec_ref_p(&mp);
 }
 
+//add by william
+static void
+IjkMediaPlayer_setDataSourceType(JNIEnv *env, jobject thiz,jint type)
+{
+    MPTRACE("IjkMediaPlayer_setDataSourceType");
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setDataSourceType: null mp", LABEL_RETURN);
+
+    ijkmp_set_data_source_type(mp, type);
+    
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
 static jstring
 IjkMediaPlayer_getColorFormatName(JNIEnv *env, jclass clazz, jint mediaCodecColorFormat)
 {
@@ -885,6 +899,7 @@ static JNINativeMethod g_methods[] = {
     { "_setFrameDrop", "(I)V", (void *) IjkMediaPlayer_setFrameDrop },
     { "_setMediaCodecEnabled", "(Z)V", (void *) IjkMediaPlayer_setMediaCodecEnabled },
     { "_setOpenSLESEnabled", "(Z)V", (void *) IjkMediaPlayer_setOpenSLESEnabled },
+    { "_setDataSourceType", "(I)V", (void *) IjkMediaPlayer_setDataSourceType },
 
     { "_getColorFormatName", "(I)Ljava/lang/String;", (void *) IjkMediaPlayer_getColorFormatName },
     { "_getVideoCodecInfo", "()Ljava/lang/String;", (void *) IjkMediaPlayer_getVideoCodecInfo },

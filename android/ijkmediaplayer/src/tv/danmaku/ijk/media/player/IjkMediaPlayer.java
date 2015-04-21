@@ -517,6 +517,9 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     private native void _setFrameDrop(int frameDrop);
     private native void _setMediaCodecEnabled(boolean enabled);
     private native void _setOpenSLESEnabled(boolean enabled);
+    
+    //add by william
+    private native void _setDataSourceType(int type);
 
     public Bundle getMediaMeta() {
         return _getMediaMeta();
@@ -848,4 +851,8 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             return bestCodec.mCodecInfo.getName();
         }
     }
+
+	public void setDataSourceType(int type) {
+		_setDataSourceType(type);
+	}
 }
