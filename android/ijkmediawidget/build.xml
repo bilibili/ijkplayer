@@ -1,24 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name ="ijkmediaplayer" default="release">
+<project name ="ijkmediawidget" default="release">
 	
 	<property file="local.properties" />
 	<property file="build.properties" />
 
-	<property name="JarName" value="ijkmediaplayer" />
-
-	<property name="libs.dir" location="libs" />
+	<property name="JarName" value="ijkmediawidget" />
 
 	<property name="src.dir" location="src" />
 	<property name="build.dir" location="build" />
 
 	<property name="sdk.dir" location="sdk" />
 
-	<target name="compile">
+	<target name="gen-R">
+		<echo>Generating R.java from the resources...</echo>
+		<mkdir dir="gen" />
+		<exec executable="${ANDROID_AAPT}" failonerror="true">
+			<arg value="package" />
+			<arg value="-f" />
+			<arg value="-m" />
+			<arg value="--non-constant-id" />
+			<arg value="--auto-add-overlay" />
+			<arg value="-J" />
+			<arg value="gen" />
+			<arg value="-M" />
+			<arg value="AndroidManifest.xml" />
+			<arg value="-S" />
+			<arg value="res" />
+			<arg value="-I" />
+			<arg value="${ANDROID_SDK}/platforms/android-21/android.jar" />
+		</exec>
+	</target>
+
+	<target name="compile" depends="gen-R">
 		<mkdir dir="${build.dir}/class" />
 
 		<path id="libraries">
 			<fileset file="${ANDROID_SDK}/platforms/android-21/android.jar" />
+			<fileset file="../ijkmediaplayer/sdk/jars/ijkmediaplayer.jar" />
 		</path>
 
 		<javac 
@@ -32,6 +51,7 @@
 			debug="false">
 			<compilerarg value="-Xlint:unchecked" />
 			<compilerarg value="-Xlint:deprecation" />
+			<src path="gen" />
 		</javac>
 	</target>
 	
@@ -41,16 +61,12 @@
 	</target>
 
 	<target name="sdk" depends="jar">
-		<copy todir="${sdk.dir}/libs" overwrite="true" verbose="true">
-			<fileset dir="${libs.dir}">
-				<filename name="**/*.so" />
-			</fileset>
-		</copy>
 	</target>
 
 	<target name="clean_java" >
 		<delete dir="${build.dir}" />
 		<delete dir="${sdk.dir}" />
+		<delete dir="gen" />
 	</target>
 
 	<target name="release" depends="clean_java, sdk" >
