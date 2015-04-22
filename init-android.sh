@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 #
-# Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
+# Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 #
 
 IJK_FFMPEG_UPSTREAM=git://git.videolan.org/ffmpeg.git
-IJK_FFMPEG_FORK=https://github.com/bbcallen/FFmpeg.git
+IJK_FFMPEG_FORK=https://github.com/Bilibili/FFmpeg.gitD
 IJK_FFMPEG_COMMIT=ijk-r0.2.2-dev
 IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
