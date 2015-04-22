@@ -49,6 +49,8 @@ public class VideoPlayerActivity extends Activity {
         mMediaController = new MediaController(this);
 
         mVideoView = (VideoView) findViewById(R.id.video_view);
+        mVideoView.setMediaCodecEnabled(true);
+        mVideoView.setDataSourceType(VideoView.VOD_STREAMING_TYPE);
         mVideoView.setMediaController(mMediaController);
         mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
         mVideoView.setVideoPath(mVideoPath);

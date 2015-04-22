@@ -32,9 +32,11 @@ libs/
 obj/
 
 # Local configuration file (sdk path, etc)
-local.properties
+#local.properties
 
 # Android Studio
 .idea
 .gradle
 build/
+
+sdk/
