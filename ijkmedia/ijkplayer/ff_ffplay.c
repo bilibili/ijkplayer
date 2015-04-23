@@ -2435,6 +2435,9 @@ static int read_thread(void *arg)
     uint64_t drop_audiopacket_timing_now = 0;
     bool enable_drop_audiopacket = false;
     //
+    
+    //for flush
+    bool isFlushing = false;
 
     for (;;) {
         if (is->abort_request)
@@ -2484,6 +2487,7 @@ static int read_thread(void *arg)
                 if (is->video_stream >= 0) {
                     packet_queue_flush(&is->videoq);
                     packet_queue_put(&is->videoq, &flush_pkt);
+                    isFlushing = true;
                 }
                 if (is->seek_flags & AVSEEK_FLAG_BYTE) {
                    set_clock(&is->extclk, NAN, 0);
@@ -2578,6 +2582,7 @@ static int read_thread(void *arg)
                 if (is->video_stream >= 0) {
                     packet_queue_flush(&is->videoq);
                     packet_queue_put(&is->videoq, &flush_pkt);
+                    isFlushing = true;
                 }
                 
                 ffp_toggle_buffering(ffp, 1);
@@ -2672,6 +2677,20 @@ static int read_thread(void *arg)
             }
         }
         ret = av_read_frame(ic, pkt);
+        if(isFlushing)
+        {
+            if(pkt->flags & AV_PKT_FLAG_KEY && pkt->stream_index==is->video_stream)
+            {
+                isFlushing = false;
+            }else{
+                av_free_packet(pkt);
+                
+                SDL_LockMutex(wait_mutex);
+                SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
+                SDL_UnlockMutex(wait_mutex);
+                continue;
+            }
+        }
         if(enable_drop_audiopacket && pkt->stream_index == is->audio_stream)
         {
             av_free_packet(pkt);

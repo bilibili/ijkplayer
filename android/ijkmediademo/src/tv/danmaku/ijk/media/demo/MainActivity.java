@@ -10,7 +10,7 @@ import android.widget.EditText;
 
 public class MainActivity extends Activity {
 	private String rtmpAddress;
-	@Override
+
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
