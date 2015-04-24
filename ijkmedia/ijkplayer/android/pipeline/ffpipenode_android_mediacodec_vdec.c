@@ -426,6 +426,21 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 if (SDL_AMediaCodec_isStarted(opaque->acodec)) {
                     if (opaque->input_packet_count > 0) {
                         // flush empty queue cause error on OMX.SEC.AVC.Decoder (Nexus S)
+/*                        ALOGE("flush output buffers start\n");
+                        while(true)
+                        {
+				int index = SDL_AMediaCodec_dequeueOutputBuffer(opaque->acodec,NULL,1000*100);
+				if(index>=0)
+				{
+					ALOGE("flush output buffers index:%d\n",index);
+					SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec,index,false);
+					continue;
+				}else{
+					ALOGE("flush output buffers break\n");
+					break;
+				}
+			   }
+			   ALOGE("flush output buffers end\n");*/
                         SDL_AMediaCodec_flush(opaque->acodec);
                         opaque->input_packet_count = 0;
                     }
