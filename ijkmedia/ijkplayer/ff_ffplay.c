@@ -2606,7 +2606,7 @@ static int read_thread(void *arg)
                 enable_drop_audiopacket = true;
             }
         }
-        
+
 //        printf("is->videoq.duration:%lld\n",is->videoq.duration);
 
         if (ffp->infinite_buffer==1 && !is->seek_req && ((is->audioq.duration > live_duration_lwm || is->audio_stream < 0 || is->audioq.abort_request) && (is->videoq.duration > live_duration_lwm || is->video_stream < 0 || is->videoq.abort_request || (is->video_st->disposition & AV_DISPOSITION_ATTACHED_PIC))))

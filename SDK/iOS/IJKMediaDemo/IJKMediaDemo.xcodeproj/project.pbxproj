@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB729FF71AEA39CC00757392 /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB729FF61AEA39CC00757392 /* libIJKMediaPlayer.a */; };
 		ABD5DF081AE4D43D00778032 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABD5DF051AE4D43D00778032 /* MainViewController.xib */; };
 		ABD5DF091AE4D43D00778032 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ABD5DF061AE4D43D00778032 /* MainViewController.m */; };
-		ABD5DF121AE4E72500778032 /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABD5DF111AE4E72500778032 /* libIJKMediaPlayer.a */; };
 		E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E60E8C2919EF70BB005B5B6E /* CoreMedia.framework */; };
 		E612EAE517F7E0F800BEE660 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E612EAE417F7E0F800BEE660 /* MediaPlayer.framework */; };
 		E6166C9C17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch in Resources */ = {isa = PBXBuildFile; fileRef = E6166C9B17EDA4A20006B956 /* IJKMediaDemo-Prefix.pch */; };
@@ -43,10 +43,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AB729FF61AEA39CC00757392 /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIJKMediaPlayer.a; path = ../lib/libIJKMediaPlayer.a; sourceTree = "<group>"; };
 		ABD5DF051AE4D43D00778032 /* MainViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainViewController.xib; sourceTree = "<group>"; };
 		ABD5DF061AE4D43D00778032 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		ABD5DF071AE4D43D00778032 /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
-		ABD5DF111AE4E72500778032 /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIJKMediaPlayer.a; path = ../lib/libIJKMediaPlayer.a; sourceTree = "<group>"; };
 		E60E8C2719EF70A7005B5B6E /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		E60E8C2919EF70BB005B5B6E /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		E612EAE417F7E0F800BEE660 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
@@ -91,7 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ABD5DF121AE4E72500778032 /* libIJKMediaPlayer.a in Frameworks */,
+				AB729FF71AEA39CC00757392 /* libIJKMediaPlayer.a in Frameworks */,
 				E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */,
 				E61B45AE19EF7021002792EC /* AVFoundation.framework in Frameworks */,
 				E64D4F4F1938CD2100F1C75D /* QuartzCore.framework in Frameworks */,
@@ -153,7 +153,7 @@
 		E6903EFE17EAF70200CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				ABD5DF111AE4E72500778032 /* libIJKMediaPlayer.a */,
+				AB729FF61AEA39CC00757392 /* libIJKMediaPlayer.a */,
 				E63FC29917F062E8003551EB /* libbz2.dylib */,
 				E63FC29517F060A7003551EB /* libz.dylib */,
 				E63FC28F17F04C83003551EB /* AudioToolbox.framework */,

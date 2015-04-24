@@ -56,6 +56,7 @@
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
+    self.player.movieSourceType = IJKMPMovieSourceTypeLiveStreaming;
 
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
@@ -316,6 +317,7 @@
         self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
         self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         self.player.view.frame = self.view.bounds;
+        self.player.movieSourceType = IJKMPMovieSourceTypeLiveStreaming;
         
         self.view.autoresizesSubviews = YES;
         [self.view addSubview:self.player.view];

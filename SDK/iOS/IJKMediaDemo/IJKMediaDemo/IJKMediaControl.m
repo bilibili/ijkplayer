@@ -20,8 +20,17 @@
     return self;
 }
 
+-(void)sliderValueChanged:(id)sender
+{
+    if (self.mediaProgressSlider.value<=self.mediaProgressSlider.maximumValue && self.mediaProgressSlider.value>=0) {
+        self.delegatePlayer.currentPlaybackTime = self.mediaProgressSlider.value*1.0;
+    }
+}
+
 - (void)awakeFromNib
 {
+        [self.mediaProgressSlider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
+    
     [self refreshMediaControl];
 }
 

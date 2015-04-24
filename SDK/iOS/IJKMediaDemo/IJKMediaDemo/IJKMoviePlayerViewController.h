@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "IJKMediaPlayer.h"
+#import <IJKMediaPlayer.h>
 @class IJKMediaControl;
 
 @interface IJKVideoViewController : UIViewController
