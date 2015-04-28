@@ -614,6 +614,18 @@ inline static void ffp_remove_msg(FFPlayer *ffp, int what) {
     msg_queue_remove(&ffp->msg_queue, what);
 }
 
+inline static const char *ffp_get_error_string(int error) {
+    switch (error) {
+        case AVERROR(ENOMEM):       return "AVERROR(ENOMEM)";       // 12
+        case AVERROR(EINVAL):       return "AVERROR(EINVAL)";       // 22
+        case AVERROR(EAGAIN):       return "AVERROR(EAGAIN)";       // 35
+        case AVERROR(ETIMEDOUT):    return "AVERROR(ETIMEDOUT)";    // 60
+        case AVERROR_EOF:           return "AVERROR_EOF";
+        case AVERROR_EXIT:          return "AVERROR_EXIT";
+    }
+    return "unknown";
+}
+
 #define FFTRACE ALOGW
 
 #define AVCODEC_MODULE_NAME    "avcodec"

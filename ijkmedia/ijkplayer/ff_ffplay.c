@@ -2593,11 +2593,12 @@ static int read_thread(void *arg)
 #endif
                 is->eof = 1;
                 ffp->error = ic->pb->error;
-                ALOGE("av_read_frame error: %x(%c,%c,%c,%c)\n", ffp->error,
+                ALOGE("av_read_frame error: %x(%c,%c,%c,%c): %s\n", ffp->error,
                       (char) (0xff & (ffp->error >> 24)),
                       (char) (0xff & (ffp->error >> 16)),
                       (char) (0xff & (ffp->error >> 8)),
-                      (char) (0xff & (ffp->error)));
+                      (char) (0xff & (ffp->error)),
+                      ffp_get_error_string(ffp->error));
                 // break;
             } else {
                 ffp->error = 0;
