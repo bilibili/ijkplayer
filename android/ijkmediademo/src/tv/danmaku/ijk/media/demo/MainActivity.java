@@ -19,8 +19,8 @@ public class MainActivity extends Activity {
         final EditText et = (EditText) this.findViewById(R.id.RtmpAddress1);
 
 //        et.setText("http://live.3gv.ifeng.com/zixun.m3u8");
-        et.setText("rtmp://pull1.arenazb.hupu.com/test/789");
-//        et.setText("http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8");
+//        et.setText("rtmp://pull1.arenazb.hupu.com/test/789");
+        et.setText("http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8");
 
         btn.setOnClickListener(new OnClickListener(){
 

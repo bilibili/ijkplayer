@@ -20,8 +20,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
-
 import tv.danmaku.ijk.media.widget.MediaController;
 import tv.danmaku.ijk.media.widget.VideoView;
 
@@ -49,11 +49,14 @@ public class VideoPlayerActivity extends Activity {
 
         mVideoView = (VideoView) findViewById(R.id.video_view);
         mVideoView.setMediaCodecEnabled(true);
-        mVideoView.setDataSourceType(VideoView.LIVE_STREAMING_TYPE);
+        mVideoView.setDataSourceType(VideoView.VOD_STREAMING_TYPE);
         mVideoView.setMediaController(mMediaController);
         mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
         mVideoView.setVideoPath(mVideoPath);
         mVideoView.requestFocus();
         mVideoView.start();
+        
+        Log.i("ID", mVideoView.getUniqueId());
+        
     }
 }
