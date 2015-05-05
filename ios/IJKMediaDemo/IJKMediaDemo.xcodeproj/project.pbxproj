@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ABCC3F7D1AF8594700214BBE /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */; };
 		ABD5DF081AE4D43D00778032 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABD5DF051AE4D43D00778032 /* MainViewController.xib */; };
 		ABD5DF091AE4D43D00778032 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ABD5DF061AE4D43D00778032 /* MainViewController.m */; };
 		E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E60E8C2919EF70BB005B5B6E /* CoreMedia.framework */; };
@@ -60,6 +61,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		ABD5DF051AE4D43D00778032 /* MainViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainViewController.xib; sourceTree = "<group>"; };
 		ABD5DF061AE4D43D00778032 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		ABD5DF071AE4D43D00778032 /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABCC3F7D1AF8594700214BBE /* VideoToolbox.framework in Frameworks */,
 				E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */,
 				E61B45AE19EF7021002792EC /* AVFoundation.framework in Frameworks */,
 				E60FFBE418BF695700825D7F /* libIJKMediaPlayer.a in Frameworks */,
@@ -171,6 +174,7 @@
 		E6903EFE17EAF70200CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */,
 				E63FC29917F062E8003551EB /* libbz2.dylib */,
 				E63FC29517F060A7003551EB /* libz.dylib */,
 				E63FC28F17F04C83003551EB /* AudioToolbox.framework */,

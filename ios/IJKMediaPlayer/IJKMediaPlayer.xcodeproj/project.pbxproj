@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		451103131A5CE36A00337D24 /* IJKSDLGLRenderNV12.m in Sources */ = {isa = PBXBuildFile; fileRef = 451103121A5CE36A00337D24 /* IJKSDLGLRenderNV12.m */; };
+		ABCC3F791AF858C300214BBE /* VideoToolBoxDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABCC3F721AF858C300214BBE /* VideoToolBoxDecoder.cpp */; };
+		ABCC3F7A1AF858C300214BBE /* VideoDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABCC3F741AF858C300214BBE /* VideoDecoder.cpp */; };
+		ABCC3F7B1AF858C300214BBE /* iOSUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABCC3F771AF858C300214BBE /* iOSUtils.mm */; };
 		E62139BE180FA89B00553533 /* IJKFFOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = E62139BD180FA89A00553533 /* IJKFFOptions.m */; };
 		E62139BF180FAE5F00553533 /* IJKFFOptions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E62139BC180FA89A00553533 /* IJKFFOptions.h */; };
 		E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27017F01143003551EB /* ijksdl_audio.c */; };
@@ -87,6 +90,14 @@
 /* Begin PBXFileReference section */
 		451103111A5CE36A00337D24 /* IJKSDLGLRenderNV12.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKSDLGLRenderNV12.h; sourceTree = "<group>"; };
 		451103121A5CE36A00337D24 /* IJKSDLGLRenderNV12.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKSDLGLRenderNV12.m; sourceTree = "<group>"; };
+		ABCC3F711AF858C300214BBE /* VideoToolBoxDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VideoToolBoxDecoder.h; path = iOS/VideoToolBoxDecoder.h; sourceTree = "<group>"; };
+		ABCC3F721AF858C300214BBE /* VideoToolBoxDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoToolBoxDecoder.cpp; path = iOS/VideoToolBoxDecoder.cpp; sourceTree = "<group>"; };
+		ABCC3F731AF858C300214BBE /* VideoDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VideoDecoder.h; path = iOS/VideoDecoder.h; sourceTree = "<group>"; };
+		ABCC3F741AF858C300214BBE /* VideoDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoDecoder.cpp; path = iOS/VideoDecoder.cpp; sourceTree = "<group>"; };
+		ABCC3F751AF858C300214BBE /* MediaDemuxer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MediaDemuxer.h; path = iOS/MediaDemuxer.h; sourceTree = "<group>"; };
+		ABCC3F761AF858C300214BBE /* Media_Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Media_Log.h; path = iOS/Media_Log.h; sourceTree = "<group>"; };
+		ABCC3F771AF858C300214BBE /* iOSUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = iOSUtils.mm; path = iOS/iOSUtils.mm; sourceTree = "<group>"; };
+		ABCC3F781AF858C300214BBE /* iOSUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iOSUtils.h; path = iOS/iOSUtils.h; sourceTree = "<group>"; };
 		E62139BC180FA89A00553533 /* IJKFFOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFOptions.h; sourceTree = "<group>"; };
 		E62139BD180FA89A00553533 /* IJKFFOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFOptions.m; sourceTree = "<group>"; };
 		E63FC27017F01143003551EB /* ijksdl_audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_audio.c; sourceTree = "<group>"; };
@@ -289,6 +300,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		ABCC3F701AF8589C00214BBE /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				ABCC3F711AF858C300214BBE /* VideoToolBoxDecoder.h */,
+				ABCC3F721AF858C300214BBE /* VideoToolBoxDecoder.cpp */,
+				ABCC3F731AF858C300214BBE /* VideoDecoder.h */,
+				ABCC3F741AF858C300214BBE /* VideoDecoder.cpp */,
+				ABCC3F751AF858C300214BBE /* MediaDemuxer.h */,
+				ABCC3F761AF858C300214BBE /* Media_Log.h */,
+				ABCC3F771AF858C300214BBE /* iOSUtils.mm */,
+				ABCC3F781AF858C300214BBE /* iOSUtils.h */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		E63FC27217F013DE003551EB /* dummy */ = {
 			isa = PBXGroup;
 			children = (
@@ -555,6 +581,7 @@
 		E6903FCE17EAFC6100CFD954 /* ijkplayer */ = {
 			isa = PBXGroup;
 			children = (
+				ABCC3F701AF8589C00214BBE /* iOS */,
 				E6903FD517EAFC6100CFD954 /* ff_cmdutils.c */,
 				E6903FD617EAFC6100CFD954 /* ff_cmdutils.h */,
 				E6903FD717EAFC6100CFD954 /* ff_fferror.h */,
@@ -757,6 +784,7 @@
 				E690401F17EAFC6100CFD954 /* ff_cmdutils.c in Sources */,
 				E690402017EAFC6100CFD954 /* ff_ffplay.c in Sources */,
 				E690402717EAFC6100CFD954 /* image_convert.c in Sources */,
+				ABCC3F7A1AF858C300214BBE /* VideoDecoder.cpp in Sources */,
 				E690402D17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.c in Sources */,
 				E690402E17EAFC6100CFD954 /* ijksdl_aout.c in Sources */,
 				E690402F17EAFC6100CFD954 /* ijksdl_error.c in Sources */,
@@ -772,6 +800,7 @@
 				E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */,
 				E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */,
 				E6EE92B91878230C009EAB56 /* ijksdl_thread_ios.m in Sources */,
+				ABCC3F7B1AF858C300214BBE /* iOSUtils.mm in Sources */,
 				E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */,
 				E67C4E0819D15EEA00415CEE /* IJKAVMoviePlayerController.m in Sources */,
 				E6FAD9571A515CE300725002 /* ijkmeta.c in Sources */,
@@ -782,6 +811,7 @@
 				E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */,
 				E6EE92BB1878230C009EAB56 /* IJKSDLAudioUnitController.m in Sources */,
 				E66F8E0317EFEEA400354D80 /* ijkplayer_ios.m in Sources */,
+				ABCC3F791AF858C300214BBE /* VideoToolBoxDecoder.cpp in Sources */,
 				E65DC3B919D93D5F004F8A08 /* IJKKVOController.m in Sources */,
 				E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */,
 				E6EE92BD1878230C009EAB56 /* IJKSDLGLRenderRV24.m in Sources */,
