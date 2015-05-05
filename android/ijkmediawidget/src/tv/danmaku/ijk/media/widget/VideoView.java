@@ -251,7 +251,13 @@ public class VideoView extends SurfaceView implements
                 if(isMediaCodecEnabled)
                 {
                 	ijkMediaPlayer.setMediaCodecEnabled(true);
-                }
+                }else {
+                    if(isSupportMediaCodec())
+                    {
+                    	ijkMediaPlayer.setMediaCodecEnabled(true);
+                    	isMediaCodecEnabled = true;
+                    }
+				}
                 ijkMediaPlayer.setDataSourceType(mDataSourceType);
                 ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
                 ijkMediaPlayer.setOverlayFormat(AvFourCC.SDL_FCC_RV32);
@@ -711,5 +717,29 @@ public class VideoView extends SurfaceView implements
     public void setMediaCodecEnabled(boolean enable)
     {
     	isMediaCodecEnabled = enable;
+    }
+    
+    public String getUniqueId()
+    {
+    	return android.os.Build.FINGERPRINT;
+    }
+    
+    private String SUMSUN_NOTE_III_N9002 = "samsung/h3gduoszn/hlte:4.4.2/KOT49H/N9002ZNUFNK1:user/release-keys";
+    private String MI_4LTE = "Xiaomi/cancro_wc_lte/cancro:4.4.4/KTU84P/V6.4.1.0.KXDCNCB:user/release-keys";
+    private String SUMSUN_S_IV = "samsung/jftddzn/jftdd:4.4.2/KOT49H/I9507VZNUBOB1:user/release-keys";
+    private String MI_3 = "Xiaomi/cancro/cancro:4.4.4/KTU84P/5.4.24:user/release-keys";
+    private String M1_NOTE = "Meizu/meizu_m1note/m1note:4.4.4/KTU84P/m71c.Flyme_OS_4.2.20150312033938:user/release-keys";
+    
+    private boolean isSupportMediaCodec()
+    {
+    	if (getUniqueId().equals(SUMSUN_NOTE_III_N9002)
+    			|| getUniqueId().equals(MI_4LTE)
+    			|| getUniqueId().equals(SUMSUN_S_IV)
+    			|| getUniqueId().equals(MI_3)
+    			|| getUniqueId().equals(M1_NOTE)) {
+			return true;
+		}else {
+			return false;
+		}
     }
 }
