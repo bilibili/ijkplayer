@@ -1,8 +1,0 @@
----- _reset Matches (7 in 6 files) ----
-IjkMediaPlayer.java (android\ijkmediaplayer\src\tv\danmaku\ijk\media\player):        _reset();
-IjkMediaPlayer.java (android\ijkmediaplayer\src\tv\danmaku\ijk\media\player):    private native void _reset();
-Ijkplayer_jni.c (android\ijkmediaplayer-arm64-v8a\jni\ijkmedia\ijkplayer\android):    { "_reset", "()V", (void *) IjkMediaPlayer_reset },
-Ijkplayer_jni.c (android\ijkmediaplayer-armv5\jni\ijkmedia\ijkplayer\android):    { "_reset", "()V", (void *) IjkMediaPlayer_reset },
-Ijkplayer_jni.c (android\ijkmediaplayer-x86\jni\ijkmedia\ijkplayer\android):    { "_reset", "()V", (void *) IjkMediaPlayer_reset },
-Ijkplayer_jni.c (android\ijkmediaplayer\jni\ijkmedia\ijkplayer\android):    { "_reset", "()V", (void *) IjkMediaPlayer_reset },
-Ijkplayer_jni.c (ijkmedia\ijkplayer\android):    { "_reset", "()V", (void *) IjkMediaPlayer_reset },
