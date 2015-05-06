@@ -6,12 +6,12 @@ ijkplayer
 
 ### My Build Enviroment
 - Common
- - Mac OS X 10.9.5
+ - Mac OS X 10.10.3
 - Android
- - [ADT v23.0.4-1468518](http://developer.android.com/sdk/index.html)
- - [NDK r10c](http://developer.android.com/tools/sdk/ndk/index.html)
+ - [ADT v23.0.6-1720515](http://developer.android.com/sdk/index.html)
+ - [NDK r10d](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
- - Xcode 6.1.0
+ - Xcode 6.3.0
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
  - brew install git
@@ -24,29 +24,32 @@ ijkplayer
  - remove rarely used ffmpeg components to reduce binary size [config/module-lite.sh](config/module-lite.sh)
  - workaround for some buggy online video.
 - Android
- - platform: API 9~21
+ - platform: API 9~22
  - cpu: ARMv7a, x86, ARMv5 (not tested on real devices)
  - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - video output: NativeWindow
  - audio output: OpenSL ES, AudioTrack
  - hw decoder: MediaCodec
 - iOS
- - platform: iOS 5.1.1~8.1.x
+ - platform: iOS 5.1.1~8.3.x
  - cpu: ARMv7, ARM64, i386, x86_64, (armv7s is obselete)
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
  - video-output: OpenGL ES 2.0 (I420/YV12/NV12 shaders)
  - audio-output: AudioQueue, AudioUnit
+ - hw decoder: VideoToolbox (iOS 8+)
 
 ### TODO
 - iOS
  - api: AVFoundation-like
- - hw-accelerator: HW decode
+- Android
+ - Android Studio
+- Build 
+ - cygwin compatibility
 
 ### NOT-ON-PLAN
 - obsolete platforms (Android: API-8 and below; iOS: below 5.1.1)
 - obsolete cpu: ARMv5, ARMv6, MIPS (I don't even have these types of devices…)
 - native subtitle render
-- cygwin compatibility
 
 ### Before Build
 - If you prefer more codec/format
