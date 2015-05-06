@@ -721,22 +721,28 @@ public class VideoView extends SurfaceView implements
     
     public String getUniqueId()
     {
-    	return android.os.Build.FINGERPRINT;
+    	return android.os.Build.MODEL;
     }
     
-    private String SUMSUN_NOTE_III_N9002 = "samsung/h3gduoszn/hlte:4.4.2/KOT49H/N9002ZNUFNK1:user/release-keys";
-    private String MI_4LTE = "Xiaomi/cancro_wc_lte/cancro:4.4.4/KTU84P/V6.4.1.0.KXDCNCB:user/release-keys";
-    private String SUMSUN_S_IV = "samsung/jftddzn/jftdd:4.4.2/KOT49H/I9507VZNUBOB1:user/release-keys";
-    private String MI_3 = "Xiaomi/cancro/cancro:4.4.4/KTU84P/5.4.24:user/release-keys";
-    private String M1_NOTE = "Meizu/meizu_m1note/m1note:4.4.4/KTU84P/m71c.Flyme_OS_4.2.20150312033938:user/release-keys";
+//    private String SUMSUN_NOTE_III_N9002 = "samsung/h3gduoszn/hlte:4.4.2/KOT49H/N9002ZNUFNK1:user/release-keys";
+//    private String MI_4LTE = "Xiaomi/cancro_wc_lte/cancro:4.4.4/KTU84P/V6.4.1.0.KXDCNCB:user/release-keys";
+//    private String SUMSUN_S_IV = "samsung/jftddzn/jftdd:4.4.2/KOT49H/I9507VZNUBOB1:user/release-keys";
+//    private String MI_3 = "Xiaomi/cancro/cancro:4.4.4/KTU84P/5.4.24:user/release-keys";
+//    private String M1_NOTE = "Meizu/meizu_m1note/m1note:4.4.4/KTU84P/m71c.Flyme_OS_4.2.20150312033938:user/release-keys";
+    
+    private String M1_NOTE_model = "m1 note";
+    private String mI_3_model = "MI 3";
+    private String MI_4LTE_model = "MI 4LTE";
+    private String SUMSUN_S_IV_model = "GT-I95";
+    private String sUMSUN_NOTE_III_model = "SM-N900";
     
     private boolean isSupportMediaCodec()
     {
-    	if (getUniqueId().equals(SUMSUN_NOTE_III_N9002)
-    			|| getUniqueId().equals(MI_4LTE)
-    			|| getUniqueId().equals(SUMSUN_S_IV)
-    			|| getUniqueId().equals(MI_3)
-    			|| getUniqueId().equals(M1_NOTE)) {
+    	if (getUniqueId().startsWith(M1_NOTE_model)
+    			|| getUniqueId().startsWith(SUMSUN_S_IV_model)
+    			|| getUniqueId().startsWith(mI_3_model)
+    			|| getUniqueId().startsWith(MI_4LTE_model)
+    			|| getUniqueId().startsWith(sUMSUN_NOTE_III_model)) {
 			return true;
 		}else {
 			return false;
