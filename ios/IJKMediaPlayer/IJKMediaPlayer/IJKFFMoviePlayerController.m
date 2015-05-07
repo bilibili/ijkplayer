@@ -56,6 +56,7 @@
 
     BOOL _keepScreenOnWhilePlaying;
     BOOL _pauseInBackground;
+    BOOL _isVideoToolboxOpen;
 
 //    NSMutableArray *_registeredNotifications;
 }
@@ -278,6 +279,22 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 - (void)setPauseInBackground:(BOOL)pause
 {
     _pauseInBackground = pause;
+}
+
+- (BOOL)isVideoToolboxOpen
+{
+    if (!_mediaPlayer)
+        return NO;
+
+    return _isVideoToolboxOpen;
+}
+
+- (void)setMaxBufferSize:(int)maxBufferSize
+{
+    if (!_mediaPlayer)
+        return;
+
+    ijkmp_set_max_buffer_size(_mediaPlayer, maxBufferSize);
 }
 
 + (void)setLogReport:(BOOL)preferLogReport
@@ -661,6 +678,14 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         case FFP_MSG_SEEK_COMPLETE: {
             NSLog(@"FFP_MSG_SEEK_COMPLETE:");
             _seeking = NO;
+            break;
+        }
+        case FFP_MSG_VIDEO_DECODER_OPEN: {
+            _isVideoToolboxOpen = avmsg->arg1;
+            NSLog(@"FFP_MSG_VIDEO_DECODER_OPEN: %@", _isVideoToolboxOpen ? @"true" : @"false");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerVideoDecoderOpenNotification
+             object:self];
             break;
         }
         default:

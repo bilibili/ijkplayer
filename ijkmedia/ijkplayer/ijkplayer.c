@@ -208,6 +208,16 @@ void ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop)
     MPTRACE("ijkmp_set_framedrop()=void\n");
 }
 
+void ijkmp_set_max_buffer_size(IjkMediaPlayer *mp, int max_buffer_size)
+{
+    assert(mp);
+
+    MPTRACE("%s(%d)\n", __func__, max_buffer_size);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_max_buffer_size(mp->ffplayer, max_buffer_size);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+}
 int ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info)
 {
     assert(mp);
@@ -633,6 +643,9 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             } else {
                 // FIXME: 1: onError() ?
                 ALOGE("FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING\n");
+            }
+            if (ffp_is_paused_l(mp->ffplayer)) {
+                ijkmp_change_state_l(mp, MP_STATE_PAUSED);
             }
             pthread_mutex_unlock(&mp->mutex);
             break;

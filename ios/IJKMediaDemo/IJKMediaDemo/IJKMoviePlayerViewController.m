@@ -53,7 +53,7 @@
     NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
 
     [IJKFFMoviePlayerController setLogReport:YES];
-    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
+    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
     self.player.movieSourceType = IJKMPMovieSourceTypeLiveStreaming;
@@ -314,7 +314,7 @@
         NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
         
         [IJKFFMoviePlayerController setLogReport:YES];
-        self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
+        self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
         self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         self.player.view.frame = self.view.bounds;
         self.player.movieSourceType = IJKMPMovieSourceTypeLiveStreaming;

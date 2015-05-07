@@ -419,28 +419,13 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 ret = -1;
                 goto fail;
             }
-            if (ffp_is_flush_packet(&pkt)) {
+            if (ffp_is_flush_packet(&pkt) || opaque->acodec_flush_request) {
                 // request flush before lock, or never get mutex
                 opaque->acodec_flush_request = true;
                 SDL_LockMutex(opaque->acodec_mutex);
                 if (SDL_AMediaCodec_isStarted(opaque->acodec)) {
                     if (opaque->input_packet_count > 0) {
                         // flush empty queue cause error on OMX.SEC.AVC.Decoder (Nexus S)
-/*                        ALOGE("flush output buffers start\n");
-                        while(true)
-                        {
-				int index = SDL_AMediaCodec_dequeueOutputBuffer(opaque->acodec,NULL,1000*100);
-				if(index>=0)
-				{
-					ALOGE("flush output buffers index:%d\n",index);
-					SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec,index,false);
-					continue;
-				}else{
-					ALOGE("flush output buffers break\n");
-					break;
-				}
-			   }
-			   ALOGE("flush output buffers end\n");*/
                         SDL_AMediaCodec_flush(opaque->acodec);
                         opaque->input_packet_count = 0;
                     }
@@ -981,6 +966,19 @@ fallback_to_ffplay:
 #endif
 }
 
+static int func_flush(IJKFF_Pipenode *node)
+{
+    JNIEnv                *env      = NULL;
+    IJKFF_Pipenode_Opaque *opaque   = node->opaque;
+
+    if (!opaque)
+        return -1;
+
+    opaque->acodec_flush_request = true;
+
+    return 0;
+}
+
 IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer *ffp, IJKFF_Pipeline *pipeline, SDL_Vout *vout)
 {
     ALOGD("ffpipenode_create_video_decoder_from_android_mediacodec()\n");
@@ -1001,12 +999,23 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
 
     node->func_destroy  = func_destroy;
     node->func_run_sync = func_run_sync;
+    node->func_flush    = func_flush;
     opaque->pipeline    = pipeline;
     opaque->ffp         = ffp;
     opaque->decoder     = &is->viddec;
     opaque->weak_vout   = vout;
 
     opaque->avctx = opaque->decoder->avctx;
+    switch (opaque->avctx->profile) {
+        case FF_PROFILE_H264_HIGH_10:
+        case FF_PROFILE_H264_HIGH_10_INTRA:
+        case FF_PROFILE_H264_HIGH_422:
+        case FF_PROFILE_H264_HIGH_422_INTRA:
+        case FF_PROFILE_H264_HIGH_444_PREDICTIVE:
+        case FF_PROFILE_H264_HIGH_444_INTRA:
+        case FF_PROFILE_H264_CAVLC_444:
+            goto fail;
+    }
     switch (opaque->avctx->codec_id) {
     case AV_CODEC_ID_H264:
         strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_AVC);

@@ -30,6 +30,7 @@
 #include "ijkplayer/ff_ffplay.h"
 #include "ijkplayer/ijkplayer_internal.h"
 #include "ijkplayer/pipeline/ffpipeline_ffplay.h"
+#include "ffpipeline_ios.h"
 
 IjkMediaPlayer *ijkmp_ios_create(int (*msg_loop)(void*))
 {
@@ -45,7 +46,7 @@ IjkMediaPlayer *ijkmp_ios_create(int (*msg_loop)(void*))
     if (!mp->ffplayer->vout)
         goto fail;
 
-    mp->ffplayer->pipeline = ffpipeline_create_from_ffplay(mp->ffplayer);
+    mp->ffplayer->pipeline = ffpipeline_create_from_ios(mp->ffplayer);
     if (!mp->ffplayer->pipeline)
         goto fail;
 
@@ -55,8 +56,6 @@ fail:
     ijkmp_dec_ref_p(&mp);
     return NULL;
 }
-
-
 
 void ijkmp_ios_set_glview_l(IjkMediaPlayer *mp, IJKSDLGLView *glView)
 {
@@ -75,4 +74,63 @@ void ijkmp_ios_set_glview(IjkMediaPlayer *mp, IJKSDLGLView *glView)
     ijkmp_ios_set_glview_l(mp, glView);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_ios_set_view(glView=%p)=void\n", (void*)glView);
+}
+
+void ijkmp_ios_set_frame_max_width_l(IjkMediaPlayer *mp, int width)
+{
+    assert(mp);
+    assert(mp->ffplayer);
+    assert(mp->ffplayer->pipeline);
+    ffpipeline_ios_set_frame_max_width(mp->ffplayer->pipeline, width);
+}
+
+void ijkmp_ios_set_frame_max_width(IjkMediaPlayer *mp, int width)
+{
+    assert(mp);
+    MPTRACE("%s (width=%d)\n", __func__, width);
+    pthread_mutex_lock(&mp->mutex);
+    ijkmp_ios_set_frame_max_width_l(mp, width);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s after(width=%d)\n", __func__, width);
+}
+
+void ijkmp_ios_set_videotoolbox_enabled_l(IjkMediaPlayer *mp, BOOL enabled)
+{
+    assert(mp);
+    assert(mp->ffplayer);
+    assert(mp->ffplayer->pipeline);
+    if (enabled == YES) {
+        ffpipeline_ios_set_videotoolbox_enabled(mp->ffplayer->pipeline, 1);
+    } else {
+        ffpipeline_ios_set_videotoolbox_enabled(mp->ffplayer->pipeline, 0);
+    }
+}
+
+void ijkmp_ios_set_videotoolbox_enabled(IjkMediaPlayer *mp, BOOL enabled)
+{
+    assert(mp);
+    MPTRACE("%s enable(EnableFlag=%d)\n", __func__, enabled);
+    pthread_mutex_lock(&mp->mutex);
+    ijkmp_ios_set_videotoolbox_enabled_l(mp, enabled);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s enable(EnableFlag=%d)\n", __func__, enabled);
+}
+
+bool ijkmp_ios_is_videotoolbox_open_l(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    assert(mp->ffplayer);
+
+    return false;
+}
+
+bool ijkmp_ios_is_videotoolbox_open(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    MPTRACE("%s()\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    bool ret = ijkmp_ios_is_videotoolbox_open_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=%d\n", __func__, ret ? 1 : 0);
+    return ret;
 }

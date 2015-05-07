@@ -176,6 +176,8 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     
     int64_t         _lastFrameTime;
 
+    GLfloat         _prevScaleFactor;
+
     id<IJKSDLGLRender> _renderer;
 
     BOOL            _didSetContentMode;
@@ -211,11 +213,12 @@ enum {
                                         kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
                                         nil];
 
-        CGFloat scaleFactor = [[UIScreen mainScreen] scale];
-        if (scaleFactor < 1.0f)
-            scaleFactor = 1.0f;
+        _scaleFactor = [[UIScreen mainScreen] scale];
+        if (_scaleFactor < 0.1f)
+            _scaleFactor = 1.0f;
+        _prevScaleFactor = _scaleFactor;
 
-        [eaglLayer setContentsScale:scaleFactor];
+        [eaglLayer setContentsScale:_scaleFactor];
 
         _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
 
@@ -317,6 +320,11 @@ enum {
     
     is_display_black_screen = false;
 
+}
+
+- (void)setScaleFactor:(CGFloat)scaleFactor
+{
+    _scaleFactor = scaleFactor;
 }
 
 - (void)layoutSubviews
@@ -539,6 +547,14 @@ exit:
     }
 
     [EAGLContext setCurrentContext:_context];
+
+    CGFloat newScaleFactor = _scaleFactor;
+    if (_prevScaleFactor != newScaleFactor) {
+        CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
+        [eaglLayer setContentsScale:newScaleFactor];
+
+        _prevScaleFactor = newScaleFactor;
+    }
 
     if (![self setupDisplay:overlay]) {
         if ([EAGLContext currentContext] == _context)

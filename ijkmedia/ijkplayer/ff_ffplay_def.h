@@ -196,15 +196,13 @@ typedef struct Decoder {
     AVRational start_pts_tb;
     int64_t next_pts;
     AVRational next_pts_tb;
+    SDL_Thread *decoder_tid;
+    SDL_Thread _decoder_tid;
 } Decoder;
 
 typedef struct VideoState {
     SDL_Thread *read_tid;
     SDL_Thread _read_tid;
-    SDL_Thread *video_tid;
-    SDL_Thread _video_tid;
-    SDL_Thread *audio_tid;
-    SDL_Thread _audio_tid;
     AVInputFormat *iformat;
     int abort_request;
     int force_refresh;
@@ -283,7 +281,6 @@ typedef struct VideoState {
     double last_vis_time;
 
 #ifdef FFP_MERGE
-    SDL_Thread *subtitle_tid;
     int subtitle_stream;
     AVStream *subtitle_st;
     PacketQueue subtitleq;
@@ -303,6 +300,7 @@ typedef struct VideoState {
 #ifdef FFP_MERGE
     SDL_Rect last_display_rect;
 #endif
+    int eof;
 
     char filename[4096];
     int width, height, xleft, ytop;
@@ -492,7 +490,7 @@ typedef struct FFPlayer {
 
     int last_error;
     int prepared;
-    int auto_start;
+    int auto_resume;
     int error;
     int error_count;
 
@@ -588,7 +586,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->last_error             = 0;
     ffp->prepared               = 0;
-    ffp->auto_start             = 0;
+    ffp->auto_resume            = 0;
     ffp->error                  = 0;
     ffp->error_count            = 0;
 
@@ -627,6 +625,18 @@ inline static void ffp_notify_msg3(FFPlayer *ffp, int what, int arg1, int arg2) 
 
 inline static void ffp_remove_msg(FFPlayer *ffp, int what) {
     msg_queue_remove(&ffp->msg_queue, what);
+}
+
+inline static const char *ffp_get_error_string(int error) {
+    switch (error) {
+        case AVERROR(ENOMEM):       return "AVERROR(ENOMEM)";       // 12
+        case AVERROR(EINVAL):       return "AVERROR(EINVAL)";       // 22
+        case AVERROR(EAGAIN):       return "AVERROR(EAGAIN)";       // 35
+        case AVERROR(ETIMEDOUT):    return "AVERROR(ETIMEDOUT)";    // 60
+        case AVERROR_EOF:           return "AVERROR_EOF";
+        case AVERROR_EXIT:          return "AVERROR_EXIT";
+    }
+    return "unknown";
 }
 
 #define FFTRACE ALOGW

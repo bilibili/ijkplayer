@@ -8,9 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		451103131A5CE36A00337D24 /* IJKSDLGLRenderNV12.m in Sources */ = {isa = PBXBuildFile; fileRef = 451103121A5CE36A00337D24 /* IJKSDLGLRenderNV12.m */; };
-		ABCC3F791AF858C300214BBE /* VideoToolBoxDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABCC3F721AF858C300214BBE /* VideoToolBoxDecoder.cpp */; };
-		ABCC3F7A1AF858C300214BBE /* VideoDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABCC3F741AF858C300214BBE /* VideoDecoder.cpp */; };
-		ABCC3F7B1AF858C300214BBE /* iOSUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABCC3F771AF858C300214BBE /* iOSUtils.mm */; };
+		AB4939CB1AFB1D4B00E71A34 /* IJKVideoToolBox.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4939C31AFB1D4B00E71A34 /* IJKVideoToolBox.m */; };
+		AB4939CC1AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4939C51AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.m */; };
+		AB4939CD1AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vdec.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4939C71AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vdec.m */; };
+		AB4939CE1AFB1D4B00E71A34 /* ffpipeline_ios.c in Sources */ = {isa = PBXBuildFile; fileRef = AB4939CA1AFB1D4B00E71A34 /* ffpipeline_ios.c */; };
+		AB4939D11AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4939CF1AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m */; };
+		ABD0B0061AFB463300317F1F /* iOSUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = ABD0B0041AFB463300317F1F /* iOSUtils.m */; };
 		E62139BE180FA89B00553533 /* IJKFFOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = E62139BD180FA89A00553533 /* IJKFFOptions.m */; };
 		E62139BF180FAE5F00553533 /* IJKFFOptions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E62139BC180FA89A00553533 /* IJKFFOptions.h */; };
 		E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27017F01143003551EB /* ijksdl_audio.c */; };
@@ -90,14 +93,19 @@
 /* Begin PBXFileReference section */
 		451103111A5CE36A00337D24 /* IJKSDLGLRenderNV12.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKSDLGLRenderNV12.h; sourceTree = "<group>"; };
 		451103121A5CE36A00337D24 /* IJKSDLGLRenderNV12.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKSDLGLRenderNV12.m; sourceTree = "<group>"; };
-		ABCC3F711AF858C300214BBE /* VideoToolBoxDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VideoToolBoxDecoder.h; path = iOS/VideoToolBoxDecoder.h; sourceTree = "<group>"; };
-		ABCC3F721AF858C300214BBE /* VideoToolBoxDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoToolBoxDecoder.cpp; path = iOS/VideoToolBoxDecoder.cpp; sourceTree = "<group>"; };
-		ABCC3F731AF858C300214BBE /* VideoDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VideoDecoder.h; path = iOS/VideoDecoder.h; sourceTree = "<group>"; };
-		ABCC3F741AF858C300214BBE /* VideoDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoDecoder.cpp; path = iOS/VideoDecoder.cpp; sourceTree = "<group>"; };
-		ABCC3F751AF858C300214BBE /* MediaDemuxer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MediaDemuxer.h; path = iOS/MediaDemuxer.h; sourceTree = "<group>"; };
-		ABCC3F761AF858C300214BBE /* Media_Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Media_Log.h; path = iOS/Media_Log.h; sourceTree = "<group>"; };
-		ABCC3F771AF858C300214BBE /* iOSUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = iOSUtils.mm; path = iOS/iOSUtils.mm; sourceTree = "<group>"; };
-		ABCC3F781AF858C300214BBE /* iOSUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iOSUtils.h; path = iOS/iOSUtils.h; sourceTree = "<group>"; };
+		AB4939C31AFB1D4B00E71A34 /* IJKVideoToolBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKVideoToolBox.m; path = ijkmedia/ijkplayer/ios/pipeline/IJKVideoToolBox.m; sourceTree = "<group>"; };
+		AB4939C41AFB1D4B00E71A34 /* IJKVideoToolBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKVideoToolBox.h; path = ijkmedia/ijkplayer/ios/pipeline/IJKVideoToolBox.h; sourceTree = "<group>"; };
+		AB4939C51AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ffpipenode_ios_videotoolbox_vout.m; path = ijkmedia/ijkplayer/ios/pipeline/ffpipenode_ios_videotoolbox_vout.m; sourceTree = "<group>"; };
+		AB4939C61AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ffpipenode_ios_videotoolbox_vout.h; path = ijkmedia/ijkplayer/ios/pipeline/ffpipenode_ios_videotoolbox_vout.h; sourceTree = "<group>"; };
+		AB4939C71AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vdec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ffpipenode_ios_videotoolbox_vdec.m; path = ijkmedia/ijkplayer/ios/pipeline/ffpipenode_ios_videotoolbox_vdec.m; sourceTree = "<group>"; };
+		AB4939C81AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vdec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ffpipenode_ios_videotoolbox_vdec.h; path = ijkmedia/ijkplayer/ios/pipeline/ffpipenode_ios_videotoolbox_vdec.h; sourceTree = "<group>"; };
+		AB4939C91AFB1D4B00E71A34 /* ffpipeline_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ffpipeline_ios.h; path = ijkmedia/ijkplayer/ios/pipeline/ffpipeline_ios.h; sourceTree = "<group>"; };
+		AB4939CA1AFB1D4B00E71A34 /* ffpipeline_ios.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ffpipeline_ios.c; path = ijkmedia/ijkplayer/ios/pipeline/ffpipeline_ios.c; sourceTree = "<group>"; };
+		AB4939CF1AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ijksdl_vout_overlay_videotoolbox.m; sourceTree = "<group>"; };
+		AB4939D01AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_vout_overlay_videotoolbox.h; sourceTree = "<group>"; };
+		AB4939D21AFB1DE500E71A34 /* h264_sps_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = h264_sps_parser.h; sourceTree = "<group>"; };
+		ABD0B0041AFB463300317F1F /* iOSUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = iOSUtils.m; path = ijkmedia/ijkplayer/ios/pipeline/iOSUtils.m; sourceTree = "<group>"; };
+		ABD0B0051AFB463300317F1F /* iOSUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iOSUtils.h; path = ijkmedia/ijkplayer/ios/pipeline/iOSUtils.h; sourceTree = "<group>"; };
 		E62139BC180FA89A00553533 /* IJKFFOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFOptions.h; sourceTree = "<group>"; };
 		E62139BD180FA89A00553533 /* IJKFFOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFOptions.m; sourceTree = "<group>"; };
 		E63FC27017F01143003551EB /* ijksdl_audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_audio.c; sourceTree = "<group>"; };
@@ -300,19 +308,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		ABCC3F701AF8589C00214BBE /* iOS */ = {
+		AB4939C21AFB1D1E00E71A34 /* pipeline */ = {
 			isa = PBXGroup;
 			children = (
-				ABCC3F711AF858C300214BBE /* VideoToolBoxDecoder.h */,
-				ABCC3F721AF858C300214BBE /* VideoToolBoxDecoder.cpp */,
-				ABCC3F731AF858C300214BBE /* VideoDecoder.h */,
-				ABCC3F741AF858C300214BBE /* VideoDecoder.cpp */,
-				ABCC3F751AF858C300214BBE /* MediaDemuxer.h */,
-				ABCC3F761AF858C300214BBE /* Media_Log.h */,
-				ABCC3F771AF858C300214BBE /* iOSUtils.mm */,
-				ABCC3F781AF858C300214BBE /* iOSUtils.h */,
+				ABD0B0041AFB463300317F1F /* iOSUtils.m */,
+				ABD0B0051AFB463300317F1F /* iOSUtils.h */,
+				AB4939C31AFB1D4B00E71A34 /* IJKVideoToolBox.m */,
+				AB4939C41AFB1D4B00E71A34 /* IJKVideoToolBox.h */,
+				AB4939C51AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.m */,
+				AB4939C61AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.h */,
+				AB4939C71AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vdec.m */,
+				AB4939C81AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vdec.h */,
+				AB4939C91AFB1D4B00E71A34 /* ffpipeline_ios.h */,
+				AB4939CA1AFB1D4B00E71A34 /* ffpipeline_ios.c */,
 			);
-			name = iOS;
+			name = pipeline;
 			sourceTree = "<group>";
 		};
 		E63FC27217F013DE003551EB /* dummy */ = {
@@ -348,6 +358,7 @@
 		E66F8DF817EFEC1300354D80 /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				AB4939C21AFB1D1E00E71A34 /* pipeline */,
 				E66F8E0117EFEEA400354D80 /* ijkplayer_ios.m */,
 				E66F8E0217EFEEA400354D80 /* ijkplayer_ios.h */,
 			);
@@ -406,6 +417,7 @@
 		E6903EBE17EAF6C500CFD954 /* IJKFFMoviePlayerController */ = {
 			isa = PBXGroup;
 			children = (
+				AB4939D21AFB1DE500E71A34 /* h264_sps_parser.h */,
 				E6716E4C1807EA4F00B3FBC1 /* IJKFFMrl.h */,
 				E6716E4D1807EA5000B3FBC1 /* IJKFFMrl.m */,
 				E62139BC180FA89A00553533 /* IJKFFOptions.h */,
@@ -581,7 +593,6 @@
 		E6903FCE17EAFC6100CFD954 /* ijkplayer */ = {
 			isa = PBXGroup;
 			children = (
-				ABCC3F701AF8589C00214BBE /* iOS */,
 				E6903FD517EAFC6100CFD954 /* ff_cmdutils.c */,
 				E6903FD617EAFC6100CFD954 /* ff_cmdutils.h */,
 				E6903FD717EAFC6100CFD954 /* ff_fferror.h */,
@@ -682,6 +693,8 @@
 		E6EE92A51878230C009EAB56 /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				AB4939CF1AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m */,
+				AB4939D01AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.h */,
 				E6EE92A61878230C009EAB56 /* ijksdl_aout_ios_audiounit.h */,
 				E6EE92A71878230C009EAB56 /* ijksdl_aout_ios_audiounit.m */,
 				E6EE92A81878230C009EAB56 /* ijksdl_ios.h */,
@@ -784,7 +797,6 @@
 				E690401F17EAFC6100CFD954 /* ff_cmdutils.c in Sources */,
 				E690402017EAFC6100CFD954 /* ff_ffplay.c in Sources */,
 				E690402717EAFC6100CFD954 /* image_convert.c in Sources */,
-				ABCC3F7A1AF858C300214BBE /* VideoDecoder.cpp in Sources */,
 				E690402D17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.c in Sources */,
 				E690402E17EAFC6100CFD954 /* ijksdl_aout.c in Sources */,
 				E690402F17EAFC6100CFD954 /* ijksdl_error.c in Sources */,
@@ -793,6 +805,8 @@
 				E6EE92C818782770009EAB56 /* IJKSDLAudioKit.m in Sources */,
 				E690403117EAFC6100CFD954 /* ijksdl_stdinc.c in Sources */,
 				E6EE92BC1878230C009EAB56 /* IJKSDLGLRenderI420.m in Sources */,
+				AB4939D11AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m in Sources */,
+				ABD0B0061AFB463300317F1F /* iOSUtils.m in Sources */,
 				E690403217EAFC6100CFD954 /* ijksdl_thread.c in Sources */,
 				E67B91AF1A3801DB00717EA9 /* ff_ffpipeline.c in Sources */,
 				E67B91B01A3801DB00717EA9 /* ff_ffpipenode.c in Sources */,
@@ -800,7 +814,7 @@
 				E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */,
 				E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */,
 				E6EE92B91878230C009EAB56 /* ijksdl_thread_ios.m in Sources */,
-				ABCC3F7B1AF858C300214BBE /* iOSUtils.mm in Sources */,
+				AB4939CC1AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.m in Sources */,
 				E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */,
 				E67C4E0819D15EEA00415CEE /* IJKAVMoviePlayerController.m in Sources */,
 				E6FAD9571A515CE300725002 /* ijkmeta.c in Sources */,
@@ -808,10 +822,12 @@
 				E6EE92C21878236A009EAB56 /* IJKSDLAudioQueueController.m in Sources */,
 				E67B91BA1A3801E600717EA9 /* ffpipenode_ffplay_vout.c in Sources */,
 				E66F8DE717EFD9C300354D80 /* IJKFFMoviePlayerController.m in Sources */,
+				AB4939CD1AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vdec.m in Sources */,
+				AB4939CB1AFB1D4B00E71A34 /* IJKVideoToolBox.m in Sources */,
+				AB4939CE1AFB1D4B00E71A34 /* ffpipeline_ios.c in Sources */,
 				E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */,
 				E6EE92BB1878230C009EAB56 /* IJKSDLAudioUnitController.m in Sources */,
 				E66F8E0317EFEEA400354D80 /* ijkplayer_ios.m in Sources */,
-				ABCC3F791AF858C300214BBE /* VideoToolBoxDecoder.cpp in Sources */,
 				E65DC3B919D93D5F004F8A08 /* IJKKVOController.m in Sources */,
 				E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */,
 				E6EE92BD1878230C009EAB56 /* IJKSDLGLRenderRV24.m in Sources */,
@@ -916,8 +932,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				DSTROOT = /tmp/IJKMediaPlayer.dst;
 				GCC_C_LANGUAGE_STANDARD = c11;
+				GCC_INPUT_FILETYPE = automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaPlayer/IJKMediaPlayer-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -939,8 +957,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				DSTROOT = /tmp/IJKMediaPlayer.dst;
 				GCC_C_LANGUAGE_STANDARD = c11;
+				GCC_INPUT_FILETYPE = automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaPlayer/IJKMediaPlayer-Prefix.pch";
 				HEADER_SEARCH_PATHS = (

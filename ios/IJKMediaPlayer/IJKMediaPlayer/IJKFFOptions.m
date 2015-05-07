@@ -18,13 +18,16 @@
     options.skipLoopFilter  = IJK_AVDISCARD_ALL;
     options.skipFrame       = IJK_AVDISCARD_NONREF;
 
-    options.frameBufferCount  = 3;
-    options.maxFps            = 30;
-    options.frameDrop         = 0;
-    options.pauseInBackground = YES;
+    options.frameBufferCount        = 3;
+    options.maxFps                  = 30;
+    options.frameDrop               = 0;
+    options.pauseInBackground       = YES;
 
-    options.timeout         = -1;
-    options.userAgent = @"";
+    options.timeout                 = 30 * 1000 * 1000; // 30 seconds
+    options.userAgent               = @"";
+    options.videotoolboxEnabled     = YES;
+    options.frameMaxWidth           = 960;
+    options.autoReconnect           = NO;
 
     return options;
 }
@@ -43,12 +46,23 @@
     ijkmp_set_picture_queue_capicity(mediaPlayer, _frameBufferCount);
     ijkmp_set_max_fps(mediaPlayer, _maxFps);
     ijkmp_set_framedrop(mediaPlayer, _frameDrop);
+    ijkmp_ios_set_videotoolbox_enabled(mediaPlayer, _videotoolboxEnabled);
+    ijkmp_ios_set_frame_max_width(mediaPlayer, _frameMaxWidth);
 
+    if (self.autoReconnect == NO) {
+        [self setFormatOption:@"reconnect" withInt64:0 to:mediaPlayer];
+    } else {
+        [self setFormatOption:@"reconnect" withInt64:1 to:mediaPlayer];
+    }
+
+#if 0
     if (self.timeout > 0) {
         [self setFormatOption:@"timeout"
                     withInt64:self.timeout
                            to:mediaPlayer];
     }
+#endif
+
     if ([self.userAgent isEqualToString:@""] == NO) {
         [self setFormatOption:@"user-agent" withString:self.userAgent to:mediaPlayer];
     }

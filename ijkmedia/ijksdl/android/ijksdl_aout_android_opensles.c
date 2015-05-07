@@ -316,7 +316,7 @@ static int aout_open_audio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_Aud
     ALOGI("OpenSL-ES: native sample rate %d Hz\n", native_sample_rate);
 
     CHECK_COND_ERROR((desired->format == AUDIO_S16SYS), "%s: not AUDIO_S16SYS", __func__);
-    CHECK_COND_ERROR((desired->channels == 2), "%s: not 2 channel", __func__);
+    CHECK_COND_ERROR((desired->channels == 2 || desired->channels == 1), "%s: not 1,2 channel", __func__);
     CHECK_COND_ERROR((desired->freq >= 8000 && desired->freq <= 48000), "%s: unsupport freq %d Hz", __func__, desired->freq);
     if (SDL_Android_GetApiLevel() < IJK_API_21_LOLLIPOP &&
         native_sample_rate > 0 &&
@@ -341,7 +341,17 @@ static int aout_open_audio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_Aud
 
     format_pcm->bitsPerSample    = SL_PCMSAMPLEFORMAT_FIXED_16;
     format_pcm->containerSize    = SL_PCMSAMPLEFORMAT_FIXED_16;
-    format_pcm->channelMask      = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+    switch (desired->channels) {
+    case 2:
+        format_pcm->channelMask  = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+        break;
+    case 1:
+        format_pcm->channelMask  = SL_SPEAKER_FRONT_CENTER;
+        break;
+    default:
+        ALOGE("%s, invalid channel %d", __func__, desired->channels);
+        goto fail;
+    }
     format_pcm->endianness       = SL_BYTEORDER_LITTLEENDIAN;
 
     SLDataSource audio_source = {&loc_bufq, format_pcm};
@@ -465,6 +475,7 @@ static double aout_get_latency_seconds(SDL_Aout *aout)
         return ((double)opaque->milli_per_buffer) * OPENSLES_BUFFERS / 1000;
     }
 
+    // assume there is always a buffer in coping
     double latency = ((double)opaque->milli_per_buffer) * state.count / 1000;
     return latency;
 }

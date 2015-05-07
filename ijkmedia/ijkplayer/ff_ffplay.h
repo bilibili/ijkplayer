@@ -50,7 +50,7 @@ void      ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc);
 void      ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count);
 void      ffp_set_max_fps(FFPlayer *ffp, int max_fps);
 void      ffp_set_framedrop(FFPlayer *ffp, int framedrop);
-
+void      ffp_set_max_buffer_size(FFPlayer *ffp, int max_buffer_size);
 int       ffp_get_video_codec_info(FFPlayer *ffp, char **codec_info);
 int       ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info);
 
@@ -59,6 +59,7 @@ int       ffp_prepare_async_l(FFPlayer *ffp, const char *file_name);
 int       ffp_start_from_l(FFPlayer *ffp, long msec);
 int       ffp_start_l(FFPlayer *ffp);
 int       ffp_pause_l(FFPlayer *ffp);
+int       ffp_is_paused_l(FFPlayer *ffp);
 int       ffp_stop_l(FFPlayer *ffp);
 int       ffp_wait_stop_l(FFPlayer *ffp);
 

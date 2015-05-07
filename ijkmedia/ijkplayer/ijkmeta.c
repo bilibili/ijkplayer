@@ -185,8 +185,11 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
 
     for (int i = 0; i < ic->nb_streams; i++) {
         AVStream *st = ic->streams[i];
+        if (!st)
+            continue;
+
         IjkMediaMeta *stream_meta = ijkmeta_create();
-        if (!st || !stream_meta)
+        if (!stream_meta)
             continue;
 
         if (st->codec) {

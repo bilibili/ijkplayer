@@ -28,6 +28,8 @@
 #include "ijksdl/ijksdl_vout_internal.h"
 #include "ijksdl/ffmpeg/ijksdl_vout_overlay_ffmpeg.h"
 #import "IJKSDLGLView.h"
+#include "ijksdl_vout_overlay_videotoolbox.h"
+#import "IJKVideoToolBox.h"
 
 typedef struct SDL_VoutSurface_Opaque {
     SDL_Vout *vout;
@@ -39,7 +41,14 @@ typedef struct SDL_Vout_Opaque {
 
 static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, Uint32 format, SDL_Vout *vout)
 {
-    return SDL_VoutFFmpeg_CreateOverlay(width, height, format, vout);
+    if (format == SDL_FCC_NV12)
+    {
+        return SDL_VoutVideoToolBox_CreateOverlay(width, height, format, vout);
+    }
+    else
+    {
+        return SDL_VoutFFmpeg_CreateOverlay(width, height, format, vout);
+    }
 }
 
 static SDL_VoutOverlay *vout_create_overlay(int width, int height, Uint32 format, SDL_Vout *vout)
@@ -109,7 +118,6 @@ SDL_Vout *SDL_VoutIos_CreateForGLES2()
 
     SDL_Vout_Opaque *opaque = vout->opaque;
     opaque->gl_view = nil;
-
     vout->create_overlay = vout_create_overlay;
     vout->free_l = vout_free_l;
     vout->display_overlay = voud_display_overlay;

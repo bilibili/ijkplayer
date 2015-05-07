@@ -37,5 +37,6 @@
 
 @property(nonatomic,strong) NSLock  *appActivityLock;
 @property(nonatomic)        CGFloat  fps;
+@property(nonatomic)        CGFloat  scaleFactor;
 
 @end

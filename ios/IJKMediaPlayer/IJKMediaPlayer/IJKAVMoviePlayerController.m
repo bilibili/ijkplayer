@@ -126,6 +126,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     BOOL _isSeeking;
     BOOL _isError;
     BOOL _isCompleted;
+    BOOL _isShutdown;
     
     BOOL _pauseInBackground;
     
@@ -150,6 +151,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 @synthesize controlStyle                = _controlStyle;
 @synthesize scalingMode                 = _scalingMode;
 @synthesize shouldAutoplay              = _shouldAutoplay;
+static IJKAVMoviePlayerController* instance;
 
 - (id)initWithContentURL:(NSURL *)aUrl
 {
@@ -187,9 +189,22 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     return self;
 }
 
++ (id)getInstance:(NSString *)aUrl
+{
+    if (instance == nil) {
+        instance = [[IJKAVMoviePlayerController alloc] initWithContentURLString:aUrl];
+    } else {
+        instance = [instance initWithContentURLString:aUrl];
+    }
+    return instance;
+}
+
 - (id)initWithContentURLString:(NSString *)aUrl
 {
     NSURL *url;
+    if (aUrl == nil) {
+        aUrl = @"";
+    }
     if ([aUrl rangeOfString:@"/"].location == 0) {
         //本地
         url = [NSURL fileURLWithPath:aUrl];
@@ -267,6 +282,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 
 - (void)shutdown
 {
+    _isShutdown = YES;
     [self stop];
     
     if (_playerItem != nil) {
@@ -291,7 +307,13 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 
 - (UIImage *)thumbnailImageAtCurrentTime
 {
-    return nil;
+    AVAssetImageGenerator *imageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:_playAsset];
+    NSError *error = nil;
+    CMTime time = CMTimeMakeWithSeconds(self.currentPlaybackTime, 1);
+    CMTime actualTime;
+    CGImageRef cgImage = [imageGenerator copyCGImageAtTime:time actualTime:&actualTime error:&error];
+    UIImage *image = [UIImage imageWithCGImage:cgImage];
+    return image;
 }
 
 - (void)setCurrentPlaybackTime:(NSTimeInterval)aCurrentPlaybackTime
@@ -300,17 +322,19 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
         return;
     
     _isSeeking = YES;
-    
     [self didPlaybackStateChange];
     [self didLoadStateChange];
+    if (_isPrerolling) {
+        [_player pause];
+    }
     
-    [_player pause];
     [_player seekToTime:CMTimeMakeWithSeconds(aCurrentPlaybackTime, NSEC_PER_SEC)
       completionHandler:^(BOOL finished) {
           dispatch_async(dispatch_get_main_queue(), ^{
               _isSeeking = NO;
-              [_player play];
-              
+              if (_isPrerolling) {
+                  [_player play];
+              }
               [self didPlaybackStateChange];
               [self didLoadStateChange];
           });
@@ -395,6 +419,9 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 
 - (void)didPrepareToPlayAsset:(AVURLAsset *)asset withKeys:(NSArray *)requestedKeys
 {
+    if (_isShutdown)
+        return;
+
     /* Make sure that the value of each key has loaded successfully. */
     for (NSString *thisKey in requestedKeys)
     {
@@ -602,16 +629,25 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
 
 - (void)assetFailedToPrepareForPlayback:(NSError *)error
 {
+    if (_isShutdown)
+        return;
+
     [self onError:error];
 }
 
 - (void)playerItemFailedToPlayToEndTime:(NSNotification *)notification
 {
+    if (_isShutdown)
+        return;
+
     [self onError:[notification.userInfo objectForKey:@"error"]];
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
+    if (_isShutdown)
+        return;
+
     _isCompleted = YES;
     
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -635,6 +671,9 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
                         change:(NSDictionary*)change
                        context:(void*)context
 {
+    if (_isShutdown)
+        return;
+
     if (context == KVO_AVPlayerItem_state)
     {
         /* AVPlayerItem "status" property value observer. */
@@ -841,6 +880,30 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
                                                       object:nil];
     }
 }
+
+- (void)setScalingMode: (MPMovieScalingMode) aScalingMode
+{
+    MPMovieScalingMode newScalingMode = aScalingMode;
+    switch (aScalingMode) {
+        case MPMovieScalingModeNone:
+            [_view setContentMode:UIViewContentModeCenter];
+            break;
+        case MPMovieScalingModeAspectFit:
+            [_view setContentMode:UIViewContentModeScaleAspectFit];
+            break;
+        case MPMovieScalingModeAspectFill:
+            [_view setContentMode:UIViewContentModeScaleAspectFill];
+            break;
+        case MPMovieScalingModeFill:
+            [_view setContentMode:UIViewContentModeScaleToFill];
+            break;
+        default:
+            newScalingMode = _scalingMode;
+    }
+    
+    _scalingMode = newScalingMode;
+}
+
 
 - (void)applicationWillEnterForeground
 {
