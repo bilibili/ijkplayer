@@ -22,7 +22,7 @@ IJK_FFMPEG_COMMIT=ijk-r0.2.2-dev
 IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
 # gas-preprocessor backup
-# https://github.com/bbcallen/gas-preprocessor.git
+# https://github.com/Bilibili/gas-preprocessor.git
 
 set -e
 TOOLS=tools
