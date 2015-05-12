@@ -2062,7 +2062,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         if(is->video_st->avg_frame_rate.den && is->video_st->avg_frame_rate.num) {
             double fps = av_q2d(is->video_st->avg_frame_rate);
-            if (fps > ffp->max_fps && fps < 100.0) {
+            if (fps > ffp->max_fps && fps < 130.0) {
                 is->is_video_high_fps = 1;
                 ALOGI("fps: %lf (too high)\n", fps);
             } else {
@@ -2071,7 +2071,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         }
         if(is->video_st->r_frame_rate.den && is->video_st->r_frame_rate.num) {
             double tbr = av_q2d(is->video_st->r_frame_rate);
-            if (tbr > ffp->max_fps && tbr < 100.0) {
+            if (tbr > ffp->max_fps && tbr < 130.0) {
                 is->is_video_high_fps = 1;
                 ALOGI("fps: %lf (too high)\n", tbr);
             } else {
@@ -2566,6 +2566,7 @@ static int read_thread(void *arg)
                 }
             }
         }
+        pkt->flags = 0;
         ret = av_read_frame(ic, pkt);
         if (ret < 0) {
             if (ret == AVERROR_INVALIDDATA && (pkt->flags & AV_PKT_FLAG_MP4_PF)) {
