@@ -62,7 +62,7 @@ FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-cross-compile"
 # FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-symver"
 
 # Developer options (useful when working on FFmpeg itself):
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-stripping"
+#FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-stripping"
 
 ##
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --arch=$FF_ARCH"
@@ -82,7 +82,7 @@ FFMPEG_CFG_FLAGS_ARM=
 FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-pic"
 FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-neon"
 FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-optimizations"
-FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-debug"
+#FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-debug"
 FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-small"
 
 echo "build_root: $FF_BUILD_ROOT"

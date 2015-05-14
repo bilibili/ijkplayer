@@ -2729,7 +2729,7 @@ static int read_thread(void *arg)
         {
             av_free_packet(pkt);
             
-            printf("isDropAllPackets\n");
+//            printf("isDropAllPackets\n");
             
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
@@ -2742,7 +2742,7 @@ static int read_thread(void *arg)
             {
                 isFlushing = false;
             }else{
-                printf("isFlushing\n");
+//                printf("isFlushing\n");
                 
                 av_free_packet(pkt);
                 
