@@ -517,7 +517,9 @@ typedef struct FFPlayer {
     // add by william shi
     int stalled_count;
     
-    //0:LIVE 1:VOD
+    //0:Low Delay Live
+    //1:High Delay Live
+    //2:VOD
     int data_source_type;
     
 } FFPlayer;

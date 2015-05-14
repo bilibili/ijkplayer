@@ -14,13 +14,15 @@
 @implementation IJKVideoViewController
 {
     NSMutableArray *_registeredNotifications;
+    IJKMPMovieSourceType mUrlSourceType;
 }
 
 @synthesize urlString = _urlString;
 
-- (void)setUrlString:(NSString *)URLString
+- (void)setUrlString:(NSString *)URLString UrlSourceType:(IJKMPMovieSourceType) urlSourceType
 {
     _urlString = URLString;
+    mUrlSourceType = urlSourceType;
 }
 
 - (id)initView
@@ -56,7 +58,7 @@
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
-    self.player.movieSourceType = IJKMPMovieSourceTypeLiveStreaming;
+    self.player.movieSourceType = mUrlSourceType;
 
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
@@ -317,7 +319,7 @@
         self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
         self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         self.player.view.frame = self.view.bounds;
-        self.player.movieSourceType = IJKMPMovieSourceTypeLiveStreaming;
+        self.player.movieSourceType = mUrlSourceType;
         
         self.view.autoresizesSubviews = YES;
         [self.view addSubview:self.player.view];

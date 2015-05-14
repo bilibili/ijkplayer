@@ -437,13 +437,18 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (!_mediaPlayer) return;
     
     IJKMPMovieSourceType newMPMovieSourceType = aMovieSourceType;
-    //0:LIVE 1:VOD
+    //0:Low Delay Live
+    //1:High Delay Live
+    //2:VOD
     switch (aMovieSourceType) {
-        case IJKMPMovieSourceTypeLiveStreaming:
+        case IJKMPMovieSourceTypeLowDelayLiveStreaming:
             ijkmp_set_data_source_type(_mediaPlayer,0);
             break;
-        case IJKMPMovieSourceTypeOnDemandStreaming:
+        case IJKMPMovieSourceTypeHighDelayLiveStreaming:
             ijkmp_set_data_source_type(_mediaPlayer,1);
+            break;
+        case IJKMPMovieSourceTypeOnDemandStreaming:
+            ijkmp_set_data_source_type(_mediaPlayer,2);
             break;
 
         default:

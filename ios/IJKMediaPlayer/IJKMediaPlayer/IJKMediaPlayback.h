@@ -27,7 +27,8 @@
 typedef NS_ENUM(NSInteger, IJKMPMovieSourceType) {
     IJKMPMovieSourceTypeUnknown,
     IJKMPMovieSourceTypeFile,     // Local or progressively downloaded network content
-    IJKMPMovieSourceTypeLiveStreaming, // Live streaming content
+    IJKMPMovieSourceTypeLowDelayLiveStreaming, // Low Delay Live streaming content
+    IJKMPMovieSourceTypeHighDelayLiveStreaming, // High Delay Live streaming content
     IJKMPMovieSourceTypeOnDemandStreaming // on-demand streaming content
 };
 

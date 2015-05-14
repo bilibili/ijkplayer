@@ -2318,7 +2318,10 @@ static int read_thread(void *arg)
         }
     }
 
-    is->realtime = is_realtime(ic) || ffp->data_source_type==0;
+    //0:Low Delay Live
+    //1:High Delay Live
+    //2:VOD
+    is->realtime = is_realtime(ic) || ffp->data_source_type==0 || ffp->data_source_type==1;
     if(is->realtime)
     {
         printf("realtime data source\n");
@@ -2452,10 +2455,13 @@ static int read_thread(void *arg)
     
     //for flush
     bool isFlushing = false;
+    
+    bool isDropAllPackets = false;
 
     for (;;) {
         if (is->abort_request)
             break;
+
 #ifdef FFP_MERGE
         if (is->paused != is->last_paused) {
             is->last_paused = is->paused;
@@ -2545,8 +2551,30 @@ static int read_thread(void *arg)
             }
             is->queue_attachments_req = 0;
         }
+        
+        if(is->realtime && ffp->data_source_type==1)
+        {
+            if (is->pause_req){
+                isDropAllPackets = true;
+            }else{
+                if(isDropAllPackets)
+                {
+                    isDropAllPackets = false;
+                    if (is->audio_stream >= 0) {
+                        packet_queue_flush(&is->audioq);
+                        packet_queue_put(&is->audioq, &flush_pkt);
+                    }
+                    
+                    if (is->video_stream >= 0) {
+                        packet_queue_flush(&is->videoq);
+                        packet_queue_put(&is->videoq, &flush_pkt);
+                        isFlushing = true;
+                    }
+                }
+            }
+        }
 
-        if(is->realtime)
+        if(is->realtime && ffp->data_source_type==0)
         {
             // check stall
             if(av_stalled_begin_time==0)
@@ -2697,12 +2725,25 @@ static int read_thread(void *arg)
             }
         }
         ret = av_read_frame(ic, pkt);
+        if(isDropAllPackets)
+        {
+            av_free_packet(pkt);
+            
+//            printf("isDropAllPackets\n");
+            
+            SDL_LockMutex(wait_mutex);
+            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
+            SDL_UnlockMutex(wait_mutex);
+            continue;
+        }
         if(isFlushing)
         {
             if(pkt->flags & AV_PKT_FLAG_KEY && pkt->stream_index==is->video_stream)
             {
                 isFlushing = false;
             }else{
+//                printf("isFlushing\n");
+                
                 av_free_packet(pkt);
                 
                 SDL_LockMutex(wait_mutex);

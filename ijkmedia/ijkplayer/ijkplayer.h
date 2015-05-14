@@ -182,7 +182,9 @@ void            ijkmp_inc_ref(IjkMediaPlayer *mp);
 void            ijkmp_dec_ref(IjkMediaPlayer *mp);
 void            ijkmp_dec_ref_p(IjkMediaPlayer **pmp);
 
-//0:LIVE 1:VOD
+//0:Low Delay Live
+//1:High Delay Live
+//2:VOD
 void            ijkmp_set_data_source_type(IjkMediaPlayer *mp, int type);
 
 int             ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);

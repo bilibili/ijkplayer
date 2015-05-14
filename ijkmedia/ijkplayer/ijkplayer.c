@@ -105,7 +105,7 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
         goto fail;
     
     // default is VOD mode
-    mp->ffplayer->data_source_type = 1;
+    mp->ffplayer->data_source_type = 2;
 
     mp->msg_loop = msg_loop;
 
@@ -322,6 +322,9 @@ static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
     return 0;
 }
 
+//0:Low Delay Live
+//1:High Delay Live
+//2:VOD
 void ijkmp_set_data_source_type(IjkMediaPlayer *mp, int type)
 {
     assert(mp);
