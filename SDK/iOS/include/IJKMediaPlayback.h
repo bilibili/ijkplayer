@@ -27,7 +27,8 @@
 typedef NS_ENUM(NSInteger, IJKMPMovieSourceType) {
     IJKMPMovieSourceTypeUnknown,
     IJKMPMovieSourceTypeFile,     // Local or progressively downloaded network content
-    IJKMPMovieSourceTypeLiveStreaming, // Live streaming content
+    IJKMPMovieSourceTypeLowDelayLiveStreaming, // Low Delay Live streaming content
+    IJKMPMovieSourceTypeHighDelayLiveStreaming, // High Delay Live streaming content
     IJKMPMovieSourceTypeOnDemandStreaming // on-demand streaming content
 };
 
@@ -80,7 +81,7 @@ IJK_EXTERN NSString *const IJKMediaPlaybackIsPreparedToPlayDidChangeNotification
 IJK_EXTERN NSString *const IJKMoviePlayerLoadStateDidChangeNotification;
 IJK_EXTERN NSString *const IJKMoviePlayerPlaybackDidFinishNotification;
 IJK_EXTERN NSString *const IJKMoviePlayerPlaybackStateDidChangeNotification;
-
+IJK_EXTERN NSString *const IJKMoviePlayerVideoDecoderOpenNotification;
 @end
 
 #pragma mark IJKMediaResource

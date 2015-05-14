@@ -14,7 +14,7 @@
 
 @property(atomic, retain) id<IJKMediaPlayback> player;
 
-- (void)setUrlString:(NSString *)URLString;
+- (void)setUrlString:(NSString *)URLString UrlSourceType:(IJKMPMovieSourceType) urlSourceType;
 
 - (id)initView;
 

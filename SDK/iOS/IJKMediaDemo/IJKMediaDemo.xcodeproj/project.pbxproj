@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AB729FF71AEA39CC00757392 /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB729FF61AEA39CC00757392 /* libIJKMediaPlayer.a */; };
+		AB2A1EE61B04877F0091A6AD /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB2A1EE51B04877F0091A6AD /* libIJKMediaPlayer.a */; };
+		AB4939D61AFB207E00E71A34 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB4939D51AFB207E00E71A34 /* CoreVideo.framework */; };
+		ABBADD481AF9C336006B688B /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ABBADD471AF9C336006B688B /* libstdc++.dylib */; };
+		ABCC3F7D1AF8594700214BBE /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */; };
 		ABD5DF081AE4D43D00778032 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABD5DF051AE4D43D00778032 /* MainViewController.xib */; };
 		ABD5DF091AE4D43D00778032 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ABD5DF061AE4D43D00778032 /* MainViewController.m */; };
 		E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E60E8C2919EF70BB005B5B6E /* CoreMedia.framework */; };
@@ -43,7 +46,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		AB729FF61AEA39CC00757392 /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIJKMediaPlayer.a; path = ../lib/libIJKMediaPlayer.a; sourceTree = "<group>"; };
+		AB2A1EE51B04877F0091A6AD /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIJKMediaPlayer.a; path = ../lib/libIJKMediaPlayer.a; sourceTree = "<group>"; };
+		AB4939D51AFB207E00E71A34 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		ABBADD471AF9C336006B688B /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
+		ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		ABD5DF051AE4D43D00778032 /* MainViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainViewController.xib; sourceTree = "<group>"; };
 		ABD5DF061AE4D43D00778032 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		ABD5DF071AE4D43D00778032 /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
@@ -91,7 +97,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AB729FF71AEA39CC00757392 /* libIJKMediaPlayer.a in Frameworks */,
+				AB2A1EE61B04877F0091A6AD /* libIJKMediaPlayer.a in Frameworks */,
+				AB4939D61AFB207E00E71A34 /* CoreVideo.framework in Frameworks */,
+				ABBADD481AF9C336006B688B /* libstdc++.dylib in Frameworks */,
+				ABCC3F7D1AF8594700214BBE /* VideoToolbox.framework in Frameworks */,
 				E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */,
 				E61B45AE19EF7021002792EC /* AVFoundation.framework in Frameworks */,
 				E64D4F4F1938CD2100F1C75D /* QuartzCore.framework in Frameworks */,
@@ -153,7 +162,10 @@
 		E6903EFE17EAF70200CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				AB729FF61AEA39CC00757392 /* libIJKMediaPlayer.a */,
+				AB2A1EE51B04877F0091A6AD /* libIJKMediaPlayer.a */,
+				AB4939D51AFB207E00E71A34 /* CoreVideo.framework */,
+				ABBADD471AF9C336006B688B /* libstdc++.dylib */,
+				ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */,
 				E63FC29917F062E8003551EB /* libbz2.dylib */,
 				E63FC29517F060A7003551EB /* libz.dylib */,
 				E63FC28F17F04C83003551EB /* AudioToolbox.framework */,
@@ -240,6 +252,11 @@
 				CLASSPREFIX = IJK;
 				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = bilibili;
+				TargetAttributes = {
+					E6903EFB17EAF70200CFD954 = {
+						DevelopmentTeam = 634AFE5Y68;
+					};
+				};
 			};
 			buildConfigurationList = E6903EF717EAF70200CFD954 /* Build configuration list for PBXProject "IJKMediaDemo" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -377,6 +394,8 @@
 					"$(ARCHS_STANDARD)",
 					armv7s,
 				);
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -385,12 +404,13 @@
 					../include,
 				);
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/WilliamShi/Desktop/HoopMediaPlayer/ijkplayer/SDK/iOS/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -403,6 +423,8 @@
 					"$(ARCHS_STANDARD)",
 					armv7s,
 				);
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -411,12 +433,13 @@
 					../include,
 				);
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/WilliamShi/Desktop/HoopMediaPlayer/ijkplayer/SDK/iOS/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};

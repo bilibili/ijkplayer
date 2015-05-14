@@ -25,11 +25,24 @@
     if (self.mediaProgressSlider.value<=self.mediaProgressSlider.maximumValue && self.mediaProgressSlider.value>=0) {
         self.delegatePlayer.currentPlaybackTime = self.mediaProgressSlider.value*1.0;
     }
+    
+    [self refreshMediaControl];
+}
+
+-(void)sliderTouchDown:(id)sender
+{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(refreshMediaControl) object:nil];
 }
 
 - (void)awakeFromNib
 {
-        [self.mediaProgressSlider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
+    //    [self.mediaProgressSlider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
+    
+    [self.mediaProgressSlider addTarget:self action:@selector(sliderTouchDown:) forControlEvents:UIControlEventTouchDown];
+    
+    [self.mediaProgressSlider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.mediaProgressSlider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventTouchUpOutside];
     
     [self refreshMediaControl];
 }

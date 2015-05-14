@@ -73,5 +73,6 @@
 
 - (id)initWithContentURL:(NSURL *)aUrl;
 - (id)initWithContentURLString:(NSString *)aUrl;
++ (id)getInstance:(NSString *)aUrl;
 
 @end

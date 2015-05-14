@@ -41,7 +41,7 @@
 {
     IJKVideoViewController *viewController;
     viewController = [[IJKVideoViewController alloc] initView];
-    [viewController setUrlString:self.wsUrlTextField.text];
+    [viewController setUrlString:self.wsUrlTextField.text UrlSourceType:IJKMPMovieSourceTypeLowDelayLiveStreaming];
     [self presentModalViewController:viewController animated:YES];
 }
 
@@ -49,7 +49,7 @@
 {
     IJKVideoViewController *viewController;
     viewController = [[IJKVideoViewController alloc] initView];
-    [viewController setUrlString:self.lxUrlTextField.text];
+    [viewController setUrlString:self.lxUrlTextField.text UrlSourceType:IJKMPMovieSourceTypeOnDemandStreaming];
     [self presentModalViewController:viewController animated:YES];
 }
 
@@ -57,7 +57,7 @@
 {
     IJKVideoViewController *viewController;
     viewController = [[IJKVideoViewController alloc] initView];
-    [viewController setUrlString:self.dlUrlTextField.text];
+    [viewController setUrlString:self.dlUrlTextField.text UrlSourceType:IJKMPMovieSourceTypeHighDelayLiveStreaming];
     [self presentModalViewController:viewController animated:YES];
 }
 
