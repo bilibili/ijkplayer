@@ -705,9 +705,10 @@ public class VideoView extends SurfaceView implements
     }
     
     //add by william
-    private int mDataSourceType = LIVE_STREAMING_TYPE;
-    public static final int LIVE_STREAMING_TYPE = 0;
-    public static final int VOD_STREAMING_TYPE = 1;
+    private int mDataSourceType = VOD_STREAMING_TYPE;
+    public static final int LOWDELAY_LIVE_STREAMING_TYPE = 0;
+    public static final int HIGHDELAY_LIVE_STREAMING_TYPE = 1;
+    public static final int VOD_STREAMING_TYPE = 2;
     public void setDataSourceType(int type)
     {
     	mDataSourceType = type;
