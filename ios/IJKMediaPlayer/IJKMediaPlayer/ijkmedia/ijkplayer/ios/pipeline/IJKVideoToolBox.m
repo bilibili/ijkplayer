@@ -401,7 +401,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
     successed:
         return;
     failed:
-        ALOGI("FailedSignal: %lf\n", newFrame->pts);
+        // ALOGI("FailedSignal: %lf\n", newFrame->pts);
         if (newFrame) {
             free(newFrame);
         }
