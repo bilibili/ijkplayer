@@ -483,7 +483,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     if (context->refresh_session) {
         decoderFlags |= kVTDecodeFrame_DoNotOutputFrame;
-        ALOGI("flag :%d flag %d \n", decoderFlags,avpkt->flags);
+        // ALOGI("flag :%d flag %d \n", decoderFlags,avpkt->flags);
     }
 
     if (context->refresh_request) {
