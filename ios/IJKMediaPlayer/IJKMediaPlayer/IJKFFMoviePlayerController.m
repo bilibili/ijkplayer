@@ -399,6 +399,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return 0.0f;
 
     NSTimeInterval ret = ijkmp_get_current_position(_mediaPlayer);
+    if (isnan(ret) || isinf(ret))
+        return -1;
+
     return ret / 1000;
 }
 
@@ -408,6 +411,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return 0.0f;
 
     NSTimeInterval ret = ijkmp_get_duration(_mediaPlayer);
+    if (isnan(ret) || isinf(ret))
+        return -1;
+
     return ret / 1000;
 }
 
