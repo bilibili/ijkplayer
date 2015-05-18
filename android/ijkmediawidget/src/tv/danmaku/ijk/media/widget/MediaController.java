@@ -393,7 +393,7 @@ public class MediaController extends FrameLayout {
     }
 
     private static String generateTime(long position) {
-        int totalSeconds = (int) (position / 1000);
+        int totalSeconds = (int) ((position / 1000.0)+0.5);
 
         int seconds = totalSeconds % 60;
         int minutes = (totalSeconds / 60) % 60;
