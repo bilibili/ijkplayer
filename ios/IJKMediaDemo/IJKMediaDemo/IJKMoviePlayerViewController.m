@@ -15,6 +15,8 @@
 {
     NSMutableArray *_registeredNotifications;
     IJKMPMovieSourceType mUrlSourceType;
+    
+    BOOL misLocalAVPlayer;
 }
 
 @synthesize urlString = _urlString;
@@ -23,6 +25,11 @@
 {
     _urlString = URLString;
     mUrlSourceType = urlSourceType;
+}
+
+- (void)setLocalAVPlayer:(BOOL)isLocalAVPlayer
+{
+    misLocalAVPlayer = isLocalAVPlayer;
 }
 
 - (id)initView
@@ -54,11 +61,16 @@
 //    NSURL *theMovieURL = [NSURL URLWithString:@"rtmp://pull1.arenazb.hupu.com/test/789"];
     NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
 
-    [IJKFFMoviePlayerController setLogReport:YES];
-    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
+    if (misLocalAVPlayer) {
+            self.player = [[IJKAVMoviePlayerController alloc] initWithContentURL:theMovieURL];
+    }else{
+        [IJKFFMoviePlayerController setLogReport:YES];
+        self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
+        self.player.movieSourceType = mUrlSourceType;
+    }
+
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
-    self.player.movieSourceType = mUrlSourceType;
 
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
@@ -315,11 +327,16 @@
         
         NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
         
-        [IJKFFMoviePlayerController setLogReport:YES];
-        self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
+        if (misLocalAVPlayer) {
+            self.player = [[IJKAVMoviePlayerController alloc] initWithContentURL:theMovieURL];
+        }else{
+            [IJKFFMoviePlayerController setLogReport:YES];
+            self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
+            self.player.movieSourceType = mUrlSourceType;
+        }
+
         self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         self.player.view.frame = self.view.bounds;
-        self.player.movieSourceType = mUrlSourceType;
         
         self.view.autoresizesSubviews = YES;
         [self.view addSubview:self.player.view];

@@ -2446,6 +2446,10 @@ static int read_thread(void *arg)
     ffp->stalled_count = 0;
     
     int live_duration_lwm = REALTIME_DURATION_LWM;
+    if(ffp->data_source_type==1)
+    {
+        live_duration_lwm = REALTIME_DURATION_LWM;
+    }
     
     // for drop
     uint64_t drop_audiopacket_timing_begin = 0;
@@ -2555,21 +2559,29 @@ static int read_thread(void *arg)
         if(is->realtime && ffp->data_source_type==1)
         {
             if (is->pause_req){
-                isDropAllPackets = true;
-            }else{
-                if(isDropAllPackets)
+                if(!isDropAllPackets)
                 {
-                    isDropAllPackets = false;
                     if (is->audio_stream >= 0) {
                         packet_queue_flush(&is->audioq);
                         packet_queue_put(&is->audioq, &flush_pkt);
                     }
                     
                     if (is->video_stream >= 0) {
+                        if (ffp->node_vdec) {
+                            ffpipenode_flush(ffp->node_vdec);
+                        }
                         packet_queue_flush(&is->videoq);
                         packet_queue_put(&is->videoq, &flush_pkt);
-                        isFlushing = true;
                     }
+                    set_clock(&is->extclk, NAN, 0); //fix the slow motion bug
+                    isDropAllPackets = true;
+                }
+            }else{
+                if(isDropAllPackets)
+                {
+                    isDropAllPackets = false;
+                    isFlushing = true;
+                    ffp_toggle_buffering(ffp, 1);
                 }
             }
         }
@@ -2625,8 +2637,14 @@ static int read_thread(void *arg)
                 }
                 
                 if (is->video_stream >= 0) {
+                    if (ffp->node_vdec) {
+                        ffpipenode_flush(ffp->node_vdec);
+                    }
                     packet_queue_flush(&is->videoq);
                     packet_queue_put(&is->videoq, &flush_pkt);
+                    
+                    set_clock(&is->extclk, NAN, 0); //fix the slow motion bug
+                    
                     isFlushing = true;
                 }
                 
@@ -2657,7 +2675,7 @@ static int read_thread(void *arg)
         if (ffp->infinite_buffer==1 && !is->seek_req && ((is->audioq.duration > live_duration_lwm || is->audio_stream < 0 || is->audioq.abort_request) && (is->videoq.duration > live_duration_lwm || is->video_stream < 0 || is->videoq.abort_request || (is->video_st->disposition & AV_DISPOSITION_ATTACHED_PIC))))
         {
             if (!is->eof) {
-                // ALOGE("ffp_toggle_buffering: full\n");
+//                ALOGE("ffp_toggle_buffering: full\n");
                 ffp_toggle_buffering(ffp, 0);
             }
         }
@@ -2729,7 +2747,7 @@ static int read_thread(void *arg)
         {
             av_free_packet(pkt);
             
-//            printf("isDropAllPackets\n");
+            printf("isDropAllPackets\n");
             
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
@@ -2742,7 +2760,7 @@ static int read_thread(void *arg)
             {
                 isFlushing = false;
             }else{
-//                printf("isFlushing\n");
+                printf("isFlushing\n");
                 
                 av_free_packet(pkt);
                 

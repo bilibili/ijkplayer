@@ -404,7 +404,7 @@
 					../include,
 				);
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/WilliamShi/Desktop/HoopMediaPlayer/ijkplayer/SDK/iOS/lib,
@@ -433,7 +433,7 @@
 					../include,
 				);
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/WilliamShi/Desktop/HoopMediaPlayer/ijkplayer/SDK/iOS/lib,

@@ -14,8 +14,12 @@
 @property (nonatomic, strong) IBOutlet UITextField *lxUrlTextField;
 @property (nonatomic, strong) IBOutlet UITextField *dlUrlTextField;
 
+@property (nonatomic, strong) IBOutlet UITextField *avplayerUrlTextField;
+
 -(IBAction)playWSButtonAction:(id)sender;
 -(IBAction)playLXButtonAction:(id)sender;
 -(IBAction)playDLButtonAction:(id)sender;
+
+-(IBAction)playAVPLayerButtonAction:(id)sender;
 
 @end

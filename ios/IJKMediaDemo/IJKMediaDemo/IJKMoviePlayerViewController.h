@@ -16,6 +16,8 @@
 
 - (void)setUrlString:(NSString *)URLString UrlSourceType:(IJKMPMovieSourceType) urlSourceType;
 
+- (void)setLocalAVPlayer:(BOOL)isLocalAVPlayer;
+
 - (id)initView;
 
 - (IBAction)onClickMediaControl:(id)sender;
