@@ -187,10 +187,39 @@
             NSLog(@"playbackPlayBackDidFinish: ???: %d\n", reason);
             break;
     }
+
+//    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.player stop];
+        [self.player shutdown];
+        self.player = nil;
+//    });
     
-    [self.player stop];
-    [self.player shutdown];
-    self.player = nil;
+//    dispatch_async(dispatch_get_main_queue(), ^{
+
+        NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
+        
+        if (misLocalAVPlayer) {
+            self.player = [[IJKAVMoviePlayerController alloc] initWithContentURL:theMovieURL];
+        }else{
+            [IJKFFMoviePlayerController setLogReport:YES];
+            self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
+            self.player.movieSourceType = mUrlSourceType;
+        }
+        
+        self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+        self.player.view.frame = self.view.bounds;
+        
+        self.view.autoresizesSubviews = YES;
+        [self.view addSubview:self.player.view];
+        [self.view addSubview:self.mediaControl];
+        
+        self.mediaControl.delegatePlayer = self.player;
+        
+        [self installMovieNotificationObservers];
+        
+        [self.player prepareToPlay];
+        
+//    });
 }
 
 - (void)mediaIsPreparedToPlayDidChange:(NSNotification*)notification
@@ -357,7 +386,6 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.player play];
     });
-    
 }
 
 - (void)applicationWillResignActive

@@ -2160,7 +2160,12 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
 static int decode_interrupt_cb(void *ctx)
 {
     VideoState *is = ctx;
-    return is->abort_request;
+    if(is!=NULL)
+    {
+        return is->abort_request;
+    }else{
+        return 1;
+    }
 }
 
 static int is_realtime(AVFormatContext *s)
@@ -2448,7 +2453,7 @@ static int read_thread(void *arg)
     int live_duration_lwm = REALTIME_DURATION_LWM;
     if(ffp->data_source_type==1)
     {
-        live_duration_lwm = REALTIME_DURATION_LWM;
+        live_duration_lwm = REALTIME_DURATION_LWM*2;
     }
     
     // for drop
@@ -2584,6 +2589,47 @@ static int read_thread(void *arg)
                     ffp_toggle_buffering(ffp, 1);
                 }
             }
+            
+            if(!is->pause_req)
+            {
+                // check delay
+                if(av_begin_time==0)
+                {
+                    av_begin_time = GetNowMs();
+                }
+                if(av_flush_time==0)
+                {
+                    av_flush_time = GetNowMs();
+                }
+                av_now_time = GetNowMs();
+                
+                //drop all
+                if((is->videoq.duration>REALTIME_DURATION_HWM*2.5 && is->audioq.duration>REALTIME_DURATION_HWM*2.5) && av_now_time - av_flush_time>60*1000)
+                {
+                    if (is->audio_stream >= 0) {
+                        packet_queue_flush(&is->audioq);
+                        packet_queue_put(&is->audioq, &flush_pkt);
+                    }
+                    
+                    if (is->video_stream >= 0) {
+                        if (ffp->node_vdec) {
+                            ffpipenode_flush(ffp->node_vdec);
+                        }
+                        packet_queue_flush(&is->videoq);
+                        packet_queue_put(&is->videoq, &flush_pkt);
+                    }
+                    set_clock(&is->extclk, NAN, 0); //fix the slow motion bug
+                    
+                    isFlushing = true;
+                    
+                    ffp_toggle_buffering(ffp, 1);
+                    
+                    printf("live stream is delay,flush all cached packets...\n");
+                    
+                    av_flush_time = 0;
+                }
+            }
+            
         }
 
         if(is->realtime && ffp->data_source_type==0)

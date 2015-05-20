@@ -205,6 +205,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
  //        _registeredNotifications = [[NSMutableArray alloc] init];
  //        [self registerApplicationObservers];
+        
+        NSLog(@"Newest SDK by shilingkai");
     }
     return self;
 }
@@ -318,8 +320,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return;
 
     ijkmp_stop(_mediaPlayer);
-//    [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
-    [self shutdownClose:self];
+    [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
+//    [self shutdownClose:self];
 }
 
 - (void)shutdownClose:(IJKFFMoviePlayerController *) mySelf
