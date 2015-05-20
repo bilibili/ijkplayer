@@ -41,4 +41,9 @@
 
 typedef int (*ijk_format_control_message)(void *opaque, int type, void *data, size_t data_size);
 
+// for compatible
+#ifndef AV_PKT_FLAG_MP4_PF
+#define AV_PKT_FLAG_MP4_PF 0x4000
+#endif
+
 #endif
