@@ -2860,7 +2860,8 @@ static int read_thread(void *arg)
                       (char) (0xff & (ffp->error >> 8)),
                       (char) (0xff & (ffp->error)),
                       ffp_get_error_string(ffp->error));
-                // break;
+                //break;
+                ffp_notify_msg1(ffp, FFP_MSG_ERROR);
             } else {
                 ffp->error = 0;
             }
