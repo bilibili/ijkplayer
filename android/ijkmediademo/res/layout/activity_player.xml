@@ -1,4 +1,5 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -41,4 +42,46 @@
             android:layout_height="60dip" />
     </LinearLayout>
 
-</FrameLayout>
+</FrameLayout> -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+    <tv.danmaku.ijk.media.widget.VideoView
+        android:id="@+id/video_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
+    <LinearLayout
+        android:id="@+id/buffering_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/buffering_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="0"
+            android:scaleType="centerInside"
+            android:singleLine="true"
+            android:text="@string/buffering"
+            android:textSize="12sp" />
+
+        <ProgressBar
+            android:id="@+id/buffering_progress"
+            style="@android:style/Widget.ProgressBar.Large"
+            android:layout_width="60dip"
+            android:layout_height="60dip" />
+    </LinearLayout>
+</LinearLayout>

@@ -22,6 +22,8 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.IMediaPlayer.OnErrorListener;
 import tv.danmaku.ijk.media.widget.MediaController;
 import tv.danmaku.ijk.media.widget.VideoView;
 
@@ -53,6 +55,7 @@ public class VideoPlayerActivity extends Activity {
         mVideoView.setMediaController(mMediaController);
         mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
         mVideoView.setVideoPath(mVideoPath);
+
         mVideoView.requestFocus();
         mVideoView.start();
         

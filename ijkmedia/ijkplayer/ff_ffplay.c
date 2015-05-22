@@ -2586,6 +2586,7 @@ static int read_thread(void *arg)
                 {
                     isDropAllPackets = false;
                     isFlushing = true;
+                    
                     ffp_toggle_buffering(ffp, 1);
                 }
             }
@@ -2604,7 +2605,7 @@ static int read_thread(void *arg)
                 av_now_time = GetNowMs();
                 
                 //drop all
-                if((is->videoq.duration>REALTIME_DURATION_HWM*2.5 && is->audioq.duration>REALTIME_DURATION_HWM*2.5) && av_now_time - av_flush_time>60*1000)
+                if((is->videoq.duration>REALTIME_DURATION_HWM*2.5 && is->audioq.duration>REALTIME_DURATION_HWM*2.5) && av_now_time - av_flush_time>120*1000)
                 {
                     if (is->audio_stream >= 0) {
                         packet_queue_flush(&is->audioq);
@@ -2643,7 +2644,7 @@ static int read_thread(void *arg)
 
             if(av_stalled_now_time-av_stalled_begin_time > 10*1000)
             {
-                if(ffp->stalled_count>=2)
+                if(ffp->stalled_count>=1)
                 {
                     live_duration_lwm = live_duration_lwm + REALTIME_DURATION_LWM*(ffp->stalled_count-1);
                 }else{
