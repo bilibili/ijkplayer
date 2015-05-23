@@ -221,6 +221,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (void)dealloc
 {
+    ijkmp_ios_set_glview(_mediaPlayer, nil);
     [_ffMrl removeTempFiles];
     [self unregisterApplicationObservers];
 }
