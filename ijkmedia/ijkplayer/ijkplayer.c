@@ -183,6 +183,28 @@ void ijkmp_set_player_option(IjkMediaPlayer *mp, const char *name, const char *v
     MPTRACE("%s()=void\n", __func__);
 }
 
+void ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, const char *value)
+{
+    assert(mp);
+
+    MPTRACE("%s()\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_option(mp->ffplayer, opt_category, name, value);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+}
+
+void ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const char *name, int64_t value)
+{
+    assert(mp);
+
+    MPTRACE("%s()\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_option_int(mp->ffplayer, opt_category, name, value);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+}
+
 void ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count)
 {
     assert(mp);
@@ -198,22 +220,14 @@ void ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps)
 {
     assert(mp);
 
-    MPTRACE("ijkmp_set_max_fp(%d)\n", max_fps);
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_max_fps(mp->ffplayer, max_fps);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_max_fp()=void\n");
+    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_FORMAT, "max-fps", max_fps);
 }
 
 void ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop)
 {
     assert(mp);
 
-    MPTRACE("ijkmp_set_framedrop(%d)\n", framedrop);
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_framedrop(mp->ffplayer, framedrop);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_framedrop()=void\n");
+    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_FORMAT, "framedrop", framedrop);
 }
 
 void ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepared)

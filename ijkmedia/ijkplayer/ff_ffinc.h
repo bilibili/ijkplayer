@@ -46,4 +46,9 @@ typedef int (*ijk_format_control_message)(void *opaque, int type, void *data, si
 #define AV_PKT_FLAG_MP4_PF 0x4000
 #endif
 
+#define FFP_OPT_CATEGORY_FORMAT 1
+#define FFP_OPT_CATEGORY_CODEC  2
+#define FFP_OPT_CATEGORY_SWS    3
+#define FFP_OPT_CATEGORY_PLAYER 4
+
 #endif

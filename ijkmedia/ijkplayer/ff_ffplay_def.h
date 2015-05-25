@@ -541,7 +541,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->decoder_reorder_pts    = -1;
     ffp->autoexit               = 0;
     ffp->loop                   = 1;
-    ffp->framedrop              = 0;
+    ffp->framedrop              = 0; // option
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
     av_freep(&ffp->audio_codec_name);
@@ -591,8 +591,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->playable_duration_ms           = 0;
 
-    ffp->pictq_size                     = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT;
-    ffp->max_fps                        = VIDEO_MAX_FPS_DEFAULT;
+    ffp->pictq_size                     = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT; // option
+    ffp->max_fps                        = 31; // option
 
     ffp->format_control_message = NULL;
     ffp->format_control_opaque  = NULL;

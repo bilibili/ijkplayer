@@ -64,6 +64,31 @@ static int64_t g_vdps_total_time = 0;
 static int ffp_format_control_message(struct AVFormatContext *s, int type,
                                       void *data, size_t data_size);
 
+#define OPTION_OFFSET(x) offsetof(FFPlayer, x)
+#define OPTION_INT(default__, min__, max__) \
+    .type = AV_OPT_TYPE_INT, \
+    { .i64 = default__ }, \
+    .min = min__, \
+    .max = max__, \
+    .flags = AV_OPT_FLAG_DECODING_PARAM
+
+static const AVOption ffp_context_options[] = {
+    // original options in ffplay.c
+    { "framedrop",                  "drop frames when cpu is too slow",
+        OPTION_OFFSET(framedrop),   OPTION_INT(0, -1, 1) },
+
+    // extended options in ff_ffplay.c
+    { "max-fps",                    "drop frames in video whose fps is greater than max-fps",
+        OPTION_OFFSET(max_fps),     OPTION_INT(31, 0, 121) },
+    { "video-pictq-size",           "max picture queue frame count",
+        OPTION_OFFSET(pictq_size),  OPTION_INT(VIDEO_PICTURE_QUEUE_SIZE_DEFAULT,
+                                               VIDEO_PICTURE_QUEUE_SIZE_MIN,
+                                               VIDEO_PICTURE_QUEUE_SIZE_MAX) },
+
+    { NULL }
+};
+#undef OPTION_INT
+#undef OPTION_OFFSET
 
 #define FFP_BUF_MSG_PERIOD (3)
 
@@ -2930,7 +2955,6 @@ static const AVClass *ffp_context_child_class_next(const AVClass *prev)
     return NULL;
 }
 
-static const AVOption ffp_context_options[] = { { NULL } };
 const AVClass ffp_context_class = {
     .class_name       = "FFPlayer",
     .item_name        = ffp_context_to_name,
@@ -2950,6 +2974,9 @@ FFPlayer *ffp_create()
     ffp_reset_internal(ffp);
     ffp->av_class = &ffp_context_class;
     ffp->meta = ijkmeta_create();
+
+    av_opt_set_defaults(ffp);
+
     return ffp;
 }
 
@@ -3024,6 +3051,39 @@ void ffp_set_player_option(FFPlayer *ffp, const char *name, const char *value)
     av_dict_set(&ffp->player_opts, name, value, 0);
 }
 
+static AVDictionary **ffp_get_opt_dict(FFPlayer *ffp, int opt_category)
+{
+    assert(ffp);
+
+    switch (opt_category) {
+        case FFP_OPT_CATEGORY_FORMAT:   return &ffp->format_opts;
+        case FFP_OPT_CATEGORY_CODEC:    return &ffp->codec_opts;
+        case FFP_OPT_CATEGORY_SWS:      return &ffp->sws_opts;
+        case FFP_OPT_CATEGORY_PLAYER:   return &ffp->player_opts;
+        default:
+            ALOGE("unknown option category %d\n", opt_category);
+            return NULL;
+    }
+}
+
+void ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const char *value)
+{
+    if (!ffp)
+        return;
+
+    AVDictionary **dict = ffp_get_opt_dict(ffp, opt_category);
+    av_dict_set(dict, name, value, 0);
+}
+
+void ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64_t value)
+{
+    if (!ffp)
+        return;
+
+    AVDictionary **dict = ffp_get_opt_dict(ffp, opt_category);
+    av_dict_set_int(dict, name, value, 0);
+}
+
 void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
 {
     switch (chroma_fourcc) {
@@ -3043,11 +3103,6 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
 void ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count)
 {
     ffp->pictq_size = frame_count;
-}
-
-void ffp_set_max_fps(FFPlayer *ffp, int max_fps)
-{
-    ffp->max_fps = max_fps;
 }
 
 void ffp_set_framedrop(FFPlayer *ffp, int framedrop)
@@ -3096,11 +3151,27 @@ int ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info)
     return 0;
 }
 
+static void ffp_show_dict(const char *tag, AVDictionary *dict)
+{
+    AVDictionaryEntry *t = NULL;
+
+    while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
+        av_log(NULL, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 20, t->key, t->value);
+    }
+}
+
 int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
 {
     assert(ffp);
     assert(!ffp->is);
     assert(file_name);
+
+    av_log(NULL, AV_LOG_INFO, "===== options =====\n");
+    ffp_show_dict("player-opts", ffp->player_opts);
+    ffp_show_dict("format-opts", ffp->format_opts);
+    ffp_show_dict("codec-opts ", ffp->codec_opts);
+    ffp_show_dict("sws-opts   ", ffp->sws_opts);
+    av_log(NULL, AV_LOG_INFO, "===================\n");
 
     av_opt_set_dict(ffp, &ffp->player_opts);
 
