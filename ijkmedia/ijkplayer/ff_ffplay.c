@@ -2914,6 +2914,32 @@ void ffp_io_stat_complete_register(void (*cb)(const char *url,
     // avijk_io_stat_complete_register(cb);
 }
 
+static const char *ffp_context_to_name(void *ptr)
+{
+    return "FFPlayer";
+}
+
+
+static void *ffp_context_child_next(void *obj, void *prev)
+{
+    return NULL;
+}
+
+static const AVClass *ffp_context_child_class_next(const AVClass *prev)
+{
+    return NULL;
+}
+
+static const AVOption ffp_context_options[] = { { NULL } };
+const AVClass ffp_context_class = {
+    .class_name       = "FFPlayer",
+    .item_name        = ffp_context_to_name,
+    .option           = ffp_context_options,
+    .version          = LIBAVUTIL_VERSION_INT,
+    .child_next       = ffp_context_child_next,
+    .child_class_next = ffp_context_child_class_next,
+};
+
 FFPlayer *ffp_create()
 {
     FFPlayer* ffp = (FFPlayer*) av_mallocz(sizeof(FFPlayer));
@@ -2922,6 +2948,7 @@ FFPlayer *ffp_create()
 
     msg_queue_init(&ffp->msg_queue);
     ffp_reset_internal(ffp);
+    ffp->av_class = &ffp_context_class;
     ffp->meta = ijkmeta_create();
     return ffp;
 }
@@ -2987,6 +3014,14 @@ void ffp_set_sws_option(FFPlayer *ffp, const char *name, const char *value)
         return;
 
     av_dict_set(&ffp->sws_opts, name, value, 0);
+}
+
+void ffp_set_player_option(FFPlayer *ffp, const char *name, const char *value)
+{
+    if (!ffp)
+        return;
+
+    av_dict_set(&ffp->player_opts, name, value, 0);
 }
 
 void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
@@ -3066,6 +3101,8 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
     assert(ffp);
     assert(!ffp->is);
     assert(file_name);
+
+    av_opt_set_dict(ffp, &ffp->player_opts);
 
     VideoState *is = stream_open(ffp, file_name, NULL);
     if (!is) {

@@ -46,6 +46,7 @@ void      ffp_set_format_callback(FFPlayer *ffp, ijk_format_control_message cb, 
 void      ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value);
 void      ffp_set_codec_option(FFPlayer *ffp, const char *name, const char *value);
 void      ffp_set_sws_option(FFPlayer *ffp, const char *name, const char *value);
+void      ffp_set_player_option(FFPlayer *ffp, const char *name, const char *value);
 void      ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc);
 void      ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count);
 void      ffp_set_max_fps(FFPlayer *ffp, int max_fps);

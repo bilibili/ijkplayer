@@ -143,33 +143,44 @@ void ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *v
 {
     assert(mp);
 
-    MPTRACE("ijkmp_set_format_option(%s, %s)\n", name, value);
+    MPTRACE("%s(%s, %s)\n", __func__, name, value);
     pthread_mutex_lock(&mp->mutex);
     ffp_set_format_option(mp->ffplayer, name, value);
     pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_format_option()=void\n");
+    MPTRACE("%s()=void\n", __func__);
 }
 
 void ijkmp_set_codec_option(IjkMediaPlayer *mp, const char *name, const char *value)
 {
     assert(mp);
 
-    MPTRACE("ijkmp_set_codec_option()\n");
+    MPTRACE("%s()\n", __func__);
     pthread_mutex_lock(&mp->mutex);
     ffp_set_codec_option(mp->ffplayer, name, value);
     pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_codec_option()=void\n");
+    MPTRACE("%s()=void\n", __func__);
 }
 
 void ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *value)
 {
     assert(mp);
 
-    MPTRACE("ijkmp_set_sws_option()\n");
+    MPTRACE("%s()\n", __func__);
     pthread_mutex_lock(&mp->mutex);
     ffp_set_sws_option(mp->ffplayer, name, value);
     pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_sws_option()=void\n");
+    MPTRACE("%s()=void\n", __func__);
+}
+
+void ijkmp_set_player_option(IjkMediaPlayer *mp, const char *name, const char *value)
+{
+    assert(mp);
+
+    MPTRACE("%s()\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_player_option(mp->ffplayer, name, value);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
 }
 
 void ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count)

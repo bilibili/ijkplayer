@@ -393,6 +393,8 @@ static SDL_Surface *screen;
 typedef struct IjkMediaMeta IjkMediaMeta;
 typedef struct IJKFF_Pipeline IJKFF_Pipeline;
 typedef struct FFPlayer {
+    const AVClass *av_class;
+
     /* ffplay context */
     VideoState *is;
 
@@ -400,6 +402,7 @@ typedef struct FFPlayer {
     AVDictionary *format_opts;
     AVDictionary *codec_opts;
     AVDictionary *sws_opts;
+    AVDictionary *player_opts;
 
     /* ffplay options specified by the user */
 #ifdef FFP_MERGE
@@ -519,6 +522,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     av_dict_free(&ffp->format_opts);
     av_dict_free(&ffp->codec_opts);
     av_dict_free(&ffp->sws_opts);
+    av_dict_free(&ffp->player_opts);
 
     /* ffplay options specified by the user */
     av_freep(&ffp->input_filename);

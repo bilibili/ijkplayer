@@ -159,6 +159,7 @@ void            ijkmp_set_format_callback(IjkMediaPlayer *mp, ijk_format_control
 void            ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value);
 void            ijkmp_set_codec_option(IjkMediaPlayer *mp, const char *name, const char *value);
 void            ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *value);
+void            ijkmp_set_player_option(IjkMediaPlayer *mp, const char *name, const char *value);
 void            ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc);
 void            ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count);
 void            ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps);
