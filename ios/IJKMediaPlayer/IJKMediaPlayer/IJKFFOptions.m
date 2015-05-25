@@ -37,33 +37,27 @@
 {
     [self logOptions];
 
-    [self setCodecOption:@"skip_loop_filter"
-               withInt64:self.skipLoopFilter
-                      to:mediaPlayer];
-    [self setCodecOption:@"skip_frame"
-               withInt64:self.skipFrame
-                      to:mediaPlayer];
+    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_CODEC, "skip_loop_filter", _skipLoopFilter);
+    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_CODEC, "skip_frame",       _skipFrame);
 
-    ijkmp_set_picture_queue_capicity(mediaPlayer, _frameBufferCount);
-    ijkmp_set_max_fps(mediaPlayer, _maxFps);
-    ijkmp_set_framedrop(mediaPlayer, _frameDrop);
+    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "max-fps",             _maxFps);
+    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "framedrop",           _frameDrop);
+    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "video-pictq-size",    _frameBufferCount);
     ijkmp_ios_set_videotoolbox_enabled(mediaPlayer, _videotoolboxEnabled);
     ijkmp_ios_set_frame_max_width(mediaPlayer, _frameMaxWidth);
 
     if (self.autoReconnect == NO) {
-        [self setFormatOption:@"reconnect" withInt64:0 to:mediaPlayer];
+        ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "reconnect", 0);
     } else {
-        [self setFormatOption:@"reconnect" withInt64:1 to:mediaPlayer];
+        ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "reconnect", 1);
     }
 
     if (self.timeout > 0) {
-        [self setFormatOption:@"timeout"
-                    withInt64:self.timeout
-                           to:mediaPlayer];
+        ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "timeout", self.timeout);
     }
 
     if ([self.userAgent isEqualToString:@""] == NO) {
-        [self setFormatOption:@"user-agent" withString:self.userAgent to:mediaPlayer];
+        ijkmp_set_option(mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "user-agent", [self.userAgent UTF8String]);
     }
 }
 
@@ -99,34 +93,6 @@
         default:
             return @"avdiscard unknown";
     }
-}
-
-- (void)setFormatOption:(NSString *)optionName
-              withInt64:(int64_t)value
-                     to:(IjkMediaPlayer *)mediaPlayer
-{
-    ijkmp_set_format_option(mediaPlayer,
-                           [optionName UTF8String],
-                           [[NSString stringWithFormat:@"%lld", value] UTF8String]);
-}
-
-- (void)setFormatOption:(NSString *)optionName
-              withString:(NSString*)value
-                     to:(IjkMediaPlayer *)mediaPlayer
-{
-    ijkmp_set_format_option(mediaPlayer,
-                            [optionName UTF8String],
-                            [value UTF8String]);
-}
-
-
-- (void)setCodecOption:(NSString *)optionName
-             withInt64:(int64_t)value
-                    to:(IjkMediaPlayer *)mediaPlayer
-{
-    ijkmp_set_codec_option(mediaPlayer,
-                           [optionName UTF8String],
-                           [[NSString stringWithFormat:@"%lld", value] UTF8String]);
 }
 
 @end

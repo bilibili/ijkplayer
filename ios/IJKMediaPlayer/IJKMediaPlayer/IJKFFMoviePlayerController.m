@@ -248,7 +248,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     [self setScreenOn:_keepScreenOnWhilePlaying];
 
     ijkmp_set_data_source(_mediaPlayer, [_ffMrl.resolvedMrl UTF8String]);
-    ijkmp_set_format_option(_mediaPlayer, "safe", "0"); // for concat demuxer
+    ijkmp_set_option(_mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "safe", "0"); // for concat demuxer
     ijkmp_prepare_async(_mediaPlayer);
 }
 
