@@ -175,8 +175,11 @@ void            ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const cha
 void            ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const char *name, int64_t value);
 
 void            ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc);
+attribute_deprecated
 void            ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count);
+attribute_deprecated
 void            ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps);
+attribute_deprecated
 void            ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop);
 void            ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepared);
 void            ijkmp_set_max_buffer_size(IjkMediaPlayer *mp, int max_buffer_size);

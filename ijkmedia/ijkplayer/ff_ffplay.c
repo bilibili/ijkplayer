@@ -3100,16 +3100,6 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
     }
 }
 
-void ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count)
-{
-    ffp->pictq_size = frame_count;
-}
-
-void ffp_set_framedrop(FFPlayer *ffp, int framedrop)
-{
-    ffp->framedrop = framedrop;
-}
-
 void ffp_set_auto_play_on_prepared(FFPlayer *ffp, int auto_play_on_prepared)
 {
     ffp->auto_play_on_prepared = auto_play_on_prepared;

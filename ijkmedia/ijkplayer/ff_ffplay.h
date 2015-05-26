@@ -56,8 +56,6 @@ void      ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, cons
 void      ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64_t value);
 
 void      ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc);
-void      ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count);
-void      ffp_set_framedrop(FFPlayer *ffp, int framedrop);
 void      ffp_set_auto_play_on_prepared(FFPlayer *ffp, int auto_play_on_prepared);
 void      ffp_set_max_buffer_size(FFPlayer *ffp, int max_buffer_size);
 

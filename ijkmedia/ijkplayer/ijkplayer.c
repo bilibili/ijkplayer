@@ -209,11 +209,7 @@ void ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count)
 {
     assert(mp);
 
-    MPTRACE("ijkmp_set_picture_queue_capicity(%d)\n", frame_count);
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_picture_queue_capicity(mp->ffplayer, frame_count);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_picture_queue_capicity()=void\n");
+    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "video-pictq-size", frame_count);
 }
 
 void ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps)
