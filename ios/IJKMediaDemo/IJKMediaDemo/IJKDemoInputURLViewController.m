@@ -37,7 +37,7 @@
     
     if ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) {
         [IJKVideoViewController presentFromViewController:self withTitle:[NSString stringWithFormat:@"URL: %@", url] URL:url completion:^{
-            [self.navigationController popViewControllerAnimated:NO];
+//            [self.navigationController popViewControllerAnimated:NO];
         }];
     }
 }

@@ -12,6 +12,7 @@
 #import "IJKCommon.h"
 #import "IJKDemoHistory.h"
 #import "IJKMoviePlayerViewController.h"
+#import "IJKDemoLocalFolderViewController.h"
 
 @interface IJKDemoMainViewController () <UITableViewDataSource, UITableViewDelegate>
 
@@ -33,6 +34,14 @@
                                  @"Input URL",
                                  @"Scan QRCode",
                                  ];
+    
+    NSURL *documentsUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] firstObject];
+    
+    NSError *error = nil;
+    
+    [documentsUrl setResourceValue:[NSNumber numberWithBool:YES]
+                            forKey:NSURLIsExcludedFromBackupKey
+                             error:&error];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -81,6 +90,7 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"abc"];
     if (nil == cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"abc"];
+        cell.textLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
     }
     
     switch (indexPath.section) {
@@ -105,9 +115,13 @@
     switch (indexPath.section) {
         case 0: {
             switch (indexPath.row) {
-                case 0:
-                    [[[UIAlertView alloc] initWithTitle:nil message:@"TODO" delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:nil] show];
-                    break;
+                case 0: {
+                    NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+
+                    IJKDemoLocalFolderViewController *viewController = [[IJKDemoLocalFolderViewController alloc] initWithFolderPath:documentsPath];
+                    
+                    [self.navigationController pushViewController:viewController animated:YES];
+                } break;
                     
                 case 1:
                     [self.navigationController pushViewController:[[IJKDemoInputURLViewController alloc] init] animated:YES];
