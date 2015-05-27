@@ -162,6 +162,8 @@ ijkplayer is based on or derives from projects below:
   - [libyuv](https://code.google.com/p/libyuv/)
 - ISC license
   - [libyuv/source/x86inc.asm](https://code.google.com/p/libyuv/source/browse/trunk/source/x86inc.asm)
+- Unknown license
+  - [iOS7-BarcodeScanner](https://github.com/jpwidmer/iOS7-BarcodeScanner)
 
 ijkplayer's build scripts are based on or derives from projects below:
 - [gas-preprocessor](http://git.libav.org/?p=gas-preprocessor.git)

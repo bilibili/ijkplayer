@@ -7,18 +7,21 @@
 //
 
 #import "IJKAppDelegate.h"
-#import "IJKMoviePlayerViewController.h"
+#import "IJKDemoMainViewController.h"
 
 @implementation IJKAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-
-    self.viewController = [[IJKVideoViewController alloc] initView];
+    
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:[[IJKDemoMainViewController alloc] init]];
+    
+    self.viewController = navigationController;
     self.window.rootViewController = self.viewController;
 
     [self.window makeKeyAndVisible];
+    
     return YES;
 }
 
