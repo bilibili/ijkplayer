@@ -1137,6 +1137,12 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
            av_get_picture_type_char(src_frame->pict_type), pts);
 #endif
 
+    // add by Javan drop the data don't need. 2015.4.9
+    if (pts < is->seek_pos/1000000.0) {
+       return 0;
+    }
+    // end of add.
+           
     if (!(vp = frame_queue_peek_writable(&is->pictq)))
         return -1;
 
@@ -1831,6 +1837,14 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     VideoState *is = ffp->is;
     int audio_size, len1;
 
+    // add by Javan 2015.4.9
+    // when step no need to play sound.
+    if (is->step && !is->paused) {
+        memset(stream, 0, len);
+        return;
+    }
+    // end of add
+    
     ffp->audio_callback_time = av_gettime_relative();
 
     while (len > 0) {
@@ -2649,7 +2663,23 @@ static int read_thread(void *arg)
                 (double)(ffp->start_time != AV_NOPTS_VALUE ? ffp->start_time : 0) / 1000000
                 <= ((double)ffp->duration / 1000000);
         if (pkt->stream_index == is->audio_stream && pkt_in_play_range) {
-            packet_queue_put(&is->audioq, pkt);
+          // edit by Javan 2015.4.9 add exact audio seek.
+            // packet_queue_put(&is->audioq, pkt);
+          if (is->seek_pos) { // caculate actual audio time. judge whether to drop audio data pkt
+              double dpts = (pkt->pts - (stream_start_time != AV_NOPTS_VALUE ? stream_start_time : 0)) *
+              av_q2d(ic->streams[pkt->stream_index]->time_base) -
+              (double)(ffp->start_time != AV_NOPTS_VALUE ? ffp->start_time : 0) / 1000000;
+              if (dpts*1000000 < is->seek_pos) {
+                  pkt_in_play_range = 0;
+              } else
+                  pkt_in_play_range = 1;
+          }
+          if (!pkt_in_play_range) {
+              av_free_packet(pkt);
+          } else
+              packet_queue_put(&is->audioq, pkt);
+          // end of edit.
+          
         } else if (pkt->stream_index == is->video_stream && pkt_in_play_range
                    && !(is->video_st && (is->video_st->disposition & AV_DISPOSITION_ATTACHED_PIC))) {
             packet_queue_put(&is->videoq, pkt);
