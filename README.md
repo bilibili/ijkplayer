@@ -54,14 +54,22 @@ ijkplayer
 ### Before Build
 - If you prefer more codec/format
 ```
-rm config/module.sh
-ln -s config/module-default.sh config/module.sh
+cd config
+rm module.sh
+ln -s module-default.sh module.sh
+cd android
+# cd ios
+sh compile-ffmpeg clean
 ```
 
 - If you prefer less codec/format for smaller binary size (by default)
 ```
-rm config/module.sh
-ln -s config/module-lite.sh config/module.sh
+cd config
+rm module.sh
+ln -s module-lite.sh module.sh
+cd android
+# cd ios
+sh compile-ffmpeg clean
 ```
 
 - For Ubuntu/Debian users.
