@@ -88,8 +88,8 @@ static void IjkAudioSessionInterruptionListener(void *inClientData, UInt32 inInt
         case kAudioSessionBeginInterruption: {
             NSLog(@"kAudioSessionBeginInterruption\n");
             dispatch_async(dispatch_get_main_queue(), ^{
-                AudioSessionSetActive(false);
                 [delegate ijkAudioBeginInterruption];
+                AudioSessionSetActive(false);
             });
             break;
         }
