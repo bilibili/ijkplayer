@@ -320,8 +320,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return;
 
     ijkmp_stop(_mediaPlayer);
-    [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
-//    [self shutdownClose:self];
+//    [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
+    [self shutdownClose:self];
 }
 
 - (void)shutdownClose:(IJKFFMoviePlayerController *) mySelf
