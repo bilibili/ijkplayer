@@ -168,7 +168,7 @@
 
 - (void)stop
 {
-    AudioSessionSetActive(false);
+    // AudioSessionSetActive(false);
 
     if (!_auUnit)
         return;

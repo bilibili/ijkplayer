@@ -137,7 +137,7 @@
 
 - (void)stop
 {
-    AudioSessionSetActive(false);
+    // AudioSessionSetActive(false);
     if (!_audioQueueRef)
         return;
 
