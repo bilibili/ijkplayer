@@ -57,6 +57,7 @@
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:nil];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
+    self.player.scalingMode = MPMovieScalingModeAspectFit;
 
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
