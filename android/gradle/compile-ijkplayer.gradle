@@ -20,12 +20,12 @@ def LIB_NAMES = ['armeabi', 'armeabi-v7a', 'x86', 'arm64-v8a']
 def FF_COMPILE_PREFIX = 'compileFFmpeg'
 def BUILD_LIBS_PREFIX = 'compileLibs'
 
+def String getAndroidSdkDir() {
+    return plugins.getPlugin('com.android.library').sdkHandler.getSdkFolder()
+}
+
 def String getAndroidNdkDir(){
-    String path = hasProperty('ANDROID_NDK')? ANDROID_NDK : System.env.ANDROID_NDK
-    def ndkDir = file(path)
-    if(!ndkDir.exists())
-        throw new FileNotFoundException("The ANDROID_NDK is not found: ${ndkDir}")
-    return ndkDir.absolutePath
+    return plugins.getPlugin('com.android.library').sdkHandler.getNdkFolder()
 }
 
 tasks.addRule("Pattern: $FF_COMPILE_PREFIX<ARCH>") { String taskName ->
@@ -34,7 +34,7 @@ tasks.addRule("Pattern: $FF_COMPILE_PREFIX<ARCH>") { String taskName ->
         arch = arch ? arch.toLowerCase() : 'armv7a'
         task(taskName, group: TASK_GROUP, description: "Compile ffmpeg-${arch}", type: Exec) {
             workingDir = rootProject.rootDir.absolutePath
-            environment.ANDROID_SDK = android.sdkDirectory
+            environment.ANDROID_SDK = getAndroidSdkDir()
             environment.ANDROID_NDK = getAndroidNdkDir()
             def output = new File(rootProject.buildDir, "ffmpeg-${arch}/output")
             inputs.sourceDir(rootProject.file("ffmpeg-${arch}"))
@@ -56,7 +56,7 @@ tasks.addRule("Pattern: ${BUILD_LIBS_PREFIX}<ABI>") { String taskName ->
                     group: TASK_GROUP,
                     description: "Build ijkplayer for abi ${abiName}",
                     type: Exec) {
-                environment.ANDROID_SDK = android.sdkDirectory
+                environment.ANDROID_SDK = getAndroidSdkDir()
                 environment.ANDROID_NDK = getAndroidNdkDir()
                 def exec = new File(file(environment.ANDROID_NDK), 'ndk-build')
                 if(!exec.canExecute()){
