@@ -13,6 +13,7 @@
 #import "IJKDemoHistory.h"
 #import "IJKMoviePlayerViewController.h"
 #import "IJKDemoLocalFolderViewController.h"
+#import "IJKDemoSampleViewController.h"
 
 @interface IJKDemoMainViewController () <UITableViewDataSource, UITableViewDelegate>
 
@@ -33,6 +34,7 @@
                                  @"Local Folder",
                                  @"Input URL",
                                  @"Scan QRCode",
+                                 @"Online Samples",
                                  ];
     
     NSURL *documentsUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] firstObject];
@@ -130,7 +132,11 @@
                 case 2:
                     [self.navigationController pushViewController:[[IJKQRCodeScanViewController alloc] init] animated:YES];
                     break;
-                    
+
+                case 3:
+                    [self.navigationController pushViewController:[[IJKDemoSampleViewController alloc] init] animated:YES];
+                    break;
+
                 default:
                     break;
             }
