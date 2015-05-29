@@ -71,8 +71,10 @@ do_lipo_ssl () {
         fi
     done
 
-    xcrun lipo -create $LIPO_FLAGS -output $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
-    xcrun lipo -info $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
+    if [ "$LIPO_FLAGS" != "$LIPO_FLAGS" ]; then
+        xcrun lipo -create $LIPO_FLAGS -output $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
+        xcrun lipo -info $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
+    fi
 }
 
 do_lipo_all () {
