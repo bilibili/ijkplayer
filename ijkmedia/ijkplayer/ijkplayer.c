@@ -141,7 +141,7 @@ void ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *v
 
     MPTRACE("%s(%s, %s)\n", __func__, name, value);
     pthread_mutex_lock(&mp->mutex);
-    ffp_set_format_option(mp->ffplayer, name, value);
+    ffp_set_option(mp->ffplayer, IJKMP_OPT_CATEGORY_FORMAT, name, value);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("%s()=void\n", __func__);
 }
@@ -152,7 +152,7 @@ void ijkmp_set_codec_option(IjkMediaPlayer *mp, const char *name, const char *va
 
     MPTRACE("%s()\n", __func__);
     pthread_mutex_lock(&mp->mutex);
-    ffp_set_codec_option(mp->ffplayer, name, value);
+    ffp_set_option(mp->ffplayer, IJKMP_OPT_CATEGORY_CODEC, name, value);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("%s()=void\n", __func__);
 }
@@ -163,7 +163,7 @@ void ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *valu
 
     MPTRACE("%s()\n", __func__);
     pthread_mutex_lock(&mp->mutex);
-    ffp_set_sws_option(mp->ffplayer, name, value);
+    ffp_set_option(mp->ffplayer, IJKMP_OPT_CATEGORY_SWS, name, value);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("%s()=void\n", __func__);
 }
@@ -174,7 +174,7 @@ void ijkmp_set_player_option(IjkMediaPlayer *mp, const char *name, const char *v
 
     MPTRACE("%s()\n", __func__);
     pthread_mutex_lock(&mp->mutex);
-    ffp_set_player_option(mp->ffplayer, name, value);
+    ffp_set_option(mp->ffplayer, IJKMP_OPT_CATEGORY_PLAYER, name, value);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("%s()=void\n", __func__);
 }

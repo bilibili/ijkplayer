@@ -3035,38 +3035,6 @@ void ffp_set_format_callback(FFPlayer *ffp, ijk_format_control_message cb, void 
     ffp->format_control_opaque  = opaque;
 }
 
-void ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value)
-{
-    if (!ffp)
-        return;
-
-    av_dict_set(&ffp->format_opts, name, value, 0);
-}
-
-void ffp_set_codec_option(FFPlayer *ffp, const char *name, const char *value)
-{
-    if (!ffp)
-        return;
-
-    av_dict_set(&ffp->codec_opts, name, value, 0);
-}
-
-void ffp_set_sws_option(FFPlayer *ffp, const char *name, const char *value)
-{
-    if (!ffp)
-        return;
-
-    av_dict_set(&ffp->sws_opts, name, value, 0);
-}
-
-void ffp_set_player_option(FFPlayer *ffp, const char *name, const char *value)
-{
-    if (!ffp)
-        return;
-
-    av_dict_set(&ffp->player_opts, name, value, 0);
-}
-
 static AVDictionary **ffp_get_opt_dict(FFPlayer *ffp, int opt_category)
 {
     assert(ffp);
