@@ -72,18 +72,34 @@ static int ffp_format_control_message(struct AVFormatContext *s, int type,
     .max = max__, \
     .flags = AV_OPT_FLAG_DECODING_PARAM
 
+#define OPTION_CONST(default__) \
+    .type = AV_OPT_TYPE_CONST, \
+    { .i64 = default__ }, \
+    .min = INT_MIN, \
+    .max = INT_MAX, \
+    .flags = AV_OPT_FLAG_DECODING_PARAM
+
 static const AVOption ffp_context_options[] = {
     // original options in ffplay.c
-    { "framedrop",                  "drop frames when cpu is too slow",
-        OPTION_OFFSET(framedrop),   OPTION_INT(0, -1, 1) },
+    { "framedrop",                      "drop frames when cpu is too slow",
+        OPTION_OFFSET(framedrop),       OPTION_INT(0, -1, 1) },
 
     // extended options in ff_ffplay.c
-    { "max-fps",                    "drop frames in video whose fps is greater than max-fps",
-        OPTION_OFFSET(max_fps),     OPTION_INT(31, 0, 121) },
-    { "video-pictq-size",           "max picture queue frame count",
-        OPTION_OFFSET(pictq_size),  OPTION_INT(VIDEO_PICTURE_QUEUE_SIZE_DEFAULT,
-                                               VIDEO_PICTURE_QUEUE_SIZE_MIN,
-                                               VIDEO_PICTURE_QUEUE_SIZE_MAX) },
+    { "max-fps",                        "drop frames in video whose fps is greater than max-fps",
+        OPTION_OFFSET(max_fps),         OPTION_INT(31, 0, 121) },
+    { "video-pictq-size",               "max picture queue frame count",
+        OPTION_OFFSET(pictq_size),      OPTION_INT(VIDEO_PICTURE_QUEUE_SIZE_DEFAULT,
+                                                   VIDEO_PICTURE_QUEUE_SIZE_MIN,
+                                                   VIDEO_PICTURE_QUEUE_SIZE_MAX) },
+
+    { "overlay-format",                 "fourcc of overlay format",
+        OPTION_OFFSET(overlay_format),  OPTION_INT(SDL_FCC_RV32, INT_MIN, INT_MAX),
+        .unit = "overlay-format" },
+    { "fcc-i420",                       "", 0, OPTION_CONST(SDL_FCC_I420), .unit = "overlay-format" },
+    { "fcc-yv12",                       "", 0, OPTION_CONST(SDL_FCC_YV12), .unit = "overlay-format" },
+    { "fcc-rv16",                       "", 0, OPTION_CONST(SDL_FCC_RV16), .unit = "overlay-format" },
+    { "fcc-rv23",                       "", 0, OPTION_CONST(SDL_FCC_RV24), .unit = "overlay-format" },
+    { "fcc-rv32",                       "", 0, OPTION_CONST(SDL_FCC_RV32), .unit = "overlay-format" },
 
     { NULL }
 };

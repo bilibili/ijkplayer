@@ -188,13 +188,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         ijkmp_set_auto_play_on_prepared(_mediaPlayer, _shouldAutoplay);
 
         // init video sink
-//        int chroma = SDL_FCC_RV24;
-        int chroma = SDL_FCC_I420;
         _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
         _view   = _glView;
 
         ijkmp_ios_set_glview(_mediaPlayer, _glView);
-        ijkmp_set_overlay_format(_mediaPlayer, chroma);
+        ijkmp_set_option(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", "fcc-i420");
 
         // init audio sink
         [[IJKAudioKit sharedInstance] setupAudioSession:self];

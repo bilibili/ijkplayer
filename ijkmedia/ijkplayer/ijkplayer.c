@@ -121,11 +121,7 @@ void ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc)
     if (!mp)
         return;
 
-    MPTRACE("ijkmp_set_overlay_format(%.4s(0x%x))\n", (char*)&chroma_fourcc, chroma_fourcc);
-    if (mp->ffplayer) {
-        ffp_set_overlay_format(mp->ffplayer, chroma_fourcc);
-    }
-    MPTRACE("ijkmp_set_overlay_format()=void\n");
+    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", chroma_fourcc);
 }
 
 void ijkmp_set_format_callback(IjkMediaPlayer *mp, ijk_format_control_message cb, void *opaque)
@@ -187,7 +183,7 @@ void ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, co
 {
     assert(mp);
 
-    MPTRACE("%s()\n", __func__);
+    MPTRACE("%s(%s, %s)\n", __func__, name, value);
     pthread_mutex_lock(&mp->mutex);
     ffp_set_option(mp->ffplayer, opt_category, name, value);
     pthread_mutex_unlock(&mp->mutex);
@@ -198,7 +194,7 @@ void ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const char *name
 {
     assert(mp);
 
-    MPTRACE("%s()\n", __func__);
+    MPTRACE("%s(%s, %"PRId64")\n", __func__, name, value);
     pthread_mutex_lock(&mp->mutex);
     ffp_set_option_int(mp->ffplayer, opt_category, name, value);
     pthread_mutex_unlock(&mp->mutex);
