@@ -182,6 +182,7 @@ attribute_deprecated
 void            ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps);
 attribute_deprecated
 void            ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop);
+attribute_deprecated
 void            ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepared);
 void            ijkmp_set_max_buffer_size(IjkMediaPlayer *mp, int max_buffer_size);
 

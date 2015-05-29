@@ -87,10 +87,6 @@ static const AVOption ffp_context_options[] = {
     // extended options in ff_ffplay.c
     { "max-fps",                        "drop frames in video whose fps is greater than max-fps",
         OPTION_OFFSET(max_fps),         OPTION_INT(31, 0, 121) },
-    { "video-pictq-size",               "max picture queue frame count",
-        OPTION_OFFSET(pictq_size),      OPTION_INT(VIDEO_PICTURE_QUEUE_SIZE_DEFAULT,
-                                                   VIDEO_PICTURE_QUEUE_SIZE_MIN,
-                                                   VIDEO_PICTURE_QUEUE_SIZE_MAX) },
 
     { "overlay-format",                 "fourcc of overlay format",
         OPTION_OFFSET(overlay_format),  OPTION_INT(SDL_FCC_RV32, INT_MIN, INT_MAX),
@@ -100,6 +96,14 @@ static const AVOption ffp_context_options[] = {
     { "fcc-rv16",                       "", 0, OPTION_CONST(SDL_FCC_RV16), .unit = "overlay-format" },
     { "fcc-rv23",                       "", 0, OPTION_CONST(SDL_FCC_RV24), .unit = "overlay-format" },
     { "fcc-rv32",                       "", 0, OPTION_CONST(SDL_FCC_RV32), .unit = "overlay-format" },
+
+    { "start-on-prepared",                  "automatically start playing on prepared",
+        OPTION_OFFSET(start_on_prepared),   OPTION_INT(1, 0, 1) },
+
+    { "video-pictq-size",                   "max picture queue frame count",
+        OPTION_OFFSET(pictq_size),          OPTION_INT(VIDEO_PICTURE_QUEUE_SIZE_DEFAULT,
+                                                       VIDEO_PICTURE_QUEUE_SIZE_MIN,
+                                                       VIDEO_PICTURE_QUEUE_SIZE_MAX) },
 
     { NULL }
 };
@@ -2434,7 +2438,7 @@ static int read_thread(void *arg)
     if (ffp->infinite_buffer < 0 && is->realtime)
         ffp->infinite_buffer = 1;
 
-    if (!ffp->auto_play_on_prepared)
+    if (!ffp->start_on_prepared)
         toggle_pause(ffp, 1);
     ffp->prepared = true;
     ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
@@ -2443,7 +2447,7 @@ static int read_thread(void *arg)
         ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
         ffp_notify_msg3(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
     }
-    if (!ffp->auto_play_on_prepared) {
+    if (!ffp->start_on_prepared) {
         while (is->paused && !is->abort_request) {
             SDL_Delay(100);
         }
@@ -3082,11 +3086,6 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
             ALOGE("ffp_set_overlay_format: unknown chroma fourcc: %d\n", chroma_fourcc);
             break;
     }
-}
-
-void ffp_set_auto_play_on_prepared(FFPlayer *ffp, int auto_play_on_prepared)
-{
-    ffp->auto_play_on_prepared = auto_play_on_prepared;
 }
 
 void ffp_set_max_buffer_size(FFPlayer *ffp, int max_buffer_size)

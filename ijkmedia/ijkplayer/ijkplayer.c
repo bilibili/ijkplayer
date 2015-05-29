@@ -226,11 +226,7 @@ void ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepar
 {
     assert(mp);
 
-    MPTRACE("ijkmp_set_auto_play_on_prepared(%d)\n", auto_play_on_prepared);
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_auto_play_on_prepared(mp->ffplayer, auto_play_on_prepared);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_auto_play_on_prepared()=void\n");
+    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", auto_play_on_prepared);
 }
 
 void ijkmp_set_max_buffer_size(IjkMediaPlayer *mp, int max_buffer_size)

@@ -185,7 +185,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
         ijkmp_set_format_callback(_mediaPlayer, format_control_message, (__bridge void *) self);
-        ijkmp_set_auto_play_on_prepared(_mediaPlayer, _shouldAutoplay);
+        ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", _shouldAutoplay ? 1 : 0);
 
         // init video sink
         _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -198,6 +198,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         [[IJKAudioKit sharedInstance] setupAudioSession:self];
 
         // apply ffmpeg options
+        if (options == nil) {
+            options = [IJKFFOptions optionsByDefault];
+        }
         [options applyTo:_mediaPlayer];
         _pauseInBackground = options.pauseInBackground;
 
@@ -230,7 +233,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (!_mediaPlayer)
         return;
 
-    ijkmp_set_auto_play_on_prepared(_mediaPlayer, shouldAutoplay);
+    ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", _shouldAutoplay ? 1 : 0);
 }
 
 - (BOOL)shouldAutoplay
