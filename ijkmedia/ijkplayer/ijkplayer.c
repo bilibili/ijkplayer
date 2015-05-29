@@ -233,11 +233,7 @@ void ijkmp_set_max_buffer_size(IjkMediaPlayer *mp, int max_buffer_size)
 {
     assert(mp);
 
-    MPTRACE("%s(%d)\n", __func__, max_buffer_size);
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_max_buffer_size(mp->ffplayer, max_buffer_size);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("%s()=void\n", __func__);
+    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "max-buffer-size", max_buffer_size);
 }
 
 int ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info)

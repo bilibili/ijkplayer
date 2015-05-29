@@ -105,6 +105,9 @@ static const AVOption ffp_context_options[] = {
                                                        VIDEO_PICTURE_QUEUE_SIZE_MIN,
                                                        VIDEO_PICTURE_QUEUE_SIZE_MAX) },
 
+    { "max-buffer-size",                    "max buffer size should be pre-read",
+        OPTION_OFFSET(max_buffer_size),     OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
+
     { NULL }
 };
 #undef OPTION_INT
@@ -3086,14 +3089,6 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
             ALOGE("ffp_set_overlay_format: unknown chroma fourcc: %d\n", chroma_fourcc);
             break;
     }
-}
-
-void ffp_set_max_buffer_size(FFPlayer *ffp, int max_buffer_size)
-{
-    if (max_buffer_size < 0 || max_buffer_size > MAX_QUEUE_SIZE)
-        ffp->max_buffer_size = MAX_QUEUE_SIZE;
-    else
-        ffp->max_buffer_size = max_buffer_size;
 }
 
 int ffp_get_video_codec_info(FFPlayer *ffp, char **codec_info)

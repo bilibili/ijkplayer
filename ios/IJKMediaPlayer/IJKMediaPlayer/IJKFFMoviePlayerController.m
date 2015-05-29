@@ -307,7 +307,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (!_mediaPlayer)
         return;
 
-    ijkmp_set_max_buffer_size(_mediaPlayer, maxBufferSize);
+    ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "max-buffer-size", maxBufferSize);
 }
 
 + (void)setLogReport:(BOOL)preferLogReport
