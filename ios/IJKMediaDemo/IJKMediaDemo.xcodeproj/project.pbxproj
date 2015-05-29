@@ -250,22 +250,22 @@
 		E6A9B55C17EDA6AC00A1A500 /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				55E809E01B143C47003E98A5 /* IJKDemoMainViewController.h */,
-				55E809E11B143C47003E98A5 /* IJKDemoMainViewController.m */,
-				55E809E31B143C85003E98A5 /* IJKDemoMainViewController.xib */,
-				E6A9B56117EDA72C00A1A500 /* IJKMoviePlayerViewController.h */,
-				E6A9B56217EDA72C00A1A500 /* IJKMoviePlayerViewController.m */,
-				E6A9B56317EDA72C00A1A500 /* IJKMoviePlayerViewController.xib */,
-				E66F8DC917EEDD8B00354D80 /* IJKMediaControl.h */,
-				E66F8DCA17EEDD8B00354D80 /* IJKMediaControl.m */,
 				55E809E71B145BC2003E98A5 /* IJKDemoInputURLViewController.h */,
 				55E809E81B145BC2003E98A5 /* IJKDemoInputURLViewController.m */,
 				55E809E91B145BC2003E98A5 /* IJKDemoInputURLViewController.xib */,
+				55E809F71B15A1DB003E98A5 /* IJKDemoLocalFolderViewController.h */,
+				55E809F81B15A1DB003E98A5 /* IJKDemoLocalFolderViewController.m */,
+				55E809E01B143C47003E98A5 /* IJKDemoMainViewController.h */,
+				55E809E11B143C47003E98A5 /* IJKDemoMainViewController.m */,
+				55E809E31B143C85003E98A5 /* IJKDemoMainViewController.xib */,
+				E66F8DC917EEDD8B00354D80 /* IJKMediaControl.h */,
+				E66F8DCA17EEDD8B00354D80 /* IJKMediaControl.m */,
+				E6A9B56117EDA72C00A1A500 /* IJKMoviePlayerViewController.h */,
+				E6A9B56217EDA72C00A1A500 /* IJKMoviePlayerViewController.m */,
+				E6A9B56317EDA72C00A1A500 /* IJKMoviePlayerViewController.xib */,
 				55E809EC1B146C1E003E98A5 /* IJKQRCodeScanViewController.h */,
 				55E809ED1B146C1E003E98A5 /* IJKQRCodeScanViewController.m */,
 				55E809F21B146DE8003E98A5 /* IJKQRCodeScanViewController.xib */,
-				55E809F71B15A1DB003E98A5 /* IJKDemoLocalFolderViewController.h */,
-				55E809F81B15A1DB003E98A5 /* IJKDemoLocalFolderViewController.m */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
