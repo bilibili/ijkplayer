@@ -508,19 +508,19 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts,context->serial);
 
     if (context->m_convert_bytestream) {
-        ALOGI("the buffer should m_convert_byte\n");
+        // ALOGI("the buffer should m_convert_byte\n");
         if(avio_open_dyn_buf(&pb) < 0) {
             goto failed;
         }
         ff_avc_parse_nal_units(pb, pData, iSize);
         demux_size = avio_close_dyn_buf(pb, &demux_buff);
-        ALOGI("demux_size:%d\n", demux_size);
+        // ALOGI("demux_size:%d\n", demux_size);
         if (demux_size == 0) {
             goto failed;
         }
         sample_buff = CreateSampleBufferFrom(context->m_fmt_desc, demux_buff, demux_size);
     } else if (context->m_convert_3byteTo4byteNALSize) {
-        ALOGI("3byteto4byte\n");
+        // ALOGI("3byteto4byte\n");
         if (avio_open_dyn_buf(&pb) < 0) {
             goto failed;
         }
