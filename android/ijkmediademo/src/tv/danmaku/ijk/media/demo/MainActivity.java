@@ -18,8 +18,8 @@ public class MainActivity extends Activity {
         Button btn = (Button) this.findViewById(R.id.StartPlay1);
         final EditText et = (EditText) this.findViewById(R.id.RtmpAddress1);
 
-        et.setText("http://live.3gv.ifeng.com/zixun.m3u8");
-//        et.setText("rtmp://pull1.arenazb.hupu.com/test/789_1/playlist.m3u8");
+//        et.setText("http://live.3gv.ifeng.com/zixun.m3u8");
+        et.setText("rtmp://wsvideopull.smartcourt.cn/test/sh_loft_b01lm");
 //        et.setText("http://172.16.52.31/test1.mp4");
 
         btn.setOnClickListener(new OnClickListener(){

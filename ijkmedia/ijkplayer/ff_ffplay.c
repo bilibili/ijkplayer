@@ -2231,6 +2231,9 @@ static int read_thread(void *arg)
     int64_t av_stalled_now_time = 0;
     //
 
+    //
+    printf("start loading....\n");
+
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
     is->last_audio_stream = is->audio_stream = -1;
@@ -2466,6 +2469,8 @@ static int read_thread(void *arg)
     bool isFlushing = false;
     
     bool isDropAllPackets = false;
+
+    printf("end loading....\n");
 
     for (;;) {
         if (is->abort_request)

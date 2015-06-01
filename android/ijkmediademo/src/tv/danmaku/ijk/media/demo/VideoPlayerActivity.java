@@ -31,6 +31,8 @@ public class VideoPlayerActivity extends Activity {
     private VideoView mVideoView;
     private View mBufferingIndicator;
     private MediaController mMediaController;
+    
+    private VideoView mVideoView1;
 
     private String mVideoPath;
 
@@ -59,7 +61,12 @@ public class VideoPlayerActivity extends Activity {
         mVideoView.requestFocus();
         mVideoView.start();
         
-        Log.i("ID", mVideoView.getUniqueId());
+        mVideoView1 = (VideoView) findViewById(R.id.video_view1);
+        mVideoView1.setDataSourceType(VideoView.HIGHDELAY_LIVE_STREAMING_TYPE);
+        mVideoView1.setVideoPath(mVideoPath);
+        
+        mVideoView1.requestFocus();
+        mVideoView1.start();
         
     }
 }
