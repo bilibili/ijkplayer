@@ -53,10 +53,10 @@
         self.scalingMode = MPMovieScalingModeAspectFit;
         self.shouldAutoplay = YES;
         [self IJK_installMovieNotificationObservers];
-
+        
         self.useApplicationAudioSession = YES;
         [[IJKAudioKit sharedInstance] setupAudioSession:self];
-
+        
         _bufferingProgress = -1;
     }
     return self;
@@ -72,10 +72,10 @@
     else {
         url = [NSURL URLWithString:aUrl];
     }
-
+    
     self = [self initWithContentURL:url];
     if (self) {
-
+        
     }
     return self;
 }
@@ -88,12 +88,11 @@
 - (BOOL)isPlaying
 {
     switch (self.playbackState) {
-    case MPMoviePlaybackStatePlaying:
-        return YES;
-    default:
-        return NO;
+        case MPMoviePlaybackStatePlaying:
+            return YES;
+        default:
+            return NO;
     }
-   
 }
 
 - (void)shutdown
@@ -154,22 +153,22 @@
 /* Register observers for the various movie object notifications. */
 -(void)IJK_installMovieNotificationObservers
 {
-	[[NSNotificationCenter defaultCenter] addObserver:self
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(IJK_dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:)
                                                  name:MPMediaPlaybackIsPreparedToPlayDidChangeNotification
                                                object:self];
-
-	[[NSNotificationCenter defaultCenter] addObserver:self
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(IJK_dispatchMPMoviePlayerLoadStateDidChangeNotification:)
                                                  name:MPMoviePlayerLoadStateDidChangeNotification
                                                object:self];
-
-	[[NSNotificationCenter defaultCenter] addObserver:self
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(IJK_dispatchMPMoviePlayerPlaybackDidFinishNotification:)
                                                  name:MPMoviePlayerPlaybackDidFinishNotification
                                                object:self];
-
-	[[NSNotificationCenter defaultCenter] addObserver:self
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(IJK_dispatchMPMoviePlayerPlaybackStateDidChangeNotification:)
                                                  name:MPMoviePlayerPlaybackStateDidChangeNotification
                                                object:self];
@@ -183,7 +182,6 @@
 - (void)IJK_removeMovieNotificationObservers
 {
     [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
-
     [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerLoadStateDidChangeNotification object:self];
     [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:self];
     [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerPlaybackStateDidChangeNotification object:self];
@@ -225,6 +223,11 @@
 - (void)ijkAudioEndInterruption
 {
     [self pause];
+}
+
+- (void)setPauseInBackground:(BOOL)pause
+{
+    //mpPlayer还未找到方法实现
 }
 
 @end
