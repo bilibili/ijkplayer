@@ -2605,7 +2605,7 @@ static int read_thread(void *arg)
                 av_now_time = GetNowMs();
                 
                 //drop all
-                if((is->videoq.duration>REALTIME_DURATION_HWM*2.5 && is->audioq.duration>REALTIME_DURATION_HWM*2.5) && av_now_time - av_flush_time>120*1000)
+                if(is->videoq.duration>REALTIME_DURATION_HWM*2.5 && av_now_time - av_flush_time>120*1000)
                 {
                     if (is->audio_stream >= 0) {
                         packet_queue_flush(&is->audioq);
@@ -2706,7 +2706,7 @@ static int read_thread(void *arg)
                 av_now_time = GetNowMs();
                 
                 //drop all
-                if((is->videoq.duration>REALTIME_DURATION_HWM && is->audioq.duration>REALTIME_DURATION_HWM) && av_now_time - av_flush_time>60*1000)
+                if(is->videoq.duration>REALTIME_DURATION_HWM && av_now_time - av_flush_time>60*1000)
                 {
                     if (is->audio_stream >= 0) {
                         packet_queue_flush(&is->audioq);
@@ -2740,7 +2740,7 @@ static int read_thread(void *arg)
                 
                 drop_audiopacket_timing_now = GetNowMs();
                 
-                if((is->videoq.duration>REALTIME_DURATION_HWM/2 && is->audioq.duration>REALTIME_DURATION_HWM/2) && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
+                if(is->videoq.duration>REALTIME_DURATION_HWM/2 && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
                 {
                     drop_audiopacket_timing_begin = 0;
                     enable_drop_audiopacket = true;
@@ -2748,6 +2748,9 @@ static int read_thread(void *arg)
             }
         }
 
+//        printf("is->videoq.duration:%lld\n",is->videoq.duration);
+//        printf("is->audioq.duration:%lld\n",is->audioq.duration);
+        
         if (ffp->infinite_buffer==1 && !is->seek_req && ((is->audioq.duration > live_duration_lwm || is->audio_stream < 0 || is->audioq.abort_request) && (is->videoq.duration > live_duration_lwm || is->video_stream < 0 || is->videoq.abort_request || (is->video_st->disposition & AV_DISPOSITION_ATTACHED_PIC))))
         {
             if (!is->eof) {
