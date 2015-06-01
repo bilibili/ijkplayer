@@ -189,10 +189,16 @@
     }
 
 //    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.player.view removeFromSuperview];
+        [self.mediaControl removeFromSuperview];
+    
         [self.player stop];
         [self.player shutdown];
         self.player = nil;
 //    });
+    
+    [self removeMovieNotificationObservers];
+    [self unregisterApplicationObservers];
     
 //    dispatch_async(dispatch_get_main_queue(), ^{
 
@@ -218,6 +224,8 @@
         [self installMovieNotificationObservers];
         
         [self.player prepareToPlay];
+    
+        [self registerApplicationObservers];
         
 //    });
 }
