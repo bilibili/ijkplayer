@@ -75,7 +75,7 @@
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
     [self.view addSubview:self.mediaControl];
-
+    
     self.mediaControl.delegatePlayer = self.player;
 
     [self installMovieNotificationObservers];
@@ -226,7 +226,7 @@
         [self.player prepareToPlay];
     
         [self registerApplicationObservers];
-        
+    
 //    });
 }
 
@@ -234,6 +234,8 @@
 {
     NSLog(@"mediaIsPreparedToPlayDidChange\n");
     [self.player play];
+    
+    self.player.currentPlaybackTime = 10;
 }
 
 - (void)moviePlayBackStateDidChange:(NSNotification*)notification

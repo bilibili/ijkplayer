@@ -25,7 +25,7 @@
 
     options.timeout                 = 20 * 1000 * 1000; // 30 seconds
     options.userAgent               = @"";
-    options.videotoolboxEnabled     = YES;
+    options.videotoolboxEnabled     = NO;
     options.frameMaxWidth           = 960;
     options.autoReconnect           = NO;
 

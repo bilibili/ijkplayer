@@ -2231,9 +2231,6 @@ static int read_thread(void *arg)
     int64_t av_stalled_now_time = 0;
     //
 
-    //
-    printf("start loading....\n");
-
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
     is->last_audio_stream = is->audio_stream = -1;
@@ -2469,8 +2466,6 @@ static int read_thread(void *arg)
     bool isFlushing = false;
     
     bool isDropAllPackets = false;
-
-    printf("end loading....\n");
 
     for (;;) {
         if (is->abort_request)
@@ -2868,7 +2863,8 @@ static int read_thread(void *arg)
         }
         if (ret < 0) {
             if (ret == AVERROR_INVALIDDATA && (pkt->flags & AV_PKT_FLAG_MP4_PF)) {
-                ffp_seek_to_l(ffp, ffp_get_current_position_l(ffp));
+//                ffp_seek_to_l(ffp, ffp_get_current_position_l(ffp)+1);
+                av_free_packet(pkt);
             }
             if ((ret == AVERROR_EOF || avio_feof(ic->pb)) && !is->eof) {
                 if (is->video_stream >= 0)
@@ -3055,6 +3051,7 @@ static int ffplay_video_refresh_thread(void *arg)
     VideoState *is = ffp->is;
     double remaining_time = 0.0;
     while (!is->abort_request) {
+//        printf("remaining_time:%f\n",remaining_time);
         if (remaining_time > 0.0)
             av_usleep((int)(int64_t)(remaining_time * 1000000.0));
         remaining_time = REFRESH_RATE;

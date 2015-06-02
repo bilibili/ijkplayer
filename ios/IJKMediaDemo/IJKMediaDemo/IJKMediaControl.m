@@ -95,8 +95,7 @@
     BOOL isPlaying = [self.delegatePlayer isPlaying];
     self.playButton.hidden = isPlaying;
     self.pauseButton.hidden = !isPlaying;
-
-
+    
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(refreshMediaControl) object:nil];
     if (!self.overlayPanel.hidden) {
         [self performSelector:@selector(refreshMediaControl) withObject:nil afterDelay:0.5];

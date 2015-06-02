@@ -311,7 +311,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     [self setScreenOn:NO];
 
-    [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
+//    [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
+    [self shutdownWaitStop:self];
 }
 
 - (void)shutdownWaitStop:(IJKFFMoviePlayerController *) mySelf
