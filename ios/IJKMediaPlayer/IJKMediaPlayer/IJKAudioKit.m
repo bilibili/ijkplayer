@@ -24,6 +24,8 @@
 
 #import "IJKAudioKit.h"
 
+#import <AVFoundation/AVFoundation.h>
+
 @implementation IJKAudioKit {
     __weak id<IJKAudioSessionDelegate> _delegate;
 
@@ -47,35 +49,56 @@
         return;
     }
 
-    OSStatus status = noErr;
     if (!_audioSessionInitialized) {
-        status = AudioSessionInitialize(NULL,
-                                        kCFRunLoopCommonModes,
-                                        IjkAudioSessionInterruptionListener,
-                                        NULL);
-        if (status != noErr) {
-            NSLog(@"IJKAudioKit: AudioSessionInitialize failed (%d)", (int)status);
-            return;
-        }
+        [[NSNotificationCenter defaultCenter] addObserver: self
+                                                 selector: @selector(handleInterruption:)
+                                                     name: AVAudioSessionInterruptionNotification
+                                                   object: [AVAudioSession sharedInstance]];
         _audioSessionInitialized = YES;
     }
 
     /* Set audio session to mediaplayback */
-    UInt32 sessionCategory = kAudioSessionCategory_MediaPlayback;
-    status = AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(sessionCategory), &sessionCategory);
-    if (status != noErr) {
-        NSLog(@"IJKAudioKit: AudioSessionSetProperty(kAudioSessionProperty_AudioCategory) failed (%d)", (int)status);
+    NSError *error = nil;
+    if (NO == [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error]) {
+        NSLog(@"IJKAudioKit: AVAudioSession.setCategory() failed: %@\n", error ? [error localizedDescription] : @"nil");
         return;
     }
 
-    status = AudioSessionSetActive(true);
-    if (status != noErr) {
-        NSLog(@"IJKAudioKit: AudioSessionSetActive(true) failed (%d)", (int)status);
+    error = nil;
+    if (NO == [[AVAudioSession sharedInstance] setActive:YES error:&error]) {
+        NSLog(@"IJKAudioKit: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
         return;
     }
 
     _delegate = delegate;
     return ;
+}
+
+- (void)handleInterruption:(NSNotification *)notification
+{
+    int reason = [[[notification userInfo] valueForKey:AVAudioSessionInterruptionTypeKey] intValue];
+    switch (reason) {
+        case AVAudioSessionInterruptionTypeBegan: {
+            NSLog(@"AVAudioSessionInterruptionTypeBegan\n");
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [_delegate ijkAudioBeginInterruption];
+                [[AVAudioSession sharedInstance] setActive:YES error:nil];
+            });
+            break;
+        }
+        case AVAudioSessionInterruptionTypeEnded: {
+            NSLog(@"AVAudioSessionInterruptionTypeEnded\n");
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [_delegate ijkAudioEndInterruption];
+                @try {
+                    [[AVAudioSession sharedInstance] setActive:NO error:nil];
+                } @catch (NSException *exception) {
+                    NSLog(@"failed to inactive AVAudioSession\n");
+                }
+            });
+            break;
+        }
+    }
 }
 
 static void IjkAudioSessionInterruptionListener(void *inClientData, UInt32 inInterruptionState)
@@ -89,15 +112,19 @@ static void IjkAudioSessionInterruptionListener(void *inClientData, UInt32 inInt
             NSLog(@"kAudioSessionBeginInterruption\n");
             dispatch_async(dispatch_get_main_queue(), ^{
                 [delegate ijkAudioBeginInterruption];
-                AudioSessionSetActive(false);
+                [[AVAudioSession sharedInstance] setActive:YES error:nil];
             });
             break;
         }
         case kAudioSessionEndInterruption: {
             NSLog(@"kAudioSessionEndInterruption\n");
             dispatch_async(dispatch_get_main_queue(), ^{
-                AudioSessionSetActive(true);
                 [delegate ijkAudioEndInterruption];
+                @try {
+                    [[AVAudioSession sharedInstance] setActive:NO error:nil];
+                } @catch (NSException *exception) {
+                    NSLog(@"failed to inactive AVAudioSession\n");
+                }
             });
             break;
         }

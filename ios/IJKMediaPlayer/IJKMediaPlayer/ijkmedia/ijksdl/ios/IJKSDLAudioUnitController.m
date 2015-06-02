@@ -26,6 +26,8 @@
 #include "ijkutil/ijkutil.h"
 #import "IJKSDLAudioKit.h"
 
+#import <AVFoundation/AVFoundation.h>
+
 @implementation IJKSDLAudioUnitController {
     AudioUnit _auUnit;
     BOOL _isPaused;
@@ -98,7 +100,7 @@
                                       &streamDescription,
                                       &i_param_size);
         if (status != noErr) {
-            ALOGE("AudioUnit: failed to verify stream format (%d)", (int)status);
+            ALOGE("AudioUnit: failed to verify stream format (%d)\n", (int)status);
         }
 
         AURenderCallbackStruct callback;
@@ -109,7 +111,7 @@
                                       kAudioUnitScope_Input,
                                       0, &callback, sizeof(callback));
         if (status != noErr) {
-            ALOGE("AudioUnit: render callback setup failed (%d)", (int)status);
+            ALOGE("AudioUnit: render callback setup failed (%d)\n", (int)status);
             self = nil;
             return nil;
         }
@@ -119,7 +121,7 @@
         /* AU initiliaze */
         status = AudioUnitInitialize(auUnit);
         if (status != noErr) {
-            ALOGE("AudioUnit: AudioUnitInitialize failed (%d)", (int)status);
+            ALOGE("AudioUnit: AudioUnitInitialize failed (%d)\n", (int)status);
             self = nil;
             return nil;
         }
@@ -140,8 +142,14 @@
         return;
 
     _isPaused = NO;
-    AudioSessionSetActive(true);
-    AudioOutputUnitStart(_auUnit);
+    NSError *error = nil;
+    if (NO == [[AVAudioSession sharedInstance] setActive:YES error:&error]) {
+        NSLog(@"AudioUnit: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
+    }
+
+    OSStatus status = AudioOutputUnitStart(_auUnit);
+    if (status != noErr)
+        NSLog(@"AudioUnit: AudioOutputUnitStart failed (%d)\n", (int)status);
 }
 
 - (void)pause
@@ -150,12 +158,9 @@
         return;
 
     _isPaused = YES;
-    // Delay > 1 seconds on ios8
-    // Maybe we don't need this call in pause
-    // AudioSessionSetActive(false);
     OSStatus status = AudioOutputUnitStop(_auUnit);
     if (status != noErr)
-        ALOGE("AudioUnit: failed to stop AudioUnit (%d)", (int)status);
+        ALOGE("AudioUnit: failed to stop AudioUnit (%d)\n", (int)status);
 }
 
 - (void)flush
@@ -168,8 +173,6 @@
 
 - (void)stop
 {
-    // AudioSessionSetActive(false);
-
     if (!_auUnit)
         return;
 

@@ -25,6 +25,8 @@
 #import "IJKSDLAudioQueueController.h"
 #import "IJKSDLAudioKit.h"
 
+#import <AVFoundation/AVFoundation.h>
+
 #define kIJKAudioQueueNumberBuffers (3)
 
 @implementation IJKSDLAudioQueueController {
@@ -107,7 +109,11 @@
         return;
 
     _isPaused = NO;
-    AudioSessionSetActive(true);
+    NSError *error = nil;
+    if (NO == [[AVAudioSession sharedInstance] setActive:YES error:&error]) {
+        NSLog(@"AudioQueue: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
+    }
+
     OSStatus status = AudioQueueStart(_audioQueueRef, NULL);
     if (status != noErr)
         NSLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
@@ -119,9 +125,6 @@
         return;
 
     _isPaused = YES;
-    // Delay > 1 seconds on ios8
-    // Maybe we don't need this call in pause
-    // AudioSessionSetActive(false);
     OSStatus status = AudioQueuePause(_audioQueueRef);
     if (status != noErr)
         NSLog(@"AudioQueue: AudioQueuePause failed (%d)\n", (int)status);
@@ -137,7 +140,6 @@
 
 - (void)stop
 {
-    // AudioSessionSetActive(false);
     if (!_audioQueueRef)
         return;
 
