@@ -29,7 +29,7 @@
 
 #include "string.h"
 
-@interface IJKFFMoviePlayerController() <IJKAudioSessionDelegate>
+@interface IJKFFMoviePlayerController()
 
 @property(nonatomic, readonly) NSDictionary *mediaMeta;
 @property(nonatomic, readonly) NSDictionary *videoMeta;
@@ -195,7 +195,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         ijkmp_set_option(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", "fcc-i420");
 
         // init audio sink
-        [[IJKAudioKit sharedInstance] setupAudioSession:self];
+        [[IJKAudioKit sharedInstance] setupAudioSession];
 
         // apply ffmpeg options
         if (options == nil) {
@@ -773,18 +773,6 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     }
 }
 
-#pragma mark IJKAudioSessionDelegate
-
-- (void)ijkAudioBeginInterruption
-{
-    [self pause];
-}
-
-- (void)ijkAudioEndInterruption
-{
-    [self pause];
-}
-
 #pragma mark Airplay
 
 -(BOOL)allowsMediaAirPlay
@@ -835,6 +823,11 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 
 - (void)registerApplicationObservers
 {
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(audioSessionInterrupt:)
+                                                 name:AVAudioSessionInterruptionNotification
+                                               object:nil];
+    [_registeredNotifications addObject:AVAudioSessionInterruptionNotification];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillEnterForeground)
@@ -873,6 +866,25 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
         [[NSNotificationCenter defaultCenter] removeObserver:self
                                                         name:name
                                                       object:nil];
+    }
+}
+
+- (void)audioSessionInterrupt:(NSNotification *)notification
+{
+    int reason = [[[notification userInfo] valueForKey:AVAudioSessionInterruptionTypeKey] intValue];
+    switch (reason) {
+        case AVAudioSessionInterruptionTypeBegan: {
+            NSLog(@"IJKFFMoviePlayerController:audioSessionInterrupt: begin\n");
+            [self pause];
+            [[IJKAudioKit sharedInstance] setActive:NO];
+            break;
+        }
+        case AVAudioSessionInterruptionTypeEnded: {
+            NSLog(@"IJKFFMoviePlayerController:audioSessionInterrupt: end\n");
+            [[IJKAudioKit sharedInstance] setActive:YES];
+            [self play];
+            break;
+        }
     }
 }
 

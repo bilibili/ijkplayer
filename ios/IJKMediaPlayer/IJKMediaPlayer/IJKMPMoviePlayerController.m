@@ -23,9 +23,6 @@
 #import "IJKMPMoviePlayerController.h"
 #import "IJKAudioKit.h"
 
-@interface IJKMPMoviePlayerController() <IJKAudioSessionDelegate>
-@end
-
 @implementation IJKMPMoviePlayerController
 
 @dynamic view;
@@ -55,7 +52,7 @@
         [self IJK_installMovieNotificationObservers];
         
         self.useApplicationAudioSession = YES;
-        [[IJKAudioKit sharedInstance] setupAudioSession:self];
+        [[IJKAudioKit sharedInstance] setupAudioSession];
         
         _bufferingProgress = -1;
     }
@@ -211,18 +208,6 @@
 - (void)IJK_dispatchMoviePlayerIsAirPlayVideoActiveDidChangeNotification:(NSNotification*)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:notification.object userInfo:notification.userInfo];
-}
-
-#pragma mark IJKAudioSessionDelegate
-
-- (void)ijkAudioBeginInterruption
-{
-    [self pause];
-}
-
-- (void)ijkAudioEndInterruption
-{
-    [self pause];
 }
 
 - (void)setPauseInBackground:(BOOL)pause
