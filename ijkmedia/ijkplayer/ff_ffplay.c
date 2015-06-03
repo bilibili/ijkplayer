@@ -2455,7 +2455,7 @@ static int read_thread(void *arg)
         ffp_notify_msg3(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
     }
     if (!ffp->start_on_prepared) {
-        while (is->paused && !is->abort_request) {
+        while (is->pause_req && !is->abort_request) {
             SDL_Delay(100);
         }
     }
@@ -2763,6 +2763,7 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
 
     is->play_mutex = SDL_CreateMutex();
     ffp->is = is;
+    is->pause_req = !ffp->start_on_prepared;
 
     is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp, "ff_vout");
     if (!is->video_refresh_tid) {
