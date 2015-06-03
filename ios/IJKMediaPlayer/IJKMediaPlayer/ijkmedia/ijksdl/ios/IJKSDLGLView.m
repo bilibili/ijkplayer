@@ -184,6 +184,8 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     BOOL            _didRelayoutSubViews;
     BOOL            _didPaddingChanged;
 
+    int             _tryLockErrorCount;
+    BOOL            _didSetupGL;
     NSMutableArray *_registeredNotifications;
 }
 
@@ -201,86 +203,137 @@ enum {
 {
     self = [super initWithFrame:frame];
     if (self) {
+        _tryLockErrorCount = 0;
+
         self.glActiveLock = [[NSRecursiveLock alloc] init];
         _registeredNotifications = [[NSMutableArray alloc] init];
-
-        CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
-        eaglLayer.opaque = YES;
-        eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                        [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
-                                        kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-                                        nil];
-
-        _scaleFactor = [[UIScreen mainScreen] scale];
-        if (_scaleFactor < 0.1f)
-            _scaleFactor = 1.0f;
-        _prevScaleFactor = _scaleFactor;
-
-        [eaglLayer setContentsScale:_scaleFactor];
-
-        _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-
-        if (_context == nil || ![EAGLContext setCurrentContext:_context]) {
-            NSLog(@"failed to setup EAGLContext");
-            self = nil;
-            return nil;
-        }
-
-        glGenFramebuffers(1, &_framebuffer);
-        glGenRenderbuffers(1, &_renderbuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-        [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
-        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
-        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _renderbuffer);
-
-        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            NSLog(@"failed to make complete framebuffer object %x\n", status);
-            if ([EAGLContext currentContext] == _context)
-                [EAGLContext setCurrentContext:nil];
-            self = nil;
-            return nil;
-        }
-
-        GLenum glError = glGetError();
-        if (GL_NO_ERROR != glError) {
-            NSLog(@"failed to setup GL %x\n", glError);
-            if ([EAGLContext currentContext] == _context)
-                [EAGLContext setCurrentContext:nil];
-            self = nil;
-            return nil;
-        }
-
-        _vertices[0] = -1.0f;  // x0
-        _vertices[1] = -1.0f;  // y0
-        _vertices[2] =  1.0f;  // ..
-        _vertices[3] = -1.0f;
-        _vertices[4] = -1.0f;
-        _vertices[5] =  1.0f;
-        _vertices[6] =  1.0f;  // x3
-        _vertices[7] =  1.0f;  // y3
-
-        _texCoords[0] = 0.0f;
-        _texCoords[1] = 1.0f;
-        _texCoords[2] = 1.0f;
-        _texCoords[3] = 1.0f;
-        _texCoords[4] = 0.0f;
-        _texCoords[5] = 0.0f;
-        _texCoords[6] = 1.0f;
-        _texCoords[7] = 0.0f;
-
-        _rightPadding = 0.0f;
-
-        NSLog(@"OK setup GL");
-        if ([EAGLContext currentContext] == _context)
-            [EAGLContext setCurrentContext:nil];
-
         [self registerApplicationObservers];
+
+        _didSetupGL = NO;
+        [self setupGLOnce];
     }
 
     return self;
+}
+
+- (BOOL)setupGL
+{
+    CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
+    eaglLayer.opaque = YES;
+    eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+                                    [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
+                                    kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
+                                    nil];
+
+    _scaleFactor = [[UIScreen mainScreen] scale];
+    if (_scaleFactor < 0.1f)
+        _scaleFactor = 1.0f;
+    _prevScaleFactor = _scaleFactor;
+
+    [eaglLayer setContentsScale:_scaleFactor];
+
+    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+
+    if (_context == nil || ![EAGLContext setCurrentContext:_context]) {
+        NSLog(@"failed to setup EAGLContext\n");
+        return NO;
+    }
+
+    glGenFramebuffers(1, &_framebuffer);
+    glGenRenderbuffers(1, &_renderbuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+    [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _renderbuffer);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        NSLog(@"failed to make complete framebuffer object %x\n", status);
+        if ([EAGLContext currentContext] == _context)
+            [EAGLContext setCurrentContext:nil];
+        return NO;
+    }
+
+    GLenum glError = glGetError();
+    if (GL_NO_ERROR != glError) {
+        NSLog(@"failed to setup GL %x\n", glError);
+        if ([EAGLContext currentContext] == _context)
+            [EAGLContext setCurrentContext:nil];
+        return NO;
+    }
+
+    _vertices[0] = -1.0f;  // x0
+    _vertices[1] = -1.0f;  // y0
+    _vertices[2] =  1.0f;  // ..
+    _vertices[3] = -1.0f;
+    _vertices[4] = -1.0f;
+    _vertices[5] =  1.0f;
+    _vertices[6] =  1.0f;  // x3
+    _vertices[7] =  1.0f;  // y3
+
+    _texCoords[0] = 0.0f;
+    _texCoords[1] = 1.0f;
+    _texCoords[2] = 1.0f;
+    _texCoords[3] = 1.0f;
+    _texCoords[4] = 0.0f;
+    _texCoords[5] = 0.0f;
+    _texCoords[6] = 1.0f;
+    _texCoords[7] = 0.0f;
+
+    _rightPadding = 0.0f;
+
+    NSLog(@"OK setup GL\n");
+    if ([EAGLContext currentContext] == _context)
+        [EAGLContext setCurrentContext:nil];
+
+    _didSetupGL = YES;
+    return YES;
+}
+
+- (BOOL)setupGLGuarded
+{
+    if (![self tryLockGLActive]) {
+        return NO;
+    }
+
+    BOOL didSetupGL = [self setupGL];
+    [self unlockGLActive];
+    return didSetupGL;
+}
+
+- (BOOL)setupGLOnce
+{
+    if (_didSetupGL)
+        return YES;
+
+    if ([self isApplicationActive] == NO)
+        return NO;
+
+    __block BOOL didSetup = NO;
+    if ([NSThread isMainThread]) {
+        didSetup = [self setupGLGuarded];
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            didSetup = [self setupGLGuarded];
+        });
+    }
+
+    return didSetup;
+}
+
+- (BOOL)isApplicationActive
+{
+    UIApplicationState appState = [UIApplication sharedApplication].applicationState;
+    switch (appState) {
+        case UIApplicationStateActive:
+            return YES;
+        case UIApplicationStateInactive:
+        case UIApplicationStateBackground:
+        default:
+            return NO;
+    }
 }
 
 - (void)dealloc
@@ -489,15 +542,21 @@ exit:
 
 - (void)display: (SDL_VoutOverlay *) overlay
 {
-    // gles throws gpus_ReturnNotPermittedKillClient, while app is in background
-    if (![self tryLockGLActive]) {
-        NSLog(@"IJKSDLGLView:display: unable to tryLock GL active\n");
-        return;
+    if ([self setupGLOnce]) {
+        // gles throws gpus_ReturnNotPermittedKillClient, while app is in background
+        if (![self tryLockGLActive]) {
+            if (0 == (_tryLockErrorCount % 100)) {
+                NSLog(@"IJKSDLGLView:display: unable to tryLock GL active: %d\n", _tryLockErrorCount);
+            }
+            _tryLockErrorCount++;
+            return;
+        }
+
+        _tryLockErrorCount = 0;
+        [self displayInternal:overlay];
+
+        [self unlockGLActive];
     }
-
-    [self displayInternal:overlay];
-
-    [self unlockGLActive];
 }
 
 - (void)displayInternal: (SDL_VoutOverlay *) overlay
