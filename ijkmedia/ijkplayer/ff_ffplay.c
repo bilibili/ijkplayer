@@ -3514,14 +3514,14 @@ void ffp_set_video_codec_info(FFPlayer *ffp, const char *module, const char *cod
 {
     av_freep(&ffp->video_codec_info);
     ffp->video_codec_info = av_asprintf("%s, %s", module ? module : "", codec ? codec : "");
-    ALOGI("VideoCodec: %s", ffp->video_codec_info);
+    ALOGI("VideoCodec: %s\n", ffp->video_codec_info);
 }
 
 void ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *codec)
 {
     av_freep(&ffp->audio_codec_info);
     ffp->audio_codec_info = av_asprintf("%s, %s", module ? module : "", codec ? codec : "");
-    ALOGI("AudioCodec: %s", ffp->audio_codec_info);
+    ALOGI("AudioCodec: %s\n", ffp->audio_codec_info);
 }
 
 IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
