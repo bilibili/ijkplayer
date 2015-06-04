@@ -75,12 +75,26 @@
 
 - (void)setPauseInBackground:(BOOL)pause;
 - (BOOL)isVideoToolboxOpen;
-- (void)setMaxBufferSize:(int)maxBufferSize; // -1 for default size
 
 + (void)setLogReport:(BOOL)preferLogReport;
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
+
+typedef enum IJKFFOptionCategory {
+    kIJKFFOptionCategoryFormat = 1,
+    kIJKFFOptionCategoryCodec  = 2,
+    kIJKFFOptionCategorySws    = 3,
+    kIJKFFOptionCategoryPlayer = 4,
+} IJKFFOptionCategory;
+
+- (void)setOptionValue:(NSString *)value
+                forKey:(NSString *)key
+            ofCategory:(IJKFFOptionCategory)category;
+
+- (void)setOptionIntValue:(NSInteger)value
+                   forKey:(NSString *)key
+               ofCategory:(IJKFFOptionCategory)category;
 
 @end
 

@@ -302,12 +302,48 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     return _isVideoToolboxOpen;
 }
 
-- (void)setMaxBufferSize:(int)maxBufferSize
+inline static int getPlayerOption(IJKFFOptionCategory category)
 {
+    int mp_category = -1;
+    switch (category) {
+        case kIJKFFOptionCategoryFormat:
+            mp_category = IJKMP_OPT_CATEGORY_FORMAT;
+            break;
+        case kIJKFFOptionCategoryCodec:
+            mp_category = IJKMP_OPT_CATEGORY_CODEC;
+            break;
+        case kIJKFFOptionCategorySws:
+            mp_category = IJKMP_OPT_CATEGORY_SWS;
+            break;
+        case kIJKFFOptionCategoryPlayer:
+            mp_category = IJKMP_OPT_CATEGORY_PLAYER;
+            break;
+        default:
+            NSLog(@"unknown option category: %d\n", category);
+    }
+    return mp_category;
+}
+
+- (void)setOptionValue:(NSString *)value
+                forKey:(NSString *)key
+            ofCategory:(IJKFFOptionCategory)category
+{
+    assert(_mediaPlayer);
     if (!_mediaPlayer)
         return;
 
-    ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "max-buffer-size", maxBufferSize);
+    ijkmp_set_option(_mediaPlayer, getPlayerOption(category), [key UTF8String], [value UTF8String]);
+}
+
+- (void)setOptionIntValue:(NSInteger)value
+                   forKey:(NSString *)key
+               ofCategory:(IJKFFOptionCategory)category
+{
+    assert(_mediaPlayer);
+    if (!_mediaPlayer)
+        return;
+
+    ijkmp_set_option_int(_mediaPlayer, getPlayerOption(category), [key UTF8String], value);
 }
 
 + (void)setLogReport:(BOOL)preferLogReport
