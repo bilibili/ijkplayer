@@ -1,3 +1,7 @@
+tag next-next
+--------------------------------
+ffmpeg: switch to ffmpeg n2.7
+
 tag next
 --------------------------------
 ios: remove armv7s build from default
@@ -10,6 +14,7 @@ tag k0.2.3
 android: support OpenSL ES
 ios: support NV12 Render
 ios: support VideoToolBox
+ffmpeg: switch to ffmpeg n2.6
 
 tag n0.2.2:
 --------------------------------
