@@ -278,6 +278,7 @@ echo "[*] link ffmpeg"
 echo "--------------------"
 echo $FF_EXTRA_LDFLAGS
 $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack $FF_EXTRA_LDFLAGS \
+    -Wl,-soname,libijkffmpeg.so \
     compat/*.o \
     libavutil/*.o \
     libavcodec/*.o \
