@@ -110,6 +110,7 @@ static const AVOption ffp_context_options[] = {
 
     { NULL }
 };
+#undef OPTION_CONST
 #undef OPTION_INT
 #undef OPTION_OFFSET
 
