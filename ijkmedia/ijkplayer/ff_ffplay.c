@@ -1473,8 +1473,12 @@ static int audio_thread(void *arg)
     AVRational tb;
     int ret = 0;
 
-    if (!frame)
+    if (!frame) {
+#if CONFIG_AVFILTER
+        avfilter_graph_free(&graph);
+#endif
         return AVERROR(ENOMEM);
+    }
 
     do {
         if ((got_frame = decoder_decode_frame(ffp, &is->auddec, frame, NULL)) < 0)
@@ -1570,8 +1574,10 @@ static int ffplay_video_thread(void *arg)
     enum AVPixelFormat last_format = -2;
     int last_serial = -1;
     int last_vfilter_idx = 0;
-    if (!graph)
+    if (!graph) {
+        av_frame_free(&frame);
         return AVERROR(ENOMEM);
+    }
 
 #endif
 
