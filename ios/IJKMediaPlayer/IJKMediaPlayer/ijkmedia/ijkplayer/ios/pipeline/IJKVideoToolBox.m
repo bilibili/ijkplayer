@@ -411,7 +411,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
 
 
-void CreateVTBSession(VideoToolBoxContext* context, int width, int height, CMFormatDescriptionRef fmt_desc)
+void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
 {
     VTDecompressionSessionRef vt_session = NULL;
     CFMutableDictionaryRef destinationPixelBufferAttributes;
@@ -442,7 +442,7 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height, CMFor
     outputCallback.decompressionOutputRefCon = context  ;
     status = VTDecompressionSessionCreate(
                                           kCFAllocatorDefault,
-                                          fmt_desc,
+                                          context->m_fmt_desc,
                                           NULL,
                                           destinationPixelBufferAttributes,
                                           &outputCallback,
@@ -497,7 +497,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
             CFRelease(context->m_vt_session);
         }
 
-        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
+        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
         context->refresh_request = false;
     }
 
@@ -658,7 +658,7 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
             CFRelease(context->m_vt_session);
         }
 
-        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
+        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
 
         if ((context->m_buffer_deep > 0) &&
             ff_avpacket_i_or_idr(&context->m_buffer_packet[0], context->idr_based_identified) == true ) {
@@ -876,7 +876,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     }
 
 
-    CreateVTBSession(context_vtb, width, height, context_vtb->m_fmt_desc);
+    CreateVTBSession(context_vtb, width, height);
     context_vtb->m_sort_queue = 0;
     if (context_vtb->m_vt_session == NULL) {
         if (context_vtb->m_fmt_desc) {
