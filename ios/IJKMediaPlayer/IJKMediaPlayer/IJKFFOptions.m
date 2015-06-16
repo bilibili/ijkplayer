@@ -43,7 +43,6 @@
     ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "max-fps",             _maxFps);
     ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "framedrop",           _frameDrop);
     ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "video-pictq-size",    _frameBufferCount);
-    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "max-buffer-size",     123);
     ijkmp_ios_set_videotoolbox_enabled(mediaPlayer, _videotoolboxEnabled);
     ijkmp_ios_set_frame_max_width(mediaPlayer, _frameMaxWidth);
 
