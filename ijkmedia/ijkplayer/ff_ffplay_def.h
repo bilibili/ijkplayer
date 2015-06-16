@@ -190,6 +190,8 @@ typedef struct Decoder {
     AVRational next_pts_tb;
     SDL_Thread *decoder_tid;
     SDL_Thread _decoder_tid;
+
+    SDL_Profiler decode_profiler;
 } Decoder;
 
 typedef struct VideoState {

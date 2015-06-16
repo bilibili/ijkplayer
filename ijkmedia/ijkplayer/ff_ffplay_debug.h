@@ -25,7 +25,7 @@
 
 #define FFP_XPS_PERIOD (3)
 // #define FFP_SHOW_FPS
-// #define FFP_SHOW_VDPS
+#define FFP_SHOW_VDPS
 // #define FFP_SHOW_AUDIO_DELAY
 // #define FFP_SHOW_DEMUX_CACHE
 // #define FFP_SHOW_BUF_POS
