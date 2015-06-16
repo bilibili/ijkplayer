@@ -1,13 +1,13 @@
-tag next-next
---------------------------------
-ffmpeg: switch to ffmpeg n2.7
-
 tag next
+--------------------------------
+
+tag k0.2.4
 --------------------------------
 ios: remove armv7s build from default
 player: introduce key-value options
 ios: demo improvement
 ios: support init/play in background.
+ffmpeg: switch to ffmpeg n2.7
 
 tag k0.2.3
 --------------------------------
