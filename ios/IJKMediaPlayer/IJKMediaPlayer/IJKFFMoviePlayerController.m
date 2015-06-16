@@ -351,6 +351,11 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     ijkmp_global_set_log_report(preferLogReport ? 1 : 0);
 }
 
++ (void)setLogLevel:(IJKAVLogLevel)logLevel
+{
+    ijkmp_global_set_log_level(logLevel);
+}
+
 - (void)shutdown
 {
     if (!_mediaPlayer)

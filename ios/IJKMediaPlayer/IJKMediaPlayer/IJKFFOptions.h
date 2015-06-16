@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum IJKAVDiscard{
+typedef enum IJKAVDiscard {
     /* We leave some space between them for extensions (drop some
      * keyframes for intra-only or drop just some bidir frames). */
     IJK_AVDISCARD_NONE    =-16, ///< discard nothing

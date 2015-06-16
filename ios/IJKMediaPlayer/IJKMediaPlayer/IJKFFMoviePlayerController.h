@@ -54,6 +54,18 @@
 
 #define kk_IJKM_KEY_STREAMS       @"streams"
 
+typedef enum IJKAVLogLevel {
+    IJK_AV_LOG_QUIET   = -8,
+    IJK_AV_LOG_PANIC   =  0,
+    IJK_AV_LOG_FATAL   =  8,
+    IJK_AV_LOG_ERROR   = 16,
+    IJK_AV_LOG_WARNING = 24,
+    IJK_AV_LOG_INFO    = 32,
+    IJK_AV_LOG_VERBOSE = 40,
+    IJK_AV_LOG_DEBUG   = 48,
+    IJK_AV_LOG_TRACE   = 56,
+} IJKAVLogLevel;
+
 @interface IJKFFMoviePlayerController : NSObject <IJKMediaPlayback>
 
 - (id)initWithContentURL:(NSURL *)aUrl
@@ -77,6 +89,7 @@
 - (BOOL)isVideoToolboxOpen;
 
 + (void)setLogReport:(BOOL)preferLogReport;
++ (void)setLogLevel:(IJKAVLogLevel)logLevel;
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
