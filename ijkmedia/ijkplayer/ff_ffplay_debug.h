@@ -1,8 +1,7 @@
-/*****************************************************************************
- * ijksdl_thread.h
- *****************************************************************************
+/*
+ * ff_ffplaye_debug.h
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,27 +20,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__IJKSDL_TIMER_H
-#define IJKSDL__IJKSDL_TIMER_H
+#ifndef FFPLAY__FF_FFPLAY_DEBUG_H
+#define FFPLAY__FF_FFPLAY_DEBUG_H
 
-#include "ijksdl_stdinc.h"
+#define FFP_XPS_PERIOD (3)
+// #define FFP_SHOW_FPS
+// #define FFP_SHOW_VDPS
+// #define FFP_SHOW_AUDIO_DELAY
+// #define FFP_SHOW_DEMUX_CACHE
+// #define FFP_SHOW_BUF_POS
+// #define FFP_SHOW_PKT_RECYCLE
 
-void SDL_Delay(Uint32 ms);
-
-Uint64 SDL_GetTickHR(void);
-
-
-typedef struct SDL_Profiler {
-    int64_t total_elapsed;
-    int     total_counter;
-    int64_t average_elapsed;
-    int64_t begin_time;
-
-    int     max_sample;
-} SDL_Profiler;
-
-void    SDL_ProfilerReset(SDL_Profiler* profiler, int max_sample);
-void    SDL_ProfilerBegin(SDL_Profiler* profiler);
-int64_t SDL_ProfilerEnd(SDL_Profiler* profiler);
+// #define FFP_NOTIFY_BUF_TIME
+// #define FFP_NOTIFY_BUF_BYTES
 
 #endif

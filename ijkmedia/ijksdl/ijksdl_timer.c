@@ -23,6 +23,7 @@
 
 #include "ijksdl_timer.h"
 #include <unistd.h>
+#include <string.h>
 #include <time.h>
 #include <sys/time.h>
 
@@ -75,4 +76,39 @@ Uint64 SDL_GetTickHR(void)
     }
 #endif
     return (clock);
+}
+
+void SDL_ProfilerReset(SDL_Profiler* profiler, int max_sample)
+{
+    memset(profiler, 0, sizeof(SDL_Profiler));
+    if (max_sample < 0)
+        profiler->max_sample = 3;
+    else
+        profiler->max_sample = max_sample;
+}
+
+void SDL_ProfilerBegin(SDL_Profiler* profiler)
+{
+    profiler->begin_time = SDL_GetTickHR();
+}
+
+int64_t SDL_ProfilerEnd(SDL_Profiler* profiler)
+{
+    int64_t delta = SDL_GetTickHR();
+
+    if (profiler->max_sample > 0) {
+        profiler->total_elapsed += delta;
+        profiler->total_counter += 1;
+
+        if (profiler->total_counter > profiler->max_sample) {
+            profiler->total_elapsed -= profiler->average_elapsed;
+            profiler->total_counter -= 1;
+        }
+
+        if (profiler->total_counter > 0) {
+            profiler->average_elapsed = profiler->total_elapsed / profiler->total_counter;
+        }
+    }
+
+    return delta;
 }

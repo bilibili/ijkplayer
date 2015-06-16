@@ -28,6 +28,7 @@
 #include "ff_fferror.h"
 #include "ff_ffpipeline.h"
 #include "ff_ffpipenode.h"
+#include "ff_ffplay_debug.h"
 #include "ijkmeta.h"
 
 // FIXME: 9 work around NDKr8e or gcc4.7 bug
@@ -42,17 +43,6 @@
 #if defined(__ANDROID__)
 #define printf(...) ALOGD(__VA_ARGS__)
 #endif
-
-#define FFP_XPS_PERIOD (3)
-// #define FFP_SHOW_FPS
-// #define FFP_SHOW_VDPS
-// #define FFP_SHOW_AUDIO_DELAY
-// #define FFP_SHOW_DEMUX_CACHE
-// #define FFP_SHOW_BUF_POS
-// #define FFP_SHOW_PKT_RECYCLE
-
-// #define FFP_NOTIFY_BUF_TIME
-// #define FFP_NOTIFY_BUF_BYTES
 
 #define FFP_IO_STAT_STEP (50 * 1024)
 
