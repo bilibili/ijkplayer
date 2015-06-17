@@ -23,12 +23,12 @@
     <color name="background_floating_material_light">#ffeeeeee</color>
 
     <color name="primary_material_dark">#ff212121</color>
-    <color name="primary_material_light">#ffbdbdbd</color>
+    <color name="primary_material_light">#ffefefef</color>
     <color name="primary_dark_material_dark">#ff000000</color>
     <color name="primary_dark_material_light">#ff757575</color>
 
-    <color name="ripple_material_dark">#40ffffff</color>
-    <color name="ripple_material_light">#40000000</color>
+    <color name="ripple_material_dark">#4dffffff</color>
+    <color name="ripple_material_light">#1f000000</color>
 
     <color name="accent_material_light">@color/material_deep_teal_500</color>
     <color name="accent_material_dark">@color/material_deep_teal_200</color>
@@ -38,6 +38,8 @@
 
     <color name="switch_thumb_normal_material_dark">#ffbdbdbd</color>
     <color name="switch_thumb_normal_material_light">#fff1f1f1</color>
+    <color name="switch_thumb_disabled_material_dark">#ff616161</color>
+    <color name="switch_thumb_disabled_material_light">#ffbdbdbd</color>
 
     <color name="bright_foreground_material_dark">@android:color/white</color>
     <color name="bright_foreground_material_light">@android:color/black</color>

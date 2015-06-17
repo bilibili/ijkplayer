@@ -41,6 +41,8 @@
 
     <!-- SearchView accessibility description for search button [CHAR LIMIT=NONE] -->
     <string name="abc_searchview_description_search">Search</string>
+    <!-- Default hint text for the system-wide search UI's text field. [CHAR LIMIT=30] -->
+    <string name="abc_search_hint">Search…</string>
     <!-- SearchView accessibility description for search text field [CHAR LIMIT=NONE] -->
     <string name="abc_searchview_description_query">Search query</string>
     <!-- SearchView accessibility description for clear button [CHAR LIMIT=NONE] -->
@@ -60,4 +62,10 @@
     <!-- Description of the choose target button in a ShareActionProvider (share UI). [CHAR LIMIT=NONE] -->
     <string name="abc_shareactionprovider_share_with">Share with</string>
 
+    <!-- Text to use when the number in a notification info is too large
+         (greater than status_bar_notification_info_maxnum, defined in
+         values/config.xml) and must be truncated. May need to be localized
+         for most appropriate textual indicator of "more than X".
+         [CHAR LIMIT=4] -->
+    <string name="status_bar_notification_info_overflow">999+</string>
 </resources>

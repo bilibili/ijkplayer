@@ -29,5 +29,12 @@
     <dimen name="abc_action_bar_default_height_material">64dp</dimen>
     <!-- Default padding of an action bar. -->
     <dimen name="abc_action_bar_default_padding_material">4dp</dimen>
+    <!-- Default content inset of an action bar. -->
+    <dimen name="abc_action_bar_content_inset_material">24dp</dimen>
+
+    <!-- Padding to add to the start of the overflow action button. -->
+    <dimen name="abc_action_bar_navigation_padding_start_material">8dp</dimen>
+    <!-- Padding to add to the end of the overflow action button. -->
+    <dimen name="abc_action_bar_overflow_padding_end_material">18dp</dimen>
 
 </resources>

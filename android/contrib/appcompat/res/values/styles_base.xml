@@ -37,6 +37,8 @@
         <item name="actionOverflowButtonStyle">@style/Widget.AppCompat.ActionButton.Overflow</item>
 
         <item name="android:gravity">center_vertical</item>
+        <item name="contentInsetStart">@dimen/abc_action_bar_content_inset_material</item>
+        <item name="contentInsetEnd">@dimen/abc_action_bar_content_inset_material</item>
         <item name="elevation">8dp</item>
         <item name="popupTheme">?attr/actionBarPopupTheme</item>
     </style>
@@ -72,6 +74,7 @@
 
     <style name="Base.Widget.AppCompat.ActionButton.CloseMode">
         <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:minWidth">56dp</item>
     </style>
 
     <style name="Base.Widget.AppCompat.ActionButton.Overflow">
@@ -210,8 +213,11 @@
         <item name="android:gravity">center_vertical</item>
     </style>
 
-    <style name="Base.Widget.AppCompat.ListView.DropDown" parent="android:Widget.ListView">
+    <style name="Base.Widget.AppCompat.ListView" parent="android:Widget.ListView">
         <item name="android:listSelector">?attr/listChoiceBackgroundIndicator</item>
+    </style>
+
+    <style name="Base.Widget.AppCompat.ListView.DropDown">
         <item name="android:divider">@null</item>
     </style>
 
@@ -281,7 +287,9 @@
         <item name="android:textColor">?android:textColorSecondary</item>
     </style>
 
-    <style name="Base.Widget.AppCompat.AutoCompleteTextView" parent="android:Widget.AutoCompleteTextView">
+    <style name="Base.Widget.AppCompat.AutoCompleteTextView" parent="Base.V7.Widget.AppCompat.AutoCompleteTextView" />
+
+    <style name="Base.V7.Widget.AppCompat.AutoCompleteTextView" parent="android:Widget.AutoCompleteTextView">
         <item name="android:dropDownSelector">?attr/listChoiceBackgroundIndicator</item>
         <item name="android:popupBackground">@drawable/abc_popup_background_mtrl_mult</item>
         <item name="android:background">?attr/editTextBackground</item>
@@ -331,17 +339,28 @@
         <item name="submitBackground">@drawable/abc_textfield_search_material</item>
         <item name="closeIcon">@drawable/abc_ic_clear_mtrl_alpha</item>
         <item name="searchIcon">@drawable/abc_ic_search_api_mtrl_alpha</item>
+        <item name="searchHintIcon">@drawable/abc_ic_search_api_mtrl_alpha</item>
         <item name="goIcon">@drawable/abc_ic_go_search_api_mtrl_alpha</item>
         <item name="voiceIcon">@drawable/abc_ic_voice_search_api_mtrl_alpha</item>
         <item name="commitIcon">@drawable/abc_ic_commit_search_api_mtrl_alpha</item>
         <item name="suggestionRowLayout">@layout/abc_search_dropdown_item_icons_2line</item>
     </style>
 
-    <style name="Base.Widget.AppCompat.EditText" parent="android:Widget.EditText">
+    <style name="Base.Widget.AppCompat.SearchView.ActionBar">
+        <item name="queryBackground">@null</item>
+        <item name="submitBackground">@null</item>
+        <item name="searchHintIcon">@null</item>
+        <item name="defaultQueryHint">@string/abc_search_hint</item>
+    </style>
+
+    <style name="Base.Widget.AppCompat.EditText" parent="Base.V7.Widget.AppCompat.EditText" />
+
+    <style name="Base.V7.Widget.AppCompat.EditText" parent="android:Widget.EditText">
         <item name="android:background">?attr/editTextBackground</item>
         <item name="android:textColor">?attr/editTextColor</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
     </style>
+
     <!-- contains values used in all dpis -->
     <style name="Base.Widget.AppCompat.DrawerArrowToggle.Common" parent="">
         <item name="color">?android:attr/textColorSecondary</item>
@@ -358,12 +377,23 @@
         <item name="drawableSize">24dp</item>
     </style>
 
+    <style name="Base.Widget.AppCompat.CompoundButton.CheckBox" parent="android:Widget.CompoundButton.CheckBox">
+        <item name="android:button">?android:attr/listChoiceIndicatorMultiple</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+    </style>
+
+    <style name="Base.Widget.AppCompat.CompoundButton.RadioButton" parent="android:Widget.CompoundButton.RadioButton">
+        <item name="android:button">?android:attr/listChoiceIndicatorSingle</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+    </style>
+
     <style name="Base.Widget.AppCompat.CompoundButton.Switch" parent="android:Widget.CompoundButton">
         <item name="track">@drawable/abc_switch_track_mtrl_alpha</item>
         <item name="android:thumb">@drawable/abc_switch_thumb_material</item>
         <item name="switchTextAppearance">@style/TextAppearance.AppCompat.Widget.Switch</item>
         <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
         <item name="showText">false</item>
+        <item name="switchPadding">@dimen/abc_switch_padding</item>
     </style>
 
     <style name="Base.TextAppearance.AppCompat.Widget.Switch" parent="TextAppearance.AppCompat.Button" />
@@ -390,6 +420,22 @@
         <item name="android:minWidth">48dip</item>
     </style>
 
+    <!-- Borderless ink button -->
+    <style name="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@drawable/abc_btn_borderless_material</item>
+    </style>
+
+    <!-- Colored borderless ink button -->
+    <style name="Base.Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:textColor">?attr/colorAccent</item>
+    </style>
+
+    <style name="Base.Widget.AppCompat.Button.ButtonBar.AlertDialog" parent="Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:minWidth">64dp</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:minHeight">@dimen/abc_alert_dialog_button_bar_height</item>
+    </style>
+
     <style name="Base.Widget.AppCompat.TextView.SpinnerItem" parent="android:Widget.TextView.SpinnerItem">
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem</item>
         <item name="android:paddingLeft">8dp</item>
@@ -397,5 +443,46 @@
     </style>
 
     <style name="Base.TextAppearance.AppCompat.Widget.TextView.SpinnerItem" parent="TextAppearance.AppCompat.Menu" />
+
+    <style name="Base.DialogWindowTitleBackground.AppCompat" parent="android:Widget">
+        <item name="android:background">@null</item>
+        <item name="android:paddingLeft">?attr/dialogPreferredPadding</item>
+        <item name="android:paddingRight">?attr/dialogPreferredPadding</item>
+        <item name="android:paddingTop">@dimen/abc_dialog_padding_top_material</item>
+    </style>
+
+    <style name="Base.DialogWindowTitle.AppCompat" parent="android:Widget">
+        <item name="android:maxLines">1</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
+    </style>
+
+    <style name="Base.Animation.AppCompat.Dialog" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/abc_popup_enter</item>
+        <item name="android:windowExitAnimation">@anim/abc_popup_exit</item>
+    </style>
+
+    <style name="Base.Widget.AppCompat.ButtonBar" parent="android:Widget">
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="Base.Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="Base.Animation.AppCompat.DropDownUp" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/abc_grow_fade_in_from_bottom</item>
+        <item name="android:windowExitAnimation">@anim/abc_shrink_fade_out_from_bottom</item>
+    </style>
+
+    <style name="Base.AlertDialog.AppCompat" parent="android:Widget">
+        <item name="android:layout">@layout/abc_alert_dialog_material</item>
+        <item name="listLayout">@layout/abc_select_dialog_material</item>
+        <item name="listItemLayout">@layout/select_dialog_item_material</item>
+        <item name="multiChoiceItemLayout">@layout/select_dialog_multichoice_material</item>
+        <item name="singleChoiceItemLayout">@layout/select_dialog_singlechoice_material</item>
+    </style>
+
+    <style name="Base.AlertDialog.AppCompat.Light" parent="Base.AlertDialog.AppCompat" />
 
 </resources>

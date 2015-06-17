@@ -60,8 +60,7 @@
 
     <style name="Widget.AppCompat.ActionButton" parent="Base.Widget.AppCompat.ActionButton" />
 
-    <!-- This style has an extra indirection to properly set RTL attributes. See styles_rtl.xml -->
-    <style name="Widget.AppCompat.ActionButton.CloseMode" parent="RtlOverlay.Widget.AppCompat.ActionButton.CloseMode" />
+    <style name="Widget.AppCompat.ActionButton.CloseMode" parent="Base.Widget.AppCompat.ActionButton.CloseMode" />
 
     <style name="Widget.AppCompat.ActionButton.Overflow"
            parent="RtlOverlay.Widget.AppCompat.ActionButton.Overflow" />
@@ -129,9 +128,8 @@
     <!-- This style has an extra indirection to properly set RTL attributes. See styles_rtl.xml -->
     <style name="Widget.AppCompat.DropDownItem.Spinner" parent="RtlOverlay.Widget.AppCompat.Search.DropDown.Text" />
 
-    <style name="Widget.AppCompat.ListView.DropDown"
-           parent="Base.Widget.AppCompat.ListView.DropDown">
-    </style>
+    <style name="Widget.AppCompat.ListView" parent="Base.Widget.AppCompat.ListView" />
+    <style name="Widget.AppCompat.ListView.DropDown" parent="Base.Widget.AppCompat.ListView.DropDown" />
 
     <style name="TextAppearance.Widget.AppCompat.ExpandedMenu.Item"
            parent="Base.TextAppearance.Widget.AppCompat.ExpandedMenu.Item">
@@ -194,6 +192,7 @@
     </style>
 
     <style name="Widget.AppCompat.SearchView" parent="Base.Widget.AppCompat.SearchView" />
+    <style name="Widget.AppCompat.SearchView.ActionBar" parent="Base.Widget.AppCompat.SearchView.ActionBar" />
 
     <style name="Widget.AppCompat.EditText"
            parent="Base.Widget.AppCompat.EditText">
@@ -201,20 +200,38 @@
 
     <style name="Widget.AppCompat.CompoundButton.Switch" parent="Base.Widget.AppCompat.CompoundButton.Switch" />
 
+    <style name="Widget.AppCompat.CompoundButton.CheckBox" parent="Base.Widget.AppCompat.CompoundButton.CheckBox" />
+
+    <style name="Widget.AppCompat.CompoundButton.RadioButton" parent="Base.Widget.AppCompat.CompoundButton.RadioButton" />
+
     <style name="Widget.AppCompat.RatingBar" parent="Base.Widget.AppCompat.RatingBar" />
 
     <style name="Widget.AppCompat.Button" parent="Base.Widget.AppCompat.Button" />
 
     <style name="Widget.AppCompat.Button.Small" parent="Base.Widget.AppCompat.Button.Small" />
 
+    <style name="Widget.AppCompat.Button.Borderless" parent="Base.Widget.AppCompat.Button.Borderless" />
+
+    <style name="Widget.AppCompat.Button.Borderless.Colored" parent="Base.Widget.AppCompat.Button.Borderless.Colored" />
+
+    <style name="Widget.AppCompat.Button.ButtonBar.AlertDialog" parent="Base.Widget.AppCompat.Button.ButtonBar.AlertDialog" />
+
+    <style name="Widget.AppCompat.ButtonBar" parent="Base.Widget.AppCompat.ButtonBar" />
+
+    <style name="Widget.AppCompat.ButtonBar.AlertDialog" parent="Base.Widget.AppCompat.ButtonBar.AlertDialog" />
+
     <style name="Widget.AppCompat.TextView.SpinnerItem" parent="Base.Widget.AppCompat.TextView.SpinnerItem" />
+
+    <style name="AlertDialog.AppCompat" parent="Base.AlertDialog.AppCompat" />
+
+    <style name="AlertDialog.AppCompat.Light" parent="Base.AlertDialog.AppCompat.Light" />
 
     <!-- Toolbar -->
 
     <style name="Widget.AppCompat.Toolbar" parent="Base.Widget.AppCompat.Toolbar" />
 
     <style name="Widget.AppCompat.Toolbar.Button.Navigation"
-           parent="Base.Widget.AppCompat.Toolbar.Button.Navigation" />
+           parent="RtlOverlay.Widget.AppCompat.Toolbar.Button.Navigation" />
 
     <style name="TextAppearance.Widget.AppCompat.Toolbar.Title"
            parent="Base.TextAppearance.Widget.AppCompat.Toolbar.Title">
@@ -225,8 +242,14 @@
     </style>
 
 
+    <!-- Animation styles -->
     <eat-comment />
+    <style name="Animation.AppCompat.Dialog" parent="Base.Animation.AppCompat.Dialog" />
+    <style name="Animation.AppCompat.DropDownUp" parent="Base.Animation.AppCompat.DropDownUp" />
+
+
     <!-- Text styles -->
+    <eat-comment />
 
     <style name="TextAppearance.AppCompat" parent="Base.TextAppearance.AppCompat" />
 
@@ -298,4 +321,11 @@
     <style name="Widget.AppCompat.Light.AutoCompleteTextView" parent="Widget.AppCompat.AutoCompleteTextView" />
     <style name="Widget.AppCompat.Light.ActivityChooserView" parent="Widget.AppCompat.ActivityChooserView" />
 
+    <!-- These styles didn't exist on v7. Since we only use the media template in later versions
+         (ICS+), just define it here and use the correct references in values/v14 -->
+    <style name="TextAppearance.StatusBar.EventContent" parent=""/>
+    <style name="TextAppearance.StatusBar.EventContent.Title" parent=""/>
+    <style name="TextAppearance.StatusBar.EventContent.Line2" parent=""/>
+    <style name="TextAppearance.StatusBar.EventContent.Info" parent=""/>
+    <style name="TextAppearance.StatusBar.EventContent.Time" parent=""/>
 </resources>

@@ -14,8 +14,7 @@
      limitations under the License.
 -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
-            android:paddingMode="stack">
-    <item android:drawable="@drawable/abc_cab_background_internal_bg" />
-    <item android:drawable="@drawable/abc_cab_background_top_mtrl_alpha" />
-</layer-list>
+<!-- This is a dummy drawable so that we can refer to the drawable ID -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@android:color/white"/>
+</shape>

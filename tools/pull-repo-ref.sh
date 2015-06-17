@@ -12,6 +12,6 @@ elif [ ! -d $LOCAL_WORKSPACE ]; then
     git repack -a
 else
     cd $LOCAL_WORKSPACE
-    git pull --rebase
+    git fetch --all --tags
     cd -
 fi
