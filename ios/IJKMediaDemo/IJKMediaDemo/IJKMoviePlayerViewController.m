@@ -128,7 +128,7 @@
 - (IBAction)onClickBack:(id)sender
 {
 //    exit(0);
-    [self.player pause];
+//    [self.player pause];
     [self dismissModalViewControllerAnimated:YES];
 }
 
@@ -235,7 +235,7 @@
     NSLog(@"mediaIsPreparedToPlayDidChange\n");
     [self.player play];
     
-    self.player.currentPlaybackTime = 10;
+//    self.player.currentPlaybackTime = 10;
 }
 
 - (void)moviePlayBackStateDidChange:(NSNotification*)notification

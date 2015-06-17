@@ -94,7 +94,7 @@ static void *KVO_AVPlayerItem_playbackLikelyToKeepUp    = &KVO_AVPlayerItem_play
 static void *KVO_AVPlayerItem_playbackBufferFull        = &KVO_AVPlayerItem_playbackBufferFull;
 static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_playbackBufferEmpty;
 
-@interface IJKAVMoviePlayerController() <IJKAudioSessionDelegate>
+@interface IJKAVMoviePlayerController()
 
 // Redeclare property
 @property(nonatomic, readwrite) UIView *view;
@@ -133,8 +133,6 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     BOOL _playbackLikelyToKeeyUp;
     BOOL _playbackBufferEmpty;
     BOOL _playbackBufferFull;
-    
-//    NSMutableArray *_registeredNotifications;
 }
 
 @synthesize view                        = _view;
@@ -167,7 +165,7 @@ static IJKAVMoviePlayerController* instance;
         self.view = _avView;
         
         // TODO:
-        [[IJKAudioKit sharedInstance] setupAudioSession:self];
+        [[IJKAudioKit sharedInstance] setupAudioSession];
         
         _isPrerolling   = NO;
         
@@ -182,9 +180,6 @@ static IJKAVMoviePlayerController* instance;
         
         // init extra
         [self setScreenOn:YES];
-        
-//        _registeredNotifications = [[NSMutableArray alloc] init];
-//        [self registerApplicationObservers];
     }
     return self;
 }
@@ -297,6 +292,10 @@ static IJKAVMoviePlayerController* instance;
     [_playerKVO safelyRemoveAllObservers];
     
 //    [self unregisterApplicationObservers];
+
+      [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                        name:AVAudioSessionInterruptionNotification
+                                                      object:nil];
     
     if (_avView != nil) {
         [_avView setPlayer:nil];
@@ -464,6 +463,11 @@ static IJKAVMoviePlayerController* instance;
     _playerItem = [AVPlayerItem playerItemWithAsset:asset];
     _playerItemKVO = [[IJKKVOController alloc] initWithTarget:_playerItem];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(audioSessionInterrupt:)
+                                                 name:AVAudioSessionInterruptionNotification
+                                               object:nil];
+
     /* Observe the player item "status" key to determine when it is ready to play. */
     [_playerItemKVO safelyAddObserver:self
                            forKeyPath:@"status"
@@ -822,18 +826,46 @@ static IJKAVMoviePlayerController* instance;
     return error;
 }
 
-
-
-#pragma mark IJKAudioSessionDelegate
-
-- (void)ijkAudioBeginInterruption
+- (void)setScalingMode: (MPMovieScalingMode) aScalingMode
 {
-    [self pause];
+    MPMovieScalingMode newScalingMode = aScalingMode;
+    switch (aScalingMode) {
+        case MPMovieScalingModeNone:
+            [_view setContentMode:UIViewContentModeCenter];
+            break;
+        case MPMovieScalingModeAspectFit:
+            [_view setContentMode:UIViewContentModeScaleAspectFit];
+            break;
+        case MPMovieScalingModeAspectFill:
+            [_view setContentMode:UIViewContentModeScaleAspectFill];
+            break;
+        case MPMovieScalingModeFill:
+            [_view setContentMode:UIViewContentModeScaleToFill];
+            break;
+        default:
+            newScalingMode = _scalingMode;
+    }
+    
+    _scalingMode = newScalingMode;
 }
 
-- (void)ijkAudioEndInterruption
+- (void)audioSessionInterrupt:(NSNotification *)notification
 {
-    [self play];
+    int reason = [[[notification userInfo] valueForKey:AVAudioSessionInterruptionTypeKey] intValue];
+    switch (reason) {
+        case AVAudioSessionInterruptionTypeBegan: {
+            NSLog(@"IJKAVMoviePlayerController:audioSessionInterrupt: begin\n");
+            [self pause];
+            [[IJKAudioKit sharedInstance] setActive:NO];
+            break;
+        }
+        case AVAudioSessionInterruptionTypeEnded: {
+            NSLog(@"IJKAVMoviePlayerController:audioSessionInterrupt: end\n");
+            [[IJKAudioKit sharedInstance] setActive:YES];
+            [self play];
+            break;
+        }
+    }
 }
 
 #pragma mark app state changed
@@ -881,28 +913,6 @@ static IJKAVMoviePlayerController* instance;
     }
 }
 
-- (void)setScalingMode: (MPMovieScalingMode) aScalingMode
-{
-    MPMovieScalingMode newScalingMode = aScalingMode;
-    switch (aScalingMode) {
-        case MPMovieScalingModeNone:
-            [_view setContentMode:UIViewContentModeCenter];
-            break;
-        case MPMovieScalingModeAspectFit:
-            [_view setContentMode:UIViewContentModeScaleAspectFit];
-            break;
-        case MPMovieScalingModeAspectFill:
-            [_view setContentMode:UIViewContentModeScaleAspectFill];
-            break;
-        case MPMovieScalingModeFill:
-            [_view setContentMode:UIViewContentModeScaleToFill];
-            break;
-        default:
-            newScalingMode = _scalingMode;
-    }
-    
-    _scalingMode = newScalingMode;
-}
 
 
 - (void)applicationWillEnterForeground

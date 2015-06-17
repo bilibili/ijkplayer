@@ -393,7 +393,7 @@ public class MediaController extends FrameLayout {
     }
 
     private static String generateTime(long position) {
-        int totalSeconds = (int) (position / 1000);
+        int totalSeconds = (int) ((position / 1000.0)+0.5);
 
         int seconds = totalSeconds % 60;
         int minutes = (totalSeconds / 60) % 60;
@@ -474,6 +474,7 @@ public class MediaController extends FrameLayout {
         updatePausePlay();
     }
 
+    private Runnable lastRunnable;
     private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
         public void onStartTrackingTouch(SeekBar bar) {
             mDragging = true;
@@ -492,10 +493,18 @@ public class MediaController extends FrameLayout {
             if (!fromuser)
                 return;
 
-            long newposition = (mDuration * progress) / 1000;
+            final long newposition = (mDuration * progress) / 1000;
             String time = generateTime(newposition);
-            if (mInstantSeeking)
-                mPlayer.seekTo(newposition);
+            if (mInstantSeeking) {
+                mHandler.removeCallbacks(lastRunnable);
+                lastRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        mPlayer.seekTo(newposition);
+                    }
+                };
+                mHandler.postDelayed(lastRunnable, 200);
+            }
             if (mInfoView != null)
                 mInfoView.setText(time);
             if (mCurrentTime != null)

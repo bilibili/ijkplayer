@@ -29,7 +29,7 @@
 
 #include "string.h"
 
-@interface IJKFFMoviePlayerController() <IJKAudioSessionDelegate>
+@interface IJKFFMoviePlayerController()
 
 @property(nonatomic, readonly) NSDictionary *mediaMeta;
 @property(nonatomic, readonly) NSDictionary *videoMeta;
@@ -57,8 +57,6 @@
     BOOL _keepScreenOnWhilePlaying;
     BOOL _pauseInBackground;
     BOOL _isVideoToolboxOpen;
-
-//    NSMutableArray *_registeredNotifications;
 }
 
 @synthesize view = _view;
@@ -193,9 +191,12 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         ijkmp_set_overlay_format(_mediaPlayer, chroma);
 
         // init audio sink
-        [[IJKAudioKit sharedInstance] setupAudioSession:self];
+        [[IJKAudioKit sharedInstance] setupAudioSession];
 
         // apply ffmpeg options
+        if (options == nil) {
+            options = [IJKFFOptions optionsByDefault];
+        }
         [options applyTo:_mediaPlayer];
         _pauseInBackground = options.pauseInBackground;
 
@@ -203,10 +204,10 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         _keepScreenOnWhilePlaying = YES;
         [self setScreenOn:YES];
 
- //        _registeredNotifications = [[NSMutableArray alloc] init];
- //        [self registerApplicationObservers];
-        
-        NSLog(@"Newest SDK by shilingkai");
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(audioSessionInterrupt:)
+                                                 name:AVAudioSessionInterruptionNotification
+                                               object:nil];
     }
     return self;
 }
@@ -221,6 +222,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 {
     [_ffMrl removeTempFiles];
 //    [self unregisterApplicationObservers];
+
 }
 
 - (void)prepareToPlay
@@ -309,10 +311,12 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (!_mediaPlayer)
         return;
 
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                        name:AVAudioSessionInterruptionNotification
+                                                      object:nil];
     [self setScreenOn:NO];
 
-//    [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
-    [self shutdownWaitStop:self];
+    [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
 }
 
 - (void)shutdownWaitStop:(IJKFFMoviePlayerController *) mySelf
@@ -321,8 +325,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return;
 
     ijkmp_stop(_mediaPlayer);
-//    [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
-    [self shutdownClose:self];
+    [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
 }
 
 - (void)shutdownClose:(IJKFFMoviePlayerController *) mySelf
@@ -391,6 +394,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return 0.0f;
 
     NSTimeInterval ret = ijkmp_get_current_position(_mediaPlayer);
+    if (isnan(ret) || isinf(ret))
+        return -1;
+
     return ret / 1000;
 }
 
@@ -400,6 +406,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return 0.0f;
 
     NSTimeInterval ret = ijkmp_get_duration(_mediaPlayer);
+    if (isnan(ret) || isinf(ret))
+        return -1;
+
     return ret / 1000;
 }
 
@@ -784,16 +793,23 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     }
 }
 
-#pragma mark IJKAudioSessionDelegate
-
-- (void)ijkAudioBeginInterruption
+- (void)audioSessionInterrupt:(NSNotification *)notification
 {
-    [self pause];
-}
-
-- (void)ijkAudioEndInterruption
-{
-    [self play];
+    int reason = [[[notification userInfo] valueForKey:AVAudioSessionInterruptionTypeKey] intValue];
+    switch (reason) {
+        case AVAudioSessionInterruptionTypeBegan: {
+            NSLog(@"IJKFFMoviePlayerController:audioSessionInterrupt: begin\n");
+            [self pause];
+            [[IJKAudioKit sharedInstance] setActive:NO];
+            break;
+        }
+        case AVAudioSessionInterruptionTypeEnded: {
+            NSLog(@"IJKFFMoviePlayerController:audioSessionInterrupt: end\n");
+            [[IJKAudioKit sharedInstance] setActive:YES];
+            [self play];
+            break;
+        }
+    }
 }
 
 #pragma mark app state changed

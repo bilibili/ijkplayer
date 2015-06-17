@@ -1430,8 +1430,12 @@ static int audio_thread(void *arg)
     AVRational tb;
     int ret = 0;
 
-    if (!frame)
+    if (!frame) {
+#if CONFIG_AVFILTER
+        avfilter_graph_free(&graph);
+#endif
         return AVERROR(ENOMEM);
+    }
 
     do {
         if ((got_frame = decoder_decode_frame(ffp, &is->auddec, frame, NULL)) < 0)
@@ -1527,8 +1531,10 @@ static int ffplay_video_thread(void *arg)
     enum AVPixelFormat last_format = -2;
     int last_serial = -1;
     int last_vfilter_idx = 0;
-    if (!graph)
+    if (!graph) {
+        av_frame_free(&frame);
         return AVERROR(ENOMEM);
+    }
 
 #endif
 
@@ -1855,6 +1861,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wanted_nb_channels, int wanted_sample_rate, struct AudioParams *audio_hw_params)
 {
     FFPlayer *ffp = opaque;
+    VideoState *is = ffp->is;
     SDL_AudioSpec wanted_spec, spec;
     const char *env;
     static const int next_nb_channels[] = {0, 0, 1, 6, 2, 6, 4, 6};
@@ -1888,6 +1895,9 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
     wanted_spec.callback = sdl_audio_callback;
     wanted_spec.userdata = opaque;
     while (SDL_AoutOpenAudio(ffp->aout, &wanted_spec, &spec) < 0) {
+        /* avoid infinity loop on exit. --by bbcallen */
+        if (is->abort_request)
+            return -1;
         av_log(NULL, AV_LOG_WARNING, "SDL_OpenAudio (%d channels, %d Hz): %s\n",
                wanted_spec.channels, wanted_spec.freq, SDL_GetError());
         wanted_spec.channels = next_nb_channels[FFMIN(7, wanted_spec.channels)];
@@ -2067,7 +2077,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         if(is->video_st->avg_frame_rate.den && is->video_st->avg_frame_rate.num) {
             double fps = av_q2d(is->video_st->avg_frame_rate);
-            if (fps > ffp->max_fps && fps < 100.0) {
+            if (fps > ffp->max_fps && fps < 130.0) {
                 is->is_video_high_fps = 1;
                 ALOGI("fps: %lf (too high)\n", fps);
             } else {
@@ -2076,7 +2086,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         }
         if(is->video_st->r_frame_rate.den && is->video_st->r_frame_rate.num) {
             double tbr = av_q2d(is->video_st->r_frame_rate);
-            if (tbr > ffp->max_fps && tbr < 100.0) {
+            if (tbr > ffp->max_fps && tbr < 130.0) {
                 is->is_video_high_fps = 1;
                 ALOGI("fps: %lf (too high)\n", tbr);
             } else {
@@ -2114,8 +2124,10 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
     switch (avctx->codec_type) {
     case AVMEDIA_TYPE_AUDIO:
         decoder_abort(&is->auddec, &is->sampq);
+        printf("SDL_AoutCloseAudio\n");
         SDL_AoutCloseAudio(ffp->aout);
 
+        printf("decoder_destroy\n");
         decoder_destroy(&is->auddec);
         swr_free(&is->swr_ctx);
         av_freep(&is->audio_buf1);
@@ -2231,6 +2243,10 @@ static int read_thread(void *arg)
     int64_t av_stalled_now_time = 0;
     //
 
+    //
+    printf("start loading\n");
+    //
+    
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
     is->last_audio_stream = is->audio_stream = -1;
@@ -2467,6 +2483,10 @@ static int read_thread(void *arg)
     
     bool isDropAllPackets = false;
 
+    //
+    printf("end loading\n");
+    //
+    
     for (;;) {
         if (is->abort_request)
             break;
@@ -2821,6 +2841,7 @@ static int read_thread(void *arg)
                 }
             }
         }
+        pkt->flags = 0;
         ret = av_read_frame(ic, pkt);
         if(isDropAllPackets)
         {
@@ -2901,7 +2922,7 @@ static int read_thread(void *arg)
             }
             if (is->eof) {
                 ffp_toggle_buffering(ffp, 0);
-                SDL_Delay(1000);
+//                SDL_Delay(1000); //fix for release delay by william shi
             }
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
@@ -2945,14 +2966,17 @@ static int read_thread(void *arg)
     ret = 0;
  fail:
     /* close each stream */
+    printf("audio_stream close\n");
     if (is->audio_stream >= 0)
         stream_component_close(ffp, is->audio_stream);
+    printf("video_stream close\n");
     if (is->video_stream >= 0)
         stream_component_close(ffp, is->video_stream);
 #ifdef FFP_MERGE
     if (is->subtitle_stream >= 0)
         stream_component_close(ffp, is->subtitle_stream);
 #endif
+    printf("avformat_close_input\n");
     if (ic) {
         avformat_close_input(&is->ic);
         is->ic = NULL;
@@ -3730,14 +3754,14 @@ void ffp_set_video_codec_info(FFPlayer *ffp, const char *module, const char *cod
 {
     av_freep(&ffp->video_codec_info);
     ffp->video_codec_info = av_asprintf("%s, %s", module ? module : "", codec ? codec : "");
-    ALOGI("VideoCodec: %s", ffp->video_codec_info);
+    ALOGI("VideoCodec: %s\n", ffp->video_codec_info);
 }
 
 void ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *codec)
 {
     av_freep(&ffp->audio_codec_info);
     ffp->audio_codec_info = av_asprintf("%s, %s", module ? module : "", codec ? codec : "");
-    ALOGI("AudioCodec: %s", ffp->audio_codec_info);
+    ALOGI("AudioCodec: %s\n", ffp->audio_codec_info);
 }
 
 IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)

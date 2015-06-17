@@ -833,28 +833,14 @@ exit:
 
     // OpenGL ES measures data in PIXELS
     // Create a graphics context with the target size measured in POINTS
-    NSInteger widthInPoints, heightInPoints;
-    if (NULL != UIGraphicsBeginImageContextWithOptions) {
-        // On iOS 4 and later, use UIGraphicsBeginImageContextWithOptions to take the scale into consideration
-        // Set the scale parameter to your OpenGL ES view's contentScaleFactor
-        // so that you get a high-resolution snapshot when its value is greater than 1.0
-        CGFloat scale = self.contentScaleFactor;
-        widthInPoints = width / scale;
-        heightInPoints = height / scale;
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(widthInPoints, heightInPoints), NO, scale);
-    } else {
-        // On iOS prior to 4, fall back to use UIGraphicsBeginImageContext
-        widthInPoints = width;
-        heightInPoints = height;
-        UIGraphicsBeginImageContext(CGSizeMake(widthInPoints, heightInPoints));
-    }
+    UIGraphicsBeginImageContext(CGSizeMake(width, height));
 
     CGContextRef cgcontext = UIGraphicsGetCurrentContext();
     // UIKit coordinate system is upside down to GL/Quartz coordinate system
     // Flip the CGImage by rendering it to the flipped bitmap context
     // The size of the destination area is measured in POINTS
     CGContextSetBlendMode(cgcontext, kCGBlendModeCopy);
-    CGContextDrawImage(cgcontext, CGRectMake(0.0, 0.0, widthInPoints, heightInPoints), iref);
+    CGContextDrawImage(cgcontext, CGRectMake(0.0, 0.0, width, height), iref);
 
     // Retrieve the UIImage from the current context
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();

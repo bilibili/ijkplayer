@@ -378,7 +378,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
     successed:
         return;
     failed:
-        ALOGI("FailedSignal: %lf\n", newFrame->pts);
+        // ALOGI("FailedSignal: %lf\n", newFrame->pts);
         if (newFrame) {
             free(newFrame);
         }
@@ -460,7 +460,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     if (context->refresh_session) {
         decoderFlags |= kVTDecodeFrame_DoNotOutputFrame;
-        ALOGI("flag :%d flag %d \n", decoderFlags,avpkt->flags);
+        // ALOGI("flag :%d flag %d \n", decoderFlags,avpkt->flags);
     }
 
     if (context->refresh_request) {
@@ -614,11 +614,11 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
     if (!avpkt || !avpkt->data) {
         return 0;
     }
-/*
+
     if (ff_avpacket_is_idr(avpkt) == true) {
         context->idr_based_identified = true;
-    }*/
-    context->idr_based_identified = false;
+    }
+//    context->idr_based_identified = false;
     if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
         ResetPktBuffer(context);
         context->recovery_drop_packet = false;

@@ -23,17 +23,12 @@
  */
 
 #import <Foundation/Foundation.h>
-
-@protocol IJKAudioSessionDelegate <NSObject>
-
-- (void)ijkAudioBeginInterruption;
-- (void)ijkAudioEndInterruption;
-
-@end
+#import <AVFoundation/AVFoundation.h>
 
 @interface IJKAudioKit : NSObject
 
 + (IJKAudioKit *)sharedInstance;
-- (void)setupAudioSession:(id<IJKAudioSessionDelegate>) delegate;
+- (void)setupAudioSession;
+- (BOOL)setActive:(BOOL)active;
 
 @end

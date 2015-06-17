@@ -23,9 +23,9 @@
     options.frameDrop               = 0;
     options.pauseInBackground       = YES;
 
-    options.timeout                 = 20 * 1000 * 1000; // 30 seconds
+    options.timeout                 = 30 * 1000 * 1000; // 30 seconds
     options.userAgent               = @"";
-    options.videotoolboxEnabled     = NO;
+    options.videotoolboxEnabled     = YES;
     options.frameMaxWidth           = 960;
     options.autoReconnect           = NO;
 

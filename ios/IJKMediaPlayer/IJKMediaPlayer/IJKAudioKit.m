@@ -25,8 +25,6 @@
 #import "IJKAudioKit.h"
 
 @implementation IJKAudioKit {
-    __weak id<IJKAudioSessionDelegate> _delegate;
-
     BOOL _audioSessionInitialized;
 }
 
@@ -40,65 +38,57 @@
     return sAudioKit;
 }
 
-- (void)setupAudioSession:(id<IJKAudioSessionDelegate>) delegate
+- (void)setupAudioSession
 {
-    _delegate = nil;
-    if (delegate == nil) {
-        return;
-    }
-
-    OSStatus status = noErr;
     if (!_audioSessionInitialized) {
-        status = AudioSessionInitialize(NULL,
-                                        kCFRunLoopCommonModes,
-                                        IjkAudioSessionInterruptionListener,
-                                        NULL);
-        if (status != noErr) {
-            NSLog(@"IJKAudioKit: AudioSessionInitialize failed (%d)", (int)status);
-            return;
-        }
+        [[NSNotificationCenter defaultCenter] addObserver: self
+                                                 selector: @selector(handleInterruption:)
+                                                     name: AVAudioSessionInterruptionNotification
+                                                   object: [AVAudioSession sharedInstance]];
         _audioSessionInitialized = YES;
     }
 
     /* Set audio session to mediaplayback */
-    UInt32 sessionCategory = kAudioSessionCategory_MediaPlayback;
-    status = AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(sessionCategory), &sessionCategory);
-    if (status != noErr) {
-        NSLog(@"IJKAudioKit: AudioSessionSetProperty(kAudioSessionProperty_AudioCategory) failed (%d)", (int)status);
+    NSError *error = nil;
+    if (NO == [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error]) {
+        NSLog(@"IJKAudioKit: AVAudioSession.setCategory() failed: %@\n", error ? [error localizedDescription] : @"nil");
         return;
     }
 
-    status = AudioSessionSetActive(true);
-    if (status != noErr) {
-        NSLog(@"IJKAudioKit: AudioSessionSetActive(true) failed (%d)", (int)status);
+    error = nil;
+    if (NO == [[AVAudioSession sharedInstance] setActive:YES error:&error]) {
+        NSLog(@"IJKAudioKit: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
         return;
     }
 
-    _delegate = delegate;
     return ;
 }
 
-static void IjkAudioSessionInterruptionListener(void *inClientData, UInt32 inInterruptionState)
+- (BOOL)setActive:(BOOL)active
 {
-    id<IJKAudioSessionDelegate> delegate = [IJKAudioKit sharedInstance]->_delegate;
-    if (delegate == nil)
-        return;
+    if (active != NO) {
+        [[AVAudioSession sharedInstance] setActive:YES error:nil];
+    } else {
+        @try {
+            [[AVAudioSession sharedInstance] setActive:NO error:nil];
+        } @catch (NSException *exception) {
+            NSLog(@"failed to inactive AVAudioSession\n");
+        }
+    }
+}
 
-    switch (inInterruptionState) {
-        case kAudioSessionBeginInterruption: {
-            NSLog(@"kAudioSessionBeginInterruption\n");
-            dispatch_async(dispatch_get_main_queue(), ^{
-                AudioSessionSetActive(false);
-                [delegate ijkAudioBeginInterruption];
-            });
+- (void)handleInterruption:(NSNotification *)notification
+{
+    int reason = [[[notification userInfo] valueForKey:AVAudioSessionInterruptionTypeKey] intValue];
+    switch (reason) {
+        case AVAudioSessionInterruptionTypeBegan: {
+            NSLog(@"AVAudioSessionInterruptionTypeBegan\n");
+            [self setActive:NO];
             break;
         }
-        case kAudioSessionEndInterruption: {
-            NSLog(@"kAudioSessionEndInterruption\n");
-            dispatch_async(dispatch_get_main_queue(), ^{
-                AudioSessionSetActive(true);
-                [delegate ijkAudioEndInterruption];
-            });
+        case AVAudioSessionInterruptionTypeEnded: {
+            NSLog(@"AVAudioSessionInterruptionTypeEnded\n");
+            [self setActive:YES];
             break;
         }
     }

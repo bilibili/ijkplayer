@@ -278,7 +278,7 @@ static bool ff_avpacket_is_idr(const AVPacket* pkt) {
 
     if (pkt->data && pkt->size >= 5) {
         int offset = 0;
-        while (offset <= pkt->size) {
+        while (offset >= 0 && offset + 5 <= pkt->size) {
             void* nal_start = pkt->data+offset;
             state = ff_get_nal_units_type(nal_start);
             if (state == NAL_IDR_SLICE) {
