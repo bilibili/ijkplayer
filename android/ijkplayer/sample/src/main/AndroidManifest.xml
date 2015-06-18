@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="tv.danmaku.ijk.media.sample" >
+    package="tv.danmaku.ijk.media.sample"
+    android:versionCode="300000"
+    android:versionName="0.3.0">
 
     <uses-sdk
         android:minSdkVersion="9"
