@@ -968,7 +968,6 @@ fallback_to_ffplay:
 
 static int func_flush(IJKFF_Pipenode *node)
 {
-    JNIEnv                *env      = NULL;
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
 
     if (!opaque)
