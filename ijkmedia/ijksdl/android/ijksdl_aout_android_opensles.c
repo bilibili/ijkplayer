@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <math.h>
+#include <inttypes.h>
 #include <jni.h>
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
@@ -329,7 +330,7 @@ static int aout_open_audio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_Aud
         // this workaround could be made conditional.
         //
         // by VLC/android_opensles.c
-        ALOGW("OpenSL-ES: force resample %d to native sample rate %d\n", format_pcm->samplesPerSec / 1000, native_sample_rate);
+        ALOGW("OpenSL-ES: force resample %lu to native sample rate %d\n", format_pcm->samplesPerSec / 1000, native_sample_rate);
         format_pcm->samplesPerSec = native_sample_rate * 1000;
     }
 
