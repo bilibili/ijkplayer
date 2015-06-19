@@ -9,6 +9,7 @@ ijkplayer
  - Mac OS X 10.10.3
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
+ - Android Studio 1.2.2
 - iOS
  - Xcode 6.3.2 (6D2105)
 - [HomeBrew](http://brew.sh)
