@@ -1,5 +1,8 @@
 tag next
 --------------------------------
+
+tag k0.3.0
+--------------------------------
 android: support build with Android Studio / Gradle
 build: improve library fetch
 openssl: switch to openssl 1.0.1o
