@@ -8,10 +8,9 @@ ijkplayer
 - Common
  - Mac OS X 10.10.3
 - Android
- - [ADT v23.0.6-1720515](http://developer.android.com/sdk/index.html)
- - [NDK r10d](http://developer.android.com/tools/sdk/ndk/index.html)
+ - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
 - iOS
- - Xcode 6.3.0
+ - Xcode 6.3.2 (6D2105)
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
  - brew install git
@@ -25,7 +24,7 @@ ijkplayer
  - workaround for some buggy online video.
 - Android
  - platform: API 9~22
- - cpu: ARMv7a, x86, ARMv5 (not tested on real devices)
+ - cpu: ARMv7a, x86, ARMv5 (ARMv5 is not tested on real devices)
  - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - video output: NativeWindow
  - audio output: OpenSL ES, AudioTrack
@@ -41,8 +40,6 @@ ijkplayer
 ### TODO
 - iOS
  - api: AVFoundation-like
-- Android
- - Android Studio
 - Build 
  - cygwin compatibility
 
@@ -57,7 +54,7 @@ ijkplayer
 cd config
 rm module.sh
 ln -s module-default.sh module.sh
-cd android
+cd android/contrib
 # cd ios
 sh compile-ffmpeg clean
 ```
@@ -67,7 +64,7 @@ sh compile-ffmpeg clean
 cd config
 rm module.sh
 ln -s module-lite.sh module.sh
-cd android
+cd android/contrib
 # cd ios
 sh compile-ffmpeg clean
 ```
@@ -81,57 +78,40 @@ sudo dpkg-reconfigure dash
 - If you'd like to share your config, pull request is welcome.
 
 ### Build Android
-#### Build latest stable version
-
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest k0.2.4
-# or for master
-# git checkout master
+git checkout -B latest k0.3.0
 
 ./init-android.sh
 
-cd android
-
+cd android/contrib
 ./compile-ffmpeg.sh clean
 ./compile-ffmpeg.sh
+
+cd ..
 ./compile-ijk.sh
 
-# or Add Native Support in eclipse
-# cd ijkmediaplayer
-# cp .cproject.bak .cproject
-
-# import android/ijkmediaplayer for MediaPlayer-like interface (recommended)
-# import android/ijkmediawidget for VideoView-like interface (based on Vitamio UI)
-# import android/ijkmediademo for VideoActivity demo (Simple VideoActivity)
-
-```
-
-#### Build development version
-
-```
-git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
-cd ijkplayer-android
-git checkout master
-
-./init-android.sh
-
-cd android
-# add property ANDROID_NDK to gradle.properties
-
-./gradlew cleanFFmpeg buildJniLibs
-# or import project via Android Studio
+# Eclipse:
+#     File -> New -> Project -> Android Project from Existing Code
+#     Select android/ and import all project
+#
+# Android Studio:
+#     Open an existing Android Studio project
+#     Select android/ijkplayer/ and import
+#
+# Gradle
+#     cd ijkplayer
+#     gradle
 
 ```
+
 
 ### Build iOS
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
-git checkout -B latest k0.2.4
-# or for master
-# git checkout master
+git checkout -B latest k0.3.0
 
 ./init-ios.sh
 
