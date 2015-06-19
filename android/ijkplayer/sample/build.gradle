@@ -27,5 +27,6 @@ dependencies {
     compile project(':player-armv7a')
     compile project(':player-x86')
     compile project(':player-armv5')
-    compile project(':player-arm64')
+    // need API-21
+    // compile project(':player-arm64')
 }
