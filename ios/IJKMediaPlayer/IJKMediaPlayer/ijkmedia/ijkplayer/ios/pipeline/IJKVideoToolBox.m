@@ -454,7 +454,7 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
                                           destinationPixelBufferAttributes,
                                           &outputCallback,
                                           &vt_session);
-
+    CFRelease(destinationPixelBufferAttributes);
 
     if (status != noErr) {
         context->m_vt_session = NULL;
@@ -762,9 +762,14 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
     if (context && context->m_vt_session) {
         VTDecompressionSessionInvalidate(context->m_vt_session);
         CFRelease(context->m_vt_session);
+        context->m_vt_session = NULL;
     }
     if (context) {
         ResetPktBuffer(context);
+        if (context->m_fmt_desc) {
+            CFRelease(context->m_fmt_desc);
+            context->m_fmt_desc = NULL;
+        }
         context->dealloced = true;
     }
 }
