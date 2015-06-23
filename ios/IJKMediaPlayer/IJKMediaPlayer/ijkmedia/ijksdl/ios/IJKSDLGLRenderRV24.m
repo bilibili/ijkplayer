@@ -56,7 +56,7 @@ static NSString *const g_rgbFragmentShaderString = IJK_SHADER_STRING
     _uniformSamplers[0] = glGetUniformLocation(program, "s_texture");
 }
 
-- (void) display: (SDL_VoutOverlay *) overlay
+- (void) render: (SDL_VoutOverlay *) overlay
 {
     assert(overlay->planes);
     assert(overlay->format == SDL_FCC_RV24);

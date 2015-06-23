@@ -64,6 +64,11 @@ static void CFDictionarySetSInt32(CFMutableDictionaryRef dictionary, CFStringRef
     CFRelease(number);
 }
 
+static void CFDictionarySetBoolean(CFMutableDictionaryRef dictionary, CFStringRef key, BOOL value)
+{
+    CFDictionarySetValue(dictionary, key, value ? kCFBooleanTrue : kCFBooleanFalse);
+}
+
 
 static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc, void *demux_buff, size_t demux_size)
 {
@@ -438,6 +443,8 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
                           kCVPixelBufferWidthKey, width);
     CFDictionarySetSInt32(destinationPixelBufferAttributes,
                           kCVPixelBufferHeightKey, height);
+    CFDictionarySetBoolean(destinationPixelBufferAttributes,
+                          kCVPixelBufferOpenGLESCompatibilityKey, YES);
     outputCallback.decompressionOutputCallback = VTDecoderCallback;
     outputCallback.decompressionOutputRefCon = context  ;
     status = VTDecompressionSessionCreate(

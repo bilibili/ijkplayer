@@ -25,4 +25,6 @@
 
 @interface IJKSDLGLRenderNV12 : NSObject<IJKSDLGLRender>
 
+-(id)initWithTextureCache:(CVOpenGLESTextureCacheRef) textureCache;
+
 @end

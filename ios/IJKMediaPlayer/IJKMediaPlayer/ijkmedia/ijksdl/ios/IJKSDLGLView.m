@@ -168,7 +168,8 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
 
     GLfloat         _prevScaleFactor;
 
-    id<IJKSDLGLRender> _renderer;
+    id<IJKSDLGLRender>        _renderer;
+    CVOpenGLESTextureCacheRef _textureCache;
 
     BOOL            _didSetContentMode;
     BOOL            _didRelayoutSubViews;
@@ -243,6 +244,12 @@ enum {
         NSLog(@"failed to make complete framebuffer object %x\n", status);
         if ([EAGLContext currentContext] == _context)
             [EAGLContext setCurrentContext:nil];
+        return NO;
+    }
+
+    CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_textureCache);
+    if (err) {
+        NSLog(@"Error at CVOpenGLESTextureCacheCreate %d\n", err);
         return NO;
     }
 
@@ -349,6 +356,11 @@ enum {
         _program = 0;
     }
 
+    if (_textureCache) {
+        CFRelease(_textureCache);
+        _textureCache = 0;
+    }
+
     if ([EAGLContext currentContext] == _context) {
         [EAGLContext setCurrentContext:nil];
     }
@@ -407,7 +419,7 @@ enum {
             return NO;
         } else if (overlay->format == SDL_FCC_NV12) {
             _frameChroma = overlay->format;
-            _renderer = [[IJKSDLGLRenderNV12 alloc] init];
+            _renderer = [[IJKSDLGLRenderNV12 alloc] initWithTextureCache:_textureCache];
             _bytesPerPixel = 1;
             NSLog(@"OK use NV12 GL renderer");
         } else if (overlay->format == SDL_FCC_I420) {
@@ -598,7 +610,7 @@ exit:
     if (overlay) {
         _frameWidth = overlay->w;
         _frameHeight = overlay->h;
-        [_renderer display:overlay];
+        [_renderer render:overlay];
     }
 
     if ([_renderer prepareDisplay]) {

@@ -30,6 +30,6 @@
 - (BOOL) isValid;
 - (NSString *) fragmentShader;
 - (void) resolveUniforms: (GLuint) program;
-- (void) display: (SDL_VoutOverlay *) overlay;
+- (void) render: (SDL_VoutOverlay *) overlay;
 - (BOOL) prepareDisplay;
 @end
