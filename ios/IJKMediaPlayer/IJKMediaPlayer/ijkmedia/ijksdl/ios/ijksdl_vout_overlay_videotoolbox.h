@@ -30,6 +30,7 @@
 #include "ijksdl_inc_ffmpeg.h"
 
 SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout);
-int SDL_VoutOverlayVideoToolBox_FillFrame(SDL_VoutOverlay *overlay, VTBPicture* picture);
+int              SDL_VoutOverlayVideoToolBox_FillFrame(SDL_VoutOverlay *overlay, VTBPicture* picture);
+CVPixelBufferRef SDL_VoutOverlayVideoToolBox_GetCVPixelBufferRef(SDL_VoutOverlay *overlay);
 
 #endif
