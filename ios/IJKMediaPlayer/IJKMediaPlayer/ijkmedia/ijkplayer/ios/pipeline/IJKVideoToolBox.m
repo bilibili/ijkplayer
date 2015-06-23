@@ -702,7 +702,6 @@ static void dict_set_boolean(CFMutableDictionaryRef dict, CFStringRef key, BOOL 
 static void dict_set_object(CFMutableDictionaryRef dict, CFStringRef key, CFTypeRef *value)
 {
     CFDictionarySetValue(dict, key, value);
-    CFRelease(value);
 }
 
 static void dict_set_data(CFMutableDictionaryRef dict, CFStringRef key, uint8_t * value, uint64_t length)
@@ -744,6 +743,10 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
     dict_set_object(extensions, CFSTR ("CVPixelAspectRatio"), (CFTypeRef *) par);
     dict_set_object(extensions, CFSTR ("SampleDescriptionExtensionAtoms"), (CFTypeRef *) atoms);
     status = CMVideoFormatDescriptionCreate(NULL, format_id, width, height, extensions, &fmt_desc);
+
+    CFRelease(extensions);
+    CFRelease(atoms);
+    CFRelease(par);
 
     if (status == 0)
         return fmt_desc;
