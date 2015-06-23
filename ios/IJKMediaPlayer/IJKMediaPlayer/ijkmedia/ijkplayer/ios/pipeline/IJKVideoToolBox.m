@@ -454,7 +454,6 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
                                           destinationPixelBufferAttributes,
                                           &outputCallback,
                                           &vt_session);
-    CFRelease(destinationPixelBufferAttributes);
 
     if (status != noErr) {
         context->m_vt_session = NULL;
