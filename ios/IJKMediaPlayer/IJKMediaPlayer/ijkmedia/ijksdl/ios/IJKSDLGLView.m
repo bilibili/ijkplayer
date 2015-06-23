@@ -29,17 +29,7 @@
 #import "IJKSDLGLRenderRV24.h"
 #import "IJKSDLGLRenderNV12.h"
 #include "ijksdl/ijksdl_timer.h"
-
-#define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
-#define SYSTEM_VERSION_GREATER_THAN(v)              ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
-#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
-#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
-#define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
-
-inline static BOOL isIOS7OrLater()
-{
-    return SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0");
-}
+#include "ijksdl/ios/ijksdl_ios.h"
 
 
 static NSString *const g_vertexShaderString = IJK_SHADER_STRING
