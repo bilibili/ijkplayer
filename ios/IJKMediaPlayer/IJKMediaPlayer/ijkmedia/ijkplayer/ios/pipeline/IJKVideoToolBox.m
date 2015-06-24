@@ -500,6 +500,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         if(context->m_vt_session) {
             VTDecompressionSessionInvalidate(context->m_vt_session);
             CFRelease(context->m_vt_session);
+            context->m_vt_session = NULL;
         }
 
         CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
