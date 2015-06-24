@@ -311,7 +311,6 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         newFrame->nextframe = NULL;
         GetPktTSFromRef(sourceFrameRefCon, newFrame);
         ctx->last_sort = newFrame->sort;
-        CFRelease(sourceFrameRefCon);
         if (status != 0) {
             ALOGI("decode callback  %d \n", (int)status);
             ALOGI("Signal: status\n");
@@ -569,6 +568,8 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     if (status != 0) {
         ALOGE("status %d \n", (int)status);
+        CFRelease(frame_info);
+
         if (status == kVTInvalidSessionErr) {
             context->refresh_session = true;
         }
