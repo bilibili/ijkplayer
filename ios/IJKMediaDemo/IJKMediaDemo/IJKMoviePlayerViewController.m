@@ -107,7 +107,7 @@
 }
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation{
-    return UIInterfaceOrientationLandscapeLeft;
+    return UIInterfaceOrientationLandscapeRight;
 }
 
 - (void)didReceiveMemoryWarning
