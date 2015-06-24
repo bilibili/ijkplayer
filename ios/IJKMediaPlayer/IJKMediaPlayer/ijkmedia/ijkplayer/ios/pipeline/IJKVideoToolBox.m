@@ -471,7 +471,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 {
     OSStatus status                 = 0;
     double sort_time                = GetSystemTime();
-    uint32_t decoderFlags           = kVTDecodeFrame_EnableAsynchronousDecompression;
+    uint32_t decoder_flags          = 0;// kVTDecodeFrame_EnableAsynchronousDecompression;
     CFDictionaryRef frame_info      = NULL;;
     CMSampleBufferRef sample_buff   = NULL;
     AVIOContext *pb                 = NULL;
@@ -487,7 +487,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     }
 
     if (context->refresh_session) {
-        decoderFlags |= kVTDecodeFrame_DoNotOutputFrame;
+        decoder_flags |= kVTDecodeFrame_DoNotOutputFrame;
         // ALOGI("flag :%d flag %d \n", decoderFlags,avpkt->flags);
     }
 
@@ -562,7 +562,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts,context->serial);
 
     //ALOGI("Decode before \n!!!!!!!");
-    status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoderFlags, (void*)frame_info, 0);
+    status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)frame_info, 0);
     //ALOGI("Decode after \n!!!!!!!");
 
     CFRelease(frame_info);
@@ -582,15 +582,11 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         }
     }
 
-
-    status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-
-    //ALOGI("Wait : %lf \n",pts);
-    if ((sort_time - context->m_sort_time_offset) > context->last_sort) {
-
-    }
-    if (status != 0) {
-        goto failed;
+    if (decoder_flags & kVTDecodeFrame_EnableAsynchronousDecompression) {
+        status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+        if (status != 0) {
+            goto failed;
+        }
     }
 
     if (sample_buff) {
