@@ -512,8 +512,6 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         pts = dts;
     }
 
-    frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts,context->serial);
-
     if (context->m_convert_bytestream) {
         // ALOGI("the buffer should m_convert_byte\n");
         if(avio_open_dyn_buf(&pb) < 0) {
@@ -562,9 +560,13 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     context->last_keyframe_pts = avpkt->pts;
 
+    frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts,context->serial);
+
     //ALOGI("Decode before \n!!!!!!!");
     status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoderFlags, (void*)frame_info, 0);
     //ALOGI("Decode after \n!!!!!!!");
+
+    CFRelease(frame_info);
 
     if (status != 0) {
         ALOGE("status %d \n", (int)status);
