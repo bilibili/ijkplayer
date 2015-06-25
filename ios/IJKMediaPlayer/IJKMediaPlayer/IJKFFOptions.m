@@ -85,11 +85,11 @@
         case IJK_AVDISCARD_NONREF:
             return @"avdiscard nonref";
         case IJK_AVDISCARD_BIDIR:
-            return @"avdicard bidir;";
+            return @"avdicard bidir";
         case IJK_AVDISCARD_NONKEY:
             return @"avdicard nonkey";
         case IJK_AVDISCARD_ALL:
-            return @"avdicard all;";
+            return @"avdicard all";
         default:
             return @"avdiscard unknown";
     }
