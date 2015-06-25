@@ -582,11 +582,10 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         }
     }
 
-    if (decoder_flags & kVTDecodeFrame_EnableAsynchronousDecompression) {
-        status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-        if (status != 0) {
-            goto failed;
-        }
+    // Wait for delayed frames even if kVTDecodeInfo_Asynchronous is not set.
+    status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+    if (status != 0) {
+        goto failed;
     }
 
     if (sample_buff) {
