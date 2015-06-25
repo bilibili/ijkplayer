@@ -34,7 +34,7 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 @property(nonatomic) int    maxFps;
 @property(nonatomic) int    frameDrop;
 @property(nonatomic) BOOL   pauseInBackground;
-@property(nonatomic) BOOL   videotoolboxEnabled;
+@property(nonatomic) BOOL   videoToolboxEnabled;
 @property(nonatomic) int    frameMaxWidth;
 @property(nonatomic) BOOL   autoReconnect;
 
