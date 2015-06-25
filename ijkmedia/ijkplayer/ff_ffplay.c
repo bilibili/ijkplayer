@@ -2258,6 +2258,11 @@ static int read_thread(void *arg)
         av_format_set_control_message_cb(ic, ffp_format_control_message);
         av_format_set_opaque(ic, ffp);
     }
+    if (av_strstart(is->filename, "rtmp", NULL)) {
+        // There is total different meaning for 'timeout' option in rtmp
+        av_log(NULL, AV_LOG_WARNING, "remove 'timeout' option for rtmp.\n");
+        av_dict_set(&ffp->format_opts, "timeout", NULL, 0);
+    }
     err = avformat_open_input(&ic, is->filename, is->iformat, &ffp->format_opts);
     if (err < 0) {
         print_error(is->filename, err);
