@@ -71,14 +71,14 @@ void ijkmp_global_uninit()
     ffp_global_uninit();
 }
 
-void ijkmp_global_set_log_report(int use_report)
+void ijkmp_global_set_ff_log_report(int use_report)
 {
-    ffp_global_set_log_report(use_report);
+    ffp_global_set_ff_log_report(use_report);
 }
 
-void ijkmp_global_set_log_level(int log_level)
+void ijkmp_global_set_ff_log_level(int log_level)
 {
-    ffp_global_set_log_level(log_level);
+    ffp_global_set_ff_log_level(log_level);
 }
 
 void ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes))

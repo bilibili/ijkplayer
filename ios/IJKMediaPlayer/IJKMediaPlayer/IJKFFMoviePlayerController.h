@@ -88,8 +88,8 @@ typedef enum IJKAVLogLevel {
 - (void)setPauseInBackground:(BOOL)pause;
 - (BOOL)isVideoToolboxOpen;
 
-+ (void)setLogReport:(BOOL)preferLogReport;
-+ (void)setLogLevel:(IJKAVLogLevel)logLevel;
++ (void)setFFLogReport:(BOOL)preferLogReport;
++ (void)setFFLogLevel:(IJKAVLogLevel)logLevel;
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;

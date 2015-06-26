@@ -2835,10 +2835,10 @@ static int lockmgr(void **mtx, enum AVLockOp op)
 
 static bool g_ffmpeg_global_inited = false;
 
-inline static int av_log_level_to_ffp_log_level(int av_log_level)
+inline static int log_level_av_to_ffp(int av_log_level)
 {
     int ffplv = IJK_LOG_VERBOSE;
-    if (av_log_level <= AV_LOG_ERROR)           ffplv = IJK_LOG_ERROR;
+    if      (av_log_level <= AV_LOG_ERROR)      ffplv = IJK_LOG_ERROR;
     else if (av_log_level <= AV_LOG_WARNING)    ffplv = IJK_LOG_WARN;
     else if (av_log_level <= AV_LOG_INFO)       ffplv = IJK_LOG_INFO;
     else if (av_log_level <= AV_LOG_VERBOSE)    ffplv = IJK_LOG_VERBOSE;
@@ -2849,18 +2849,19 @@ inline static int av_log_level_to_ffp_log_level(int av_log_level)
 
 static void ffp_log_callback_brief(void *ptr, int level, const char *fmt, va_list vl)
 {
-    int ffplv __unused = av_log_level_to_ffp_log_level(level);
     if (level > av_log_get_level())
         return;
 
+    int ffplv __unused = log_level_av_to_ffp(level);
     VLOG(ffplv, IJK_LOG_TAG, fmt, vl);
 }
 
 static void ffp_log_callback_report(void *ptr, int level, const char *fmt, va_list vl)
 {
-    int ffplv __unused = av_log_level_to_ffp_log_level(level);
     if (level > av_log_get_level())
         return;
+
+    int ffplv __unused = log_level_av_to_ffp(level);
 
     va_list vl2;
     char line[1024];
@@ -2915,7 +2916,7 @@ void ffp_global_uninit()
     g_ffmpeg_global_inited = false;
 }
 
-void ffp_global_set_log_report(int use_report)
+void ffp_global_set_ff_log_report(int use_report)
 {
     if (use_report) {
         av_log_set_callback(ffp_log_callback_report);
@@ -2924,7 +2925,7 @@ void ffp_global_set_log_report(int use_report)
     }
 }
 
-void ffp_global_set_log_level(int log_level)
+void ffp_global_set_ff_log_level(int log_level)
 {
     av_log_set_level(log_level);
 }

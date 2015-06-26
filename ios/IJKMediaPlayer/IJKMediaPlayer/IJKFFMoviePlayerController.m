@@ -346,14 +346,14 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     ijkmp_set_option_int(_mediaPlayer, getPlayerOption(category), [key UTF8String], value);
 }
 
-+ (void)setLogReport:(BOOL)preferLogReport
++ (void)setFFLogReport:(BOOL)preferLogReport
 {
-    ijkmp_global_set_log_report(preferLogReport ? 1 : 0);
+    ijkmp_global_set_ff_log_report(preferLogReport ? 1 : 0);
 }
 
-+ (void)setLogLevel:(IJKAVLogLevel)logLevel
++ (void)setFFLogLevel:(IJKAVLogLevel)logLevel
 {
-    ijkmp_global_set_log_level(logLevel);
+    ijkmp_global_set_ff_log_level(logLevel);
 }
 
 - (void)shutdown
