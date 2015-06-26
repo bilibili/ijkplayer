@@ -98,7 +98,7 @@ static const GLfloat kColorConversion709[] = {
     _uniform[0] = glGetUniformLocation(program, "colorConversionMatrix");
 }
 
-- (void) displayInternal:(SDL_VoutOverlay *)overlay withPixelBuffer:(CVPixelBufferRef) pixelBuffer
+- (void) render: (SDL_VoutOverlay *) overlay
 {
     assert(overlay->planes);
     assert(overlay->format == SDL_FCC_NV12);
@@ -106,6 +106,17 @@ static const GLfloat kColorConversion709[] = {
 
     if (overlay->pixels[0] == NULL || overlay->pixels[1] == NULL)
         return;
+
+    if (!_textureCache) {
+        ALOGE("nil textureCache\n");
+        return;
+    }
+
+    CVPixelBufferRef pixelBuffer = SDL_VoutOverlayVideoToolBox_GetCVPixelBufferRef(overlay);
+    if (!pixelBuffer) {
+        ALOGE("nil pixelBuffer in overlay\n");
+        return;
+    }
 
     for (int i = 0; i < 2; ++i) {
         if (_cvTexturesRef[i]) {
@@ -165,76 +176,6 @@ static const GLfloat kColorConversion709[] = {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
-
-- (void) displayInternal:(SDL_VoutOverlay *) overlay
-{
-    assert(overlay->planes);
-    assert(overlay->format == SDL_FCC_NV12);
-    assert(overlay->planes == 2);
-
-    if (overlay->pixels[0] == NULL || overlay->pixels[1] == NULL)
-        return;
-
-    const NSUInteger frameHeight = overlay->h;
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    if (0 == _textures[0])
-        glGenTextures(2, _textures);
-
-    const UInt8 *pixels[2] = { overlay->pixels[0], overlay->pixels[1] };
-    const size_t widths[2]  = { overlay->pitches[0], overlay->pitches[1]/2 };
-    const size_t heights[2] = { frameHeight, frameHeight / 2 };
-
-
-    glBindTexture(GL_TEXTURE_2D, _textures[0]);
-    glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     GL_RED_EXT,
-                     (int)widths[0],
-                     (int)heights[0],
-                     0,
-                     GL_RED_EXT,
-                     GL_UNSIGNED_BYTE,
-                     pixels[0]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-
-    glBindTexture(GL_TEXTURE_2D, _textures[1]);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RG_EXT,
-                 (int)widths[1],
-                 (int)heights[1],
-                 0,
-                 GL_RG_EXT,
-                 GL_UNSIGNED_BYTE,
-                 pixels[1]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
-
-- (void) render: (SDL_VoutOverlay *) overlay
-{
-    assert(overlay->planes);
-    assert(overlay->format == SDL_FCC_NV12);
-    assert(overlay->planes == 2);
-
-    CVPixelBufferRef pixelBuffer = nil;
-    if (_textureCache)
-        pixelBuffer = SDL_VoutOverlayVideoToolBox_GetCVPixelBufferRef(overlay);
-
-    if (pixelBuffer) {
-        [self displayInternal:overlay withPixelBuffer:pixelBuffer];
-    } else {
-        [self displayInternal:overlay];
-    }
 }
 
 - (BOOL) prepareDisplay
