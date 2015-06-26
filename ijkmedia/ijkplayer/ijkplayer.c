@@ -656,7 +656,7 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
                 ijkmp_change_state_l(mp, MP_STATE_PREPARED);
             } else {
                 // FIXME: 1: onError() ?
-                ALOGE("FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING\n");
+                av_log(mp->ffplayer, AV_LOG_DEBUG, "FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING\n");
             }
             if (ffp_is_paused_l(mp->ffplayer)) {
                 ijkmp_change_state_l(mp, MP_STATE_PAUSED);
@@ -690,19 +690,19 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
                 // FIXME: 8 check seekable
                 if (mp->mp_state == MP_STATE_COMPLETED) {
                     if (mp->restart_from_beginning) {
-                        ALOGD("ijkmp_get_msg: FFP_REQ_START: restart from beginning\n");
+                        av_log(mp->ffplayer, AV_LOG_DEBUG, "ijkmp_get_msg: FFP_REQ_START: restart from beginning\n");
                         retval = ffp_start_from_l(mp->ffplayer, 0);
                         if (retval == 0)
                             ijkmp_change_state_l(mp, MP_STATE_STARTED);
                     } else {
-                        ALOGD("ijkmp_get_msg: FFP_REQ_START: restart from seek pos\n");
+                        av_log(mp->ffplayer, AV_LOG_DEBUG, "ijkmp_get_msg: FFP_REQ_START: restart from seek pos\n");
                         retval = ffp_start_l(mp->ffplayer);
                         if (retval == 0)
                             ijkmp_change_state_l(mp, MP_STATE_STARTED);
                     }
                     mp->restart_from_beginning = 0;
                 } else {
-                    ALOGD("ijkmp_get_msg: FFP_REQ_START: start on fly\n");
+                    av_log(mp->ffplayer, AV_LOG_DEBUG, "ijkmp_get_msg: FFP_REQ_START: start on fly\n");
                     retval = ffp_start_l(mp->ffplayer);
                     if (retval == 0)
                         ijkmp_change_state_l(mp, MP_STATE_STARTED);
@@ -730,7 +730,7 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             pthread_mutex_lock(&mp->mutex);
             if (0 == ikjmp_chkst_seek_l(mp->mp_state)) {
                 if (0 == ffp_seek_to_l(mp->ffplayer, msg->arg1)) {
-                    ALOGD("ijkmp_get_msg: FFP_REQ_SEEK: seek to %d\n", (int)msg->arg1);
+                    av_log(mp->ffplayer, AV_LOG_DEBUG, "ijkmp_get_msg: FFP_REQ_SEEK: seek to %d\n", (int)msg->arg1);
                     mp->restart_from_beginning = 0;
                 }
             }
