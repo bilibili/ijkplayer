@@ -310,6 +310,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         sort_queue *newFrame = (sort_queue*)malloc(sizeof(sort_queue));
         newFrame->nextframe = NULL;
         GetPktTSFromRef(sourceFrameRefCon, newFrame);
+        CFRelease(sourceFrameRefCon);
         ctx->last_sort = newFrame->sort;
         if (status != 0) {
             ALOGI("decode callback  %d \n", (int)status);
@@ -564,8 +565,6 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     //ALOGI("Decode before \n!!!!!!!");
     status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)frame_info, 0);
     //ALOGI("Decode after \n!!!!!!!");
-
-    CFRelease(frame_info);
 
     if (status != 0) {
         ALOGE("status %d \n", (int)status);
