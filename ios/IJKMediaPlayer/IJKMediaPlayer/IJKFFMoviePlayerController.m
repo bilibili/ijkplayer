@@ -193,7 +193,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         ijkmp_ios_set_glview(_mediaPlayer, _glView);
         ijkmp_set_option(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", "fcc-i420");
-
+#ifdef DEBUG
+        [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_DEBUG];
+#else
+        [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_SILENT];
+#endif
         // init audio sink
         [[IJKAudioKit sharedInstance] setupAudioSession];
 
