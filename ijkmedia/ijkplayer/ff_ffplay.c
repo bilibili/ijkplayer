@@ -2835,16 +2835,37 @@ static int lockmgr(void **mtx, enum AVLockOp op)
 
 static bool g_ffmpeg_global_inited = false;
 
-inline static int log_level_av_to_ffp(int av_log_level)
+inline static int log_level_av_to_ijk(int av_level)
 {
-    int ffplv = IJK_LOG_VERBOSE;
-    if      (av_log_level <= AV_LOG_ERROR)      ffplv = IJK_LOG_ERROR;
-    else if (av_log_level <= AV_LOG_WARNING)    ffplv = IJK_LOG_WARN;
-    else if (av_log_level <= AV_LOG_INFO)       ffplv = IJK_LOG_INFO;
-    else if (av_log_level <= AV_LOG_VERBOSE)    ffplv = IJK_LOG_VERBOSE;
-    else if (av_log_level <= AV_LOG_DEBUG)      ffplv = IJK_LOG_DEBUG;
-    else                                        ffplv = IJK_LOG_VERBOSE;
-    return ffplv;
+    int ijk_level = IJK_LOG_VERBOSE;
+    if      (av_level <= AV_LOG_PANIC)      ijk_level = IJK_LOG_FATAL;
+    else if (av_level <= AV_LOG_FATAL)      ijk_level = IJK_LOG_FATAL;
+    else if (av_level <= AV_LOG_ERROR)      ijk_level = IJK_LOG_ERROR;
+    else if (av_level <= AV_LOG_WARNING)    ijk_level = IJK_LOG_WARN;
+    else if (av_level <= AV_LOG_INFO)       ijk_level = IJK_LOG_INFO;
+    // AV_LOG_VERBOSE means detailed info
+    else if (av_level <= AV_LOG_VERBOSE)    ijk_level = IJK_LOG_INFO;
+    else if (av_level <= AV_LOG_DEBUG)      ijk_level = IJK_LOG_DEBUG;
+    else if (av_level <= AV_LOG_TRACE)      ijk_level = IJK_LOG_VERBOSE;
+    else                                    ijk_level = IJK_LOG_VERBOSE;
+    return ijk_level;
+}
+
+inline static int log_level_ijk_to_av(int ijk_level)
+{
+    int av_level = IJK_LOG_VERBOSE;
+    if      (ijk_level >= IJK_LOG_SILENT)   av_level = AV_LOG_QUIET;
+    else if (ijk_level >= IJK_LOG_FATAL)    av_level = AV_LOG_FATAL;
+    else if (ijk_level >= IJK_LOG_ERROR)    av_level = AV_LOG_ERROR;
+    else if (ijk_level >= IJK_LOG_WARN)     av_level = AV_LOG_WARNING;
+    else if (ijk_level >= IJK_LOG_INFO)     av_level = AV_LOG_INFO;
+    // AV_LOG_VERBOSE means detailed info
+    else if (ijk_level >= IJK_LOG_DEBUG)    av_level = AV_LOG_DEBUG;
+    else if (ijk_level >= IJK_LOG_VERBOSE)  av_level = AV_LOG_TRACE;
+    else if (ijk_level >= IJK_LOG_DEFAULT)  av_level = AV_LOG_TRACE;
+    else if (ijk_level >= IJK_LOG_UNKNOWN)  av_level = AV_LOG_TRACE;
+    else                                    av_level = AV_LOG_TRACE;
+    return av_level;
 }
 
 static void ffp_log_callback_brief(void *ptr, int level, const char *fmt, va_list vl)
@@ -2852,7 +2873,7 @@ static void ffp_log_callback_brief(void *ptr, int level, const char *fmt, va_lis
     if (level > av_log_get_level())
         return;
 
-    int ffplv __unused = log_level_av_to_ffp(level);
+    int ffplv __unused = log_level_av_to_ijk(level);
     VLOG(ffplv, IJK_LOG_TAG, fmt, vl);
 }
 
@@ -2861,7 +2882,7 @@ static void ffp_log_callback_report(void *ptr, int level, const char *fmt, va_li
     if (level > av_log_get_level())
         return;
 
-    int ffplv __unused = log_level_av_to_ffp(level);
+    int ffplv __unused = log_level_av_to_ijk(level);
 
     va_list vl2;
     char line[1024];
@@ -2916,7 +2937,7 @@ void ffp_global_uninit()
     g_ffmpeg_global_inited = false;
 }
 
-void ffp_global_set_ff_log_report(int use_report)
+void ffp_global_set_log_report(int use_report)
 {
     if (use_report) {
         av_log_set_callback(ffp_log_callback_report);
@@ -2925,9 +2946,10 @@ void ffp_global_set_ff_log_report(int use_report)
     }
 }
 
-void ffp_global_set_ff_log_level(int log_level)
+void ffp_global_set_log_level(int log_level)
 {
-    av_log_set_level(log_level);
+    int av_level = log_level_ijk_to_av(log_level);
+    av_log_set_level(av_level);
 }
 
 void ffp_io_stat_register(void (*cb)(const char *url, int type, int bytes))
