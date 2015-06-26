@@ -47,9 +47,9 @@ inline static void ijkmp_destroy(IjkMediaPlayer *mp)
 
     pthread_mutex_destroy(&mp->mutex);
 
-    av_freep(&mp->data_source);
+    freep((void**)&mp->data_source);
     memset(mp, 0, sizeof(IjkMediaPlayer));
-    av_freep(&mp);
+    freep((void**)&mp);
 }
 
 inline static void ijkmp_destroy_p(IjkMediaPlayer **pmp)
@@ -101,7 +101,7 @@ void ijkmp_change_state_l(IjkMediaPlayer *mp, int new_state)
 
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
 {
-    IjkMediaPlayer *mp = (IjkMediaPlayer *) av_mallocz(sizeof(IjkMediaPlayer));
+    IjkMediaPlayer *mp = (IjkMediaPlayer *) mallocz(sizeof(IjkMediaPlayer));
     if (!mp)
         goto fail;
 
@@ -336,8 +336,8 @@ static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
     MPST_RET_IF_EQ(mp->mp_state, MP_STATE_ERROR);
     MPST_RET_IF_EQ(mp->mp_state, MP_STATE_END);
 
-    av_freep(&mp->data_source);
-    mp->data_source = av_strdup(url);
+    freep((void**)&mp->data_source);
+    mp->data_source = strdup(url);
     if (!mp->data_source)
         return EIJK_OUT_OF_MEMORY;
 

@@ -77,16 +77,16 @@
 
     size_t out_size = (in_size + 1) * 3 / 4 + 1;
 
-    if (out_size > INT_MAX || !(utf8Plain = av_mallocz(out_size)))
+    if (out_size > INT_MAX || !(utf8Plain = malloc(out_size)))
         return NULL;
     if ((ret = av_base64_decode(utf8Plain, utf8Cipher, (int)out_size)) < 0) {
-        av_free(utf8Plain);
+        free(utf8Plain);
         NSLog(@"Invalid base64 in MRL\n");
         return NULL;
     }
 
     NSString *plain = [[NSString alloc] initWithUTF8String:(const char *)utf8Plain];
-    av_free(utf8Plain);
+    free(utf8Plain);
 
     return plain;
 }
