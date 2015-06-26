@@ -310,7 +310,6 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         sort_queue *newFrame = (sort_queue*)malloc(sizeof(sort_queue));
         newFrame->nextframe = NULL;
         GetPktTSFromRef(sourceFrameRefCon, newFrame);
-        CFRelease(sourceFrameRefCon);
         ctx->last_sort = newFrame->sort;
         if (status != 0) {
             ALOGI("decode callback  %d \n", (int)status);
@@ -562,30 +561,26 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts,context->serial);
 
-    //ALOGI("Decode before \n!!!!!!!");
     status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)frame_info, 0);
-    //ALOGI("Decode after \n!!!!!!!");
+    if (status == noErr) {
+        // Wait for delayed frames even if kVTDecodeInfo_Asynchronous is not set.
+        status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+    }
+
+    CFRelease(frame_info);
 
     if (status != 0) {
         ALOGE("status %d \n", (int)status);
-        CFRelease(frame_info);
-
         if (status == kVTInvalidSessionErr) {
             context->refresh_session = true;
         }
         if (status == kVTVideoDecoderMalfunctionErr) {
             context->recovery_drop_packet = true;
         }
-        if (status != 0) {
-            goto failed;
-        }
-    }
-
-    // Wait for delayed frames even if kVTDecodeInfo_Asynchronous is not set.
-    status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-    if (status != 0) {
         goto failed;
     }
+
+
 
     if (sample_buff) {
         CFRelease(sample_buff);
