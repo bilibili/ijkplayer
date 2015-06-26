@@ -616,16 +616,7 @@ static inline void DuplicatePkt(VideoToolBoxContext* context, const AVPacket* pk
         ResetPktBuffer(context);
     }
     AVPacket* avpkt = &context->m_buffer_packet[context->m_buffer_deep];
-    av_new_packet(avpkt, pkt->size);
-    avpkt->flags        = pkt->flags;
-    avpkt->pts          = pkt->pts;
-    avpkt->dts          = pkt->dts;
-    avpkt->duration     = pkt->duration;
-    avpkt->pos          = pkt->pos;
-    avpkt->size         = pkt->size;
-    avpkt->stream_index = pkt->stream_index;
-    avpkt->convergence_duration = pkt->convergence_duration;
-    memcpy(avpkt->data, pkt->data, pkt->size);
+    av_copy_packet(avpkt, pkt);
     context->m_buffer_deep++;
 }
 
