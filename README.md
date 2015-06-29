@@ -88,10 +88,10 @@ git checkout -B latest k0.3.0
 
 cd android/contrib
 ./compile-ffmpeg.sh clean
-./compile-ffmpeg.sh
+./compile-ffmpeg.sh all
 
 cd ..
-./compile-ijk.sh
+./compile-ijk.sh all
 
 # Eclipse:
 #     File -> New -> Project -> Android Project from Existing Code
