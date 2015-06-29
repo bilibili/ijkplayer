@@ -33,7 +33,7 @@
 
 
 #define MAX_PKT_QUEUE_DEEP   350
-#define MAX_DECODING_SAMPLES 16
+#define VTB_MAX_DECODING_SAMPLES 16
 
 typedef struct VTBPicture {
     double              pts;
@@ -96,10 +96,11 @@ typedef struct VideoToolBoxContext {
     int                         m_buffer_deep;
     AVPacket                    m_buffer_packet[MAX_PKT_QUEUE_DEEP];
 
-    pthread_mutex_t             sample_info_mutex;
-    sample_info                 sample_info_array[MAX_DECODING_SAMPLES];
-    int                         sample_info_index;
-    int                         sample_info_id_generator;
+    SDL_mutex                  *sample_info_mutex;
+    SDL_cond                   *sample_info_cond;
+    sample_info                 sample_info_array[VTB_MAX_DECODING_SAMPLES];
+    volatile int                sample_info_index;
+    volatile int                sample_info_id_generator;
     volatile int                sample_infos_in_decoding;
 } VideoToolBoxContext ;
 

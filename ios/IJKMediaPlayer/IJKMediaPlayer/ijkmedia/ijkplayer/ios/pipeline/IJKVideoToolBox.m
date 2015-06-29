@@ -71,14 +71,45 @@ static void CFDictionarySetBoolean(CFMutableDictionaryRef dictionary, CFStringRe
 
 
 
-inline static sample_info* sample_info_alloc(VideoToolBoxContext* context)
+inline static sample_info* sample_info_peek(VideoToolBoxContext* context)
 {
-    pthread_mutex_lock(&context->sample_info_mutex);
+    FFPlayer   *ffp = context->ffp;
+    VideoState *is  = ffp->is;
+
+    SDL_LockMutex(context->sample_info_mutex);
 
     sample_info *sample_info = &context->sample_info_array[context->sample_info_index];
+    while (sample_info->is_decoding) {
+        if (is->videoq.abort_request) {
+            sample_info = NULL;
+            goto abort;
+        }
+
+        SDL_CondWaitTimeout(context->sample_info_cond, context->sample_info_mutex, 10);
+    }
+
+abort:
+    SDL_UnlockMutex(context->sample_info_mutex);
+    return sample_info;
+}
+
+inline static void sample_info_push(VideoToolBoxContext* context)
+{
+    FFPlayer   *ffp = context->ffp;
+    VideoState *is  = ffp->is;
+
+    SDL_LockMutex(context->sample_info_mutex);
+
+    sample_info *sample_info = &context->sample_info_array[context->sample_info_index];
+    while (sample_info->is_decoding) {
+        if (is->videoq.abort_request)
+            goto abort;
+
+        SDL_CondWaitTimeout(context->sample_info_cond, context->sample_info_mutex, 10);
+    }
 
     if (sample_info->is_decoding) {
-        ALOGW("%s, reallocate sample in decoding %d -> %d (%d)\n", __FUNCTION__,
+        ALOGW("%s, reallocate sample in decoding %d -> %d /%d\n", __FUNCTION__,
               sample_info->sample_id,
               context->sample_info_id_generator,
               context->sample_infos_in_decoding);
@@ -86,14 +117,47 @@ inline static sample_info* sample_info_alloc(VideoToolBoxContext* context)
         sample_info->is_decoding = 1;
         context->sample_infos_in_decoding++;
     }
-    sample_info->sample_id = context->sample_info_id_generator++;
 
+    sample_info->sample_id = context->sample_info_id_generator++;
     context->sample_info_index++;
-    context->sample_info_index %= MAX_DECODING_SAMPLES;
-    pthread_mutex_unlock(&context->sample_info_mutex);
-    return sample_info;
+    context->sample_info_index %= VTB_MAX_DECODING_SAMPLES;
+
+abort:
+    SDL_UnlockMutex(context->sample_info_mutex);
 }
 
+inline static void sample_info_drop_last_push(VideoToolBoxContext* context)
+{
+    SDL_LockMutex(context->sample_info_mutex);
+
+    int last_index = context->sample_info_index + VTB_MAX_DECODING_SAMPLES - 1;
+    last_index %= VTB_MAX_DECODING_SAMPLES;
+
+    sample_info *sample_info = &context->sample_info_array[last_index];
+    if (sample_info->is_decoding) {
+        sample_info->is_decoding = 0;
+        context->sample_infos_in_decoding--;
+    }
+
+    SDL_UnlockMutex(context->sample_info_mutex);
+}
+
+inline static void sample_info_recycle(VideoToolBoxContext* context, sample_info *sample_info)
+{
+    SDL_LockMutex(context->sample_info_mutex);
+
+    if (sample_info->is_decoding) {
+        sample_info->is_decoding = 0;
+        context->sample_infos_in_decoding--;
+    } else {
+        ALOGW("%s, multiple frames in same sample %d / %d\n", __FUNCTION__,
+              sample_info->sample_id,
+              context->sample_info_id_generator);
+    }
+
+    SDL_CondSignal(context->sample_info_cond);
+    SDL_UnlockMutex(context->sample_info_mutex);
+}
 
 static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc, void *demux_buff, size_t demux_size)
 {
@@ -277,7 +341,6 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
         sort_queue *newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
 
-        pthread_mutex_lock(&ctx->sample_info_mutex);
         {
             sample_info *sample_info = sourceFrameRefCon;
             newFrame->pts    = sample_info->pts;
@@ -285,19 +348,8 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             newFrame->sort   = sample_info->sort;
             newFrame->serial = sample_info->serial;
             newFrame->nextframe = NULL;
-
-            if (sample_info->is_decoding) {
-                sample_info->is_decoding = 0;
-                ctx->sample_infos_in_decoding--;
-                ALOGW("%s: in decoding: %d\n", __func__,
-                      ctx->sample_infos_in_decoding);
-            } else {
-                ALOGW("%s: multiple frames in single sample buffer: %d (%d)\n", __func__,
-                      sample_info->sample_id,
-                      ctx->sample_infos_in_decoding);
-            }
+            sample_info_recycle(ctx, sample_info);
         }
-        pthread_mutex_unlock(&ctx->sample_info_mutex);
 
         ctx->last_sort = newFrame->sort;
         if (status != 0) {
@@ -548,7 +600,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     context->last_keyframe_pts = avpkt->pts;
 
-    sample_info = sample_info_alloc(context);
+    sample_info = sample_info_peek(context);
     if (!sample_info) {
         ALOGE("%s, failed to peek frame_info\n", __FUNCTION__);
         goto failed;
@@ -558,14 +610,20 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     sample_info->pts    = pts;
     sample_info->dts    = dts;
     sample_info->serial = context->serial;
+    sample_info_push(context);
 
     status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)sample_info, 0);
     if (status == noErr) {
+        if (context->ffp->is->videoq.abort_request)
+            goto failed;
+
         // Wait for delayed frames even if kVTDecodeInfo_Asynchronous is not set.
         status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
     }
 
     if (status != 0) {
+        sample_info_drop_last_push(context);
+
         ALOGE("status %d \n", (int)status);
         if (status == kVTInvalidSessionErr) {
             context->refresh_session = true;
@@ -749,7 +807,8 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
             CFRelease(context->m_fmt_desc);
             context->m_fmt_desc = NULL;
         }
-        pthread_mutex_destroy(&context->sample_info_mutex);
+        SDL_DestroyCondP(&context->sample_info_cond);
+        SDL_DestroyMutexP(&context->sample_info_mutex);
         context->dealloced = true;
     }
 }
@@ -883,7 +942,8 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
     context_vtb->m_sort_time_offset = GetSystemTime();
 
-    pthread_mutex_init(&context_vtb->sample_info_mutex, NULL);
+    context_vtb->sample_info_mutex = SDL_CreateMutex();
+    context_vtb->sample_info_cond  = SDL_CreateCond();
     return context_vtb;
 
 failed:
