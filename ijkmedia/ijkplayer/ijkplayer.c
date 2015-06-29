@@ -217,14 +217,14 @@ void ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps)
 {
     assert(mp);
 
-    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_FORMAT, "max-fps", max_fps);
+    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "max-fps", max_fps);
 }
 
 void ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop)
 {
     assert(mp);
 
-    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_FORMAT, "framedrop", framedrop);
+    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "framedrop", framedrop);
 }
 
 void ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepared)
