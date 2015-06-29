@@ -39,6 +39,7 @@
 
 #import "GCDAsyncUdpSocket.h"
 
+#include <sys/time.h>
 
 @interface IJKFFMoviePlayerController() <ASIHTTPRequestDelegate>
 
@@ -76,10 +77,15 @@
     // new param by WilliamShi for udp
     NSInteger stalledCountPerMinute;
     NSInteger allStalledCount;
+    NSTimeInterval stalledTimePerMinute;
+    NSTimeInterval stalledStartTime;
+    NSTimeInterval stalledEndTime;
     
     long tag;
     GCDAsyncUdpSocket *udpSocket;
     NSTimer *timer;
+    
+    NSInteger streamOpenCount;
 }
 
 @synthesize view = _view;
@@ -204,7 +210,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     //start a timer
     udpSocket = [[GCDAsyncUdpSocket alloc] init];
     
-    timer =  [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(doSendOnce:) userInfo:nil repeats:YES];
+    timer =  [NSTimer scheduledTimerWithTimeInterval:10.0 target:self selector:@selector(doSendOnce:) userInfo:nil repeats:YES];
 }
 
 - (void)endReport
@@ -214,6 +220,26 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     
     [timer invalidate];
     timer = nil;
+}
+
+- (NSInteger) openCountWithStream:(NSString*)token
+{
+    static NSMutableDictionary *dictionary = nil;
+    if (dictionary==nil) {
+        dictionary = [[NSMutableDictionary alloc] init];
+    }
+    
+    
+    NSInteger openCount = 0;
+    NSNumber *valueObj = [dictionary objectForKey:token];
+    if (valueObj!=nil) {
+        openCount = [valueObj integerValue];
+    }
+    openCount++;
+    
+    [dictionary setObject:[NSNumber numberWithInt:openCount] forKey:token];
+    
+    return openCount;
 }
 
 - ( void )requestFinished:( ASIHTTPRequest *)request
@@ -272,8 +298,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     _shouldAutoplay = NO;
     
     // init media resource
-    _ffMrl = [[IJKFFMrl alloc] initWithMrl:linkAddress];
-//    _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"rtmp://wspub.live.hupucdn.com/prod/slk"]];
+//    _ffMrl = [[IJKFFMrl alloc] initWithMrl:linkAddress];
+    _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"rtmp://wspub.live.hupucdn.com/prod/slk"]];
 //        _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"http://v.iask.com/v_play_ipad.php?vid=99264895"]];
     _segmentResolver = nil;
     _mediaMeta = [[NSDictionary alloc] init];
@@ -318,6 +344,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         //start report
         [self startReport];
     }
+    
+    streamOpenCount = [self openCountWithStream:self.token];
+    NSLog ( @"StreamOpenCount:%d\n" ,streamOpenCount);
     
     [[NSNotificationCenter defaultCenter]
      postNotificationName:IJKMoviePlayerInitSuccessNotification
@@ -739,6 +768,18 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
     }
 }
 
+int64_t GetNowMs()
+{
+    return systemTime() / 1000000ll;
+}
+
+int64_t systemTime() {
+    struct timeval t;
+    t.tv_sec = t.tv_usec = 0;
+    gettimeofday(&t, NULL);
+    return t.tv_sec * 1000000000LL + t.tv_usec * 1000LL;
+}
+
 - (void)postEvent: (IJKFFMoviePlayerMessage *)msg
 {
     if (!msg)
@@ -891,6 +932,8 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             
             stalledCountPerMinute++;
             allStalledCount++;
+            
+            stalledStartTime = GetNowMs();
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
@@ -899,6 +942,10 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         }
         case FFP_MSG_BUFFERING_END: {
             NSLog(@"FFP_MSG_BUFFERING_END:");
+            
+            stalledEndTime = GetNowMs();
+            
+            stalledTimePerMinute += stalledEndTime - stalledStartTime;
 
             _loadState = MPMovieLoadStatePlayable | MPMovieLoadStatePlaythroughOK;
 
@@ -1247,6 +1294,24 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     }
 }
 
+- (NSString*)oc
+{
+    return [NSString stringWithFormat:@"%d",streamOpenCount];
+}
+
+- (NSString*)cd
+{
+    if((_loadState & MPMovieLoadStateStalled)!= 0){
+        stalledTimePerMinute += GetNowMs() - stalledStartTime;
+        stalledStartTime = GetNowMs();
+    }
+    
+    NSString* retStr = [NSString stringWithFormat:@"%d",(NSInteger)(stalledTimePerMinute/1000)];
+    stalledTimePerMinute = 0;
+    
+    return retStr;
+}
+
 - (NSString*)getReportInfoWithJsonFormat
 {
 /*
@@ -1268,6 +1333,8 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
                               self.bc,@"bc",
                               self.bt,@"bt",
                               self.br,@"br",
+                              self.oc,@"oc",
+                              self.cd,@"cd",
                               self.token,@"token", nil];
     
     if ([NSJSONSerialization isValidJSONObject:infoDict])

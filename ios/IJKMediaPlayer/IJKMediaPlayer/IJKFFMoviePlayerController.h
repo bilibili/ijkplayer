@@ -98,6 +98,8 @@
 @property(nonatomic, readonly)  NSString* br; //bitrate
 @property(nonatomic, readonly)  NSString* bw; //ignore
 @property(nonatomic)  NSString* token; //
+@property(nonatomic)  NSString* oc; //stream open count
+@property(nonatomic)  NSString* cd; //stalled time / one minute
 
 @end
 
