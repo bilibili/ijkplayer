@@ -223,7 +223,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 - (void)dealloc
 {
     [_ffMrl removeTempFiles];
-    [self unregisterApplicationObservers];
+//    [self unregisterApplicationObservers];
 }
 
 - (void)setShouldAutoplay:(BOOL)shouldAutoplay
