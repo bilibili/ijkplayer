@@ -213,19 +213,6 @@ static int vtb_queue_picture(
     return 0;
 }
 
-
-
-static sort_queue *CreateDictionaryWithPkt(double time, double dts, double pts, int pkt_serial)
-{
-    sort_queue *frame = (sort_queue *)mallocz(sizeof(sort_queue));
-    frame->sort   = time;
-    frame->pts    = pts;
-    frame->dts    = dts;
-    frame->serial = pkt_serial;
-    return frame;
-}
-
-
 void QueuePicture(VideoToolBoxContext* ctx) {
     VTBPicture picture;
     if (true == GetVTBPicture(ctx, &picture)) {
