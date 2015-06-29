@@ -47,7 +47,7 @@ typedef struct VTBPicture {
 typedef struct sort_queue {
     double              dts;
     double              pts;
-    double              serial;
+    int                 serial;
     double              sort;
     int64_t             width;
     int64_t             height;
@@ -77,7 +77,7 @@ typedef struct VideoToolBoxContext {
     int32_t                     m_max_ref_frames;
     bool                        m_convert_bytestream;
     bool                        m_convert_3byteTo4byteNALSize;
-    double                      serial;
+    int                         serial;
     volatile double             last_sort;
     bool                        dealloced;
     int                         m_buffer_deep;

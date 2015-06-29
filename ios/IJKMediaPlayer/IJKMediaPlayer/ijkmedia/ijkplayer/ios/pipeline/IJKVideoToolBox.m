@@ -215,7 +215,7 @@ static int vtb_queue_picture(
 
 
 
-static sort_queue *CreateDictionaryWithPkt(double time, double dts, double pts,double pkt_serial)
+static sort_queue *CreateDictionaryWithPkt(double time, double dts, double pts, int pkt_serial)
 {
     sort_queue *frame = (sort_queue *)mallocz(sizeof(sort_queue));
     frame->sort   = time;
