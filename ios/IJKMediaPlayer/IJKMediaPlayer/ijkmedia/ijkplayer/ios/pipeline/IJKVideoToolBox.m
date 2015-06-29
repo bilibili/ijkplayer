@@ -733,26 +733,13 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     int codec           = ic->codec_id;
     uint8_t* extradata  = ic->extradata;
 
-    VideoToolBoxContext* context_vtb = malloc(sizeof(VideoToolBoxContext));
+    VideoToolBoxContext *context_vtb = (VideoToolBoxContext *)mallocz(sizeof(VideoToolBoxContext));
     if (!context_vtb) {
         goto failed;
     }
 
-    context_vtb->m_convert_bytestream = false;
-    context_vtb->m_convert_3byteTo4byteNALSize = false;
-    context_vtb->refresh_request = false;
-    context_vtb->new_seg_flag = false;
-    context_vtb->recovery_drop_packet = false;
-    context_vtb->refresh_session = false;
     context_vtb->idr_based_identified = true;
-    context_vtb->dealloced = false;
-    context_vtb->last_keyframe_pts = 0;
-    context_vtb->m_max_ref_frames = 0;
     context_vtb->ffp = ffp;
-    context_vtb->serial = 0;
-    context_vtb->last_sort = 0;
-    context_vtb->m_buffer_deep = 0;
-    memset(context_vtb->m_buffer_packet, 0, sizeof(context_vtb->m_buffer_packet));
 
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:
