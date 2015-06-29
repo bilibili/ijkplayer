@@ -101,6 +101,12 @@ cd ..
 #     Open an existing Android Studio project
 #     Select android/ijkplayer/ and import
 #
+#     define ext block in your root build.gradle
+#     ext {
+#       compileSdkVersion = 22       // depending on your sdk version
+#       buildToolsVersion = "22.0.1" // depending on your build tools version
+#     }
+#
 # Gradle
 #     cd ijkplayer
 #     gradle
