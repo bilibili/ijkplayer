@@ -427,6 +427,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     double sort_time                = GetSystemTime();
     uint32_t decoder_flags          = 0;// kVTDecodeFrame_EnableAsynchronousDecompression;
     sort_queue *frame_info          = NULL;
+    sample_info *sample_info        = NULL;
     CMSampleBufferRef sample_buff   = NULL;
     AVIOContext *pb                 = NULL;
     int demux_size                  = 0;
@@ -715,6 +716,7 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
             CFRelease(context->m_fmt_desc);
             context->m_fmt_desc = NULL;
         }
+        pthread_mutex_destroy(&context->sample_info_mutex);
         context->dealloced = true;
     }
 }
@@ -848,6 +850,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
     context_vtb->m_sort_time_offset = GetSystemTime();
 
+    pthread_mutex_init(&context_vtb->sample_info_mutex, NULL);
     return context_vtb;
 
 failed:

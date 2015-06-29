@@ -91,6 +91,7 @@ typedef struct VideoToolBoxContext {
     int                         m_buffer_deep;
     AVPacket                    m_buffer_packet[MAX_PKT_QUEUE_DEEP];
 
+    pthread_mutex_t             sample_info_mutex;
     sample_info                 sample_info_array[MAX_DECODING_SAMPLES];
     int                         sample_info_index;
 } VideoToolBoxContext ;
