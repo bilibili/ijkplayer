@@ -512,7 +512,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 {
     OSStatus status                 = 0;
     double sort_time                = GetSystemTime();
-    uint32_t decoder_flags          = 0;// kVTDecodeFrame_EnableAsynchronousDecompression;
+    uint32_t decoder_flags          = kVTDecodeFrame_EnableAsynchronousDecompression;
     sample_info *sample_info        = NULL;
     CMSampleBufferRef sample_buff   = NULL;
     AVIOContext *pb                 = NULL;
