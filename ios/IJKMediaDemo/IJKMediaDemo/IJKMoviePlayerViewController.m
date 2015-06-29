@@ -15,8 +15,6 @@
 {
     NSMutableArray *_registeredNotifications;
     IJKMPMovieSourceType mUrlSourceType;
-    
-    BOOL misLocalAVPlayer;
 }
 
 @synthesize urlString = _urlString;
@@ -25,11 +23,6 @@
 {
     _urlString = URLString;
     mUrlSourceType = urlSourceType;
-}
-
-- (void)setLocalAVPlayer:(BOOL)isLocalAVPlayer
-{
-    misLocalAVPlayer = isLocalAVPlayer;
 }
 
 - (id)initView
@@ -58,38 +51,21 @@
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
     [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
 
-//    NSURL *theMovieURL = [NSURL URLWithString:@"rtmp://pull1.arenazb.hupu.com/test/789"];
-    NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
-
-    if (misLocalAVPlayer) {
-            self.player = [[IJKAVMoviePlayerController alloc] initWithContentURL:theMovieURL];
-    }else{
-        [IJKFFMoviePlayerController setLogReport:YES];
-        self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
-        self.player.movieSourceType = mUrlSourceType;
-    }
-
-    self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
-    self.player.view.frame = self.view.bounds;
-
-    self.view.autoresizesSubviews = YES;
-    [self.view addSubview:self.player.view];
-    [self.view addSubview:self.mediaControl];
-    
-    self.mediaControl.delegatePlayer = self.player;
-
-    [self installMovieNotificationObservers];
-
-    [self.player prepareToPlay];
-//    [self.player play];
-    
+    _registeredNotifications = [[NSMutableArray alloc] init];
     [self registerApplicationObservers];
+    
+    [IJKFFMoviePlayerController setLogReport:YES];
+    IJKFFOptions * options = [IJKFFOptions optionsByDefault];
+    options.reportPlayInfo = YES;
+    self.player = [[IJKFFMoviePlayerController alloc] initWithContentToken:self.urlString withOptions:options];
+    [self installMovieNotificationObservers];
+    
 }
 
 - (void)dealloc
 {
-    [self.player shutdown];
     [self removeMovieNotificationObservers];
+    [self.player shutdown];
     
     [self unregisterApplicationObservers];
 }
@@ -128,7 +104,6 @@
 - (IBAction)onClickBack:(id)sender
 {
 //    exit(0);
-//    [self.player pause];
     [self dismissModalViewControllerAnimated:YES];
 }
 
@@ -188,54 +163,42 @@
             break;
     }
 
-//    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.player.view removeFromSuperview];
-        [self.mediaControl removeFromSuperview];
+    [self.player.view removeFromSuperview];
+    [self.mediaControl removeFromSuperview];
     
-        [self.player stop];
-        [self.player shutdown];
-        self.player = nil;
-//    });
+    [self.player stop];
+    [self.player shutdown];
+    self.player = nil;
     
     [self removeMovieNotificationObservers];
-    [self unregisterApplicationObservers];
-    
-//    dispatch_async(dispatch_get_main_queue(), ^{
+/*
+    [IJKFFMoviePlayerController setLogReport:YES];
+    IJKFFOptions * options = [IJKFFOptions optionsByDefault];
+    options.reportPlayInfo = YES;
+    self.player = [[IJKFFMoviePlayerController alloc] initWithContentToken:self.urlString withOptions:options];
+    [self installMovieNotificationObservers];*/
+}
 
-        NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
-        
-        if (misLocalAVPlayer) {
-            self.player = [[IJKAVMoviePlayerController alloc] initWithContentURL:theMovieURL];
-        }else{
-            [IJKFFMoviePlayerController setLogReport:YES];
-            self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
-            self.player.movieSourceType = mUrlSourceType;
-        }
-        
-        self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
-        self.player.view.frame = self.view.bounds;
-        
-        self.view.autoresizesSubviews = YES;
-        [self.view addSubview:self.player.view];
-        [self.view addSubview:self.mediaControl];
-        
-        self.mediaControl.delegatePlayer = self.player;
-        
-        [self installMovieNotificationObservers];
-        
-        [self.player prepareToPlay];
+- (void)movieInitedDidChange:(NSNotification*)notification
+{
+    self.player.movieSourceType = mUrlSourceType;
     
-        [self registerApplicationObservers];
+    self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+    self.player.view.frame = self.view.bounds;
     
-//    });
+    self.view.autoresizesSubviews = YES;
+    [self.view addSubview:self.player.view];
+    [self.view addSubview:self.mediaControl];
+    
+    self.mediaControl.delegatePlayer = self.player;
+    
+    [self.player prepareToPlay];
 }
 
 - (void)mediaIsPreparedToPlayDidChange:(NSNotification*)notification
 {
     NSLog(@"mediaIsPreparedToPlayDidChange\n");
     [self.player play];
-    
-//    self.player.currentPlaybackTime = 10;
 }
 
 - (void)moviePlayBackStateDidChange:(NSNotification*)notification
@@ -301,6 +264,11 @@
                                              selector:@selector(moviePlayBackStateDidChange:)
                                                  name:IJKMoviePlayerPlaybackStateDidChangeNotification
                                                object:_player];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(movieInitedDidChange:)
+                                                 name:IJKMoviePlayerInitSuccessNotification
+                                               object:_player];
 }
 
 #pragma mark Remove Movie Notification Handlers
@@ -312,13 +280,13 @@
     [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMoviePlayerPlaybackDidFinishNotification object:_player];
     [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification object:_player];
     [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMoviePlayerPlaybackStateDidChangeNotification object:_player];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMoviePlayerInitSuccessNotification object:_player];
 }
 
 #pragma mark app state changed
 
 - (void)registerApplicationObservers
 {
-    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillEnterForeground)
                                                  name:UIApplicationWillEnterForegroundNotification
@@ -357,6 +325,8 @@
                                                         name:name
                                                       object:nil];
     }
+    
+    [_registeredNotifications removeAllObjects];
 }
 
 - (void)applicationWillEnterForeground
@@ -364,28 +334,11 @@
     NSLog(@"applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
         
-        NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
-        
-        if (misLocalAVPlayer) {
-            self.player = [[IJKAVMoviePlayerController alloc] initWithContentURL:theMovieURL];
-        }else{
-            [IJKFFMoviePlayerController setLogReport:YES];
-            self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
-            self.player.movieSourceType = mUrlSourceType;
-        }
-
-        self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
-        self.player.view.frame = self.view.bounds;
-        
-        self.view.autoresizesSubviews = YES;
-        [self.view addSubview:self.player.view];
-        [self.view addSubview:self.mediaControl];
-        
-        self.mediaControl.delegatePlayer = self.player;
-        
+        [IJKFFMoviePlayerController setLogReport:YES];
+        IJKFFOptions * options = [IJKFFOptions optionsByDefault];
+        options.reportPlayInfo = YES;
+        self.player = [[IJKFFMoviePlayerController alloc] initWithContentToken:self.urlString withOptions:options];
         [self installMovieNotificationObservers];
-        
-        [self.player prepareToPlay];
         
     });
 }
@@ -394,7 +347,7 @@
 {
     NSLog(@"applicationDidBecomeActive: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.player play];
+//        [self.player play];
     });
 }
 
@@ -410,9 +363,15 @@
 {
     NSLog(@"applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.player stop];
+        
+        [self.player.view removeFromSuperview];
+        [self.mediaControl removeFromSuperview];
+        
+//        [self.player stop];
         [self.player shutdown];
         self.player = nil;
+        
+        [self removeMovieNotificationObservers];
     });
 }
 
@@ -420,12 +379,16 @@
 {
     NSLog(@"applicationWillTerminate: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
+        [self.player.view removeFromSuperview];
+        [self.mediaControl removeFromSuperview];
+        
         [self.player stop];
         [self.player shutdown];
         self.player = nil;
         
+        [self removeMovieNotificationObservers];
+        [self unregisterApplicationObservers];
+        
     });
 }
-
-
 @end

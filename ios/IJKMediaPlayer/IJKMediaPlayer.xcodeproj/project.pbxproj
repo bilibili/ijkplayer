@@ -8,19 +8,43 @@
 
 /* Begin PBXBuildFile section */
 		451103131A5CE36A00337D24 /* IJKSDLGLRenderNV12.m in Sources */ = {isa = PBXBuildFile; fileRef = 451103121A5CE36A00337D24 /* IJKSDLGLRenderNV12.m */; };
+		AB09E84B1B3BE544006E0985 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E7F71B3BE544006E0985 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E84C1B3BE544006E0985 /* ASIAuthenticationDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E7FA1B3BE544006E0985 /* ASIAuthenticationDialog.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E84D1B3BE544006E0985 /* ASIDataCompressor.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E7FD1B3BE544006E0985 /* ASIDataCompressor.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E84E1B3BE544006E0985 /* ASIDataDecompressor.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E7FF1B3BE544006E0985 /* ASIDataDecompressor.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E84F1B3BE544006E0985 /* ASIDownloadCache.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8011B3BE544006E0985 /* ASIDownloadCache.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8501B3BE544006E0985 /* ASIFormDataRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8031B3BE544006E0985 /* ASIFormDataRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8511B3BE544006E0985 /* ASIHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8051B3BE544006E0985 /* ASIHTTPRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8521B3BE544006E0985 /* ASIInputStream.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8091B3BE544006E0985 /* ASIInputStream.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8531B3BE544006E0985 /* ASINetworkQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E80B1B3BE544006E0985 /* ASINetworkQueue.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8541B3BE544006E0985 /* ASIWebPageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E80F1B3BE544006E0985 /* ASIWebPageRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8551B3BE544006E0985 /* ASICloudFilesCDNRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8121B3BE544006E0985 /* ASICloudFilesCDNRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8561B3BE544006E0985 /* ASICloudFilesContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8141B3BE544006E0985 /* ASICloudFilesContainer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8571B3BE544006E0985 /* ASICloudFilesContainerRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8161B3BE544006E0985 /* ASICloudFilesContainerRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8581B3BE544006E0985 /* ASICloudFilesContainerXMLParserDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8181B3BE544006E0985 /* ASICloudFilesContainerXMLParserDelegate.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8591B3BE544006E0985 /* ASICloudFilesObject.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E81A1B3BE544006E0985 /* ASICloudFilesObject.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E85A1B3BE544006E0985 /* ASICloudFilesObjectRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E81C1B3BE544006E0985 /* ASICloudFilesObjectRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E85B1B3BE544006E0985 /* ASICloudFilesRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E81E1B3BE544006E0985 /* ASICloudFilesRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E85C1B3BE544006E0985 /* ASIS3Bucket.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8221B3BE544006E0985 /* ASIS3Bucket.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E85D1B3BE544006E0985 /* ASIS3BucketObject.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8241B3BE544006E0985 /* ASIS3BucketObject.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E85E1B3BE544006E0985 /* ASIS3BucketRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8261B3BE544006E0985 /* ASIS3BucketRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E85F1B3BE544006E0985 /* ASIS3ObjectRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E8281B3BE544006E0985 /* ASIS3ObjectRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8601B3BE544006E0985 /* ASIS3Request.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E82A1B3BE544006E0985 /* ASIS3Request.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		AB09E8611B3BE544006E0985 /* ASIS3ServiceRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AB09E82C1B3BE544006E0985 /* ASIS3ServiceRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		AB4939CB1AFB1D4B00E71A34 /* IJKVideoToolBox.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4939C31AFB1D4B00E71A34 /* IJKVideoToolBox.m */; };
 		AB4939CC1AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4939C51AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.m */; };
 		AB4939CD1AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vdec.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4939C71AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vdec.m */; };
 		AB4939CE1AFB1D4B00E71A34 /* ffpipeline_ios.c in Sources */ = {isa = PBXBuildFile; fileRef = AB4939CA1AFB1D4B00E71A34 /* ffpipeline_ios.c */; };
 		AB4939D11AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4939CF1AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m */; };
+		AB98B84C1B3D4A9F00F715BF /* IJKFFMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = AB98B84A1B3D4A9F00F715BF /* IJKFFMoviePlayerController.m */; };
 		ABD0B0061AFB463300317F1F /* iOSUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = ABD0B0041AFB463300317F1F /* iOSUtils.m */; };
+		ABF204061B341BAD00C67E5D /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = ABF204041B341BAD00C67E5D /* GCDAsyncUdpSocket.m */; };
 		E62139BE180FA89B00553533 /* IJKFFOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = E62139BD180FA89A00553533 /* IJKFFOptions.m */; };
 		E62139BF180FAE5F00553533 /* IJKFFOptions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E62139BC180FA89A00553533 /* IJKFFOptions.h */; };
 		E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27017F01143003551EB /* ijksdl_audio.c */; };
 		E63FC27617F013DE003551EB /* ijksdl_vout_dummy.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27417F013DE003551EB /* ijksdl_vout_dummy.c */; };
 		E65DC3B919D93D5F004F8A08 /* IJKKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = E65DC3B819D93D5F004F8A08 /* IJKKVOController.m */; };
 		E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */; };
-		E66F8DE717EFD9C300354D80 /* IJKFFMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DE617EFD9C300354D80 /* IJKFFMoviePlayerController.m */; };
 		E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */ = {isa = PBXBuildFile; fileRef = E66F8DEF17EFEA9400354D80 /* ijkplayer.c */; };
 		E66F8E0317EFEEA400354D80 /* ijkplayer_ios.m in Sources */ = {isa = PBXBuildFile; fileRef = E66F8E0117EFEEA400354D80 /* ijkplayer_ios.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		E6716E4B1807E5FC00B3FBC1 /* IJKMediaUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = E6716E4A1807E5FC00B3FBC1 /* IJKMediaUtils.m */; };
@@ -66,7 +90,6 @@
 		E6F727BB17F2D9D40043623F /* IJKFFMoviePlayerDef.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727BA17F2D9D30043623F /* IJKFFMoviePlayerDef.m */; };
 		E6F727BC17F40C1C0043623F /* IJKMediaPlayer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */; };
 		E6F727BD17F40C360043623F /* IJKMPMoviePlayerController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DBF17EEC65200354D80 /* IJKMPMoviePlayerController.h */; };
-		E6F727BE17F40C390043623F /* IJKFFMoviePlayerController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E66F8DE517EFD9C300354D80 /* IJKFFMoviePlayerController.h */; };
 		E6F727C217F7C9BA0043623F /* IJKMediaPlayback.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F727C117F7C9B90043623F /* IJKMediaPlayback.m */; };
 		E6FAD9571A515CE300725002 /* ijkmeta.c in Sources */ = {isa = PBXBuildFile; fileRef = E6FAD9551A515CE300725002 /* ijkmeta.c */; };
 /* End PBXBuildFile section */
@@ -81,7 +104,6 @@
 				E67C4E0A19D2BFF100415CEE /* IJKAVMoviePlayerController.h in CopyFiles */,
 				E672D6F418D345C100C51FF9 /* IJKMediaModule.h in CopyFiles */,
 				E62139BF180FAE5F00553533 /* IJKFFOptions.h in CopyFiles */,
-				E6F727BE17F40C390043623F /* IJKFFMoviePlayerController.h in CopyFiles */,
 				E6F727BD17F40C360043623F /* IJKMPMoviePlayerController.h in CopyFiles */,
 				E6F727BC17F40C1C0043623F /* IJKMediaPlayer.h in CopyFiles */,
 				E6903EC217EAF6C500CFD954 /* IJKMediaPlayback.h in CopyFiles */,
@@ -93,6 +115,57 @@
 /* Begin PBXFileReference section */
 		451103111A5CE36A00337D24 /* IJKSDLGLRenderNV12.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKSDLGLRenderNV12.h; sourceTree = "<group>"; };
 		451103121A5CE36A00337D24 /* IJKSDLGLRenderNV12.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKSDLGLRenderNV12.m; sourceTree = "<group>"; };
+		AB09E7F61B3BE544006E0985 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
+		AB09E7F71B3BE544006E0985 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		AB09E7F91B3BE544006E0985 /* ASIAuthenticationDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIAuthenticationDialog.h; sourceTree = "<group>"; };
+		AB09E7FA1B3BE544006E0985 /* ASIAuthenticationDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIAuthenticationDialog.m; sourceTree = "<group>"; };
+		AB09E7FB1B3BE544006E0985 /* ASICacheDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASICacheDelegate.h; sourceTree = "<group>"; };
+		AB09E7FC1B3BE544006E0985 /* ASIDataCompressor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIDataCompressor.h; sourceTree = "<group>"; };
+		AB09E7FD1B3BE544006E0985 /* ASIDataCompressor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIDataCompressor.m; sourceTree = "<group>"; };
+		AB09E7FE1B3BE544006E0985 /* ASIDataDecompressor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIDataDecompressor.h; sourceTree = "<group>"; };
+		AB09E7FF1B3BE544006E0985 /* ASIDataDecompressor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIDataDecompressor.m; sourceTree = "<group>"; };
+		AB09E8001B3BE544006E0985 /* ASIDownloadCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIDownloadCache.h; sourceTree = "<group>"; };
+		AB09E8011B3BE544006E0985 /* ASIDownloadCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIDownloadCache.m; sourceTree = "<group>"; };
+		AB09E8021B3BE544006E0985 /* ASIFormDataRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIFormDataRequest.h; sourceTree = "<group>"; };
+		AB09E8031B3BE544006E0985 /* ASIFormDataRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIFormDataRequest.m; sourceTree = "<group>"; };
+		AB09E8041B3BE544006E0985 /* ASIHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIHTTPRequest.h; sourceTree = "<group>"; };
+		AB09E8051B3BE544006E0985 /* ASIHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIHTTPRequest.m; sourceTree = "<group>"; };
+		AB09E8061B3BE544006E0985 /* ASIHTTPRequestConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIHTTPRequestConfig.h; sourceTree = "<group>"; };
+		AB09E8071B3BE544006E0985 /* ASIHTTPRequestDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIHTTPRequestDelegate.h; sourceTree = "<group>"; };
+		AB09E8081B3BE544006E0985 /* ASIInputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIInputStream.h; sourceTree = "<group>"; };
+		AB09E8091B3BE544006E0985 /* ASIInputStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIInputStream.m; sourceTree = "<group>"; };
+		AB09E80A1B3BE544006E0985 /* ASINetworkQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASINetworkQueue.h; sourceTree = "<group>"; };
+		AB09E80B1B3BE544006E0985 /* ASINetworkQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASINetworkQueue.m; sourceTree = "<group>"; };
+		AB09E80C1B3BE544006E0985 /* ASIProgressDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIProgressDelegate.h; sourceTree = "<group>"; };
+		AB09E80E1B3BE544006E0985 /* ASIWebPageRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIWebPageRequest.h; sourceTree = "<group>"; };
+		AB09E80F1B3BE544006E0985 /* ASIWebPageRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIWebPageRequest.m; sourceTree = "<group>"; };
+		AB09E8111B3BE544006E0985 /* ASICloudFilesCDNRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASICloudFilesCDNRequest.h; sourceTree = "<group>"; };
+		AB09E8121B3BE544006E0985 /* ASICloudFilesCDNRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASICloudFilesCDNRequest.m; sourceTree = "<group>"; };
+		AB09E8131B3BE544006E0985 /* ASICloudFilesContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASICloudFilesContainer.h; sourceTree = "<group>"; };
+		AB09E8141B3BE544006E0985 /* ASICloudFilesContainer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASICloudFilesContainer.m; sourceTree = "<group>"; };
+		AB09E8151B3BE544006E0985 /* ASICloudFilesContainerRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASICloudFilesContainerRequest.h; sourceTree = "<group>"; };
+		AB09E8161B3BE544006E0985 /* ASICloudFilesContainerRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASICloudFilesContainerRequest.m; sourceTree = "<group>"; };
+		AB09E8171B3BE544006E0985 /* ASICloudFilesContainerXMLParserDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASICloudFilesContainerXMLParserDelegate.h; sourceTree = "<group>"; };
+		AB09E8181B3BE544006E0985 /* ASICloudFilesContainerXMLParserDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASICloudFilesContainerXMLParserDelegate.m; sourceTree = "<group>"; };
+		AB09E8191B3BE544006E0985 /* ASICloudFilesObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASICloudFilesObject.h; sourceTree = "<group>"; };
+		AB09E81A1B3BE544006E0985 /* ASICloudFilesObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASICloudFilesObject.m; sourceTree = "<group>"; };
+		AB09E81B1B3BE544006E0985 /* ASICloudFilesObjectRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASICloudFilesObjectRequest.h; sourceTree = "<group>"; };
+		AB09E81C1B3BE544006E0985 /* ASICloudFilesObjectRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASICloudFilesObjectRequest.m; sourceTree = "<group>"; };
+		AB09E81D1B3BE544006E0985 /* ASICloudFilesRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASICloudFilesRequest.h; sourceTree = "<group>"; };
+		AB09E81E1B3BE544006E0985 /* ASICloudFilesRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASICloudFilesRequest.m; sourceTree = "<group>"; };
+		AB09E8201B3BE544006E0985 /* ASINSXMLParserCompat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASINSXMLParserCompat.h; sourceTree = "<group>"; };
+		AB09E8211B3BE544006E0985 /* ASIS3Bucket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIS3Bucket.h; sourceTree = "<group>"; };
+		AB09E8221B3BE544006E0985 /* ASIS3Bucket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIS3Bucket.m; sourceTree = "<group>"; };
+		AB09E8231B3BE544006E0985 /* ASIS3BucketObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIS3BucketObject.h; sourceTree = "<group>"; };
+		AB09E8241B3BE544006E0985 /* ASIS3BucketObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIS3BucketObject.m; sourceTree = "<group>"; };
+		AB09E8251B3BE544006E0985 /* ASIS3BucketRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIS3BucketRequest.h; sourceTree = "<group>"; };
+		AB09E8261B3BE544006E0985 /* ASIS3BucketRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIS3BucketRequest.m; sourceTree = "<group>"; };
+		AB09E8271B3BE544006E0985 /* ASIS3ObjectRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIS3ObjectRequest.h; sourceTree = "<group>"; };
+		AB09E8281B3BE544006E0985 /* ASIS3ObjectRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIS3ObjectRequest.m; sourceTree = "<group>"; };
+		AB09E8291B3BE544006E0985 /* ASIS3Request.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIS3Request.h; sourceTree = "<group>"; };
+		AB09E82A1B3BE544006E0985 /* ASIS3Request.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIS3Request.m; sourceTree = "<group>"; };
+		AB09E82B1B3BE544006E0985 /* ASIS3ServiceRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIS3ServiceRequest.h; sourceTree = "<group>"; };
+		AB09E82C1B3BE544006E0985 /* ASIS3ServiceRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIS3ServiceRequest.m; sourceTree = "<group>"; };
 		AB4939C31AFB1D4B00E71A34 /* IJKVideoToolBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKVideoToolBox.m; path = ijkmedia/ijkplayer/ios/pipeline/IJKVideoToolBox.m; sourceTree = "<group>"; };
 		AB4939C41AFB1D4B00E71A34 /* IJKVideoToolBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKVideoToolBox.h; path = ijkmedia/ijkplayer/ios/pipeline/IJKVideoToolBox.h; sourceTree = "<group>"; };
 		AB4939C51AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ffpipenode_ios_videotoolbox_vout.m; path = ijkmedia/ijkplayer/ios/pipeline/ffpipenode_ios_videotoolbox_vout.m; sourceTree = "<group>"; };
@@ -104,8 +177,12 @@
 		AB4939CF1AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ijksdl_vout_overlay_videotoolbox.m; sourceTree = "<group>"; };
 		AB4939D01AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_vout_overlay_videotoolbox.h; sourceTree = "<group>"; };
 		AB4939D21AFB1DE500E71A34 /* h264_sps_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = h264_sps_parser.h; sourceTree = "<group>"; };
+		AB98B84A1B3D4A9F00F715BF /* IJKFFMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFMoviePlayerController.m; sourceTree = "<group>"; };
+		AB98B84B1B3D4A9F00F715BF /* IJKFFMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFMoviePlayerController.h; sourceTree = "<group>"; };
 		ABD0B0041AFB463300317F1F /* iOSUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = iOSUtils.m; path = ijkmedia/ijkplayer/ios/pipeline/iOSUtils.m; sourceTree = "<group>"; };
 		ABD0B0051AFB463300317F1F /* iOSUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iOSUtils.h; path = ijkmedia/ijkplayer/ios/pipeline/iOSUtils.h; sourceTree = "<group>"; };
+		ABF204041B341BAD00C67E5D /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncUdpSocket.m; path = CocoaAsyncSocket/GCD/GCDAsyncUdpSocket.m; sourceTree = "<group>"; };
+		ABF204051B341BAD00C67E5D /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDAsyncUdpSocket.h; path = CocoaAsyncSocket/GCD/GCDAsyncUdpSocket.h; sourceTree = "<group>"; };
 		E62139BC180FA89A00553533 /* IJKFFOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFOptions.h; sourceTree = "<group>"; };
 		E62139BD180FA89A00553533 /* IJKFFOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFOptions.m; sourceTree = "<group>"; };
 		E63FC27017F01143003551EB /* ijksdl_audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_audio.c; sourceTree = "<group>"; };
@@ -117,8 +194,6 @@
 		E66F8DBF17EEC65200354D80 /* IJKMPMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMPMoviePlayerController.h; path = IJKMediaPlayer/IJKMPMoviePlayerController.h; sourceTree = "<group>"; };
 		E66F8DC017EEC65200354D80 /* IJKMPMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMPMoviePlayerController.m; path = IJKMediaPlayer/IJKMPMoviePlayerController.m; sourceTree = "<group>"; };
 		E66F8DC217EECB1E00354D80 /* IJKMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaPlayer.h; path = IJKMediaPlayer/IJKMediaPlayer.h; sourceTree = "<group>"; };
-		E66F8DE517EFD9C300354D80 /* IJKFFMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFMoviePlayerController.h; sourceTree = "<group>"; };
-		E66F8DE617EFD9C300354D80 /* IJKFFMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFMoviePlayerController.m; sourceTree = "<group>"; };
 		E66F8DEE17EFEA9400354D80 /* ijkplayer_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkplayer_internal.h; sourceTree = "<group>"; };
 		E66F8DEF17EFEA9400354D80 /* ijkplayer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijkplayer.c; sourceTree = "<group>"; };
 		E66F8DF017EFEA9400354D80 /* ijkplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkplayer.h; sourceTree = "<group>"; };
@@ -308,6 +383,114 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AB09E7F11B3BE267006E0985 /* Http */ = {
+			isa = PBXGroup;
+			children = (
+				AB09E7F21B3BE544006E0985 /* External */,
+				AB09E7F81B3BE544006E0985 /* Classes */,
+			);
+			name = Http;
+			sourceTree = "<group>";
+		};
+		AB09E7F21B3BE544006E0985 /* External */ = {
+			isa = PBXGroup;
+			children = (
+				AB09E7F51B3BE544006E0985 /* Reachability */,
+			);
+			name = External;
+			path = "asi-http-request/External";
+			sourceTree = "<group>";
+		};
+		AB09E7F51B3BE544006E0985 /* Reachability */ = {
+			isa = PBXGroup;
+			children = (
+				AB09E7F61B3BE544006E0985 /* Reachability.h */,
+				AB09E7F71B3BE544006E0985 /* Reachability.m */,
+			);
+			path = Reachability;
+			sourceTree = "<group>";
+		};
+		AB09E7F81B3BE544006E0985 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				AB09E7F91B3BE544006E0985 /* ASIAuthenticationDialog.h */,
+				AB09E7FA1B3BE544006E0985 /* ASIAuthenticationDialog.m */,
+				AB09E7FB1B3BE544006E0985 /* ASICacheDelegate.h */,
+				AB09E7FC1B3BE544006E0985 /* ASIDataCompressor.h */,
+				AB09E7FD1B3BE544006E0985 /* ASIDataCompressor.m */,
+				AB09E7FE1B3BE544006E0985 /* ASIDataDecompressor.h */,
+				AB09E7FF1B3BE544006E0985 /* ASIDataDecompressor.m */,
+				AB09E8001B3BE544006E0985 /* ASIDownloadCache.h */,
+				AB09E8011B3BE544006E0985 /* ASIDownloadCache.m */,
+				AB09E8021B3BE544006E0985 /* ASIFormDataRequest.h */,
+				AB09E8031B3BE544006E0985 /* ASIFormDataRequest.m */,
+				AB09E8041B3BE544006E0985 /* ASIHTTPRequest.h */,
+				AB09E8051B3BE544006E0985 /* ASIHTTPRequest.m */,
+				AB09E8061B3BE544006E0985 /* ASIHTTPRequestConfig.h */,
+				AB09E8071B3BE544006E0985 /* ASIHTTPRequestDelegate.h */,
+				AB09E8081B3BE544006E0985 /* ASIInputStream.h */,
+				AB09E8091B3BE544006E0985 /* ASIInputStream.m */,
+				AB09E80A1B3BE544006E0985 /* ASINetworkQueue.h */,
+				AB09E80B1B3BE544006E0985 /* ASINetworkQueue.m */,
+				AB09E80C1B3BE544006E0985 /* ASIProgressDelegate.h */,
+				AB09E80D1B3BE544006E0985 /* ASIWebPageRequest */,
+				AB09E8101B3BE544006E0985 /* CloudFiles */,
+				AB09E81F1B3BE544006E0985 /* S3 */,
+			);
+			name = Classes;
+			path = "asi-http-request/Classes";
+			sourceTree = "<group>";
+		};
+		AB09E80D1B3BE544006E0985 /* ASIWebPageRequest */ = {
+			isa = PBXGroup;
+			children = (
+				AB09E80E1B3BE544006E0985 /* ASIWebPageRequest.h */,
+				AB09E80F1B3BE544006E0985 /* ASIWebPageRequest.m */,
+			);
+			path = ASIWebPageRequest;
+			sourceTree = "<group>";
+		};
+		AB09E8101B3BE544006E0985 /* CloudFiles */ = {
+			isa = PBXGroup;
+			children = (
+				AB09E8111B3BE544006E0985 /* ASICloudFilesCDNRequest.h */,
+				AB09E8121B3BE544006E0985 /* ASICloudFilesCDNRequest.m */,
+				AB09E8131B3BE544006E0985 /* ASICloudFilesContainer.h */,
+				AB09E8141B3BE544006E0985 /* ASICloudFilesContainer.m */,
+				AB09E8151B3BE544006E0985 /* ASICloudFilesContainerRequest.h */,
+				AB09E8161B3BE544006E0985 /* ASICloudFilesContainerRequest.m */,
+				AB09E8171B3BE544006E0985 /* ASICloudFilesContainerXMLParserDelegate.h */,
+				AB09E8181B3BE544006E0985 /* ASICloudFilesContainerXMLParserDelegate.m */,
+				AB09E8191B3BE544006E0985 /* ASICloudFilesObject.h */,
+				AB09E81A1B3BE544006E0985 /* ASICloudFilesObject.m */,
+				AB09E81B1B3BE544006E0985 /* ASICloudFilesObjectRequest.h */,
+				AB09E81C1B3BE544006E0985 /* ASICloudFilesObjectRequest.m */,
+				AB09E81D1B3BE544006E0985 /* ASICloudFilesRequest.h */,
+				AB09E81E1B3BE544006E0985 /* ASICloudFilesRequest.m */,
+			);
+			path = CloudFiles;
+			sourceTree = "<group>";
+		};
+		AB09E81F1B3BE544006E0985 /* S3 */ = {
+			isa = PBXGroup;
+			children = (
+				AB09E8201B3BE544006E0985 /* ASINSXMLParserCompat.h */,
+				AB09E8211B3BE544006E0985 /* ASIS3Bucket.h */,
+				AB09E8221B3BE544006E0985 /* ASIS3Bucket.m */,
+				AB09E8231B3BE544006E0985 /* ASIS3BucketObject.h */,
+				AB09E8241B3BE544006E0985 /* ASIS3BucketObject.m */,
+				AB09E8251B3BE544006E0985 /* ASIS3BucketRequest.h */,
+				AB09E8261B3BE544006E0985 /* ASIS3BucketRequest.m */,
+				AB09E8271B3BE544006E0985 /* ASIS3ObjectRequest.h */,
+				AB09E8281B3BE544006E0985 /* ASIS3ObjectRequest.m */,
+				AB09E8291B3BE544006E0985 /* ASIS3Request.h */,
+				AB09E82A1B3BE544006E0985 /* ASIS3Request.m */,
+				AB09E82B1B3BE544006E0985 /* ASIS3ServiceRequest.h */,
+				AB09E82C1B3BE544006E0985 /* ASIS3ServiceRequest.m */,
+			);
+			path = S3;
+			sourceTree = "<group>";
+		};
 		AB4939C21AFB1D1E00E71A34 /* pipeline */ = {
 			isa = PBXGroup;
 			children = (
@@ -325,6 +508,24 @@
 			name = pipeline;
 			sourceTree = "<group>";
 		};
+		ABF204031B341B8000C67E5D /* UDP */ = {
+			isa = PBXGroup;
+			children = (
+				ABF204041B341BAD00C67E5D /* GCDAsyncUdpSocket.m */,
+				ABF204051B341BAD00C67E5D /* GCDAsyncUdpSocket.h */,
+			);
+			name = UDP;
+			sourceTree = "<group>";
+		};
+		ABF219C81B326D1100DEA3BD /* IJKMediaPlayerExtra */ = {
+			isa = PBXGroup;
+			children = (
+				AB09E7F11B3BE267006E0985 /* Http */,
+				ABF204031B341B8000C67E5D /* UDP */,
+			);
+			name = IJKMediaPlayerExtra;
+			sourceTree = "<group>";
+		};
 		E63FC27217F013DE003551EB /* dummy */ = {
 			isa = PBXGroup;
 			children = (
@@ -338,6 +539,7 @@
 		E66F8DBC17EEC2CF00354D80 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				ABF219C81B326D1100DEA3BD /* IJKMediaPlayerExtra */,
 				E6F727B517F2B1690043623F /* IJKMediaPlayer */,
 				E67C4E0219D15B0600415CEE /* IJKAVMoviePlayerController */,
 				E66F8DBE17EEC5DE00354D80 /* IJKMPMoviePlayerController */,
@@ -417,13 +619,13 @@
 		E6903EBE17EAF6C500CFD954 /* IJKFFMoviePlayerController */ = {
 			isa = PBXGroup;
 			children = (
+				AB98B84A1B3D4A9F00F715BF /* IJKFFMoviePlayerController.m */,
+				AB98B84B1B3D4A9F00F715BF /* IJKFFMoviePlayerController.h */,
 				AB4939D21AFB1DE500E71A34 /* h264_sps_parser.h */,
 				E6716E4C1807EA4F00B3FBC1 /* IJKFFMrl.h */,
 				E6716E4D1807EA5000B3FBC1 /* IJKFFMrl.m */,
 				E62139BC180FA89A00553533 /* IJKFFOptions.h */,
 				E62139BD180FA89A00553533 /* IJKFFOptions.m */,
-				E66F8DE517EFD9C300354D80 /* IJKFFMoviePlayerController.h */,
-				E66F8DE617EFD9C300354D80 /* IJKFFMoviePlayerController.m */,
 				E6F727B917F2D9D30043623F /* IJKFFMoviePlayerDef.h */,
 				E6F727BA17F2D9D30043623F /* IJKFFMoviePlayerDef.m */,
 				E6903F7617EAFC2C00CFD954 /* ffmpeg */,
@@ -795,6 +997,9 @@
 			files = (
 				E6EE92A3187810C5009EAB56 /* IJKAudioKit.m in Sources */,
 				E690401F17EAFC6100CFD954 /* ff_cmdutils.c in Sources */,
+				AB98B84C1B3D4A9F00F715BF /* IJKFFMoviePlayerController.m in Sources */,
+				AB09E8521B3BE544006E0985 /* ASIInputStream.m in Sources */,
+				AB09E84D1B3BE544006E0985 /* ASIDataCompressor.m in Sources */,
 				E690402017EAFC6100CFD954 /* ff_ffplay.c in Sources */,
 				E690402717EAFC6100CFD954 /* image_convert.c in Sources */,
 				E690402D17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.c in Sources */,
@@ -806,7 +1011,9 @@
 				E690403117EAFC6100CFD954 /* ijksdl_stdinc.c in Sources */,
 				E6EE92BC1878230C009EAB56 /* IJKSDLGLRenderI420.m in Sources */,
 				AB4939D11AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m in Sources */,
+				AB09E8501B3BE544006E0985 /* ASIFormDataRequest.m in Sources */,
 				ABD0B0061AFB463300317F1F /* iOSUtils.m in Sources */,
+				AB09E8511B3BE544006E0985 /* ASIHTTPRequest.m in Sources */,
 				E690403217EAFC6100CFD954 /* ijksdl_thread.c in Sources */,
 				E67B91AF1A3801DB00717EA9 /* ff_ffpipeline.c in Sources */,
 				E67B91B01A3801DB00717EA9 /* ff_ffpipenode.c in Sources */,
@@ -814,24 +1021,36 @@
 				E690403317EAFC6100CFD954 /* ijksdl_timer.c in Sources */,
 				E690403417EAFC6100CFD954 /* ijksdl_vout.c in Sources */,
 				E6EE92B91878230C009EAB56 /* ijksdl_thread_ios.m in Sources */,
+				AB09E8581B3BE544006E0985 /* ASICloudFilesContainerXMLParserDelegate.m in Sources */,
 				AB4939CC1AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vout.m in Sources */,
 				E66F8DC117EEC65200354D80 /* IJKMPMoviePlayerController.m in Sources */,
 				E67C4E0819D15EEA00415CEE /* IJKAVMoviePlayerController.m in Sources */,
+				AB09E84F1B3BE544006E0985 /* ASIDownloadCache.m in Sources */,
 				E6FAD9571A515CE300725002 /* ijkmeta.c in Sources */,
 				E6EE92B81878230C009EAB56 /* ijksdl_aout_ios_audiounit.m in Sources */,
 				E6EE92C21878236A009EAB56 /* IJKSDLAudioQueueController.m in Sources */,
 				E67B91BA1A3801E600717EA9 /* ffpipenode_ffplay_vout.c in Sources */,
-				E66F8DE717EFD9C300354D80 /* IJKFFMoviePlayerController.m in Sources */,
 				AB4939CD1AFB1D4B00E71A34 /* ffpipenode_ios_videotoolbox_vdec.m in Sources */,
+				AB09E8611B3BE544006E0985 /* ASIS3ServiceRequest.m in Sources */,
 				AB4939CB1AFB1D4B00E71A34 /* IJKVideoToolBox.m in Sources */,
+				AB09E8571B3BE544006E0985 /* ASICloudFilesContainerRequest.m in Sources */,
+				AB09E84C1B3BE544006E0985 /* ASIAuthenticationDialog.m in Sources */,
+				AB09E85F1B3BE544006E0985 /* ASIS3ObjectRequest.m in Sources */,
+				AB09E8601B3BE544006E0985 /* ASIS3Request.m in Sources */,
+				ABF204061B341BAD00C67E5D /* GCDAsyncUdpSocket.m in Sources */,
 				AB4939CE1AFB1D4B00E71A34 /* ffpipeline_ios.c in Sources */,
+				AB09E8561B3BE544006E0985 /* ASICloudFilesContainer.m in Sources */,
 				E66F8DF117EFEA9400354D80 /* ijkplayer.c in Sources */,
+				AB09E85C1B3BE544006E0985 /* ASIS3Bucket.m in Sources */,
 				E6EE92BB1878230C009EAB56 /* IJKSDLAudioUnitController.m in Sources */,
 				E66F8E0317EFEEA400354D80 /* ijkplayer_ios.m in Sources */,
 				E65DC3B919D93D5F004F8A08 /* IJKKVOController.m in Sources */,
 				E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */,
 				E6EE92BD1878230C009EAB56 /* IJKSDLGLRenderRV24.m in Sources */,
 				E63FC27617F013DE003551EB /* ijksdl_vout_dummy.c in Sources */,
+				AB09E8531B3BE544006E0985 /* ASINetworkQueue.m in Sources */,
+				AB09E84E1B3BE544006E0985 /* ASIDataDecompressor.m in Sources */,
+				AB09E85B1B3BE544006E0985 /* ASICloudFilesRequest.m in Sources */,
 				E6EE92BF1878230C009EAB56 /* IJKSDLGLView.m in Sources */,
 				E6F727BB17F2D9D40043623F /* IJKFFMoviePlayerDef.m in Sources */,
 				E6EE92BE1878230C009EAB56 /* IJKSDLGLShader.m in Sources */,
@@ -839,9 +1058,16 @@
 				E6F727C217F7C9BA0043623F /* IJKMediaPlayback.m in Sources */,
 				E6EE92BA1878230C009EAB56 /* ijksdl_vout_ios_gles2.m in Sources */,
 				E6716E4B1807E5FC00B3FBC1 /* IJKMediaUtils.m in Sources */,
+				AB09E8551B3BE544006E0985 /* ASICloudFilesCDNRequest.m in Sources */,
 				E6716E4E1807EA5000B3FBC1 /* IJKFFMrl.m in Sources */,
+				AB09E8541B3BE544006E0985 /* ASIWebPageRequest.m in Sources */,
+				AB09E85A1B3BE544006E0985 /* ASICloudFilesObjectRequest.m in Sources */,
 				E67B91B91A3801E600717EA9 /* ffpipenode_ffplay_vdec.c in Sources */,
 				451103131A5CE36A00337D24 /* IJKSDLGLRenderNV12.m in Sources */,
+				AB09E84B1B3BE544006E0985 /* Reachability.m in Sources */,
+				AB09E85E1B3BE544006E0985 /* ASIS3BucketRequest.m in Sources */,
+				AB09E8591B3BE544006E0985 /* ASICloudFilesObject.m in Sources */,
+				AB09E85D1B3BE544006E0985 /* ASIS3BucketObject.m in Sources */,
 				E62139BE180FA89B00553533 /* IJKFFOptions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -885,6 +1111,10 @@
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -921,6 +1151,10 @@
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -942,6 +1176,8 @@
 					../build/universal/include,
 					IJKMediaPlayer/ijkmedia,
 					../../ijkmedia,
+					"${SDK_DIR}/usr/include/libxml2",
+					IJKMediaPlayer,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -967,6 +1203,8 @@
 					../build/universal/include,
 					IJKMediaPlayer/ijkmedia,
 					../../ijkmedia,
+					"${SDK_DIR}/usr/include/libxml2",
+					IJKMediaPlayer,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

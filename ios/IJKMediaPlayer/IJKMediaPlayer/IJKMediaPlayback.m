@@ -29,3 +29,6 @@ NSString *const IJKMoviePlayerPlaybackDidFinishNotification = @"IJKMoviePlayerPl
 NSString *const IJKMoviePlayerPlaybackStateDidChangeNotification = @"IJKMoviePlayerPlaybackStateDidChangeNotification";
 
 NSString *const IJKMoviePlayerVideoDecoderOpenNotification = @"IJKMoviePlayerVideoDecoderOpenNotification";
+
+//add by William
+NSString *const IJKMoviePlayerInitSuccessNotification = @"IJKMoviePlayerInitSuccessNotification";

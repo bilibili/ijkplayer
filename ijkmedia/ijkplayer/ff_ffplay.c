@@ -2242,6 +2242,11 @@ static int read_thread(void *arg)
     int64_t av_stalled_begin_time = 0;
     int64_t av_stalled_now_time = 0;
     //
+    
+    // add by William Shi
+    int64_t av_bitrate_begin_time = 0;
+    int64_t av_bitrate_now_time = 0;
+    int av_bitrate_DataSize = 0;
 
     //
     printf("start loading\n");
@@ -2277,6 +2282,7 @@ static int read_thread(void *arg)
         ret = -1;
         goto fail;
     }
+    printf("ip address:%s\n",ic->pb->iPAddress);
     if (scan_all_pmts_set)
         av_dict_set(&ffp->format_opts, "scan_all_pmts", NULL, AV_DICT_MATCH_CASE);
 
@@ -2843,6 +2849,27 @@ static int read_thread(void *arg)
         }
         pkt->flags = 0;
         ret = av_read_frame(ic, pkt);
+
+        if(ret>=0)
+        {
+            av_bitrate_DataSize += pkt->size;
+        }
+                
+        if(av_bitrate_begin_time==0)
+        {
+            av_bitrate_begin_time = GetNowMs();
+        }
+        av_bitrate_now_time = GetNowMs();
+                
+        if(av_bitrate_now_time-av_bitrate_begin_time >= 1000)
+        {
+            ic->bit_rate=av_bitrate_DataSize*8/1024/((av_bitrate_now_time-av_bitrate_begin_time)/1000);
+
+            av_bitrate_begin_time = 0;
+            av_bitrate_DataSize = 0;
+        }
+
+            
         if(isDropAllPackets)
         {
             av_free_packet(pkt);
@@ -3542,6 +3569,32 @@ long ffp_get_playable_duration_l(FFPlayer *ffp)
 
     return (long)ffp->playable_duration_ms;
 }
+            
+int ffp_get_bitRate_l(FFPlayer *ffp)
+{
+    assert(ffp);
+    if (!ffp)
+        return 0;
+    
+    VideoState *is = ffp->is;
+    if (!is || !is->ic)
+        return 0;
+    
+    return (int)is->ic->bit_rate;
+}
+            
+char* ffp_get_ipaddress_l(FFPlayer *ffp)
+{
+    assert(ffp);
+    if (!ffp)
+        return NULL;
+    
+    VideoState *is = ffp->is;
+    if (!is || !is->ic || !is->ic->pb)
+        return NULL;
+
+    return is->ic->pb->iPAddress;
+}
 
 void ffp_packet_queue_init(PacketQueue *q)
 {
@@ -3674,7 +3727,9 @@ void ffp_check_buffering_l(FFPlayer *ffp)
 
         if (cached_duration_in_ms >= 0) {
             buf_time_position = ffp_get_current_position_l(ffp) + cached_duration_in_ms;
-            ffp->playable_duration_ms = buf_time_position;
+            // modify by WilliamShi
+//            ffp->playable_duration_ms = buf_time_position;
+            ffp->playable_duration_ms = cached_duration_in_ms;
 
             buf_time_percent = (int)av_rescale(cached_duration_in_ms, 1005, hwm_in_ms * 10);
 #ifdef FFP_SHOW_DEMUX_CACHE

@@ -61,13 +61,4 @@
     [self presentModalViewController:viewController animated:YES];
 }
 
--(IBAction)playAVPLayerButtonAction:(id)sender
-{
-    IJKVideoViewController *viewController;
-    viewController = [[IJKVideoViewController alloc] initView];
-    [viewController setUrlString:self.avplayerUrlTextField.text UrlSourceType:IJKMPMovieSourceTypeUnknown];
-    [viewController setLocalAVPlayer:YES];
-    [self presentModalViewController:viewController animated:YES];
-}
-
 @end

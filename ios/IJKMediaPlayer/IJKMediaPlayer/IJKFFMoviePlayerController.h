@@ -56,6 +56,10 @@
 
 @interface IJKFFMoviePlayerController : NSObject <IJKMediaPlayback>
 
+//new API by WilliamShi
+- (id)initWithContentToken:(NSString*)token
+               withOptions:(IJKFFOptions *)options;
+
 - (id)initWithContentURL:(NSURL *)aUrl
              withOptions:(IJKFFOptions *)options;
 
@@ -82,6 +86,18 @@
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
+
+//add by WilliamShi for info report
+@property(nonatomic)  NSString* ve; //CDN Name
+@property(nonatomic, readonly)  NSString* m; //mode (720p, 1080p)
+@property(nonatomic, readonly)  NSString* rip; //CDN IP
+@property(nonatomic, readonly)  NSString* lip; //local IP
+@property(nonatomic, readonly)  NSString* bl; // current cache length (S)
+@property(nonatomic, readonly)  NSString* bc; // stalled count / one minute
+@property(nonatomic, readonly)  NSString* bt; // all stalled count
+@property(nonatomic, readonly)  NSString* br; //bitrate
+@property(nonatomic, readonly)  NSString* bw; //ignore
+@property(nonatomic)  NSString* token; //
 
 @end
 

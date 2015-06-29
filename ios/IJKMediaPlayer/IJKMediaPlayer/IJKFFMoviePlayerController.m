@@ -29,7 +29,18 @@
 
 #include "string.h"
 
-@interface IJKFFMoviePlayerController()
+#import "ASIHTTPRequest.h"
+#import "ASIFormDataRequest.h"
+
+#include <netdb.h>
+
+#import <ifaddrs.h>
+#import <arpa/inet.h>
+
+#import "GCDAsyncUdpSocket.h"
+
+
+@interface IJKFFMoviePlayerController() <ASIHTTPRequestDelegate>
 
 @property(nonatomic, readonly) NSDictionary *mediaMeta;
 @property(nonatomic, readonly) NSDictionary *videoMeta;
@@ -45,8 +56,8 @@
     IJKSDLGLView *_glView;
     IJKFFMoviePlayerMessagePool *_msgPool;
 
-    NSInteger _videoWidth;
-    NSInteger _videoHeight;
+//    NSInteger _videoWidth;
+//    NSInteger _videoHeight;
     NSInteger _sampleAspectRatioNumerator;
     NSInteger _sampleAspectRatioDenominator;
 
@@ -57,6 +68,18 @@
     BOOL _keepScreenOnWhilePlaying;
     BOOL _pauseInBackground;
     BOOL _isVideoToolboxOpen;
+    
+    // new param by WilliamShi for http
+    IJKFFOptions *tokenOptions;
+    ASIHTTPRequest *request;
+    
+    // new param by WilliamShi for udp
+    NSInteger stalledCountPerMinute;
+    NSInteger allStalledCount;
+    
+    long tag;
+    GCDAsyncUdpSocket *udpSocket;
+    NSTimer *timer;
 }
 
 @synthesize view = _view;
@@ -80,6 +103,12 @@
 @synthesize mediaMeta = _mediaMeta;
 @synthesize videoMeta = _videoMeta;
 @synthesize audioMeta = _audioMeta;
+
+@synthesize videoWidth = _videoWidth;
+@synthesize videoHeight = _videoHeight;
+
+@synthesize ve = _ve;
+@synthesize token=_token;
 
 #define FFP_IO_STAT_STEP (50 * 1024)
 
@@ -129,6 +158,182 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
                                             int64_t elpased_time, int64_t total_duration))
 {
     ijkmp_io_stat_complete_register(cb);
+}
+
+- (id)initWithContentToken:(NSString*)token
+               withOptions:(IJKFFOptions *)options
+{
+    self = [super init];
+    if (self) {
+        NSString* urlHeader = [NSString stringWithUTF8String:"http://192.168.9.117:8080/live/httpcdn?token="];
+        
+        ASIFormDataRequest *formDataRequest = [ASIFormDataRequest requestWithURL:nil];
+        NSString* encodedTokenString = [formDataRequest encodeURL:token];
+        
+        NSString* encodedUrlString = [urlHeader stringByAppendingString:encodedTokenString];
+        
+        NSLog ( @"%@" ,encodedUrlString);
+
+        //http request
+        request = [ ASIHTTPRequest requestWithURL :[NSURL URLWithString:encodedUrlString]];
+        [request setDelegate:self];
+        [request startAsynchronous];
+        
+        tokenOptions = options;
+        
+        self.token = token;
+    }
+    
+    return self;
+}
+
+- (void)send
+{
+    [udpSocket sendData:[[self getReportInfoWithJsonFormat] dataUsingEncoding:NSUTF8StringEncoding] toHost:@"172.16.55.62" port:33333 withTimeout:-1 tag:tag];
+    
+    tag++;
+}
+
+- (void)doSendOnce:(NSTimer*)theTimer
+{
+    [self performSelectorInBackground:@selector(send) withObject:self];
+}
+
+- (void)startReport
+{
+    //start a timer
+    udpSocket = [[GCDAsyncUdpSocket alloc] init];
+    
+    timer =  [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(doSendOnce:) userInfo:nil repeats:YES];
+}
+
+- (void)endReport
+{
+    [udpSocket close];
+    udpSocket = nil;
+    
+    [timer invalidate];
+    timer = nil;
+}
+
+- ( void )requestFinished:( ASIHTTPRequest *)request
+{
+    NSString *responseString = [request responseString ];
+    NSLog ( @"requestFinished:%@" ,responseString);
+    
+    //parse response string
+    NSData *data= [responseString dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSError *error = nil;
+    
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+
+    if (json==nil) {
+        NSLog(@"json parse failed \r\n");
+        
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
+         object:self
+         userInfo:@{
+                    MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError)}];
+        
+        return;
+    }
+
+    NSString *cdnName = [json objectForKey:@"cdn"];
+    NSLog ( @"%@" ,cdnName );
+    
+    NSString *linkAddress = [json objectForKey:@"link"];
+    NSLog ( @"%@" ,linkAddress );
+    
+    if (cdnName==nil || linkAddress==nil) {
+        NSLog(@"json parse failed \r\n");
+        
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
+         object:self
+         userInfo:@{
+                    MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError)}];
+        
+        return;
+    }
+    
+    self.ve = cdnName;
+    
+    //init content
+    ijkmp_global_init();
+    
+    // IJKFFIOStatRegister(IJKFFIOStatDebugCallback);
+    // IJKFFIOStatCompleteRegister(IJKFFIOStatCompleteDebugCallback);
+    
+    // init fields
+    _controlStyle = MPMovieControlStyleNone;
+    _scalingMode = MPMovieScalingModeAspectFit;
+    _shouldAutoplay = NO;
+    
+    // init media resource
+    _ffMrl = [[IJKFFMrl alloc] initWithMrl:linkAddress];
+//    _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"rtmp://wspub.live.hupucdn.com/prod/slk"]];
+//        _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"http://v.iask.com/v_play_ipad.php?vid=99264895"]];
+    _segmentResolver = nil;
+    _mediaMeta = [[NSDictionary alloc] init];
+    
+    // init player
+    _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
+    _msgPool = [[IJKFFMoviePlayerMessagePool alloc] init];
+    
+    ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
+    ijkmp_set_format_callback(_mediaPlayer, format_control_message, (__bridge void *) self);
+    
+    // init video sink
+    //        int chroma = SDL_FCC_RV24;
+    int chroma = SDL_FCC_I420;
+    _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    _view   = _glView;
+    
+    ijkmp_ios_set_glview(_mediaPlayer, _glView);
+    ijkmp_set_overlay_format(_mediaPlayer, chroma);
+    
+    // init audio sink
+    [[IJKAudioKit sharedInstance] setupAudioSession];
+    
+    // apply ffmpeg options
+    if (tokenOptions == nil) {
+        tokenOptions = [IJKFFOptions optionsByDefault];
+    }
+    [tokenOptions applyTo:_mediaPlayer];
+    _pauseInBackground = tokenOptions.pauseInBackground;
+    
+    // init extra
+    _keepScreenOnWhilePlaying = YES;
+    [self setScreenOn:YES];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(audioSessionInterrupt:)
+                                                 name:AVAudioSessionInterruptionNotification
+                                               object:nil];
+    
+    // PlayInfoReport module
+    if (tokenOptions.reportPlayInfo) {
+        //start report
+        [self startReport];
+    }
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:IJKMoviePlayerInitSuccessNotification
+     object:self];
+}
+
+- ( void )requestFailed:( ASIHTTPRequest *)request
+{
+    NSError *error = [request error ];
+    NSLog ( @"requestFailed:%@" ,error. userInfo );
+    
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
+     object:self
+     userInfo:@{
+                MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError)}];
 }
 
 - (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
@@ -308,6 +513,17 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (void)shutdown
 {
+    if (request) {
+        [request cancel];
+        request = nil;
+    }
+    
+    // PlayInfoReport module
+    if (tokenOptions.reportPlayInfo) {
+        //start report
+        [self endReport];
+    }
+    
     if (!_mediaPlayer)
         return;
 
@@ -419,6 +635,22 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     NSTimeInterval ret = ijkmp_get_playable_duration(_mediaPlayer);
     return ret / 1000;
+}
+
+- (NSInteger)bitRate
+{
+    if (!_mediaPlayer)
+        return 0;
+    
+    return ijkmp_get_bitRate(_mediaPlayer);
+}
+
+-(NSString*)iPAddress
+{
+    if (!_mediaPlayer)
+        return nil;
+    
+    return [NSString stringWithUTF8String:ijkmp_get_iPAddress(_mediaPlayer)];
 }
 
 - (void)setScalingMode: (MPMovieScalingMode) aScalingMode
@@ -656,6 +888,9 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             NSLog(@"FFP_MSG_BUFFERING_START:");
 
             _loadState = MPMovieLoadStateStalled;
+            
+            stalledCountPerMinute++;
+            allStalledCount++;
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
@@ -897,5 +1132,160 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     });
 }
 */
+
+- (void)setVe:(NSString*)cdnName
+{
+    _ve = cdnName;
+}
+
+- (NSString*)ve
+{
+    if (_ve) {
+        return _ve;
+    }else {
+        return @"unknown";
+    }
+}
+
+- (NSString*)m
+{
+    if (self.videoWidth==1280 && self.videoHeight==720) {
+        return @"720p";
+    }
+    
+    if(self.videoWidth==1920 && self.videoHeight==1080) {
+        return @"1080p";
+    }
+    
+    if (self.videoWidth==640 && self.videoHeight==480) {
+        return @"480p";
+    }
+    
+    return [NSString stringWithFormat:@"%dx%d",self.videoWidth,self.videoHeight];
+}
+
+// Get Remote IP Address
+- (NSString*)rip
+{
+    if (!_mediaPlayer)
+        return @"unknown";
+    
+    char* ipaddr = ijkmp_get_iPAddress(_mediaPlayer);
+    if (ipaddr==NULL) {
+        return @"unknown";
+    }else {
+        return [NSString stringWithUTF8String:ipaddr];
+    }
+}
+
+// Get local IP Address
+- (NSString *)getLocalIPAddress {
+    NSString *address = @"error";
+    struct ifaddrs *interfaces = NULL;
+    struct ifaddrs *temp_addr = NULL;
+    int success = 0;
+    // retrieve the current interfaces - returns 0 on success
+    success = getifaddrs(&interfaces);
+    if (success == 0) {
+        // Loop through linked list of interfaces
+        temp_addr = interfaces;
+        while(temp_addr != NULL) {
+            if(temp_addr->ifa_addr->sa_family == AF_INET) {
+                // Check if interface is en0 which is the wifi connection on the iPhone
+                if([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"]) {
+                    // Get NSString from C String
+                    address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
+                }
+            }
+            temp_addr = temp_addr->ifa_next;
+        }
+    }
+    // Free memory
+    freeifaddrs(interfaces);
+    return address;}
+
+- (NSString*)lip
+{
+    return [self getLocalIPAddress];
+}
+
+- (NSString*)bl
+{
+    return [NSString stringWithFormat:@"%f",self.playableDuration];
+}
+
+- (NSString*) bc
+{
+    NSString* retStr = [NSString stringWithFormat:@"%d",stalledCountPerMinute];
+    
+    stalledCountPerMinute = 0;
+    
+    return retStr;
+}
+
+- (NSString*) bt
+{
+    return [NSString stringWithFormat:@"%d",allStalledCount];
+}
+
+- (NSString*) br
+{
+    return [NSString stringWithFormat:@"%d",self.bitRate];
+}
+
+- (void)setToken:(NSString *)token_
+{
+    _token = token_;
+}
+
+- (NSString*)token
+{
+    if (_token) {
+        return _token;
+    }else{
+        return @"unknown";
+    }
+}
+
+- (NSString*)getReportInfoWithJsonFormat
+{
+/*
+    NSLog(@"ve:%@",self.ve);
+    NSLog(@"m:%@",self.m);
+    NSLog(@"rip:%@",self.rip);
+    NSLog(@"lip:%@",self.lip);
+    NSLog(@"bl:%@",self.bl);
+    NSLog(@"bc:%@",self.bc);
+    NSLog(@"bt:%@",self.bt);
+    NSLog(@"br:%@",self.br);
+    NSLog(@"token:%@",self.token);*/
+    
+    NSDictionary *infoDict = [NSDictionary dictionaryWithObjectsAndKeys:self.ve,@"ve",
+                              self.m,@"m",
+                              self.rip,@"rip",
+                              self.lip,@"lip",
+                              self.bl,@"bl",
+                              self.bc,@"bc",
+                              self.bt,@"bt",
+                              self.br,@"br",
+                              self.token,@"token", nil];
+    
+    if ([NSJSONSerialization isValidJSONObject:infoDict])
+    {
+        NSError *error;
+        
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:infoDict options:NSJSONWritingPrettyPrinted error:&error];
+        
+        
+        NSString *json =[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        NSLog(@"json data:%@",json);
+        
+        return json;
+    }else{
+        NSLog(@"a given object can't be converted to JSON data\n");
+        return nil;
+    }
+}
+
 @end
 

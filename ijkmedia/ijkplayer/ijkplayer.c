@@ -614,6 +614,34 @@ long ijkmp_get_playable_duration(IjkMediaPlayer *mp)
     return retval;
 }
 
+static int ijkmp_get_bitRate_l(IjkMediaPlayer *mp)
+{
+    return ffp_get_bitRate_l(mp->ffplayer);
+}
+
+int ijkmp_get_bitRate(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ijkmp_get_bitRate_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
+}
+
+static char* ijkmp_get_iPAddress_l(IjkMediaPlayer *mp)
+{    
+    return ffp_get_ipaddress_l(mp->ffplayer);
+}
+
+char *ijkmp_get_iPAddress(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    char* retval = ijkmp_get_iPAddress_l(mp);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
+}
+
 void *ijkmp_get_weak_thiz(IjkMediaPlayer *mp)
 {
     return mp->weak_thiz;

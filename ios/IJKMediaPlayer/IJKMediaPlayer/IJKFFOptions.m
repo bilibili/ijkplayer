@@ -28,6 +28,7 @@
     options.videotoolboxEnabled     = YES;
     options.frameMaxWidth           = 960;
     options.autoReconnect           = NO;
+    options.reportPlayInfo          = NO;
 
     return options;
 }

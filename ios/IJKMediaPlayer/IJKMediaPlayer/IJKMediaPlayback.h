@@ -60,6 +60,12 @@ typedef NS_ENUM(NSInteger, IJKMPMovieSourceType) {
 
 @property(nonatomic, readonly) int64_t numberOfBytesTransferred;
 
+//add new api
+@property(nonatomic, readonly) NSInteger videoWidth;
+@property(nonatomic, readonly) NSInteger videoHeight;
+@property(nonatomic, readonly) NSInteger bitRate;
+@property(nonatomic, readonly) NSString* iPAddress;
+
 - (UIImage *)thumbnailImageAtCurrentTime;
 
 @property(nonatomic) MPMovieControlStyle controlStyle;
@@ -82,6 +88,10 @@ IJK_EXTERN NSString *const IJKMoviePlayerLoadStateDidChangeNotification;
 IJK_EXTERN NSString *const IJKMoviePlayerPlaybackDidFinishNotification;
 IJK_EXTERN NSString *const IJKMoviePlayerPlaybackStateDidChangeNotification;
 IJK_EXTERN NSString *const IJKMoviePlayerVideoDecoderOpenNotification;
+
+//add by William
+IJK_EXTERN NSString *const IJKMoviePlayerInitSuccessNotification;
+
 @end
 
 #pragma mark IJKMediaResource

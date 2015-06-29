@@ -7,7 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB09E87B1B3C05DC006E0985 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = AB09E87A1B3C05DC006E0985 /* libxml2.dylib */; };
+		AB09E87F1B3C079E006E0985 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB09E87E1B3C079E006E0985 /* CFNetwork.framework */; };
 		AB4939D61AFB207E00E71A34 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB4939D51AFB207E00E71A34 /* CoreVideo.framework */; };
+		AB6319AB1B3D2DFB0025924F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB6319AA1B3D2DFB0025924F /* SystemConfiguration.framework */; };
+		AB6319AD1B3D2E1B0025924F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB6319AC1B3D2E1B0025924F /* Security.framework */; };
+		AB6319AF1B3D2E3A0025924F /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB6319AE1B3D2E3A0025924F /* MobileCoreServices.framework */; };
 		ABBADD481AF9C336006B688B /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ABBADD471AF9C336006B688B /* libstdc++.dylib */; };
 		ABCC3F7D1AF8594700214BBE /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */; };
 		ABD5DF081AE4D43D00778032 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABD5DF051AE4D43D00778032 /* MainViewController.xib */; };
@@ -63,7 +68,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AB09E87A1B3C05DC006E0985 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		AB09E87E1B3C079E006E0985 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		AB4939D51AFB207E00E71A34 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		AB6319AA1B3D2DFB0025924F /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		AB6319AC1B3D2E1B0025924F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		AB6319AE1B3D2E3A0025924F /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		ABBADD471AF9C336006B688B /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
 		ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		ABD5DF051AE4D43D00778032 /* MainViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainViewController.xib; sourceTree = "<group>"; };
@@ -114,6 +124,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB6319AF1B3D2E3A0025924F /* MobileCoreServices.framework in Frameworks */,
+				AB6319AD1B3D2E1B0025924F /* Security.framework in Frameworks */,
+				AB6319AB1B3D2DFB0025924F /* SystemConfiguration.framework in Frameworks */,
+				AB09E87F1B3C079E006E0985 /* CFNetwork.framework in Frameworks */,
+				AB09E87B1B3C05DC006E0985 /* libxml2.dylib in Frameworks */,
 				AB4939D61AFB207E00E71A34 /* CoreVideo.framework in Frameworks */,
 				ABBADD481AF9C336006B688B /* libstdc++.dylib in Frameworks */,
 				ABCC3F7D1AF8594700214BBE /* VideoToolbox.framework in Frameworks */,
@@ -180,6 +195,11 @@
 		E6903EFE17EAF70200CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AB6319AE1B3D2E3A0025924F /* MobileCoreServices.framework */,
+				AB6319AC1B3D2E1B0025924F /* Security.framework */,
+				AB6319AA1B3D2DFB0025924F /* SystemConfiguration.framework */,
+				AB09E87E1B3C079E006E0985 /* CFNetwork.framework */,
+				AB09E87A1B3C05DC006E0985 /* libxml2.dylib */,
 				AB4939D51AFB207E00E71A34 /* CoreVideo.framework */,
 				ABBADD471AF9C336006B688B /* libstdc++.dylib */,
 				ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */,
@@ -405,6 +425,10 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -430,6 +454,10 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;

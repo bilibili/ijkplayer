@@ -6,7 +6,6 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="MainViewController">
             <connections>
-                <outlet property="avplayerUrlTextField" destination="ahx-bi-Uk7" id="RAd-pU-T74"/>
                 <outlet property="dlUrlTextField" destination="s4Z-gW-yrY" id="usH-nk-edc"/>
                 <outlet property="lxUrlTextField" destination="Nr0-8W-9Mb" id="Xyh-ds-RCw"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
@@ -48,13 +47,9 @@
                         <action selector="playDLButtonAction:" destination="-1" eventType="touchUpInside" id="GIv-r5-Bfi"/>
                     </connections>
                 </button>
-                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="rtmp://wspub.live.hupucdn.com/prod/slk" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Ofm-GN-crP">
-                    <rect key="frame" x="110" y="2" width="272" height="30"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                    <textInputTraits key="textInputTraits"/>
-                </textField>
-                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="rtmp://wspub.live.hupucdn.com/prod/slk" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="s4Z-gW-yrY">
-                    <rect key="frame" x="110" y="65" width="272" height="30"/>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="s4Z-gW-yrY">
+                    <rect key="frame" x="110" y="66" width="272" height="30"/>
+                    <string key="text">vod://kanqiu/hell0?ac=pull&amp;m=720p&amp;st=1435547184&amp;td=60000&amp;u=test1&amp;ve=ws&amp;k=9d95770aa1d383da565ee08669d6cc83b7a3fe80c0e3235f8c185ab8a7a4e711</string>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
@@ -73,34 +68,21 @@
                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
-                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="AVPlayer" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4MJ-LX-BEc">
-                    <rect key="frame" x="19" y="101" width="69" height="21"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                    <nil key="highlightedColor"/>
-                </label>
-                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Qxl-bQ-uwp">
-                    <rect key="frame" x="390" y="97" width="30" height="30"/>
-                    <state key="normal" title="play">
-                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                    </state>
-                    <connections>
-                        <action selector="playAVPLayerButtonAction:" destination="-1" eventType="touchUpInside" id="XEV-GW-naK"/>
-                    </connections>
-                </button>
-                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="http://v.iask.com/v_play_ipad.php?vid=99264895" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Nr0-8W-9Mb">
-                    <rect key="frame" x="110" y="33" width="272" height="30"/>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Ofm-GN-crP">
+                    <rect key="frame" x="110" y="3" width="272" height="30"/>
+                    <string key="text">vod://kanqiu/hell0?ac=pull&amp;m=720p&amp;st=1435547184&amp;td=60000&amp;u=test1&amp;ve=ws&amp;k=9d95770aa1d383da565ee08669d6cc83b7a3fe80c0e3235f8c185ab8a7a4e711</string>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
-                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="http://live.3gv.ifeng.com/zixun.m3u8" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ahx-bi-Uk7">
-                    <rect key="frame" x="110" y="97" width="272" height="30"/>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Nr0-8W-9Mb">
+                    <rect key="frame" x="110" y="36" width="272" height="30"/>
+                    <string key="text">vod://kanqiu/hell0?ac=pull&amp;m=720p&amp;st=1435547184&amp;td=60000&amp;u=test1&amp;ve=ws&amp;k=9d95770aa1d383da565ee08669d6cc83b7a3fe80c0e3235f8c185ab8a7a4e711</string>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-            <point key="canvasLocation" x="408" y="169"/>
+            <point key="canvasLocation" x="57" y="179"/>
         </view>
     </objects>
 </document>

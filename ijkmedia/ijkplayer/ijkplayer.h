@@ -199,6 +199,10 @@ long            ijkmp_get_current_position(IjkMediaPlayer *mp);
 long            ijkmp_get_duration(IjkMediaPlayer *mp);
 long            ijkmp_get_playable_duration(IjkMediaPlayer *mp);
 
+// add new API
+int             ijkmp_get_bitRate(IjkMediaPlayer *mp);
+char           *ijkmp_get_iPAddress(IjkMediaPlayer *mp);
+
 void           *ijkmp_get_weak_thiz(IjkMediaPlayer *mp);
 void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 

@@ -1,0 +1,11 @@
+//
+// Prefix header for all source files of the 'iPhone' target in the 'iPhone' project
+//
+
+// See: https://devforums.apple.com/thread/66169?start=25&tstart=0
+#import <TargetConditionals.h>
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+    #import <UIKit/UIKit.h>
+#endif
