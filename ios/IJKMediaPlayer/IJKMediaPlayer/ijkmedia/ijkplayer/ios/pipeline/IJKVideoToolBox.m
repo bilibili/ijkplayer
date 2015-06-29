@@ -70,6 +70,31 @@ static void CFDictionarySetBoolean(CFMutableDictionaryRef dictionary, CFStringRe
 }
 
 
+
+inline static sample_info* sample_info_alloc(VideoToolBoxContext* context)
+{
+    pthread_mutex_lock(&context->sample_info_mutex);
+
+    sample_info *sample_info = &context->sample_info_array[context->sample_info_index];
+
+    if (sample_info->is_decoding) {
+        ALOGW("%s, reallocate sample in decoding %d -> %d (%d)\n", __FUNCTION__,
+              sample_info->sample_id,
+              context->sample_info_id_generator,
+              context->sample_infos_in_decoding);
+    } else {
+        sample_info->is_decoding = 1;
+        context->sample_infos_in_decoding++;
+    }
+    sample_info->sample_id = context->sample_info_id_generator++;
+
+    context->sample_info_index++;
+    context->sample_info_index %= MAX_DECODING_SAMPLES;
+    pthread_mutex_unlock(&context->sample_info_mutex);
+    return sample_info;
+}
+
+
 static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc, void *demux_buff, size_t demux_size)
 {
     OSStatus status;
@@ -249,8 +274,31 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         if (!ctx || ctx->dealloced == true) {
             return;
         }
-        sort_queue *newFrame = (sort_queue*)sourceFrameRefCon;
-        newFrame->nextframe = NULL;
+
+        sort_queue *newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
+
+        pthread_mutex_lock(&ctx->sample_info_mutex);
+        {
+            sample_info *sample_info = sourceFrameRefCon;
+            newFrame->pts    = sample_info->pts;
+            newFrame->dts    = sample_info->dts;
+            newFrame->sort   = sample_info->sort;
+            newFrame->serial = sample_info->serial;
+            newFrame->nextframe = NULL;
+
+            if (sample_info->is_decoding) {
+                sample_info->is_decoding = 0;
+                ctx->sample_infos_in_decoding--;
+                ALOGW("%s: in decoding: %d\n", __func__,
+                      ctx->sample_infos_in_decoding);
+            } else {
+                ALOGW("%s: multiple frames in single sample buffer: %d (%d)\n", __func__,
+                      sample_info->sample_id,
+                      ctx->sample_infos_in_decoding);
+            }
+        }
+        pthread_mutex_unlock(&ctx->sample_info_mutex);
+
         ctx->last_sort = newFrame->sort;
         if (status != 0) {
             ALOGI("decode callback  %d \n", (int)status);
@@ -413,7 +461,6 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     OSStatus status                 = 0;
     double sort_time                = GetSystemTime();
     uint32_t decoder_flags          = 0;// kVTDecodeFrame_EnableAsynchronousDecompression;
-    sort_queue *frame_info          = NULL;
     sample_info *sample_info        = NULL;
     CMSampleBufferRef sample_buff   = NULL;
     AVIOContext *pb                 = NULL;
@@ -501,25 +548,24 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     context->last_keyframe_pts = avpkt->pts;
 
-    frame_info = (sort_queue *)mallocz(sizeof(sort_queue));
-    if (!frame_info) {
-        ALOGE("%s, failed to allocate frame_info\n", __FUNCTION__);
+    sample_info = sample_info_alloc(context);
+    if (!sample_info) {
+        ALOGE("%s, failed to peek frame_info\n", __FUNCTION__);
         goto failed;
     }
 
-    frame_info->sort   = sort_time - context->m_sort_time_offset;
-    frame_info->pts    = pts;
-    frame_info->dts    = dts;
-    frame_info->serial = context->serial;
+    sample_info->sort   = sort_time - context->m_sort_time_offset;
+    sample_info->pts    = pts;
+    sample_info->dts    = dts;
+    sample_info->serial = context->serial;
 
-    status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)frame_info, 0);
+    status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)sample_info, 0);
     if (status == noErr) {
         // Wait for delayed frames even if kVTDecodeInfo_Asynchronous is not set.
         status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
     }
 
     if (status != 0) {
-        free(frame_info);
         ALOGE("status %d \n", (int)status);
         if (status == kVTInvalidSessionErr) {
             context->refresh_session = true;

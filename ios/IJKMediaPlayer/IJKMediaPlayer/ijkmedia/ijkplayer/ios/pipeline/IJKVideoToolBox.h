@@ -46,9 +46,14 @@ typedef struct VTBPicture {
 
 
 typedef struct sample_info {
-    double dts;
-    double pts;
-    int    serial;
+    int     sample_id;
+
+    double  sort;
+    double  dts;
+    double  pts;
+    int     serial;
+
+    volatile int is_decoding;
 } sample_info;
 
 
@@ -94,6 +99,8 @@ typedef struct VideoToolBoxContext {
     pthread_mutex_t             sample_info_mutex;
     sample_info                 sample_info_array[MAX_DECODING_SAMPLES];
     int                         sample_info_index;
+    int                         sample_info_id_generator;
+    volatile int                sample_infos_in_decoding;
 } VideoToolBoxContext ;
 
 
