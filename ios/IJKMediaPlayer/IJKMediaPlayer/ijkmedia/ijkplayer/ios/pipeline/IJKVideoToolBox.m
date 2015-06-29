@@ -215,59 +215,14 @@ static int vtb_queue_picture(
 
 
 
-static CFDictionaryRef CreateDictionaryWithPkt(double time, double dts, double pts,double pkt_serial)
+static sort_queue *CreateDictionaryWithPkt(double time, double dts, double pts,double pkt_serial)
 {
-    CFStringRef key[4] = {
-        CFSTR("PKT_SORT"),
-        CFSTR("PKT_DTS"),
-        CFSTR("PKT_PTS"),
-        CFSTR("PKT_SERIAL")
-    };
-    CFNumberRef value[4];
-    CFDictionaryRef display_time;
-
-    value[0] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &time);
-    value[1] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &dts);
-    value[2] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &pts);
-    value[3] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &pkt_serial);
-
-    display_time = CFDictionaryCreate(
-                                      kCFAllocatorDefault, (const void **)&key, (const void **)&value, 4,
-                                      &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-
-    CFRelease(value[0]);
-    CFRelease(value[1]);
-    CFRelease(value[2]);
-    CFRelease(value[3]);
-    return display_time;
-}
-
-
-
-static void GetPktTSFromRef(CFDictionaryRef inFrameInfoDictionary, sort_queue *frame)
-{
-    frame->sort = -1.0;
-    frame->dts = AV_NOPTS_VALUE;
-    frame->pts = AV_NOPTS_VALUE;
-    frame->serial = AV_NOPTS_VALUE;
-    if (inFrameInfoDictionary == NULL)
-        return;
-
-    CFNumberRef value[4];
-
-    value[0] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_SORT"));
-    if (value[0])
-        CFNumberGetValue(value[0], kCFNumberDoubleType, &frame->sort);
-    value[1] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_DTS"));
-    if (value[1])
-        CFNumberGetValue(value[1], kCFNumberDoubleType, &frame->dts);
-    value[2] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_PTS"));
-    if (value[2])
-        CFNumberGetValue(value[2], kCFNumberDoubleType, &frame->pts);
-    value[3] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_SERIAL"));
-    if (value[3])
-        CFNumberGetValue(value[3], kCFNumberDoubleType, &frame->serial);
-    return;
+    sort_queue *frame = (sort_queue *)mallocz(sizeof(sort_queue));
+    frame->sort   = time;
+    frame->pts    = pts;
+    frame->dts    = dts;
+    frame->serial = pkt_serial;
+    return frame;
 }
 
 
@@ -307,9 +262,8 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         if (!ctx || ctx->dealloced == true) {
             return;
         }
-        sort_queue *newFrame = (sort_queue*)malloc(sizeof(sort_queue));
+        sort_queue *newFrame = (sort_queue*)sourceFrameRefCon;
         newFrame->nextframe = NULL;
-        GetPktTSFromRef(sourceFrameRefCon, newFrame);
         ctx->last_sort = newFrame->sort;
         if (status != 0) {
             ALOGI("decode callback  %d \n", (int)status);
@@ -472,7 +426,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     OSStatus status                 = 0;
     double sort_time                = GetSystemTime();
     uint32_t decoder_flags          = 0;// kVTDecodeFrame_EnableAsynchronousDecompression;
-    CFDictionaryRef frame_info      = NULL;;
+    sort_queue *frame_info          = NULL;
     CMSampleBufferRef sample_buff   = NULL;
     AVIOContext *pb                 = NULL;
     int demux_size                  = 0;
@@ -559,7 +513,16 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     context->last_keyframe_pts = avpkt->pts;
 
-    frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts,context->serial);
+    frame_info = (sort_queue *)mallocz(sizeof(sort_queue));
+    if (!frame_info) {
+        ALOGE("%s, failed to allocate frame_info\n", __FUNCTION__);
+        goto failed;
+    }
+
+    frame_info->sort   = sort_time - context->m_sort_time_offset;
+    frame_info->pts    = pts;
+    frame_info->dts    = dts;
+    frame_info->serial = context->serial;
 
     status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)frame_info, 0);
     if (status == noErr) {
@@ -567,9 +530,8 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
     }
 
-    CFRelease(frame_info);
-
     if (status != 0) {
+        free(frame_info);
         ALOGE("status %d \n", (int)status);
         if (status == kVTInvalidSessionErr) {
             context->refresh_session = true;
