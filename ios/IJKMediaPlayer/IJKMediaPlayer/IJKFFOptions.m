@@ -35,8 +35,6 @@
 
 - (void)applyTo:(IjkMediaPlayer *)mediaPlayer
 {
-    [self logOptions];
-
     ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_CODEC, "skip_loop_filter", _skipLoopFilter);
     ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_CODEC, "skip_frame",       _skipFrame);
 
@@ -59,20 +57,6 @@
     if ([self.userAgent isEqualToString:@""] == NO) {
         ijkmp_set_option(mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "user-agent", [self.userAgent UTF8String]);
     }
-}
-
-- (void)logOptions
-{
-    NSMutableString *echo = [[NSMutableString alloc] init];
-    [echo appendString:@"========================================\n"];
-    [echo appendString:@"= FFmpeg options:\n"];
-    [echo appendFormat:@"= skip_loop_filter: %@\n",   [IJKFFOptions getDiscardString:self.skipLoopFilter]];
-    [echo appendFormat:@"= skipFrame:        %@\n",   [IJKFFOptions getDiscardString:self.skipFrame]];
-    [echo appendFormat:@"= frameBufferCount: %d\n",   self.frameBufferCount];
-    [echo appendFormat:@"= maxFps:           %d\n",   self.maxFps];
-    [echo appendFormat:@"= timeout:          %lld\n", self.timeout];
-    [echo appendString:@"========================================\n"];
-    NSLog(@"%@", echo);
 }
 
 + (NSString *)getDiscardString:(IJKAVDiscard)discard
