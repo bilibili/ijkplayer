@@ -93,8 +93,12 @@ static const AVOption ffp_context_options[] = {
     { "max-buffer-size",                    "max buffer size should be pre-read",
         OPTION_OFFSET(max_buffer_size),     OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
 
+    // iOS only options
     { "videotoolbox",                       "enable VideoToolbox",
         OPTION_OFFSET(videotoolbox),        OPTION_INT(0, 0, 1) },
+
+    { "videotoolbox-max-frame-width",       "max width of output frame of VideoToolbox",
+        OPTION_OFFSET(vtb_max_frame_width), OPTION_INT(0, 0, INT_MAX) },
 
     { NULL }
 };

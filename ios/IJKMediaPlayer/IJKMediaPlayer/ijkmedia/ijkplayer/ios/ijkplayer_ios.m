@@ -76,24 +76,6 @@ void ijkmp_ios_set_glview(IjkMediaPlayer *mp, IJKSDLGLView *glView)
     MPTRACE("ijkmp_ios_set_view(glView=%p)=void\n", (void*)glView);
 }
 
-void ijkmp_ios_set_frame_max_width_l(IjkMediaPlayer *mp, int width)
-{
-    assert(mp);
-    assert(mp->ffplayer);
-    assert(mp->ffplayer->pipeline);
-    ffpipeline_ios_set_frame_max_width(mp->ffplayer->pipeline, width);
-}
-
-void ijkmp_ios_set_frame_max_width(IjkMediaPlayer *mp, int width)
-{
-    assert(mp);
-    MPTRACE("%s (width=%d)\n", __func__, width);
-    pthread_mutex_lock(&mp->mutex);
-    ijkmp_ios_set_frame_max_width_l(mp, width);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("%s after(width=%d)\n", __func__, width);
-}
-
 bool ijkmp_ios_is_videotoolbox_open_l(IjkMediaPlayer *mp)
 {
     assert(mp);

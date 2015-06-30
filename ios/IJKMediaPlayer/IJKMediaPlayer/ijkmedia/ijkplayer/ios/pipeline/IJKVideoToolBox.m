@@ -492,13 +492,15 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
 void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
 {
+    FFPlayer *ffp = context->ffp;
+
     VTDecompressionSessionRef vt_session = NULL;
     CFMutableDictionaryRef destinationPixelBufferAttributes;
     VTDecompressionOutputCallbackRecord outputCallback;
     OSStatus status;
-    int width_frame_max = ffpipeline_ios_get_frame_max_width(context->ffp->pipeline);
+    int width_frame_max = ffp->vtb_max_frame_width;
 
-    if (width > width_frame_max) {
+    if (width_frame_max > 0 && width > width_frame_max) {
         double w_scaler = (float)width_frame_max / width;
         width = width_frame_max;
         height = height * w_scaler;
