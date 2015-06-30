@@ -507,6 +507,8 @@ typedef struct FFPlayer {
     int pictq_size;
     int max_fps;
 
+    int videotoolbox;
+
     IjkMediaMeta *meta;
 
     ijk_format_control_message format_control_message;
@@ -595,6 +597,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->pictq_size                     = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT; // option
     ffp->max_fps                        = 31; // option
+
+    ffp->videotoolbox                   = 0; // option
 
     ffp->format_control_message = NULL;
     ffp->format_control_opaque  = NULL;

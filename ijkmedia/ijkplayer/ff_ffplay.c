@@ -93,6 +93,9 @@ static const AVOption ffp_context_options[] = {
     { "max-buffer-size",                    "max buffer size should be pre-read",
         OPTION_OFFSET(max_buffer_size),     OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
 
+    { "videotoolbox",                       "enable VideoToolbox",
+        OPTION_OFFSET(videotoolbox),        OPTION_INT(0, 0, 1) },
+
     { NULL }
 };
 #undef OPTION_CONST

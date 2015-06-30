@@ -29,7 +29,6 @@
 typedef struct IJKFF_Pipeline_Opaque {
     FFPlayer    *ffp;
     int          m_max_frame_width;
-    int          m_videotoolbox_enable;
     bool         is_videotoolbox_open;
 } IJKFF_Pipeline_Opaque;
 
@@ -50,18 +49,11 @@ int ffpipeline_ios_get_frame_max_width(IJKFF_Pipeline *pipeline)
     return opaque->m_max_frame_width;
 }
 
-
-void ffpipeline_ios_set_videotoolbox_enabled(IJKFF_Pipeline *pipeline, int enabled)
-{
-    IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
-    opaque->m_videotoolbox_enable = enabled;
-}
-
 static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
 {
     IJKFF_Pipenode* node = NULL;
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
-    if (opaque->m_videotoolbox_enable) {
+    if (ffp->videotoolbox) {
         node = ffpipenode_create_video_decoder_from_ios_videotoolbox(ffp);
     }
     if (node == NULL) {
@@ -93,7 +85,6 @@ IJKFF_Pipeline *ffpipeline_create_from_ios(FFPlayer *ffp)
     IJKFF_Pipeline_Opaque *opaque     = pipeline->opaque;
     opaque->ffp                       = ffp;
     opaque->m_max_frame_width         = 0;
-    opaque->m_videotoolbox_enable     = 0;
     pipeline->func_destroy            = func_destroy;
     pipeline->func_open_video_decoder = func_open_video_decoder;
     pipeline->func_open_video_output  = func_open_video_output;
