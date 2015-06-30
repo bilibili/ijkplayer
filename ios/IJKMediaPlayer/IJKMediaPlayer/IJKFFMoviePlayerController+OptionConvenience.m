@@ -44,22 +44,22 @@
     [self setOptionValue:value forKey:key ofCategory:kIJKFFOptionCategoryPlayer];
 }
 
-- (void)setFormatOptionIntValue:(NSInteger)value forKey:(NSString *)key
+- (void)setFormatOptionIntValue:(int64_t)value forKey:(NSString *)key
 {
     [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryFormat];
 }
 
-- (void)setCodecOptionIntValue:(NSInteger)value forKey:(NSString *)key
+- (void)setCodecOptionIntValue:(int64_t)value forKey:(NSString *)key
 {
     [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryCodec];
 }
 
-- (void)setSwsOptionIntValue:(NSInteger)value forKey:(NSString *)key
+- (void)setSwsOptionIntValue:(int64_t)value forKey:(NSString *)key
 {
     [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategorySws];
 }
 
-- (void)setPlayerOptionIntValue:(NSInteger)value forKey:(NSString *)key
+- (void)setPlayerOptionIntValue:(int64_t)value forKey:(NSString *)key
 {
     [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryPlayer];
 }

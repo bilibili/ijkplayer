@@ -206,7 +206,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
             options = [IJKFFOptions optionsByDefault];
         }
         [options applyTo:_mediaPlayer];
-        _pauseInBackground = options.pauseInBackground;
+        _pauseInBackground = NO;
 
         // init extra
         _keepScreenOnWhilePlaying = YES;

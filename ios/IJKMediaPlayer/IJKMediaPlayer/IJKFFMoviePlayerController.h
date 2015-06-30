@@ -22,6 +22,7 @@
 
 #import "IJKMediaPlayback.h"
 #import "IJKFFOptions.h"
+#import "IJKFFOptions+Convenience.h"
 
 // media meta
 #define k_IJKM_KEY_FORMAT         @"format"

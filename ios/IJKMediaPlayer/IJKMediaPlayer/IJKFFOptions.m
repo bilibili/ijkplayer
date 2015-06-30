@@ -1,10 +1,24 @@
-//
-//  IJKFFOptions.m
-//  IJKMediaPlayer
-//
-//  Created by ZhangRui on 13-10-17.
-//  Copyright (c) 2013年 bilibili. All rights reserved.
-//
+/*
+ * IJKFFOptions.m
+ *
+ * Copyright (c) 2013-2015 Zhang Rui <bbcallen@gmail.com>
+ *
+ * This file is part of ijkPlayer.
+ *
+ * ijkPlayer is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * ijkPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with ijkPlayer; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #import "IJKFFOptions.h"
 #include "ijkplayer/ios/ijkplayer_ios.h"
@@ -16,27 +30,6 @@
     NSMutableDictionary *_formatOptions;
     NSMutableDictionary *_codecOptions;
     NSMutableDictionary *_swsOptions;
-}
-
-+ (IJKFFOptions *)optionsByDefault
-{
-    IJKFFOptions *options = [[IJKFFOptions alloc] init];
-
-    options.skipLoopFilter  = IJK_AVDISCARD_ALL;
-    options.skipFrame       = IJK_AVDISCARD_NONREF;
-
-    options.frameBufferCount        = 3;
-    options.maxFps                  = 30;
-    options.frameDrop               = 0;
-    options.pauseInBackground       = YES;
-
-    options.timeout                 = 30 * 1000 * 1000; // 30 seconds
-    options.userAgent               = @"";
-    options.videoToolboxEnabled     = NO;
-    options.frameMaxWidth           = 960;
-    options.autoReconnect           = YES;
-
-    return options;
 }
 
 - (id)init
@@ -59,36 +52,13 @@
 
 - (void)applyTo:(IjkMediaPlayer *)mediaPlayer
 {
-    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_CODEC, "skip_loop_filter", _skipLoopFilter);
-    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_CODEC, "skip_frame",       _skipFrame);
-
-    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "max-fps",                         _maxFps);
-    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "framedrop",                       _frameDrop);
-    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "video-pictq-size",                _frameBufferCount);
-    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "videotoolbox",                    _videoToolboxEnabled);
-    ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "videotoolbox-max-frame-width",    _frameMaxWidth);
-
-    if (self.autoReconnect == NO) {
-        ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "reconnect", 0);
-    } else {
-        ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "reconnect", 1);
-    }
-
-    if (self.timeout > 0) {
-        ijkmp_set_option_int(mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "timeout", self.timeout);
-    }
-
-    if ([self.userAgent isEqualToString:@""] == NO) {
-        ijkmp_set_option(mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "user-agent", [self.userAgent UTF8String]);
-    }
-
     [_optionCategories enumerateKeysAndObjectsUsingBlock:^(id categoryKey, id categoryDict, BOOL *stopOuter) {
         [categoryDict enumerateKeysAndObjectsUsingBlock:^(id optKey, id optValue, BOOL *stop) {
             if ([optValue isKindOfClass:[NSNumber class]]) {
                 ijkmp_set_option_int(mediaPlayer,
                                      [categoryKey integerValue],
                                      [optKey UTF8String],
-                                     [optValue integerValue]);
+                                     [optValue longLongValue]);
             } else if ([optValue isKindOfClass:[NSString class]]) {
                 ijkmp_set_option(mediaPlayer,
                                  [categoryKey integerValue],
@@ -116,7 +86,7 @@
     }
 }
 
-- (void)setOptionIntValue:(NSInteger)value
+- (void)setOptionIntValue:(int64_t)value
                    forKey:(NSString *)key
                ofCategory:(IJKFFOptionCategory)category
 {

@@ -15,6 +15,8 @@
 		45DB4AAC1A5D52AE005CAD41 /* ijksdl_vout_overlay_videotoolbox.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB4AA81A5D52AE005CAD41 /* ijksdl_vout_overlay_videotoolbox.m */; };
 		E62139BE180FA89B00553533 /* IJKFFOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = E62139BD180FA89A00553533 /* IJKFFOptions.m */; };
 		E62139BF180FAE5F00553533 /* IJKFFOptions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E62139BC180FA89A00553533 /* IJKFFOptions.h */; };
+		E626DA471B426B1E00EC3681 /* IJKFFOptions+Convenience.m in Sources */ = {isa = PBXBuildFile; fileRef = E626DA461B426B1E00EC3681 /* IJKFFOptions+Convenience.m */; };
+		E626DA481B426BC600EC3681 /* IJKFFOptions+Convenience.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E626DA451B426B1E00EC3681 /* IJKFFOptions+Convenience.h */; };
 		E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27017F01143003551EB /* ijksdl_audio.c */; };
 		E63FC27617F013DE003551EB /* ijksdl_vout_dummy.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27417F013DE003551EB /* ijksdl_vout_dummy.c */; };
 		E65DC3B919D93D5F004F8A08 /* IJKKVOController.m in Sources */ = {isa = PBXBuildFile; fileRef = E65DC3B819D93D5F004F8A08 /* IJKKVOController.m */; };
@@ -79,6 +81,7 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
+				E626DA481B426BC600EC3681 /* IJKFFOptions+Convenience.h in CopyFiles */,
 				E6794BCB1B1FFB13000560C4 /* IJKFFMoviePlayerController+OptionConvenience.h in CopyFiles */,
 				E67C4E0A19D2BFF100415CEE /* IJKAVMoviePlayerController.h in CopyFiles */,
 				E672D6F418D345C100C51FF9 /* IJKMediaModule.h in CopyFiles */,
@@ -108,6 +111,8 @@
 		45DCC8E51A66984200DE441F /* h264_sps_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = h264_sps_parser.h; sourceTree = "<group>"; };
 		E62139BC180FA89A00553533 /* IJKFFOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFOptions.h; sourceTree = "<group>"; };
 		E62139BD180FA89A00553533 /* IJKFFOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFOptions.m; sourceTree = "<group>"; };
+		E626DA451B426B1E00EC3681 /* IJKFFOptions+Convenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "IJKFFOptions+Convenience.h"; sourceTree = "<group>"; };
+		E626DA461B426B1E00EC3681 /* IJKFFOptions+Convenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "IJKFFOptions+Convenience.m"; sourceTree = "<group>"; };
 		E63FC27017F01143003551EB /* ijksdl_audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_audio.c; sourceTree = "<group>"; };
 		E63FC27317F013DE003551EB /* ijksdl_dummy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_dummy.h; sourceTree = "<group>"; };
 		E63FC27417F013DE003551EB /* ijksdl_vout_dummy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_vout_dummy.c; sourceTree = "<group>"; };
@@ -362,6 +367,8 @@
 				E6716E4D1807EA5000B3FBC1 /* IJKFFMrl.m */,
 				E62139BC180FA89A00553533 /* IJKFFOptions.h */,
 				E62139BD180FA89A00553533 /* IJKFFOptions.m */,
+				E626DA451B426B1E00EC3681 /* IJKFFOptions+Convenience.h */,
+				E626DA461B426B1E00EC3681 /* IJKFFOptions+Convenience.m */,
 				E6903FCC17EAFC6100CFD954 /* ijkmedia */,
 				E6903EBF17EAF6C500CFD954 /* Supporting Files */,
 			);
@@ -614,6 +621,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E6EE92A3187810C5009EAB56 /* IJKAudioKit.m in Sources */,
+				E626DA471B426B1E00EC3681 /* IJKFFOptions+Convenience.m in Sources */,
 				E690401F17EAFC6100CFD954 /* ff_cmdutils.c in Sources */,
 				E690402017EAFC6100CFD954 /* ff_ffplay.c in Sources */,
 				E690402717EAFC6100CFD954 /* image_convert.c in Sources */,
