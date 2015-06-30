@@ -389,6 +389,18 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             goto failed;
         }
 
+        if (ctx->new_seg_flag) {
+            ALOGI("new seg process!!!!");
+            while (ctx->m_queue_depth > 0) {
+                QueuePicture(ctx);
+            }
+            ctx->new_seg_flag = false;
+        }
+
+        if (ctx->m_sort_queue && newFrame->pts < ctx->m_sort_queue->pts) {
+            goto failed;
+        }
+
         // FIXME: duplicated code
         {
             double dpts = NAN;
@@ -414,18 +426,6 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
                     }
                 }
             }
-        }
-
-        if (ctx->new_seg_flag) {
-            ALOGI("new seg process!!!!");
-            while (ctx->m_queue_depth > 0) {
-                QueuePicture(ctx);
-            }
-            ctx->new_seg_flag = false;
-        }
-
-        if (ctx->m_sort_queue && newFrame->pts < ctx->m_sort_queue->pts) {
-            goto failed;
         }
 
         if (CVPixelBufferIsPlanar(imageBuffer)) {
