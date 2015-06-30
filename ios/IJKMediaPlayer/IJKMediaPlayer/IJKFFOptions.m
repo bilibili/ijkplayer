@@ -161,11 +161,6 @@
     [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryPlayer];
 }
 
--(void)setMaxBufferSize:(int)maxBufferSize
-{
-    [self setPlayerOptionIntValue:maxBufferSize forKey:@"max-buffer-size"];
-}
-
 
 #pragma mark Player options
 
