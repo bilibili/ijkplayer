@@ -20,7 +20,9 @@ public class MainActivity extends Activity {
 
 //        et.setText("http://live.3gv.ifeng.com/zixun.m3u8");
 //        et.setText("rtmp://wspub.live.hupucdn.com/prod/slk");
-        et.setText("http://v.iask.com/v_play_ipad.php?vid=99264895");
+//        et.setText("http://v.iask.com/v_play_ipad.php?vid=99264895");
+//        et.setText("rtmp://wsvideopull.smartcourt.cn/prod/sh_loft_b01ll");
+        et.setText("/sdcard/test.mp4");
 
         btn.setOnClickListener(new OnClickListener(){
 

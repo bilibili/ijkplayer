@@ -536,6 +536,23 @@ public class VideoView extends SurfaceView implements
     };
 
     private void release(boolean cleartargetstate) {
+/*    	
+    	new Runnable() {
+    		IMediaPlayer tmpMediaPlayer = mMediaPlayer;
+			@Override
+			public void run() {
+		        if (tmpMediaPlayer != null) {
+		        	tmpMediaPlayer.reset();
+		        	tmpMediaPlayer.release();
+		        	tmpMediaPlayer = null;
+		        }
+			}
+		};
+		
+        mCurrentState = STATE_IDLE;
+        if (cleartargetstate)
+            mTargetState = STATE_IDLE;*/
+    	
         if (mMediaPlayer != null) {
             mMediaPlayer.reset();
             mMediaPlayer.release();
