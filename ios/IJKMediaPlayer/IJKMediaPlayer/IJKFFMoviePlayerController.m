@@ -864,6 +864,55 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
      [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:nil userInfo:nil];
 }
 
+
+#pragma mark Option Conventionce
+
+- (void)setFormatOptionValue:(NSString *)value forKey:(NSString *)key
+{
+    [self setOptionValue:value forKey:key ofCategory:kIJKFFOptionCategoryFormat];
+}
+
+- (void)setCodecOptionValue:(NSString *)value forKey:(NSString *)key
+{
+    [self setOptionValue:value forKey:key ofCategory:kIJKFFOptionCategoryCodec];
+}
+
+- (void)setSwsOptionValue:(NSString *)value forKey:(NSString *)key
+{
+    [self setOptionValue:value forKey:key ofCategory:kIJKFFOptionCategorySws];
+}
+
+- (void)setPlayerOptionValue:(NSString *)value forKey:(NSString *)key
+{
+    [self setOptionValue:value forKey:key ofCategory:kIJKFFOptionCategoryPlayer];
+}
+
+- (void)setFormatOptionIntValue:(int64_t)value forKey:(NSString *)key
+{
+    [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryFormat];
+}
+
+- (void)setCodecOptionIntValue:(int64_t)value forKey:(NSString *)key
+{
+    [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryCodec];
+}
+
+- (void)setSwsOptionIntValue:(int64_t)value forKey:(NSString *)key
+{
+    [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategorySws];
+}
+
+- (void)setPlayerOptionIntValue:(int64_t)value forKey:(NSString *)key
+{
+    [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryPlayer];
+}
+
+- (void)setMaxBufferSize:(int)maxBufferSize
+{
+    [self setPlayerOptionIntValue:maxBufferSize forKey:@"max-buffer-size"];
+}
+
+
 #pragma mark app state changed
 
 - (void)registerApplicationObservers

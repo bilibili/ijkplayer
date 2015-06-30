@@ -29,9 +29,23 @@ typedef enum IJKFFOptionCategory {
     kIJKFFOptionCategoryPlayer = 4,
 } IJKFFOptionCategory;
 
+// for codec option 'skip_loop_filter' and 'skip_frame'
+typedef enum IJKAVDiscard {
+    /* We leave some space between them for extensions (drop some
+     * keyframes for intra-only or drop just some bidir frames). */
+    IJK_AVDISCARD_NONE    =-16, ///< discard nothing
+    IJK_AVDISCARD_DEFAULT =  0, ///< discard useless packets like 0 size packets in avi
+    IJK_AVDISCARD_NONREF  =  8, ///< discard all non reference
+    IJK_AVDISCARD_BIDIR   = 16, ///< discard all bidirectional frames
+    IJK_AVDISCARD_NONKEY  = 32, ///< discard all frames except keyframes
+    IJK_AVDISCARD_ALL     = 48, ///< discard all
+} IJKAVDiscard;
+
 typedef struct IjkMediaPlayer IjkMediaPlayer;
 
 @interface IJKFFOptions : NSObject
+
++(IJKFFOptions *)optionsByDefault;
 
 -(void)applyTo:(IjkMediaPlayer *)mediaPlayer;
 
@@ -42,5 +56,30 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 - (void)setOptionIntValue:(int64_t)value
                    forKey:(NSString *)key
                ofCategory:(IJKFFOptionCategory)category;
+
+
+-(void)setFormatOptionValue:       (NSString *)value forKey:(NSString *)key;
+-(void)setCodecOptionValue:        (NSString *)value forKey:(NSString *)key;
+-(void)setSwsOptionValue:          (NSString *)value forKey:(NSString *)key;
+-(void)setPlayerOptionValue:       (NSString *)value forKey:(NSString *)key;
+
+-(void)setFormatOptionIntValue:    (int64_t)value forKey:(NSString *)key;
+-(void)setCodecOptionIntValue:     (int64_t)value forKey:(NSString *)key;
+-(void)setSwsOptionIntValue:       (int64_t)value forKey:(NSString *)key;
+-(void)setPlayerOptionIntValue:    (int64_t)value forKey:(NSString *)key;
+
+-(void)setMaxFps:(int)value;
+-(void)setFrameDrop:(int)value;
+-(void)setVideoPictureSize:(int)value;
+-(void)setVideoToolboxEnabled:(BOOL)value;
+-(void)setVideoToolboxMaxFrameWidth:(int)value;
+
+-(void)setReconnect:(int)value;
+-(void)setTimeout:(int64_t)value;
+-(void)setUserAgent:(NSString *)value;
+
+-(void)setSkipLoopFilter:(IJKAVDiscard)value;
+-(void)setSkipFrame:(IJKAVDiscard)value;
+
 
 @end

@@ -25,7 +25,6 @@
 
 #import "IJKFFOptions.h"
 #import "IJKFFMoviePlayerController.h"
-#import "IJKFFMoviePlayerController+OptionConvenience.h"
 
 #import "IJKAVMoviePlayerController.h"
 

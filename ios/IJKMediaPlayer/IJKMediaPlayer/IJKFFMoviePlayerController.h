@@ -22,7 +22,6 @@
 
 #import "IJKMediaPlayback.h"
 #import "IJKFFOptions.h"
-#import "IJKFFOptions+Convenience.h"
 
 // media meta
 #define k_IJKM_KEY_FORMAT         @"format"
@@ -103,6 +102,19 @@ typedef enum IJKLogLevel {
 - (void)setOptionIntValue:(NSInteger)value
                    forKey:(NSString *)key
                ofCategory:(IJKFFOptionCategory)category;
+
+
+
+- (void)setFormatOptionValue:       (NSString *)value forKey:(NSString *)key;
+- (void)setCodecOptionValue:        (NSString *)value forKey:(NSString *)key;
+- (void)setSwsOptionValue:          (NSString *)value forKey:(NSString *)key;
+- (void)setPlayerOptionValue:       (NSString *)value forKey:(NSString *)key;
+
+- (void)setFormatOptionIntValue:    (int64_t)value forKey:(NSString *)key;
+- (void)setCodecOptionIntValue:     (int64_t)value forKey:(NSString *)key;
+- (void)setSwsOptionIntValue:       (int64_t)value forKey:(NSString *)key;
+- (void)setPlayerOptionIntValue:    (int64_t)value forKey:(NSString *)key;
+
 
 @end
 
