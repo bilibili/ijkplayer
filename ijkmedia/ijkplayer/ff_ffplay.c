@@ -3357,6 +3357,16 @@ void ffp_frame_queue_push(FrameQueue *f)
     return frame_queue_push(f);
 }
 
+int ffp_get_master_sync_type(VideoState *is)
+{
+    return get_master_sync_type(is);
+}
+
+double ffp_get_master_clock(VideoState *is)
+{
+    return get_master_clock(is);
+}
+
 void ffp_toggle_buffering_l(FFPlayer *ffp, int buffering_on)
 {
     VideoState *is = ffp->is;

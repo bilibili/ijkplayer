@@ -340,6 +340,9 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             return;
         }
 
+        FFPlayer   *ffp = ctx->ffp;
+        VideoState *is  = ffp->is;
+
         sort_queue *newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
 
         {
@@ -384,6 +387,33 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         if (kVTDecodeInfo_FrameDropped & infoFlags) {
             ALOGI("droped\n");
             goto failed;
+        }
+
+        // FIXME: duplicated code
+        {
+            double dpts = NAN;
+
+            if (newFrame->pts != AV_NOPTS_VALUE)
+                dpts = av_q2d(is->video_st->time_base) * newFrame->pts;
+
+            if (ffp->framedrop>0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
+                if (newFrame->pts != AV_NOPTS_VALUE) {
+                    double diff = dpts - ffp_get_master_clock(is);
+                    if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
+                        diff - is->frame_last_filter_delay < 0 &&
+                        is->viddec.pkt_serial == is->vidclk.serial &&
+                        is->videoq.nb_packets) {
+                        is->frame_drops_early++;
+                        is->continuous_frame_drops_early++;
+                        if (is->continuous_frame_drops_early > ffp->framedrop) {
+                            is->continuous_frame_drops_early = 0;
+                        } else {
+                            // drop too late frame
+                            goto failed;
+                        }
+                    }
+                }
+            }
         }
 
         if (ctx->new_seg_flag) {
