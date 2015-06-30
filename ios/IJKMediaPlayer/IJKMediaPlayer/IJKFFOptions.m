@@ -75,12 +75,12 @@
         [categoryDict enumerateKeysAndObjectsUsingBlock:^(id optKey, id optValue, BOOL *stop) {
             if ([optValue isKindOfClass:[NSNumber class]]) {
                 ijkmp_set_option_int(mediaPlayer,
-                                     (int64_t)[categoryKey longLongValue],
+                                     [categoryKey integerValue],
                                      [optKey UTF8String],
                                      [optValue longLongValue]);
             } else if ([optValue isKindOfClass:[NSString class]]) {
                 ijkmp_set_option(mediaPlayer,
-                                 (int64_t)[categoryKey longLongValue],
+                                 [categoryKey integerValue],
                                  [optKey UTF8String],
                                  [optValue UTF8String]);
             }
