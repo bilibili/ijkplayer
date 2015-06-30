@@ -63,10 +63,10 @@
 
 #ifdef DEBUG
     [IJKFFMoviePlayerController setLogReport:YES];
-    [IJKFFMoviePlayerController setLogLevel:IJK_AV_LOG_DEBUG];
+    [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_DEBUG];
 #else
     [IJKFFMoviePlayerController setLogReport:NO];
-    [IJKFFMoviePlayerController setLogLevel:IJK_AV_LOG_INFO];
+    [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_INFO];
 #endif
 
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:nil];
