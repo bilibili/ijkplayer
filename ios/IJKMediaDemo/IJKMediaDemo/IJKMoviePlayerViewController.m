@@ -65,7 +65,9 @@
 - (void)dealloc
 {
     [self removeMovieNotificationObservers];
-    [self.player shutdown];
+    if (self.player) {
+        [self.player shutdown];
+    }
     
     [self unregisterApplicationObservers];
 }
@@ -163,14 +165,14 @@
             break;
     }
 
-    [self.player.view removeFromSuperview];
-    [self.mediaControl removeFromSuperview];
+//    [self.player.view removeFromSuperview];
+//    [self.mediaControl removeFromSuperview];
     
-    [self.player stop];
-    [self.player shutdown];
-    self.player = nil;
+//    [self.player stop];
+//    [self.player shutdown];
+//    self.player = nil;
     
-    [self removeMovieNotificationObservers];
+//    [self removeMovieNotificationObservers];
 /*
     [IJKFFMoviePlayerController setLogReport:YES];
     IJKFFOptions * options = [IJKFFOptions optionsByDefault];

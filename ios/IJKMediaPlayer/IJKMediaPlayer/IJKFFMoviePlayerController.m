@@ -195,7 +195,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (void)send
 {
-    [udpSocket sendData:[[self getReportInfoWithJsonFormat] dataUsingEncoding:NSUTF8StringEncoding] toHost:@"172.16.55.62" port:33333 withTimeout:-1 tag:tag];
+    [udpSocket sendData:[[self getReportInfoWithJsonFormat] dataUsingEncoding:NSUTF8StringEncoding] toHost:@"192.168.9.117" port:33333 withTimeout:-1 tag:tag];
     
     tag++;
 }
@@ -210,7 +210,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     //start a timer
     udpSocket = [[GCDAsyncUdpSocket alloc] init];
     
-    timer =  [NSTimer scheduledTimerWithTimeInterval:10.0 target:self selector:@selector(doSendOnce:) userInfo:nil repeats:YES];
+    timer =  [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(doSendOnce:) userInfo:nil repeats:YES];
 }
 
 - (void)endReport
@@ -246,6 +246,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 {
     NSString *responseString = [request responseString ];
     NSLog ( @"requestFinished:%@" ,responseString);
+    
+    //sleep
+//    sleep(4);
     
     //parse response string
     NSData *data= [responseString dataUsingEncoding:NSUTF8StringEncoding];
@@ -298,8 +301,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     _shouldAutoplay = NO;
     
     // init media resource
-//    _ffMrl = [[IJKFFMrl alloc] initWithMrl:linkAddress];
-    _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"rtmp://wspub.live.hupucdn.com/prod/slk"]];
+    _ffMrl = [[IJKFFMrl alloc] initWithMrl:linkAddress];
+//    _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"rtmp://wspub.live.hupucdn.com/prod/slk"]];
 //        _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"http://v.iask.com/v_play_ipad.php?vid=99264895"]];
     _segmentResolver = nil;
     _mediaMeta = [[NSDictionary alloc] init];

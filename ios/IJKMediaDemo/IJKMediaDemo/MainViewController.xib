@@ -70,19 +70,19 @@
                 </label>
                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Ofm-GN-crP">
                     <rect key="frame" x="110" y="3" width="272" height="30"/>
-                    <string key="text">vod://kanqiu/hell0?ac=pull&amp;m=720p&amp;st=1435547184&amp;td=60000&amp;u=test1&amp;ve=ws&amp;k=9d95770aa1d383da565ee08669d6cc83b7a3fe80c0e3235f8c185ab8a7a4e711</string>
+                    <string key="text">vod://kanqiu/test_456?ac=pull&amp;m=720p&amp;st=1435571019&amp;td=86400&amp;u=12345678&amp;ve=ws&amp;k=dfd4ec58e4fbb0922ed386bc17bccfaab686cd47f43da02c79bce154eaf907a0</string>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Nr0-8W-9Mb">
-                    <rect key="frame" x="110" y="36" width="272" height="30"/>
-                    <string key="text">vod://kanqiu/hell0?ac=pull&amp;m=720p&amp;st=1435547184&amp;td=60000&amp;u=test1&amp;ve=ws&amp;k=9d95770aa1d383da565ee08669d6cc83b7a3fe80c0e3235f8c185ab8a7a4e711</string>
+                    <rect key="frame" x="110" y="33" width="272" height="30"/>
+                    <string key="text">vod://kanqiu/test_456?ac=pull&amp;m=720p&amp;st=1435571019&amp;td=86400&amp;u=12345678&amp;ve=ws&amp;k=dfd4ec58e4fbb0922ed386bc17bccfaab686cd47f43da02c79bce154eaf907a0</string>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-            <point key="canvasLocation" x="57" y="179"/>
+            <point key="canvasLocation" x="146" y="193"/>
         </view>
     </objects>
 </document>
