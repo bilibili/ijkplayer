@@ -190,7 +190,7 @@ if [ -f "${FFMPEG_DEP_OPENSSL_LIB}/libssl.a" ]; then
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-openssl"
 
     FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_OPENSSL_INC}"
-    FFMPEG_CFLAGS="$FFMPEG_CFLAGS -L${FFMPEG_DEP_OPENSSL_LIB} -lssl -lcrypto"
+    FFMPEG_DEP_LIBS="$FFMPEG_CFLAGS -L${FFMPEG_DEP_OPENSSL_LIB} -lssl -lcrypto"
 fi
 
 #--------------------
@@ -211,7 +211,7 @@ else
         $FFMPEG_CFG_CPU \
         --extra-cflags="$FFMPEG_CFLAGS" \
         --extra-cxxflags="$FFMPEG_CFLAGS" \
-        --extra-ldflags="$FFMPEG_LDFLAGS"
+        --extra-ldflags="$FFMPEG_LDFLAGS $FFMPEG_DEP_LIBS"
     make clean
 fi
 
