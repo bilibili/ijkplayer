@@ -95,11 +95,7 @@
 
     NSMutableDictionary *options = [_optionCategories objectForKey:@(category)];
     if (options) {
-        if (value) {
-            [options setObject:@(value) forKey:key];
-        } else {
-            [options removeObjectForKey:key];
-        }
+        [options setObject:@(value) forKey:key];
     }
 }
 
