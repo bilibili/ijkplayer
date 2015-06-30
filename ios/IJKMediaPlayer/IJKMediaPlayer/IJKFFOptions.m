@@ -38,7 +38,7 @@
 
     [options setMaxFps:30];
     [options setFrameDrop:0];
-    [options setVideoPictureSize:0];
+    [options setVideoPictureSize:3];
     [options setVideoToolboxMaxFrameWidth:960];
 
     [options setReconnect:1];
@@ -46,7 +46,7 @@
     [options setUserAgent:@"ijkplayer"];
 
     [options setSkipLoopFilter:IJK_AVDISCARD_ALL];
-    [options setSkipFrame:IJK_AVDISCARD_ALL];
+    [options setSkipFrame:IJK_AVDISCARD_NONREF];
 
     return options;
 }
