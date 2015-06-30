@@ -659,7 +659,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
             goto failed;
 
         // Wait for delayed frames even if kVTDecodeInfo_Asynchronous is not set.
-        if (!ffp->vtb_no_wait_async) {
+        if (ffp->vtb_wait_async) {
             status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
         }
     }
