@@ -94,11 +94,14 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(max_buffer_size),     OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
 
     // iOS only options
-    { "videotoolbox",                       "enable VideoToolbox",
+    { "videotoolbox",                       "VideoToolbox: enable",
         OPTION_OFFSET(videotoolbox),        OPTION_INT(0, 0, 1) },
-
-    { "videotoolbox-max-frame-width",       "max width of output frame of VideoToolbox",
+    { "videotoolbox-max-frame-width",       "VideoToolbox: max width of output frame",
         OPTION_OFFSET(vtb_max_frame_width), OPTION_INT(0, 0, INT_MAX) },
+    { "videotoolbox-async",                 "VideoToolbox: use kVTDecodeFrame_EnableAsynchronousDecompression()",
+        OPTION_OFFSET(vtb_async),           OPTION_INT(0, 0, 1) },
+    { "videotoolbox-no-wait-async",         "VideoToolbox: do not call VTDecompressionSessionWaitForAsynchronousFrames()",
+        OPTION_OFFSET(vtb_no_wait_async),   OPTION_INT(0, 0, 1) },
 
     { NULL }
 };
@@ -3133,7 +3136,7 @@ static void ffp_show_dict(const char *tag, AVDictionary *dict)
     AVDictionaryEntry *t = NULL;
 
     while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
-        av_log(NULL, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 20, t->key, t->value);
+        av_log(NULL, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 28, t->key, t->value);
     }
 }
 

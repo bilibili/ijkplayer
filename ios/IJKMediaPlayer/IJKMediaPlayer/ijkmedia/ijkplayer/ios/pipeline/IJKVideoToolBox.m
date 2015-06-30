@@ -546,9 +546,10 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
 
 int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
 {
+    FFPlayer *ffp                   = context->ffp;
     OSStatus status                 = 0;
     double sort_time                = GetSystemTime();
-    uint32_t decoder_flags          = kVTDecodeFrame_EnableAsynchronousDecompression;
+    uint32_t decoder_flags          = 0;
     sample_info *sample_info        = NULL;
     CMSampleBufferRef sample_buff   = NULL;
     AVIOContext *pb                 = NULL;
@@ -561,6 +562,10 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     if (!context) {
         goto failed;
+    }
+
+    if (ffp->vtb_async) {
+        decoder_flags |= kVTDecodeFrame_EnableAsynchronousDecompression;
     }
 
     if (context->refresh_session) {
@@ -654,7 +659,9 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
             goto failed;
 
         // Wait for delayed frames even if kVTDecodeInfo_Asynchronous is not set.
-        status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+        if (!ffp->vtb_no_wait_async) {
+            status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+        }
     }
 
     if (status != 0) {

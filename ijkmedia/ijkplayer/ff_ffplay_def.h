@@ -509,6 +509,8 @@ typedef struct FFPlayer {
 
     int videotoolbox;
     int vtb_max_frame_width;
+    int vtb_async;
+    int vtb_no_wait_async;
 
     IjkMediaMeta *meta;
 
@@ -601,6 +603,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->videotoolbox                   = 0; // option
     ffp->vtb_max_frame_width            = 0; // option
+    ffp->vtb_async                      = 0; // option
+    ffp->vtb_no_wait_async              = 0; // option
 
     ffp->format_control_message = NULL;
     ffp->format_control_opaque  = NULL;
