@@ -95,13 +95,6 @@ typedef enum IJKLogLevel {
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
 
-typedef enum IJKFFOptionCategory {
-    kIJKFFOptionCategoryFormat = 1,
-    kIJKFFOptionCategoryCodec  = 2,
-    kIJKFFOptionCategorySws    = 3,
-    kIJKFFOptionCategoryPlayer = 4,
-} IJKFFOptionCategory;
-
 - (void)setOptionValue:(NSString *)value
                 forKey:(NSString *)key
             ofCategory:(IJKFFOptionCategory)category;

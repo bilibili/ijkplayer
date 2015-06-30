@@ -9,7 +9,14 @@
 #import "IJKFFOptions.h"
 #include "ijkplayer/ios/ijkplayer_ios.h"
 
-@implementation IJKFFOptions
+@implementation IJKFFOptions {
+    NSMutableDictionary *_optionCategories;
+
+    NSMutableDictionary *_playerOptions;
+    NSMutableDictionary *_formatOptions;
+    NSMutableDictionary *_codecOptions;
+    NSMutableDictionary *_swsOptions;
+}
 
 + (IJKFFOptions *)optionsByDefault
 {
@@ -29,8 +36,25 @@
     options.frameMaxWidth           = 960;
     options.autoReconnect           = YES;
 
-
     return options;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _playerOptions      = [[NSMutableDictionary alloc] init];
+        _formatOptions      = [[NSMutableDictionary alloc] init];
+        _codecOptions       = [[NSMutableDictionary alloc] init];
+        _swsOptions         = [[NSMutableDictionary alloc] init];
+
+        _optionCategories   = [[NSMutableDictionary alloc] init];
+        _optionCategories[@(IJKMP_OPT_CATEGORY_PLAYER)] = _playerOptions;
+        _optionCategories[@(IJKMP_OPT_CATEGORY_FORMAT)] = _formatOptions;
+        _optionCategories[@(IJKMP_OPT_CATEGORY_CODEC)]  = _codecOptions;
+        _optionCategories[@(IJKMP_OPT_CATEGORY_SWS)]    = _swsOptions;
+    }
+    return self;
 }
 
 - (void)applyTo:(IjkMediaPlayer *)mediaPlayer
@@ -57,25 +81,55 @@
     if ([self.userAgent isEqualToString:@""] == NO) {
         ijkmp_set_option(mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "user-agent", [self.userAgent UTF8String]);
     }
+
+    [_optionCategories enumerateKeysAndObjectsUsingBlock:^(id categoryKey, id categoryDict, BOOL *stopOuter) {
+        [categoryDict enumerateKeysAndObjectsUsingBlock:^(id optKey, id optValue, BOOL *stop) {
+            if ([optValue isKindOfClass:[NSNumber class]]) {
+                ijkmp_set_option_int(mediaPlayer,
+                                     [categoryKey integerValue],
+                                     [optKey UTF8String],
+                                     [optValue integerValue]);
+            } else if ([optValue isKindOfClass:[NSString class]]) {
+                ijkmp_set_option(mediaPlayer,
+                                 [categoryKey integerValue],
+                                 [optKey UTF8String],
+                                 [optValue UTF8String]);
+            }
+        }];
+    }];
 }
 
-+ (NSString *)getDiscardString:(IJKAVDiscard)discard
+- (void)setOptionValue:(NSString *)value
+                forKey:(NSString *)key
+            ofCategory:(IJKFFOptionCategory)category
 {
-    switch (discard) {
-        case IJK_AVDISCARD_NONE:
-            return @"avdiscard none";
-        case IJK_AVDISCARD_DEFAULT:
-            return @"avdiscard default";
-        case IJK_AVDISCARD_NONREF:
-            return @"avdiscard nonref";
-        case IJK_AVDISCARD_BIDIR:
-            return @"avdicard bidir";
-        case IJK_AVDISCARD_NONKEY:
-            return @"avdicard nonkey";
-        case IJK_AVDISCARD_ALL:
-            return @"avdicard all";
-        default:
-            return @"avdiscard unknown";
+    if (!key)
+        return;
+
+    NSMutableDictionary *options = [_optionCategories objectForKey:@(category)];
+    if (options) {
+        if (value) {
+            [options setObject:value forKey:key];
+        } else {
+            [options removeObjectForKey:key];
+        }
+    }
+}
+
+- (void)setOptionIntValue:(NSInteger)value
+                   forKey:(NSString *)key
+               ofCategory:(IJKFFOptionCategory)category
+{
+    if (!key)
+        return;
+
+    NSMutableDictionary *options = [_optionCategories objectForKey:@(category)];
+    if (options) {
+        if (value) {
+            [options setObject:@(value) forKey:key];
+        } else {
+            [options removeObjectForKey:key];
+        }
     }
 }
 
