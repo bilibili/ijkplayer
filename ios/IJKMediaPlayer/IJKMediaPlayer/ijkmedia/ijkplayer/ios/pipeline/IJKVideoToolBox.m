@@ -31,6 +31,7 @@
 #include "libavformat/avc.h"
 #include "ijksdl_vout_ios_gles2.h"
 #include "h264_sps_parser.h"
+#include "ijkplayer/ff_ffplay_debug.h"
 
 #define IJK_VTB_FCC_AVC    SDL_FOURCC('C', 'c', 'v', 'a')
 #define IJK_VTB_FCC_ESD    SDL_FOURCC('s', 'd', 's', 'e')
@@ -349,6 +350,9 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             newFrame->serial = sample_info->serial;
             newFrame->nextframe = NULL;
             sample_info_recycle(ctx, sample_info);
+#ifdef FFP_SHOW_VTB_IN_DECODING
+            ALOGD("VTB: indecoding: %d\n", ctx->sample_infos_in_decoding);
+#endif
         }
 
         ctx->last_sort = newFrame->sort;

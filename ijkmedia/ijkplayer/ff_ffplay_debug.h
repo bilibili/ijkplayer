@@ -34,4 +34,6 @@
 // #define FFP_NOTIFY_BUF_TIME
 // #define FFP_NOTIFY_BUF_BYTES
 
+// #define FFP_SHOW_VTB_IN_DECODING
+
 #endif
