@@ -65,6 +65,7 @@ int SDL_VoutOverlayVideoToolBox_FillFrame(SDL_VoutOverlay *overlay, VTBPicture* 
     overlay->format = SDL_FCC_NV12;
     overlay->planes = 2;
 
+#if 0
     if (CVPixelBufferLockBaseAddress(pixel_buffer, 0) != kCVReturnSuccess) {
         overlay->pixels[0]  = NULL;
         overlay->pixels[1]  = NULL;
@@ -80,10 +81,17 @@ int SDL_VoutOverlayVideoToolBox_FillFrame(SDL_VoutOverlay *overlay, VTBPicture* 
     overlay->pixels[1]  = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 1);
     overlay->pitches[0] = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 0);
     overlay->pitches[1] = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 1);
+    CVPixelBufferUnlockBaseAddress(pixel_buffer, 0);
+#else
+    overlay->pixels[0]  = NULL;
+    overlay->pixels[1]  = NULL;
+    overlay->pitches[0] = 0;
+    overlay->pitches[1] = 0;
+    overlay->is_private = 1;
+#endif
+
     overlay->w = (int)picture->width;
     overlay->h = (int)picture->height;
-    CVPixelBufferUnlockBaseAddress(pixel_buffer, 0);
-
     return 0;
 }
 

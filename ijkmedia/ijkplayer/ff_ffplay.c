@@ -1096,7 +1096,7 @@ static void alloc_picture(FFPlayer *ffp)
     if (!vp->bmp || vp->bmp->pitches[0] < vp->width || bufferdiff < (int64_t)vp->height * vp->bmp->pitches[0]) {
 #else
     /* RV16, RV32 contains only one plane */
-    if (!vp->bmp || vp->bmp->pitches[0] < vp->width) {
+    if (!vp->bmp || (!vp->bmp->is_private && vp->bmp->pitches[0] < vp->width)) {
 #endif
         /* SDL allocates a buffer smaller than requested if the video
          * overlay hardware is unable to support the requested size. */

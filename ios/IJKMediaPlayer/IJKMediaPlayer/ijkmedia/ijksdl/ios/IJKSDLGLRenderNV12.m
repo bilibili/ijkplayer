@@ -104,7 +104,7 @@ static const GLfloat kColorConversion709[] = {
     assert(overlay->format == SDL_FCC_NV12);
     assert(overlay->planes == 2);
 
-    if (overlay->pixels[0] == NULL || overlay->pixels[1] == NULL)
+    if (!overlay->is_private)
         return;
 
     if (!_textureCache) {

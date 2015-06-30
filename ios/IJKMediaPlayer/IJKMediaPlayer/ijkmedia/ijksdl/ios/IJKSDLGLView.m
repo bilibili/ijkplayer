@@ -585,7 +585,7 @@ exit:
         return;
     }
 
-    if (overlay->pitches[0] / _bytesPerPixel > _frameWidth) {
+    if (!overlay->is_private && overlay->pitches[0] / _bytesPerPixel > _frameWidth) {
         _rightPaddingPixels = overlay->pitches[0] / _bytesPerPixel - _frameWidth;
         _didPaddingChanged = YES;
     }
