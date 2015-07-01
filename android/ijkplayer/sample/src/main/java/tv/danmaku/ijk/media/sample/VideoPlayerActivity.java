@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 
+import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.widget.MediaController;
 import tv.danmaku.ijk.media.widget.VideoView;
 
@@ -36,6 +37,9 @@ public class VideoPlayerActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+
+        IjkMediaPlayer.loadLibrariesOnce(null);
+        IjkMediaPlayer.native_profileBegin("libijkplayer.so");
 
         mVideoPath = getIntent().getStringExtra("videoPath");
 
@@ -54,5 +58,12 @@ public class VideoPlayerActivity extends Activity {
         mVideoView.setVideoPath(mVideoPath);
         mVideoView.requestFocus();
         mVideoView.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        IjkMediaPlayer.native_profileEnd();
     }
 }
