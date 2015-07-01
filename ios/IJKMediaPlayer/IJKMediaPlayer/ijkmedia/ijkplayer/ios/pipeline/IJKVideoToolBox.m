@@ -580,6 +580,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         }
 
         if(context->m_vt_session) {
+            VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
             VTDecompressionSessionInvalidate(context->m_vt_session);
             CFRelease(context->m_vt_session);
             context->m_vt_session = NULL;
@@ -840,6 +841,7 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
         SortQueuePop(context);
     }
     if (context && context->m_vt_session) {
+        VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
         VTDecompressionSessionInvalidate(context->m_vt_session);
         CFRelease(context->m_vt_session);
         context->m_vt_session = NULL;
