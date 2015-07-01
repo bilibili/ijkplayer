@@ -18,7 +18,7 @@
 IJK_LIB_NAME=android-ndk-profiler
 IJK_LIB_UPSTREAM=https://github.com/Bilibili/android-ndk-profiler.git
 IJK_LIB_FORK=https://github.com/Bilibili/android-ndk-profiler.git
-IJK_LIB_COMMIT=master
+IJK_LIB_COMMIT=ijk-r0.3.0-dev
 IJK_LIB_LOCAL_REPO=extra/android-ndk-profiler
 
 set -e
