@@ -336,7 +336,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 {
     @autoreleasepool {
         VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
-        if (!ctx || ctx->dealloced == true) {
+        if (!ctx || ctx->dealloced) {
             return;
         }
 
@@ -837,6 +837,8 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
 
 void dealloc_videotoolbox(VideoToolBoxContext* context)
 {
+    context->dealloced = true;
+
     while (context && context->m_queue_depth > 0) {
         SortQueuePop(context);
     }
@@ -854,7 +856,6 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
         }
         SDL_DestroyCondP(&context->sample_info_cond);
         SDL_DestroyMutexP(&context->sample_info_mutex);
-        context->dealloced = true;
     }
 }
 
