@@ -868,6 +868,56 @@ static int message_loop(void *arg)
 }
 
 // ----------------------------------------------------------------------------
+void monstartup(const char *libname);
+void moncleanup(void);
+
+static void
+IjkMediaPlayer_native_profileBegin(JNIEnv *env, jclass clazz, jstring libName)
+{
+    MPTRACE("IjkMediaPlayer_native_profileBegin");
+
+    const char *c_lib_name = NULL;
+    static int s_monstartup = 0;
+
+    if (!libName)
+        return;
+
+    if (s_monstartup) {
+        ALOGW("monstartup already called\b");
+        return;
+    }
+
+    c_lib_name = (*env)->GetStringUTFChars(env, libName, NULL );
+    JNI_CHECK_GOTO(c_lib_name, env, "java/lang/OutOfMemoryError", "mpjni: monstartup: libName.string oom", LABEL_RETURN);
+
+    s_monstartup = 1;
+    monstartup(c_lib_name);
+    ALOGD("monstartup: %s\n", c_lib_name);
+
+LABEL_RETURN:
+    if (c_lib_name)
+        (*env)->ReleaseStringUTFChars(env, libName, c_lib_name);
+}
+
+static void
+IjkMediaPlayer_native_profileEnd(JNIEnv *env, jclass clazz)
+{
+    MPTRACE("IjkMediaPlayer_native_profileEnd");
+    static int s_moncleanup = 0;
+
+    if (s_moncleanup) {
+        ALOGW("moncleanu already called\b");
+        return;
+    }
+
+    s_moncleanup = 1;
+    moncleanup();
+    ALOGD("moncleanup\n");
+}
+
+
+
+// ----------------------------------------------------------------------------
 
 static JNINativeMethod g_methods[] = {
     {
@@ -904,6 +954,12 @@ static JNINativeMethod g_methods[] = {
     { "_getVideoCodecInfo", "()Ljava/lang/String;", (void *) IjkMediaPlayer_getVideoCodecInfo },
     { "_getAudioCodecInfo", "()Ljava/lang/String;", (void *) IjkMediaPlayer_getAudioCodecInfo },
     { "_getMediaMeta", "()Landroid/os/Bundle;", (void *) IjkMediaPlayer_getMediaMeta },
+
+    { "_getAudioCodecInfo", "()Ljava/lang/String;", (void *) IjkMediaPlayer_getAudioCodecInfo },
+    { "_getMediaMeta", "()Landroid/os/Bundle;", (void *) IjkMediaPlayer_getMediaMeta },
+
+    { "native_profileBegin",    "(Ljava/lang/String;)V",    (void *) IjkMediaPlayer_native_profileBegin },
+    { "native_profileEnd",      "()V",                      (void *) IjkMediaPlayer_native_profileEnd },
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)

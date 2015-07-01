@@ -856,4 +856,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
             return bestCodec.mCodecInfo.getName();
         }
     }
+
+    public static native void native_profileBegin(String libName);
+    public static native void native_profileEnd();
 }
