@@ -22,18 +22,31 @@ if [ -z "$ANDROID_NDK" -o -z "$ANDROID_NDK" ]; then
 fi
 
 REQUEST_TARGET=$1
+REQUEST_PROF=$2
 ALL_ABI="armv5 armv7a x86"
+
+do_config_prof () {
+    PROF_ENABLED=$1
+    if [ -L "./android-ndk-prof" ]; then
+        rm android-ndk-prof
+    fi
+    if [ "$1" = "prof" ]; then 
+        ln -s ../../../../../../ijkprof/android-ndk-profiler/jni android-ndk-prof
+    fi
+}
 
 do_ndk_build () {
     PARAM_TARGET=$1
     case "$PARAM_TARGET" in
         armv7a)
             cd ijkplayer/player-armv7a/src/main/jni
+            do_config_prof $REQUEST_PROF
             $ANDROID_NDK/ndk-build
             cd -
         ;;
         armv5)
             cd ijkplayer/player-armv5/src/main/jni
+            do_config_prof $REQUEST_PROF
             $ANDROID_NDK/ndk-build
             cd -
         ;;
