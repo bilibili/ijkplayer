@@ -52,6 +52,7 @@ LOCAL_SRC_FILES += android/pipeline/ffpipenode_android_mediacodec_vdec.c
 LOCAL_SRC_FILES += android/pipeline/ffpipenode_android_mediacodec_vout.c
 
 LOCAL_SHARED_LIBRARIES := ijkffmpeg ijkutil ijksdl
+LOCAL_STATIC_LIBRARIES := android-ndk-profiler
 
 LOCAL_MODULE := ijkplayer
 include $(BUILD_SHARED_LIBRARY)
