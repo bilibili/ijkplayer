@@ -20,6 +20,9 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
+
+include $(MY_APP_JNI_ROOT)/android-ndk-prof/Android-include.mk
+
 # -mfloat-abi=soft is a workaround for FP register corruption on Exynos 4210
 # http://www.spinics.net/lists/arm-kernel/msg368417.html
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
