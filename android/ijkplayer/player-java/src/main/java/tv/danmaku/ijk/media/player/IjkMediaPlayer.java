@@ -544,20 +544,20 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         return _getColorFormatName(mediaCodecColorFormat);
     }
 
-    private static native final String _getColorFormatName(int mediaCodecColorFormat);
+    private static native String _getColorFormatName(int mediaCodecColorFormat);
 
     @Override
     public void setAudioStreamType(int streamtype) {
         // do nothing
     }
 
-    private static native final void native_init();
+    private static native void native_init();
 
-    private native final void native_setup(Object IjkMediaPlayer_this);
+    private native void native_setup(Object IjkMediaPlayer_this);
 
-    private native final void native_finalize();
+    private native void native_finalize();
 
-    private native final void native_message_loop(Object IjkMediaPlayer_this);
+    private native void native_message_loop(Object IjkMediaPlayer_this);
 
     protected void finalize() {
         native_finalize();

@@ -247,7 +247,7 @@ public class AndroidMediaPlayer extends SimpleMediaPlayer {
     /*--------------------
      * Listeners adapter
      */
-    private final void attachInternalListeners() {
+    private void attachInternalListeners() {
         mInternalMediaPlayer.setOnPreparedListener(mInternalListenerAdapter);
         mInternalMediaPlayer
                 .setOnBufferingUpdateListener(mInternalListenerAdapter);
