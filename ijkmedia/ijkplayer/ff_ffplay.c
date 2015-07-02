@@ -67,7 +67,7 @@ static int ffp_format_control_message(struct AVFormatContext *s, int type,
 static const AVOption ffp_context_options[] = {
     // original options in ffplay.c
     { "framedrop",                      "drop frames when cpu is too slow",
-        OPTION_OFFSET(framedrop),       OPTION_INT(0, -1, 1) },
+        OPTION_OFFSET(framedrop),       OPTION_INT(0, -1, 120) },
 
     // extended options in ff_ffplay.c
     { "max-fps",                        "drop frames in video whose fps is greater than max-fps",
