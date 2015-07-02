@@ -341,81 +341,6 @@ LABEL_RETURN:
 }
 
 static void
-IjkMediaPlayer_setAvFormatOption(JNIEnv *env, jobject thiz, jobject name, jobject value)
-{
-    MPTRACE("%s\n", __func__);
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    const char *c_name = NULL;
-    const char *c_value = NULL;
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setAvFormatOption: null mp", LABEL_RETURN);
-
-    c_name = (*env)->GetStringUTFChars(env, name, NULL );
-    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setAvFormatOption: name.string oom", LABEL_RETURN);
-
-    c_value = (*env)->GetStringUTFChars(env, value, NULL );
-    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setAvFormatOption: name.string oom", LABEL_RETURN);
-
-    ijkmp_set_format_option(mp, c_name, c_value);
-
-LABEL_RETURN:
-    if (c_name)
-        (*env)->ReleaseStringUTFChars(env, name, c_name);
-    if (c_value)
-        (*env)->ReleaseStringUTFChars(env, value, c_value);
-    ijkmp_dec_ref_p(&mp);
-}
-
-static void
-IjkMediaPlayer_setAvCodecOption(JNIEnv *env, jobject thiz, jobject name, jobject value)
-{
-    MPTRACE("%s\n", __func__);
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    const char *c_name = NULL;
-    const char *c_value = NULL;
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setAvCodecOption: null mp", LABEL_RETURN);
-
-    c_name = (*env)->GetStringUTFChars(env, name, NULL );
-    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setAvCodecOption: name.string oom", LABEL_RETURN);
-
-    c_value = (*env)->GetStringUTFChars(env, value, NULL );
-    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setAvCodecOption: name.string oom", LABEL_RETURN);
-
-    ijkmp_set_codec_option(mp, c_name, c_value);
-
-LABEL_RETURN:
-    if (c_name)
-        (*env)->ReleaseStringUTFChars(env, name, c_name);
-    if (c_value)
-        (*env)->ReleaseStringUTFChars(env, value, c_value);
-    ijkmp_dec_ref_p(&mp);
-}
-
-static void
-IjkMediaPlayer_setSwScaleOption(JNIEnv *env, jobject thiz, jobject name, jobject value)
-{
-    MPTRACE("%s\n", __func__);
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    const char *c_name = NULL;
-    const char *c_value = NULL;
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setSwScaleOption: null mp", LABEL_RETURN);
-
-    c_name = (*env)->GetStringUTFChars(env, name, NULL );
-    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setSwScaleOption: name.string oom", LABEL_RETURN);
-
-    c_value = (*env)->GetStringUTFChars(env, value, NULL );
-    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setSwScaleOption: name.string oom", LABEL_RETURN);
-
-    ijkmp_set_sws_option(mp, c_name, c_value);
-
-LABEL_RETURN:
-    if (c_name)
-        (*env)->ReleaseStringUTFChars(env, name, c_name);
-    if (c_value)
-        (*env)->ReleaseStringUTFChars(env, value, c_value);
-    ijkmp_dec_ref_p(&mp);
-}
-
-static void
 IjkMediaPlayer_setOverlayFormat(JNIEnv *env, jobject thiz, jint chromaFourCC)
 {
     MPTRACE("%s\n", __func__);
@@ -423,19 +348,6 @@ IjkMediaPlayer_setOverlayFormat(JNIEnv *env, jobject thiz, jint chromaFourCC)
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setAvCodecOption: null mp", LABEL_RETURN);
 
     ijkmp_set_overlay_format(mp, chromaFourCC);
-
-LABEL_RETURN:
-    ijkmp_dec_ref_p(&mp);
-}
-
-static void
-IjkMediaPlayer_setFrameDrop(JNIEnv *env, jobject thiz, jint frameDrop)
-{
-    MPTRACE("%s\n", __func__);
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setFrameDrop: null mp", LABEL_RETURN);
-
-    ijkmp_set_framedrop(mp, frameDrop);
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
@@ -987,11 +899,7 @@ static JNINativeMethod g_methods[] = {
 
     { "_setOption",         "(ILjava/lang/String;Ljava/lang/String;)V",     (void *) IjkMediaPlayer_setOption },
     { "_setOptionLong",     "(ILjava/lang/String;J)V",                      (void *) IjkMediaPlayer_setOptionLong },
-    { "_setAvFormatOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvFormatOption },
-    { "_setAvCodecOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvCodecOption },
-    { "_setSwScaleOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setSwScaleOption },
     { "_setOverlayFormat", "(I)V", (void *) IjkMediaPlayer_setOverlayFormat },
-    { "_setFrameDrop", "(I)V", (void *) IjkMediaPlayer_setFrameDrop },
     { "_setMediaCodecEnabled", "(Z)V", (void *) IjkMediaPlayer_setMediaCodecEnabled },
     { "_setOpenSLESEnabled", "(Z)V", (void *) IjkMediaPlayer_setOpenSLESEnabled },
     { "_setAutoPlayOnPrepared", "(Z)V", (void *) IjkMediaPlayer_setAutoPlayOnPrepared },

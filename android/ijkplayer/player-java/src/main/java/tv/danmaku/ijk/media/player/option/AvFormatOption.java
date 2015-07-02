@@ -16,6 +16,7 @@
 
 package tv.danmaku.ijk.media.player.option;
 
+@Deprecated
 public interface AvFormatOption {
     public abstract String getName();
 

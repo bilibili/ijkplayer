@@ -63,6 +63,18 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     protected static final int MEDIA_SET_VIDEO_SAR = 10001;
 
+    //----------------------------------------
+    // options
+    public static final int OPT_CATEGORY_FORMAT     = 1;
+    public static final int OPT_CATEGORY_CODEC      = 2;
+    public static final int OPT_CATEGORY_SWS        = 3;
+    public static final int OPT_CATEGORY_PLAYER     = 4;
+
+    public static final int SDL_FCC_YV12 = 0x32315659; // YV12
+    public static final int SDL_FCC_RV16 = 0x36315652; // RGB565
+    public static final int SDL_FCC_RV32 = 0x32335652; // RGBX8888
+    //----------------------------------------
+
     @AccessedByNative
     private long mNativeMediaPlayer;
 
@@ -465,20 +477,34 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     private native String _getVideoCodecInfo();
     private native String _getAudioCodecInfo();
 
+    public void setOption(int category, String name, String value)
+    {
+        _setOption(category, name, value);
+    }
+
+    public void setOptionLong(int category, String name, long value)
+    {
+        _setOptionLong(category, name, value);
+    }
+
+    @Deprecated
     public void setAvOption(AvFormatOption option) {
         setAvFormatOption(option.getName(), option.getValue());
     }
 
+    @Deprecated
     public void setAvFormatOption(String name, String value) {
-        _setAvFormatOption(name, value);
+        setOption(OPT_CATEGORY_FORMAT, name, value);
     }
 
+    @Deprecated
     public void setAvCodecOption(String name, String value) {
-        _setAvCodecOption(name, value);
+        setOption(OPT_CATEGORY_CODEC, name, value);
     }
 
+    @Deprecated
     public void setSwScaleOption(String name, String value) {
-        _setSwScaleOption(name, value);
+        setOption(OPT_CATEGORY_SWS, name, value);
     }
 
     /**
@@ -491,14 +517,9 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         _setOverlayFormat(chromaFourCC);
     }
 
-    /**
-     * @param frameDrop
-     *      =0 do not drop any frame
-     *      +n drop as many frames as possible
-     *      -1 display 1 frame per `frameDrop` continuous dropped frames,
-     */
+    @Deprecated
     public void setFrameDrop(int frameDrop) {
-        _setFrameDrop(frameDrop);
+        setOptionLong(OPT_CATEGORY_PLAYER, "framedrop", frameDrop);
     }
 
     public void setMediaCodecEnabled(boolean enabled) {
@@ -515,11 +536,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     private native void _setOption(int category, String name, String value);
     private native void _setOptionLong(int category, String name, long value);
-    private native void _setAvFormatOption(String name, String value);
-    private native void _setAvCodecOption(String name, String value);
-    private native void _setSwScaleOption(String name, String value);
     private native void _setOverlayFormat(int chromaFourCC);
-    private native void _setFrameDrop(int frameDrop);
     private native void _setMediaCodecEnabled(boolean enabled);
     private native void _setOpenSLESEnabled(boolean enabled);
     private native void _setAutoPlayOnPrepared(boolean enabled);
