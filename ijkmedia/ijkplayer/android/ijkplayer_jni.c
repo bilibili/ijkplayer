@@ -297,6 +297,50 @@ LABEL_RETURN:
 }
 
 static void
+IjkMediaPlayer_setOption(JNIEnv *env, jobject thiz, jint category, jobject name, jobject value)
+{
+    MPTRACE("IjkMediaPlayer_setOption");
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    const char *c_name = NULL;
+    const char *c_value = NULL;
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setOption: null mp", LABEL_RETURN);
+
+    c_name = (*env)->GetStringUTFChars(env, name, NULL );
+    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setOption: name.string oom", LABEL_RETURN);
+
+    c_value = (*env)->GetStringUTFChars(env, value, NULL );
+    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setOption: name.string oom", LABEL_RETURN);
+
+    ijkmp_set_option(mp, category, c_name, c_value);
+
+LABEL_RETURN:
+    if (c_name)
+        (*env)->ReleaseStringUTFChars(env, name, c_name);
+    if (c_value)
+        (*env)->ReleaseStringUTFChars(env, value, c_value);
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_setOptionLong(JNIEnv *env, jobject thiz, jint category, jobject name, jlong value)
+{
+    MPTRACE("IjkMediaPlayer_setOptionLong");
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    const char *c_name = NULL;
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setOptionLong: null mp", LABEL_RETURN);
+
+    c_name = (*env)->GetStringUTFChars(env, name, NULL );
+    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setOptionLong: name.string oom", LABEL_RETURN);
+
+    ijkmp_set_option_int(mp, category, c_name, value);
+
+LABEL_RETURN:
+    if (c_name)
+        (*env)->ReleaseStringUTFChars(env, name, c_name);
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
 IjkMediaPlayer_setAvFormatOption(JNIEnv *env, jobject thiz, jobject name, jobject value)
 {
     MPTRACE("IjkMediaPlayer_setAvFormatOption");
@@ -941,6 +985,8 @@ static JNINativeMethod g_methods[] = {
     { "native_setup", "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_setup },
     { "native_finalize", "()V", (void *) IjkMediaPlayer_native_finalize },
 
+    { "_setOption",         "(ILjava/lang/String;Ljava/lang/String;)V",     (void *) IjkMediaPlayer_setOption },
+    { "_setOptionLong",     "(ILjava/lang/String;J)V",                      (void *) IjkMediaPlayer_setOptionLong },
     { "_setAvFormatOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvFormatOption },
     { "_setAvCodecOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setAvCodecOption },
     { "_setSwScaleOption", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setSwScaleOption },

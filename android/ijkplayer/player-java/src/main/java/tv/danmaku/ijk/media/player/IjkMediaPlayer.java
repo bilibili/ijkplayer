@@ -513,6 +513,8 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         _setAutoPlayOnPrepared(enabled);
     }
 
+    private native void _setOption(int category, String name, String value);
+    private native void _setOptionLong(int category, String name, long value);
     private native void _setAvFormatOption(String name, String value);
     private native void _setAvCodecOption(String name, String value);
     private native void _setSwScaleOption(String name, String value);
