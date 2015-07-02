@@ -245,18 +245,17 @@ public class VideoView extends SurfaceView implements
         try {
             mDuration = -1;
             mCurrentBufferPercentage = 0;
-            // mMediaPlayer = new AndroidMediaPlayer();
             IjkMediaPlayer ijkMediaPlayer = null;
             if (mUri != null) {
                 ijkMediaPlayer = new IjkMediaPlayer();
-                ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
-                ijkMediaPlayer.setOverlayFormat(AvFourCC.SDL_FCC_RV32);
 
-                ijkMediaPlayer.setAvCodecOption("skip_loop_filter", "48");
-                ijkMediaPlayer.setFrameDrop(12);
-                if (mUserAgent != null) {
-                    ijkMediaPlayer.setAvFormatOption("user_agent", mUserAgent);
-                }
+                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_RV32);
+                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 12);
+
+                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
+                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "user_agent", mUserAgent);
+
+                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
             }
             mMediaPlayer = ijkMediaPlayer;
             mMediaPlayer.setOnPreparedListener(mPreparedListener);

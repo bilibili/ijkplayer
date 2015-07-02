@@ -308,8 +308,10 @@ IjkMediaPlayer_setOption(JNIEnv *env, jobject thiz, jint category, jobject name,
     c_name = (*env)->GetStringUTFChars(env, name, NULL );
     JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setOption: name.string oom", LABEL_RETURN);
 
-    c_value = (*env)->GetStringUTFChars(env, value, NULL );
-    JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setOption: name.string oom", LABEL_RETURN);
+    if (value) {
+        c_value = (*env)->GetStringUTFChars(env, value, NULL );
+        JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setOption: name.string oom", LABEL_RETURN);
+    }
 
     ijkmp_set_option(mp, category, c_name, c_value);
 
@@ -872,7 +874,7 @@ static JNINativeMethod g_methods[] = {
     { "native_finalize", "()V", (void *) IjkMediaPlayer_native_finalize },
 
     { "_setOption",         "(ILjava/lang/String;Ljava/lang/String;)V",     (void *) IjkMediaPlayer_setOption },
-    { "_setOptionLong",     "(ILjava/lang/String;J)V",                      (void *) IjkMediaPlayer_setOptionLong },
+    { "_setOption",         "(ILjava/lang/String;J)V",                      (void *) IjkMediaPlayer_setOptionLong },
     { "_setMediaCodecEnabled", "(Z)V", (void *) IjkMediaPlayer_setMediaCodecEnabled },
     { "_setOpenSLESEnabled", "(Z)V", (void *) IjkMediaPlayer_setOpenSLESEnabled },
 

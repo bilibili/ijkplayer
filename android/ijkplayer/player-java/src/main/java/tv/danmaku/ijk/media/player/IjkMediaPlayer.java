@@ -482,9 +482,9 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         _setOption(category, name, value);
     }
 
-    public void setOptionLong(int category, String name, long value)
+    public void setOption(int category, String name, long value)
     {
-        _setOptionLong(category, name, value);
+        _setOption(category, name, value);
     }
 
     @Deprecated
@@ -509,12 +509,12 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     @Deprecated
     public void setOverlayFormat(int chromaFourCC) {
-        setOptionLong(OPT_CATEGORY_PLAYER, "overlay-format", chromaFourCC);
+        setOption(OPT_CATEGORY_PLAYER, "overlay-format", chromaFourCC);
     }
 
     @Deprecated
     public void setFrameDrop(int frameDrop) {
-        setOptionLong(OPT_CATEGORY_PLAYER, "framedrop", frameDrop);
+        setOption(OPT_CATEGORY_PLAYER, "framedrop", frameDrop);
     }
 
     public void setMediaCodecEnabled(boolean enabled) {
@@ -527,11 +527,11 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     @Deprecated
     public void setAutoPlayOnPrepared(boolean enabled) {
-        setOptionLong(OPT_CATEGORY_PLAYER, "start-on-prepared", enabled ? 1 : 0);
+        setOption(OPT_CATEGORY_PLAYER, "start-on-prepared", enabled ? 1 : 0);
     }
 
     private native void _setOption(int category, String name, String value);
-    private native void _setOptionLong(int category, String name, long value);
+    private native void _setOption(int category, String name, long value);
     private native void _setMediaCodecEnabled(boolean enabled);
     private native void _setOpenSLESEnabled(boolean enabled);
 
