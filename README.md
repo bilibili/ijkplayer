@@ -1,7 +1,7 @@
 ijkplayer
 =========
 - Video player based on [ffplay](http://ffmpeg.org)
- - Android: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/AbstractMediaPlayer.java)
+ - Android: [MediaPlayer-like](android/ijkplayer/player-java/src/main/java/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - iOS: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
 
 ### My Build Enviroment
@@ -26,7 +26,7 @@ ijkplayer
 - Android
  - platform: API 9~22
  - cpu: ARMv7a, x86, ARMv5 (ARMv5 is not tested on real devices)
- - api: [MediaPlayer-like](android/ijkmediaplayer/src/tv/danmaku/ijk/media/player/IMediaPlayer.java)
+ - api: [MediaPlayer-like](android/ijkplayer/player-java/src/main/java/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - video output: NativeWindow
  - audio output: OpenSL ES, AudioTrack
  - hw decoder: MediaCodec (API 16+, Android 4.1+)
