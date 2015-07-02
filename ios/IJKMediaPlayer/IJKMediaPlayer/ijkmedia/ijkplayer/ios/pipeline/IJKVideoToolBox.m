@@ -742,6 +742,7 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
     if (context->refresh_session) {
         int ret = 0;
         if (context->m_vt_session) {
+            VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
             VTDecompressionSessionInvalidate(context->m_vt_session);
             CFRelease(context->m_vt_session);
         }
