@@ -507,14 +507,9 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         setOption(OPT_CATEGORY_SWS, name, value);
     }
 
-    /**
-     * @param chromaFourCC
-     *      AvFourCC.SDL_FCC_RV16
-     *      AvFourCC.SDL_FCC_RV32
-     *      AvFourCC.SDL_FCC_YV12
-     */
+    @Deprecated
     public void setOverlayFormat(int chromaFourCC) {
-        _setOverlayFormat(chromaFourCC);
+        setOptionLong(OPT_CATEGORY_PLAYER, "overlay-format", chromaFourCC);
     }
 
     @Deprecated
@@ -530,16 +525,15 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         _setOpenSLESEnabled(enabled);
     }
 
+    @Deprecated
     public void setAutoPlayOnPrepared(boolean enabled) {
-        _setAutoPlayOnPrepared(enabled);
+        setOptionLong(OPT_CATEGORY_PLAYER, "start-on-prepared", enabled ? 1 : 0);
     }
 
     private native void _setOption(int category, String name, String value);
     private native void _setOptionLong(int category, String name, long value);
-    private native void _setOverlayFormat(int chromaFourCC);
     private native void _setMediaCodecEnabled(boolean enabled);
     private native void _setOpenSLESEnabled(boolean enabled);
-    private native void _setAutoPlayOnPrepared(boolean enabled);
 
     public Bundle getMediaMeta() {
         return _getMediaMeta();
