@@ -561,7 +561,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 #endif
     ffp->autorotate             = 1;
 
-    // ffp->sws_flags              = SWS_BICUBIC;
     ffp->sws_flags              = SWS_FAST_BILINEAR;
 
     /* current context */
@@ -577,9 +576,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     av_freep(&ffp->video_codec_info);
     av_freep(&ffp->audio_codec_info);
-    // ffp->overlay_format         = SDL_FCC_YV12;
     ffp->overlay_format         = SDL_FCC_RV32;
-    // ffp->overlay_format         = SDL_FCC_RV16;
 
     ffp->last_error             = 0;
     ffp->prepared               = 0;
