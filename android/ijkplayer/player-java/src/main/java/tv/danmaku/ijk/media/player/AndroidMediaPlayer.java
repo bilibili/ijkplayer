@@ -22,10 +22,12 @@ import java.lang.ref.WeakReference;
 
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -80,6 +82,7 @@ public class AndroidMediaPlayer extends SimpleMediaPlayer {
         }
     };
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public void setSurface(Surface surface) {
         mInternalMediaPlayer.setSurface(surface);
