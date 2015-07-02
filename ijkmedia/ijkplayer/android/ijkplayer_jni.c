@@ -122,7 +122,7 @@ IjkMediaPlayer_setDataSourceAndHeaders(
 
     IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -135,7 +135,7 @@ IjkMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
 
     ijkmp_android_set_surface(env, mp, jsurface);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
     return;
 }
@@ -151,7 +151,7 @@ IjkMediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
     retval = ijkmp_prepare_async(mp);
     IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -164,7 +164,7 @@ IjkMediaPlayer_start(JNIEnv *env, jobject thiz)
 
     ijkmp_start(mp);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -176,7 +176,7 @@ IjkMediaPlayer_stop(JNIEnv *env, jobject thiz)
 
     ijkmp_stop(mp);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -188,7 +188,7 @@ IjkMediaPlayer_pause(JNIEnv *env, jobject thiz)
 
     ijkmp_pause(mp);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -201,7 +201,7 @@ IjkMediaPlayer_seekTo(JNIEnv *env, jobject thiz, int msec)
 
     ijkmp_seek_to(mp, msec);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -214,7 +214,7 @@ IjkMediaPlayer_isPlaying(JNIEnv *env, jobject thiz)
 
     retval = ijkmp_is_playing(mp) ? JNI_TRUE : JNI_FALSE;
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
     return retval;
 }
@@ -228,7 +228,7 @@ IjkMediaPlayer_getCurrentPosition(JNIEnv *env, jobject thiz)
 
     retval = ijkmp_get_current_position(mp);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
     return retval;
 }
@@ -242,7 +242,7 @@ IjkMediaPlayer_getDuration(JNIEnv *env, jobject thiz)
 
     retval = ijkmp_get_duration(mp);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
     return retval;
 }
@@ -292,7 +292,7 @@ IjkMediaPlayer_setVolume(JNIEnv *env, jobject thiz, jfloat leftVolume, jfloat ri
 
     ijkmp_android_set_volume(env, mp, leftVolume, rightVolume);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -313,7 +313,7 @@ IjkMediaPlayer_setAvFormatOption(JNIEnv *env, jobject thiz, jobject name, jobjec
 
     ijkmp_set_format_option(mp, c_name, c_value);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     if (c_name)
         (*env)->ReleaseStringUTFChars(env, name, c_name);
     if (c_value)
@@ -338,7 +338,7 @@ IjkMediaPlayer_setAvCodecOption(JNIEnv *env, jobject thiz, jobject name, jobject
 
     ijkmp_set_codec_option(mp, c_name, c_value);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     if (c_name)
         (*env)->ReleaseStringUTFChars(env, name, c_name);
     if (c_value)
@@ -363,7 +363,7 @@ IjkMediaPlayer_setSwScaleOption(JNIEnv *env, jobject thiz, jobject name, jobject
 
     ijkmp_set_sws_option(mp, c_name, c_value);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     if (c_name)
         (*env)->ReleaseStringUTFChars(env, name, c_name);
     if (c_value)
@@ -380,7 +380,7 @@ IjkMediaPlayer_setOverlayFormat(JNIEnv *env, jobject thiz, jint chromaFourCC)
 
     ijkmp_set_overlay_format(mp, chromaFourCC);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -393,7 +393,7 @@ IjkMediaPlayer_setFrameDrop(JNIEnv *env, jobject thiz, jint frameDrop)
 
     ijkmp_set_framedrop(mp, frameDrop);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -406,7 +406,7 @@ IjkMediaPlayer_setMediaCodecEnabled(JNIEnv *env, jobject thiz, jboolean enabled)
 
     ijkmp_android_set_mediacodec_enabled(mp, enabled);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -419,7 +419,7 @@ IjkMediaPlayer_setOpenSLESEnabled(JNIEnv *env, jobject thiz, jboolean enabled)
 
     ijkmp_android_set_opensles_enabled(mp, enabled);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -461,7 +461,7 @@ IjkMediaPlayer_getVideoCodecInfo(JNIEnv *env, jobject thiz)
         goto LABEL_RETURN;
 
     jcodec_info = (*env)->NewStringUTF(env, codec_info);
-    LABEL_RETURN:
+LABEL_RETURN:
     if (codec_info)
         free(codec_info);
 
@@ -484,7 +484,7 @@ IjkMediaPlayer_getAudioCodecInfo(JNIEnv *env, jobject thiz)
         goto LABEL_RETURN;
 
     jcodec_info = (*env)->NewStringUTF(env, codec_info);
-    LABEL_RETURN:
+LABEL_RETURN:
     if (codec_info)
         free(codec_info);
 
@@ -583,7 +583,7 @@ IjkMediaPlayer_getMediaMeta(JNIEnv *env, jobject thiz)
     ASDK_Bundle__putParcelableArrayList_c(env, jlocal_bundle, IJKM_KEY_STREAMS, jarray_list);
     jret_bundle = jlocal_bundle;
     jlocal_bundle = NULL;
-    LABEL_RETURN:
+LABEL_RETURN:
     if (is_locked && meta)
         ijkmeta_unlock(meta);
 
@@ -613,7 +613,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
     ijkmp_set_format_callback(mp, format_control_message, (*env)->NewGlobalRef(env, weak_this));
     ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, (*env)->NewGlobalRef(env, weak_this));
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
@@ -843,7 +843,7 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
         }
     }
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ;
 }
 
@@ -859,7 +859,7 @@ static int message_loop(void *arg)
 
     message_loop_n(env, mp);
 
-    LABEL_RETURN:
+LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
     (*g_jvm)->DetachCurrentThread(g_jvm);
 
