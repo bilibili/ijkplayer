@@ -71,6 +71,22 @@ static void CFDictionarySetBoolean(CFMutableDictionaryRef dictionary, CFStringRe
 }
 
 
+inline static void sample_info_flush(VideoToolBoxContext* context, int wait_ms)
+{
+    int total_wait = 0;
+    SDL_LockMutex(context->sample_info_mutex);
+
+    while (wait_ms < 0 || total_wait < wait_ms) {
+        if (context->sample_infos_in_decoding <= 0)
+            break;
+
+        int wait_step = 10;
+        SDL_CondWaitTimeout(context->sample_info_cond, context->sample_info_mutex, wait_step);
+        total_wait += wait_step;
+    }
+
+    SDL_UnlockMutex(context->sample_info_mutex);
+}
 
 inline static sample_info* sample_info_peek(VideoToolBoxContext* context)
 {
@@ -336,7 +352,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 {
     @autoreleasepool {
         VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
-        if (!ctx || ctx->dealloced) {
+        if (!ctx) {
             return;
         }
 
@@ -345,18 +361,18 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
         sort_queue *newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
 
-        {
-            sample_info *sample_info = sourceFrameRefCon;
-            newFrame->pts    = sample_info->pts;
-            newFrame->dts    = sample_info->dts;
-            newFrame->sort   = sample_info->sort;
-            newFrame->serial = sample_info->serial;
-            newFrame->nextframe = NULL;
-            sample_info_recycle(ctx, sample_info);
+        sample_info *sample_info = sourceFrameRefCon;
+        newFrame->pts    = sample_info->pts;
+        newFrame->dts    = sample_info->dts;
+        newFrame->sort   = sample_info->sort;
+        newFrame->serial = sample_info->serial;
+        newFrame->nextframe = NULL;
 #ifdef FFP_SHOW_VTB_IN_DECODING
-            ALOGD("VTB: indecoding: %d\n", ctx->sample_infos_in_decoding);
+        ALOGD("VTB: indecoding: %d\n", ctx->sample_infos_in_decoding);
 #endif
-        }
+
+        if (ctx->dealloced)
+            goto failed;
 
         ctx->last_sort = newFrame->sort;
         if (status != 0) {
@@ -478,9 +494,10 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             QueuePicture(ctx);
         }
     successed:
+        sample_info_recycle(ctx, sample_info);
         return;
     failed:
-        // ALOGI("FailedSignal: %lf\n", newFrame->pts);
+        sample_info_recycle(ctx, sample_info);
         if (newFrame) {
             free(newFrame);
         }
@@ -845,6 +862,7 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
     }
     if (context && context->m_vt_session) {
         VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+        sample_info_flush(context, 1000);
         VTDecompressionSessionInvalidate(context->m_vt_session);
         CFRelease(context->m_vt_session);
         context->m_vt_session = NULL;
