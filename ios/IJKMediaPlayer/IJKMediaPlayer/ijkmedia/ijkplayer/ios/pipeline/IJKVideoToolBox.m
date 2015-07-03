@@ -872,7 +872,7 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
     }
     if (context && context->m_vt_session) {
         VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-        sample_info_flush(context, 1000);
+        sample_info_flush(context, 3000);
         VTDecompressionSessionInvalidate(context->m_vt_session);
         CFRelease(context->m_vt_session);
         context->m_vt_session = NULL;
