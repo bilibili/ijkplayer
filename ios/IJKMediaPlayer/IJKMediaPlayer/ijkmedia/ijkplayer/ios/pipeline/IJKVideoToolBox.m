@@ -38,6 +38,16 @@
 #define IJK_VTB_FCC_AVC1   SDL_FOURCC('1', 'c', 'v', 'a')
 
 
+static const char *vtb_get_error_string(OSStatus status) {
+    switch (status) {
+        case kVTInvalidSessionErr:                      return "kVTInvalidSessionErr";
+        case kVTVideoDecoderBadDataErr:                 return "kVTVideoDecoderBadDataErr";
+        case kVTVideoDecoderUnsupportedDataFormatErr:   return "kVTVideoDecoderUnsupportedDataFormatErr";
+        case kVTVideoDecoderMalfunctionErr:             return "kVTVideoDecoderMalfunctionErr";
+        default:                                        return "UNKNOWN";
+    }
+}
+
 static double GetSystemTime()
 {
     return ((int64_t)CVGetCurrentHostTime() * 1000.0) / ((int64_t)CVGetHostClockFrequency());
@@ -376,8 +386,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
         ctx->last_sort = newFrame->sort;
         if (status != 0) {
-            ALOGI("decode callback  %d \n", (int)status);
-            ALOGI("Signal: status\n");
+            ALOGE("decode callback %d %s\n", (int)status, vtb_get_error_string(status));
             goto failed;
         }
 
@@ -685,7 +694,8 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     if (status != 0) {
         sample_info_drop_last_push(context);
 
-        ALOGE("status %d \n", (int)status);
+        ALOGE("decodeFrame %d %s\n", (int)status, vtb_get_error_string(status));
+
         if (status == kVTInvalidSessionErr) {
             context->refresh_session = true;
         }
