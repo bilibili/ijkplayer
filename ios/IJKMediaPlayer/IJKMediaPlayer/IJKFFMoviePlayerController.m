@@ -169,6 +169,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 {
     self = [super init];
     if (self) {
+        _movieSourceType = IJKMPMovieSourceTypeLowDelayLiveStreaming;
+        
         NSString* urlHeader = [NSString stringWithUTF8String:"http://192.168.9.117:8080/live/httpcdn?token="];
         
         ASIFormDataRequest *formDataRequest = [ASIFormDataRequest requestWithURL:nil];
@@ -261,7 +263,7 @@ static NSMutableDictionary *dictionary = nil;
     NSLog ( @"requestFinished:%@" ,responseString);
     
     //sleep
-    sleep(4);
+//    sleep(4);
     
     //parse response string
     NSData *data= [responseString dataUsingEncoding:NSUTF8StringEncoding];
@@ -314,8 +316,8 @@ static NSMutableDictionary *dictionary = nil;
     _shouldAutoplay = NO;
     
     // init media resource
-    _ffMrl = [[IJKFFMrl alloc] initWithMrl:linkAddress];
-//    _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"rtmp://wspub.live.hupucdn.com/prod/slk"]];
+//    _ffMrl = [[IJKFFMrl alloc] initWithMrl:linkAddress];
+    _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"rtmp://wspub.live.hupucdn.com/prod/slk"]];
 //        _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"http://v.iask.com/v_play_ipad.php?vid=99264895"]];
     _segmentResolver = nil;
     _mediaMeta = [[NSDictionary alloc] init];
@@ -355,9 +357,22 @@ static NSMutableDictionary *dictionary = nil;
                                                  name:AVAudioSessionInterruptionNotification
                                                object:nil];
     
-    [[NSNotificationCenter defaultCenter]
-     postNotificationName:IJKMoviePlayerInitSuccessNotification
-     object:self];
+    //0:Low Delay Live
+    //1:High Delay Live
+    //2:VOD
+    switch (_movieSourceType) {
+        case IJKMPMovieSourceTypeLowDelayLiveStreaming:
+            ijkmp_set_data_source_type(_mediaPlayer,0);
+            break;
+        case IJKMPMovieSourceTypeHighDelayLiveStreaming:
+            ijkmp_set_data_source_type(_mediaPlayer,1);
+            break;
+        case IJKMPMovieSourceTypeOnDemandStreaming:
+            ijkmp_set_data_source_type(_mediaPlayer,2);
+            break;
+    }
+    
+    [self prepareToPlay];
 }
 
 - ( void )requestFailed:( ASIHTTPRequest *)request
@@ -714,7 +729,11 @@ static NSMutableDictionary *dictionary = nil;
 
 - (void)setMovieSourceType: (IJKMPMovieSourceType) aMovieSourceType
 {
-    if (!_mediaPlayer) return;
+    if (!_mediaPlayer)
+    {
+        _movieSourceType = aMovieSourceType;
+        return;
+    }
     
     IJKMPMovieSourceType newMPMovieSourceType = aMovieSourceType;
     //0:Low Delay Live

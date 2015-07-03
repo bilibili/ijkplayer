@@ -58,7 +58,10 @@
     IJKFFOptions * options = [IJKFFOptions optionsByDefault];
     options.reportPlayInfo = YES;
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentToken:self.urlString withOptions:options];
+    self.player.movieSourceType = mUrlSourceType;
     [self installMovieNotificationObservers];
+    
+    [self.view addSubview:self.mediaControl];
 }
 
 - (void)dealloc
@@ -163,42 +166,20 @@
             NSLog(@"playbackPlayBackDidFinish: ???: %d\n", reason);
             break;
     }
-/*
-    [self.player.view removeFromSuperview];
-    [self.mediaControl removeFromSuperview];
-    
-    [self.player stop];
-    [self.player shutdown];
-    self.player = nil;
-    
-    [self removeMovieNotificationObservers];
-
-    [IJKFFMoviePlayerController setLogReport:YES];
-    IJKFFOptions * options = [IJKFFOptions optionsByDefault];
-    options.reportPlayInfo = YES;
-    self.player = [[IJKFFMoviePlayerController alloc] initWithContentToken:self.urlString withOptions:options];
-    [self installMovieNotificationObservers];*/
-}
-
-- (void)movieInitedDidChange:(NSNotification*)notification
-{
-    self.player.movieSourceType = mUrlSourceType;
-    
-    self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
-    self.player.view.frame = self.view.bounds;
-    
-    self.view.autoresizesSubviews = YES;
-    [self.view addSubview:self.player.view];
-    [self.view addSubview:self.mediaControl];
-    
-    self.mediaControl.delegatePlayer = self.player;
-    
-    [self.player prepareToPlay];
 }
 
 - (void)mediaIsPreparedToPlayDidChange:(NSNotification*)notification
 {
     NSLog(@"mediaIsPreparedToPlayDidChange\n");
+    
+    self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+    self.player.view.frame = self.view.bounds;
+    
+    self.view.autoresizesSubviews = YES;
+    [self.view insertSubview:self.player.view belowSubview:self.mediaControl];
+    
+    self.mediaControl.delegatePlayer = self.player;
+    
     [self.player play];
 }
 
@@ -265,11 +246,6 @@
                                              selector:@selector(moviePlayBackStateDidChange:)
                                                  name:IJKMoviePlayerPlaybackStateDidChangeNotification
                                                object:_player];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(movieInitedDidChange:)
-                                                 name:IJKMoviePlayerInitSuccessNotification
-                                               object:_player];
 }
 
 #pragma mark Remove Movie Notification Handlers
@@ -281,7 +257,6 @@
     [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMoviePlayerPlaybackDidFinishNotification object:_player];
     [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification object:_player];
     [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMoviePlayerPlaybackStateDidChangeNotification object:_player];
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:IJKMoviePlayerInitSuccessNotification object:_player];
 }
 
 #pragma mark app state changed
@@ -339,7 +314,10 @@
         IJKFFOptions * options = [IJKFFOptions optionsByDefault];
         options.reportPlayInfo = YES;
         self.player = [[IJKFFMoviePlayerController alloc] initWithContentToken:self.urlString withOptions:options];
+        self.player.movieSourceType = mUrlSourceType;
         [self installMovieNotificationObservers];
+        
+        [self.view addSubview:self.mediaControl];
         
     });
 }
@@ -348,7 +326,6 @@
 {
     NSLog(@"applicationDidBecomeActive: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
-//        [self.player play];
     });
 }
 
@@ -367,8 +344,7 @@
         
         [self.player.view removeFromSuperview];
         [self.mediaControl removeFromSuperview];
-        
-//        [self.player stop];
+
         [self.player shutdown];
         self.player = nil;
         

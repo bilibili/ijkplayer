@@ -89,9 +89,6 @@ IJK_EXTERN NSString *const IJKMoviePlayerPlaybackDidFinishNotification;
 IJK_EXTERN NSString *const IJKMoviePlayerPlaybackStateDidChangeNotification;
 IJK_EXTERN NSString *const IJKMoviePlayerVideoDecoderOpenNotification;
 
-//add by William
-IJK_EXTERN NSString *const IJKMoviePlayerInitSuccessNotification;
-
 @end
 
 #pragma mark IJKMediaResource
