@@ -42,10 +42,6 @@ IjkMediaPlayer *ijkmp_ios_create(int (*msg_loop)(void*))
     if (!mp->ffplayer->vout)
         goto fail;
 
-    mp->ffplayer->aout = SDL_AoutIos_CreateForAudioUnit();
-    if (!mp->ffplayer->vout)
-        goto fail;
-
     mp->ffplayer->pipeline = ffpipeline_create_from_ios(mp->ffplayer);
     if (!mp->ffplayer->pipeline)
         goto fail;
