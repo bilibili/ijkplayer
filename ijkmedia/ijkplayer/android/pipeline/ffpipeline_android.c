@@ -27,6 +27,7 @@
 #include "../../pipeline/ffpipenode_ffplay_vdec.h"
 #include "../../ff_ffplay.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
+#include "ijksdl/android/ijksdl_android.h"
 
 static SDL_Class g_pipeline_class = {
     .name = "ffpipeline_android_media",
@@ -68,8 +69,9 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
 
     if (ffp->mediacodec)
         node = ffpipenode_create_video_decoder_from_android_mediacodec(ffp, pipeline, opaque->weak_vout);
-    if (!node)
+    if (!node) {
         node = ffpipenode_create_video_decoder_from_ffplay(ffp);
+    }
 
     return node;
 }
@@ -78,6 +80,16 @@ static IJKFF_Pipenode *func_open_video_output(IJKFF_Pipeline *pipeline, FFPlayer
 {
     return ffpipenode_create_video_output_from_android_mediacodec(ffp);
 }
+
+static SDL_Aout *func_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
+{
+    if (ffp->opensles) {
+        return SDL_AoutAndroid_CreateForOpenSLES();
+    } else {
+        return SDL_AoutAndroid_CreateForAudioTrack();
+    }
+}
+
 
 inline static bool check_ffpipeline(IJKFF_Pipeline* pipeline, const char *func_name)
 {
@@ -112,6 +124,7 @@ IJKFF_Pipeline *ffpipeline_create_from_android(FFPlayer *ffp)
     pipeline->func_destroy            = func_destroy;
     pipeline->func_open_video_decoder = func_open_video_decoder;
     pipeline->func_open_video_output  = func_open_video_output;
+    pipeline->func_open_audio_output  = func_open_audio_output;
 
     return pipeline;
 fail:

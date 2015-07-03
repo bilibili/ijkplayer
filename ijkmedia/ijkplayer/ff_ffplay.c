@@ -106,6 +106,8 @@ static const AVOption ffp_context_options[] = {
     // Android only options
     { "mediacodec",                         "MediaCodec: enable",
         OPTION_OFFSET(mediacodec),          OPTION_INT(0, 0, 1) },
+    { "opensles",                           "OpenSL ES: enable",
+        OPTION_OFFSET(opensles),            OPTION_INT(0, 0, 1) },
 
     { NULL }
 };
@@ -3158,6 +3160,11 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
     av_log(NULL, AV_LOG_INFO, "===================\n");
 
     av_opt_set_dict(ffp, &ffp->player_opts);
+    if (!ffp->aout) {
+        ffp->aout = ffpipeline_open_audio_output(ffp->pipeline, ffp);
+        if (!ffp->aout)
+            return -1;
+    }
 
     VideoState *is = stream_open(ffp, file_name, NULL);
     if (!is) {
