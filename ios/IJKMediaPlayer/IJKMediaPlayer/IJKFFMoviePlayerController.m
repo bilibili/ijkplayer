@@ -84,8 +84,6 @@
     long tag;
     GCDAsyncUdpSocket *udpSocket;
     NSTimer *timer;
-    
-    NSInteger streamOpenCount;
 }
 
 @synthesize view = _view;
@@ -222,13 +220,13 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     timer = nil;
 }
 
-- (NSInteger) openCountWithStream:(NSString*)token
+static NSMutableDictionary *dictionary = nil;
+
+- (NSInteger) addOpenCountWithStream:(NSString*)token
 {
-    static NSMutableDictionary *dictionary = nil;
     if (dictionary==nil) {
         dictionary = [[NSMutableDictionary alloc] init];
     }
-    
     
     NSInteger openCount = 0;
     NSNumber *valueObj = [dictionary objectForKey:token];
@@ -242,13 +240,28 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     return openCount;
 }
 
+- (NSInteger) getOpenCountWithStream:(NSString*)token
+{
+    if (dictionary==nil) {
+        dictionary = [[NSMutableDictionary alloc] init];
+    }
+    
+    NSInteger openCount = 0;
+    NSNumber *valueObj = [dictionary objectForKey:token];
+    if (valueObj!=nil) {
+        openCount = [valueObj integerValue];
+    }
+    
+    return openCount;
+}
+
 - ( void )requestFinished:( ASIHTTPRequest *)request
 {
     NSString *responseString = [request responseString ];
     NSLog ( @"requestFinished:%@" ,responseString);
     
     //sleep
-//    sleep(4);
+    sleep(4);
     
     //parse response string
     NSData *data= [responseString dataUsingEncoding:NSUTF8StringEncoding];
@@ -341,15 +354,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
                                              selector:@selector(audioSessionInterrupt:)
                                                  name:AVAudioSessionInterruptionNotification
                                                object:nil];
-    
-    // PlayInfoReport module
-    if (tokenOptions.reportPlayInfo) {
-        //start report
-        [self startReport];
-    }
-    
-    streamOpenCount = [self openCountWithStream:self.token];
-    NSLog ( @"StreamOpenCount:%d\n" ,streamOpenCount);
     
     [[NSNotificationCenter defaultCenter]
      postNotificationName:IJKMoviePlayerInitSuccessNotification
@@ -771,12 +775,13 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
     }
 }
 
-int64_t GetNowMs()
+
+int64_t _GetNowMs()
 {
-    return systemTime() / 1000000ll;
+    return _systemTime() / 1000000ll;
 }
 
-int64_t systemTime() {
+int64_t _systemTime() {
     struct timeval t;
     t.tv_sec = t.tv_usec = 0;
     gettimeofday(&t, NULL);
@@ -811,6 +816,14 @@ int64_t systemTime() {
         }
         case FFP_MSG_PREPARED: {
             NSLog(@"FFP_MSG_PREPARED:");
+            
+            [self addOpenCountWithStream:self.token];
+            
+            // PlayInfoReport module
+            if (tokenOptions.reportPlayInfo) {
+                //start report
+                [self startReport];
+            }
 
             IjkMediaMeta *rawMeta = ijkmp_get_meta_l(_mediaPlayer);
             if (rawMeta) {
@@ -936,7 +949,7 @@ int64_t systemTime() {
             stalledCountPerMinute++;
             allStalledCount++;
             
-            stalledStartTime = GetNowMs();
+            stalledStartTime = _GetNowMs();
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerLoadStateDidChangeNotification
@@ -946,7 +959,7 @@ int64_t systemTime() {
         case FFP_MSG_BUFFERING_END: {
             NSLog(@"FFP_MSG_BUFFERING_END:");
             
-            stalledEndTime = GetNowMs();
+            stalledEndTime = _GetNowMs();
             
             stalledTimePerMinute += stalledEndTime - stalledStartTime;
 
@@ -1211,7 +1224,7 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
         return @"480p";
     }
     
-    return [NSString stringWithFormat:@"%dx%d",self.videoWidth,self.videoHeight];
+    return [NSString stringWithFormat:@"%ldx%ld",(long)self.videoWidth,(long)self.videoHeight];
 }
 
 // Get Remote IP Address
@@ -1261,12 +1274,12 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 
 - (NSString*)bl
 {
-    return [NSString stringWithFormat:@"%f",self.playableDuration];
+    return [NSString stringWithFormat:@"%ld",(long)self.playableDuration];
 }
 
 - (NSString*) bc
 {
-    NSString* retStr = [NSString stringWithFormat:@"%d",stalledCountPerMinute];
+    NSString* retStr = [NSString stringWithFormat:@"%ld",(long)stalledCountPerMinute];
     
     stalledCountPerMinute = 0;
     
@@ -1275,12 +1288,12 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 
 - (NSString*) bt
 {
-    return [NSString stringWithFormat:@"%d",allStalledCount];
+    return [NSString stringWithFormat:@"%ld",(long)allStalledCount];
 }
 
 - (NSString*) br
 {
-    return [NSString stringWithFormat:@"%d",self.bitRate];
+    return [NSString stringWithFormat:@"%ld",(long)self.bitRate];
 }
 
 - (void)setToken:(NSString *)token_
@@ -1299,17 +1312,17 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
 
 - (NSString*)oc
 {
-    return [NSString stringWithFormat:@"%d",streamOpenCount];
+    return [NSString stringWithFormat:@"%ld",(long)[self getOpenCountWithStream:self.token]];
 }
 
 - (NSString*)cd
 {
     if((_loadState & MPMovieLoadStateStalled)!= 0){
-        stalledTimePerMinute += GetNowMs() - stalledStartTime;
-        stalledStartTime = GetNowMs();
+        stalledTimePerMinute += _GetNowMs() - stalledStartTime;
+        stalledStartTime = _GetNowMs();
     }
     
-    NSString* retStr = [NSString stringWithFormat:@"%d",(NSInteger)(stalledTimePerMinute/1000)];
+    NSString* retStr = [NSString stringWithFormat:@"%ld",(long)(stalledTimePerMinute/1000)];
     stalledTimePerMinute = 0;
     
     return retStr;

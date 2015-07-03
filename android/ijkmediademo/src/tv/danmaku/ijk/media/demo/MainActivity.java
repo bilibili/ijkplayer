@@ -22,7 +22,8 @@ public class MainActivity extends Activity {
 //        et.setText("rtmp://wspub.live.hupucdn.com/prod/slk");
 //        et.setText("http://v.iask.com/v_play_ipad.php?vid=99264895");
 //        et.setText("rtmp://wsvideopull.smartcourt.cn/prod/sh_loft_b01ll");
-        et.setText("/sdcard/test.mp4");
+//        et.setText("/sdcard/test.mp4");
+        et.setText("vod://kanqiu/test_999?ac=pull&m=720p&st=1435904714&td=600000&u=12345678&ve=ws&k=368a643499ff07a8c4026796680be659ac67e1614cb8794bd77f2239fc668c04");
 
         btn.setOnClickListener(new OnClickListener(){
 

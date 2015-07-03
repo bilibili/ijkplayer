@@ -45,7 +45,7 @@
 			destdir="${build.dir}/class"
 			classpathref="libraries"
 			includeantruntime="false"
-			target="1.7"
+            target="1.7"
 			encoding="UTF-8"
 			listfiles="true"
 			debug="false">

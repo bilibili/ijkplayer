@@ -383,6 +383,15 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     @Override
     public native long getDuration();
+    
+    @Override
+    public native long getPlayableDuration();
+    
+    @Override
+    public native String getRemoteIpAddress();
+    
+    @Override
+    public native int getBitRate();
 
     /**
      * Releases resources associated with this IjkMediaPlayer object. It is

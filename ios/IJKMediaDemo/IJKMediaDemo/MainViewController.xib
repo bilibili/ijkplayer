@@ -68,21 +68,21 @@
                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
-                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Ofm-GN-crP">
-                    <rect key="frame" x="110" y="3" width="272" height="30"/>
-                    <string key="text">vod://kanqiu/test_456?ac=pull&amp;m=720p&amp;st=1435571019&amp;td=86400&amp;u=12345678&amp;ve=ws&amp;k=dfd4ec58e4fbb0922ed386bc17bccfaab686cd47f43da02c79bce154eaf907a0</string>
-                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                    <textInputTraits key="textInputTraits"/>
-                </textField>
                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Nr0-8W-9Mb">
                     <rect key="frame" x="110" y="33" width="272" height="30"/>
                     <string key="text">vod://kanqiu/test_456?ac=pull&amp;m=720p&amp;st=1435571019&amp;td=86400&amp;u=12345678&amp;ve=ws&amp;k=dfd4ec58e4fbb0922ed386bc17bccfaab686cd47f43da02c79bce154eaf907a0</string>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Ofm-GN-crP">
+                    <rect key="frame" x="110" y="2" width="272" height="30"/>
+                    <string key="text">vod://kanqiu/test_567?ac=pull&amp;m=720p&amp;st=1435718231&amp;td=86400&amp;u=12345678&amp;ve=ws&amp;k=0b567714810e74dd1da55261cc6213a27e880a2e262545845aea3152be25b36f</string>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits"/>
+                </textField>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-            <point key="canvasLocation" x="146" y="193"/>
+            <point key="canvasLocation" x="97" y="243"/>
         </view>
     </objects>
 </document>

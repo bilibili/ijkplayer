@@ -22,7 +22,7 @@ if [ -z "$ANDROID_NDK" -o -z "$ANDROID_NDK" ]; then
 fi
 
 REQUEST_TARGET=$1
-ALL_ABI="armv5 armv7a x86"
+ALL_ABI="armv5 armv7a x86 arm64-v8a"
 
 do_ndk_build () {
     PARAM_TARGET=$1

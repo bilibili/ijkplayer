@@ -331,4 +331,22 @@ public class AndroidMediaPlayer extends SimpleMediaPlayer {
             notifyOnPrepared();
         }
     }
+
+	@Override
+	public String getRemoteIpAddress() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getBitRate() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getPlayableDuration() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

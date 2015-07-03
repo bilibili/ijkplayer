@@ -19,7 +19,17 @@
 package tv.danmaku.ijk.media.widget;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+
+import org.apache.http.Header;
+import org.apache.http.protocol.HTTP;
+
+import com.google.gson.Gson;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnBufferingUpdateListener;
@@ -32,6 +42,8 @@ import tv.danmaku.ijk.media.player.IMediaPlayer.OnVideoSizeChangedListener;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.option.AvFourCC;
 import tv.danmaku.ijk.media.player.option.format.AvFormatOption_HttpDetectRangeSupport;
+import android.R.bool;
+import android.R.integer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -40,7 +52,9 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -124,6 +138,24 @@ public class VideoView extends SurfaceView implements
         initVideoView(context);
     }
 
+    //new API by WilliamShi
+    private static HashMap<String, Integer> tokenOpenCountHashMap = null; 
+    private int addOpenCountWithStream(String token)
+    {
+    	if (tokenOpenCountHashMap==null) {
+    		tokenOpenCountHashMap = new HashMap<>();
+		}
+    	
+    	int openCount = 0;
+    	if (tokenOpenCountHashMap.containsKey(token)) {
+    		openCount = tokenOpenCountHashMap.get(token);
+		}
+    	openCount++;
+    	tokenOpenCountHashMap.put(token, openCount);
+    	
+    	return openCount;
+    }
+    
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = getDefaultSize(mVideoWidth, widthMeasureSpec);
@@ -205,7 +237,111 @@ public class VideoView extends SurfaceView implements
     public boolean isValid() {
         return (mSurfaceHolder != null && mSurfaceHolder.getSurface().isValid());
     }
+    
+    private String token = null;
+    
+    public String getToken()
+    {
+    	return token;
+    }
+    
+    public int getStreamOpenCount() {
+    	if (tokenOpenCountHashMap==null) {
+    		tokenOpenCountHashMap = new HashMap<>();
+		}
+    	
+    	int openCount = 0;
+    	if (tokenOpenCountHashMap.containsKey(token)) {
+    		openCount = tokenOpenCountHashMap.get(token);
+		}
+    	
+    	return openCount;
+	}
+    
+    private String cdnName = null;
+    public String getCdnName()
+    {
+    	return cdnName;
+    }
+    
+    public void setVideoToken(String token) {
+		String urlHeaderString = "http://192.168.9.117:8080/live/httpcdn?token=";
+		String tokenEncodedString;
+		try {
+			tokenEncodedString = URLEncoder.encode(token, HTTP.UTF_8);
+		} catch (UnsupportedEncodingException e) {
+			tokenEncodedString = token;
+		}
+		
+		StringBuilder urlStringBuilder = new StringBuilder();
+		String encodedUrlString = urlStringBuilder.append(urlHeaderString).append(tokenEncodedString).toString();
+		Log.v(TAG, encodedUrlString);
+		
+		//async http request
+		AsyncHttpClient client = new AsyncHttpClient();
+		client.setURLEncodingEnabled(false);
+		client.get(encodedUrlString, new AsyncHttpResponseHandler() {
 
+			@Override
+			public void onSuccess(int statusCode, Header[] headers,
+					byte[] responseBody) {
+				Log.v(TAG, "onSuccess");
+				
+				String jsonData = new String(responseBody);
+				Log.v(TAG, jsonData);
+				
+				if (jsonData.isEmpty()) {
+		            if (mOnErrorListener != null) {
+		            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
+		            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
+		            }
+		            return;
+				}
+				
+				Gson gson = new Gson();
+				PlayerUrlInfo urlInfo = new PlayerUrlInfo();
+				urlInfo = gson.fromJson(jsonData, PlayerUrlInfo.class);
+				
+				String cdnString = urlInfo.getCdn();
+				String linkString = urlInfo.getLink();
+				
+				if (cdnString==null || linkString==null) {
+		            if (mOnErrorListener != null) {
+		            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
+		            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
+		            }
+		            return;
+				}
+				
+				cdnName = cdnString;
+				
+				try {
+					Thread.sleep(4000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+//				setVideoPath("rtmp://wspub.live.hupucdn.com/prod/slk");
+				setVideoPath(linkString);
+			}
+
+			@Override
+			public void onFailure(int statusCode, Header[] headers,
+					byte[] responseBody, Throwable error) {
+				Log.v(TAG, "onFailure");
+				Log.v(TAG, new String(responseBody));
+				
+	            if (mOnErrorListener != null) {
+	            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
+	            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
+	            }
+	            return;
+			}
+		});
+		
+		this.token = token;
+	}
+    
     public void setVideoPath(String path) {
         setVideoURI(Uri.parse(path));
     }
@@ -229,6 +365,12 @@ public class VideoView extends SurfaceView implements
             mMediaPlayer = null;
             mCurrentState = STATE_IDLE;
             mTargetState = STATE_IDLE;
+        }
+        
+        //end info report
+        if (playerInfoReport!=null) {
+        	playerInfoReport.endReport();
+        	playerInfoReport = null;
         }
     }
 
@@ -343,9 +485,14 @@ public class VideoView extends SurfaceView implements
         }
     };
 
+    private PlayerInfoReport playerInfoReport = null;
+    
     OnPreparedListener mPreparedListener = new OnPreparedListener() {
         public void onPrepared(IMediaPlayer mp) {
             DebugLog.d(TAG, "onPrepared");
+            
+            addOpenCountWithStream(token);
+            
             mCurrentState = STATE_PREPARED;
             mTargetState = STATE_PLAYING;
 
@@ -377,6 +524,13 @@ public class VideoView extends SurfaceView implements
             } else if (mTargetState == STATE_PLAYING) {
                 start();
             }
+            
+            //start info report
+            if (playerInfoReport==null) {
+            	playerInfoReport = new PlayerInfoReport(VideoView.this);
+            	playerInfoReport.startReport();
+			}
+            
         }
     };
 
@@ -436,6 +590,39 @@ public class VideoView extends SurfaceView implements
         }
     };
 
+    //new API add by William Shi
+    private int allbuffingCount = 0;
+    private int buffingCountPerMinute = 0;
+    
+    public int getAllbuffingCount()
+    {
+    	return allbuffingCount;
+    }
+    
+    public int getBuffingCountPerMinute() {
+		int tmpbuffingCountPerMinute = buffingCountPerMinute;
+		buffingCountPerMinute = 0;
+		return tmpbuffingCountPerMinute;
+	}
+    
+    private boolean isBuffing = false;
+    private long buffingTimePerMinute = 0;
+    private long buffingStartTime = 0;
+    
+    public int getBuffingTimePerMinute()
+    {
+    	if (isBuffing) {
+    		buffingTimePerMinute += SystemClock.uptimeMillis() - buffingStartTime;
+		}
+    	
+    	long tmpBuffingTimePerMinute = buffingTimePerMinute;
+    	buffingTimePerMinute = 0;
+    	
+    	buffingStartTime = SystemClock.uptimeMillis();
+    	
+    	return (int)tmpBuffingTimePerMinute/1000;
+    }
+    
     private OnInfoListener mInfoListener = new OnInfoListener() {
         @Override
         public boolean onInfo(IMediaPlayer mp, int what, int extra) {
@@ -447,10 +634,20 @@ public class VideoView extends SurfaceView implements
                     DebugLog.dfmt(TAG, "onInfo: (MEDIA_INFO_BUFFERING_START)");
                     if (mMediaBufferingIndicator != null)
                         mMediaBufferingIndicator.setVisibility(View.VISIBLE);
+                    
+                    allbuffingCount++;
+                    buffingCountPerMinute++;
+                    
+                    isBuffing = true;
+                    buffingStartTime = SystemClock.uptimeMillis();
+                    
                 } else if (what == IMediaPlayer.MEDIA_INFO_BUFFERING_END) {
                     DebugLog.dfmt(TAG, "onInfo: (MEDIA_INFO_BUFFERING_END)");
                     if (mMediaBufferingIndicator != null)
                         mMediaBufferingIndicator.setVisibility(View.GONE);
+                    
+                    isBuffing = false;
+                    buffingTimePerMinute += SystemClock.uptimeMillis() - buffingStartTime;
                 }
             }
 
@@ -536,22 +733,6 @@ public class VideoView extends SurfaceView implements
     };
 
     private void release(boolean cleartargetstate) {
-/*    	
-    	new Runnable() {
-    		IMediaPlayer tmpMediaPlayer = mMediaPlayer;
-			@Override
-			public void run() {
-		        if (tmpMediaPlayer != null) {
-		        	tmpMediaPlayer.reset();
-		        	tmpMediaPlayer.release();
-		        	tmpMediaPlayer = null;
-		        }
-			}
-		};
-		
-        mCurrentState = STATE_IDLE;
-        if (cleartargetstate)
-            mTargetState = STATE_IDLE;*/
     	
         if (mMediaPlayer != null) {
             mMediaPlayer.reset();
@@ -560,6 +741,12 @@ public class VideoView extends SurfaceView implements
             mCurrentState = STATE_IDLE;
             if (cleartargetstate)
                 mTargetState = STATE_IDLE;
+        }
+        
+        //end info report
+        if (playerInfoReport!=null) {
+        	playerInfoReport.endReport();
+        	playerInfoReport = null;
         }
     }
 
@@ -673,6 +860,28 @@ public class VideoView extends SurfaceView implements
         }
         return 0;
     }
+    
+    public int getPlayableDuration() {
+        if (isInPlaybackState()) {
+            return (int)mMediaPlayer.getPlayableDuration()/1000;
+        }
+        return 0;
+	}
+
+    public String getRemoteIpAddress()
+    {
+    	if (isInPlaybackState()) {
+			return mMediaPlayer.getRemoteIpAddress();
+		}
+    	return null;
+    }
+    
+    public int getBitRate() {
+    	if (isInPlaybackState()) {
+			return mMediaPlayer.getBitRate();
+		}
+    	return 0;
+	}
 
     @Override
     public void seekTo(long msec) {

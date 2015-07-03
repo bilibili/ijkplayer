@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		AB2A1EE61B04877F0091A6AD /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB2A1EE51B04877F0091A6AD /* libIJKMediaPlayer.a */; };
 		AB4939D61AFB207E00E71A34 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB4939D51AFB207E00E71A34 /* CoreVideo.framework */; };
+		ABB97C1B1B426C2A00FC5C64 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABB97C1A1B426C2A00FC5C64 /* MobileCoreServices.framework */; };
+		ABB97C1D1B426C3500FC5C64 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABB97C1C1B426C3500FC5C64 /* Security.framework */; };
+		ABB97C1F1B426C4000FC5C64 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABB97C1E1B426C4000FC5C64 /* SystemConfiguration.framework */; };
+		ABB97C211B426C4C00FC5C64 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABB97C201B426C4C00FC5C64 /* CFNetwork.framework */; };
 		ABBADD481AF9C336006B688B /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ABBADD471AF9C336006B688B /* libstdc++.dylib */; };
 		ABCC3F7D1AF8594700214BBE /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */; };
 		ABD5DF081AE4D43D00778032 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABD5DF051AE4D43D00778032 /* MainViewController.xib */; };
@@ -48,6 +52,10 @@
 /* Begin PBXFileReference section */
 		AB2A1EE51B04877F0091A6AD /* libIJKMediaPlayer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIJKMediaPlayer.a; path = ../lib/libIJKMediaPlayer.a; sourceTree = "<group>"; };
 		AB4939D51AFB207E00E71A34 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		ABB97C1A1B426C2A00FC5C64 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		ABB97C1C1B426C3500FC5C64 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		ABB97C1E1B426C4000FC5C64 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		ABB97C201B426C4C00FC5C64 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		ABBADD471AF9C336006B688B /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
 		ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		ABD5DF051AE4D43D00778032 /* MainViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainViewController.xib; sourceTree = "<group>"; };
@@ -97,6 +105,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABB97C211B426C4C00FC5C64 /* CFNetwork.framework in Frameworks */,
+				ABB97C1F1B426C4000FC5C64 /* SystemConfiguration.framework in Frameworks */,
+				ABB97C1D1B426C3500FC5C64 /* Security.framework in Frameworks */,
+				ABB97C1B1B426C2A00FC5C64 /* MobileCoreServices.framework in Frameworks */,
 				AB2A1EE61B04877F0091A6AD /* libIJKMediaPlayer.a in Frameworks */,
 				AB4939D61AFB207E00E71A34 /* CoreVideo.framework in Frameworks */,
 				ABBADD481AF9C336006B688B /* libstdc++.dylib in Frameworks */,
@@ -162,6 +174,10 @@
 		E6903EFE17EAF70200CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				ABB97C201B426C4C00FC5C64 /* CFNetwork.framework */,
+				ABB97C1E1B426C4000FC5C64 /* SystemConfiguration.framework */,
+				ABB97C1C1B426C3500FC5C64 /* Security.framework */,
+				ABB97C1A1B426C2A00FC5C64 /* MobileCoreServices.framework */,
 				AB2A1EE51B04877F0091A6AD /* libIJKMediaPlayer.a */,
 				AB4939D51AFB207E00E71A34 /* CoreVideo.framework */,
 				ABBADD471AF9C336006B688B /* libstdc++.dylib */,

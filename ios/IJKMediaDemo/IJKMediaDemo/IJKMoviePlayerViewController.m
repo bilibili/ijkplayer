@@ -59,7 +59,6 @@
     options.reportPlayInfo = YES;
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentToken:self.urlString withOptions:options];
     [self installMovieNotificationObservers];
-    
 }
 
 - (void)dealloc
@@ -164,16 +163,16 @@
             NSLog(@"playbackPlayBackDidFinish: ???: %d\n", reason);
             break;
     }
-
-//    [self.player.view removeFromSuperview];
-//    [self.mediaControl removeFromSuperview];
-    
-//    [self.player stop];
-//    [self.player shutdown];
-//    self.player = nil;
-    
-//    [self removeMovieNotificationObservers];
 /*
+    [self.player.view removeFromSuperview];
+    [self.mediaControl removeFromSuperview];
+    
+    [self.player stop];
+    [self.player shutdown];
+    self.player = nil;
+    
+    [self removeMovieNotificationObservers];
+
     [IJKFFMoviePlayerController setLogReport:YES];
     IJKFFOptions * options = [IJKFFOptions optionsByDefault];
     options.reportPlayInfo = YES;

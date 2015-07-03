@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0099cc"
-    tools:context=".PlayerActivity" >
+    tools:context=".VideoPlayerActivity" >
 
     <tv.danmaku.ijk.media.widget.VideoView
         android:id="@+id/video_view"
@@ -42,9 +42,9 @@
             android:layout_height="60dip" />
     </LinearLayout>
 
-</FrameLayout> -->
+</FrameLayout>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
@@ -84,4 +84,4 @@
             android:layout_width="60dip"
             android:layout_height="60dip" />
     </LinearLayout>
-</LinearLayout>
+</LinearLayout> -->

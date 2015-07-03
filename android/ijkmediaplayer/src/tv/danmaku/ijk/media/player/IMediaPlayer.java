@@ -76,6 +76,15 @@ public interface IMediaPlayer {
     public abstract long getCurrentPosition();
 
     public abstract long getDuration();
+    
+    // new API by William Shi
+    public abstract long getPlayableDuration();
+    
+    // new APi by William Shi
+    public abstract String getRemoteIpAddress();
+    
+    // new API by William Shi
+    public abstract int getBitRate();
 
     public abstract void release();
 

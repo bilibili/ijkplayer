@@ -247,6 +247,49 @@ IjkMediaPlayer_getDuration(JNIEnv *env, jobject thiz)
     return retval;
 }
 
+static int IjkMediaPlayer_getPlayableDuration(JNIEnv *env, jobject thiz)
+{
+    int retval = 0;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getPlayableDuration: null mp", LABEL_RETURN);
+
+    retval = ijkmp_get_playable_duration(mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return retval;
+}
+
+static jstring IjkMediaPlayer_getRemoteIpAddress(JNIEnv *env, jobject thiz)
+{
+    char *retval = NULL;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getRemoteIpAddress: null mp", LABEL_RETURN);
+
+    retval = ijkmp_get_iPAddress(mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+
+    if (!retval)
+        return NULL ;
+    
+    return (*env)->NewStringUTF(env, retval);
+}
+
+static int IjkMediaPlayer_getBitRate(JNIEnv *env, jobject thiz)
+{
+    int retval = 0;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getBitRate: null mp", LABEL_RETURN);
+
+    retval = ijkmp_get_bitRate(mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return retval;
+}
+
 static void
 IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
 {
@@ -885,6 +928,9 @@ static JNINativeMethod g_methods[] = {
     { "isPlaying", "()Z", (void *) IjkMediaPlayer_isPlaying },
     { "getCurrentPosition", "()J", (void *) IjkMediaPlayer_getCurrentPosition },
     { "getDuration", "()J", (void *) IjkMediaPlayer_getDuration },
+    { "getPlayableDuration", "()J", (void *) IjkMediaPlayer_getPlayableDuration },
+    { "getRemoteIpAddress", "()Ljava/lang/String;", (void *) IjkMediaPlayer_getRemoteIpAddress },
+    { "getBitRate", "()I", (void *) IjkMediaPlayer_getBitRate },
     { "_release", "()V", (void *) IjkMediaPlayer_release },
     { "_reset", "()V", (void *) IjkMediaPlayer_reset },
     { "setVolume", "(FF)V", (void *) IjkMediaPlayer_setVolume },

@@ -22,8 +22,11 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.IMediaPlayer.OnCompletionListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnErrorListener;
+import tv.danmaku.ijk.media.player.IMediaPlayer.OnPreparedListener;
 import tv.danmaku.ijk.media.widget.MediaController;
 import tv.danmaku.ijk.media.widget.VideoView;
 
@@ -50,14 +53,44 @@ public class VideoPlayerActivity extends Activity {
         mMediaController = new MediaController(this);
 
         mVideoView = (VideoView) findViewById(R.id.video_view);
-//        mVideoView.setMediaCodecEnabled(true);
-        mVideoView.setDataSourceType(VideoView.VOD_STREAMING_TYPE);
+        
+        mVideoView.setOnPreparedListener(mPreparedListener);
+        mVideoView.setOnErrorListener(mErrorListener);
+        mVideoView.setOnCompletionListener(mCompletionListener);
+        
+        mVideoView.setDataSourceType(VideoView.LOWDELAY_LIVE_STREAMING_TYPE);
+        
         mVideoView.setMediaController(mMediaController);
         mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
-        mVideoView.setVideoPath(mVideoPath);
-
-        mVideoView.requestFocus();
-        mVideoView.start();
         
+//        mVideoView.setVideoPath(mVideoPath);
+        mVideoView.setVideoToken(mVideoPath);
     }
+    
+	private OnPreparedListener mPreparedListener = new OnPreparedListener() {
+
+		@Override
+		public void onPrepared(IMediaPlayer mp) {
+			Log.v("VideoPlayerActivity", "onPrepared");
+//	        mVideoView.requestFocus();
+//	        mVideoView.start();
+		}
+	};
+	
+	private OnErrorListener mErrorListener = new OnErrorListener() {
+		@Override
+		public boolean onError(IMediaPlayer mp, int what, int extra) {
+			mVideoView.stopPlayback();
+			finish();
+			return true;
+		}
+	};
+
+	private OnCompletionListener mCompletionListener = new OnCompletionListener() {
+		@Override
+		public void onCompletion(IMediaPlayer mp) {
+			mVideoView.stopPlayback();
+			finish();
+		}
+	};
 }
