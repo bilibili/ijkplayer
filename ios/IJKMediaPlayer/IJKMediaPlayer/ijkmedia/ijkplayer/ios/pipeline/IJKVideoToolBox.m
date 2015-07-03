@@ -381,7 +381,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         ALOGD("VTB: indecoding: %d\n", ctx->sample_infos_in_decoding);
 #endif
 
-        if (ctx->dealloced)
+        if (ctx->dealloced || is->abort_request || is->viddec.queue->abort_request)
             goto failed;
 
         ctx->last_sort = newFrame->sort;
