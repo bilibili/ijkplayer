@@ -121,14 +121,6 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
     return NULL;
 }
 
-void ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc)
-{
-    if (!mp)
-        return;
-
-    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", chroma_fourcc);
-}
-
 void ijkmp_set_format_callback(IjkMediaPlayer *mp, ijk_format_control_message cb, void *opaque)
 {
     assert(mp);
@@ -138,50 +130,6 @@ void ijkmp_set_format_callback(IjkMediaPlayer *mp, ijk_format_control_message cb
     ffp_set_format_callback(mp->ffplayer, cb, opaque);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_set_format_callback()=void\n");
-}
-
-void ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value)
-{
-    assert(mp);
-
-    MPTRACE("%s(%s, %s)\n", __func__, name, value);
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_option(mp->ffplayer, IJKMP_OPT_CATEGORY_FORMAT, name, value);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("%s()=void\n", __func__);
-}
-
-void ijkmp_set_codec_option(IjkMediaPlayer *mp, const char *name, const char *value)
-{
-    assert(mp);
-
-    MPTRACE("%s()\n", __func__);
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_option(mp->ffplayer, IJKMP_OPT_CATEGORY_CODEC, name, value);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("%s()=void\n", __func__);
-}
-
-void ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *value)
-{
-    assert(mp);
-
-    MPTRACE("%s()\n", __func__);
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_option(mp->ffplayer, IJKMP_OPT_CATEGORY_SWS, name, value);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("%s()=void\n", __func__);
-}
-
-void ijkmp_set_player_option(IjkMediaPlayer *mp, const char *name, const char *value)
-{
-    assert(mp);
-
-    MPTRACE("%s()\n", __func__);
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_option(mp->ffplayer, IJKMP_OPT_CATEGORY_PLAYER, name, value);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("%s()=void\n", __func__);
 }
 
 void ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, const char *value)
@@ -204,41 +152,6 @@ void ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const char *name
     ffp_set_option_int(mp->ffplayer, opt_category, name, value);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("%s()=void\n", __func__);
-}
-
-void ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count)
-{
-    assert(mp);
-
-    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "video-pictq-size", frame_count);
-}
-
-void ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps)
-{
-    assert(mp);
-
-    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "max-fps", max_fps);
-}
-
-void ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop)
-{
-    assert(mp);
-
-    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "framedrop", framedrop);
-}
-
-void ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepared)
-{
-    assert(mp);
-
-    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", auto_play_on_prepared);
-}
-
-void ijkmp_set_max_buffer_size(IjkMediaPlayer *mp, int max_buffer_size)
-{
-    assert(mp);
-
-    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_PLAYER, "max-buffer-size", max_buffer_size);
 }
 
 int ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info)

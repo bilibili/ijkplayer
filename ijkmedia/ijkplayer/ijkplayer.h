@@ -163,30 +163,8 @@ void            ijkmp_io_stat_complete_register(void (*cb)(const char *url,
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*));
 void            ijkmp_set_format_callback(IjkMediaPlayer *mp, ijk_format_control_message cb, void *opaque);
 
-attribute_deprecated
-void            ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value);
-attribute_deprecated
-void            ijkmp_set_codec_option(IjkMediaPlayer *mp, const char *name, const char *value);
-attribute_deprecated
-void            ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *value);
-attribute_deprecated
-void            ijkmp_set_player_option(IjkMediaPlayer *mp, const char *name, const char *value);
-
 void            ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, const char *value);
 void            ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const char *name, int64_t value);
-
-attribute_deprecated
-void            ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc);
-attribute_deprecated
-void            ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count);
-attribute_deprecated
-void            ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps);
-attribute_deprecated
-void            ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop);
-attribute_deprecated
-void            ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepared);
-attribute_deprecated
-void            ijkmp_set_max_buffer_size(IjkMediaPlayer *mp, int max_buffer_size);
 
 int             ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info);
 int             ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info);
