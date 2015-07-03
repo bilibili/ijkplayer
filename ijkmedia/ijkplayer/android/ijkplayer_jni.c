@@ -342,19 +342,6 @@ LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
-static void
-IjkMediaPlayer_setOpenSLESEnabled(JNIEnv *env, jobject thiz, jboolean enabled)
-{
-    MPTRACE("%s\n", __func__);
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setOpenSLESEnabled: null mp", LABEL_RETURN);
-
-    ijkmp_android_set_opensles_enabled(mp, enabled);
-
-LABEL_RETURN:
-    ijkmp_dec_ref_p(&mp);
-}
-
 static jstring
 IjkMediaPlayer_getColorFormatName(JNIEnv *env, jclass clazz, jint mediaCodecColorFormat)
 {
@@ -862,7 +849,6 @@ static JNINativeMethod g_methods[] = {
 
     { "_setOption",             "(ILjava/lang/String;Ljava/lang/String;)V", (void *) IjkMediaPlayer_setOption },
     { "_setOption",             "(ILjava/lang/String;J)V",                  (void *) IjkMediaPlayer_setOptionLong },
-    { "_setOpenSLESEnabled",    "(Z)V",     (void *) IjkMediaPlayer_setOpenSLESEnabled },
 
     { "_getColorFormatName",    "(I)Ljava/lang/String;",    (void *) IjkMediaPlayer_getColorFormatName },
     { "_getVideoCodecInfo",     "()Ljava/lang/String;",     (void *) IjkMediaPlayer_getVideoCodecInfo },
