@@ -111,22 +111,6 @@ void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*cal
     MPTRACE("ijkmp_android_set_mediacodec_select_callback()=void");
 }
 
-void ijkmp_android_set_mediacodec_enabled(IjkMediaPlayer *mp, bool enabled)
-{
-    if (!mp)
-         return;
-
-    MPTRACE("ijkmp_android_set_mediacodec_enabled(%d)", enabled ? 1 : 0);
-    pthread_mutex_lock(&mp->mutex);
-
-    if (mp && mp->ffplayer && mp->ffplayer->pipeline) {
-        ffpipeline_set_mediacodec_enabled(mp->ffplayer->pipeline, enabled);
-    }
-
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_android_set_mediacodec_enabled()=void");
-}
-
 void ijkmp_android_set_opensles_enabled(IjkMediaPlayer *mp, bool enabled)
 {
     if (!mp)

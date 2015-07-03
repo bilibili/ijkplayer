@@ -512,6 +512,8 @@ typedef struct FFPlayer {
     int vtb_async;
     int vtb_wait_async;
 
+    int mediacodec;
+
     IjkMediaMeta *meta;
 
     ijk_format_control_message format_control_message;
@@ -602,6 +604,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->vtb_max_frame_width            = 0; // option
     ffp->vtb_async                      = 0; // option
     ffp->vtb_wait_async                 = 0; // option
+
+    ffp->mediacodec                     = 0; // option
 
     ffp->format_control_message = NULL;
     ffp->format_control_opaque  = NULL;

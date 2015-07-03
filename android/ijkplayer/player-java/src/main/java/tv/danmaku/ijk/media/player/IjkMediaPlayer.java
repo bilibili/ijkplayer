@@ -517,8 +517,9 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         setOption(OPT_CATEGORY_PLAYER, "framedrop", frameDrop);
     }
 
+    @Deprecated
     public void setMediaCodecEnabled(boolean enabled) {
-        _setMediaCodecEnabled(enabled);
+        setOption(OPT_CATEGORY_PLAYER, "mediacodec", enabled ? 1 : 0);
     }
 
     public void setOpenSLESEnabled(boolean enabled) {
@@ -532,7 +533,6 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     private native void _setOption(int category, String name, String value);
     private native void _setOption(int category, String name, long value);
-    private native void _setMediaCodecEnabled(boolean enabled);
     private native void _setOpenSLESEnabled(boolean enabled);
 
     public Bundle getMediaMeta() {

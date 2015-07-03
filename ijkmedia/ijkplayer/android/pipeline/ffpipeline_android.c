@@ -40,7 +40,6 @@ typedef struct IJKFF_Pipeline_Opaque {
 
     bool         (*mediacodec_select_callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc);
     void          *mediacodec_select_callback_opaque;
-    bool           mediacodec_enabled;
 
     SDL_Vout      *weak_vout;
 } IJKFF_Pipeline_Opaque;
@@ -67,7 +66,7 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
     IJKFF_Pipenode        *node = NULL;
 
-    if (opaque->mediacodec_enabled)
+    if (ffp->mediacodec)
         node = ffpipenode_create_video_decoder_from_android_mediacodec(ffp, pipeline, opaque->weak_vout);
     if (!node)
         node = ffpipenode_create_video_decoder_from_ffplay(ffp);
@@ -207,15 +206,6 @@ void ffpipeline_set_mediacodec_select_callback(IJKFF_Pipeline* pipeline, bool (*
 
     pipeline->opaque->mediacodec_select_callback        = callback;
     pipeline->opaque->mediacodec_select_callback_opaque = opaque;
-}
-
-void ffpipeline_set_mediacodec_enabled(IJKFF_Pipeline* pipeline, bool enabled)
-{
-    ALOGD("%s\n", __func__);
-    if (!check_ffpipeline(pipeline, __func__))
-        return;
-
-    pipeline->opaque->mediacodec_enabled = enabled;
 }
 
 bool ffpipeline_select_mediacodec(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo_context *mcc)

@@ -103,6 +103,10 @@ static const AVOption ffp_context_options[] = {
     { "videotoolbox-wait-async",            "VideoToolbox: call VTDecompressionSessionWaitForAsynchronousFrames()",
         OPTION_OFFSET(vtb_wait_async),      OPTION_INT(1, 0, 1) },
 
+    // Android only options
+    { "mediacodec",                         "MediaCodec: enable",
+        OPTION_OFFSET(mediacodec),          OPTION_INT(0, 0, 1) },
+
     { NULL }
 };
 #undef OPTION_CONST
