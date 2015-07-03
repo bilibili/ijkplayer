@@ -175,7 +175,8 @@ inline static void sample_info_recycle(VideoToolBoxContext* context, sample_info
 
     if (sample_info->is_decoding) {
         sample_info->is_decoding = 0;
-        context->sample_infos_in_decoding--;
+        if (context->sample_infos_in_decoding > 0)
+            context->sample_infos_in_decoding--;
     } else {
         ALOGW("%s, multiple frames in same sample %d / %d\n", __FUNCTION__,
               sample_info->sample_id,
@@ -566,6 +567,9 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
         context->m_vt_session =(void*) vt_session;
     }
     CFRelease(destinationPixelBufferAttributes);
+
+    memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
+    context->sample_infos_in_decoding = 0;
 }
 
 
