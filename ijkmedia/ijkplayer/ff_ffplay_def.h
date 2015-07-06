@@ -1,8 +1,6 @@
 /*
- * ff_ffplaye_def.h
- *
  * Copyright (c) 2003 Fabrice Bellard
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2013-2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -24,6 +22,43 @@
 #ifndef FFPLAY__FF_FFPLAY_DEF_H
 #define FFPLAY__FF_FFPLAY_DEF_H
 
+/**
+ * @file
+ * simple media player based on the FFmpeg libraries
+ */
+
+#include "config.h"
+#include <inttypes.h>
+#include <math.h>
+#include <limits.h>
+#include <signal.h>
+#include <stdint.h>
+
+#include "libavutil/avstring.h"
+// FFP_MERGE: #include "libavutil/colorspace.h"
+#include "libavutil/eval.h"
+#include "libavutil/mathematics.h"
+#include "libavutil/pixdesc.h"
+#include "libavutil/imgutils.h"
+#include "libavutil/dict.h"
+#include "libavutil/parseutils.h"
+#include "libavutil/samplefmt.h"
+#include "libavutil/avassert.h"
+#include "libavutil/time.h"
+#include "libavformat/avformat.h"
+// FFP_MERGE: #include "libavdevice/avdevice.h"
+#include "libswscale/swscale.h"
+#include "libavutil/opt.h"
+#include "libavcodec/avfft.h"
+#include "libswresample/swresample.h"
+
+#if CONFIG_AVFILTER
+# include "libavfilter/avcodec.h"
+# include "libavfilter/avfilter.h"
+# include "libavfilter/buffersink.h"
+# include "libavfilter/buffersrc.h"
+#endif
+
 #include <stdbool.h>
 #include "ff_ffinc.h"
 #include "ff_ffplay_config.h"
@@ -44,7 +79,7 @@
 #define BUFFERING_CHECK_PER_BYTES               (512)
 #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
 
-#define MAX_QUEUE_SIZE (10 * 1024 * 1024)
+#define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 50000
 
 /* Minimum SDL audio buffer size, in samples. */
@@ -73,7 +108,6 @@
 #define AUDIO_DIFF_AVG_NB   20
 
 /* polls for possible required screen refresh at least this often, should be less than 1/fps */
-// 172.0 fps at most (High Level 5.2 1,920×1,080@172.0)
 #define REFRESH_RATE 0.01
 
 /* NOTE: the size must be big enough to compensate the hardware audio buffersize size */
