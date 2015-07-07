@@ -25,6 +25,10 @@
 - (void)hide;
 - (void)refreshMediaControl;
 
+- (void)beginDragMediaSlider;
+- (void)endDragMediaSlider;
+- (void)continueDragMediaSlider;
+
 @property(nonatomic,weak) id<IJKMediaPlayback> delegatePlayer;
 
 @property(nonatomic,strong) IBOutlet UIView *overlayPanel;

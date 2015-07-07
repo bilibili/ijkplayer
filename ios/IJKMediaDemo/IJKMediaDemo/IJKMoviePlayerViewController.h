@@ -33,6 +33,12 @@
 - (IBAction)onClickPlay:(id)sender;
 - (IBAction)onClickPause:(id)sender;
 
+- (IBAction)didSliderTouchDown;
+- (IBAction)didSliderTouchCancel;
+- (IBAction)didSliderTouchUpOutside;
+- (IBAction)didSliderTouchUpInside;
+- (IBAction)didSliderValueChanged;
+
 @property(nonatomic,strong) IBOutlet IJKMediaControl *mediaControl;
 
 @end

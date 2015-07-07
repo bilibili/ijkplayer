@@ -147,6 +147,32 @@
     [self.mediaControl refreshMediaControl];
 }
 
+- (IBAction)didSliderTouchDown
+{
+    [self.mediaControl beginDragMediaSlider];
+}
+
+- (IBAction)didSliderTouchCancel
+{
+    [self.mediaControl endDragMediaSlider];
+}
+
+- (IBAction)didSliderTouchUpOutside
+{
+    [self.mediaControl endDragMediaSlider];
+}
+
+- (IBAction)didSliderTouchUpInside
+{
+    self.player.currentPlaybackTime = self.mediaControl.mediaProgressSlider.value;
+    [self.mediaControl endDragMediaSlider];
+}
+
+- (IBAction)didSliderValueChanged
+{
+    [self.mediaControl continueDragMediaSlider];
+}
+
 - (void)loadStateDidChange:(NSNotification*)notification
 {
     //    MPMovieLoadStateUnknown        = 0,
