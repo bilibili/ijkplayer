@@ -67,7 +67,7 @@ public abstract class BaseMediaPlayer implements IMediaPlayer {
         return;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public void setSurface(Surface surface) {
     }
