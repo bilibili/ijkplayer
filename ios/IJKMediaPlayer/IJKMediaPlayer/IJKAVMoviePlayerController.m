@@ -134,6 +134,8 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     BOOL _playbackBufferEmpty;
     BOOL _playbackBufferFull;
     
+    BOOL _playingBeforeInterruption;
+    
     NSMutableArray *_registeredNotifications;
 }
 
@@ -950,6 +952,15 @@ static IJKAVMoviePlayerController* instance;
     switch (reason) {
         case AVAudioSessionInterruptionTypeBegan: {
             NSLog(@"IJKAVMoviePlayerController:audioSessionInterrupt: begin\n");
+            switch (self.playbackState) {
+                case MPMoviePlaybackStatePaused:
+                case MPMoviePlaybackStateStopped:
+                    _playingBeforeInterruption = NO;
+                    break;
+                default:
+                    _playingBeforeInterruption = YES;
+                    break;
+            }
             [self pause];
             [[IJKAudioKit sharedInstance] setActive:NO];
             break;
@@ -957,7 +968,9 @@ static IJKAVMoviePlayerController* instance;
         case AVAudioSessionInterruptionTypeEnded: {
             NSLog(@"IJKAVMoviePlayerController:audioSessionInterrupt: end\n");
             [[IJKAudioKit sharedInstance] setActive:YES];
-            [self play];
+            if (_playingBeforeInterruption) {
+                [self play];
+            }
             break;
         }
     }
