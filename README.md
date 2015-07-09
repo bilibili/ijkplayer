@@ -40,13 +40,12 @@ ijkplayer
 ### TODO
 - iOS
  - api: AVFoundation-like
-- Build 
- - cygwin compatibility
 
 ### NOT-ON-PLAN
 - obsolete platforms (Android: API-8 and below; iOS: below 5.1.1)
 - obsolete cpu: ARMv5, ARMv6, MIPS (I don't even have these types of devices…)
 - native subtitle render
+- avfilter support
 
 ### Before Build
 ```
@@ -58,6 +57,9 @@ brew install yasm
 # add these lines to your ~/.bash_profile or ~/.profile
 # export ANDROID_SDK=<your sdk path>
 # export ANDROID_NDK=<your ndk path>
+
+# on Cygwin
+# install git, make, yasm
 ```
 
 - If you prefer more codec/format
