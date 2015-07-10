@@ -1,6 +1,8 @@
 tag next
 --------------------------------
 player: key-value options API
+player: remove ijkutil
+build: support cygwin
 
 tag k0.3.0
 --------------------------------
