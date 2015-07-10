@@ -23,7 +23,6 @@
 
 #include "ijksdl_codec_android_mediacodec.h"
 #include <assert.h>
-#include "ijkutil/ijkutil.h"
 
 // FIXME: release SDL_AMediaCodec
 sdl_amedia_status_t SDL_AMediaCodec_delete(SDL_AMediaCodec* acodec)

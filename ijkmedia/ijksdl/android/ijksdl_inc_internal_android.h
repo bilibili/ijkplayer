@@ -24,9 +24,11 @@
 #define IJKPLAYER__IJKSDL_INC_INTERNAL_ANDROID_H
 
 #include <stdint.h>
+#include <jni.h>
 
 #include "../ijksdl_inc_internal.h"
-#include "ijkutil/ijkutil.h"
+#include "../ijksdl_misc.h"
+#include "../ijksdl_log.h"
 
 enum {
     HAL_PIXEL_FORMAT_RGBA_8888 = 1,

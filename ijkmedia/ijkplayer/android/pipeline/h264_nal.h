@@ -23,7 +23,7 @@
 
 #include <limits.h>
 #include "libavcodec/avcodec.h"
-#include "ijkutil/ijklog.h"
+#include "ijksdl/ijksdl_log.h"
 #if 1
 /* Parse the SPS/PPS Metadata and convert it to annex b format */
 static int convert_sps_pps( const uint8_t *p_buf, size_t i_buf_size,

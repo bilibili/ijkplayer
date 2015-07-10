@@ -26,7 +26,7 @@
 #include <string.h>
 #include <jni.h>
 #include "../ff_ffinc.h"
-#include "ijkutil/ijkutil.h"
+#include "ijksdl/ijksdl_log.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 
 #define JNI_CLASS_FFMPEG_API "tv/danmaku/ijk/media/player/ffmpeg/FFmpegApi"

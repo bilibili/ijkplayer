@@ -27,7 +27,6 @@
 #include "ijksdl_codec_android_mediacodec_internal.h"
 #include "ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl_inc_internal_android.h"
-#include "ijkutil/ijkutil.h"
 
 static SDL_Class g_amediacodec_class = {
     .name = "AMediaCodecJava",

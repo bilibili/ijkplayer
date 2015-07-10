@@ -52,9 +52,10 @@ JavaVM *SDL_JNI_GetJvm();
 
 jint    SDL_JNI_SetupThreadEnv(JNIEnv **p_env);
 
-void     SDL_JNI_ThrowException(JNIEnv *env, const char* msg);
 jboolean SDL_JNI_RethrowException(JNIEnv *env);
 jboolean SDL_JNI_CatchException(JNIEnv *env);
+int      SDL_JNI_ThrowException(JNIEnv *env, const char *exception, const char* msg);
+int      SDL_JNI_ThrowIllegalStateException(JNIEnv *env, const char* msg);
 
 jobject SDL_JNI_NewObjectAsGlobalRef(JNIEnv *env, jclass clazz, jmethodID methodID, ...);
 
@@ -114,5 +115,35 @@ int     SDL_Android_GetApiLevel();
             return -1; \
         } \
     } while(0);
+
+#define JNI_CHECK_GOTO(condition__, env__, exception__, msg__, label__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                SDL_JNI_ThrowException(env__, exception__, msg__); \
+            } \
+            goto label__; \
+        } \
+    }while(0)
+
+#define JNI_CHECK_RET_VOID(condition__, env__, exception__, msg__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                SDL_JNI_ThrowException(env__, exception__, msg__); \
+            } \
+            return; \
+        } \
+    }while(0)
+
+#define JNI_CHECK_RET(condition__, env__, exception__, msg__, ret__) \
+    do { \
+        if (!(condition__)) { \
+            if (exception__) { \
+                SDL_JNI_ThrowException(env__, exception__, msg__); \
+            } \
+            return ret__; \
+        } \
+    }while(0)
 
 #endif

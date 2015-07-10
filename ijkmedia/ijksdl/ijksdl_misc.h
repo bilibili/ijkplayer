@@ -45,6 +45,10 @@
         return (retval__); \
     }
 
+#ifndef NELEM
+#define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
+#endif
+
 inline static void *mallocz(size_t size)
 {
     void *mem = malloc(size);

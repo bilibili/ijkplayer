@@ -64,6 +64,7 @@
 #include "ff_ffpipenode.h"
 #include "ff_ffplay_debug.h"
 #include "ijkmeta.h"
+#include "ijksdl/ijksdl_log.h"
 
 // FIXME: 9 work around NDKr8e or gcc4.7 bug
 // isnan() may not recognize some double NAN, so we test both double and float

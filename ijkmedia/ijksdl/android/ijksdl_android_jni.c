@@ -82,11 +82,6 @@ jint SDL_JNI_SetupThreadEnv(JNIEnv **p_env)
     return -1;
 }
 
-void SDL_JNI_ThrowException(JNIEnv *env, const char* msg)
-{
-    jniThrowException(env, "java/lang/IllegalStateException", msg);
-}
-
 jboolean SDL_JNI_RethrowException(JNIEnv *env)
 {
     if ((*env)->ExceptionCheck(env)) {
@@ -106,6 +101,43 @@ jboolean SDL_JNI_CatchException(JNIEnv *env)
     }
 
     return JNI_FALSE;
+}
+
+int SDL_JNI_ThrowException(JNIEnv* env, const char* className, const char* msg)
+{
+    if ((*env)->ExceptionCheck(env)) {
+        jthrowable exception = (*env)->ExceptionOccurred(env);
+        (*env)->ExceptionClear(env);
+
+        if (exception != NULL) {
+            ALOGW("Discarding pending exception (%s) to throw", className);
+            (*env)->DeleteLocalRef(env, exception);
+        }
+    }
+
+    jclass exceptionClass = (*env)->FindClass(env, className);
+    if (exceptionClass == NULL) {
+        ALOGE("Unable to find exception class %s", className);
+        /* ClassNotFoundException now pending */
+        goto fail;
+    }
+
+    if ((*env)->ThrowNew(env, exceptionClass, msg) != JNI_OK) {
+        ALOGE("Failed throwing '%s' '%s'", className, msg);
+        /* an exception, most likely OOM, will now be pending */
+        goto fail;
+    }
+
+    return 0;
+fail:
+    if (exceptionClass)
+        (*env)->DeleteLocalRef(env, exceptionClass);
+    return -1;
+}
+
+int SDL_JNI_ThrowIllegalStateException(JNIEnv *env, const char* msg)
+{
+    return SDL_JNI_ThrowException(env, "java/lang/IllegalStateException", msg);
 }
 
 jobject SDL_JNI_NewObjectAsGlobalRef(JNIEnv *env, jclass clazz, jmethodID methodID, ...)

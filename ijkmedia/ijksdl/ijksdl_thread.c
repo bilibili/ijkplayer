@@ -23,6 +23,7 @@
 
 #include <errno.h>
 #include <assert.h>
+#include <unistd.h>
 #include "ijksdl_inc_internal.h"
 #include "ijksdl_thread.h"
 

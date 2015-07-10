@@ -25,7 +25,6 @@
 
 #include <assert.h>
 #include "ijksdl_android_jni.h"
-#include "ijkutil/ijkutil.h"
 #include "../ijksdl_inc_internal.h"
 #include "../ijksdl_audio.h"
 
