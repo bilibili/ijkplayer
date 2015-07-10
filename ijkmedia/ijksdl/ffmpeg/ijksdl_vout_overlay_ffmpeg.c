@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "../ijksdl_stdinc.h"
+#include "../ijksdl_misc.h"
 #include "../ijksdl_mutex.h"
 #include "../ijksdl_vout_internal.h"
 #include "../ijksdl_video.h"

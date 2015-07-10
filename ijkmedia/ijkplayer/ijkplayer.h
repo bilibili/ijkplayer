@@ -26,7 +26,6 @@
 #include <stdbool.h>
 #include "ff_ffmsg_queue.h"
 
-#include "ijkutil/ijkutil.h"
 #include "ijkmeta.h"
 
 #ifndef MPTRACE

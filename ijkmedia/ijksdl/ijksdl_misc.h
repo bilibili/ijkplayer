@@ -1,5 +1,5 @@
 /*****************************************************************************
- * loghelper.c
+ * ijksdl_misc.h
  *****************************************************************************
  *
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -21,4 +21,46 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "loghelp.h"
+#ifndef IJKSDL__IJKSDL_MISC_H
+#define IJKSDL__IJKSDL_MISC_H
+
+#include <stdlib.h>
+#include <memory.h>
+
+#ifndef IJKMAX
+#define IJKMAX(a, b)    ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef IJKMIN
+#define IJKMIN(a, b)    ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef IJKALIGN
+#define IJKALIGN(x, align) ((( x ) + (align) - 1) / (align) * (align))
+#endif
+
+#define IJK_CHECK_RET(condition__, retval__, ...) \
+    if (!(condition__)) { \
+        ALOGE(__VA_ARGS__); \
+        return (retval__); \
+    }
+
+inline static void *mallocz(size_t size)
+{
+    void *mem = malloc(size);
+    if (!mem)
+        return mem;
+
+    memset(mem, 0, size);
+    return mem;
+}
+
+inline static void freep(void **mem)
+{
+    if (mem && *mem) {
+        free(*mem);
+        *mem = NULL;
+    }
+}
+
+#endif

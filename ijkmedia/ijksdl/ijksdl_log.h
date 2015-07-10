@@ -1,8 +1,8 @@
 /*****************************************************************************
- * loghelper.h
+ * ijksdl_log.h
  *****************************************************************************
  *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,14 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKUTIL_IOS__LOGHELP_H
-#define IJKUTIL_IOS__LOGHELP_H
+#ifndef IJKSDL__IJKSDL_LOG_H
+#define IJKSDL__IJKSDL_LOG_H
 
 #include <stdio.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define IJK_LOG_TAG "IJKMEDIA"
 
@@ -57,9 +53,5 @@ extern "C" {
 #define ALOGW(...)  ALOG(IJK_LOG_WARN,      IJK_LOG_TAG, __VA_ARGS__)
 #define ALOGE(...)  ALOG(IJK_LOG_ERROR,     IJK_LOG_TAG, __VA_ARGS__)
 #define LOG_ALWAYS_FATAL(...)   do { ALOGE(__VA_ARGS__); exit(1); } while (0)
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

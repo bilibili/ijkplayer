@@ -24,6 +24,8 @@
 #ifndef IJKSDL__IJKSDL_VOUT_INTERNAL_H
 #define IJKSDL__IJKSDL_VOUT_INTERNAL_H
 
+#include <stdlib.h>
+#include <string.h>
 #include "ijksdl_vout.h"
 
 inline static SDL_Vout *SDL_Vout_CreateInternal(size_t opaque_size)
@@ -87,7 +89,5 @@ inline static void SDL_VoutOverlay_FreeInternal(SDL_VoutOverlay *overlay)
     memset(overlay, 0, sizeof(SDL_VoutOverlay));
     free(overlay);
 }
-
-#define SDLTRACE ALOGW
 
 #endif

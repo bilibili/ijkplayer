@@ -23,8 +23,8 @@
  */
 
 #import "IJKSDLAudioUnitController.h"
-#include "ijkutil/ijkutil.h"
 #import "IJKSDLAudioKit.h"
+#include "ijksdl/ijksdl_log.h"
 
 #import <AVFoundation/AVFoundation.h>
 
