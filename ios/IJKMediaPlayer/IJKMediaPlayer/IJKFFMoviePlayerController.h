@@ -84,6 +84,11 @@
 
 + (void)setLogReport:(BOOL)preferLogReport;
 
+//new API for back play
+- (void)backPlayWithABS:(long long)absTime;//绝对时间
+- (void)backPlayWithREL:(NSTimeInterval)relTime;//相对时间
+- (void)backLivePlay;
+
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
 

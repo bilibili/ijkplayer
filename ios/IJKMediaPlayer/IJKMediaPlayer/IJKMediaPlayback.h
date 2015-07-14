@@ -48,6 +48,11 @@ typedef NS_ENUM(NSInteger, IJKMPMovieSourceType) {
 
 - (void)black_screen;
 
+//new API for back play
+- (void)backPlayWithABS:(long long)absTime;//绝对时间
+- (void)backPlayWithREL:(NSTimeInterval)relTime;//相对时间
+- (void)backLivePlay;
+
 @property(nonatomic, readonly)  UIView *view;
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;
 @property(nonatomic, readonly)  NSTimeInterval duration;
@@ -71,8 +76,6 @@ typedef NS_ENUM(NSInteger, IJKMPMovieSourceType) {
 @property(nonatomic) MPMovieControlStyle controlStyle;
 @property(nonatomic) MPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;
-
-@property(nonatomic) IJKMPMovieSourceType movieSourceType;
 
 #pragma mark Notifications
 

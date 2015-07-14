@@ -33,6 +33,8 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
@@ -93,6 +95,12 @@ public class MediaController extends FrameLayout {
     private static final int SHOW_PROGRESS = 2;
     private boolean mFromXml = false;
     private ImageButton mPauseButton;
+    
+    //new buttons
+    private Button mBackLiveButton;
+    private Button mBackPlayABSButton;
+    private EditText mBackPlayABSTimeEditText;
+    private Button mBackPlayRELButton;
 
     private AudioManager mAM;
 
@@ -123,7 +131,7 @@ public class MediaController extends FrameLayout {
 
     private void initFloatingWindow() {
         mWindow = new PopupWindow(mContext);
-        mWindow.setFocusable(false);
+        mWindow.setFocusable(/*false*/true);
         mWindow.setBackgroundDrawable(null);
         mWindow.setOutsideTouchable(true);
         mAnimStyle = android.R.style.Animation;
@@ -167,6 +175,31 @@ public class MediaController extends FrameLayout {
             mPauseButton.requestFocus();
             mPauseButton.setOnClickListener(mPauseListener);
         }
+        
+        //for back live play
+        mBackLiveButton = (Button)v.findViewById(R.id.mediacontroller_back_live);
+        if (mBackLiveButton != null) {
+        	mBackLiveButton.requestFocus();
+        	mBackLiveButton.setOnClickListener(mBackLiveListener);
+		}
+        //for back play abs
+        mBackPlayABSButton = (Button)v.findViewById(R.id.mediacontroller_backplay_abs);
+        if (mBackPlayABSButton != null) {
+        	mBackPlayABSButton.requestFocus();
+        	mBackPlayABSButton.setOnClickListener(mBackPlayABSListener);
+		}
+        
+        mBackPlayABSTimeEditText = (EditText)v.findViewById(R.id.mediacontroller_backplay_abstime);
+        if (mBackPlayABSTimeEditText!=null) {
+		}
+        
+        //for back play rel
+        mBackPlayRELButton = (Button)v.findViewById(R.id.mediacontroller_backplay_rel);
+        if (mBackPlayRELButton != null) {
+        	mBackPlayRELButton.requestFocus();
+        	mBackPlayRELButton.setOnClickListener(mBackPlayRELListener);
+		}
+        
 
         mProgress = (ProgressBar) v.findViewById(R.id.mediacontroller_seekbar);
         if (mProgress != null) {
@@ -185,6 +218,32 @@ public class MediaController extends FrameLayout {
         if (mFileName != null)
             mFileName.setText(mTitle);
     }
+    
+    private View.OnClickListener mBackLiveListener = new View.OnClickListener() {
+        public void onClick(View v) {
+        	if (mPlayer!=null) {
+        		mPlayer.backLivePlay();
+			}
+        }
+    };
+    private View.OnClickListener mBackPlayABSListener = new View.OnClickListener() {
+        public void onClick(View v) {
+        	if (mPlayer!=null) {
+        		String absTimeString = mBackPlayABSTimeEditText.getText().toString();
+        		
+        		mPlayer.backPlayWithABS( Long.parseLong(absTimeString));
+			}
+        }
+    };
+    private View.OnClickListener mBackPlayRELListener = new View.OnClickListener() {
+        public void onClick(View v) {
+        	if (mPlayer!=null) {
+        		String relTimeString = mBackPlayABSTimeEditText.getText().toString();
+        		
+        		mPlayer.backPlayWithREL( Long.parseLong(relTimeString));
+			}
+        }
+    };
 
     public void setMediaPlayer(MediaPlayerControl player) {
         mPlayer = player;
@@ -262,7 +321,8 @@ public class MediaController extends FrameLayout {
      *            The timeout in milliseconds. Use 0 to show the controller
      *            until hide() is called.
      */
-    public void show(int timeout) {
+    @SuppressLint("NewApi")
+	public void show(int timeout) {
         if (!mShowing && mAnchor != null && mAnchor.getWindowToken() != null) {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH){
                 mAnchor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
@@ -303,7 +363,8 @@ public class MediaController extends FrameLayout {
         return mShowing;
     }
 
-    public void hide() {
+    @SuppressLint("NewApi")
+	public void hide() {
         if (mAnchor == null)
             return;
 
@@ -556,6 +617,10 @@ public class MediaController extends FrameLayout {
         boolean canSeekBackward();
 
         boolean canSeekForward();
+        
+        //new API
+        void backPlayWithABS(long absTime);
+        void backPlayWithREL(long relTime);
+        void backLivePlay();
     }
-
 }

@@ -9,5 +9,16 @@
     <string name="vitamio_videoview_error_text_unknown">Sorry, this video cannot be played.</string>
     <string name="vitamio_videoview_error_button">OK</string>
     <string name="mediacontroller_play_pause">Play/Pause</string>
+    
+    <string name="mediacontroller_backplay_abs">ABS</string>
+    <string name="BackPlayABS">ABS</string>
+    
+    <string name="mediacontroller_backplay_rel">REL</string>
+    <string name="BackPlayREL">REL</string>
+    
+    <string name="mediacontroller_back_live">LIVE</string>
+    <string name="BackLivePlay">LIVE</string>
+    
+    <string name="BackPlayABSTime">600</string>
 
 </resources>

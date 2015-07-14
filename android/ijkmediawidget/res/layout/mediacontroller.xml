@@ -8,7 +8,7 @@
     android:layout_marginRight="0.0dip"
     android:background="@drawable/mediacontroller_bg"
     android:orientation="horizontal" >
-
+    
     <ImageButton
         android:id="@+id/mediacontroller_play_pause"
         android:layout_width="54.6dip"
@@ -21,6 +21,56 @@
         android:contentDescription="@string/mediacontroller_play_pause"
         android:gravity="center"
         android:src="@drawable/mediacontroller_pause_button" />
+    
+    <Button
+        android:id="@+id/mediacontroller_back_live"
+        android:layout_width="32dip"
+        android:layout_height="32dip"
+        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="70.0dip"
+        android:background="#00000000"
+        android:contentDescription="@string/mediacontroller_back_live"
+        android:gravity="center"
+        android:text="@string/BackLivePlay" />    
+    
+    
+    <Button
+        android:id="@+id/mediacontroller_backplay_abs"
+        android:layout_width="32dip"
+        android:layout_height="32dip"
+        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="110.0dip"
+        android:background="#00000000"
+        android:contentDescription="@string/mediacontroller_backplay_abs"
+        android:gravity="center"
+        android:text="@string/BackPlayABS" />
+    
+    <EditText android:id="@+id/mediacontroller_backplay_abstime"
+        android:layout_width="240dip"
+        android:layout_height="40dip"
+        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="150.0dip"
+        android:gravity="center"
+        android:text="@string/BackPlayABSTime"/>   
+        
+     <Button
+        android:id="@+id/mediacontroller_backplay_rel"
+        android:layout_width="32dip"
+        android:layout_height="32dip"
+        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="400.0dip"
+        android:background="#00000000"
+        android:contentDescription="@string/mediacontroller_backplay_rel"
+        android:gravity="center"
+        android:text="@string/BackPlayREL" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -29,7 +79,7 @@
         android:layout_marginLeft="7.0dip"
         android:layout_marginRight="7.0dip"
         android:layout_marginTop="2dip"
-        android:layout_toLeftOf="@+id/mediacontroller_play_pause" >
+        android:layout_toLeftOf="@+id/mediacontroller_backplay_rel" >
 
         <RelativeLayout
             android:layout_width="match_parent"

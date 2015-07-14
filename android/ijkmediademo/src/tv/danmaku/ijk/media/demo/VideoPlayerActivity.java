@@ -40,14 +40,16 @@ public class VideoPlayerActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
-
+        
         mVideoPath = getIntent().getStringExtra("videoPath");
 
-        Intent intent = getIntent();
+/*        Intent intent = getIntent();
         String intentAction = intent.getAction();
         if (!TextUtils.isEmpty(intentAction) && intentAction.equals(Intent.ACTION_VIEW)) {
             mVideoPath = intent.getDataString();
-        }
+        }*/
+        
+//        mVideoPath = "rtmp://wspub.live.hupucdn.com/prod/slk";
 
         mBufferingIndicator = findViewById(R.id.buffering_indicator);
         mMediaController = new MediaController(this);
@@ -64,16 +66,14 @@ public class VideoPlayerActivity extends Activity {
         mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
         
 //        mVideoView.setVideoPath(mVideoPath);
-        mVideoView.setVideoToken(mVideoPath);
-    }
+        mVideoView.setVideoToken(mVideoPath);        
+}
     
 	private OnPreparedListener mPreparedListener = new OnPreparedListener() {
 
 		@Override
 		public void onPrepared(IMediaPlayer mp) {
 			Log.v("VideoPlayerActivity", "onPrepared");
-//	        mVideoView.requestFocus();
-//	        mVideoView.start();
 		}
 	};
 	
@@ -81,7 +81,7 @@ public class VideoPlayerActivity extends Activity {
 		@Override
 		public boolean onError(IMediaPlayer mp, int what, int extra) {
 			mVideoView.stopPlayback();
-			finish();
+ 			finish();
 			return true;
 		}
 	};
@@ -93,4 +93,14 @@ public class VideoPlayerActivity extends Activity {
 			finish();
 		}
 	};
+	
+    @Override  
+    protected void onResume() {
+        super.onResume();
+    }
+    
+    @Override  
+    protected void onPause() {
+        super.onPause();
+    }  
 }

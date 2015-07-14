@@ -29,6 +29,7 @@
     options.frameMaxWidth           = 960;
     options.autoReconnect           = NO;
     options.reportPlayInfo          = NO;
+    options.sourceType  = IJKMPMovieSourceTypeLowDelayLiveStreaming;
 
     return options;
 }

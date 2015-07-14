@@ -13,10 +13,13 @@
 		AB6319AB1B3D2DFB0025924F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB6319AA1B3D2DFB0025924F /* SystemConfiguration.framework */; };
 		AB6319AD1B3D2E1B0025924F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB6319AC1B3D2E1B0025924F /* Security.framework */; };
 		AB6319AF1B3D2E3A0025924F /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB6319AE1B3D2E3A0025924F /* MobileCoreServices.framework */; };
-		ABBADD481AF9C336006B688B /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ABBADD471AF9C336006B688B /* libstdc++.dylib */; };
 		ABCC3F7D1AF8594700214BBE /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */; };
 		ABD5DF081AE4D43D00778032 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABD5DF051AE4D43D00778032 /* MainViewController.xib */; };
 		ABD5DF091AE4D43D00778032 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ABD5DF061AE4D43D00778032 /* MainViewController.m */; };
+		ABF147161B4A5DF4000DCE11 /* libWSPX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABF147151B4A5DF4000DCE11 /* libWSPX.a */; };
+		ABF147181B4A60B1000DCE11 /* libstdc++.6.0.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ABF147171B4A60B1000DCE11 /* libstdc++.6.0.9.dylib */; };
+		ABF1471C1B4A61D4000DCE11 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABF1471B1B4A61D4000DCE11 /* CoreTelephony.framework */; };
+		ABF147201B4A631D000DCE11 /* libresolv.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ABF1471F1B4A631D000DCE11 /* libresolv.9.dylib */; };
 		E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E60E8C2919EF70BB005B5B6E /* CoreMedia.framework */; };
 		E60FFBE418BF695700825D7F /* libIJKMediaPlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6D74F2E18A5F94B00165BFD /* libIJKMediaPlayer.a */; };
 		E612EAE517F7E0F800BEE660 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E612EAE417F7E0F800BEE660 /* MediaPlayer.framework */; };
@@ -74,11 +77,14 @@
 		AB6319AA1B3D2DFB0025924F /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		AB6319AC1B3D2E1B0025924F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		AB6319AE1B3D2E3A0025924F /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
-		ABBADD471AF9C336006B688B /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
 		ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		ABD5DF051AE4D43D00778032 /* MainViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainViewController.xib; sourceTree = "<group>"; };
 		ABD5DF061AE4D43D00778032 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		ABD5DF071AE4D43D00778032 /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
+		ABF147151B4A5DF4000DCE11 /* libWSPX.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libWSPX.a; path = maa/libWSPX.a; sourceTree = "<group>"; };
+		ABF147171B4A60B1000DCE11 /* libstdc++.6.0.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.0.9.dylib"; path = "usr/lib/libstdc++.6.0.9.dylib"; sourceTree = SDKROOT; };
+		ABF1471B1B4A61D4000DCE11 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
+		ABF1471F1B4A631D000DCE11 /* libresolv.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.9.dylib; path = usr/lib/libresolv.9.dylib; sourceTree = SDKROOT; };
 		E60E8C2719EF70A7005B5B6E /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		E60E8C2919EF70BB005B5B6E /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		E612EAE417F7E0F800BEE660 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
@@ -124,13 +130,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABF147201B4A631D000DCE11 /* libresolv.9.dylib in Frameworks */,
+				ABF1471C1B4A61D4000DCE11 /* CoreTelephony.framework in Frameworks */,
+				ABF147181B4A60B1000DCE11 /* libstdc++.6.0.9.dylib in Frameworks */,
+				ABF147161B4A5DF4000DCE11 /* libWSPX.a in Frameworks */,
 				AB6319AF1B3D2E3A0025924F /* MobileCoreServices.framework in Frameworks */,
 				AB6319AD1B3D2E1B0025924F /* Security.framework in Frameworks */,
 				AB6319AB1B3D2DFB0025924F /* SystemConfiguration.framework in Frameworks */,
 				AB09E87F1B3C079E006E0985 /* CFNetwork.framework in Frameworks */,
 				AB09E87B1B3C05DC006E0985 /* libxml2.dylib in Frameworks */,
 				AB4939D61AFB207E00E71A34 /* CoreVideo.framework in Frameworks */,
-				ABBADD481AF9C336006B688B /* libstdc++.dylib in Frameworks */,
 				ABCC3F7D1AF8594700214BBE /* VideoToolbox.framework in Frameworks */,
 				E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */,
 				E61B45AE19EF7021002792EC /* AVFoundation.framework in Frameworks */,
@@ -195,13 +204,16 @@
 		E6903EFE17EAF70200CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				ABF1471F1B4A631D000DCE11 /* libresolv.9.dylib */,
+				ABF1471B1B4A61D4000DCE11 /* CoreTelephony.framework */,
+				ABF147171B4A60B1000DCE11 /* libstdc++.6.0.9.dylib */,
+				ABF147151B4A5DF4000DCE11 /* libWSPX.a */,
 				AB6319AE1B3D2E3A0025924F /* MobileCoreServices.framework */,
 				AB6319AC1B3D2E1B0025924F /* Security.framework */,
 				AB6319AA1B3D2DFB0025924F /* SystemConfiguration.framework */,
 				AB09E87E1B3C079E006E0985 /* CFNetwork.framework */,
 				AB09E87A1B3C05DC006E0985 /* libxml2.dylib */,
 				AB4939D51AFB207E00E71A34 /* CoreVideo.framework */,
-				ABBADD471AF9C336006B688B /* libstdc++.dylib */,
 				ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */,
 				E63FC29917F062E8003551EB /* libbz2.dylib */,
 				E63FC29517F060A7003551EB /* libz.dylib */,
@@ -428,6 +440,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					./maa,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				ONLY_ACTIVE_ARCH = YES;
@@ -457,6 +470,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					./maa,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
@@ -479,10 +493,15 @@
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/IJKMediaDemo/maa",
+					"$(PROJECT_DIR)/maa",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
+				VALID_ARCHS = "arm64 armv7 armv7s";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -500,10 +519,15 @@
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/IJKMediaDemo/maa",
+					"$(PROJECT_DIR)/maa",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
+				VALID_ARCHS = "arm64 armv7 armv7s";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

@@ -10,6 +10,8 @@
 //#import "IJKMoviePlayerViewController.h"
 #import "MainViewController.h"
 
+//#import "WSPX.h"
+
 @implementation IJKAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -22,6 +24,9 @@
     self.window.rootViewController = self.viewController;
 
     [self.window makeKeyAndVisible];
+    
+//    [WSPX start];
+    
     return YES;
 }
 
@@ -45,11 +50,13 @@
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+//    [WSPX activate];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+//    [WSPX stop];
 }
 
 @end

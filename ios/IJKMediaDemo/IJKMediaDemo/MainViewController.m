@@ -39,6 +39,8 @@
 
 -(IBAction)playWSButtonAction:(id)sender
 {
+//     [[[UIApplication sharedApplication] keyWindow] endEditing:YES];
+
     IJKVideoViewController *viewController;
     viewController = [[IJKVideoViewController alloc] initView];
     [viewController setUrlString:self.wsUrlTextField.text UrlSourceType:IJKMPMovieSourceTypeLowDelayLiveStreaming];

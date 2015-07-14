@@ -76,13 +76,13 @@
                 </textField>
                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Ofm-GN-crP">
                     <rect key="frame" x="110" y="0.0" width="272" height="30"/>
-                    <string key="text">vod://kanqiu/test_999?ac=pull&amp;m=720p&amp;st=1435904714&amp;td=600000&amp;u=12345678&amp;ve=ws&amp;k=368a643499ff07a8c4026796680be659ac67e1614cb8794bd77f2239fc668c04</string>
+                    <string key="text">vod://kanqiu/test_shiyi?ac=pull&amp;m=720p&amp;st=1436859023&amp;td=60000&amp;u=12345678&amp;ve=ws&amp;k=0f062b3824a5e0f787e1e35ff81f17a2ba025ff7f693c69460ec989b5f68eef8</string>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-            <point key="canvasLocation" x="99" y="248"/>
+            <point key="canvasLocation" x="3" y="246"/>
         </view>
     </objects>
 </document>

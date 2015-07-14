@@ -1,5 +1,7 @@
 package tv.danmaku.ijk.media.demo;
 
+import com.mato.sdk.proxy.Proxy;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +15,9 @@ public class MainActivity extends Activity {
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		Proxy.start(this);
+		
 		setContentView(R.layout.main);
 		
         Button btn = (Button) this.findViewById(R.id.StartPlay1);
@@ -23,7 +28,7 @@ public class MainActivity extends Activity {
 //        et.setText("http://v.iask.com/v_play_ipad.php?vid=99264895");
 //        et.setText("rtmp://wsvideopull.smartcourt.cn/prod/sh_loft_b01ll");
 //        et.setText("/sdcard/test.mp4");
-        et.setText("vod://kanqiu/test_999?ac=pull&m=720p&st=1435904714&td=600000&u=12345678&ve=ws&k=368a643499ff07a8c4026796680be659ac67e1614cb8794bd77f2239fc668c04");
+        et.setText("vod://kanqiu/test_shiyi?ac=pull&m=720p&st=1436859023&td=60000&u=12345678&ve=ws&k=0f062b3824a5e0f787e1e35ff81f17a2ba025ff7f693c69460ec989b5f68eef8");
 
         btn.setOnClickListener(new OnClickListener(){
 

@@ -20,6 +20,7 @@ package tv.danmaku.ijk.media.widget;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
@@ -264,7 +265,12 @@ public class VideoView extends SurfaceView implements
     	return cdnName;
     }
     
+    private String linkAddress = null;
+    private boolean isTokenMode = false;
+    private int rootDataSourceType;
     public void setVideoToken(String token) {
+    	isTokenMode = true;
+    	
 		String urlHeaderString = "http://192.168.9.117:8080/live/httpcdn?token=";
 		String tokenEncodedString;
 		try {
@@ -314,12 +320,13 @@ public class VideoView extends SurfaceView implements
 				}
 				
 				cdnName = cdnString;
+				linkAddress = linkString;
 				
-				try {
-					Thread.sleep(4000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+//				try {
+//					Thread.sleep(3000);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
 				
 //				setVideoPath("rtmp://wspub.live.hupucdn.com/prod/slk");
 				setVideoPath(linkString);
@@ -329,8 +336,7 @@ public class VideoView extends SurfaceView implements
 			public void onFailure(int statusCode, Header[] headers,
 					byte[] responseBody, Throwable error) {
 				Log.v(TAG, "onFailure");
-				Log.v(TAG, new String(responseBody));
-				
+
 	            if (mOnErrorListener != null) {
 	            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
 	            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
@@ -340,7 +346,71 @@ public class VideoView extends SurfaceView implements
 		});
 		
 		this.token = token;
+		rootDataSourceType = mDataSourceType;
 	}
+    
+    //new API for back play
+    public void backPlayWithABS(long absTime) //绝对时间
+    {
+    	if (!isTokenMode) return;
+    	
+    	//release live stream
+    	stopPlayback();
+    	
+    	//get vod url
+    	String vodUrl = null;
+    	if (this.cdnName.equals("ws")) {
+			String baseUrl = linkAddress.substring(0, linkAddress.indexOf("?"));
+			String vodBaseUrl = baseUrl.replace("rtmp://ws", "rtmp://wsshiyi");
+			String tailUrl = linkAddress.substring(linkAddress.indexOf("?")+1,linkAddress.length());
+			StringBuilder stringBuilder = new StringBuilder();
+			vodUrl = stringBuilder.append(vodBaseUrl).append("?wsStreamTimeABS=").append(absTime).append("&").append(tailUrl).toString();
+		}
+    	
+    	//start vod
+    	if (vodUrl!=null) {
+			mDataSourceType = VOD_STREAMING_TYPE;
+			setVideoPath(vodUrl);
+//			setVideoPath("http://live.3gv.ifeng.com/zixun.m3u8");
+		}
+    }
+    
+    public void backPlayWithREL(long relTime) //相对时间
+    {
+    	if (!isTokenMode) return;
+    	
+    	//release live stream
+    	stopPlayback();
+    	
+    	//get vod url
+    	String vodUrl = null;
+    	if (this.cdnName.equals("ws")) {
+			String baseUrl = linkAddress.substring(0, linkAddress.indexOf("?"));
+			String vodBaseUrl = baseUrl.replace("rtmp://ws", "rtmp://wsshiyi");
+			String tailUrl = linkAddress.substring(linkAddress.indexOf("?")+1,linkAddress.length());
+			StringBuilder stringBuilder = new StringBuilder();
+			vodUrl = stringBuilder.append(vodBaseUrl).append("?wsStreamTimeREL=").append(relTime).append("&").append(tailUrl).toString();
+		}
+    	
+    	//start vod
+    	if (vodUrl!=null) {
+			mDataSourceType = VOD_STREAMING_TYPE;
+			setVideoPath(vodUrl);
+		}
+    }
+    
+    public void backLivePlay()
+    {
+    	if (!isTokenMode) return;
+    	
+    	//release live stream
+    	stopPlayback();
+    	
+    	mDataSourceType = rootDataSourceType;
+    	
+    	this.setVideoToken(this.token);
+    }
+    //
     
     public void setVideoPath(String path) {
         setVideoURI(Uri.parse(path));
@@ -491,7 +561,10 @@ public class VideoView extends SurfaceView implements
         public void onPrepared(IMediaPlayer mp) {
             DebugLog.d(TAG, "onPrepared");
             
-            addOpenCountWithStream(token);
+            if (isTokenMode)
+            {
+            	addOpenCountWithStream(token);
+            }
             
             mCurrentState = STATE_PREPARED;
             mTargetState = STATE_PLAYING;
@@ -525,12 +598,13 @@ public class VideoView extends SurfaceView implements
                 start();
             }
             
-            //start info report
-            if (playerInfoReport==null) {
-            	playerInfoReport = new PlayerInfoReport(VideoView.this);
-            	playerInfoReport.startReport();
+            if (isTokenMode) {
+                //start info report
+                if (playerInfoReport==null) {
+                	playerInfoReport = new PlayerInfoReport(VideoView.this);
+                	playerInfoReport.startReport();
+    			}
 			}
-            
         }
     };
 
@@ -687,7 +761,81 @@ public class VideoView extends SurfaceView implements
     public void setOnInfoListener(OnInfoListener l) {
         mOnInfoListener = l;
     }
+    
+    private void openVideoWithToken(String token)
+    {
+		String urlHeaderString = "http://192.168.9.117:8080/live/httpcdn?token=";
+		String tokenEncodedString;
+		try {
+			tokenEncodedString = URLEncoder.encode(token, HTTP.UTF_8);
+		} catch (UnsupportedEncodingException e) {
+			tokenEncodedString = token;
+		}
+		
+		StringBuilder urlStringBuilder = new StringBuilder();
+		String encodedUrlString = urlStringBuilder.append(urlHeaderString).append(tokenEncodedString).toString();
+		Log.v(TAG, encodedUrlString);
+		
+		//async http request
+		AsyncHttpClient client = new AsyncHttpClient();
+		client.setURLEncodingEnabled(false);
+		client.get(encodedUrlString, new AsyncHttpResponseHandler() {
 
+			@Override
+			public void onSuccess(int statusCode, Header[] headers,
+					byte[] responseBody) {
+				Log.v(TAG, "onSuccess");
+				
+				String jsonData = new String(responseBody);
+				Log.v(TAG, jsonData);
+				
+				if (jsonData.isEmpty()) {
+		            if (mOnErrorListener != null) {
+		            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
+		            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
+		            }
+		            return;
+				}
+				
+				Gson gson = new Gson();
+				PlayerUrlInfo urlInfo = new PlayerUrlInfo();
+				urlInfo = gson.fromJson(jsonData, PlayerUrlInfo.class);
+				
+				String cdnString = urlInfo.getCdn();
+				String linkString = urlInfo.getLink();
+				
+				if (cdnString==null || linkString==null) {
+		            if (mOnErrorListener != null) {
+		            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
+		            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
+		            }
+		            return;
+				}
+				
+				cdnName = cdnString;
+				linkAddress = linkString;
+				
+//				setVideoPath("rtmp://wspub.live.hupucdn.com/prod/slk");
+//				setVideoPath(linkString);
+				
+				mUri = Uri.parse(linkAddress);
+				openVideo();
+			}
+
+			@Override
+			public void onFailure(int statusCode, Header[] headers,
+					byte[] responseBody, Throwable error) {
+				Log.v(TAG, "onFailure");
+
+	            if (mOnErrorListener != null) {
+	            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
+	            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
+	            }
+	            return;
+			}
+		});
+    }
+    
     SurfaceHolder.Callback mSHCallback = new SurfaceHolder.Callback() {
         public void surfaceChanged(SurfaceHolder holder, int format, int w,
                 int h) {
@@ -719,7 +867,12 @@ public class VideoView extends SurfaceView implements
                 mMediaPlayer.setDisplay(mSurfaceHolder);
                 resume();
             } else {
-                openVideo();
+//                openVideo();
+            	if (isTokenMode && mDataSourceType!=VOD_STREAMING_TYPE) {
+            		openVideoWithToken(token);
+				}else {
+					openVideo();
+				}
             }
         }
 
@@ -931,13 +1084,17 @@ public class VideoView extends SurfaceView implements
     }
     
     //add by william
-    private int mDataSourceType = VOD_STREAMING_TYPE;
+    private int mDataSourceType = LOWDELAY_LIVE_STREAMING_TYPE;
     public static final int LOWDELAY_LIVE_STREAMING_TYPE = 0;
     public static final int HIGHDELAY_LIVE_STREAMING_TYPE = 1;
     public static final int VOD_STREAMING_TYPE = 2;
     public void setDataSourceType(int type)
     {
     	mDataSourceType = type;
+    }
+    public int getDataSourceType()
+    {
+    	return mDataSourceType;
     }
     
     private boolean isMediaCodecEnabled = false;
