@@ -33,6 +33,7 @@
     AudioQueueRef _audioQueueRef;
     AudioQueueBufferRef _audioQueueBufferRefArray[kIJKAudioQueueNumberBuffers];
     BOOL _isPaused;
+    BOOL _isStopped;
 
     volatile BOOL _isAborted;
 }
@@ -94,6 +95,8 @@
             return nil;
         }
          */
+
+        _isStopped = NO;
     }
     return self;
 }
@@ -143,18 +146,23 @@
     if (!_audioQueueRef)
         return;
 
-    AudioQueueStop(_audioQueueRef, false);
-    AudioQueueDispose(_audioQueueRef, false);
+    if (_isStopped)
+        return;
+
+    AudioQueuePause(_audioQueueRef);
+    [self performSelectorInBackground:@selector(waitForStop) withObject:nil];
+}
+
+- (void)waitForStop
+{
+    AudioQueueStop(_audioQueueRef, YES);
+    AudioQueueDispose(_audioQueueRef, YES);
+    _audioQueueRef = nil;
 }
 
 - (void)close
 {
     [self stop];
-
-    if (!_audioQueueRef)
-        return;
-
-    _audioQueueRef = NULL;
 }
 
 static void IJKSDLAudioQueueOuptutCallback(void * inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer) {
