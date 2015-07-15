@@ -27,6 +27,7 @@
 #include "../../pipeline/ffpipenode_ffplay_vdec.h"
 #include "../../ff_ffplay.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
+#include "ijksdl/android/ijksdl_android.h"
 
 static SDL_Class g_pipeline_class = {
     .name = "ffpipeline_android_media",
@@ -40,7 +41,6 @@ typedef struct IJKFF_Pipeline_Opaque {
 
     bool         (*mediacodec_select_callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc);
     void          *mediacodec_select_callback_opaque;
-    bool           mediacodec_enabled;
 
     SDL_Vout      *weak_vout;
 } IJKFF_Pipeline_Opaque;
@@ -67,10 +67,11 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
     IJKFF_Pipenode        *node = NULL;
 
-    if (opaque->mediacodec_enabled)
+    if (ffp->mediacodec)
         node = ffpipenode_create_video_decoder_from_android_mediacodec(ffp, pipeline, opaque->weak_vout);
-    if (!node)
+    if (!node) {
         node = ffpipenode_create_video_decoder_from_ffplay(ffp);
+    }
 
     return node;
 }
@@ -79,6 +80,16 @@ static IJKFF_Pipenode *func_open_video_output(IJKFF_Pipeline *pipeline, FFPlayer
 {
     return ffpipenode_create_video_output_from_android_mediacodec(ffp);
 }
+
+static SDL_Aout *func_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
+{
+    if (ffp->opensles) {
+        return SDL_AoutAndroid_CreateForOpenSLES();
+    } else {
+        return SDL_AoutAndroid_CreateForAudioTrack();
+    }
+}
+
 
 inline static bool check_ffpipeline(IJKFF_Pipeline* pipeline, const char *func_name)
 {
@@ -113,6 +124,7 @@ IJKFF_Pipeline *ffpipeline_create_from_android(FFPlayer *ffp)
     pipeline->func_destroy            = func_destroy;
     pipeline->func_open_video_decoder = func_open_video_decoder;
     pipeline->func_open_video_output  = func_open_video_output;
+    pipeline->func_open_audio_output  = func_open_audio_output;
 
     return pipeline;
 fail:
@@ -207,15 +219,6 @@ void ffpipeline_set_mediacodec_select_callback(IJKFF_Pipeline* pipeline, bool (*
 
     pipeline->opaque->mediacodec_select_callback        = callback;
     pipeline->opaque->mediacodec_select_callback_opaque = opaque;
-}
-
-void ffpipeline_set_mediacodec_enabled(IJKFF_Pipeline* pipeline, bool enabled)
-{
-    ALOGD("%s\n", __func__);
-    if (!check_ffpipeline(pipeline, __func__))
-        return;
-
-    pipeline->opaque->mediacodec_enabled = enabled;
 }
 
 bool ffpipeline_select_mediacodec(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo_context *mcc)

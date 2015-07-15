@@ -1,25 +1,47 @@
-//
-//  IJKMoviePlayerController.m
-//  IJKMediaDemo
-//
-//  Created by ZhangRui on 13-9-21.
-//  Copyright (c) 2013年 bilibili. All rights reserved.
-//
+/*
+ * Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #import "IJKMoviePlayerViewController.h"
 #import "IJKMediaControl.h"
 #import "IJKCommon.h"
 #import "IJKMediaPlayer/IJKMediaPlayer.h"
+#import "IJKDemoHistory.h"
 
 @implementation IJKVideoViewController
 
-- (id)initView
+- (void)dealloc
 {
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        return [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
-    } else {
-        return [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
+}
+
++ (void)presentFromViewController:(UIViewController *)viewController withTitle:(NSString *)title URL:(NSURL *)url completion:(void (^)())completion {
+    IJKDemoHistoryItem *historyItem = [[IJKDemoHistoryItem alloc] init];
+    
+    historyItem.title = title;
+    historyItem.url = url;
+    [[IJKDemoHistory instance] add:historyItem];
+    
+    [viewController presentViewController:[[IJKVideoViewController alloc] initWithURL:url] animated:YES completion:completion];
+}
+
+- (instancetype)initWithURL:(NSURL *)url {
+    self = [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
+    if (self) {
+        self.url = url;
     }
+    return self;
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -36,30 +58,41 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
 
-    [[UIApplication sharedApplication] setStatusBarHidden:YES];
-    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
+//    [[UIApplication sharedApplication] setStatusBarHidden:YES];
+//    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
 
-    NSURL *theMovieURL = [NSURL URLWithString:@"http://vhotwsh.video.qq.com/flv/32/146/r0015d10iwu.p203.1.mp4?vkey=68023055CEC9CC9E1D988B0E71E4B58C38B0374F1CB9805F4A1901D8E87B42137DD9680CF88D3685C3A59F030BAE55AA2E7238551DCB6BFF&fmt=sd&type=mp4"];
-
+#ifdef DEBUG
     [IJKFFMoviePlayerController setLogReport:YES];
-    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:nil];
+    [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_DEBUG];
+#else
+    [IJKFFMoviePlayerController setLogReport:NO];
+    [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_INFO];
+#endif
+
+    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:nil];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
+    self.player.scalingMode = MPMovieScalingModeAspectFit;
 
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
     [self.view addSubview:self.mediaControl];
 
     self.mediaControl.delegatePlayer = self.player;
+}
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
     [self installMovieNotificationObservers];
 
     [self.player prepareToPlay];
     [self.player play];
 }
 
-- (void)dealloc
-{
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    
     [self.player shutdown];
     [self removeMovieNotificationObservers];
 }
@@ -97,7 +130,9 @@
 
 - (IBAction)onClickBack:(id)sender
 {
-    exit(0);
+    if (self.presentingViewController) {
+        [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+    }
 }
 
 - (IBAction)onClickPlay:(id)sender
@@ -110,6 +145,32 @@
 {
     [self.player pause];
     [self.mediaControl refreshMediaControl];
+}
+
+- (IBAction)didSliderTouchDown
+{
+    [self.mediaControl beginDragMediaSlider];
+}
+
+- (IBAction)didSliderTouchCancel
+{
+    [self.mediaControl endDragMediaSlider];
+}
+
+- (IBAction)didSliderTouchUpOutside
+{
+    [self.mediaControl endDragMediaSlider];
+}
+
+- (IBAction)didSliderTouchUpInside
+{
+    self.player.currentPlaybackTime = self.mediaControl.mediaProgressSlider.value;
+    [self.mediaControl endDragMediaSlider];
+}
+
+- (IBAction)didSliderValueChanged
+{
+    [self.mediaControl continueDragMediaSlider];
 }
 
 - (void)loadStateDidChange:(NSNotification*)notification

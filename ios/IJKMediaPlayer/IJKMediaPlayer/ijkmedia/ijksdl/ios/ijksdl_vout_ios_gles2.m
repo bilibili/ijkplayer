@@ -23,7 +23,6 @@
 #import "ijksdl_vout_ios_gles2.h"
 
 #include <assert.h>
-#include "ijkutil/ijkutil.h"
 #include "ijksdl/ijksdl_vout.h"
 #include "ijksdl/ijksdl_vout_internal.h"
 #include "ijksdl/ffmpeg/ijksdl_vout_overlay_ffmpeg.h"

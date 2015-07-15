@@ -20,9 +20,6 @@
     <string name="abc_action_bar_home_description" msgid="4600421777120114993">"转到主屏幕"</string>
     <string name="abc_action_bar_up_description" msgid="1594238315039666878">"转到上一层级"</string>
     <string name="abc_action_menu_overflow_description" msgid="3588849162933574182">"更多选项"</string>
-    <string name="abc_toolbar_collapse_description" msgid="1603543279005712093">"收起"</string>
-    <string name="abc_action_bar_home_description_format" msgid="1397052879051804371">"%1$s：%2$s"</string>
-    <string name="abc_action_bar_home_subtitle_description_format" msgid="6623331958280229229">"%1$s - %2$s：%3$s"</string>
     <string name="abc_searchview_description_search" msgid="8264924765203268293">"搜索"</string>
     <string name="abc_searchview_description_query" msgid="2550479030709304392">"搜索查询"</string>
     <string name="abc_searchview_description_clear" msgid="3691816814315814921">"清除查询"</string>

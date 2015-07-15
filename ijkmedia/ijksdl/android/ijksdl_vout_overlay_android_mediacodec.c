@@ -23,11 +23,11 @@
 
 #include "ijksdl_vout_overlay_android_mediacodec.h"
 #include "ijksdl_codec_android_mediacodec.h"
+#include "ijksdl_inc_internal_android.h"
 #include "../ijksdl_stdinc.h"
 #include "../ijksdl_mutex.h"
 #include "../ijksdl_vout_internal.h"
 #include "../ijksdl_video.h"
-#include "ijkutil/ijklog.h"
 
 typedef struct SDL_VoutOverlay_Opaque {
     SDL_mutex *mutex;

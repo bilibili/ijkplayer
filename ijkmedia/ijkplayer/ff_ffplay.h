@@ -31,6 +31,7 @@
 void      ffp_global_init();
 void      ffp_global_uninit();
 void      ffp_global_set_log_report(int use_report);
+void      ffp_global_set_log_level(int log_level);
 void      ffp_io_stat_register(void (*cb)(const char *url, int type, int bytes));
 void      ffp_io_stat_complete_register(void (*cb)(const char *url,
                                                    int64_t read_bytes, int64_t total_size,
@@ -43,15 +44,9 @@ void      ffp_reset(FFPlayer *ffp);
 
 /* set options before ffp_prepare_async_l() */
 void      ffp_set_format_callback(FFPlayer *ffp, ijk_format_control_message cb, void *opaque);
-void      ffp_set_format_option(FFPlayer *ffp, const char *name, const char *value);
-void      ffp_set_codec_option(FFPlayer *ffp, const char *name, const char *value);
-void      ffp_set_sws_option(FFPlayer *ffp, const char *name, const char *value);
-void      ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc);
-void      ffp_set_picture_queue_capicity(FFPlayer *ffp, int frame_count);
-void      ffp_set_max_fps(FFPlayer *ffp, int max_fps);
-void      ffp_set_framedrop(FFPlayer *ffp, int framedrop);
-void      ffp_set_auto_play_on_prepared(FFPlayer *ffp, int auto_play_on_prepared);
-void      ffp_set_max_buffer_size(FFPlayer *ffp, int max_buffer_size);
+
+void      ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const char *value);
+void      ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64_t value);
 
 int       ffp_get_video_codec_info(FFPlayer *ffp, char **codec_info);
 int       ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info);
@@ -84,6 +79,9 @@ bool      ffp_is_flush_packet(AVPacket *pkt);
 
 Frame    *ffp_frame_queue_peek_writable(FrameQueue *f);
 void      ffp_frame_queue_push(FrameQueue *f);
+
+int       ffp_get_master_sync_type(VideoState *is);
+double    ffp_get_master_clock(VideoState *is);
 
 void      ffp_toggle_buffering_l(FFPlayer *ffp, int start_buffering);
 void      ffp_toggle_buffering(FFPlayer *ffp, int start_buffering);

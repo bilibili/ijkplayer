@@ -105,29 +105,36 @@ FF_BUILD_NAME="unknown"
 FF_XCRUN_PLATFORM="iPhoneOS"
 FF_XCRUN_OSVERSION=
 FF_GASPP_EXPORT=
+FF_DEP_OPENSSL_INC=
+FF_DEP_OPENSSL_LIB=
 
 if [ "$FF_ARCH" = "i386" ]; then
     FF_BUILD_NAME="ffmpeg-i386"
+    FF_BUILD_NAME_OPENSSL=openssl-i386
     FF_XCRUN_PLATFORM="iPhoneSimulator"
     FF_XCRUN_OSVERSION="-mios-simulator-version-min=5.1.1"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_SIMULATOR"
 elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_BUILD_NAME="ffmpeg-x86_64"
+    FF_BUILD_NAME_OPENSSL=openssl-x86_64
     FF_XCRUN_PLATFORM="iPhoneSimulator"
     FF_XCRUN_OSVERSION="-mios-simulator-version-min=7.0"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_SIMULATOR"
 elif [ "$FF_ARCH" = "armv7" ]; then
     FF_BUILD_NAME="ffmpeg-armv7"
+    FF_BUILD_NAME_OPENSSL=openssl-armv7
     FF_XCRUN_OSVERSION="-miphoneos-version-min=5.1.1"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
 #    FFMPEG_CFG_CPU="--cpu=cortex-a8"
 elif [ "$FF_ARCH" = "armv7s" ]; then
     FF_BUILD_NAME="ffmpeg-armv7s"
+    FF_BUILD_NAME_OPENSSL=openssl-armv7s
     FFMPEG_CFG_CPU="--cpu=swift"
     FF_XCRUN_OSVERSION="-miphoneos-version-min=5.1.1"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
 elif [ "$FF_ARCH" = "arm64" ]; then
     FF_BUILD_NAME="ffmpeg-arm64"
+    FF_BUILD_NAME_OPENSSL=openssl-arm64
     FF_XCRUN_OSVERSION="-miphoneos-version-min=5.1.1"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
     FF_GASPP_EXPORT="GASPP_FIX_XCODE5=1"
@@ -168,9 +175,28 @@ FFMPEG_CFLAGS=
 FFMPEG_CFLAGS="$FFMPEG_CFLAGS -arch $FF_ARCH"
 FFMPEG_CFLAGS="$FFMPEG_CFLAGS $FF_XCRUN_OSVERSION"
 FFMPEG_CFLAGS="$FFMPEG_CFLAGS $FFMPEG_EXTRA_CFLAGS"
-FFMPEG_CXXFLAGS="$FFMPEG_CFLAGS"
 FFMPEG_LDFLAGS="$FFMPEG_CFLAGS"
+FFMPEG_DEP_LIBS=
 
+#--------------------
+echo "\n--------------------"
+echo "[*] check OpenSSL"
+echo "----------------------"
+FFMPEG_DEP_OPENSSL_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/include
+FFMPEG_DEP_OPENSSL_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/lib
+#--------------------
+# with openssl
+if [ -f "${FFMPEG_DEP_OPENSSL_LIB}/libssl.a" ]; then
+    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-openssl"
+
+    FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_OPENSSL_INC}"
+    FFMPEG_DEP_LIBS="$FFMPEG_CFLAGS -L${FFMPEG_DEP_OPENSSL_LIB} -lssl -lcrypto"
+fi
+
+#--------------------
+echo "\n--------------------"
+echo "[*] configure"
+echo "----------------------"
 # xcode configuration
 export DEBUG_INFORMATION_FORMAT=dwarf-with-dsym
 
@@ -184,8 +210,8 @@ else
         --cc="$FF_XCRUN_CC" \
         $FFMPEG_CFG_CPU \
         --extra-cflags="$FFMPEG_CFLAGS" \
-        --extra-cxxflags="$FFMPEG_CXXFLAGS" \
-        --extra-ldflags="$FFMPEG_LDFLAGS"
+        --extra-cxxflags="$FFMPEG_CFLAGS" \
+        --extra-ldflags="$FFMPEG_LDFLAGS $FFMPEG_DEP_LIBS"
     make clean
 fi
 

@@ -68,7 +68,7 @@ static NSString *const g_yuvFragmentShaderString = IJK_SHADER_STRING
     _uniformSamplers[2] = glGetUniformLocation(program, "s_texture_v");
 }
 
-- (void) display: (SDL_VoutOverlay *) overlay
+- (void) render: (SDL_VoutOverlay *) overlay
 {
     assert(overlay->planes);
     assert(overlay->format == SDL_FCC_I420);

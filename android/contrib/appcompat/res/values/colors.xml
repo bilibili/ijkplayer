@@ -19,4 +19,6 @@
     <color name="abc_search_url_text_pressed">@android:color/black</color>
 
     <color name="abc_input_method_navigation_guard">@android:color/black</color>
+
+    <drawable name="notification_template_icon_bg">#3333B5E5</drawable>
 </resources>

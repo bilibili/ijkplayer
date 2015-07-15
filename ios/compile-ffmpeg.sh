@@ -32,9 +32,6 @@ FF_TARGET=$1
 set -e
 
 #----------
-FF_LIBS="libavcodec libavformat libavutil libswscale libswresample"
-
-#----------
 echo_archs() {
     echo "===================="
     echo "[*] check xcode version"
@@ -42,7 +39,8 @@ echo_archs() {
     echo "FF_ALL_ARCHS = $FF_ALL_ARCHS"
 }
 
-do_lipo () {
+FF_LIBS="libavcodec libavformat libavutil libswscale libswresample"
+do_lipo_ffmpeg () {
     LIB_FILE=$1
     LIPO_FLAGS=
     for ARCH in $FF_ALL_ARCHS
@@ -59,12 +57,37 @@ do_lipo () {
     xcrun lipo -info $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
 }
 
+SSL_LIBS="libcrypto libssl"
+do_lipo_ssl () {
+    LIB_FILE=$1
+    LIPO_FLAGS=
+    for ARCH in $FF_ALL_ARCHS
+    do
+        ARCH_LIB_FILE="$UNI_BUILD_ROOT/build/openssl-$ARCH/output/lib/$LIB_FILE"
+        if [ -f "$ARCH_LIB_FILE" ]; then
+            LIPO_FLAGS="$LIPO_FLAGS $ARCH_LIB_FILE"
+        else
+            echo "skip $LIB_FILE of $ARCH";
+        fi
+    done
+
+    if [ "$LIPO_FLAGS" != "" ]; then
+        xcrun lipo -create $LIPO_FLAGS -output $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
+        xcrun lipo -info $UNI_BUILD_ROOT/build/universal/lib/$LIB_FILE
+    fi
+}
+
 do_lipo_all () {
     mkdir -p $UNI_BUILD_ROOT/build/universal/lib
     echo "lipo archs: $FF_ALL_ARCHS"
     for FF_LIB in $FF_LIBS
     do
-        do_lipo "$FF_LIB.a";
+        do_lipo_ffmpeg "$FF_LIB.a";
+    done
+
+    for SSL_LIB in $SSL_LIBS
+    do
+        do_lipo_ssl "$SSL_LIB.a";
     done
 
     cp -R $UNI_BUILD_ROOT/build/ffmpeg-armv7/output/include $UNI_BUILD_ROOT/build/universal/
@@ -98,7 +121,8 @@ elif [ "$FF_TARGET" = "clean" ]; then
     do
         cd ffmpeg-$ARCH && git clean -xdf && cd -
     done
-    rm -rf build
+    rm -rf build/ffmpeg-*
+    rm -rf build/openssl-*
 else
     echo "Usage:"
     echo "  compile-ffmpeg.sh armv7|arm64|i386|x86_64"

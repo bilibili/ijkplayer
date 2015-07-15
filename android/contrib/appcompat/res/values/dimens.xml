@@ -71,4 +71,39 @@
     <!-- Default rounded corner for controls -->
     <dimen name="abc_control_corner_material">2dp</dimen>
 
+    <dimen name="abc_edit_text_inset_horizontal_material">4dp</dimen>
+    <dimen name="abc_edit_text_inset_top_material">10dp</dimen>
+    <dimen name="abc_edit_text_inset_bottom_material">7dp</dimen>
+
+    <!-- Since optical insets are not available pre-v18, we add a small amount of padding -->
+    <dimen name="abc_switch_padding">3dp</dimen>
+
+    <dimen name="abc_dialog_padding_material">24dp</dimen>
+    <dimen name="abc_dialog_padding_top_material">18dp</dimen>
+
+    <!-- Dialog button bar height -->
+    <dimen name="abc_alert_dialog_button_bar_height">48dp</dimen>
+
+    <!-- Padding above and below selection dialog lists. -->
+    <dimen name="abc_dialog_list_padding_vertical_material">8dp</dimen>
+
+    <!-- The platform's desired minimum size for a dialog's width when it
+         is along the major axis (that is the screen is landscape).  This may
+         be either a fraction or a dimension. -->
+    <item type="dimen" name="abc_dialog_min_width_major">65%</item>
+
+    <!-- The platform's desired minimum size for a dialog's width when it
+         is along the minor axis (that is the screen is portrait).  This may
+         be either a fraction or a dimension. -->
+    <item type="dimen" name="abc_dialog_min_width_minor">95%</item>
+
+    <!-- The width of the big icons in notifications. -->
+    <dimen name="notification_large_icon_width">64dp</dimen>
+
+    <!-- The width of the big icons in notifications. -->
+    <dimen name="notification_large_icon_height">64dp</dimen>
+
+    <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info,
+         Time) -->
+    <dimen name="notification_subtext_size">12dp</dimen>
 </resources>

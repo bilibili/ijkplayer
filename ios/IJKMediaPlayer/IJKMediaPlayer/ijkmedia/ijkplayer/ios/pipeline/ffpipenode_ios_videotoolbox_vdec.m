@@ -134,21 +134,21 @@ the_end:
 
 static void func_destroy(IJKFF_Pipenode *node)
 {
-    ALOGI("pipeline!!! destory!!!!!\n %d", (int)node);
-    if (!node || !node->opaque)
-        return;
-    IJKFF_Pipenode_Opaque *opaque = node->opaque;
-    if (opaque->context) {
-        dealloc_videotoolbox(opaque->context);
-        free(opaque->context);
-        opaque->context = NULL;
-    }
+    // do nothing
 }
 
 static int func_run_sync(IJKFF_Pipenode *node)
 {
     IJKFF_Pipenode_Opaque *opaque = node->opaque;
-    return videotoolbox_video_thread(opaque);
+    int ret = videotoolbox_video_thread(opaque);
+
+    if (opaque->context) {
+        dealloc_videotoolbox(opaque->context);
+        free(opaque->context);
+        opaque->context = NULL;
+    }
+
+    return ret;
 }
 
 

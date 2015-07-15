@@ -1,12 +1,33 @@
 tag next
 --------------------------------
+
+tag k0.3.1
+--------------------------------
+player: key-value options API
+player: remove ijkutil
+build: support cygwin
+ios: optimize performance of VideoToolbox.
+
+tag k0.3.0
+--------------------------------
+android: support build with Android Studio / Gradle
+build: improve library fetch
+openssl: switch to openssl 1.0.1o
+
+tag k0.2.4
+--------------------------------
 ios: remove armv7s build from default
+player: introduce key-value options
+ios: demo improvement
+ios: support init/play in background.
+ffmpeg: switch to ffmpeg n2.7
 
 tag k0.2.3
 --------------------------------
 android: support OpenSL ES
 ios: support NV12 Render
 ios: support VideoToolBox
+ffmpeg: switch to ffmpeg n2.6
 
 tag n0.2.2:
 --------------------------------

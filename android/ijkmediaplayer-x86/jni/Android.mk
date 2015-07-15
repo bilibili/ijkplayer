@@ -1,1 +1,0 @@
-../../ijkmediaplayer/jni/Android.mk

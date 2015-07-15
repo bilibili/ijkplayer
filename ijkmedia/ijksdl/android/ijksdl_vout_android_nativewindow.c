@@ -25,7 +25,6 @@
 
 #include <assert.h>
 #include <android/native_window.h>
-#include "ijkutil/ijkutil.h"
 #include "ijksdl_vout_overlay_android_mediacodec.h"
 #include "android_nativewindow.h"
 #include "../ijksdl_vout.h"

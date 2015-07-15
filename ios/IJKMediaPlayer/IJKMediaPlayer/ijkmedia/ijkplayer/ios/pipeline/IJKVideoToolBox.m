@@ -31,11 +31,22 @@
 #include "libavformat/avc.h"
 #include "ijksdl_vout_ios_gles2.h"
 #include "h264_sps_parser.h"
+#include "ijkplayer/ff_ffplay_debug.h"
 
 #define IJK_VTB_FCC_AVC    SDL_FOURCC('C', 'c', 'v', 'a')
 #define IJK_VTB_FCC_ESD    SDL_FOURCC('s', 'd', 's', 'e')
 #define IJK_VTB_FCC_AVC1   SDL_FOURCC('1', 'c', 'v', 'a')
 
+
+static const char *vtb_get_error_string(OSStatus status) {
+    switch (status) {
+        case kVTInvalidSessionErr:                      return "kVTInvalidSessionErr";
+        case kVTVideoDecoderBadDataErr:                 return "kVTVideoDecoderBadDataErr";
+        case kVTVideoDecoderUnsupportedDataFormatErr:   return "kVTVideoDecoderUnsupportedDataFormatErr";
+        case kVTVideoDecoderMalfunctionErr:             return "kVTVideoDecoderMalfunctionErr";
+        default:                                        return "UNKNOWN";
+    }
+}
 
 static double GetSystemTime()
 {
@@ -64,6 +75,117 @@ static void CFDictionarySetSInt32(CFMutableDictionaryRef dictionary, CFStringRef
     CFRelease(number);
 }
 
+static void CFDictionarySetBoolean(CFMutableDictionaryRef dictionary, CFStringRef key, BOOL value)
+{
+    CFDictionarySetValue(dictionary, key, value ? kCFBooleanTrue : kCFBooleanFalse);
+}
+
+
+inline static void sample_info_flush(VideoToolBoxContext* context, int wait_ms)
+{
+    int total_wait = 0;
+    SDL_LockMutex(context->sample_info_mutex);
+
+    while (wait_ms < 0 || total_wait < wait_ms) {
+        if (context->sample_infos_in_decoding <= 0)
+            break;
+
+        int wait_step = 10;
+        SDL_CondWaitTimeout(context->sample_info_cond, context->sample_info_mutex, wait_step);
+        total_wait += wait_step;
+    }
+
+    SDL_UnlockMutex(context->sample_info_mutex);
+}
+
+inline static sample_info* sample_info_peek(VideoToolBoxContext* context)
+{
+    FFPlayer   *ffp = context->ffp;
+    VideoState *is  = ffp->is;
+
+    SDL_LockMutex(context->sample_info_mutex);
+
+    sample_info *sample_info = &context->sample_info_array[context->sample_info_index];
+    while (sample_info->is_decoding) {
+        if (is->videoq.abort_request) {
+            sample_info = NULL;
+            goto abort;
+        }
+
+        SDL_CondWaitTimeout(context->sample_info_cond, context->sample_info_mutex, 10);
+    }
+
+abort:
+    SDL_UnlockMutex(context->sample_info_mutex);
+    return sample_info;
+}
+
+inline static void sample_info_push(VideoToolBoxContext* context)
+{
+    FFPlayer   *ffp = context->ffp;
+    VideoState *is  = ffp->is;
+
+    SDL_LockMutex(context->sample_info_mutex);
+
+    sample_info *sample_info = &context->sample_info_array[context->sample_info_index];
+    while (sample_info->is_decoding) {
+        if (is->videoq.abort_request)
+            goto abort;
+
+        SDL_CondWaitTimeout(context->sample_info_cond, context->sample_info_mutex, 10);
+    }
+
+    if (sample_info->is_decoding) {
+        ALOGW("%s, reallocate sample in decoding %d -> %d /%d\n", __FUNCTION__,
+              sample_info->sample_id,
+              context->sample_info_id_generator,
+              context->sample_infos_in_decoding);
+    } else {
+        sample_info->is_decoding = 1;
+        context->sample_infos_in_decoding++;
+    }
+
+    sample_info->sample_id = context->sample_info_id_generator++;
+    context->sample_info_index++;
+    context->sample_info_index %= VTB_MAX_DECODING_SAMPLES;
+
+abort:
+    SDL_UnlockMutex(context->sample_info_mutex);
+}
+
+inline static void sample_info_drop_last_push(VideoToolBoxContext* context)
+{
+    SDL_LockMutex(context->sample_info_mutex);
+
+    int last_index = context->sample_info_index + VTB_MAX_DECODING_SAMPLES - 1;
+    last_index %= VTB_MAX_DECODING_SAMPLES;
+
+    sample_info *sample_info = &context->sample_info_array[last_index];
+    if (sample_info->is_decoding) {
+        sample_info->is_decoding = 0;
+        context->sample_infos_in_decoding--;
+    }
+
+    SDL_UnlockMutex(context->sample_info_mutex);
+}
+
+inline static void sample_info_recycle(VideoToolBoxContext* context, sample_info *sample_info)
+{
+    SDL_LockMutex(context->sample_info_mutex);
+
+    if (sample_info->is_decoding) {
+        sample_info->is_decoding = 0;
+        if (context->sample_infos_in_decoding > 0)
+            context->sample_infos_in_decoding--;
+    } else {
+        ALOGW("%s, multiple frames in same sample %d / %d\n", __FUNCTION__,
+              sample_info->sample_id,
+              context->sample_info_id_generator);
+    }
+
+    SDL_CondSignal(context->sample_info_cond);
+    SDL_UnlockMutex(context->sample_info_mutex);
+}
 
 static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc, void *demux_buff, size_t demux_size)
 {
@@ -208,64 +330,6 @@ static int vtb_queue_picture(
     return 0;
 }
 
-
-
-static CFDictionaryRef CreateDictionaryWithPkt(double time, double dts, double pts,double pkt_serial)
-{
-    CFStringRef key[4] = {
-        CFSTR("PKT_SORT"),
-        CFSTR("PKT_DTS"),
-        CFSTR("PKT_PTS"),
-        CFSTR("PKT_SERIAL")
-    };
-    CFNumberRef value[4];
-    CFDictionaryRef display_time;
-
-    value[0] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &time);
-    value[1] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &dts);
-    value[2] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &pts);
-    value[3] = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &pkt_serial);
-
-    display_time = CFDictionaryCreate(
-                                      kCFAllocatorDefault, (const void **)&key, (const void **)&value, 4,
-                                      &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-
-    CFRelease(value[0]);
-    CFRelease(value[1]);
-    CFRelease(value[2]);
-    CFRelease(value[3]);
-    return display_time;
-}
-
-
-
-static void GetPktTSFromRef(CFDictionaryRef inFrameInfoDictionary, sort_queue *frame)
-{
-    frame->sort = -1.0;
-    frame->dts = AV_NOPTS_VALUE;
-    frame->pts = AV_NOPTS_VALUE;
-    frame->serial = AV_NOPTS_VALUE;
-    if (inFrameInfoDictionary == NULL)
-        return;
-
-    CFNumberRef value[4];
-
-    value[0] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_SORT"));
-    if (value[0])
-        CFNumberGetValue(value[0], kCFNumberDoubleType, &frame->sort);
-    value[1] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_DTS"));
-    if (value[1])
-        CFNumberGetValue(value[1], kCFNumberDoubleType, &frame->dts);
-    value[2] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_PTS"));
-    if (value[2])
-        CFNumberGetValue(value[2], kCFNumberDoubleType, &frame->pts);
-    value[3] = (CFNumberRef)CFDictionaryGetValue(inFrameInfoDictionary, CFSTR("PKT_SERIAL"));
-    if (value[3])
-        CFNumberGetValue(value[3], kCFNumberDoubleType, &frame->serial);
-    return;
-}
-
-
 void QueuePicture(VideoToolBoxContext* ctx) {
     VTBPicture picture;
     if (true == GetVTBPicture(ctx, &picture)) {
@@ -299,17 +363,31 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 {
     @autoreleasepool {
         VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
-        if (!ctx || ctx->dealloced == true) {
+        if (!ctx) {
             return;
         }
-        sort_queue *newFrame = (sort_queue*)malloc(sizeof(sort_queue));
+
+        FFPlayer   *ffp = ctx->ffp;
+        VideoState *is  = ffp->is;
+
+        sort_queue *newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
+
+        sample_info *sample_info = sourceFrameRefCon;
+        newFrame->pts    = sample_info->pts;
+        newFrame->dts    = sample_info->dts;
+        newFrame->sort   = sample_info->sort;
+        newFrame->serial = sample_info->serial;
         newFrame->nextframe = NULL;
-        GetPktTSFromRef(sourceFrameRefCon, newFrame);
+#ifdef FFP_SHOW_VTB_IN_DECODING
+        ALOGD("VTB: indecoding: %d\n", ctx->sample_infos_in_decoding);
+#endif
+
+        if (ctx->dealloced || is->abort_request || is->viddec.queue->abort_request)
+            goto failed;
+
         ctx->last_sort = newFrame->sort;
-        CFRelease(sourceFrameRefCon);
         if (status != 0) {
-            ALOGI("decode callback  %d \n", (int)status);
-            ALOGI("Signal: status\n");
+            ALOGE("decode callback %d %s\n", (int)status, vtb_get_error_string(status));
             goto failed;
         }
 
@@ -347,6 +425,33 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
         if (ctx->m_sort_queue && newFrame->pts < ctx->m_sort_queue->pts) {
             goto failed;
+        }
+
+        // FIXME: duplicated code
+        {
+            double dpts = NAN;
+
+            if (newFrame->pts != AV_NOPTS_VALUE)
+                dpts = av_q2d(is->video_st->time_base) * newFrame->pts;
+
+            if (ffp->framedrop>0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
+                if (newFrame->pts != AV_NOPTS_VALUE) {
+                    double diff = dpts - ffp_get_master_clock(is);
+                    if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
+                        diff - is->frame_last_filter_delay < 0 &&
+                        is->viddec.pkt_serial == is->vidclk.serial &&
+                        is->videoq.nb_packets) {
+                        is->frame_drops_early++;
+                        is->continuous_frame_drops_early++;
+                        if (is->continuous_frame_drops_early > ffp->framedrop) {
+                            is->continuous_frame_drops_early = 0;
+                        } else {
+                            // drop too late frame
+                            goto failed;
+                        }
+                    }
+                }
+            }
         }
 
         if (CVPixelBufferIsPlanar(imageBuffer)) {
@@ -399,9 +504,10 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             QueuePicture(ctx);
         }
     successed:
+        sample_info_recycle(ctx, sample_info);
         return;
     failed:
-        ALOGI("FailedSignal: %lf\n", newFrame->pts);
+        sample_info_recycle(ctx, sample_info);
         if (newFrame) {
             free(newFrame);
         }
@@ -411,15 +517,17 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 
 
 
-void CreateVTBSession(VideoToolBoxContext* context, int width, int height, CMFormatDescriptionRef fmt_desc)
+void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
 {
+    FFPlayer *ffp = context->ffp;
+
     VTDecompressionSessionRef vt_session = NULL;
     CFMutableDictionaryRef destinationPixelBufferAttributes;
     VTDecompressionOutputCallbackRecord outputCallback;
     OSStatus status;
-    int width_frame_max = ffpipeline_ios_get_frame_max_width(context->ffp->pipeline);
+    int width_frame_max = ffp->vtb_max_frame_width;
 
-    if (width > width_frame_max) {
+    if (width_frame_max > 0 && width > width_frame_max) {
         double w_scaler = (float)width_frame_max / width;
         width = width_frame_max;
         height = height * w_scaler;
@@ -438,16 +546,17 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height, CMFor
                           kCVPixelBufferWidthKey, width);
     CFDictionarySetSInt32(destinationPixelBufferAttributes,
                           kCVPixelBufferHeightKey, height);
+    CFDictionarySetBoolean(destinationPixelBufferAttributes,
+                          kCVPixelBufferOpenGLESCompatibilityKey, YES);
     outputCallback.decompressionOutputCallback = VTDecoderCallback;
     outputCallback.decompressionOutputRefCon = context  ;
     status = VTDecompressionSessionCreate(
                                           kCFAllocatorDefault,
-                                          fmt_desc,
+                                          context->m_fmt_desc,
                                           NULL,
                                           destinationPixelBufferAttributes,
                                           &outputCallback,
                                           &vt_session);
-
 
     if (status != noErr) {
         context->m_vt_session = NULL;
@@ -458,16 +567,20 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height, CMFor
         context->m_vt_session =(void*) vt_session;
     }
     CFRelease(destinationPixelBufferAttributes);
+
+    memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
+    context->sample_infos_in_decoding = 0;
 }
 
 
 
 int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
 {
+    FFPlayer *ffp                   = context->ffp;
     OSStatus status                 = 0;
     double sort_time                = GetSystemTime();
-    uint32_t decoderFlags           = 0;
-    CFDictionaryRef frame_info      = NULL;;
+    uint32_t decoder_flags          = 0;
+    sample_info *sample_info        = NULL;
     CMSampleBufferRef sample_buff   = NULL;
     AVIOContext *pb                 = NULL;
     int demux_size                  = 0;
@@ -481,9 +594,13 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         goto failed;
     }
 
+    if (ffp->vtb_async) {
+        decoder_flags |= kVTDecodeFrame_EnableAsynchronousDecompression;
+    }
+
     if (context->refresh_session) {
-        decoderFlags |= kVTDecodeFrame_DoNotOutputFrame;
-        ALOGI("flag :%d flag %d \n", decoderFlags,avpkt->flags);
+        decoder_flags |= kVTDecodeFrame_DoNotOutputFrame;
+        // ALOGI("flag :%d flag %d \n", decoderFlags,avpkt->flags);
     }
 
     if (context->refresh_request) {
@@ -493,11 +610,13 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         }
 
         if(context->m_vt_session) {
+            VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
             VTDecompressionSessionInvalidate(context->m_vt_session);
             CFRelease(context->m_vt_session);
+            context->m_vt_session = NULL;
         }
 
-        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
+        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
         context->refresh_request = false;
     }
 
@@ -505,22 +624,20 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         pts = dts;
     }
 
-    frame_info = CreateDictionaryWithPkt(sort_time - context->m_sort_time_offset, dts, pts,context->serial);
-
     if (context->m_convert_bytestream) {
-        ALOGI("the buffer should m_convert_byte\n");
+        // ALOGI("the buffer should m_convert_byte\n");
         if(avio_open_dyn_buf(&pb) < 0) {
             goto failed;
         }
         ff_avc_parse_nal_units(pb, pData, iSize);
         demux_size = avio_close_dyn_buf(pb, &demux_buff);
-        ALOGI("demux_size:%d\n", demux_size);
+        // ALOGI("demux_size:%d\n", demux_size);
         if (demux_size == 0) {
             goto failed;
         }
         sample_buff = CreateSampleBufferFrom(context->m_fmt_desc, demux_buff, demux_size);
     } else if (context->m_convert_3byteTo4byteNALSize) {
-        ALOGI("3byteto4byte\n");
+        // ALOGI("3byteto4byte\n");
         if (avio_open_dyn_buf(&pb) < 0) {
             goto failed;
         }
@@ -555,33 +672,44 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     context->last_keyframe_pts = avpkt->pts;
 
-    //ALOGI("Decode before \n!!!!!!!");
-    status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoderFlags, (void*)frame_info, 0);
-    //ALOGI("Decode after \n!!!!!!!");
+    sample_info = sample_info_peek(context);
+    if (!sample_info) {
+        ALOGE("%s, failed to peek frame_info\n", __FUNCTION__);
+        goto failed;
+    }
+
+    sample_info->sort   = sort_time - context->m_sort_time_offset;
+    sample_info->pts    = pts;
+    sample_info->dts    = dts;
+    sample_info->serial = context->serial;
+    sample_info_push(context);
+
+    status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)sample_info, 0);
+    if (status == noErr) {
+        if (context->ffp->is->videoq.abort_request)
+            goto failed;
+
+        // Wait for delayed frames even if kVTDecodeInfo_Asynchronous is not set.
+        if (ffp->vtb_wait_async) {
+            status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+        }
+    }
 
     if (status != 0) {
-        ALOGE("status %d \n", (int)status);
+        sample_info_drop_last_push(context);
+
+        ALOGE("decodeFrame %d %s\n", (int)status, vtb_get_error_string(status));
+
         if (status == kVTInvalidSessionErr) {
             context->refresh_session = true;
         }
         if (status == kVTVideoDecoderMalfunctionErr) {
             context->recovery_drop_packet = true;
         }
-        if (status != 0) {
-            goto failed;
-        }
-    }
-
-
-    status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-
-    //ALOGI("Wait : %lf \n",pts);
-    if ((sort_time - context->m_sort_time_offset) > context->last_sort) {
-
-    }
-    if (status != 0) {
         goto failed;
     }
+
+
 
     if (sample_buff) {
         CFRelease(sample_buff);
@@ -617,16 +745,7 @@ static inline void DuplicatePkt(VideoToolBoxContext* context, const AVPacket* pk
         ResetPktBuffer(context);
     }
     AVPacket* avpkt = &context->m_buffer_packet[context->m_buffer_deep];
-    av_new_packet(avpkt, pkt->size);
-    avpkt->flags        = pkt->flags;
-    avpkt->pts          = pkt->pts;
-    avpkt->dts          = pkt->dts;
-    avpkt->duration     = pkt->duration;
-    avpkt->pos          = pkt->pos;
-    avpkt->size         = pkt->size;
-    avpkt->stream_index = pkt->stream_index;
-    avpkt->convergence_duration = pkt->convergence_duration;
-    memcpy(avpkt->data, pkt->data, pkt->size);
+    av_copy_packet(avpkt, pkt);
     context->m_buffer_deep++;
 }
 
@@ -654,11 +773,12 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
     if (context->refresh_session) {
         int ret = 0;
         if (context->m_vt_session) {
+            VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
             VTDecompressionSessionInvalidate(context->m_vt_session);
             CFRelease(context->m_vt_session);
         }
 
-        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height, context->m_fmt_desc);
+        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
 
         if ((context->m_buffer_deep > 0) &&
             ff_avpacket_i_or_idr(&context->m_buffer_packet[0], context->idr_based_identified) == true ) {
@@ -695,7 +815,6 @@ static void dict_set_boolean(CFMutableDictionaryRef dict, CFStringRef key, BOOL 
 static void dict_set_object(CFMutableDictionaryRef dict, CFStringRef key, CFTypeRef *value)
 {
     CFDictionarySetValue(dict, key, value);
-    CFRelease(value);
 }
 
 static void dict_set_data(CFMutableDictionaryRef dict, CFStringRef key, uint8_t * value, uint64_t length)
@@ -738,6 +857,10 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
     dict_set_object(extensions, CFSTR ("SampleDescriptionExtensionAtoms"), (CFTypeRef *) atoms);
     status = CMVideoFormatDescriptionCreate(NULL, format_id, width, height, extensions, &fmt_desc);
 
+    CFRelease(extensions);
+    CFRelease(atoms);
+    CFRelease(par);
+
     if (status == 0)
         return fmt_desc;
     else
@@ -746,16 +869,26 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
 
 void dealloc_videotoolbox(VideoToolBoxContext* context)
 {
+    context->dealloced = true;
+
     while (context && context->m_queue_depth > 0) {
         SortQueuePop(context);
     }
     if (context && context->m_vt_session) {
+        VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+        sample_info_flush(context, 3000);
         VTDecompressionSessionInvalidate(context->m_vt_session);
         CFRelease(context->m_vt_session);
+        context->m_vt_session = NULL;
     }
     if (context) {
         ResetPktBuffer(context);
-        context->dealloced = true;
+        if (context->m_fmt_desc) {
+            CFRelease(context->m_fmt_desc);
+            context->m_fmt_desc = NULL;
+        }
+        SDL_DestroyCondP(&context->sample_info_cond);
+        SDL_DestroyMutexP(&context->sample_info_mutex);
     }
 }
 
@@ -773,26 +906,13 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     int codec           = ic->codec_id;
     uint8_t* extradata  = ic->extradata;
 
-    VideoToolBoxContext* context_vtb = malloc(sizeof(VideoToolBoxContext));
+    VideoToolBoxContext *context_vtb = (VideoToolBoxContext *)mallocz(sizeof(VideoToolBoxContext));
     if (!context_vtb) {
         goto failed;
     }
 
-    context_vtb->m_convert_bytestream = false;
-    context_vtb->m_convert_3byteTo4byteNALSize = false;
-    context_vtb->refresh_request = false;
-    context_vtb->new_seg_flag = false;
-    context_vtb->recovery_drop_packet = false;
-    context_vtb->refresh_session = false;
     context_vtb->idr_based_identified = true;
-    context_vtb->dealloced = false;
-    context_vtb->last_keyframe_pts = 0;
-    context_vtb->m_max_ref_frames = 0;
     context_vtb->ffp = ffp;
-    context_vtb->serial = 0;
-    context_vtb->last_sort = 0;
-    context_vtb->m_buffer_deep = 0;
-    memset(context_vtb->m_buffer_packet, 0, sizeof(context_vtb->m_buffer_packet));
 
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:
@@ -876,7 +996,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     }
 
 
-    CreateVTBSession(context_vtb, width, height, context_vtb->m_fmt_desc);
+    CreateVTBSession(context_vtb, width, height);
     context_vtb->m_sort_queue = 0;
     if (context_vtb->m_vt_session == NULL) {
         if (context_vtb->m_fmt_desc) {
@@ -901,6 +1021,8 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
     context_vtb->m_sort_time_offset = GetSystemTime();
 
+    context_vtb->sample_info_mutex = SDL_CreateMutex();
+    context_vtb->sample_info_cond  = SDL_CreateCond();
     return context_vtb;
 
 failed:

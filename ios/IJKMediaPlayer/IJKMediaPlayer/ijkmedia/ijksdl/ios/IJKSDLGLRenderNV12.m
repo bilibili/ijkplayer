@@ -22,6 +22,7 @@
 
 #import "IJKSDLGLRenderNV12.h"
 #import "IJKSDLGLShader.h"
+#include "ijksdl_vout_overlay_videotoolbox.h"
 
 static NSString *const g_nv12FragmentShaderString = IJK_SHADER_STRING
 (
@@ -66,11 +67,23 @@ static const GLfloat kColorConversion709[] = {
     GLint _uniform[1];
     GLint _uniformSamplers[2];
     GLuint _textures[2];
+
+    CVOpenGLESTextureCacheRef _textureCache;
+    CVOpenGLESTextureRef      _cvTexturesRef[2];
+}
+
+-(id)initWithTextureCache:(CVOpenGLESTextureCacheRef) textureCache
+{
+    self = [super init];
+    if (self) {
+        _textureCache = textureCache;
+    }
+    return self;
 }
 
 - (BOOL) isValid
 {
-    return (_textures[0] != 0);
+    return (_textures[0] != 0) && (_textures[1] != 0);
 }
 
 - (NSString *) fragmentShader
@@ -85,59 +98,80 @@ static const GLfloat kColorConversion709[] = {
     _uniform[0] = glGetUniformLocation(program, "colorConversionMatrix");
 }
 
-- (void) display: (SDL_VoutOverlay *) overlay
+- (void) render: (SDL_VoutOverlay *) overlay
 {
     assert(overlay->planes);
     assert(overlay->format == SDL_FCC_NV12);
     assert(overlay->planes == 2);
 
-    if (overlay->pixels[0] == NULL || overlay->pixels[1] == NULL)
-    {
+    if (!overlay->is_private)
+        return;
+
+    if (!_textureCache) {
+        ALOGE("nil textureCache\n");
         return;
     }
 
-    const NSUInteger frameHeight = overlay->h;
+    CVPixelBufferRef pixelBuffer = SDL_VoutOverlayVideoToolBox_GetCVPixelBufferRef(overlay);
+    if (!pixelBuffer) {
+        ALOGE("nil pixelBuffer in overlay\n");
+        return;
+    }
+
+    for (int i = 0; i < 2; ++i) {
+        if (_cvTexturesRef[i]) {
+            CFRelease(_cvTexturesRef[i]);
+            _cvTexturesRef[i] = 0;
+            _textures[i] = 0;
+        }
+    }
+
+    // Periodic texture cache flush every frame
+    if (_textureCache)
+        CVOpenGLESTextureCacheFlush(_textureCache, 0);
+
+    if (_textures[0])
+        glDeleteTextures(2, _textures);
+
+    size_t frameWidth  = CVPixelBufferGetWidth(pixelBuffer);
+    size_t frameHeight = CVPixelBufferGetHeight(pixelBuffer);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    if (0 == _textures[0])
-        glGenTextures(2, _textures);
-
-    const UInt8 *pixels[2] = { overlay->pixels[0], overlay->pixels[1] };
-    const NSUInteger widths[2]  = { overlay->pitches[0], overlay->pitches[1]/2 };
-    const NSUInteger heights[2] = { frameHeight, frameHeight / 2 };
-
-
-    glBindTexture(GL_TEXTURE_2D, _textures[0]);
-
-    glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     GL_RED_EXT,
-                     (int)widths[0],
-                     (int)heights[0],
-                     0,
-                     GL_RED_EXT,
-                     GL_UNSIGNED_BYTE,
-                     pixels[0]);
-
+    CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
+                                                 _textureCache,
+                                                 pixelBuffer,
+                                                 NULL,
+                                                 GL_TEXTURE_2D,
+                                                 GL_RED_EXT,
+                                                 (GLsizei)frameWidth,
+                                                 (GLsizei)frameHeight,
+                                                 GL_RED_EXT,
+                                                 GL_UNSIGNED_BYTE,
+                                                 0,
+                                                 &_cvTexturesRef[0]);
+    _textures[0] = CVOpenGLESTextureGetName(_cvTexturesRef[0]);
+    glBindTexture(CVOpenGLESTextureGetTarget(_cvTexturesRef[0]), _textures[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 
-    glBindTexture(GL_TEXTURE_2D, _textures[1]);
-
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RG_EXT,
-                 (int)widths[1],
-                 (int)heights[1],
-                 0,
-                 GL_RG_EXT,
-                 GL_UNSIGNED_BYTE,
-                 pixels[1]);
-
+    CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
+                                                 _textureCache,
+                                                 pixelBuffer,
+                                                 NULL,
+                                                 GL_TEXTURE_2D,
+                                                 GL_RG_EXT,
+                                                 (GLsizei)frameWidth / 2,
+                                                 (GLsizei)frameHeight / 2,
+                                                 GL_RG_EXT,
+                                                 GL_UNSIGNED_BYTE,
+                                                 1,
+                                                 &_cvTexturesRef[1]);
+    _textures[1] = CVOpenGLESTextureGetName(_cvTexturesRef[1]);
+    glBindTexture(CVOpenGLESTextureGetTarget(_cvTexturesRef[1]), _textures[1]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -161,6 +195,14 @@ static const GLfloat kColorConversion709[] = {
 
 - (void) dealloc
 {
+    for (int i = 0; i < 2; ++i) {
+        if (_cvTexturesRef[i]) {
+            CFRelease(_cvTexturesRef[i]);
+            _cvTexturesRef[i] = 0;
+            _textures[i] = 0;
+        }
+    }
+
     if (_textures[0])
         glDeleteTextures(2, _textures);
 }

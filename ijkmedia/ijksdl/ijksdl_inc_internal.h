@@ -25,10 +25,10 @@
 
 #include <stdint.h>
 
-#include "ijkutil/ijkutil.h"
-
+#include "ijksdl_log.h"
+#include "ijksdl_misc.h"
 #include "ijksdl_stdinc.h"
 
-#define SDLTRACE ALOGW
+#define SDLTRACE ALOGD
 
 #endif

@@ -78,6 +78,7 @@
 
     <style name="Base.Widget.AppCompat.ActionButton.CloseMode"
            parent="android:Widget.Material.ActionButton.CloseMode">
+        <item name="android:minWidth">56dp</item>
     </style>
 
     <style name="Base.Widget.AppCompat.ActionButton.Overflow"
@@ -120,8 +121,8 @@
         <item name="popupPromptView">@layout/abc_simple_dropdown_hint</item>
     </style>
 
-    <style name="Base.Widget.AppCompat.ListView.Menu"
-           parent="android:Widget.Material.ListView" />
+    <style name="Base.Widget.AppCompat.ListView" parent="android:Widget.Material.ListView" />
+    <style name="Base.Widget.AppCompat.ListView.Menu" />
 
     <!-- Popup Menu -->
 
@@ -178,6 +179,16 @@
     <style name="Base.Widget.AppCompat.Button" parent="android:Widget.Material.Button" />
 
     <style name="Base.Widget.AppCompat.Button.Small" parent="android:Widget.Material.Button.Small" />
+
+    <style name="Base.Widget.AppCompat.Button.Borderless" parent="android:Widget.Material.Button.Borderless" />
+
+    <style name="Base.Widget.AppCompat.Button.Borderless.Colored" parent="android:Widget.Material.Button.Borderless.Colored" />
+
+    <style name="Base.Widget.AppCompat.ButtonBar" parent="android:Widget.Material.ButtonBar" />
+
+    <style name="Base.Widget.AppCompat.CompoundButton.CheckBox" parent="android:Widget.Material.CompoundButton.CheckBox" />
+
+    <style name="Base.Widget.AppCompat.CompoundButton.RadioButton" parent="android:Widget.Material.CompoundButton.RadioButton" />
 
     <!-- Progress Bar -->
 

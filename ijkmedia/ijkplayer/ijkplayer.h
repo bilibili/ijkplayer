@@ -26,11 +26,10 @@
 #include <stdbool.h>
 #include "ff_ffmsg_queue.h"
 
-#include "ijkutil/ijkutil.h"
 #include "ijkmeta.h"
 
 #ifndef MPTRACE
-#define MPTRACE ALOGW
+#define MPTRACE ALOGD
 #endif
 
 typedef struct IjkMediaPlayer IjkMediaPlayer;
@@ -144,10 +143,16 @@ typedef struct SDL_Vout SDL_Vout;
 #define IJKMP_IO_STAT_READ 1
 
 
+#define IJKMP_OPT_CATEGORY_FORMAT FFP_OPT_CATEGORY_FORMAT
+#define IJKMP_OPT_CATEGORY_CODEC  FFP_OPT_CATEGORY_CODEC
+#define IJKMP_OPT_CATEGORY_SWS    FFP_OPT_CATEGORY_SWS
+#define IJKMP_OPT_CATEGORY_PLAYER FFP_OPT_CATEGORY_PLAYER
+
 
 void            ijkmp_global_init();
 void            ijkmp_global_uninit();
 void            ijkmp_global_set_log_report(int use_report);
+void            ijkmp_global_set_log_level(int log_level);   // log_level = AV_LOG_xxx
 void            ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes));
 void            ijkmp_io_stat_complete_register(void (*cb)(const char *url,
                                                            int64_t read_bytes, int64_t total_size,
@@ -156,15 +161,9 @@ void            ijkmp_io_stat_complete_register(void (*cb)(const char *url,
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*));
 void            ijkmp_set_format_callback(IjkMediaPlayer *mp, ijk_format_control_message cb, void *opaque);
-void            ijkmp_set_format_option(IjkMediaPlayer *mp, const char *name, const char *value);
-void            ijkmp_set_codec_option(IjkMediaPlayer *mp, const char *name, const char *value);
-void            ijkmp_set_sws_option(IjkMediaPlayer *mp, const char *name, const char *value);
-void            ijkmp_set_overlay_format(IjkMediaPlayer *mp, int chroma_fourcc);
-void            ijkmp_set_picture_queue_capicity(IjkMediaPlayer *mp, int frame_count);
-void            ijkmp_set_max_fps(IjkMediaPlayer *mp, int max_fps);
-void            ijkmp_set_framedrop(IjkMediaPlayer *mp, int framedrop);
-void            ijkmp_set_auto_play_on_prepared(IjkMediaPlayer *mp, int auto_play_on_prepared);
-void            ijkmp_set_max_buffer_size(IjkMediaPlayer *mp, int max_buffer_size);
+
+void            ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, const char *value);
+void            ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const char *name, int64_t value);
 
 int             ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info);
 int             ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info);

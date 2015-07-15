@@ -25,6 +25,7 @@
 
 #include "ijksdl/ijksdl_class.h"
 #include "ijksdl/ijksdl_mutex.h"
+#include "ijksdl/ijksdl_aout.h"
 #include "ff_ffpipenode.h"
 
 typedef struct IJKFF_Pipeline_Opaque IJKFF_Pipeline_Opaque;
@@ -33,16 +34,19 @@ typedef struct IJKFF_Pipeline {
     SDL_Class             *opaque_class;
     IJKFF_Pipeline_Opaque *opaque;
 
-    void            (*func_destroy)            (IJKFF_Pipeline *pipeline);
-    IJKFF_Pipenode *(*func_open_video_decoder) (IJKFF_Pipeline *pipeline, FFPlayer *ffp);
-    IJKFF_Pipenode *(*func_open_video_output)  (IJKFF_Pipeline *pipeline, FFPlayer *ffp);
+    void            (*func_destroy)             (IJKFF_Pipeline *pipeline);
+    IJKFF_Pipenode *(*func_open_video_decoder)  (IJKFF_Pipeline *pipeline, FFPlayer *ffp);
+    IJKFF_Pipenode *(*func_open_video_output)   (IJKFF_Pipeline *pipeline, FFPlayer *ffp);
+    SDL_Aout       *(*func_open_audio_output)   (IJKFF_Pipeline *pipeline, FFPlayer *ffp);
 } IJKFF_Pipeline;
 
 IJKFF_Pipeline *ffpipeline_alloc(SDL_Class *opaque_class, size_t opaque_size);
 void ffpipeline_free(IJKFF_Pipeline *pipeline);
 void ffpipeline_free_p(IJKFF_Pipeline **pipeline);
 
-IJKFF_Pipenode* ffpipeline_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlayer *ffp);
-IJKFF_Pipenode* ffpipeline_open_video_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp);
+IJKFF_Pipenode *ffpipeline_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlayer *ffp);
+IJKFF_Pipenode *ffpipeline_open_video_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp);
+
+SDL_Aout       *ffpipeline_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp);
 
 #endif

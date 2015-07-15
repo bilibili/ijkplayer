@@ -54,6 +54,19 @@
 
 #define kk_IJKM_KEY_STREAMS       @"streams"
 
+typedef enum IJKLogLevel {
+    k_IJK_LOG_UNKNOWN = 0,
+    k_IJK_LOG_DEFAULT = 1,
+
+    k_IJK_LOG_VERBOSE = 2,
+    k_IJK_LOG_DEBUG   = 3,
+    k_IJK_LOG_INFO    = 4,
+    k_IJK_LOG_WARN    = 5,
+    k_IJK_LOG_ERROR   = 6,
+    k_IJK_LOG_FATAL   = 7,
+    k_IJK_LOG_SILENT  = 8,
+} IJKLogLevel;
+
 @interface IJKFFMoviePlayerController : NSObject <IJKMediaPlayback>
 
 - (id)initWithContentURL:(NSURL *)aUrl
@@ -75,12 +88,33 @@
 
 - (void)setPauseInBackground:(BOOL)pause;
 - (BOOL)isVideoToolboxOpen;
-- (void)setMaxBufferSize:(int)maxBufferSize; // -1 for default size
 
 + (void)setLogReport:(BOOL)preferLogReport;
++ (void)setLogLevel:(IJKLogLevel)logLevel;
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
+
+- (void)setOptionValue:(NSString *)value
+                forKey:(NSString *)key
+            ofCategory:(IJKFFOptionCategory)category;
+
+- (void)setOptionIntValue:(NSInteger)value
+                   forKey:(NSString *)key
+               ofCategory:(IJKFFOptionCategory)category;
+
+
+
+- (void)setFormatOptionValue:       (NSString *)value forKey:(NSString *)key;
+- (void)setCodecOptionValue:        (NSString *)value forKey:(NSString *)key;
+- (void)setSwsOptionValue:          (NSString *)value forKey:(NSString *)key;
+- (void)setPlayerOptionValue:       (NSString *)value forKey:(NSString *)key;
+
+- (void)setFormatOptionIntValue:    (int64_t)value forKey:(NSString *)key;
+- (void)setCodecOptionIntValue:     (int64_t)value forKey:(NSString *)key;
+- (void)setSwsOptionIntValue:       (int64_t)value forKey:(NSString *)key;
+- (void)setPlayerOptionIntValue:    (int64_t)value forKey:(NSString *)key;
+
 
 @end
 

@@ -42,6 +42,9 @@
              in place of the usual title bar. -->
         <attr name="windowActionBar" format="boolean" />
 
+        <!-- Flag indicating whether there should be no title on this window. -->
+        <attr name="windowNoTitle" format="boolean" />
+
         <!-- Flag indicating whether this window's Action Bar should overlay
              application content. Does nothing if the window would not
              have an Action Bar. -->
@@ -68,6 +71,17 @@
              that is, when in portrait. Can be either an absolute dimension
              or a fraction of the screen size in that dimension. -->
         <attr name="windowFixedHeightMajor" format="dimension|fraction" />
+
+        <!-- The minimum width the window is allowed to be, along the major
+             axis of the screen.  That is, when in landscape.  Can be either
+             an absolute dimension or a fraction of the screen size in that
+             dimension. -->
+        <attr name="windowMinWidthMajor" format="dimension|fraction" />
+        <!-- The minimum width the window is allowed to be, along the minor
+             axis of the screen.  That is, when in portrait.  Can be either
+             an absolute dimension or a fraction of the screen size in that
+             dimension. -->
+        <attr name="windowMinWidthMinor" format="dimension|fraction" />
 
         <attr name="android:windowIsFloating" />
         <attr name="android:windowAnimationStyle" />
@@ -163,6 +177,18 @@
 
 
         <!-- =================== -->
+        <!-- Dialog styles -->
+        <!-- =================== -->
+        <eat-comment />
+
+        <!-- Theme to use for dialogs spawned from this theme. -->
+        <attr name="dialogTheme" format="reference" />
+        <!-- Preferred padding for dialog content. -->
+        <attr name="dialogPreferredPadding" format="dimension" />
+        <!-- The list divider used in alert dialogs. -->
+        <attr name="listDividerAlertDialog" format="reference" />
+
+        <!-- =================== -->
         <!-- Other widget styles -->
         <!-- =================== -->
         <eat-comment />
@@ -171,9 +197,6 @@
         <attr name="actionDropDownStyle" format="reference"/>
         <!-- The preferred item height for dropdown lists. -->
         <attr name="dropdownListPreferredItemHeight" format="dimension"/>
-
-        <!-- Default Spinner style. -->
-        <attr name="spinnerStyle" format="reference" />
         <!-- Default Spinner style. -->
         <attr name="spinnerDropDownItemStyle" format="reference" />
         <!-- Specifies a drawable to use for the 'home as up' indicator. -->
@@ -182,11 +205,9 @@
         <!-- Default action button style. -->
         <attr name="actionButtonStyle" format="reference"/>
 
-        <!-- A style that may be applied to horizontal LinearLayouts
-         to form a button bar. -->
+        <!-- Style for button bars -->
         <attr name="buttonBarStyle" format="reference"/>
-        <!-- A style that may be applied to Buttons placed within a
-             LinearLayout with the style buttonBarStyle to form a button bar. -->
+        <!-- Style for buttons within button bars -->
         <attr name="buttonBarButtonStyle" format="reference"/>
         <!-- A style that may be applied to buttons or other selectable items
              that should react to pressed and focus states, but that do not
@@ -194,6 +215,8 @@
         <attr name="selectableItemBackground" format="reference"/>
         <!-- Background drawable for borderless standalone items that need focus/pressed states. -->
         <attr name="selectableItemBackgroundBorderless" format="reference" />
+        <!-- Style for buttons without an explicit border, often used in groups. -->
+        <attr name="borderlessButtonStyle" format="reference" />
         <!-- A drawable that may be used as a vertical divider between visual elements. -->
         <attr name="dividerVertical" format="reference"/>
         <!-- A drawable that may be used as a horizontal divider between visual elements. -->
@@ -215,9 +238,6 @@
         <attr name="editTextColor" format="reference|color" />
         <!-- EditText background drawable. -->
         <attr name="editTextBackground" format="reference" />
-
-        <!-- Default style for the Switch widget. -->
-        <attr name="switchStyle" format="reference" />
 
         <!-- ============================ -->
         <!-- SearchView styles and assets -->
@@ -304,6 +324,54 @@
 
         <!-- The color applied to framework switch thumbs in their normal state. -->
         <attr name="colorSwitchThumbNormal" format="color" />
+
+        <!-- ============ -->
+        <!-- Alert Dialog styles -->
+        <!-- ============ -->
+        <eat-comment />
+        <attr name="alertDialogStyle" format="reference" />
+        <attr name="alertDialogButtonGroupStyle" format="reference" />
+        <attr name="alertDialogCenterButtons" format="boolean" />
+        <!-- Theme to use for alert dialogs spawned from this theme. -->
+        <attr name="alertDialogTheme" format="reference" />
+
+        <!-- Color of list item text in alert dialogs. -->
+        <attr name="textColorAlertDialogListItem" format="reference|color" />
+
+        <!-- Style for the "positive" buttons within button bars -->
+        <attr name="buttonBarPositiveButtonStyle" format="reference" />
+
+        <!-- Style for the "negative" buttons within button bars -->
+        <attr name="buttonBarNegativeButtonStyle" format="reference" />
+
+        <!-- Style for the "neutral" buttons within button bars -->
+        <attr name="buttonBarNeutralButtonStyle" format="reference" />
+
+        <!-- ===================== -->
+        <!-- Default widget styles -->
+        <!-- ===================== -->
+        <eat-comment />
+
+        <!-- Default AutoCompleteTextView style. -->
+        <attr name="autoCompleteTextViewStyle" format="reference" />
+        <!-- Normal Button style. -->
+        <attr name="buttonStyle" format="reference" />
+        <!-- Small Button style. -->
+        <attr name="buttonStyleSmall" format="reference" />
+        <!-- Default Checkbox style. -->
+        <attr name="checkboxStyle" format="reference" />
+        <!-- Default CheckedTextView style. -->
+        <attr name="checkedTextViewStyle" format="reference" />
+        <!-- Default EditText style. -->
+        <attr name="editTextStyle" format="reference" />
+        <!-- Default RadioButton style. -->
+        <attr name="radioButtonStyle" format="reference" />
+        <!-- Default RatingBar style. -->
+        <attr name="ratingBarStyle" format="reference" />
+        <!-- Default Spinner style. -->
+        <attr name="spinnerStyle" format="reference" />
+        <!-- Default style for the Switch widget. -->
+        <attr name="switchStyle" format="reference" />
 
     </declare-styleable>
 
@@ -432,6 +500,35 @@
              always request focus regardless of this view.  It only impacts where
              focus navigation will try to move focus. -->
         <attr name="android:focusable" />
+
+        <!-- Deprecated. -->
+        <attr name="theme" format="reference" />
+
+        <!-- Specifies a theme override for a view. When a theme override is set, the
+             view will be inflated using a {@link android.content.Context} themed with
+             the specified resource. -->
+        <attr name="android:theme" />
+
+        <!-- Tint to apply to the background. -->
+        <attr name="backgroundTint" format="color" />
+
+        <!-- Blending mode used to apply the background tint. -->
+        <attr name="backgroundTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="MenuView">
@@ -615,8 +712,11 @@
         <attr name="iconifiedByDefault" format="boolean" />
         <!-- An optional maximum width of the SearchView. -->
         <attr name="android:maxWidth" />
-        <!-- An optional query hint string to be displayed in the empty query field. -->
+        <!-- An optional user-defined query hint string to be displayed in the empty query field. -->
         <attr name="queryHint" format="string" />
+        <!-- Default query hint used when {@code queryHint} is undefined and
+             the search view's {@code SearchableInfo} does not provide a hint. -->
+        <attr name="defaultQueryHint" format="string" />
         <!-- The IME options to set on the query text field. -->
         <attr name="android:imeOptions" />
         <!-- The input type to set on the query text field. -->
@@ -627,6 +727,8 @@
         <attr name="goIcon" format="reference" />
         <!-- Search icon -->
         <attr name="searchIcon" format="reference" />
+        <!-- Search icon displayed as a text field hint -->
+        <attr name="searchHintIcon" format="reference" />
         <!-- Voice button icon -->
         <attr name="voiceIcon" format="reference" />
         <!-- Commit icon shown in the query suggestion row -->
@@ -653,9 +755,10 @@
         <attr name="expandActivityOverflowButtonDrawable" format="reference" />
     </declare-styleable>
 
-    <declare-styleable name="CompatTextView">
+    <declare-styleable name="AppCompatTextView">
         <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
         <attr name="textAllCaps" format="reference|boolean" />
+        <attr name="android:textAppearance" />
     </declare-styleable>
 
     <declare-styleable name="LinearLayoutCompat">
@@ -719,12 +822,6 @@
         <attr name="contentInsetRight" />
         <attr name="maxButtonHeight" format="dimension" />
 
-        <!-- Specifies a theme override for a view. When a theme override is set, the
-             view will be inflated using a {@link android.content.Context} themed with
-             the specified resource. During XML inflation, any child views under the
-             view with a theme override will inherit the themed context. -->
-        <attr name="theme" format="reference" />
-        <!-- Icon drawable to use for the collapse button. -->
         <attr name="collapseIcon" format="reference" />
         <!-- Text to set as the content description for the collapse button. -->
         <attr name="collapseContentDescription" format="string" />
@@ -814,10 +911,22 @@
         <attr name="showText" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="SwitchCompatTextAppearance">
+    <declare-styleable name="TextAppearance">
         <attr name="android:textSize" />
         <attr name="android:textColor" />
+        <attr name="android:textStyle" />
+        <attr name="android:typeface" />
         <attr name="textAllCaps" />
+    </declare-styleable>
+
+    <!-- The set of attributes that describe a AlertDialog's theme. -->
+    <declare-styleable name="AlertDialog">
+        <attr name="android:layout" />
+        <attr name="buttonPanelSideLayout" format="reference" />
+        <attr name="listLayout" format="reference" />
+        <attr name="multiChoiceItemLayout" format="reference" />
+        <attr name="singleChoiceItemLayout" format="reference" />
+        <attr name="listItemLayout" format="reference" />
     </declare-styleable>
 
 </resources>

@@ -39,6 +39,8 @@ typedef struct SDL_VoutOverlay {
     Uint16 *pitches; /**< in bytes, Read-only */
     Uint8 **pixels; /**< Read-write */
 
+    int is_private;
+
     SDL_Class               *opaque_class;
     SDL_VoutOverlay_Opaque  *opaque;
     void                    (*free_l)(SDL_VoutOverlay *overlay);

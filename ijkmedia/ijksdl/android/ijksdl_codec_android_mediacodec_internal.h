@@ -25,7 +25,6 @@
 #define IJKSDL_ANDROID__ANDROID_CODEC_ANDROID_MEDIACODEC_INTERNAL_H
 
 #include "ijksdl_codec_android_mediacodec.h"
-#include "ijkutil/ijkutil.h"
 
 inline static SDL_AMediaCodec *SDL_AMediaCodec_CreateInternal(size_t opaque_size)
 {

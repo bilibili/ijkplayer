@@ -38,7 +38,7 @@
 + (NSString*)createTempFileNameInDirectory: (NSString*)aDirectory
                                 withPrefix: (NSString*)aPrefix
 {
-    NSString* templateStr = [NSString stringWithFormat:@"%@/%@XXXXX", aDirectory, aPrefix];
+    NSString* templateStr = [NSString stringWithFormat:@"%@/%@XXXXXX", aDirectory, aPrefix];
     char template[templateStr.length + 1];
     strcpy(template, [templateStr cStringUsingEncoding:NSASCIIStringEncoding]);
     char* filename = mktemp(template);
@@ -48,6 +48,32 @@
         return nil;
     }
     return [NSString stringWithCString:filename encoding:NSASCIIStringEncoding];
+}
+
++ (int)createTempFDForFFConcat
+{
+    return [IJKMediaUtils createTempFDWithPrefix:@"ffconcat-"];
+}
+
++ (int)createTempFDWithPrefix: (NSString*)aPrefix
+{
+    return [IJKMediaUtils createTempFDInDirectory: NSTemporaryDirectory()
+                                       withPrefix: aPrefix];
+}
+
++ (int)createTempFDInDirectory: (NSString*)aDirectory
+                    withPrefix: (NSString*)aPrefix
+{
+    NSString* templateStr = [NSString stringWithFormat:@"%@/%@XXXXXX", aDirectory, aPrefix];
+    char template[templateStr.length + 32];
+    strcpy(template, [templateStr cStringUsingEncoding:NSASCIIStringEncoding]);
+    int fd = mkstemp(template);
+    if (fd <= 0) {
+        NSLog(@"Could not create fd in directory %@", aDirectory);
+        return -1;
+    }
+    unlink(template);
+    return fd;
 }
 
 + (NSError*)createErrorWithDomain: (NSString*)domain

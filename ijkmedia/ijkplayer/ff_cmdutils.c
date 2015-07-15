@@ -24,6 +24,9 @@
 
 #include "ff_cmdutils.h"
 
+#include "libavutil/display.h"
+#include "libavutil/eval.h"
+
 // MERGE: sws_opts
 // MERGE: swr_opts
 // MERGE: format_opts, codec_opts, resample_opts
@@ -200,8 +203,29 @@ AVDictionary **setup_find_stream_info_opts(AVFormatContext *s,
 }
 
 // MERGE: grow_array
-// MERGE: alloc_buffer
-// MERGE: codec_get_buffer
-// MERGE: unref_buffer
-// MERGE: codec_release_buffer
-// MERGE: filter_release_buffer
+// MERGE: print_device_sources
+// MERGE: print_device_sinks
+// MERGE: show_sinks_sources_parse_arg
+// MERGE: show_sources
+// MERGE: show_sinks
+
+double get_rotation(AVStream *st)
+{
+    AVDictionaryEntry *rotate_tag = av_dict_get(st->metadata, "rotate", NULL, 0);
+    uint8_t* displaymatrix = av_stream_get_side_data(st,
+                                                     AV_PKT_DATA_DISPLAYMATRIX, NULL);
+    double theta = 0;
+
+    if (rotate_tag && *rotate_tag->value && strcmp(rotate_tag->value, "0")) {
+        char *tail;
+        theta = av_strtod(rotate_tag->value, &tail);
+        if (*tail)
+            theta = 0;
+    }
+    if (displaymatrix && !theta)
+        theta = av_display_rotation_get((int32_t*) displaymatrix);
+
+    theta -= 360*floor(theta/360 + 0.9/360);
+
+    return theta;
+}

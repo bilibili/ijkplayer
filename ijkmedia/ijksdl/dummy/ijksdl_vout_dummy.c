@@ -23,7 +23,6 @@
 
 #include "ijksdl_vout_dummy.h"
 
-#include "ijkutil/ijkutil.h"
 #include "../ijksdl_vout.h"
 #include "../ijksdl_vout_internal.h"
 

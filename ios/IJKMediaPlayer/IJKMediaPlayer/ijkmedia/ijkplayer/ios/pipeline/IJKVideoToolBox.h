@@ -32,7 +32,8 @@
 #include "ff_ffplay.h"
 
 
-#define MAX_PKT_QUEUE_DEEP 350
+#define MAX_PKT_QUEUE_DEEP   350
+#define VTB_MAX_DECODING_SAMPLES 16
 
 typedef struct VTBPicture {
     double              pts;
@@ -44,10 +45,22 @@ typedef struct VTBPicture {
 } VTBPicture;
 
 
+typedef struct sample_info {
+    int     sample_id;
+
+    double  sort;
+    double  dts;
+    double  pts;
+    int     serial;
+
+    volatile int is_decoding;
+} sample_info;
+
+
 typedef struct sort_queue {
     double              dts;
     double              pts;
-    double              serial;
+    int                 serial;
     double              sort;
     int64_t             width;
     int64_t             height;
@@ -77,11 +90,18 @@ typedef struct VideoToolBoxContext {
     int32_t                     m_max_ref_frames;
     bool                        m_convert_bytestream;
     bool                        m_convert_3byteTo4byteNALSize;
-    double                      serial;
+    int                         serial;
     volatile double             last_sort;
     bool                        dealloced;
     int                         m_buffer_deep;
     AVPacket                    m_buffer_packet[MAX_PKT_QUEUE_DEEP];
+
+    SDL_mutex                  *sample_info_mutex;
+    SDL_cond                   *sample_info_cond;
+    sample_info                 sample_info_array[VTB_MAX_DECODING_SAMPLES];
+    volatile int                sample_info_index;
+    volatile int                sample_info_id_generator;
+    volatile int                sample_infos_in_decoding;
 } VideoToolBoxContext ;
 
 

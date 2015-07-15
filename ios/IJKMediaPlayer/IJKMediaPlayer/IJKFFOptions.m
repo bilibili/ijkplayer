@@ -1,134 +1,223 @@
-//
-//  IJKFFOptions.m
-//  IJKMediaPlayer
-//
-//  Created by ZhangRui on 13-10-17.
-//  Copyright (c) 2013年 bilibili. All rights reserved.
-//
+/*
+ * IJKFFOptions.m
+ *
+ * Copyright (c) 2013-2015 Zhang Rui <bbcallen@gmail.com>
+ *
+ * This file is part of ijkPlayer.
+ *
+ * ijkPlayer is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * ijkPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with ijkPlayer; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #import "IJKFFOptions.h"
 #include "ijkplayer/ios/ijkplayer_ios.h"
 
-@implementation IJKFFOptions
+@implementation IJKFFOptions {
+    NSMutableDictionary *_optionCategories;
+
+    NSMutableDictionary *_playerOptions;
+    NSMutableDictionary *_formatOptions;
+    NSMutableDictionary *_codecOptions;
+    NSMutableDictionary *_swsOptions;
+}
 
 + (IJKFFOptions *)optionsByDefault
 {
     IJKFFOptions *options = [[IJKFFOptions alloc] init];
 
-    options.skipLoopFilter  = IJK_AVDISCARD_ALL;
-    options.skipFrame       = IJK_AVDISCARD_NONREF;
+    [options setMaxFps:30];
+    [options setFrameDrop:0];
+    [options setVideoPictureSize:3];
+    [options setVideoToolboxMaxFrameWidth:960];
 
-    options.frameBufferCount        = 3;
-    options.maxFps                  = 30;
-    options.frameDrop               = 0;
-    options.pauseInBackground       = YES;
+    [options setReconnect:1];
+    [options setTimeout:30 * 1000 * 1000];
+    [options setUserAgent:@"ijkplayer"];
 
-    options.timeout                 = 30 * 1000 * 1000; // 30 seconds
-    options.userAgent               = @"";
-    options.videotoolboxEnabled     = YES;
-    options.frameMaxWidth           = 960;
-    options.autoReconnect           = YES;
-
+    [options setSkipLoopFilter:IJK_AVDISCARD_ALL];
+    [options setSkipFrame:IJK_AVDISCARD_NONREF];
 
     return options;
 }
 
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _playerOptions      = [[NSMutableDictionary alloc] init];
+        _formatOptions      = [[NSMutableDictionary alloc] init];
+        _codecOptions       = [[NSMutableDictionary alloc] init];
+        _swsOptions         = [[NSMutableDictionary alloc] init];
+
+        _optionCategories   = [[NSMutableDictionary alloc] init];
+        _optionCategories[@(IJKMP_OPT_CATEGORY_PLAYER)] = _playerOptions;
+        _optionCategories[@(IJKMP_OPT_CATEGORY_FORMAT)] = _formatOptions;
+        _optionCategories[@(IJKMP_OPT_CATEGORY_CODEC)]  = _codecOptions;
+        _optionCategories[@(IJKMP_OPT_CATEGORY_SWS)]    = _swsOptions;
+    }
+    return self;
+}
+
 - (void)applyTo:(IjkMediaPlayer *)mediaPlayer
 {
-    [self logOptions];
-
-    [self setCodecOption:@"skip_loop_filter"
-               withInt64:self.skipLoopFilter
-                      to:mediaPlayer];
-    [self setCodecOption:@"skip_frame"
-               withInt64:self.skipFrame
-                      to:mediaPlayer];
-
-    ijkmp_set_picture_queue_capicity(mediaPlayer, _frameBufferCount);
-    ijkmp_set_max_fps(mediaPlayer, _maxFps);
-    ijkmp_set_framedrop(mediaPlayer, _frameDrop);
-    ijkmp_ios_set_videotoolbox_enabled(mediaPlayer, _videotoolboxEnabled);
-    ijkmp_ios_set_frame_max_width(mediaPlayer, _frameMaxWidth);
-
-    if (self.autoReconnect == NO) {
-        [self setFormatOption:@"reconnect" withInt64:0 to:mediaPlayer];
-    } else {
-        [self setFormatOption:@"reconnect" withInt64:1 to:mediaPlayer];
-    }
-
-#if 0
-    if (self.timeout > 0) {
-        [self setFormatOption:@"timeout"
-                    withInt64:self.timeout
-                           to:mediaPlayer];
-    }
-#endif
-
-    if ([self.userAgent isEqualToString:@""] == NO) {
-        [self setFormatOption:@"user-agent" withString:self.userAgent to:mediaPlayer];
-    }
+    [_optionCategories enumerateKeysAndObjectsUsingBlock:^(id categoryKey, id categoryDict, BOOL *stopOuter) {
+        [categoryDict enumerateKeysAndObjectsUsingBlock:^(id optKey, id optValue, BOOL *stop) {
+            if ([optValue isKindOfClass:[NSNumber class]]) {
+                ijkmp_set_option_int(mediaPlayer,
+                                     (int)[categoryKey integerValue],
+                                     [optKey UTF8String],
+                                     [optValue longLongValue]);
+            } else if ([optValue isKindOfClass:[NSString class]]) {
+                ijkmp_set_option(mediaPlayer,
+                                 (int)[categoryKey integerValue],
+                                 [optKey UTF8String],
+                                 [optValue UTF8String]);
+            }
+        }];
+    }];
 }
 
-- (void)logOptions
+- (void)setOptionValue:(NSString *)value
+                forKey:(NSString *)key
+            ofCategory:(IJKFFOptionCategory)category
 {
-    NSMutableString *echo = [[NSMutableString alloc] init];
-    [echo appendString:@"========================================\n"];
-    [echo appendString:@"= FFmpeg options:\n"];
-    [echo appendFormat:@"= skip_loop_filter: %@\n",   [IJKFFOptions getDiscardString:self.skipLoopFilter]];
-    [echo appendFormat:@"= skipFrame:        %@\n",   [IJKFFOptions getDiscardString:self.skipFrame]];
-    [echo appendFormat:@"= frameBufferCount: %d\n",   self.frameBufferCount];
-    [echo appendFormat:@"= maxFps:           %d\n",   self.maxFps];
-    [echo appendFormat:@"= timeout:          %lld\n", self.timeout];
-    [echo appendString:@"========================================\n"];
-    NSLog(@"%@", echo);
-}
+    if (!key)
+        return;
 
-+ (NSString *)getDiscardString:(IJKAVDiscard)discard
-{
-    switch (discard) {
-        case IJK_AVDISCARD_NONE:
-            return @"avdiscard none";
-        case IJK_AVDISCARD_DEFAULT:
-            return @"avdiscard default";
-        case IJK_AVDISCARD_NONREF:
-            return @"avdiscard nonref";
-        case IJK_AVDISCARD_BIDIR:
-            return @"avdicard bidir;";
-        case IJK_AVDISCARD_NONKEY:
-            return @"avdicard nonkey";
-        case IJK_AVDISCARD_ALL:
-            return @"avdicard all;";
-        default:
-            return @"avdiscard unknown";
+    NSMutableDictionary *options = [_optionCategories objectForKey:@(category)];
+    if (options) {
+        if (value) {
+            [options setObject:value forKey:key];
+        } else {
+            [options removeObjectForKey:key];
+        }
     }
 }
 
-- (void)setFormatOption:(NSString *)optionName
-              withInt64:(int64_t)value
-                     to:(IjkMediaPlayer *)mediaPlayer
+- (void)setOptionIntValue:(int64_t)value
+                   forKey:(NSString *)key
+               ofCategory:(IJKFFOptionCategory)category
 {
-    ijkmp_set_format_option(mediaPlayer,
-                           [optionName UTF8String],
-                           [[NSString stringWithFormat:@"%lld", value] UTF8String]);
-}
+    if (!key)
+        return;
 
-- (void)setFormatOption:(NSString *)optionName
-              withString:(NSString*)value
-                     to:(IjkMediaPlayer *)mediaPlayer
-{
-    ijkmp_set_format_option(mediaPlayer,
-                            [optionName UTF8String],
-                            [value UTF8String]);
+    NSMutableDictionary *options = [_optionCategories objectForKey:@(category)];
+    if (options) {
+        [options setObject:@(value) forKey:key];
+    }
 }
 
 
-- (void)setCodecOption:(NSString *)optionName
-             withInt64:(int64_t)value
-                    to:(IjkMediaPlayer *)mediaPlayer
+#pragma mark Common Helper
+
+-(void)setFormatOptionValue:(NSString *)value forKey:(NSString *)key
 {
-    ijkmp_set_codec_option(mediaPlayer,
-                           [optionName UTF8String],
-                           [[NSString stringWithFormat:@"%lld", value] UTF8String]);
+    [self setOptionValue:value forKey:key ofCategory:kIJKFFOptionCategoryFormat];
+}
+
+-(void)setCodecOptionValue:(NSString *)value forKey:(NSString *)key
+{
+    [self setOptionValue:value forKey:key ofCategory:kIJKFFOptionCategoryCodec];
+}
+
+-(void)setSwsOptionValue:(NSString *)value forKey:(NSString *)key
+{
+    [self setOptionValue:value forKey:key ofCategory:kIJKFFOptionCategorySws];
+}
+
+-(void)setPlayerOptionValue:(NSString *)value forKey:(NSString *)key
+{
+    [self setOptionValue:value forKey:key ofCategory:kIJKFFOptionCategoryPlayer];
+}
+
+-(void)setFormatOptionIntValue:(int64_t)value forKey:(NSString *)key
+{
+    [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryFormat];
+}
+
+-(void)setCodecOptionIntValue:(int64_t)value forKey:(NSString *)key
+{
+    [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryCodec];
+}
+
+-(void)setSwsOptionIntValue:(int64_t)value forKey:(NSString *)key
+{
+    [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategorySws];
+}
+
+-(void)setPlayerOptionIntValue:(int64_t)value forKey:(NSString *)key
+{
+    [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryPlayer];
+}
+
+
+#pragma mark Player options
+
+-(void)setMaxFps:(int)value
+{
+    [self setPlayerOptionIntValue:value forKey:@"max-fps"];
+}
+
+-(void)setFrameDrop:(int)value
+{
+    [self setPlayerOptionIntValue:value forKey:@"framedrop"];
+}
+
+-(void)setVideoPictureSize:(int)value
+{
+    [self setPlayerOptionIntValue:value forKey:@"video-pictq-size"];
+}
+
+-(void)setVideoToolboxEnabled:(BOOL)value
+{
+    [self setPlayerOptionIntValue:(value ? 1 : 0) forKey:@"videotoolbox"];
+}
+
+-(void)setVideoToolboxMaxFrameWidth:(int)value
+{
+    [self setPlayerOptionIntValue:value forKey:@"videotoolbox-max-frame-width"];
+}
+
+
+#pragma mark Format options
+
+-(void)setReconnect:(int)value
+{
+    [self setFormatOptionIntValue:value forKey:@"reconnect"];
+}
+
+-(void)setTimeout:(int64_t)value
+{
+    [self setFormatOptionIntValue:value forKey:@"timeout"];
+}
+
+-(void)setUserAgent:(NSString *)value
+{
+    [self setFormatOptionValue:value forKey:@"user-agent"];
+}
+
+
+#pragma mark Codec options
+
+-(void)setSkipLoopFilter:(IJKAVDiscard)value
+{
+    [self setCodecOptionIntValue:value forKey:@"skip_loop_filter"];
+}
+
+-(void)setSkipFrame:(IJKAVDiscard)value
+{
+    [self setCodecOptionIntValue:value forKey:@"skip_frame"];
 }
 
 @end

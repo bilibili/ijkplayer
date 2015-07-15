@@ -24,7 +24,7 @@
 #ifndef IJKSDL_ANDROID__ANDROID_CODEC_ANDROID_MEDIADEF_H
 #define IJKSDL_ANDROID__ANDROID_CODEC_ANDROID_MEDIADEF_H
 
-#include "ijkutil/ijkutil.h"
+#include "../ijksdl_misc.h"
 
 typedef enum sdl_amedia_status_t {
     SDL_AMEDIA_OK = 0,

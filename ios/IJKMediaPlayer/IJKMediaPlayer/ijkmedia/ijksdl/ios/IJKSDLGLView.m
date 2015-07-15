@@ -29,17 +29,7 @@
 #import "IJKSDLGLRenderRV24.h"
 #import "IJKSDLGLRenderNV12.h"
 #include "ijksdl/ijksdl_timer.h"
-
-#define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
-#define SYSTEM_VERSION_GREATER_THAN(v)              ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
-#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
-#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
-#define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
-
-inline static BOOL isIOS7OrLater()
-{
-    return SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0");
-}
+#include "ijksdl/ios/ijksdl_ios.h"
 
 
 static NSString *const g_vertexShaderString = IJK_SHADER_STRING
@@ -178,12 +168,15 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
 
     GLfloat         _prevScaleFactor;
 
-    id<IJKSDLGLRender> _renderer;
+    id<IJKSDLGLRender>        _renderer;
+    CVOpenGLESTextureCacheRef _textureCache;
 
     BOOL            _didSetContentMode;
     BOOL            _didRelayoutSubViews;
     BOOL            _didPaddingChanged;
 
+    int             _tryLockErrorCount;
+    BOOL            _didSetupGL;
     NSMutableArray *_registeredNotifications;
 }
 
@@ -201,86 +194,143 @@ enum {
 {
     self = [super initWithFrame:frame];
     if (self) {
+        _tryLockErrorCount = 0;
+
         self.glActiveLock = [[NSRecursiveLock alloc] init];
         _registeredNotifications = [[NSMutableArray alloc] init];
-
-        CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
-        eaglLayer.opaque = YES;
-        eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                        [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
-                                        kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-                                        nil];
-
-        _scaleFactor = [[UIScreen mainScreen] scale];
-        if (_scaleFactor < 0.1f)
-            _scaleFactor = 1.0f;
-        _prevScaleFactor = _scaleFactor;
-
-        [eaglLayer setContentsScale:_scaleFactor];
-
-        _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-
-        if (_context == nil || ![EAGLContext setCurrentContext:_context]) {
-            NSLog(@"failed to setup EAGLContext");
-            self = nil;
-            return nil;
-        }
-
-        glGenFramebuffers(1, &_framebuffer);
-        glGenRenderbuffers(1, &_renderbuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-        [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
-        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
-        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _renderbuffer);
-
-        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            NSLog(@"failed to make complete framebuffer object %x\n", status);
-            if ([EAGLContext currentContext] == _context)
-                [EAGLContext setCurrentContext:nil];
-            self = nil;
-            return nil;
-        }
-
-        GLenum glError = glGetError();
-        if (GL_NO_ERROR != glError) {
-            NSLog(@"failed to setup GL %x\n", glError);
-            if ([EAGLContext currentContext] == _context)
-                [EAGLContext setCurrentContext:nil];
-            self = nil;
-            return nil;
-        }
-
-        _vertices[0] = -1.0f;  // x0
-        _vertices[1] = -1.0f;  // y0
-        _vertices[2] =  1.0f;  // ..
-        _vertices[3] = -1.0f;
-        _vertices[4] = -1.0f;
-        _vertices[5] =  1.0f;
-        _vertices[6] =  1.0f;  // x3
-        _vertices[7] =  1.0f;  // y3
-
-        _texCoords[0] = 0.0f;
-        _texCoords[1] = 1.0f;
-        _texCoords[2] = 1.0f;
-        _texCoords[3] = 1.0f;
-        _texCoords[4] = 0.0f;
-        _texCoords[5] = 0.0f;
-        _texCoords[6] = 1.0f;
-        _texCoords[7] = 0.0f;
-
-        _rightPadding = 0.0f;
-
-        NSLog(@"OK setup GL");
-        if ([EAGLContext currentContext] == _context)
-            [EAGLContext setCurrentContext:nil];
-
         [self registerApplicationObservers];
+
+        _didSetupGL = NO;
+        [self setupGLOnce];
     }
 
     return self;
+}
+
+- (BOOL)setupGL
+{
+    CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
+    eaglLayer.opaque = YES;
+    eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+                                    [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
+                                    kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
+                                    nil];
+
+    _scaleFactor = [[UIScreen mainScreen] scale];
+    if (_scaleFactor < 0.1f)
+        _scaleFactor = 1.0f;
+    _prevScaleFactor = _scaleFactor;
+
+    [eaglLayer setContentsScale:_scaleFactor];
+
+    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+
+    if (_context == nil || ![EAGLContext setCurrentContext:_context]) {
+        NSLog(@"failed to setup EAGLContext\n");
+        return NO;
+    }
+
+    glGenFramebuffers(1, &_framebuffer);
+    glGenRenderbuffers(1, &_renderbuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+    [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _renderbuffer);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        NSLog(@"failed to make complete framebuffer object %x\n", status);
+        if ([EAGLContext currentContext] == _context)
+            [EAGLContext setCurrentContext:nil];
+        return NO;
+    }
+
+    CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_textureCache);
+    if (err) {
+        NSLog(@"Error at CVOpenGLESTextureCacheCreate %d\n", err);
+        return NO;
+    }
+
+    GLenum glError = glGetError();
+    if (GL_NO_ERROR != glError) {
+        NSLog(@"failed to setup GL %x\n", glError);
+        if ([EAGLContext currentContext] == _context)
+            [EAGLContext setCurrentContext:nil];
+        return NO;
+    }
+
+    _vertices[0] = -1.0f;  // x0
+    _vertices[1] = -1.0f;  // y0
+    _vertices[2] =  1.0f;  // ..
+    _vertices[3] = -1.0f;
+    _vertices[4] = -1.0f;
+    _vertices[5] =  1.0f;
+    _vertices[6] =  1.0f;  // x3
+    _vertices[7] =  1.0f;  // y3
+
+    _texCoords[0] = 0.0f;
+    _texCoords[1] = 1.0f;
+    _texCoords[2] = 1.0f;
+    _texCoords[3] = 1.0f;
+    _texCoords[4] = 0.0f;
+    _texCoords[5] = 0.0f;
+    _texCoords[6] = 1.0f;
+    _texCoords[7] = 0.0f;
+
+    _rightPadding = 0.0f;
+
+    NSLog(@"OK setup GL\n");
+    if ([EAGLContext currentContext] == _context)
+        [EAGLContext setCurrentContext:nil];
+
+    _didSetupGL = YES;
+    return YES;
+}
+
+- (BOOL)setupGLGuarded
+{
+    if (![self tryLockGLActive]) {
+        return NO;
+    }
+
+    BOOL didSetupGL = [self setupGL];
+    [self unlockGLActive];
+    return didSetupGL;
+}
+
+- (BOOL)setupGLOnce
+{
+    if (_didSetupGL)
+        return YES;
+
+    if ([self isApplicationActive] == NO)
+        return NO;
+
+    __block BOOL didSetup = NO;
+    if ([NSThread isMainThread]) {
+        didSetup = [self setupGLGuarded];
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            didSetup = [self setupGLGuarded];
+        });
+    }
+
+    return didSetup;
+}
+
+- (BOOL)isApplicationActive
+{
+    UIApplicationState appState = [UIApplication sharedApplication].applicationState;
+    switch (appState) {
+        case UIApplicationStateActive:
+            return YES;
+        case UIApplicationStateInactive:
+        case UIApplicationStateBackground:
+        default:
+            return NO;
+    }
 }
 
 - (void)dealloc
@@ -304,6 +354,11 @@ enum {
     if (_program) {
         glDeleteProgram(_program);
         _program = 0;
+    }
+
+    if (_textureCache) {
+        CFRelease(_textureCache);
+        _textureCache = 0;
     }
 
     if ([EAGLContext currentContext] == _context) {
@@ -364,7 +419,7 @@ enum {
             return NO;
         } else if (overlay->format == SDL_FCC_NV12) {
             _frameChroma = overlay->format;
-            _renderer = [[IJKSDLGLRenderNV12 alloc] init];
+            _renderer = [[IJKSDLGLRenderNV12 alloc] initWithTextureCache:_textureCache];
             _bytesPerPixel = 1;
             NSLog(@"OK use NV12 GL renderer");
         } else if (overlay->format == SDL_FCC_I420) {
@@ -489,15 +544,21 @@ exit:
 
 - (void)display: (SDL_VoutOverlay *) overlay
 {
-    // gles throws gpus_ReturnNotPermittedKillClient, while app is in background
-    if (![self tryLockGLActive]) {
-        NSLog(@"IJKSDLGLView:display: unable to tryLock GL active\n");
-        return;
+    if ([self setupGLOnce]) {
+        // gles throws gpus_ReturnNotPermittedKillClient, while app is in background
+        if (![self tryLockGLActive]) {
+            if (0 == (_tryLockErrorCount % 100)) {
+                NSLog(@"IJKSDLGLView:display: unable to tryLock GL active: %d\n", _tryLockErrorCount);
+            }
+            _tryLockErrorCount++;
+            return;
+        }
+
+        _tryLockErrorCount = 0;
+        [self displayInternal:overlay];
+
+        [self unlockGLActive];
     }
-
-    [self displayInternal:overlay];
-
-    [self unlockGLActive];
 }
 
 - (void)displayInternal: (SDL_VoutOverlay *) overlay
@@ -524,7 +585,7 @@ exit:
         return;
     }
 
-    if (overlay->pitches[0] / _bytesPerPixel > _frameWidth) {
+    if (!overlay->is_private && overlay->pitches[0] / _bytesPerPixel > _frameWidth) {
         _rightPaddingPixels = overlay->pitches[0] / _bytesPerPixel - _frameWidth;
         _didPaddingChanged = YES;
     }
@@ -549,7 +610,7 @@ exit:
     if (overlay) {
         _frameWidth = overlay->w;
         _frameHeight = overlay->h;
-        [_renderer display:overlay];
+        [_renderer render:overlay];
     }
 
     if ([_renderer prepareDisplay]) {
@@ -794,28 +855,14 @@ exit:
 
     // OpenGL ES measures data in PIXELS
     // Create a graphics context with the target size measured in POINTS
-    NSInteger widthInPoints, heightInPoints;
-    if (NULL != UIGraphicsBeginImageContextWithOptions) {
-        // On iOS 4 and later, use UIGraphicsBeginImageContextWithOptions to take the scale into consideration
-        // Set the scale parameter to your OpenGL ES view's contentScaleFactor
-        // so that you get a high-resolution snapshot when its value is greater than 1.0
-        CGFloat scale = self.contentScaleFactor;
-        widthInPoints = width / scale;
-        heightInPoints = height / scale;
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(widthInPoints, heightInPoints), NO, scale);
-    } else {
-        // On iOS prior to 4, fall back to use UIGraphicsBeginImageContext
-        widthInPoints = width;
-        heightInPoints = height;
-        UIGraphicsBeginImageContext(CGSizeMake(widthInPoints, heightInPoints));
-    }
+    UIGraphicsBeginImageContext(CGSizeMake(width, height));
 
     CGContextRef cgcontext = UIGraphicsGetCurrentContext();
     // UIKit coordinate system is upside down to GL/Quartz coordinate system
     // Flip the CGImage by rendering it to the flipped bitmap context
     // The size of the destination area is measured in POINTS
     CGContextSetBlendMode(cgcontext, kCGBlendModeCopy);
-    CGContextDrawImage(cgcontext, CGRectMake(0.0, 0.0, widthInPoints, heightInPoints), iref);
+    CGContextDrawImage(cgcontext, CGRectMake(0.0, 0.0, width, height), iref);
 
     // Retrieve the UIImage from the current context
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();

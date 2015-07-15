@@ -36,4 +36,13 @@
     <integer name="abc_config_activityShortDur">150</integer>
     <integer name="abc_config_activityDefaultDur">220</integer>
 
+    <bool name="abc_config_closeDialogWhenTouchOutside">true</bool>
+
+    <!-- Maximum numerical value that will be shown in a status bar
+         notification icon or in the notification itself. Will be replaced
+         with @string/status_bar_notification_info_overflow when shown in the
+         UI. -->
+    <integer name="status_bar_notification_info_maxnum">999</integer>
+
+    <integer name="cancel_button_image_alpha">127</integer>
 </resources>
