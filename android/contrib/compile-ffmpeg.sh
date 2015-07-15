@@ -37,7 +37,7 @@ echo_archs() {
     echo ""
 }
 
-usage() {
+echo_usage() {
     echo "Usage:"
     echo "  compile-ffmpeg.sh armv5|armv7a|x86|arm64"
     echo "  compile-ffmpeg.sh all"
@@ -46,7 +46,7 @@ usage() {
     exit 1
 }
 
-nextstep_help() {
+echo_nextstep_help() {
     echo ""
     echo "--------------------"
     echo "[*] Finished"
@@ -64,6 +64,7 @@ case "$FF_TARGET" in
     armv5|armv7a|x86|arm64)
         echo_archs
         sh tools/do-compile-ffmpeg.sh $FF_TARGET
+        echo_nextstep_help
     ;;
     all)
         echo_archs
@@ -71,6 +72,7 @@ case "$FF_TARGET" in
         do
             sh tools/do-compile-ffmpeg.sh $ARCH
         done
+        echo_nextstep_help
     ;;
     clean)
         echo_archs
@@ -86,13 +88,7 @@ case "$FF_TARGET" in
         echo_archs
     ;;
     *)
-        usage
+        echo_usage
         exit 1
-    ;;
-esac
-
-case "$FF_TARGET" in
-    armv5|armv7a|x86|arm64-v8a|all)
-        nextstep_help
     ;;
 esac
