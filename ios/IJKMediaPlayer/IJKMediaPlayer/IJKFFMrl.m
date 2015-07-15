@@ -22,11 +22,13 @@
 
 #import "IJKFFMrl.h"
 #import "IJKMediaUtils.h"
+#include "ijksdl/ios/ijksdl_ios.h"
 #include "libavutil/base64.h"
 #include "libavutil/mem.h"
 
 @implementation IJKFFMrl {
     NSString *_tmpFile;
+    int _fd;
 }
 
 @synthesize rawMrl      = _rawMrl;
@@ -44,13 +46,13 @@
                 NSString *data = [_rawMrl substringFromIndex:(range.location + 1)];
                 NSString *ffConcat = [IJKFFMrl base64Decode:data];
 
-                _tmpFile = [IJKMediaUtils createTempFileNameForFFConcat];
-                [ffConcat writeToFile:_tmpFile
-                           atomically:YES
-                             encoding:NSStringEncodingConversionAllowLossy
-                                error:nil];
+                _fd = [IJKMediaUtils createTempFDForFFConcat];
+                const char *ffConcatU8 = [ffConcat UTF8String];
+                size_t len = strlen(ffConcatU8);
+                write(_fd, ffConcatU8, len);
+                lseek(_fd, 0, SEEK_SET);
 
-                _resolvedMrl = [[NSString alloc] initWithFormat:@"concat://%@", _tmpFile];
+                _resolvedMrl = [[NSString alloc] initWithFormat:@"pipe:%"PRId64, (int64_t)_fd];
             }
         }
 
@@ -66,9 +68,13 @@
         [[NSFileManager defaultManager] removeItemAtPath:_tmpFile error:nil];
         _tmpFile = nil;
     }
+    if (_fd > 0) {
+        close(_fd);
+        _fd = 0;
+    }
 }
 
-+ (NSString *) base64Decode: (NSString*)cipher
++ (NSString *) base64Decode_preIOS7: (NSString*)cipher
 {
     int ret = 0;
     const char *utf8Cipher = [cipher UTF8String];
@@ -89,6 +95,17 @@
     free(utf8Plain);
 
     return plain;
+}
+
++ (NSString *) base64Decode: (NSString*)cipher
+{
+    if (isIOS7OrLater()) {
+        NSData   *plainData = [[NSData alloc] initWithBase64EncodedString:cipher options:0];
+        NSString *plain    = [[NSString alloc] initWithData:plainData encoding:NSUTF8StringEncoding];
+        return plain;
+    } else {
+        return [IJKFFMrl base64Decode_preIOS7:cipher];
+    }
 }
 
 @end
