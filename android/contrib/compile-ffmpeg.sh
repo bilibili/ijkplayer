@@ -37,6 +37,24 @@ echo_archs() {
     echo ""
 }
 
+usage() {
+    echo "Usage:"
+    echo "  compile-ffmpeg.sh armv5|armv7a|x86|arm64"
+    echo "  compile-ffmpeg.sh all"
+    echo "  compile-ffmpeg.sh clean"
+    echo "  compile-ffmpeg.sh check"
+    exit 1
+}
+
+nextstep_help() {
+    echo ""
+    echo "--------------------"
+    echo "[*] Finished"
+    echo "--------------------"
+    echo "# to continue to build ijkplayer, run script below,"
+    echo "sh compile-ijk.sh "
+}
+
 #----------
 case "$FF_TARGET" in
     "")
@@ -58,7 +76,9 @@ case "$FF_TARGET" in
         echo_archs
         for ARCH in $FF_ALL_ARCHS
         do
-            cd ffmpeg-$ARCH && git clean -xdf && cd -
+            if [ -d ffmpeg-$ARCH ]; then
+                cd ffmpeg-$ARCH && git clean -xdf && cd -
+            fi
         done
         rm -rf ./build/ffmpeg-*
     ;;
@@ -66,18 +86,13 @@ case "$FF_TARGET" in
         echo_archs
     ;;
     *)
-        echo "Usage:"
-        echo "  compile-ffmpeg.sh armv5|armv7a|x86|arm64"
-        echo "  compile-ffmpeg.sh all"
-        echo "  compile-ffmpeg.sh clean"
-        echo "  compile-ffmpeg.sh check"
+        usage
         exit 1
     ;;
 esac
 
-#----------
-echo "\n--------------------"
-echo "[*] Finished"
-echo "--------------------"
-echo "# to continue to build ijkplayer, run script below,"
-echo "sh compile-ijk.sh "
+case "$FF_TARGET" in
+    armv5|armv7a|x86|arm64-v8a|all)
+        nextstep_help
+    ;;
+esac
