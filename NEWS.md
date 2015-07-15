@@ -1,8 +1,12 @@
 tag next
 --------------------------------
+
+tag k0.3.1
+--------------------------------
 player: key-value options API
 player: remove ijkutil
 build: support cygwin
+ios: optimize performance of VideoToolbox.
 
 tag k0.3.0
 --------------------------------
