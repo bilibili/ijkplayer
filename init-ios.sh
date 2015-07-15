@@ -39,6 +39,7 @@ function pull_fork()
     sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK ios/ffmpeg-$1 ${IJK_FFMPEG_LOCAL_REPO}
     cd ios/ffmpeg-$1
     git checkout ${IJK_FFMPEG_COMMIT}
+    git pull --rebase
     cd -
 }
 
