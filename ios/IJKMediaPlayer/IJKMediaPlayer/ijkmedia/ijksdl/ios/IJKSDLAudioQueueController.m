@@ -52,6 +52,8 @@
         _spec.channels = 2;
         AudioStreamBasicDescription streamDescription;
         IJKSDLGetAudioStreamBasicDescriptionFromSpec(&_spec, &streamDescription);
+        
+//        streamDescription.mSampleRate = streamDescription.mSampleRate*0.5; //add by William
 
         /* Set the desired format */
         AudioQueueRef audioQueueRef;

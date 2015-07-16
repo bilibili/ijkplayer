@@ -68,21 +68,20 @@
                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
-                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Nr0-8W-9Mb">
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="http://v.iask.com/v_play_ipad.php?vid=99264895" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Nr0-8W-9Mb">
                     <rect key="frame" x="110" y="33" width="272" height="30"/>
-                    <string key="text">vod://kanqiu/test_456?ac=pull&amp;m=720p&amp;st=1435571019&amp;td=86400&amp;u=12345678&amp;ve=ws&amp;k=dfd4ec58e4fbb0922ed386bc17bccfaab686cd47f43da02c79bce154eaf907a0</string>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Ofm-GN-crP">
-                    <rect key="frame" x="110" y="0.0" width="272" height="30"/>
+                    <rect key="frame" x="110" y="2" width="272" height="30"/>
                     <string key="text">vod://kanqiu/test_shiyi?ac=pull&amp;m=720p&amp;st=1436859023&amp;td=60000&amp;u=12345678&amp;ve=ws&amp;k=0f062b3824a5e0f787e1e35ff81f17a2ba025ff7f693c69460ec989b5f68eef8</string>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-            <point key="canvasLocation" x="3" y="246"/>
+            <point key="canvasLocation" x="-5" y="209"/>
         </view>
     </objects>
 </document>

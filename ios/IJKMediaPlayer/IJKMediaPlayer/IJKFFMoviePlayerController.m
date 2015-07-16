@@ -91,6 +91,8 @@
     NSString* liveUrl;
     NSString* liveCDN;
     IJKMPMovieSourceType rootSourceType;
+    NSString* backPlayUrlField;
+    BOOL isBackPlayMode;
     
     //
     NSMutableArray *_registeredNotifications;
@@ -178,6 +180,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     self = [super init];
     if (self) {
         isTokenMode = YES;
+        isBackPlayMode = NO;
         
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
@@ -199,6 +202,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         _options = options;
         
         self.token = token;
+        
+        rootSourceType = _options.sourceType;
     }
     
     return self;
@@ -317,6 +322,35 @@ static NSMutableDictionary *dictionary = nil;
     
     //sleep
 //    sleep(3);
+
+    NSString* playUrl = nil;
+    
+    if (isBackPlayMode) {
+        _options.sourceType = IJKMPMovieSourceTypeOnDemandStreaming;
+        //get Vod Url
+        NSString* vodUrl = nil;
+        if ([liveCDN isEqualToString:@"ws"]) {
+            NSArray* array = [liveUrl componentsSeparatedByString:@"?"];
+            NSString* livebaseUrl = [array objectAtIndex:0];
+            NSString* liveTailUrl = [array objectAtIndex:1];
+            NSString* baseUrl = [livebaseUrl stringByReplacingOccurrencesOfString:@"rtmp://ws" withString:@"rtmp://wsshiyi"];
+            vodUrl = [[baseUrl stringByAppendingString:backPlayUrlField] stringByAppendingString:liveTailUrl];
+        }
+        
+        if (vodUrl==nil) {
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
+             object:self
+             userInfo:@{
+                        MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError)}];
+            return;
+        }
+        
+        playUrl = vodUrl;
+    }else{
+        _options.sourceType = rootSourceType;
+        playUrl = liveUrl;
+    }
     
     //init content
     ijkmp_global_init();
@@ -330,7 +364,7 @@ static NSMutableDictionary *dictionary = nil;
     _shouldAutoplay = NO;
     
     // init media resource
-    _ffMrl = [[IJKFFMrl alloc] initWithMrl:linkAddress];
+    _ffMrl = [[IJKFFMrl alloc] initWithMrl:playUrl];
 //    _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"rtmp://wspub.live.hupucdn.com/prod/slk"]];
 //        _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"http://v.iask.com/v_play_ipad.php?vid=99264895"]];
     _segmentResolver = nil;
@@ -386,8 +420,6 @@ static NSMutableDictionary *dictionary = nil;
             break;
     }
     
-    rootSourceType = _options.sourceType;
-    
     [self prepareToPlay];
 }
 
@@ -408,174 +440,63 @@ static NSMutableDictionary *dictionary = nil;
 {
     if (!isTokenMode) return;
     
+    isBackPlayMode = YES;
+    
     //release Live Stream
     [self shutdown_l];
     
-    if(liveUrl==nil || liveCDN==nil)
-    {
-        [[NSNotificationCenter defaultCenter]
-         postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
-         object:self
-         userInfo:@{
-                    MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError)}];
-        return;
-    }
+    NSString* urlHeader = [NSString stringWithUTF8String:"http://192.168.9.117:8080/live/httpcdn?token="];
     
-    //get Vod Url
-    NSString* vodUrl = nil;
-    if ([liveCDN isEqualToString:@"ws"]) {
-        NSArray* array = [liveUrl componentsSeparatedByString:@"?"];
-        NSString* livebaseUrl = [array objectAtIndex:0];
-        NSString* liveTailUrl = [array objectAtIndex:1];
-        NSString* baseUrl = [livebaseUrl stringByReplacingOccurrencesOfString:@"rtmp://ws" withString:@"rtmp://wsshiyi"];
-        vodUrl = [[[baseUrl stringByAppendingString:@"?wsStreamTimeABS="] stringByAppendingString:[NSString stringWithFormat:@"%lld&",absTime]]
-                  stringByAppendingString:liveTailUrl];
-    }
-
-
-    if (vodUrl==nil) {
-        [[NSNotificationCenter defaultCenter]
-         postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
-         object:self
-         userInfo:@{
-                    MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError)}];
-        return;
-    }
-
-    [self backPlayWithUrl:vodUrl];
-}
-
-- (NSString *)getSystemTime
-{
-    NSDate *senddate=[NSDate date];
-    NSDateFormatter *dateformatter=[[NSDateFormatter alloc] init];
-    [dateformatter setDateFormat:@"YYYYMMddHHmmss"];
-    return [dateformatter stringFromDate:senddate];
+    ASIFormDataRequest *formDataRequest = [ASIFormDataRequest requestWithURL:nil];
+    NSString* encodedTokenString = [formDataRequest encodeURL:self.token];
+    
+    NSString* encodedUrlString = [urlHeader stringByAppendingString:encodedTokenString];
+    
+    NSLog ( @"%@" ,encodedUrlString);
+    
+    //http request
+    request = [ ASIHTTPRequest requestWithURL :[NSURL URLWithString:encodedUrlString]];
+    [request setDelegate:self];
+    [request startAsynchronous];
+    
+    backPlayUrlField = [[NSString alloc] initWithFormat:@"?wsStreamTimeABS="];
+    backPlayUrlField = [backPlayUrlField stringByAppendingString:[NSString stringWithFormat:@"%lld&",absTime]];
 }
 
 - (void)backPlayWithREL:(NSTimeInterval)relTime//相对时间
 {
     if (!isTokenMode) return;
     
+    isBackPlayMode = YES;
+    
     //release Live Stream
     [self shutdown_l];
-
-    if(liveUrl==nil || liveCDN==nil)
-    {
-        [[NSNotificationCenter defaultCenter]
-         postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
-         object:self
-         userInfo:@{
-                    MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError)}];
-        return;
-    }
-
-    //get Vod Url
-    NSString* vodUrl = nil;
-    if ([liveCDN isEqualToString:@"ws"]) {
-        NSArray* array = [liveUrl componentsSeparatedByString:@"?"];
-        NSString* livebaseUrl = [array objectAtIndex:0];
-        NSString* liveTailUrl = [array objectAtIndex:1];
-        NSString* baseUrl = [livebaseUrl stringByReplacingOccurrencesOfString:@"rtmp://ws" withString:@"rtmp://wsshiyi"];
-        vodUrl = [[[baseUrl stringByAppendingString:@"?wsStreamTimeREL="] stringByAppendingString:[NSString stringWithFormat:@"%ld&",(long)relTime]]
-                  stringByAppendingString:liveTailUrl];
-    }
-
-    if (vodUrl==nil) {
-        [[NSNotificationCenter defaultCenter]
-         postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
-         object:self
-         userInfo:@{
-                    MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackError)}];
-        return;
-    }
-
-    [self backPlayWithUrl:vodUrl];
-}
-
-- (void)backPlayWithUrl:(NSString*)vodUrl
-{
-    NSLog ( @"%@" ,vodUrl );
     
-    //start VOD
-    _options.sourceType = IJKMPMovieSourceTypeOnDemandStreaming;
+    NSString* urlHeader = [NSString stringWithUTF8String:"http://192.168.9.117:8080/live/httpcdn?token="];
     
-    ijkmp_global_init();
+    ASIFormDataRequest *formDataRequest = [ASIFormDataRequest requestWithURL:nil];
+    NSString* encodedTokenString = [formDataRequest encodeURL:self.token];
     
-    // IJKFFIOStatRegister(IJKFFIOStatDebugCallback);
-    // IJKFFIOStatCompleteRegister(IJKFFIOStatCompleteDebugCallback);
+    NSString* encodedUrlString = [urlHeader stringByAppendingString:encodedTokenString];
     
-    // init fields
-    _controlStyle = MPMovieControlStyleNone;
-    _scalingMode = MPMovieScalingModeAspectFit;
-    _shouldAutoplay = NO;
+    NSLog ( @"%@" ,encodedUrlString);
     
-    // init media resource
-    _ffMrl = [[IJKFFMrl alloc] initWithMrl:vodUrl];
-//    _ffMrl = [[IJKFFMrl alloc] initWithMrl:[NSString stringWithUTF8String:"http://live.3gv.ifeng.com/zixun.m3u8"]];
-    _segmentResolver = nil;
-    _mediaMeta = [[NSDictionary alloc] init];
+    //http request
+    request = [ ASIHTTPRequest requestWithURL :[NSURL URLWithString:encodedUrlString]];
+    [request setDelegate:self];
+    [request startAsynchronous];
     
-    // init player
-    _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
-    _msgPool = [[IJKFFMoviePlayerMessagePool alloc] init];
-    
-    ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
-    ijkmp_set_format_callback(_mediaPlayer, format_control_message, (__bridge void *) self);
-    
-    // init video sink
-    //        int chroma = SDL_FCC_RV24;
-    int chroma = SDL_FCC_I420;
-    _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    _view   = _glView;
-    
-    ijkmp_ios_set_glview(_mediaPlayer, _glView);
-    ijkmp_set_overlay_format(_mediaPlayer, chroma);
-    
-    // init audio sink
-    [[IJKAudioKit sharedInstance] setupAudioSession];
-    
-    // apply ffmpeg options
-    if (_options == nil) {
-        _options = [IJKFFOptions optionsByDefault];
-    }
-    [_options applyTo:_mediaPlayer];
-    _pauseInBackground = _options.pauseInBackground;
-    
-    // init extra
-    _keepScreenOnWhilePlaying = YES;
-    [self setScreenOn:YES];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(audioSessionInterrupt:)
-                                                 name:AVAudioSessionInterruptionNotification
-                                               object:nil];
-    
-    //0:Low Delay Live
-    //1:High Delay Live
-    //2:VOD
-    switch (_options.sourceType) {
-        case IJKMPMovieSourceTypeLowDelayLiveStreaming:
-            ijkmp_set_data_source_type(_mediaPlayer,0);
-            break;
-        case IJKMPMovieSourceTypeHighDelayLiveStreaming:
-            ijkmp_set_data_source_type(_mediaPlayer,1);
-            break;
-        case IJKMPMovieSourceTypeOnDemandStreaming:
-            ijkmp_set_data_source_type(_mediaPlayer,2);
-            break;
-    }
-    
-    [self prepareToPlay];
+    backPlayUrlField = [[NSString alloc] initWithFormat:@"?wsStreamTimeREL="];
+    backPlayUrlField = [backPlayUrlField stringByAppendingString:[NSString stringWithFormat:@"%ld&",(long)relTime]];
 }
 
 - (void)backLivePlay
 {
     if (!isTokenMode) return;
     
-    [self shutdown_l];
+    isBackPlayMode = NO;
     
-    _options.sourceType = rootSourceType;
+    [self shutdown_l];
     
     NSString* urlHeader = [NSString stringWithUTF8String:"http://192.168.9.117:8080/live/httpcdn?token="];
     
@@ -1415,7 +1336,7 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if (isTokenMode) {
-            if (_options.sourceType!=IJKMPMovieSourceTypeOnDemandStreaming)
+            if (!isBackPlayMode)
             {
                 NSString* urlHeader = [NSString stringWithUTF8String:"http://192.168.9.117:8080/live/httpcdn?token="];
                 
@@ -1463,7 +1384,7 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     dispatch_async(dispatch_get_main_queue(), ^{
         if (isTokenMode)
         {
-            if (_options.sourceType!=IJKMPMovieSourceTypeOnDemandStreaming)
+            if (!isBackPlayMode)
             {
                 [self shutdown_l];
             }

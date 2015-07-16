@@ -270,7 +270,14 @@ public class VideoView extends SurfaceView implements
     private int rootDataSourceType;
     public void setVideoToken(String token) {
     	isTokenMode = true;
-    	
+		this.token = token;
+		rootDataSourceType = mDataSourceType;
+		
+		loadVideoToken(this.token);
+	}
+    
+    private void loadVideoToken(String token)
+    {
 		String urlHeaderString = "http://192.168.9.117:8080/live/httpcdn?token=";
 		String tokenEncodedString;
 		try {
@@ -327,9 +334,36 @@ public class VideoView extends SurfaceView implements
 //				} catch (InterruptedException e) {
 //					e.printStackTrace();
 //				}
+				String playUrl = null;
+				if (isBackPlayMode) {
+					mDataSourceType = VOD_STREAMING_TYPE;
+					
+			    	//get vod url
+			    	String vodUrl = null;
+			    	if (cdnName.equals("ws")) {
+						String baseUrl = linkAddress.substring(0, linkAddress.indexOf("?"));
+						String vodBaseUrl = baseUrl.replace("rtmp://ws", "rtmp://wsshiyi");
+						String tailUrl = linkAddress.substring(linkAddress.indexOf("?")+1,linkAddress.length());
+						StringBuilder stringBuilder = new StringBuilder();
+						vodUrl = stringBuilder.append(vodBaseUrl).append(backPlayUrlField).append(tailUrl).toString();
+					}
+			    	
+
+			    	if (vodUrl==null) {
+			            if (mOnErrorListener != null) {
+			            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
+			            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
+			            }
+			            return;
+					}
+			    	
+			    	playUrl = vodUrl;
+				}else {
+					mDataSourceType = rootDataSourceType;
+					playUrl = linkAddress;
+				}
 				
-//				setVideoPath("rtmp://wspub.live.hupucdn.com/prod/slk");
-				setVideoPath(linkString);
+				setVideoPath(playUrl);
 			}
 
 			@Override
@@ -344,71 +378,49 @@ public class VideoView extends SurfaceView implements
 	            return;
 			}
 		});
-		
-		this.token = token;
-		rootDataSourceType = mDataSourceType;
-	}
+
+    }
     
+    private boolean isBackPlayMode = false;
+    private String backPlayUrlField = null;
     //new API for back play
     public void backPlayWithABS(long absTime) //绝对时间
     {
     	if (!isTokenMode) return;
+    	isBackPlayMode = true;
     	
     	//release live stream
     	stopPlayback();
     	
-    	//get vod url
-    	String vodUrl = null;
-    	if (this.cdnName.equals("ws")) {
-			String baseUrl = linkAddress.substring(0, linkAddress.indexOf("?"));
-			String vodBaseUrl = baseUrl.replace("rtmp://ws", "rtmp://wsshiyi");
-			String tailUrl = linkAddress.substring(linkAddress.indexOf("?")+1,linkAddress.length());
-			StringBuilder stringBuilder = new StringBuilder();
-			vodUrl = stringBuilder.append(vodBaseUrl).append("?wsStreamTimeABS=").append(absTime).append("&").append(tailUrl).toString();
-		}
+    	StringBuilder stringBuilder = new StringBuilder();
+    	backPlayUrlField = stringBuilder.append("?wsStreamTimeABS=").append(absTime).append("&").toString();
     	
-    	//start vod
-    	if (vodUrl!=null) {
-			mDataSourceType = VOD_STREAMING_TYPE;
-			setVideoPath(vodUrl);
-//			setVideoPath("http://live.3gv.ifeng.com/zixun.m3u8");
-		}
+    	loadVideoToken(token);
     }
     
     public void backPlayWithREL(long relTime) //相对时间
     {
     	if (!isTokenMode) return;
+    	isBackPlayMode = true;
     	
     	//release live stream
     	stopPlayback();
     	
-    	//get vod url
-    	String vodUrl = null;
-    	if (this.cdnName.equals("ws")) {
-			String baseUrl = linkAddress.substring(0, linkAddress.indexOf("?"));
-			String vodBaseUrl = baseUrl.replace("rtmp://ws", "rtmp://wsshiyi");
-			String tailUrl = linkAddress.substring(linkAddress.indexOf("?")+1,linkAddress.length());
-			StringBuilder stringBuilder = new StringBuilder();
-			vodUrl = stringBuilder.append(vodBaseUrl).append("?wsStreamTimeREL=").append(relTime).append("&").append(tailUrl).toString();
-		}
+    	StringBuilder stringBuilder = new StringBuilder();
+    	backPlayUrlField = stringBuilder.append("?wsStreamTimeREL=").append(relTime).append("&").toString();
     	
-    	//start vod
-    	if (vodUrl!=null) {
-			mDataSourceType = VOD_STREAMING_TYPE;
-			setVideoPath(vodUrl);
-		}
+    	loadVideoToken(token);
     }
     
     public void backLivePlay()
     {
     	if (!isTokenMode) return;
+    	isBackPlayMode = false;
     	
     	//release live stream
     	stopPlayback();
-    	
-    	mDataSourceType = rootDataSourceType;
-    	
-    	this.setVideoToken(this.token);
+
+    	loadVideoToken(token);
     }
     //
     
@@ -815,10 +827,36 @@ public class VideoView extends SurfaceView implements
 				cdnName = cdnString;
 				linkAddress = linkString;
 				
-//				setVideoPath("rtmp://wspub.live.hupucdn.com/prod/slk");
-//				setVideoPath(linkString);
+				String playUrl = null;
+				if (isBackPlayMode) {
+					mDataSourceType = VOD_STREAMING_TYPE;
+					
+			    	//get vod url
+			    	String vodUrl = null;
+			    	if (cdnName.equals("ws")) {
+						String baseUrl = linkAddress.substring(0, linkAddress.indexOf("?"));
+						String vodBaseUrl = baseUrl.replace("rtmp://ws", "rtmp://wsshiyi");
+						String tailUrl = linkAddress.substring(linkAddress.indexOf("?")+1,linkAddress.length());
+						StringBuilder stringBuilder = new StringBuilder();
+						vodUrl = stringBuilder.append(vodBaseUrl).append(backPlayUrlField).append(tailUrl).toString();
+					}
+			    	
+
+			    	if (vodUrl==null) {
+			            if (mOnErrorListener != null) {
+			            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
+			            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
+			            }
+			            return;
+					}
+			    	
+			    	playUrl = vodUrl;
+				}else {
+					mDataSourceType = rootDataSourceType;
+					playUrl = linkAddress;
+				}
 				
-				mUri = Uri.parse(linkAddress);
+				mUri = Uri.parse(playUrl);
 				openVideo();
 			}
 
@@ -868,7 +906,7 @@ public class VideoView extends SurfaceView implements
                 resume();
             } else {
 //                openVideo();
-            	if (isTokenMode && mDataSourceType!=VOD_STREAMING_TYPE) {
+            	if (isTokenMode && !isBackPlayMode) {
             		openVideoWithToken(token);
 				}else {
 					openVideo();
