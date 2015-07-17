@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="mediacontroller_progress" type="id"/>
+    <item name="mediacontroller_pause" type="id"/>
+    <item name="mediacontroller_time_current" type="id"/>
+    <item name="mediacontroller_time_total" type="id"/>
+    <item name="mediacontroller_file_name" type="id"/>
+</resources>
