@@ -1882,6 +1882,10 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     FFPlayer *ffp = opaque;
     VideoState *is = ffp->is;
     int audio_size, len1;
+    if (!ffp || !is) {
+        memset(stream, 0, len);
+        return;
+    }
 
     ffp->audio_callback_time = av_gettime_relative();
 
