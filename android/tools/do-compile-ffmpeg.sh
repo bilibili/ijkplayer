@@ -261,7 +261,17 @@ if [ -f "./config.h" ]; then
 else
     ./configure $FF_CFG_FLAGS \
         --extra-cflags="$FF_CFLAGS $FF_EXTRA_CFLAGS" \
-        --extra-ldflags="$FF_DEP_LIBS $FF_EXTRA_LDFLAGS"
+        --extra-ldflags="$FF_DEP_LIBS $FF_EXTRA_LDFLAGS" \
+		--enable-avfilter	\
+		--enable-rdft	\
+		--enable-fft	\
+		--enable-filter=pan	\
+		--enable-filter=atempo	\
+		--enable-filter=anull	\
+		--enable-filter=aresample	\
+		--enable-filter=asetrate	\
+		--enable-filter=setpts	\
+		--enable-filter=asetpts
     make clean
 fi
 
@@ -285,6 +295,7 @@ $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack 
     libavformat/*.o \
     libswresample/*.o \
     libswscale/*.o \
+	libavfilter/*.o \
     $FF_ASM_OBJ_DIR \
     $FF_DEP_LIBS \
     -o $FF_PREFIX/libijkffmpeg.so
