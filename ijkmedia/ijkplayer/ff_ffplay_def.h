@@ -29,6 +29,12 @@
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
 #include "ff_ffpipenode.h"
+#if CONFIG_AVFILTER
+# include "libavfilter/avcodec.h"
+# include "libavfilter/avfilter.h"
+# include "libavfilter/buffersink.h"
+# include "libavfilter/buffersrc.h"
+#endif
 
 // add by william
 #define REALTIME_DURATION_LWM 500
@@ -294,9 +300,9 @@ typedef struct VideoState {
     PacketQueue videoq;
     int64_t videoq_duration;
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
-#if !CONFIG_AVFILTER
+//#if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;
-#endif
+//#endif
 #ifdef FFP_MERGE
     SDL_Rect last_display_rect;
 #endif
@@ -521,7 +527,8 @@ typedef struct FFPlayer {
     //1:High Delay Live
     //2:VOD
     int data_source_type;
-    
+
+	int speed_mode;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));

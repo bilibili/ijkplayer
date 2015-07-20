@@ -322,6 +322,19 @@ static int ijkmp_set_data_source_l(IjkMediaPlayer *mp, const char *url)
     return 0;
 }
 
+//add by fw-----start
+void ijkmp_set_player_speed_mode(IjkMediaPlayer *mp, int speed_mode)
+{
+    assert(mp);
+	MPTRACE("%s %d: ijkmp_set_player_speed speed_mode=%d\n",__FILE__,__LINE__,speed_mode);
+
+    pthread_mutex_lock(&mp->mutex);
+    mp->ffplayer->speed_mode = speed_mode;
+    pthread_mutex_unlock(&mp->mutex);
+	MPTRACE("%s %d: ijkmp_set_player_speed mp->ffplayer->speed_mode=%d mp->ffplayer=%p\n",__FILE__,__LINE__,mp->ffplayer->speed_mode,mp->ffplayer);
+}
+//add by fw-----end
+
 //0:Low Delay Live
 //1:High Delay Live
 //2:VOD

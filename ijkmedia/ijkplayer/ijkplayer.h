@@ -181,6 +181,9 @@ void            ijkmp_inc_ref(IjkMediaPlayer *mp);
 // NOTE: ijkmp_dec_ref may block thread
 void            ijkmp_dec_ref(IjkMediaPlayer *mp);
 void            ijkmp_dec_ref_p(IjkMediaPlayer **pmp);
+//add by fw-----start
+void ijkmp_set_player_speed_mode(IjkMediaPlayer *mp, int speed_mode);
+//add by fw-----end
 
 //0:Low Delay Live
 //1:High Delay Live

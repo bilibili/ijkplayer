@@ -1120,7 +1120,11 @@ public class VideoView extends SurfaceView implements
     public boolean canSeekForward() {
         return mCanSeekForward;
     }
-    
+	public void setPlayerSpeedMode(int speedMode)
+	{
+		IjkMediaPlayer ijkMediaPlayer = (IjkMediaPlayer)mMediaPlayer;
+		ijkMediaPlayer.setPlayerSpeedMode(speedMode);
+	}
     //add by william
     private int mDataSourceType = LOWDELAY_LIVE_STREAMING_TYPE;
     public static final int LOWDELAY_LIVE_STREAMING_TYPE = 0;

@@ -103,6 +103,11 @@ public class MediaController extends FrameLayout {
     private Button mBackPlayRELButton;
 
     private AudioManager mAM;
+	//add by fw------start
+	private Button mFasterBn;
+	private Button mSlowerBn;
+	private int mPlayerSpeedMode = 0;
+	//add by fw------end
 
     public MediaController(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -201,6 +206,30 @@ public class MediaController extends FrameLayout {
 		}
         
 
+		//add by fw---------start
+		mFasterBn = (Button)v.findViewById(R.id.faster);
+		if(mFasterBn != null)
+		{
+			mFasterBn.setOnClickListener(new View.OnClickListener() {
+                                            public void onClick(View v)
+                                            {
+                                                incPlayerSpeed();
+                                            }
+                                         }
+            );
+		}
+
+        mSlowerBn = (Button)v.findViewById(R.id.slower);
+        if(mSlowerBn != null)
+        {
+            mSlowerBn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    decPlayerSpeed();
+                }
+            });
+        }
+		//add by fw---------end
         mProgress = (ProgressBar) v.findViewById(R.id.mediacontroller_seekbar);
         if (mProgress != null) {
             if (mProgress instanceof SeekBar) {
@@ -533,6 +562,8 @@ public class MediaController extends FrameLayout {
         else
             mPlayer.start();
         updatePausePlay();
+		//add by fw
+		mPlayer.setPlayerSpeedMode(mPlayerSpeedMode);
     }
 
     private Runnable lastRunnable;
@@ -622,5 +653,29 @@ public class MediaController extends FrameLayout {
         void backPlayWithABS(long absTime);
         void backPlayWithREL(long relTime);
         void backLivePlay();
+		void setPlayerSpeedMode(int speedMode);
     }
+//add by fw---------start
+	public int incPlayerSpeed()
+	{
+		if(mPlayerSpeedMode == 2)
+		{
+			return -1;
+		}
+		mPlayerSpeedMode++;
+        Log.v("incPlayerSpeed",""+mPlayerSpeedMode);
+        mPlayer.setPlayerSpeedMode(mPlayerSpeedMode);
+		return 0;
+	}
+	public int decPlayerSpeed()
+	{
+		if(mPlayerSpeedMode == -2)
+		{
+			return -1;
+		}
+		mPlayerSpeedMode--;
+		mPlayer.setPlayerSpeedMode(mPlayerSpeedMode);
+        return 0;
+	}
+    //add by fw---------end
 }
