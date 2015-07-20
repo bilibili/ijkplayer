@@ -185,7 +185,17 @@ else
         $FFMPEG_CFG_CPU \
         --extra-cflags="$FFMPEG_CFLAGS" \
         --extra-cxxflags="$FFMPEG_CXXFLAGS" \
-        --extra-ldflags="$FFMPEG_LDFLAGS"
+        --extra-ldflags="$FFMPEG_LDFLAGS"   \
+	--enable-avfilter	\
+	--enable-rdft	\
+	--enable-fft	\
+	--enable-filter=pan	\
+	--enable-filter=atempo	\
+	--enable-filter=anull	\
+	--enable-filter=aresample	\
+	--enable-filter=asetrate	\
+	--enable-filter=setpts	\
+	--enable-filter=asetpts
     make clean
 fi
 

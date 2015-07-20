@@ -14,6 +14,7 @@
 @implementation IJKVideoViewController
 {
     IJKMPMovieSourceType mUrlSourceType;
+	int mPlaySpeedMode;
 }
 
 @synthesize urlString = _urlString;
@@ -136,6 +137,23 @@
 - (IBAction)onClickBackLive:(id)sender
 {
     [self.player backLivePlay];
+}
+
+- (IBAction)onClickSlower:(id)sender {
+	
+	if(mPlaySpeedMode <=-2)
+		return;
+	
+	mPlaySpeedMode--;
+	[self.player setPlaySpeedMode:mPlaySpeedMode];
+}
+
+- (IBAction)onClickFaster:(id)sender {
+	if(mPlaySpeedMode >= 2)
+		return;
+	
+	mPlaySpeedMode++;
+	[self.player setPlaySpeedMode:mPlaySpeedMode];
 }
 
 - (void)loadStateDidChange:(NSNotification*)notification

@@ -26,6 +26,8 @@
 - (IBAction)onClickBackPlayREL:(id)sender;
 - (IBAction)onClickBackPlayABS:(id)sender;
 - (IBAction)onClickBackLive:(id)sender;
+- (IBAction)onClickSlower:(id)sender;
+- (IBAction)onClickFaster:(id)sender;
 
 @property(nonatomic,strong) IBOutlet IJKMediaControl *mediaControl;
 @property(nonatomic,strong) NSString *urlString;

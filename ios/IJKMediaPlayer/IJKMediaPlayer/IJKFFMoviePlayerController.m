@@ -93,7 +93,7 @@
     IJKMPMovieSourceType rootSourceType;
     NSString* backPlayUrlField;
     BOOL isBackPlayMode;
-    
+
     //
     NSMutableArray *_registeredNotifications;
 }
@@ -511,6 +511,13 @@ static NSMutableDictionary *dictionary = nil;
     request = [ ASIHTTPRequest requestWithURL :[NSURL URLWithString:encodedUrlString]];
     [request setDelegate:self];
     [request startAsynchronous];
+}
+
+-(void)setPlaySpeedMode:(int)mode
+{
+	if(!_mediaPlayer || mode>2 || mode <-2)
+		return;
+	ijkmp_set_player_speed_mode(_mediaPlayer, mode);
 }
 
 - (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options

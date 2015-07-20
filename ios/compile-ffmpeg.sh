@@ -32,7 +32,7 @@ FF_TARGET=$1
 set -e
 
 #----------
-FF_LIBS="libavcodec libavformat libavutil libswscale libswresample"
+FF_LIBS="libavcodec libavformat libavutil libswscale libswresample libavfilter"
 
 #----------
 echo_archs() {

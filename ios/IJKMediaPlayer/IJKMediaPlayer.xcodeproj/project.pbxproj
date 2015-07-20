@@ -39,6 +39,7 @@
 		AB98B84C1B3D4A9F00F715BF /* IJKFFMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = AB98B84A1B3D4A9F00F715BF /* IJKFFMoviePlayerController.m */; };
 		ABD0B0061AFB463300317F1F /* iOSUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = ABD0B0041AFB463300317F1F /* iOSUtils.m */; };
 		ABF204061B341BAD00C67E5D /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = ABF204041B341BAD00C67E5D /* GCDAsyncUdpSocket.m */; };
+		B30A18A41B5CF1BB0036D607 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B30A18A31B5CF1BB0036D607 /* libavfilter.a */; };
 		E62139BE180FA89B00553533 /* IJKFFOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = E62139BD180FA89A00553533 /* IJKFFOptions.m */; };
 		E62139BF180FAE5F00553533 /* IJKFFOptions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E62139BC180FA89A00553533 /* IJKFFOptions.h */; };
 		E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27017F01143003551EB /* ijksdl_audio.c */; };
@@ -183,6 +184,8 @@
 		ABD0B0051AFB463300317F1F /* iOSUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iOSUtils.h; path = ijkmedia/ijkplayer/ios/pipeline/iOSUtils.h; sourceTree = "<group>"; };
 		ABF204041B341BAD00C67E5D /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncUdpSocket.m; path = CocoaAsyncSocket/GCD/GCDAsyncUdpSocket.m; sourceTree = "<group>"; };
 		ABF204051B341BAD00C67E5D /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDAsyncUdpSocket.h; path = CocoaAsyncSocket/GCD/GCDAsyncUdpSocket.h; sourceTree = "<group>"; };
+		B30A18A11B5CF1970036D607 /* build */ = {isa = PBXFileReference; lastKnownFileType = folder; name = build; path = ../build; sourceTree = "<group>"; };
+		B30A18A31B5CF1BB0036D607 /* libavfilter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavfilter.a; path = ../build/universal/lib/libavfilter.a; sourceTree = "<group>"; };
 		E62139BC180FA89A00553533 /* IJKFFOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFOptions.h; sourceTree = "<group>"; };
 		E62139BD180FA89A00553533 /* IJKFFOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFOptions.m; sourceTree = "<group>"; };
 		E63FC27017F01143003551EB /* ijksdl_audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_audio.c; sourceTree = "<group>"; };
@@ -372,6 +375,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B30A18A41B5CF1BB0036D607 /* libavfilter.a in Frameworks */,
 				E6903FC717EAFC2C00CFD954 /* libavcodec.a in Frameworks */,
 				E6903FC817EAFC2C00CFD954 /* libavformat.a in Frameworks */,
 				E6903FC917EAFC2C00CFD954 /* libavutil.a in Frameworks */,
@@ -612,6 +616,8 @@
 		E6903EBB17EAF6C500CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B30A18A31B5CF1BB0036D607 /* libavfilter.a */,
+				B30A18A11B5CF1970036D607 /* build */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1182,6 +1188,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../build/universal/lib\"",
+					/Users/hupu/workspace/ijkplayer/ijkplayer/ios/build/universal/lib,
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1209,6 +1216,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../build/universal/lib\"",
+					/Users/hupu/workspace/ijkplayer/ijkplayer/ios/build/universal/lib,
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
