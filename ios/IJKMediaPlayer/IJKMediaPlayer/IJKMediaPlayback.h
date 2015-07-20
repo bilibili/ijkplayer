@@ -53,6 +53,9 @@ typedef NS_ENUM(NSInteger, IJKMPMovieSourceType) {
 - (void)backPlayWithREL:(NSTimeInterval)relTime;//相对时间
 - (void)backLivePlay;
 
+//new API for slower or faster play
+- (void)setPlaySpeedMode:(int)mode;//mode:1(2倍速快放)，2（4倍速快放），0（正常播放），-1（2倍速慢放），-2（4倍速慢放）
+
 @property(nonatomic, readonly)  UIView *view;
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;
 @property(nonatomic, readonly)  NSTimeInterval duration;
