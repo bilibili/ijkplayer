@@ -867,4 +867,12 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 	public void setDataSourceType(int type) {
 		_setDataSourceType(type);
 	}
+
+	//add by fw
+	public void setPlayerSpeedMode(int speedMode)
+	{
+		_setPlayerSpeedMode(speedMode);
+	}
+	private native void _setPlayerSpeedMode(int speedMode);
+
 }
