@@ -102,7 +102,6 @@
 		4543162A1A66497900676070 /* IJKVideoToolBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKVideoToolBox.m; path = ijkmedia/ijkplayer/ios/pipeline/IJKVideoToolBox.m; sourceTree = "<group>"; };
 		45DB4AA71A5D52AE005CAD41 /* ijksdl_vout_overlay_videotoolbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_vout_overlay_videotoolbox.h; sourceTree = "<group>"; };
 		45DB4AA81A5D52AE005CAD41 /* ijksdl_vout_overlay_videotoolbox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ijksdl_vout_overlay_videotoolbox.m; sourceTree = "<group>"; };
-		45DCC8E51A66984200DE441F /* h264_sps_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = h264_sps_parser.h; sourceTree = "<group>"; };
 		E62139BC180FA89A00553533 /* IJKFFOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFOptions.h; sourceTree = "<group>"; };
 		E62139BD180FA89A00553533 /* IJKFFOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFOptions.m; sourceTree = "<group>"; };
 		E63FC27017F01143003551EB /* ijksdl_audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_audio.c; sourceTree = "<group>"; };
@@ -191,6 +190,7 @@
 		E6CA1EE71B4FAFCF00BCAF89 /* ijksdl_class.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_class.h; sourceTree = "<group>"; };
 		E6CA1EE81B4FAFCF00BCAF89 /* ijksdl_misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_misc.h; sourceTree = "<group>"; };
 		E6CA1EE91B4FB04500BCAF89 /* ijksdl_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_log.h; sourceTree = "<group>"; };
+		E6D5FFF71B5F445E00E1E328 /* h264_sps_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = h264_sps_parser.h; path = ijkmedia/ijkplayer/ios/pipeline/h264_sps_parser.h; sourceTree = "<group>"; };
 		E6EE92A1187810C5009EAB56 /* IJKAudioKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKAudioKit.h; path = IJKMediaPlayer/IJKAudioKit.h; sourceTree = "<group>"; };
 		E6EE92A2187810C5009EAB56 /* IJKAudioKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKAudioKit.m; path = IJKMediaPlayer/IJKAudioKit.m; sourceTree = "<group>"; };
 		E6EE92A61878230C009EAB56 /* ijksdl_aout_ios_audiounit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_aout_ios_audiounit.h; sourceTree = "<group>"; };
@@ -247,9 +247,9 @@
 				454316231A66493700676070 /* ffpipenode_ios_videotoolbox_vdec.m */,
 				454316241A66493700676070 /* ffpipenode_ios_videotoolbox_vout.h */,
 				454316251A66493700676070 /* ffpipenode_ios_videotoolbox_vout.m */,
+				E6D5FFF71B5F445E00E1E328 /* h264_sps_parser.h */,
 				454316291A66497900676070 /* IJKVideoToolBox.h */,
 				4543162A1A66497900676070 /* IJKVideoToolBox.m */,
-				45DCC8E51A66984200DE441F /* h264_sps_parser.h */,
 			);
 			name = pipeline;
 			sourceTree = "<group>";
