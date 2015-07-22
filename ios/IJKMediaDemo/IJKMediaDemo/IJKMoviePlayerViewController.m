@@ -156,6 +156,11 @@
 	[self.player setPlaySpeedMode:mPlaySpeedMode];
 }
 
+- (IBAction)onClickNormal:(id)sender {
+	mPlaySpeedMode = 0;
+	[self.player setPlaySpeedMode:mPlaySpeedMode];
+}
+
 - (void)loadStateDidChange:(NSNotification*)notification
 {
     //    MPMovieLoadStateUnknown        = 0,
