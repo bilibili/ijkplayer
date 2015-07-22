@@ -106,6 +106,7 @@ public class MediaController extends FrameLayout {
 	//add by fw------start
 	private Button mFasterBn;
 	private Button mSlowerBn;
+    private Button mNormalBn;
 	private int mPlayerSpeedMode = 0;
 	//add by fw------end
 
@@ -226,6 +227,17 @@ public class MediaController extends FrameLayout {
                 @Override
                 public void onClick(View v) {
                     decPlayerSpeed();
+                }
+            });
+        }
+        mNormalBn = (Button)v.findViewById(R.id.normal);
+        if(mNormalBn != null)
+        {
+            mNormalBn.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    mPlayerSpeedMode = 0;
+                    mPlayer.setPlayerSpeedMode(mPlayerSpeedMode);
                 }
             });
         }
@@ -663,7 +675,6 @@ public class MediaController extends FrameLayout {
 			return -1;
 		}
 		mPlayerSpeedMode++;
-        Log.v("incPlayerSpeed",""+mPlayerSpeedMode);
         mPlayer.setPlayerSpeedMode(mPlayerSpeedMode);
 		return 0;
 	}
