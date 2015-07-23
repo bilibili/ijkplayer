@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "ijkplayer"
-  s.version      = "0.3.1"
+  s.version      = "0.3.2-rc.1"
   s.summary      = "Video player based on FFmpeg n2.7"
   s.homepage     = "https://github.com/Bilibili/ijkplayer"
 
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
 
   s.platform     = :ios, '6.0'
 
-  s.source         = { :git => "https://github.com/Bilibili/ijkplayer.git", :tag => "k0.3.1" }
+  s.source       = { :git => "https://github.com/Bilibili/ijkplayer.git", :tag => "k#{s.version}" }
 
   s.frameworks     = 'AudioToolbox', 'AVFoundation', 'CoreAudio', 'CoreGraphics', 'CoreMedia', 'CoreVideo', 'MediaPlayer', 'OpenGLES', 'UIKit', 'QuartzCore'
   s.weak_framework = 'VideoToolbox'
