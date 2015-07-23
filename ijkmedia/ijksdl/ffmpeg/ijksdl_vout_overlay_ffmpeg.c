@@ -33,7 +33,7 @@
 #include "ijksdl_inc_ffmpeg.h"
 #include "ijksdl_image_convert.h"
 
-typedef struct SDL_VoutOverlay_Opaque {
+struct SDL_VoutOverlay_Opaque {
     SDL_mutex *mutex;
 
     AVFrame *managed_frame;
@@ -46,7 +46,7 @@ typedef struct SDL_VoutOverlay_Opaque {
     Uint8 *pixels[AV_NUM_DATA_POINTERS];
 
     int no_neon_warned;
-} SDL_VoutOverlay_Opaque;
+};
 
 /* Always assume a linesize alignment of 1 here */
 // TODO: 9 alignment to speed up memcpy when display

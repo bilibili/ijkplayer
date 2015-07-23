@@ -30,7 +30,7 @@
 
 typedef struct SDL_Aout_Opaque SDL_Aout_Opaque;
 typedef struct SDL_Aout SDL_Aout;
-typedef struct SDL_Aout {
+struct SDL_Aout {
     SDL_mutex *mutex;
     double     minimal_latency_seconds;
 
@@ -45,7 +45,7 @@ typedef struct SDL_Aout {
 
     double (*func_get_latency_seconds)(SDL_Aout *aout);
     void   (*func_set_default_latency_seconds)(SDL_Aout *aout, double latency);
-} SDL_Aout;
+};
 
 int SDL_AoutOpenAudio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained);
 void SDL_AoutPauseAudio(SDL_Aout *aout, int pause_on);

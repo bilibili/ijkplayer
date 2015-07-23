@@ -31,12 +31,12 @@
 #include "IJKVideoToolBox.h"
 
 
-typedef struct SDL_VoutOverlay_Opaque {
+struct SDL_VoutOverlay_Opaque {
     SDL_mutex *mutex;
     CVPixelBufferRef pixel_buffer;
     Uint16 pitches[AV_NUM_DATA_POINTERS];
     Uint8 *pixels[AV_NUM_DATA_POINTERS];
-} SDL_VoutOverlay_Opaque;
+};
 
 
 static void overlay_free_l(SDL_VoutOverlay *overlay)

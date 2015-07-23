@@ -25,8 +25,8 @@
 
 #include "ijkplayer/ff_ffpipenode.h"
 
-typedef struct FFPlayer FFPlayer;
+struct FFPlayer;
 
-IJKFF_Pipenode *ffpipenode_create_video_output_from_ios_videotoolbox(FFPlayer *ffp);
+IJKFF_Pipenode *ffpipenode_create_video_output_from_ios_videotoolbox(struct FFPlayer *ffp);
 
 #endif

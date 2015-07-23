@@ -41,13 +41,13 @@ typedef enum IJKAVDiscard {
     IJK_AVDISCARD_ALL     = 48, ///< discard all
 } IJKAVDiscard;
 
-typedef struct IjkMediaPlayer IjkMediaPlayer;
+struct IjkMediaPlayer;
 
 @interface IJKFFOptions : NSObject
 
 +(IJKFFOptions *)optionsByDefault;
 
--(void)applyTo:(IjkMediaPlayer *)mediaPlayer;
+-(void)applyTo:(struct IjkMediaPlayer *)mediaPlayer;
 
 - (void)setOptionValue:(NSString *)value
                 forKey:(NSString *)key

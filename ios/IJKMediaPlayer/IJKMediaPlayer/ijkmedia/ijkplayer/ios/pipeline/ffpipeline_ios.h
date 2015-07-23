@@ -25,9 +25,8 @@
 
 #include "ijkplayer/ff_ffpipeline.h"
 
-typedef struct FFPlayer       FFPlayer;
-typedef struct IJKFF_Pipeline IJKFF_Pipeline;
+struct FFPlayer;
 
-IJKFF_Pipeline *ffpipeline_create_from_ios(FFPlayer *ffp);
+IJKFF_Pipeline *ffpipeline_create_from_ios(struct FFPlayer *ffp);
 
 #endif
