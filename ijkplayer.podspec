@@ -40,7 +40,7 @@ end
     ss.dependency 'ijkplayer/ijksdl-ios'
     ss.dependency 'ijkplayer/ijksdl-ios-mrc'
 
-    ss.source_files         = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijkplayer/**/*.{h,m}'
+    ss.source_files         = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijkplayer/**/*.{c,h,m}'
     ss.private_header_files = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijkplayer/**/*.h'
     ss.header_mappings_dir  = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia'
 
@@ -53,7 +53,9 @@ end
     ss.dependency 'ijkplayer/ijksdl-ios-mrc'
 
     ss.requires_arc         = false;
-    ss.source_files         = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijkplayer/ios/ijkplayer_ios.m'
+    ss.source_files         = [
+    'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijkplayer/ios/ijkplayer_ios.m',
+    'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijkplayer/**/*.h']
     ss.private_header_files = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijkplayer/**/*.h'
     ss.header_mappings_dir  = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia'
 end
@@ -61,7 +63,7 @@ end
   s.subspec 'ijksdl-ios' do |ss|
     ss.dependency 'ijkplayer/ijksdl'
 
-    ss.source_files         = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/**/*.{c,h}'
+    ss.source_files         = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/**/*.{c,h,m}'
     ss.private_header_files = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/**/*.h'
     ss.header_mappings_dir  = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia'
 
@@ -72,7 +74,8 @@ end
     ss.dependency 'ijkplayer/ijksdl'
 
     ss.requires_arc         = false;
-    ss.source_files         = ['ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/ios/ijksdl_aout_ios_audiounit.m', 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/ios/ijksdl_vout_ios_gles2.m']
+    ss.source_files         = ['ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/ios/ijksdl_aout_ios_audiounit.m', 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/ios/ijksdl_vout_ios_gles2.m',
+    'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/**/*.h']
     ss.private_header_files = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/**/*.h'
     ss.header_mappings_dir  = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia'
 end
@@ -81,7 +84,7 @@ end
   s.subspec 'ijkplayer' do |ss|
     ss.dependency 'ijkplayer/ijksdl'
 
-    ss.source_files         = 'ijkmedia/ijkplayer/**/*.{c,h}'
+    ss.source_files         = 'ijkmedia/ijkplayer/**/*.{c,h,m}'
     ss.private_header_files = 'ijkmedia/ijkplayer/**/*.h'
     ss.exclude_files        = 'ijkmedia/ijkplayer/android/**/*'
     ss.header_mappings_dir  = 'ijkmedia'
