@@ -1125,6 +1125,11 @@ public class VideoView extends SurfaceView implements
 		IjkMediaPlayer ijkMediaPlayer = (IjkMediaPlayer)mMediaPlayer;
 		ijkMediaPlayer.setPlayerSpeedMode(speedMode);
 	}
+	public void setPlayerVolume(int volume)
+	{
+		IjkMediaPlayer ijkMediaPlayer = (IjkMediaPlayer)mMediaPlayer;
+		ijkMediaPlayer.setPlayerVolume(volume);
+	}
     //add by william
     private int mDataSourceType = LOWDELAY_LIVE_STREAMING_TYPE;
     public static final int LOWDELAY_LIVE_STREAMING_TYPE = 0;

@@ -529,6 +529,7 @@ typedef struct FFPlayer {
     int data_source_type;
 
 	int speed_mode;
+	int volume;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));

@@ -874,5 +874,10 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 		_setPlayerSpeedMode(speedMode);
 	}
 	private native void _setPlayerSpeedMode(int speedMode);
+	public void setPlayerVolume(int volume)
+	{
+		_setPlayerVolume(volume);
+	}
+	private native void _setPlayerVolume(int volume);
 
 }

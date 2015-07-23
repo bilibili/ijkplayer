@@ -1434,6 +1434,44 @@ int64_t get_valid_channel_layout(int64_t channel_layout, int channels)
         return 0;
 }
 
+static void getAvFilterDesc(int speedMode,int volume,char*avfilterDesc,int nBytes)
+{
+		memset(avfilterDesc,0,nBytes);
+		if(speedMode == 0)
+		{
+			sprintf(avfilterDesc,"anull");
+		}
+		else if((speedMode == 1))
+		{
+			sprintf(avfilterDesc,"atempo=%f",2.0f);
+		}
+		else if((speedMode == -1))
+		{
+			sprintf(avfilterDesc,"atempo=%f",0.5f);
+		}
+		else if(speedMode == 2)
+		{
+			sprintf(avfilterDesc,"atempo=%f,atempo=%f",2.0f,2.0f);
+		}
+		else if(speedMode == -2)
+		{
+			sprintf(avfilterDesc,"atempo=%f,atempo=%f",0.5f,0.5f);
+		}
+		else
+		{
+			sprintf(avfilterDesc,"atempo=%f",1.0f);
+		}
+
+		if(volume > 0)
+		{
+			sprintf(avfilterDesc+strlen(avfilterDesc),",volume=%f",(float)volume);
+		}
+		else if(volume < 0)
+		{
+			sprintf(avfilterDesc+strlen(avfilterDesc),",volume=%f",1.0f/(abs(volume)));
+		}
+}
+
 #endif  /* CONFIG_AVFILTER */
 
 static int audio_thread(void *arg)
@@ -1452,9 +1490,10 @@ static int audio_thread(void *arg)
     int ret = 0;
 //add by fw
 	int lastSpeedMode = 0;
-	char avfilterDesc[256];
+	char avfilterDesc[256]={0};
 	int speedChanged = 0;
-	int64_t tmp;
+	int64_t tmp_pts;
+	int lastVolume = 0;
 
     if (!frame) {
 #if 0//CONFIG_AVFILTER
@@ -1469,15 +1508,15 @@ static int audio_thread(void *arg)
 
         if (got_frame) {
                 tb = (AVRational){1, frame->sample_rate};
-				tmp = frame->pts;
+				tmp_pts = frame->pts;
 #if CONFIG_AVFILTER
 				if(is->realtime)
 				{
 					ffp->speed_mode = 0;
 				}
-				if(ffp->speed_mode !=0)
+				if(ffp->speed_mode !=0 || ffp->volume != 0)
 				{
-					if(lastSpeedMode!= ffp->speed_mode)
+					if(lastSpeedMode!= ffp->speed_mode || lastVolume != ffp->volume)
 						speedChanged = 1;
 					else
 						speedChanged = 0;
@@ -1505,35 +1544,21 @@ static int audio_thread(void *arg)
 	                    is->audio_filter_src.channel_layout = dec_channel_layout;
 	                    is->audio_filter_src.freq           = frame->sample_rate;
 	                    last_serial                         = is->auddec.pkt_serial;
-						lastSpeedMode = ffp->speed_mode;
-						memset(avfilterDesc,0,sizeof(avfilterDesc));
-						if(lastSpeedMode == 0)
-						{
-							sprintf(avfilterDesc,"anull");
-						}
-						else if((lastSpeedMode == 1))
-						{
-							sprintf(avfilterDesc,"atempo=%f",2.0f);
-						}
-						else if((lastSpeedMode == -1))
-						{
-							sprintf(avfilterDesc,"atempo=%f",0.5f);
-						}
-						else if(lastSpeedMode == 2)
-						{
-							sprintf(avfilterDesc,"atempo=%f,atempo=%f",2.0f,2.0f);
-						}
-						else if(lastSpeedMode == -2)
-						{
-							sprintf(avfilterDesc,"atempo=%f,atempo=%f",0.5f,0.5f);
-						}
+						
+						getAvFilterDesc(ffp->speed_mode,ffp->volume,avfilterDesc,sizeof(avfilterDesc));
+						printf("avfilterDesc=%s\n",avfilterDesc);
+	                    if ((ret = configure_audio_filters(is, avfilterDesc, 1)) < 0)
+	                    {
+	                    	getAvFilterDesc(lastSpeedMode,lastVolume,avfilterDesc,sizeof(avfilterDesc));
+							printf("recover avfilterDesc=%s\n",avfilterDesc);
+							if ((ret = configure_audio_filters(is, avfilterDesc, 1)) < 0)
+	                        	goto the_end;
+	                    }
 						else
 						{
-							sprintf(avfilterDesc,"atempo=%f",1.0f);
+							lastVolume = ffp->volume;
+							lastSpeedMode = ffp->speed_mode;
 						}
-						//printf("avfilterDesc=%s\n",avfilterDesc);
-	                    if ((ret = configure_audio_filters(is, avfilterDesc, 1)) < 0)
-	                        goto the_end;
 	                }
 
 	            if ((ret = av_buffersrc_add_frame(is->in_audio_filter, frame)) < 0)
@@ -1542,7 +1567,7 @@ static int audio_thread(void *arg)
 	            while ((ret = av_buffersink_get_frame_flags(is->out_audio_filter, frame, 0)) >= 0) {
 	                tb = is->out_audio_filter->inputs[0]->time_base;
 #endif
-				frame->pts = tmp;
+				frame->pts = tmp_pts;
                 if (!(af = frame_queue_peek_writable(&is->sampq)))
                     goto the_end;
 				
@@ -1568,6 +1593,7 @@ static int audio_thread(void *arg)
 			else
 			{
 				lastSpeedMode = ffp->speed_mode;
+				lastVolume = ffp->volume;
 				
                 if (!(af = frame_queue_peek_writable(&is->sampq)))
                     goto the_end;
@@ -3359,6 +3385,7 @@ FFPlayer *ffp_create()
     ffp->meta = ijkmeta_create();
 	//add by fw
 	ffp->speed_mode = 0;
+	ffp->volume = 0;
     return ffp;
 }
 

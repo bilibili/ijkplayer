@@ -493,6 +493,19 @@ IjkMediaPlayer_setPlayerSpeedMode(JNIEnv *env, jobject thiz,jint speedMode)
     LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
+static void
+IjkMediaPlayer_setPlayerVolume(JNIEnv *env, jobject thiz,jint volume)
+{
+    MPTRACE("IjkMediaPlayer_setPlayerVolume");
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setPlayerVolume: null mp", LABEL_RETURN);
+
+    ijkmp_set_player_volume(mp, volume);
+    
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
 //add by fw------end
 
 static jstring
@@ -962,6 +975,7 @@ static JNINativeMethod g_methods[] = {
     { "_setOpenSLESEnabled", "(Z)V", (void *) IjkMediaPlayer_setOpenSLESEnabled },
     { "_setDataSourceType", "(I)V", (void *) IjkMediaPlayer_setDataSourceType },
     { "_setPlayerSpeedMode", "(I)V", (void *) IjkMediaPlayer_setPlayerSpeedMode },
+    { "_setPlayerVolume", "(I)V", (void *) IjkMediaPlayer_setPlayerVolume },
 
     { "_getColorFormatName", "(I)Ljava/lang/String;", (void *) IjkMediaPlayer_getColorFormatName },
     { "_getVideoCodecInfo", "()Ljava/lang/String;", (void *) IjkMediaPlayer_getVideoCodecInfo },

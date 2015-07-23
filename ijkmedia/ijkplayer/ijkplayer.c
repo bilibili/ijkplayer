@@ -333,6 +333,17 @@ void ijkmp_set_player_speed_mode(IjkMediaPlayer *mp, int speed_mode)
     pthread_mutex_unlock(&mp->mutex);
 	MPTRACE("%s %d: ijkmp_set_player_speed mp->ffplayer->speed_mode=%d mp->ffplayer=%p\n",__FILE__,__LINE__,mp->ffplayer->speed_mode,mp->ffplayer);
 }
+void ijkmp_set_player_volume(IjkMediaPlayer *mp, int volume)
+{
+    assert(mp);
+	MPTRACE("%s %d: ijkmp_set_player_volume volume=%d\n",__FILE__,__LINE__,volume);
+
+    pthread_mutex_lock(&mp->mutex);
+    mp->ffplayer->volume = volume;
+    pthread_mutex_unlock(&mp->mutex);
+	MPTRACE("%s %d: ijkmp_set_player_volume mp->ffplayer->volume=%d mp->ffplayer=%p\n",__FILE__,__LINE__,mp->ffplayer->speed_mode,mp->ffplayer);
+}
+
 //add by fw-----end
 
 //0:Low Delay Live

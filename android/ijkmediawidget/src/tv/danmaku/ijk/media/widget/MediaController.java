@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -42,6 +43,13 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.AdapterView.OnItemSelectedListener;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * A view containing controls for a MediaPlayer. Typically contains the buttons
@@ -108,6 +116,7 @@ public class MediaController extends FrameLayout {
 	private Button mSlowerBn;
     private Button mNormalBn;
 	private int mPlayerSpeedMode = 0;
+	private Spinner mVolume;
 	//add by fw------end
 
     public MediaController(Context context, AttributeSet attrs) {
@@ -136,6 +145,7 @@ public class MediaController extends FrameLayout {
     }
 
     private void initFloatingWindow() {
+        Log.v("fwwwwwww","init floating window");
         mWindow = new PopupWindow(mContext);
         mWindow.setFocusable(/*false*/true);
         mWindow.setBackgroundDrawable(null);
@@ -241,6 +251,38 @@ public class MediaController extends FrameLayout {
                 }
             });
         }
+		mVolume = (Spinner)v.findViewById(R.id.volume);
+		mVolume.setOnItemSelectedListener(mVolumeListener);
+		 // Spinner Drop down elements
+        List<String> categories = new ArrayList<String>();
+		categories.add("-1");
+        categories.add("-2");
+        categories.add("-3");
+        categories.add("-4");
+        categories.add("-5");
+        categories.add("-6");
+		categories.add("-7");
+		categories.add("-8");
+		categories.add("0");
+        categories.add("1");
+        categories.add("2");
+        categories.add("3");
+        categories.add("4");
+        categories.add("5");
+        categories.add("6");
+		categories.add("7");
+		categories.add("8");
+ 
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(mContext, android.R.layout.simple_spinner_item, categories);
+ 
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+ 
+        // attaching data adapter to spinner
+        mVolume.setAdapter(dataAdapter);
+        mVolume.setSelection(8);
+		
 		//add by fw---------end
         mProgress = (ProgressBar) v.findViewById(R.id.mediacontroller_seekbar);
         if (mProgress != null) {
@@ -259,7 +301,24 @@ public class MediaController extends FrameLayout {
         if (mFileName != null)
             mFileName.setText(mTitle);
     }
-    
+
+	private OnItemSelectedListener mVolumeListener = new OnItemSelectedListener()
+	{
+		@Override
+	    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+	        // On selecting a spinner item
+	        String item = parent.getItemAtPosition(position).toString();
+            Log.v("fwwwwwwww", item);
+	 		int volume = Integer.parseInt(item)*2;
+			setPlayerVolume(volume);
+	    }
+	 
+	    public void onNothingSelected(AdapterView<?> arg0) {
+	        // TODO Auto-generated method stub
+	 
+	    }	
+	};
+	
     private View.OnClickListener mBackLiveListener = new View.OnClickListener() {
         public void onClick(View v) {
         	if (mPlayer!=null) {
@@ -666,6 +725,7 @@ public class MediaController extends FrameLayout {
         void backPlayWithREL(long relTime);
         void backLivePlay();
 		void setPlayerSpeedMode(int speedMode);
+		void setPlayerVolume(int volume);
     }
 //add by fw---------start
 	public int incPlayerSpeed()
@@ -687,6 +747,11 @@ public class MediaController extends FrameLayout {
 		mPlayerSpeedMode--;
 		mPlayer.setPlayerSpeedMode(mPlayerSpeedMode);
         return 0;
+	}
+	public int setPlayerVolume(int volume)
+	{
+		mPlayer.setPlayerVolume(volume);
+		return 0;
 	}
     //add by fw---------end
 }
