@@ -25,5 +25,8 @@
 #import <Foundation/Foundation.h>
 #include "ijksdl/ijksdl_aout.h"
 
-extern void IJKSDLGetAudioComponentDescriptionFromSpec(const SDL_AudioSpec *spec, AudioComponentDescription *desc);
-extern void IJKSDLGetAudioStreamBasicDescriptionFromSpec(const SDL_AudioSpec *spec, AudioStreamBasicDescription *desc);
+struct AudioComponentDescription;
+struct AudioStreamBasicDescription;
+
+extern void IJKSDLGetAudioComponentDescriptionFromSpec(const SDL_AudioSpec *spec, struct AudioComponentDescription *desc);
+extern void IJKSDLGetAudioStreamBasicDescriptionFromSpec(const SDL_AudioSpec *spec, struct AudioStreamBasicDescription *desc);
