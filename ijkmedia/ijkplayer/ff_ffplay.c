@@ -1553,6 +1553,15 @@ static int audio_thread(void *arg)
 							printf("recover avfilterDesc=%s\n",avfilterDesc);
 							if ((ret = configure_audio_filters(is, avfilterDesc, 1)) < 0)
 	                        	goto the_end;
+							if(lastVolume != ffp->volume && lastSpeedMode != ffp->speed_mode)
+							{
+								ffp->volume = lastVolume;
+								ffp->speed_mode = lastSpeedMode;	
+							}
+							else if(lastVolume != ffp->volume)
+								ffp->volume = lastVolume;
+							else if(lastSpeedMode != ffp->speed_mode)
+								ffp->speed_mode = lastSpeedMode;							
 	                    }
 						else
 						{
