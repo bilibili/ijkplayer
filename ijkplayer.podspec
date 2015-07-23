@@ -21,9 +21,17 @@ Pod::Spec.new do |s|
     ss.dependency 'ijkplayer/ijkplayer-ios-mrc'
 
     ss.source_files         = 'ios/IJKMediaPlayer/IJKMediaPlayer/*.{h,m}'
-    ss.private_header_files = 'ios/IJKMediaPlayer/IJKMediaPlayer/*.h'
-    ss.exclude_files        = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/**/*'
+    ss.public_header_files  = [
+      'ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayer.h',
+      'ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaModule.h',
+      'ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h',
+      'ios/IJKMediaPlayer/IJKMediaPlayer/IJKMPMoviePlayerController.h',
+      'ios/IJKMediaPlayer/IJKMediaPlayer/IJKAVMoviePlayerController.h',
+      'ios/IJKMediaPlayer/IJKMediaPlayer/IJKFFMoviePlayerController.h',
+      'ios/IJKMediaPlayer/IJKMediaPlayer/IJKFFOptions.h']
     ss.header_mappings_dir  = 'ios/IJKMediaPlayer'
+
+    ss.exclude_files        = 'ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/**/*'
 end
 
 
