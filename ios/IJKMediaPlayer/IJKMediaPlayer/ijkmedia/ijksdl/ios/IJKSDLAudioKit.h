@@ -22,11 +22,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 #include "ijksdl/ijksdl_aout.h"
 
-struct AudioComponentDescription;
-struct AudioStreamBasicDescription;
-
-extern void IJKSDLGetAudioComponentDescriptionFromSpec(const SDL_AudioSpec *spec, struct AudioComponentDescription *desc);
-extern void IJKSDLGetAudioStreamBasicDescriptionFromSpec(const SDL_AudioSpec *spec, struct AudioStreamBasicDescription *desc);
+extern void IJKSDLGetAudioComponentDescriptionFromSpec(const SDL_AudioSpec *spec, AudioComponentDescription *desc);
+extern void IJKSDLGetAudioStreamBasicDescriptionFromSpec(const SDL_AudioSpec *spec, AudioStreamBasicDescription *desc);
