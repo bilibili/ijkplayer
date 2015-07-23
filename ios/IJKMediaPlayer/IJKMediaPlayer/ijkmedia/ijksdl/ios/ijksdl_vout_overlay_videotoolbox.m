@@ -28,7 +28,6 @@
 #include "ijksdl_mutex.h"
 #include "ijksdl_vout_internal.h"
 #include "ijksdl_video.h"
-#include "IJKVideoToolBox.h"
 
 
 struct SDL_VoutOverlay_Opaque {
