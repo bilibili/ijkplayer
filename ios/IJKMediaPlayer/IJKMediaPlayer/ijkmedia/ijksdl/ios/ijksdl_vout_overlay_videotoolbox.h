@@ -26,8 +26,16 @@
 
 #include "ijksdl_stdinc.h"
 #include "ijksdl_vout.h"
-#include "IJKVideoToolBox.h"
 #include "ijksdl_inc_ffmpeg.h"
+
+typedef struct VTBPicture {
+    double              pts;
+    double              dts;
+    double              sort;
+    CVPixelBufferRef    cvBufferRef;
+    uint64_t            width;
+    uint64_t            height;
+} VTBPicture;
 
 SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout);
 int              SDL_VoutOverlayVideoToolBox_FillFrame(SDL_VoutOverlay *overlay, VTBPicture* picture);

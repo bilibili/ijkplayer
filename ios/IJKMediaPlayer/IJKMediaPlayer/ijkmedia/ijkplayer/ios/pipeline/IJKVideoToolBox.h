@@ -30,19 +30,11 @@
 #include "ff_fferror.h"
 #include "ff_ffmsg.h"
 #include "ff_ffplay.h"
+#include "ijksdl/ios/ijksdl_vout_overlay_videotoolbox.h"
 
 
 #define MAX_PKT_QUEUE_DEEP   350
 #define VTB_MAX_DECODING_SAMPLES 16
-
-typedef struct VTBPicture {
-    double              pts;
-    double              dts;
-    double              sort;
-    CVPixelBufferRef    cvBufferRef;
-    uint64_t            width;
-    uint64_t            height;
-} VTBPicture;
 
 
 typedef struct sample_info {
@@ -82,7 +74,7 @@ typedef struct VideoToolBoxContext {
     VTDecompressionSessionRef   m_vt_session;
     CMFormatDescriptionRef      m_fmt_desc;
     const char                 *m_pformat_name;
-    VTBPicture                  m_videobuffer;
+    struct VTBPicture           m_videobuffer;
     double                      m_sort_time_offset;
     pthread_mutex_t             m_queue_mutex;
     volatile sort_queue        *m_sort_queue;
