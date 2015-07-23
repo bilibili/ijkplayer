@@ -40,8 +40,7 @@ IjkMediaMeta *ijkmeta_create()
 {
     IjkMediaMeta *meta = (IjkMediaMeta *)calloc(1, sizeof(IjkMediaMeta));
     if (!meta)
-        goto fail;
-
+    	return NULL;
     meta->mutex = SDL_CreateMutex();
     if (!meta->mutex)
         goto fail;
@@ -60,7 +59,6 @@ void ijkmeta_destroy(IjkMediaMeta *meta)
     if (meta->dict) {
         av_dict_free(&meta->dict);
     }
-
     if (meta->children) {
         for(int i = 0; i < meta->children_count; ++i) {
             IjkMediaMeta *child = meta->children[i];
