@@ -195,7 +195,9 @@ else
 	--enable-filter=aresample	\
 	--enable-filter=asetrate	\
 	--enable-filter=setpts	\
-	--enable-filter=asetpts
+	--enable-filter=asetpts \
+	--enable-filter=volume	\
+	--enable-filter=volumedetect
     make clean
 fi
 

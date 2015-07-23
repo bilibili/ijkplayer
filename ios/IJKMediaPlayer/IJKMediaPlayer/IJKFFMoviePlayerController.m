@@ -520,6 +520,13 @@ static NSMutableDictionary *dictionary = nil;
 	ijkmp_set_player_speed_mode(_mediaPlayer, mode);
 }
 
+-(void)setPlayVolume:(int)volume
+{
+	if(!_mediaPlayer)
+		return;
+	ijkmp_set_player_volume(_mediaPlayer, volume);
+}
+
 - (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
 {
     return [self initWithContentURL:aUrl

@@ -11,6 +11,7 @@
                 <outlet property="relTimeTextField" destination="wHU-kn-zeD" id="cMt-gb-Xkw"/>
                 <outlet property="startTimeTextField" destination="oCE-cV-Fmy" id="22c-cd-IW5"/>
                 <outlet property="view" destination="6qe-ey-jvY" id="sfy-m4-qop"/>
+                <outlet property="volume" destination="AiY-Y1-exG" id="Ww9-AI-ZU0"/>
             </connections>
         </placeholder>
         <view contentMode="scaleToFill" id="6qe-ey-jvY">
@@ -166,15 +167,16 @@
                                     <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                     <nil key="highlightedColor"/>
                                 </label>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="Klq-PO-K6s">
-                                    <rect key="frame" x="307" y="12" width="43" height="30"/>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="7Pz-W6-GfW">
+                                    <rect key="frame" x="80" y="12" width="47" height="30"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <state key="normal" title="Faster">
+                                    <state key="normal" title="Slower">
                                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                     </state>
                                     <connections>
-                                        <action selector="onClickFaster:" destination="-1" eventType="touchUpInside" id="KB5-Wk-aQM"/>
+                                        <action selector="onClickBackLive:" destination="-1" eventType="touchUpInside" id="waZ-Dc-odu"/>
+                                        <action selector="onClickSlower:" destination="-1" eventType="touchUpInside" id="CBI-Rf-8df"/>
                                     </connections>
                                 </button>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="MZD-Lg-dCp">
@@ -188,18 +190,34 @@
                                         <action selector="onClickNormal:" destination="-1" eventType="touchUpInside" id="xch-sb-Yzn"/>
                                     </connections>
                                 </button>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="7Pz-W6-GfW">
-                                    <rect key="frame" x="99" y="12" width="47" height="30"/>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="Klq-PO-K6s">
+                                    <rect key="frame" x="135" y="12" width="43" height="30"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <state key="normal" title="Slower">
+                                    <state key="normal" title="Faster">
                                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                     </state>
                                     <connections>
-                                        <action selector="onClickBackLive:" destination="-1" eventType="touchUpInside" id="waZ-Dc-odu"/>
-                                        <action selector="onClickSlower:" destination="-1" eventType="touchUpInside" id="CBI-Rf-8df"/>
+                                        <action selector="onClickFaster:" destination="-1" eventType="touchUpInside" id="KB5-Wk-aQM"/>
                                     </connections>
                                 </button>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="hny-nk-ZCy">
+                                    <rect key="frame" x="340" y="12" width="30" height="30"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <state key="normal" title="set">
+                                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                    </state>
+                                    <connections>
+                                        <action selector="onClickSetVolume:" destination="-1" eventType="touchUpInside" id="WIi-ea-9AU"/>
+                                    </connections>
+                                </button>
+                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="AiY-Y1-exG">
+                                    <rect key="frame" x="300" y="12" width="32" height="30"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                    <textInputTraits key="textInputTraits"/>
+                                </textField>
                             </subviews>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         </view>
@@ -225,6 +243,7 @@
                 <outlet property="topPanel" destination="29" id="37"/>
                 <outlet property="totalDurationLabel" destination="44" id="63"/>
             </connections>
+            <point key="canvasLocation" x="652" y="-34"/>
         </view>
     </objects>
     <resources>
