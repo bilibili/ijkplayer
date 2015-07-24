@@ -91,6 +91,7 @@ typedef enum IJKLogLevel {
 
 + (void)setLogReport:(BOOL)preferLogReport;
 + (void)setLogLevel:(IJKLogLevel)logLevel;
++ (BOOL)checkIfFFmpegVersionMatch:(BOOL)showAlert;
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;

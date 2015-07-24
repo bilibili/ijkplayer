@@ -21,6 +21,8 @@
  */
 
 #import "IJKFFMoviePlayerController.h"
+
+#import <UIKit/UIKit.h>
 #import "IJKFFMoviePlayerDef.h"
 #import "IJKMediaPlayback.h"
 #import "IJKMediaModule.h"
@@ -28,6 +30,8 @@
 #import "IJKAudioKit.h"
 
 #include "string.h"
+
+NSString *const kIJKFFRequiredFFmpegVersion = @"n2.7-24-g58b28fc";
 
 @interface IJKFFMoviePlayerController()
 
@@ -359,6 +363,26 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 + (void)setLogLevel:(IJKLogLevel)logLevel
 {
     ijkmp_global_set_log_level(logLevel);
+}
+
++ (BOOL)checkIfFFmpegVersionMatch:(BOOL)showAlert;
+{
+    NSString *actualVersion = [NSString stringWithUTF8String:av_version_info()];
+    NSString *expectVersion = kIJKFFRequiredFFmpegVersion;
+    if ([actualVersion isEqualToString:expectVersion]) {
+        return YES;
+    } else {
+        if (showAlert) {
+            NSString *message = [NSString stringWithFormat:@"actual: %@\n expect: %@\n", actualVersion, expectVersion];
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Unexpected FFmpeg version"
+                                                                message:message
+                                                               delegate:nil
+                                                      cancelButtonTitle:@"OK"
+                                                      otherButtonTitles:nil];
+            [alertView show];
+        }
+        return NO;
+    }
 }
 
 - (void)shutdown
