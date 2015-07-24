@@ -69,6 +69,8 @@
     [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_INFO];
 #endif
 
+    [IJKFFMoviePlayerController checkIfFFmpegVersionMatch:YES];
+
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:nil];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
