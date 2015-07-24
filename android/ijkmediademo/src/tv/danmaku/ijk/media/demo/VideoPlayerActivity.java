@@ -43,14 +43,6 @@ public class VideoPlayerActivity extends Activity {
         
         mVideoPath = getIntent().getStringExtra("videoPath");
 
-/*        Intent intent = getIntent();
-        String intentAction = intent.getAction();
-        if (!TextUtils.isEmpty(intentAction) && intentAction.equals(Intent.ACTION_VIEW)) {
-            mVideoPath = intent.getDataString();
-        }*/
-        
-//        mVideoPath = "rtmp://wspub.live.hupucdn.com/prod/slk";
-
         mBufferingIndicator = findViewById(R.id.buffering_indicator);
         mMediaController = new MediaController(this);
 
@@ -65,8 +57,8 @@ public class VideoPlayerActivity extends Activity {
         mVideoView.setMediaController(mMediaController);
         mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
         
-//        mVideoView.setVideoPath(mVideoPath);
-        mVideoView.setVideoToken(mVideoPath);        
+        mVideoView.setVideoPath(mVideoPath);
+//        mVideoView.setVideoToken(mVideoPath);        
 }
     
 	private OnPreparedListener mPreparedListener = new OnPreparedListener() {

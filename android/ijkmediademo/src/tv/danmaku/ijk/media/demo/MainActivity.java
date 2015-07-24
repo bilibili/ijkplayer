@@ -24,11 +24,11 @@ public class MainActivity extends Activity {
         final EditText et = (EditText) this.findViewById(R.id.RtmpAddress1);
 
 //        et.setText("http://live.3gv.ifeng.com/zixun.m3u8");
-//        et.setText("rtmp://wspub.live.hupucdn.com/prod/slk");
+        et.setText("rtmp://wspub.live.hupucdn.com/prod/slk");
 //        et.setText("http://v.iask.com/v_play_ipad.php?vid=99264895");
 //        et.setText("rtmp://wsvideopull.smartcourt.cn/prod/sh_loft_b01ll");
 //        et.setText("/sdcard/test.mp4");
-        et.setText("vod://kanqiu/test_shiyi?ac=pull&m=720p&st=1436859023&td=60000&u=12345678&ve=ws&k=0f062b3824a5e0f787e1e35ff81f17a2ba025ff7f693c69460ec989b5f68eef8");
+//        et.setText("vod://kanqiu/test_shiyi?ac=pull&m=720p&st=1436859023&td=60000&u=12345678&ve=ws&k=0f062b3824a5e0f787e1e35ff81f17a2ba025ff7f693c69460ec989b5f68eef8");
 
         btn.setOnClickListener(new OnClickListener(){
 
