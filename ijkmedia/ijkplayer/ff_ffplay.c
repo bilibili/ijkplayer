@@ -943,13 +943,27 @@ retry:
             if (is->paused)
                 goto display;
 
+			if(is->realtime)
+			{
+				ffp->speed_mode = 0;
+			}
+			
             /* compute nominal last_duration */
             last_duration = vp_duration(is, lastvp, vp);
             if (redisplay)
                 delay = 0.0;
             else
-                delay = compute_target_delay(last_duration, is);
-
+            {
+            
+				if(ffp->speed_mode < -1)
+				{
+					delay = compute_target_delay(AV_SYNC_FRAMEDUP_THRESHOLD+last_duration, is);
+					delay -= AV_SYNC_FRAMEDUP_THRESHOLD;
+				}
+				else
+                	delay = compute_target_delay(last_duration, is);
+            }
+			
             time= av_gettime_relative()/1000000.0;
             if (isnan(is->frame_timer) || time < is->frame_timer)
                 is->frame_timer = time;
