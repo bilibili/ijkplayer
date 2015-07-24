@@ -50,15 +50,16 @@
 
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
     [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeLeft animated:NO];
+    
+    _registeredNotifications = [[NSMutableArray alloc] init];
+    [self registerApplicationObservers];
 
-//    NSURL *theMovieURL = [NSURL URLWithString:@"rtmp://pull1.arenazb.hupu.com/test/789"];
     NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
 
     [IJKFFMoviePlayerController setLogReport:YES];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
-    self.player.movieSourceType = mUrlSourceType;
 
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
@@ -69,15 +70,12 @@
     [self installMovieNotificationObservers];
 
     [self.player prepareToPlay];
-//    [self.player play];
-    
-    [self registerApplicationObservers];
 }
 
 - (void)dealloc
 {
-    [self.player shutdown];
     [self removeMovieNotificationObservers];
+    [self.player shutdown];
     
     [self unregisterApplicationObservers];
 }
@@ -176,7 +174,7 @@
             break;
     }
     
-    [self.player stop];
+    [self removeMovieNotificationObservers];
     [self.player shutdown];
     self.player = nil;
 }
@@ -319,7 +317,6 @@
         self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
         self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         self.player.view.frame = self.view.bounds;
-        self.player.movieSourceType = mUrlSourceType;
         
         self.view.autoresizesSubviews = YES;
         [self.view addSubview:self.player.view];
@@ -338,7 +335,7 @@
 {
     NSLog(@"applicationDidBecomeActive: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.player play];
+//        [self.player play];
     });
     
 }
@@ -355,7 +352,7 @@
 {
     NSLog(@"applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.player stop];
+        [self removeMovieNotificationObservers];
         [self.player shutdown];
         self.player = nil;
     });
@@ -365,7 +362,7 @@
 {
     NSLog(@"applicationWillTerminate: %d", (int)[UIApplication sharedApplication].applicationState);
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.player stop];
+        [self removeMovieNotificationObservers];
         [self.player shutdown];
         self.player = nil;
         
