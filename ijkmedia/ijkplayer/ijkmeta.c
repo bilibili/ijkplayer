@@ -40,7 +40,7 @@ IjkMediaMeta *ijkmeta_create()
 {
     IjkMediaMeta *meta = (IjkMediaMeta *)calloc(1, sizeof(IjkMediaMeta));
     if (!meta)
-        goto fail;
+        return NULL;
 
     meta->mutex = SDL_CreateMutex();
     if (!meta->mutex)
