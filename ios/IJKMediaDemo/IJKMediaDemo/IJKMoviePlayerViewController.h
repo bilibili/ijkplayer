@@ -29,6 +29,8 @@
 - (IBAction)onClickSlower:(id)sender;
 - (IBAction)onClickFaster:(id)sender;
 - (IBAction)onClickNormal:(id)sender;
+- (IBAction)onClickSetVolume:(id)sender;
+@property (weak, nonatomic) IBOutlet UITextField *volume;
 
 @property(nonatomic,strong) IBOutlet IJKMediaControl *mediaControl;
 @property(nonatomic,strong) NSString *urlString;

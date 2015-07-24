@@ -100,6 +100,7 @@
 - (IBAction)onClickOverlay:(id)sender
 {
     [self.mediaControl hide];
+	[self.volume resignFirstResponder];
 }
 
 - (IBAction)onClickBack:(id)sender
@@ -159,6 +160,12 @@
 - (IBAction)onClickNormal:(id)sender {
 	mPlaySpeedMode = 0;
 	[self.player setPlaySpeedMode:mPlaySpeedMode];
+}
+
+- (IBAction)onClickSetVolume:(id)sender {
+	int volume;
+	volume = [[self.volume text] intValue];
+	[self.player setPlayVolume:volume];
 }
 
 - (void)loadStateDidChange:(NSNotification*)notification

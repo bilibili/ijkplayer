@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "IJKMediaPlayback.h"
 
 typedef enum IJKAVDiscard{
     /* We leave some space between them for extensions (drop some
@@ -44,5 +45,6 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 
 // new API by WilliamShi
 @property(nonatomic)BOOL reportPlayInfo;
+@property(nonatomic)IJKMPMovieSourceType sourceType;
 
 @end
