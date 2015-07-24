@@ -1,0 +1,1 @@
+COPYING.LGPLv2.1

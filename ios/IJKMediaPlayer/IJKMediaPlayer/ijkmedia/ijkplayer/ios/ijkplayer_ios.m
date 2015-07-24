@@ -30,7 +30,7 @@
 #include "ijkplayer/ff_ffplay.h"
 #include "ijkplayer/ijkplayer_internal.h"
 #include "ijkplayer/pipeline/ffpipeline_ffplay.h"
-#include "ffpipeline_ios.h"
+#include "pipeline/ffpipeline_ios.h"
 
 IjkMediaPlayer *ijkmp_ios_create(int (*msg_loop)(void*))
 {

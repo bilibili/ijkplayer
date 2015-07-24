@@ -57,7 +57,8 @@
     BOOL _keepScreenOnWhilePlaying;
     BOOL _pauseInBackground;
     BOOL _isVideoToolboxOpen;
-
+    BOOL _playingBeforeInterruption;
+    
     NSMutableArray *_registeredNotifications;
 }
 
@@ -969,6 +970,15 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     switch (reason) {
         case AVAudioSessionInterruptionTypeBegan: {
             NSLog(@"IJKFFMoviePlayerController:audioSessionInterrupt: begin\n");
+            switch (self.playbackState) {
+                case MPMoviePlaybackStatePaused:
+                case MPMoviePlaybackStateStopped:
+                    _playingBeforeInterruption = NO;
+                    break;
+                default:
+                    _playingBeforeInterruption = YES;
+                    break;
+            }
             [self pause];
             [[IJKAudioKit sharedInstance] setActive:NO];
             break;
@@ -976,7 +986,9 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
         case AVAudioSessionInterruptionTypeEnded: {
             NSLog(@"IJKFFMoviePlayerController:audioSessionInterrupt: end\n");
             [[IJKAudioKit sharedInstance] setActive:YES];
-            [self play];
+            if (_playingBeforeInterruption) {
+                [self play];
+            }
             break;
         }
     }

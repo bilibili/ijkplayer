@@ -29,7 +29,7 @@
 #include "ijksdl_mutex.h"
 #include "ijksdl_vout_ios_gles2.h"
 
-typedef struct IJKFF_Pipenode_Opaque {
+struct IJKFF_Pipenode_Opaque {
     IJKFF_Pipeline           *pipeline;
     FFPlayer                 *ffp;
     Decoder                  *decoder;
@@ -37,7 +37,7 @@ typedef struct IJKFF_Pipenode_Opaque {
     AVCodecContext           *avctx; // not own
     SDL_Thread*              video_fill_thread;
     SDL_Thread              _video_fill_thread;
-} IJKFF_Pipenode_Opaque;
+};
 
 
 

@@ -33,8 +33,8 @@
 #endif
 
 typedef struct IjkMediaPlayer IjkMediaPlayer;
-typedef struct FFPlayer FFPlayer;
-typedef struct SDL_Vout SDL_Vout;
+struct FFPlayer;
+struct SDL_Vout;
 
 /*-
  MPST_CHECK_NOT_RET(mp->mp_state, MP_STATE_IDLE);

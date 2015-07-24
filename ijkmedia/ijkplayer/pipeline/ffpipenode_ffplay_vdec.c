@@ -24,9 +24,9 @@
 #include "../ff_ffpipenode.h"
 #include "../ff_ffplay.h"
 
-typedef struct IJKFF_Pipenode_Opaque {
+struct IJKFF_Pipenode_Opaque {
     FFPlayer *ffp;
-} IJKFF_Pipenode_Opaque;
+};
 
 static void func_destroy(IJKFF_Pipenode *node)
 {

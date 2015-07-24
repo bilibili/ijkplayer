@@ -46,10 +46,10 @@ import android.widget.TextView;
  * A view containing controls for a MediaPlayer. Typically contains the buttons
  * like "Play/Pause" and a progress slider. It takes care of synchronizing the
  * controls with the state of the MediaPlayer.
- * <p>
+ * <p/>
  * The way to use this class is to a) instantiate it programatically or b)
  * create it in your xml layout.
- * 
+ * <p/>
  * a) The MediaController will create a default set of controls and put them in
  * a window floating above your application. Specifically, the controls will
  * float above the view specified with setAnchorView(). By default, the window
@@ -57,17 +57,18 @@ import android.widget.TextView;
  * touches the anchor view. To customize the MediaController's style, layout and
  * controls you should extend MediaController and override the {#link
  * {@link #makeControllerView()} method.
- * 
+ * <p/>
  * b) The MediaController is a FrameLayout, you can put it in your layout xml
  * and get it through {@link #findViewById(int)}.
- * 
- * NOTES: In each way, if you want customize the MediaController, the SeekBar's
- * id must be mediacontroller_progress, the Play/Pause's must be
- * mediacontroller_pause, current time's must be mediacontroller_time_current,
- * total time's must be mediacontroller_time_total, file name's must be
- * mediacontroller_file_name. And your resources must have a pause_button
- * drawable and a play_button drawable.
- * <p>
+ * <p/>
+ * NOTES: In each way, if you want customize the MediaController,
+ * the SeekBar's id must be {@link R.id#mediacontroller_progress}},<br>
+ * the Play/Pause's must be {@link R.id#mediacontroller_pause}, <br>
+ * current time's must be {@link R.id#mediacontroller_time_current},<br>
+ * total time's must be {@link R.id#mediacontroller_time_total}, <br>
+ * file name's must be {@link R.id#mediacontroller_file_name}. <br>
+ * And your resources must have a pause_button drawable and a play_button drawable.
+ * <p/>
  * Functions like show() and hide() have no effect when MediaController is
  * created in an xml layout.
  */
@@ -118,6 +119,7 @@ public class MediaController extends FrameLayout {
 
     @Override
     public void onFinishInflate() {
+        super.onFinishInflate();//add super to suppress warning
         if (mRoot != null)
             initControllerView(mRoot);
     }
@@ -163,13 +165,13 @@ public class MediaController extends FrameLayout {
 
     private void initControllerView(View v) {
         mPauseButton = (ImageButton) v
-                .findViewById(R.id.mediacontroller_play_pause);
+                .findViewById(R.id.mediacontroller_pause);
         if (mPauseButton != null) {
             mPauseButton.requestFocus();
             mPauseButton.setOnClickListener(mPauseListener);
         }
 
-        mProgress = (SeekBar) v.findViewById(R.id.mediacontroller_seekbar);
+        mProgress = (SeekBar) v.findViewById(R.id.mediacontroller_progress);
         if (mProgress != null) {
             if (mProgress instanceof SeekBar) {
                 SeekBar seeker = (SeekBar) mProgress;

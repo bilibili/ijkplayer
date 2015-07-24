@@ -26,7 +26,7 @@
 
 #define IJK_META_INIT_CAPACITY 13
 
-typedef struct IjkMediaMeta {
+struct IjkMediaMeta {
     SDL_mutex *mutex;
 
     AVDictionary *dict;
@@ -34,7 +34,7 @@ typedef struct IjkMediaMeta {
     size_t children_count;
     size_t children_capacity;
     IjkMediaMeta **children;
-} IjkMediaMeta;
+};
 
 IjkMediaMeta *ijkmeta_create()
 {

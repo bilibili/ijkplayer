@@ -426,8 +426,8 @@ static SDL_Surface *screen;
  ****************************************************************************/
 
 /* ffplayer */
-typedef struct IjkMediaMeta IjkMediaMeta;
-typedef struct IJKFF_Pipeline IJKFF_Pipeline;
+struct IjkMediaMeta;
+struct IJKFF_Pipeline;
 typedef struct FFPlayer {
     const AVClass *av_class;
 
@@ -510,8 +510,8 @@ typedef struct FFPlayer {
     /* extra fields */
     SDL_Aout *aout;
     SDL_Vout *vout;
-    IJKFF_Pipeline *pipeline;
-    IJKFF_Pipenode *node_vdec;
+    struct IJKFF_Pipeline *pipeline;
+    struct IJKFF_Pipenode *node_vdec;
     int sar_num;
     int sar_den;
 
@@ -549,7 +549,7 @@ typedef struct FFPlayer {
     int mediacodec;
     int opensles;
 
-    IjkMediaMeta *meta;
+    struct IjkMediaMeta *meta;
 
     ijk_format_control_message format_control_message;
     void *format_control_opaque;
