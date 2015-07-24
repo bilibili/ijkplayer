@@ -132,7 +132,7 @@ static SDL_Class g_vout_overlay_videotoolbox_class = {
 static bool check_object(SDL_VoutOverlay* object, const char *func_name)
 {
     if (!object || !object->opaque || !object->opaque_class) {
-        ALOGE("%s.%s: invalid pipeline\n", object->opaque_class->name, func_name);
+        ALOGE("%s: invalid pipeline\n", func_name);
         return false;
     }
 
