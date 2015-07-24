@@ -3059,7 +3059,7 @@ void ffp_destroy(FFPlayer *ffp)
     if (!ffp)
         return;
 
-    if (ffp && ffp->is) {
+    if (ffp->is) {
         av_log(NULL, AV_LOG_WARNING, "ffp_destroy_ffplayer: force stream_close()");
         stream_close(ffp->is);
         ffp->is = NULL;
@@ -3069,11 +3069,11 @@ void ffp_destroy(FFPlayer *ffp)
     SDL_AoutFreeP(&ffp->aout);
     ffpipenode_free_p(&ffp->node_vdec);
     ffpipeline_free_p(&ffp->pipeline);
+    ijkmeta_destroy_p(&ffp->meta);
     ffp_reset_internal(ffp);
 
     msg_queue_destroy(&ffp->msg_queue);
 
-    ijkmeta_destroy_p(&ffp->meta);
 
     av_free(ffp);
 }
