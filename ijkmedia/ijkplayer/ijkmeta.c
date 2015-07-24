@@ -54,7 +54,7 @@ fail:
 
 void ijkmeta_reset(IjkMediaMeta *meta)
 {
-    if (meta->dict)
+    if (meta && meta->dict)
         av_dict_free(&meta->dict);
 }
 
