@@ -52,6 +52,12 @@ fail:
     return NULL;
 }
 
+void ijkmeta_reset(IjkMediaMeta *meta)
+{
+    if (meta->dict)
+        av_dict_free(&meta->dict);
+}
+
 void ijkmeta_destroy(IjkMediaMeta *meta)
 {
     if (!meta)

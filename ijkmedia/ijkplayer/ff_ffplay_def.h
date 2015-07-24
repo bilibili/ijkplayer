@@ -64,6 +64,7 @@
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
 #include "ff_ffpipenode.h"
+#include "ijkmeta.h"
 
 #define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
 
@@ -646,7 +647,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->format_control_message = NULL;
     ffp->format_control_opaque  = NULL;
 
-    ffp->meta = NULL;
+    ijkmeta_reset(ffp->meta);
 
     msg_queue_flush(&ffp->msg_queue);
 }
