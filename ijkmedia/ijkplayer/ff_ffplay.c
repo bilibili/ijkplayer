@@ -3044,6 +3044,8 @@ const AVClass ffp_context_class = {
 
 FFPlayer *ffp_create()
 {
+    av_log(NULL, AV_LOG_INFO, "av_version_info: %s\n", av_version_info());
+
     FFPlayer* ffp = (FFPlayer*) av_mallocz(sizeof(FFPlayer));
     if (!ffp)
         return NULL;
