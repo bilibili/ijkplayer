@@ -1,4 +1,4 @@
-source 'https://github.com/CocoaPods/Specs.git''
+source 'https://github.com/CocoaPods/Specs.git'
 # source <your private repo containing ijkplayer, FFmpeg4ijkplayer-ios-bin>
 
 platform :ios, '8.0'
