@@ -108,6 +108,17 @@
         android:text="normal"
         android:background="#00000000"
         />
+    <Spinner
+        android:id="@+id/volume"
+        android:layout_width="32dip"
+        android:layout_height="32dip"
+        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="480.0dip"
+        android:background="#00000000"
+        android:spinnerMode="dialog"
+    />
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -115,7 +126,7 @@
         android:layout_marginLeft="7.0dip"
         android:layout_marginRight="7.0dip"
         android:layout_marginTop="2dip"
-        android:layout_toLeftOf="@+id/normal" >
+        android:layout_toLeftOf="@+id/volume" >
 
         <RelativeLayout
             android:layout_width="match_parent"
