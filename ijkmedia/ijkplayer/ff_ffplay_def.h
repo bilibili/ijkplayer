@@ -539,6 +539,7 @@ typedef struct FFPlayer {
 
     int64_t playable_duration_ms;
 
+    int packet_buffering;
     int pictq_size;
     int max_fps;
 
@@ -633,6 +634,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->playable_duration_ms           = 0;
 
+    ffp->packet_buffering               = 1;
     ffp->pictq_size                     = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT; // option
     ffp->max_fps                        = 31; // option
 

@@ -128,6 +128,9 @@ static const AVOption ffp_context_options[] = {
     { "max-buffer-size",                    "max buffer size should be pre-read",
         OPTION_OFFSET(max_buffer_size),     OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
 
+    { "packet-buffering",                   "pause output until enough packets have been read after stalling",
+        OPTION_OFFSET(packet_buffering),    OPTION_INT(1, 0, 1) },
+
     // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
         OPTION_OFFSET(videotoolbox),        OPTION_INT(0, 0, 1) },
@@ -350,6 +353,9 @@ static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *seria
 static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket *pkt, int *serial, int *finished)
 {
     assert(finished);
+    if (!ffp->packet_buffering)
+        return packet_queue_get(q, pkt, 1, serial);
+
     while (1) {
         int new_packet = packet_queue_get(q, pkt, 0, serial);
         if (new_packet < 0)
@@ -2571,7 +2577,8 @@ static int read_thread(void *arg)
             SDL_LockMutex(ffp->is->play_mutex);
             if (ffp->auto_resume) {
                 is->pause_req = 0;
-                is->buffering_on = 1;
+                if (ffp->packet_buffering)
+                    is->buffering_on = 1;
                 ffp->auto_resume = 0;
                 stream_update_pause_l(ffp);
             }
@@ -2721,10 +2728,12 @@ static int read_thread(void *arg)
             av_free_packet(pkt);
         }
 
-        io_tick_counter = SDL_GetTickHR();
-        if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
-            prev_io_tick_counter = io_tick_counter;
-            ffp_check_buffering_l(ffp);
+        if (ffp->packet_buffering) {
+            io_tick_counter = SDL_GetTickHR();
+            if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
+                prev_io_tick_counter = io_tick_counter;
+                ffp_check_buffering_l(ffp);
+            }
         }
     }
     /* wait until the end */
@@ -3429,6 +3438,9 @@ double ffp_get_master_clock(VideoState *is)
 
 void ffp_toggle_buffering_l(FFPlayer *ffp, int buffering_on)
 {
+    if (!ffp->packet_buffering)
+        return;
+
     VideoState *is = ffp->is;
     if (buffering_on && !is->buffering_on) {
         av_log(ffp, AV_LOG_DEBUG, "ffp_toggle_buffering_l: start\n");
