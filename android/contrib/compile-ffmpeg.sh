@@ -68,7 +68,7 @@ case "$FF_TARGET" in
     ;;
     all)
         echo_archs
-        for ARCH in $FF_ACT_ARCHS
+        for ARCH in $FF_ALL_ARCHS
         do
             sh tools/do-compile-ffmpeg.sh $ARCH
         done
