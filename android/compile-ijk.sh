@@ -23,7 +23,7 @@ fi
 
 REQUEST_TARGET=$1
 REQUEST_SUB_CMD=$2
-ALL_ABI="armv5 armv7a x86"
+ALL_ABI="armv5 armv7a x86 arm64"
 
 do_sub_cmd () {
     SUB_CMD=$1
