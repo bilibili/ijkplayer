@@ -1,7 +1,7 @@
 package tv.danmaku.ijk.media.widget;
 
 public class PlayerInfo {
-	private String ve;
+//	private String ve;
 	private String m;
 	private String rip;
 	private String lip;
@@ -12,7 +12,8 @@ public class PlayerInfo {
 	private String token;
 	private String oc;
 	private String cd;
-	
+
+/*
 	public void setVe(String veString)
 	{
 		this.ve = veString;
@@ -22,7 +23,7 @@ public class PlayerInfo {
 	{
 		return ve;
 	}
-	
+*/	
 	public void setM(String mString)
 	{
 		this.m = mString;

@@ -70,10 +70,12 @@ public class PlayerInfoReport {
 	{
 		if (handler!=null) {
 			handler.removeCallbacks(runnable);
+			handler = null;
 		}
 		
 		if (handlerThread!=null) {
 			handlerThread.quit();
+			handlerThread = null;
 		}
 	}
 	
@@ -127,7 +129,7 @@ public class PlayerInfoReport {
 			playerInfo = new PlayerInfo();
 		}
 		
-		playerInfo.setVe(this.getVe());
+//		playerInfo.setVe(this.getVe());
 		playerInfo.setM(this.getM());
 		playerInfo.setRip(this.getRip());
 		playerInfo.setLip(this.getLip());

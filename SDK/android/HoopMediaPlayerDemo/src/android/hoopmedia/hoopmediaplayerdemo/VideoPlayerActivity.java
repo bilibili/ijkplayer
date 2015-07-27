@@ -44,7 +44,7 @@ public class VideoPlayerActivity extends Activity {
 //		MediaController mediaController = new MediaController(this);
 //		mVideoView.setMediaController(mediaController);
 		
-		mVideoView.setDataSourceType(VideoView.LOWDELAY_LIVE_STREAMING_TYPE);
+//		mVideoView.setDataSourceType(VideoView.LOWDELAY_LIVE_STREAMING_TYPE);
 		mVideoView.setVideoPath(mVideoPath);
 		
 		setContentView(mVideoView);

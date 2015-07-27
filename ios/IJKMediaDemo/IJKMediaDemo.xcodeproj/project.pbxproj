@@ -16,7 +16,6 @@
 		ABCC3F7D1AF8594700214BBE /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABCC3F7C1AF8594700214BBE /* VideoToolbox.framework */; };
 		ABD5DF081AE4D43D00778032 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABD5DF051AE4D43D00778032 /* MainViewController.xib */; };
 		ABD5DF091AE4D43D00778032 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ABD5DF061AE4D43D00778032 /* MainViewController.m */; };
-		ABF147161B4A5DF4000DCE11 /* libWSPX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABF147151B4A5DF4000DCE11 /* libWSPX.a */; };
 		ABF147181B4A60B1000DCE11 /* libstdc++.6.0.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ABF147171B4A60B1000DCE11 /* libstdc++.6.0.9.dylib */; };
 		ABF1471C1B4A61D4000DCE11 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABF1471B1B4A61D4000DCE11 /* CoreTelephony.framework */; };
 		ABF147201B4A631D000DCE11 /* libresolv.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ABF1471F1B4A631D000DCE11 /* libresolv.9.dylib */; };
@@ -133,7 +132,6 @@
 				ABF147201B4A631D000DCE11 /* libresolv.9.dylib in Frameworks */,
 				ABF1471C1B4A61D4000DCE11 /* CoreTelephony.framework in Frameworks */,
 				ABF147181B4A60B1000DCE11 /* libstdc++.6.0.9.dylib in Frameworks */,
-				ABF147161B4A5DF4000DCE11 /* libWSPX.a in Frameworks */,
 				AB6319AF1B3D2E3A0025924F /* MobileCoreServices.framework in Frameworks */,
 				AB6319AD1B3D2E1B0025924F /* Security.framework in Frameworks */,
 				AB6319AB1B3D2DFB0025924F /* SystemConfiguration.framework in Frameworks */,
@@ -416,6 +414,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+				);
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -440,7 +442,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					./maa,
+					"../IJKMediaPlayer/IJKMediaPlayer/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				ONLY_ACTIVE_ARCH = YES;
@@ -453,6 +455,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+				);
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -470,7 +476,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					./maa,
+					"../IJKMediaPlayer/IJKMediaPlayer/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
@@ -489,11 +495,7 @@
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/IJKMediaDemo/maa",
-					"$(PROJECT_DIR)/maa",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -511,11 +513,7 @@
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/IJKMediaDemo/maa",
-					"$(PROJECT_DIR)/maa",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;

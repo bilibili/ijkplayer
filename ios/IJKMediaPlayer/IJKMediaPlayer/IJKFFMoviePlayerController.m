@@ -231,11 +231,16 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (void)endReport
 {
-    [udpSocket close];
-    udpSocket = nil;
+    if (udpSocket!=nil) {
+        [udpSocket close];
+        udpSocket = nil;
+    }
     
-    [timer invalidate];
-    timer = nil;
+    if(timer!=nil)
+    {
+        [timer invalidate];
+        timer = nil;
+    }
 }
 
 static NSMutableDictionary *dictionary = nil;
@@ -622,6 +627,12 @@ static NSMutableDictionary *dictionary = nil;
         }
         
         [self prepareToPlay];
+        
+        //add by William
+        _options = options;
+        
+        ASIFormDataRequest *formDataRequest = [ASIFormDataRequest requestWithURL:nil];
+        self.token = [formDataRequest encodeURL:aUrlString];
     }
     return self;
 }
@@ -730,12 +741,12 @@ static NSMutableDictionary *dictionary = nil;
             [request cancel];
             request = nil;
         }
-        
-        // PlayInfoReport module
-        if (_options.reportPlayInfo) {
-            //start report
-            [self endReport];
-        }
+    }
+    
+    // PlayInfoReport module
+    if (_options.reportPlayInfo) {
+        //end report
+        [self endReport];
     }
     
     if (!_mediaPlayer)
@@ -763,12 +774,12 @@ static NSMutableDictionary *dictionary = nil;
             [request cancel];
             request = nil;
         }
-        
-        // PlayInfoReport module
-        if (_options.reportPlayInfo) {
-            //start report
-            [self endReport];
-        }
+    }
+    
+    // PlayInfoReport module
+    if (_options.reportPlayInfo) {
+        //end report
+        [self endReport];
     }
     
     if (!_mediaPlayer)
@@ -1004,13 +1015,14 @@ int64_t _systemTime() {
             
             if(isTokenMode)
             {
-                [self addOpenCountWithStream:self.token];
                 
-                // PlayInfoReport module
-                if (_options.reportPlayInfo) {
-                    //start report
-                    [self startReport];
-                }
+            }
+
+            // PlayInfoReport module
+            if (_options.reportPlayInfo) {
+                [self addOpenCountWithStream:self.token];
+                //start report
+                [self startReport];
             }
 
 
@@ -1559,7 +1571,7 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     NSLog(@"br:%@",self.br);
     NSLog(@"token:%@",self.token);*/
     
-    NSDictionary *infoDict = [NSDictionary dictionaryWithObjectsAndKeys:self.ve,@"ve",
+    NSDictionary *infoDict = [NSDictionary dictionaryWithObjectsAndKeys:/*self.ve,@"ve",*/
                               self.m,@"m",
                               self.rip,@"rip",
                               self.lip,@"lip",

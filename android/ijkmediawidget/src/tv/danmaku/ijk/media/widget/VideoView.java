@@ -425,6 +425,13 @@ public class VideoView extends SurfaceView implements
     //
     
     public void setVideoPath(String path) {
+    	//add by William
+    	try {
+			this.token = URLEncoder.encode(path, HTTP.UTF_8);
+		} catch (UnsupportedEncodingException e) {
+			this.token = path;
+		}
+    	
         setVideoURI(Uri.parse(path));
     }
 
@@ -575,8 +582,10 @@ public class VideoView extends SurfaceView implements
             
             if (isTokenMode)
             {
-            	addOpenCountWithStream(token);
             }
+            
+            //add by William
+            addOpenCountWithStream(token);
             
             mCurrentState = STATE_PREPARED;
             mTargetState = STATE_PLAYING;
@@ -611,11 +620,12 @@ public class VideoView extends SurfaceView implements
             }
             
             if (isTokenMode) {
-                //start info report
-                if (playerInfoReport==null) {
-                	playerInfoReport = new PlayerInfoReport(VideoView.this);
-                	playerInfoReport.startReport();
-    			}
+
+			}
+            //start info report
+            if (playerInfoReport==null) {
+            	playerInfoReport = new PlayerInfoReport(VideoView.this);
+            	playerInfoReport.startReport();
 			}
         }
     };
