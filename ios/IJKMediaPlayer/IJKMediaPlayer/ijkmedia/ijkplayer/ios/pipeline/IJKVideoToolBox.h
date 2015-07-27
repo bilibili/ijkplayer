@@ -34,7 +34,7 @@
 
 
 #define MAX_PKT_QUEUE_DEEP   350
-#define VTB_MAX_DECODING_SAMPLES 16
+#define VTB_MAX_DECODING_SAMPLES 3
 
 
 typedef struct sample_info {
