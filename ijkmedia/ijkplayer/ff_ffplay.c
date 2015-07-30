@@ -2416,6 +2416,9 @@ static int read_thread(void *arg)
     if (err < 0) {
         print_error(is->filename, err);
         ret = -1;
+        
+        last_error = err;
+        
         goto fail;
     }
     printf("ip address:%s\n",ic->pb->iPAddress);
@@ -2976,7 +2979,8 @@ static int read_thread(void *arg)
                     ffp_toggle_buffering(ffp, 0);
                     toggle_pause(ffp, 1);
                     if (ffp->error) {
-                        ffp_notify_msg1(ffp, FFP_MSG_ERROR);
+//                        ffp_notify_msg1(ffp, FFP_MSG_ERROR);
+                        ffp_notify_msg2(ffp, FFP_MSG_ERROR,ffp->error);
                     } else {
                         ffp_notify_msg1(ffp, FFP_MSG_COMPLETED);
                     }
@@ -3079,7 +3083,8 @@ static int read_thread(void *arg)
                       (char) (0xff & (ffp->error)),
                       ffp_get_error_string(ffp->error));
                 //break;
-                ffp_notify_msg1(ffp, FFP_MSG_ERROR);
+//                ffp_notify_msg1(ffp, FFP_MSG_ERROR);
+                ffp_notify_msg2(ffp, FFP_MSG_ERROR,ffp->error);
             } else {
                 ffp->error = 0;
             }

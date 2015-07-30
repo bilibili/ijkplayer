@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
         final EditText et = (EditText) this.findViewById(R.id.RtmpAddress1);
 
 //        et.setText("http://live.3gv.ifeng.com/zixun.m3u8");
-        et.setText("rtmp://dl.live.hupucdn.com/prod/0011kaniu");
+        et.setText("rtmp://ws.live.hupucdn.com/prod/0011testq?time=55b71f1c&key=5d9071370dd91be601a4fd9766d10381");
 //        et.setText("http://v.iask.com/v_play_ipad.php?vid=99264895");
 //        et.setText("rtmp://wsvideopull.smartcourt.cn/prod/sh_loft_b01ll");
 //        et.setText("/sdcard/test.mp4");

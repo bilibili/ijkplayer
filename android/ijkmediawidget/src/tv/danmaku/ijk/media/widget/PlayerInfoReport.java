@@ -66,14 +66,27 @@ public class PlayerInfoReport {
 		}
 	}
 	
+	public void reportError()
+	{
+		new Thread() {
+			@Override
+			public void run() {
+				String sendData = getPlayerInfoWithJsonFormatOnError();
+				Log.v("PlayerErrorInfoReport", sendData);
+				udpSend(sendData);
+			}
+		}.start();
+	}
+	
 	public void endReport()
 	{
-		if (handler!=null) {
-			handler.removeCallbacks(runnable);
-			handler = null;
-		}
-		
 		if (handlerThread!=null) {
+			
+			if (handler!=null) {
+				handler.removeCallbacks(runnable);
+				handler = null;
+			}
+			
 			handlerThread.quit();
 			handlerThread = null;
 		}
@@ -95,7 +108,7 @@ public class PlayerInfoReport {
 
 		if (serverAddress==null) {
 			try {
-				serverAddress = InetAddress.getByName("192.168.9.117");
+				serverAddress = InetAddress.getByName("cloudci.hupu.com");
 			} catch (UnknownHostException e) {
 				Log.e("PlayerInfoReport", "UDP Report Fail");
 				return;
@@ -142,6 +155,27 @@ public class PlayerInfoReport {
 		playerInfo.setCd(this.getCd());
 
 		return gson.toJson(playerInfo);
+	}
+	
+	private PlayerErrorInfo playerErrorInfo = null;
+	private String getPlayerInfoWithJsonFormatOnError()
+	{
+		if (gson==null) {
+			gson = new Gson();
+		}
+		
+		if (playerErrorInfo==null) {
+			playerErrorInfo = new PlayerErrorInfo();
+		}
+		
+		playerErrorInfo.setAc("close");
+		playerErrorInfo.setM(this.getM());
+		playerErrorInfo.setRip(this.getRip());
+		playerErrorInfo.setBr(this.getBr());
+		playerErrorInfo.setErrcode(this.getErrorCode());
+		playerErrorInfo.setToken(this.getToken());
+		
+		return gson.toJson(playerErrorInfo);
 	}
 	
 	private String getVe() {
@@ -276,5 +310,12 @@ public class PlayerInfoReport {
 			return "unknown";
 		}
 		return Integer.valueOf(videoView.getBuffingTimePerMinute()).toString();
+	}
+	
+	private String getErrorCode() {
+		if (videoView==null) {
+			return "unknown";
+		}
+		return Integer.valueOf(videoView.getErrorCode()).toString();
 	}
 }

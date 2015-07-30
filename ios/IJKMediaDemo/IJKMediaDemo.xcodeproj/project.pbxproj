@@ -80,7 +80,6 @@
 		ABD5DF051AE4D43D00778032 /* MainViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainViewController.xib; sourceTree = "<group>"; };
 		ABD5DF061AE4D43D00778032 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		ABD5DF071AE4D43D00778032 /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
-		ABF147151B4A5DF4000DCE11 /* libWSPX.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libWSPX.a; path = maa/libWSPX.a; sourceTree = "<group>"; };
 		ABF147171B4A60B1000DCE11 /* libstdc++.6.0.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.0.9.dylib"; path = "usr/lib/libstdc++.6.0.9.dylib"; sourceTree = SDKROOT; };
 		ABF1471B1B4A61D4000DCE11 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		ABF1471F1B4A631D000DCE11 /* libresolv.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.9.dylib; path = usr/lib/libresolv.9.dylib; sourceTree = SDKROOT; };
@@ -205,7 +204,6 @@
 				ABF1471F1B4A631D000DCE11 /* libresolv.9.dylib */,
 				ABF1471B1B4A61D4000DCE11 /* CoreTelephony.framework */,
 				ABF147171B4A60B1000DCE11 /* libstdc++.6.0.9.dylib */,
-				ABF147151B4A5DF4000DCE11 /* libWSPX.a */,
 				AB6319AE1B3D2E3A0025924F /* MobileCoreServices.framework */,
 				AB6319AC1B3D2E1B0025924F /* Security.framework */,
 				AB6319AA1B3D2DFB0025924F /* SystemConfiguration.framework */,

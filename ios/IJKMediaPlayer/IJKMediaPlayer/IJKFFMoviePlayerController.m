@@ -96,6 +96,9 @@
 
     //
     NSMutableArray *_registeredNotifications;
+    
+    //
+    int errcode;
 }
 
 @synthesize view = _view;
@@ -211,7 +214,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (void)send
 {
-    [udpSocket sendData:[[self getReportInfoWithJsonFormat] dataUsingEncoding:NSUTF8StringEncoding] toHost:@"192.168.9.117" port:33333 withTimeout:-1 tag:tag];
+    [udpSocket sendData:[[self getReportInfoWithJsonFormat] dataUsingEncoding:NSUTF8StringEncoding] toHost:@"cloudci.hupu.com" port:33333 withTimeout:-1 tag:tag];
     
     tag++;
 }
@@ -221,10 +224,27 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     [self performSelectorInBackground:@selector(send) withObject:self];
 }
 
+- (void)sendOnError
+{
+    [udpSocket sendData:[[self getReportInfoWithJsonFormatOnError] dataUsingEncoding:NSUTF8StringEncoding] toHost:@"cloudci.hupu.com" port:33333 withTimeout:-1 tag:tag];
+    
+    tag++;
+}
+
+- (void)doSendOnError
+{
+    if (udpSocket==nil) {
+        udpSocket = [[GCDAsyncUdpSocket alloc] init];
+    }
+    [self performSelectorInBackground:@selector(sendOnError) withObject:self];
+}
+
 - (void)startReport
 {
     //start a timer
-    udpSocket = [[GCDAsyncUdpSocket alloc] init];
+    if (udpSocket==nil) {
+        udpSocket = [[GCDAsyncUdpSocket alloc] init];
+    }
     
     timer =  [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(doSendOnce:) userInfo:nil repeats:YES];
 }
@@ -995,6 +1015,11 @@ int64_t _systemTime() {
             break;
         case FFP_MSG_ERROR: {
             NSLog(@"FFP_MSG_ERROR: %d", avmsg->arg1);
+            errcode = avmsg->arg1;
+            
+            if (_options.reportPlayInfo) {
+                [self doSendOnError];
+            }
 
             [self setScreenOn:NO];
 
@@ -1015,7 +1040,6 @@ int64_t _systemTime() {
             
             if(isTokenMode)
             {
-                
             }
 
             // PlayInfoReport module
@@ -1556,6 +1580,37 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     stalledTimePerMinute = 0;
     
     return retStr;
+}
+
+- (NSString*)errorcode
+{
+    return [NSString stringWithFormat:@"%d",errcode];
+}
+
+- (NSString*)getReportInfoWithJsonFormatOnError
+{
+    NSDictionary *infoDict = [NSDictionary dictionaryWithObjectsAndKeys:@"close",@"ac",
+                              self.m,@"m",
+                              self.rip,@"rip",
+                              self.br,@"br",
+                              self.errorcode,@"errcode",
+                              self.token,@"token", nil];
+
+    if ([NSJSONSerialization isValidJSONObject:infoDict])
+    {
+        NSError *error;
+        
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:infoDict options:NSJSONWritingPrettyPrinted error:&error];
+        
+        
+        NSString *json =[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        NSLog(@"json data:%@",json);
+        
+        return json;
+    }else{
+        NSLog(@"a given object can't be converted to JSON data\n");
+        return nil;
+    }
 }
 
 - (NSString*)getReportInfoWithJsonFormat

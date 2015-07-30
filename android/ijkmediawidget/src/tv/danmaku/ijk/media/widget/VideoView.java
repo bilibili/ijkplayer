@@ -625,8 +625,8 @@ public class VideoView extends SurfaceView implements
             //start info report
             if (playerInfoReport==null) {
             	playerInfoReport = new PlayerInfoReport(VideoView.this);
-            	playerInfoReport.startReport();
 			}
+            playerInfoReport.startReport();
         }
     };
 
@@ -642,9 +642,24 @@ public class VideoView extends SurfaceView implements
         }
     };
 
+    
+    private int errorCode = 0;
+    public int getErrorCode()
+    {
+    	return errorCode;
+    }
+    
     private OnErrorListener mErrorListener = new OnErrorListener() {
         public boolean onError(IMediaPlayer mp, int framework_err, int impl_err) {
             DebugLog.dfmt(TAG, "Error: %d, %d", framework_err, impl_err);
+            
+            errorCode = impl_err;
+            
+            if (playerInfoReport==null) {
+            	playerInfoReport = new PlayerInfoReport(VideoView.this);
+			}
+            playerInfoReport.reportError();
+            
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
             if (mMediaController != null)
