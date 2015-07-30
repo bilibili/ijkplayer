@@ -22,8 +22,9 @@
 #import "IJKMoviePlayerViewController.h"
 #import "IJKDemoLocalFolderViewController.h"
 #import "IJKDemoSampleViewController.h"
+#import <MobileCoreServices/MobileCoreServices.h>
 
-@interface IJKDemoMainViewController () <UITableViewDataSource, UITableViewDelegate>
+@interface IJKDemoMainViewController () <UITableViewDataSource, UITableViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
 @property(nonatomic,strong) IBOutlet UITableView *tableView;
 @property(nonatomic,strong) NSArray *tableViewCellTitles;
@@ -40,6 +41,7 @@
     
     self.tableViewCellTitles = @[
                                  @"Local Folder",
+                                 @"Local Movies",
                                  @"Input URL",
                                  @"Scan QRCode",
                                  @"Online Samples",
@@ -132,16 +134,20 @@
                     
                     [self.navigationController pushViewController:viewController animated:YES];
                 } break;
-                    
+
                 case 1:
+                    [self startMediaBrowserFromViewController: self
+                                                usingDelegate: self];
+
+                case 2:
                     [self.navigationController pushViewController:[[IJKDemoInputURLViewController alloc] init] animated:YES];
                     break;
                     
-                case 2:
+                case 3:
                     [self.navigationController pushViewController:[[IJKQRCodeScanViewController alloc] init] animated:YES];
                     break;
 
-                case 3:
+                case 4:
                     [self.navigationController pushViewController:[[IJKDemoSampleViewController alloc] init] animated:YES];
                     break;
 
@@ -182,6 +188,61 @@
         
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
     }
+}
+
+#pragma mark UIImagePickerControllerDelegate
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    NSString *mediaType = [info objectForKey: UIImagePickerControllerMediaType];
+    NSURL *movieUrl;
+
+    // Handle a movied picked from a photo album
+    if (CFStringCompare ((CFStringRef) mediaType, kUTTypeMovie, 0)
+        == kCFCompareEqualTo) {
+
+        NSString *moviePath = [[info objectForKey:
+                                UIImagePickerControllerMediaURL] path];
+        movieUrl = [NSURL URLWithString:moviePath];
+    }
+
+    [self dismissViewControllerAnimated:YES completion:^(void){
+        [self.navigationController pushViewController:[[IJKVideoViewController alloc]   initWithURL:movieUrl] animated:YES];
+    }];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [self dismissViewControllerAnimated:YES completion:NULL];
+}
+
+#pragma mark misc
+
+- (BOOL) startMediaBrowserFromViewController: (UIViewController*) controller
+                               usingDelegate: (id <UIImagePickerControllerDelegate,
+                                               UINavigationControllerDelegate>) delegate {
+
+    if (([UIImagePickerController isSourceTypeAvailable:
+          UIImagePickerControllerSourceTypeSavedPhotosAlbum] == NO)
+        || (delegate == nil)
+        || (controller == nil))
+        return NO;
+
+    UIImagePickerController *mediaUI = [[UIImagePickerController alloc] init];
+    mediaUI.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+
+    // Displays saved pictures and movies, if both are available, from the
+    // Camera Roll album.
+    mediaUI.mediaTypes = [[NSArray alloc] initWithObjects: (NSString *) kUTTypeMovie, nil];
+
+    // Hides the controls for moving & scaling pictures, or for
+    // trimming movies. To instead show the controls, use YES.
+    mediaUI.allowsEditing = NO;
+
+    mediaUI.delegate = delegate;
+
+    [controller presentViewController:mediaUI animated:YES completion:nil];
+    return YES;
 }
 
 @end
