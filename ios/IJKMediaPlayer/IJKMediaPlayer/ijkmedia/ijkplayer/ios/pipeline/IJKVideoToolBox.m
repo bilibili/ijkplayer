@@ -404,6 +404,22 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             goto failed;
         }
 
+#ifdef FFP_SHOW_VTB_VDPS
+        {
+            if (ctx->benchmark_start_time == 0) {
+                ctx->benchmark_start_time   = SDL_GetTickHR();
+            }
+            ctx->benchmark_frame_count += 1;
+            if (0 == (ctx->benchmark_frame_count % 240)) {
+                Uint64 diff = SDL_GetTickHR() - ctx->benchmark_start_time;
+                double per_frame_ms = ((double) diff) / ctx->benchmark_frame_count;
+                double fps          = ((double) ctx->benchmark_frame_count) * 1000 / diff;
+                ALOGD("%lf fps, %lf ms/frame, %"PRIu64" frames\n",
+                      fps, per_frame_ms, ctx->benchmark_frame_count);
+            }
+            goto failed;
+        }
+#endif
 
         OSType format_type = CVPixelBufferGetPixelFormatType(imageBuffer);
         if (format_type != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) {
