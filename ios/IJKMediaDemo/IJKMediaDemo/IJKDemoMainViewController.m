@@ -41,7 +41,7 @@
     
     self.tableViewCellTitles = @[
                                  @"Local Folder",
-                                 @"Local Movies",
+                                 @"Movie Picker",
                                  @"Input URL",
                                  @"Scan QRCode",
                                  @"Online Samples",
@@ -138,11 +138,12 @@
                 case 1:
                     [self startMediaBrowserFromViewController: self
                                                 usingDelegate: self];
+                    break;
 
                 case 2:
                     [self.navigationController pushViewController:[[IJKDemoInputURLViewController alloc] init] animated:YES];
                     break;
-                    
+
                 case 3:
                     [self.navigationController pushViewController:[[IJKQRCodeScanViewController alloc] init] animated:YES];
                     break;
@@ -177,7 +178,7 @@
     if (indexPath.section == 1) {
         return UITableViewCellEditingStyleDelete;
     }
-    
+
     return UITableViewCellEditingStyleNone;
 }
 
@@ -185,7 +186,7 @@
     if (indexPath.section == 1 && editingStyle == UITableViewCellEditingStyleDelete) {
         [[IJKDemoHistory instance] removeAtIndex:indexPath.row];
         self.historyList = [[IJKDemoHistory instance] list];
-        
+
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
     }
 }

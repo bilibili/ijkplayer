@@ -46,6 +46,8 @@
     BOOL isDirectory = NO;
     NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:_folderPath error:&error];
 
+    [_subpaths addObject:@".."];
+
     for (NSString *fileName in files) {
         NSString *fullFileName = [_folderPath stringByAppendingPathComponent:fileName];
         
@@ -120,6 +122,8 @@
         } break;
         case 1: {
             NSString *fileName = [_folderPath stringByAppendingPathComponent:_files[indexPath.row]];
+
+            fileName = [fileName stringByExpandingTildeInPath];
             
             [IJKVideoViewController presentFromViewController:self withTitle:[NSString stringWithFormat:@"File: %@", fileName] URL:[NSURL fileURLWithPath:fileName] completion:^{
             }];
