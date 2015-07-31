@@ -30,6 +30,7 @@
 - (instancetype)initWithFolderPath:(NSString *)folderPath {
     self = [super init];
     if (self) {
+        folderPath = [folderPath stringByStandardizingPath];
         self.title = [folderPath lastPathComponent];
         
         _folderPath = folderPath;
@@ -123,7 +124,7 @@
         case 1: {
             NSString *fileName = [_folderPath stringByAppendingPathComponent:_files[indexPath.row]];
 
-            fileName = [fileName stringByExpandingTildeInPath];
+            fileName = [fileName stringByStandardizingPath];
             
             [IJKVideoViewController presentFromViewController:self withTitle:[NSString stringWithFormat:@"File: %@", fileName] URL:[NSURL fileURLWithPath:fileName] completion:^{
             }];
