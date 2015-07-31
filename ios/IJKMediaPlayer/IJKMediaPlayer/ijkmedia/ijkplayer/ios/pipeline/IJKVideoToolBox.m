@@ -24,14 +24,15 @@
 #include "IJKVideoToolBox.h"
 #include "ijksdl_vout_overlay_videotoolbox.h"
 #include "ffpipeline_ios.h"
-#import <CoreMedia/CMSampleBuffer.h>
-#import <CoreFoundation/CoreFoundation.h>
-#import <CoreVideo/CVHostTime.h>
 #include <mach/mach_time.h>
 #include "libavformat/avc.h"
 #include "ijksdl_vout_ios_gles2.h"
 #include "h264_sps_parser.h"
 #include "ijkplayer/ff_ffplay_debug.h"
+#import <CoreMedia/CoreMedia.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <CoreVideo/CVHostTime.h>
+#import <Foundation/Foundation.h>
 
 #define IJK_VTB_FCC_AVC    SDL_FOURCC('C', 'c', 'v', 'a')
 #define IJK_VTB_FCC_ESD    SDL_FOURCC('s', 'd', 's', 'e')
