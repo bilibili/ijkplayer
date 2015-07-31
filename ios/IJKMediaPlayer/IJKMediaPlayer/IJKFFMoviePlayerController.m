@@ -30,8 +30,9 @@
 #import "IJKAudioKit.h"
 
 #include "string.h"
+#include "ijkplayer/version.h"
 
-NSString *const kIJKFFRequiredFFmpegVersion = @"n2.7-24-g58b28fc";
+static const char *kIJKFFRequiredFFmpegVersion = "n2.7-24-g58b28fc";
 
 @interface IJKFFMoviePlayerController()
 
@@ -367,14 +368,37 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 
 + (BOOL)checkIfFFmpegVersionMatch:(BOOL)showAlert;
 {
-    NSString *actualVersion = [NSString stringWithUTF8String:av_version_info()];
-    NSString *expectVersion = kIJKFFRequiredFFmpegVersion;
-    if ([actualVersion isEqualToString:expectVersion]) {
+    const char *actualVersion = av_version_info();
+    const char *expectVersion = kIJKFFRequiredFFmpegVersion;
+    if (0 == strcmp(actualVersion, expectVersion)) {
         return YES;
     } else {
         if (showAlert) {
-            NSString *message = [NSString stringWithFormat:@"actual: %@\n expect: %@\n", actualVersion, expectVersion];
+            NSString *message = [NSString stringWithFormat:@"actual: %s\n expect: %s\n", actualVersion, expectVersion];
             UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Unexpected FFmpeg version"
+                                                                message:message
+                                                               delegate:nil
+                                                      cancelButtonTitle:@"OK"
+                                                      otherButtonTitles:nil];
+            [alertView show];
+        }
+        return NO;
+    }
+}
+
++ (BOOL)checkIfPlayerVersionMatch:(BOOL)showAlert
+                            major:(unsigned int)major
+                            minor:(unsigned int)minor
+                            micro:(unsigned int)micro
+{
+    unsigned int actualVersion = ijkmp_version_int();
+    if (actualVersion == AV_VERSION_INT(major, minor, micro)) {
+        return YES;
+    } else {
+        if (showAlert) {
+            NSString *message = [NSString stringWithFormat:@"actual: %s\n expect: %d.%d.%d\n",
+                                 ijkmp_version_ident(), major, minor, micro];
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Unexpected ijkplayer version"
                                                                 message:message
                                                                delegate:nil
                                                       cancelButtonTitle:@"OK"

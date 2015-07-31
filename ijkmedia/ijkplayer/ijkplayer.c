@@ -21,8 +21,8 @@
  */
 
 #include "ijkplayer.h"
-
 #include "ijkplayer_internal.h"
+#include "version.h"
 
 #define MP_RET_IF_FAILED(ret) \
     do { \
@@ -79,6 +79,16 @@ void ijkmp_global_set_log_report(int use_report)
 void ijkmp_global_set_log_level(int log_level)
 {
     ffp_global_set_log_level(log_level);
+}
+
+const char *ijkmp_version_ident()
+{
+    return LIBIJKPLAYER_IDENT;
+}
+
+unsigned int ijkmp_version_int()
+{
+    return LIBIJKPLAYER_VERSION_INT;
 }
 
 void ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes))

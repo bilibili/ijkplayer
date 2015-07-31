@@ -52,6 +52,7 @@
     return self;
 }
 
+#define EXPECTED_IJKPLAYER_VERSION (1 << 16) & 0xFF) | 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -69,6 +70,7 @@
 #endif
 
     [IJKFFMoviePlayerController checkIfFFmpegVersionMatch:YES];
+    // [IJKFFMoviePlayerController checkIfPlayerVersionMatch:YES major:1 minor:0 micro:0];
 
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:nil];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
