@@ -17,7 +17,6 @@
 #import "IJKMoviePlayerViewController.h"
 #import "IJKMediaControl.h"
 #import "IJKCommon.h"
-#import "IJKMediaPlayer/IJKMediaPlayer.h"
 #import "IJKDemoHistory.h"
 
 @implementation IJKVideoViewController
