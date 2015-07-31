@@ -7,6 +7,7 @@
 //
 
 #import "IJKMediaModule.h"
+#import <UIKit/UIKit.h>
 
 @implementation IJKMediaModule
 

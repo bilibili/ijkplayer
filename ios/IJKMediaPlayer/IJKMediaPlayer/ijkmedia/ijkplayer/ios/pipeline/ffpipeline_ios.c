@@ -82,7 +82,4 @@ IJKFF_Pipeline *ffpipeline_create_from_ios(FFPlayer *ffp)
     pipeline->func_open_audio_output  = func_open_audio_output;
 
     return pipeline;
-fail:
-    ffpipeline_free_p(&pipeline);
-    return NULL;
 }

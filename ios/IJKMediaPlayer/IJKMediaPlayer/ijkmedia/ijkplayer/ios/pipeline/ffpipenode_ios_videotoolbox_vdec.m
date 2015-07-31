@@ -28,6 +28,7 @@
 #include "ijkplayer/ff_ffplay.h"
 #include "ijksdl_mutex.h"
 #include "ijksdl_vout_ios_gles2.h"
+#import <UIKit/UIKit.h>
 
 struct IJKFF_Pipenode_Opaque {
     IJKFF_Pipeline           *pipeline;

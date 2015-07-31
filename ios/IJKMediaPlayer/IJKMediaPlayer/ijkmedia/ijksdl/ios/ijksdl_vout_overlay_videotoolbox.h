@@ -24,6 +24,7 @@
 #ifndef __IJKMediaPlayer__ijksdl_vout_overlay_videotoolbox__
 #define __IJKMediaPlayer__ijksdl_vout_overlay_videotoolbox__
 
+#import <CoreVideo/CoreVideo.h>
 #include "ijksdl_stdinc.h"
 #include "ijksdl_vout.h"
 #include "ijksdl_inc_ffmpeg.h"

@@ -1,7 +1,7 @@
 /*
- * IJKSDLGLRenderNV12.h
+ * IJKMediaFramework.h
  *
- * Copyright (c) 2014 Zhou Quan <zhouqicy@gmail.com>
+ * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -20,11 +20,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <CoreVideo/CoreVideo.h>
-#import "IJKSDLGLRender.h"
+#import <UIKit/UIKit.h>
 
-@interface IJKSDLGLRenderNV12 : NSObject<IJKSDLGLRender>
+//! Project version number for IJKMediaFramework.
+FOUNDATION_EXPORT double IJKMediaFrameworkVersionNumber;
 
--(id)initWithTextureCache:(CVOpenGLESTextureCacheRef) textureCache;
+//! Project version string for IJKMediaFramework.
+FOUNDATION_EXPORT const unsigned char IJKMediaFrameworkVersionString[];
 
-@end
+// In this header, you should import all the public headers of your framework using statements like #import <IJKMediaFramework/PublicHeader.h>
+
+
