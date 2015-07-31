@@ -77,6 +77,9 @@ do_lipo_ssl () {
     fi
 }
 
+FF_ALL_GEN_HEADER_FILES=
+FF_ALL_GEN_HEADER_FILES="$FF_ALL_GEN_HEADER_FILES include/libavutil/avconfig.h"
+FF_ALL_GEN_HEADER_FILES="$FF_ALL_GEN_HEADER_FILES include/libavutil/ffversion.h"
 do_lipo_all () {
     mkdir -p $UNI_BUILD_ROOT/build/universal/lib
     echo "lipo archs: $FF_ALL_ARCHS"
@@ -85,12 +88,30 @@ do_lipo_all () {
         do_lipo_ffmpeg "$FF_LIB.a";
     done
 
+    ANY_ARCH=
+    for ARCH in $FF_ALL_ARCHS
+    do
+        if [ -z "$ANY_ARCH" ]; then
+            ANY_ARCH=$ARCH
+            cp -R "$UNI_BUILD_ROOT/build/ffmpeg-$ARCH/output/include" "$UNI_BUILD_ROOT/build/universal/"
+        fi
+
+        ARCH_INC_DIR="$UNI_BUILD_ROOT/build/ffmpeg-$ARCH/output/include"
+        if [ -d "$ARCH_INC_DIR" ]; then
+            UNI_INC_DIR="$UNI_BUILD_ROOT/build/universal/include"
+
+            mkdir -p "$UNI_INC_DIR/libavutil/$ARCH"
+            cp -f "$ARCH_INC_DIR/libavutil/avconfig.h"  "$UNI_INC_DIR/libavutil/$ARCH/avconfig.h"
+            cp -f tools/avconfig.h                      "$UNI_INC_DIR/libavutil/avconfig.h"
+            cp -f "$ARCH_INC_DIR/libavutil/ffversion.h" "$UNI_INC_DIR/libavutil/$ARCH/ffversion.h"
+            cp -f tools/ffversion.h                     "$UNI_INC_DIR/libavutil/ffversion.h"
+        fi
+    done
+
     for SSL_LIB in $SSL_LIBS
     do
         do_lipo_ssl "$SSL_LIB.a";
     done
-
-    cp -R $UNI_BUILD_ROOT/build/ffmpeg-armv7/output/include $UNI_BUILD_ROOT/build/universal/
 }
 
 #----------
