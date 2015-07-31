@@ -100,7 +100,7 @@ typedef enum IJKLogLevel {
                 forKey:(NSString *)key
             ofCategory:(IJKFFOptionCategory)category;
 
-- (void)setOptionIntValue:(NSInteger)value
+- (void)setOptionIntValue:(int64_t)value
                    forKey:(NSString *)key
                ofCategory:(IJKFFOptionCategory)category;
 

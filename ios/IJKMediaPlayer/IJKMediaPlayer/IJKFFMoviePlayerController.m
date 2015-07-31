@@ -344,7 +344,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     ijkmp_set_option(_mediaPlayer, getPlayerOption(category), [key UTF8String], [value UTF8String]);
 }
 
-- (void)setOptionIntValue:(NSInteger)value
+- (void)setOptionIntValue:(int64_t)value
                    forKey:(NSString *)key
                ofCategory:(IJKFFOptionCategory)category
 {

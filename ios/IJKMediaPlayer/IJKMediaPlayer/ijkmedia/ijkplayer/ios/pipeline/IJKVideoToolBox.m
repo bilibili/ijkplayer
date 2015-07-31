@@ -836,7 +836,7 @@ static void dict_set_object(CFMutableDictionaryRef dict, CFStringRef key, CFType
 static void dict_set_data(CFMutableDictionaryRef dict, CFStringRef key, uint8_t * value, uint64_t length)
 {
     CFDataRef data;
-    data = CFDataCreate(NULL, value, length);
+    data = CFDataCreate(NULL, value, (CFIndex)length);
     CFDictionarySetValue(dict, key, data);
     CFRelease(data);
 }

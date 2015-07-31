@@ -174,8 +174,4 @@ SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, Uint3
     overlay->unref = overlay_unref;
     opaque->mutex = SDL_CreateMutex();
     return overlay;
-
-fail:
-    overlay_free_l(overlay);
-    return NULL;
 }
