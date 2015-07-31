@@ -986,7 +986,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"/Users/bbcallen/Workspace/bili/ios/ibiliplayer/contrib/FFmpeg-ios-bin/lib",
+					"\"$(SRCROOT)/../build/universal/lib\"",
 				);
 				MACH_O_TYPE = staticlib;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -1033,7 +1033,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"/Users/bbcallen/Workspace/bili/ios/ibiliplayer/contrib/FFmpeg-ios-bin/lib",
+					"\"$(SRCROOT)/../build/universal/lib\"",
 				);
 				MACH_O_TYPE = staticlib;
 				MTL_ENABLE_DEBUG_INFO = NO;
