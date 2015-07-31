@@ -50,8 +50,7 @@
         self.scalingMode = MPMovieScalingModeAspectFit;
         self.shouldAutoplay = YES;
         [self IJK_installMovieNotificationObservers];
-        
-        self.useApplicationAudioSession = YES;
+
         [[IJKAudioKit sharedInstance] setupAudioSession];
         
         _bufferingProgress = -1;
