@@ -38,6 +38,7 @@
 		<path id="libraries">
 			<fileset file="${ANDROID_SDK}/platforms/android-21/android.jar" />
 			<fileset file="../ijkmediaplayer/sdk/jars/ijkmediaplayer.jar" />
+            <fileset file="./libs/gson-2.2.4.jar" />
 		</path>
 
 		<javac 
