@@ -81,5 +81,6 @@ struct IjkMediaPlayer;
 -(void)setSkipLoopFilter:(IJKAVDiscard)value;
 -(void)setSkipFrame:(IJKAVDiscard)value;
 
+@property(nonatomic) BOOL useRenderQueue;
 
 @end

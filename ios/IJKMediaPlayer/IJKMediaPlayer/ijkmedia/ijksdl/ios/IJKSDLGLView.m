@@ -178,6 +178,9 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     int             _tryLockErrorCount;
     BOOL            _didSetupGL;
     NSMutableArray *_registeredNotifications;
+
+    BOOL                _useRenderQueue;
+    dispatch_queue_t    _renderQueue;
 }
 
 enum {
@@ -185,12 +188,14 @@ enum {
    	ATTRIBUTE_TEXCOORD,
 };
 
+static int g_ijk_gles_queue_spec_key;
+
 + (Class) layerClass
 {
 	return [CAEAGLLayer class];
 }
 
-- (id) initWithFrame:(CGRect)frame
+- (id) initWithFrame:(CGRect)frame useRenderQueue:(BOOL)useRenderQueue;
 {
     self = [super initWithFrame:frame];
     if (self) {
@@ -199,6 +204,19 @@ enum {
         self.glActiveLock = [[NSRecursiveLock alloc] init];
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
+
+        self->_useRenderQueue = useRenderQueue;
+        if (useRenderQueue) {
+            dispatch_queue_attr_t attr =
+            dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL,
+                                                    QOS_CLASS_USER_INTERACTIVE,
+                                                    DISPATCH_QUEUE_PRIORITY_HIGH);
+            _renderQueue = dispatch_queue_create("ijk-gles", attr);
+            dispatch_queue_set_specific(_renderQueue,
+                                        &g_ijk_gles_queue_spec_key,
+                                        &g_ijk_gles_queue_spec_key,
+                                        NULL);
+        }
 
         _didSetupGL = NO;
         [self setupGLOnce];
@@ -406,6 +424,11 @@ enum {
 {
     _didSetContentMode = YES;
     [super setContentMode:contentMode];
+    if (self->_useRenderQueue) {
+        dispatch_async(self->_renderQueue, ^(){
+            [self display:nil];
+        });
+    }
 }
 
 - (BOOL)setupDisplay: (SDL_VoutOverlay *) overlay
@@ -544,6 +567,13 @@ exit:
 
 - (void)display: (SDL_VoutOverlay *) overlay
 {
+    if (self->_useRenderQueue && !dispatch_get_specific(&g_ijk_gles_queue_spec_key)) {
+        dispatch_sync(self->_renderQueue, ^() {
+            [self display:overlay];
+        });
+        return;
+    }
+
     if ([self setupGLOnce]) {
         // gles throws gpus_ReturnNotPermittedKillClient, while app is in background
         if (![self tryLockGLActive]) {
@@ -585,7 +615,7 @@ exit:
         return;
     }
 
-    if (!overlay->is_private && overlay->pitches[0] / _bytesPerPixel > _frameWidth) {
+    if (overlay && !overlay->is_private && overlay->pitches[0] / _bytesPerPixel > _frameWidth) {
         _rightPaddingPixels = overlay->pitches[0] / _bytesPerPixel - _frameWidth;
         _didPaddingChanged = YES;
     }

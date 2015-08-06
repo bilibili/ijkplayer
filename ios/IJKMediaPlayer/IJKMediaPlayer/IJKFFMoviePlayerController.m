@@ -172,6 +172,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (self) {
         ijkmp_global_init();
 
+        if (options == nil)
+            options = [IJKFFOptions optionsByDefault];
+
         // IJKFFIOStatRegister(IJKFFIOStatDebugCallback);
         // IJKFFIOStatCompleteRegister(IJKFFIOStatCompleteDebugCallback);
 
@@ -194,7 +197,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", _shouldAutoplay ? 1 : 0);
 
         // init video sink
-        _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]
+                                       useRenderQueue:options.useRenderQueue];
         _view   = _glView;
 
         ijkmp_ios_set_glview(_mediaPlayer, _glView);
@@ -207,10 +211,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init audio sink
         [[IJKAudioKit sharedInstance] setupAudioSession];
 
-        // apply ffmpeg options
-        if (options == nil) {
-            options = [IJKFFOptions optionsByDefault];
-        }
         [options applyTo:_mediaPlayer];
         _pauseInBackground = NO;
 

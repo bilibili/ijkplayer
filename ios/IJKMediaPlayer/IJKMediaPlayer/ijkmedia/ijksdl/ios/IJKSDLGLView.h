@@ -28,7 +28,7 @@
 
 @interface IJKSDLGLView : UIView
 
-- (id) initWithFrame:(CGRect)frame;
+- (id) initWithFrame:(CGRect)frame useRenderQueue:(BOOL)useRenderQueue;
 - (void) display: (SDL_VoutOverlay *) overlay;
 
 - (UIImage*) snapshot;
