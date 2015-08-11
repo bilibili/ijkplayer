@@ -355,6 +355,11 @@ static int g_ijk_gles_queue_spec_key;
 {
     _renderer = nil;
 
+    if (_renderQueue) {
+        dispatch_release(_renderQueue);
+        _renderQueue = nil;
+    }
+
     if ([EAGLContext currentContext] != _context) {
         [EAGLContext setCurrentContext:_context];
     }
