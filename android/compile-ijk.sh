@@ -84,13 +84,13 @@ case "$REQUEST_TARGET" in
     armv5|armv7a|x86|arm64)
         do_ndk_build $REQUEST_TARGET $REQUEST_SUB_CMD;
     ;;
-    all|all32)
+    all32)
         for ABI in $ACT_ABI_32
         do
             do_ndk_build "$ABI" $REQUEST_SUB_CMD;
         done
     ;;
-    all64)
+    all|all64)
         for ABI in $ACT_ABI_64
         do
             do_ndk_build "$ABI" $REQUEST_SUB_CMD;

@@ -68,7 +68,7 @@ case "$FF_TARGET" in
         sh tools/do-compile-ffmpeg.sh $FF_TARGET
         echo_nextstep_help
     ;;
-    all|all32)
+    all32)
         echo_archs $FF_ACT_ARCHS_32
         for ARCH in $FF_ACT_ARCHS_32
         do
@@ -76,7 +76,7 @@ case "$FF_TARGET" in
         done
         echo_nextstep_help
     ;;
-    all64)
+    all|all64)
         echo_archs $FF_ACT_ARCHS_64
         for ARCH in $FF_ACT_ARCHS_64
         do
