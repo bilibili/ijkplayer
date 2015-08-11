@@ -177,6 +177,7 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
 
     int             _tryLockErrorCount;
     BOOL            _didSetupGL;
+    BOOL            _didStopGL;
     NSMutableArray *_registeredNotifications;
 
     BOOL                _useRenderQueue;
@@ -351,8 +352,11 @@ static int g_ijk_gles_queue_spec_key;
     }
 }
 
-- (void)dealloc
+- (void) shutdown
 {
+    [self lockGLActive];
+
+    _didStopGL = YES;
     _renderer = nil;
 
     if (_renderQueue) {
@@ -388,9 +392,15 @@ static int g_ijk_gles_queue_spec_key;
         [EAGLContext setCurrentContext:nil];
     }
 
-	_context = nil;
+    _context = nil;
 
     [self unregisterApplicationObservers];
+
+    [self unlockGLActive];
+}
+
+- (void)dealloc
+{
 }
 
 - (void)setScaleFactor:(CGFloat)scaleFactor
@@ -429,7 +439,7 @@ static int g_ijk_gles_queue_spec_key;
 {
     _didSetContentMode = YES;
     [super setContentMode:contentMode];
-    if (self->_useRenderQueue) {
+    if (self->_useRenderQueue && self->_renderQueue) {
         dispatch_async(self->_renderQueue, ^(){
             [self display:nil];
         });
@@ -590,7 +600,8 @@ exit:
         }
 
         _tryLockErrorCount = 0;
-        [self displayInternal:overlay];
+        if (!_didStopGL)
+            [self displayInternal:overlay];
 
         [self unlockGLActive];
     }
