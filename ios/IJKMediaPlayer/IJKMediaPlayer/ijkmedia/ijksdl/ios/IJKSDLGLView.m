@@ -391,9 +391,7 @@ static int g_ijk_gles_queue_spec_key;
         _textureCache = 0;
     }
 
-    if ([EAGLContext currentContext] == _context) {
-        [EAGLContext setCurrentContext:prevContext];
-    }
+    [EAGLContext setCurrentContext:prevContext];
 
     _context = nil;
 
