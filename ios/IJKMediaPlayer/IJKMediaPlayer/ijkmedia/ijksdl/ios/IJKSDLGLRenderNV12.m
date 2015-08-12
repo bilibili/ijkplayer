@@ -45,12 +45,12 @@ static NSString *const g_nv12FragmentShaderString = IJK_SHADER_STRING
     }
 );
 
-//// BT.601, which is the standard for SDTV.
-//static const GLfloat kColorConversion601[] = {
-//    1.164,  1.164, 1.164,
-//    0.0, -0.392, 2.017,
-//    1.596, -0.813,   0.0,
-//};
+// BT.601, which is the standard for SDTV.
+static const GLfloat kColorConversion601[] = {
+    1.164,  1.164, 1.164,
+    0.0,   -0.392, 2.017,
+    1.596, -0.813,   0.0,
+};
 
 // BT.709, which is the standard for HDTV.
 static const GLfloat kColorConversion709[] = {
@@ -70,6 +70,8 @@ static const GLfloat kColorConversion709[] = {
 
     CVOpenGLESTextureCacheRef _textureCache;
     CVOpenGLESTextureRef      _cvTexturesRef[2];
+
+    const GLfloat *_preferredConversion;
 }
 
 -(id)initWithTextureCache:(CVOpenGLESTextureCacheRef) textureCache
@@ -116,6 +118,15 @@ static const GLfloat kColorConversion709[] = {
     if (!pixelBuffer) {
         ALOGE("nil pixelBuffer in overlay\n");
         return;
+    }
+
+    CFTypeRef colorAttachments = CVBufferGetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, NULL);
+    if (colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_601_4) {
+        _preferredConversion = kColorConversion601;
+    } else if (colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_709_2){
+        _preferredConversion = kColorConversion709;
+    } else {
+        _preferredConversion = kColorConversion709;
     }
 
     for (int i = 0; i < 2; ++i) {
@@ -189,7 +200,7 @@ static const GLfloat kColorConversion709[] = {
         glUniform1i(_uniformSamplers[i], i);
     }
 
-    glUniformMatrix3fv(_uniform[0], 1, GL_FALSE, kColorConversion709);
+    glUniformMatrix3fv(_uniform[0], 1, GL_FALSE, _preferredConversion);
     return YES;
 }
 
