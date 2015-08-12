@@ -357,7 +357,7 @@ static int g_ijk_gles_queue_spec_key;
     }
 }
 
-- (void) shutdown
+- (void)dealloc
 {
     [self lockGLActive];
 
@@ -400,10 +400,6 @@ static int g_ijk_gles_queue_spec_key;
     [self unregisterApplicationObservers];
 
     [self unlockGLActive];
-}
-
-- (void)dealloc
-{
 }
 
 - (void)setScaleFactor:(CGFloat)scaleFactor

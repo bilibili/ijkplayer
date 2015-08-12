@@ -30,7 +30,6 @@
 
 - (id) initWithFrame:(CGRect)frame useRenderQueue:(BOOL)useRenderQueue;
 - (void) display: (SDL_VoutOverlay *) overlay;
-- (void) shutdown;
 
 - (UIImage*) snapshot;
 

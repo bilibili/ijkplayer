@@ -435,7 +435,6 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
         return;
 
     ijkmp_dec_ref_p(&_mediaPlayer);
-    [_glView shutdown];
 }
 
 - (MPMoviePlaybackState)playbackState
