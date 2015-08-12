@@ -933,6 +933,11 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:
+#ifdef __aarch64__
+            // Apple A7 SoC
+            // Hi10p can be decoded into NV12 ('420v')
+            break;
+#endif
         case FF_PROFILE_H264_HIGH_10_INTRA:
         case FF_PROFILE_H264_HIGH_422:
         case FF_PROFILE_H264_HIGH_422_INTRA:
