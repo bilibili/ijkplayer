@@ -13,6 +13,8 @@
 		454316281A66493700676070 /* ffpipenode_ios_videotoolbox_vout.m in Sources */ = {isa = PBXBuildFile; fileRef = 454316251A66493700676070 /* ffpipenode_ios_videotoolbox_vout.m */; };
 		4543162B1A66497900676070 /* IJKVideoToolBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 4543162A1A66497900676070 /* IJKVideoToolBox.m */; };
 		45DB4AAC1A5D52AE005CAD41 /* ijksdl_vout_overlay_videotoolbox.m in Sources */ = {isa = PBXBuildFile; fileRef = 45DB4AA81A5D52AE005CAD41 /* ijksdl_vout_overlay_videotoolbox.m */; };
+		E607FFE01B7B60F9005F11A6 /* IJKDeviceModel.m in Sources */ = {isa = PBXBuildFile; fileRef = E607FFDF1B7B60F9005F11A6 /* IJKDeviceModel.m */; };
+		E607FFE11B7B62E3005F11A6 /* IJKDeviceModel.m in Sources */ = {isa = PBXBuildFile; fileRef = E607FFDF1B7B60F9005F11A6 /* IJKDeviceModel.m */; };
 		E62139BE180FA89B00553533 /* IJKFFOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = E62139BD180FA89A00553533 /* IJKFFOptions.m */; };
 		E62139BF180FAE5F00553533 /* IJKFFOptions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E62139BC180FA89A00553533 /* IJKFFOptions.h */; };
 		E63FC27117F01143003551EB /* ijksdl_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = E63FC27017F01143003551EB /* ijksdl_audio.c */; };
@@ -176,6 +178,8 @@
 		4543162A1A66497900676070 /* IJKVideoToolBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKVideoToolBox.m; path = ijkmedia/ijkplayer/ios/pipeline/IJKVideoToolBox.m; sourceTree = "<group>"; };
 		45DB4AA71A5D52AE005CAD41 /* ijksdl_vout_overlay_videotoolbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_vout_overlay_videotoolbox.h; sourceTree = "<group>"; };
 		45DB4AA81A5D52AE005CAD41 /* ijksdl_vout_overlay_videotoolbox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ijksdl_vout_overlay_videotoolbox.m; sourceTree = "<group>"; };
+		E607FFDE1B7B60F9005F11A6 /* IJKDeviceModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKDeviceModel.h; path = IJKMediaPlayer/IJKDeviceModel.h; sourceTree = "<group>"; };
+		E607FFDF1B7B60F9005F11A6 /* IJKDeviceModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKDeviceModel.m; path = IJKMediaPlayer/IJKDeviceModel.m; sourceTree = "<group>"; };
 		E62139BC180FA89A00553533 /* IJKFFOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFOptions.h; sourceTree = "<group>"; };
 		E62139BD180FA89A00553533 /* IJKFFOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFOptions.m; sourceTree = "<group>"; };
 		E63FC27017F01143003551EB /* ijksdl_audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksdl_audio.c; sourceTree = "<group>"; };
@@ -674,6 +678,8 @@
 		E6F727B517F2B1690043623F /* IJKMediaPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				E607FFDE1B7B60F9005F11A6 /* IJKDeviceModel.h */,
+				E607FFDF1B7B60F9005F11A6 /* IJKDeviceModel.m */,
 				E6EE92A1187810C5009EAB56 /* IJKAudioKit.h */,
 				E6EE92A2187810C5009EAB56 /* IJKAudioKit.m */,
 				E672D6F118D3445100C51FF9 /* IJKMediaModule.h */,
@@ -835,6 +841,7 @@
 				E654EABD1B6B287000B0F2D0 /* ijksdl_vout_dummy.c in Sources */,
 				E654EABC1B6B286B00B0F2D0 /* ffpipenode_ffplay_vout.c in Sources */,
 				E654EAC21B6B287E00B0F2D0 /* ijksdl_error.c in Sources */,
+				E607FFE11B7B62E3005F11A6 /* IJKDeviceModel.m in Sources */,
 				E654EAA31B6B283700B0F2D0 /* IJKAudioKit.m in Sources */,
 				E654EAAA1B6B284300B0F2D0 /* IJKMPMoviePlayerController.m in Sources */,
 				E654EACB1B6B288A00B0F2D0 /* ijksdl_vout_overlay_videotoolbox.m in Sources */,
@@ -899,6 +906,7 @@
 				4543162B1A66497900676070 /* IJKVideoToolBox.m in Sources */,
 				E690402D17EAFC6100CFD954 /* ijksdl_vout_overlay_ffmpeg.c in Sources */,
 				E690402E17EAFC6100CFD954 /* ijksdl_aout.c in Sources */,
+				E607FFE01B7B60F9005F11A6 /* IJKDeviceModel.m in Sources */,
 				E690402F17EAFC6100CFD954 /* ijksdl_error.c in Sources */,
 				E690403017EAFC6100CFD954 /* ijksdl_mutex.c in Sources */,
 				E690403117EAFC6100CFD954 /* ijksdl_stdinc.c in Sources */,
@@ -1227,6 +1235,7 @@
 				E654EA9E1B6B27E600B0F2D0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E654EAA21B6B27E600B0F2D0 /* Build configuration list for PBXNativeTarget "IJKMediaFrameworkTests" */ = {
 			isa = XCConfigurationList;
@@ -1235,6 +1244,7 @@
 				E654EAA01B6B27E600B0F2D0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E6903EB417EAF6C500CFD954 /* Build configuration list for PBXProject "IJKMediaPlayer" */ = {
 			isa = XCConfigurationList;

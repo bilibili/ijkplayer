@@ -33,6 +33,7 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <CoreVideo/CVHostTime.h>
 #import <Foundation/Foundation.h>
+#import "IJKDeviceModel.h"
 
 #define IJK_VTB_FCC_AVC    SDL_FOURCC('C', 'c', 'v', 'a')
 #define IJK_VTB_FCC_ESD    SDL_FOURCC('s', 'd', 's', 'e')
@@ -933,11 +934,12 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:
-#ifdef __aarch64__
-            // Apple A7 SoC
-            // Hi10p can be decoded into NV12 ('420v')
+            if ([IJKDeviceModel currentModel].rank >= kIJKDeviceRank_AppleA7Class) {
+                // Apple A7 SoC
+                // Hi10p can be decoded into NV12 ('420v')
+                break;
+            }
             break;
-#endif
         case FF_PROFILE_H264_HIGH_10_INTRA:
         case FF_PROFILE_H264_HIGH_422:
         case FF_PROFILE_H264_HIGH_422_INTRA:
