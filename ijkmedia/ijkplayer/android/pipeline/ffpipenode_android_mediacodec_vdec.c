@@ -24,6 +24,7 @@
 #include "ffpipeline_android.h"
 #include "../../ff_ffpipenode.h"
 #include "../../ff_ffplay.h"
+#include "../../ff_ffplay_debug.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl/android/ijksdl_codec_android_mediacodec_java.h"
@@ -99,6 +100,9 @@ typedef struct IJKFF_Pipenode_Opaque {
     AMC_Buf_Out               *amc_buf_out;
     int                       off_buf_out;
     double                    last_queued_pts;
+
+    Uint64                    benchmark_start_time;
+    Uint64                    benchmark_frame_count;
 } IJKFF_Pipenode_Opaque;
 
 static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
@@ -258,6 +262,33 @@ static int amc_queue_picture(
     printf("frame_type=%c pts=%0.3f\n",
            av_get_picture_type_char(src_frame->pict_type), pts);
 #endif
+
+    // FIXME: duplicated code
+    if (output_buffer_index >= 0){
+        double dpts = NAN;
+
+        if (pts != AV_NOPTS_VALUE)
+            dpts = av_q2d(is->video_st->time_base) * pts;
+
+        if (ffp->framedrop>0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
+            if (pts != AV_NOPTS_VALUE) {
+                double diff = dpts - ffp_get_master_clock(is);
+                if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
+                    diff - is->frame_last_filter_delay < 0 &&
+                    is->viddec.pkt_serial == is->vidclk.serial &&
+                    is->videoq.nb_packets) {
+                    is->frame_drops_early++;
+                    is->continuous_frame_drops_early++;
+                    if (is->continuous_frame_drops_early > ffp->framedrop) {
+                        is->continuous_frame_drops_early = 0;
+                    } else {
+                        SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
 
     if (!(vp = ffp_frame_queue_peek_writable(&is->pictq)))
         return -1;
@@ -778,6 +809,26 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
     } else if (output_buffer_index >= 0) {
         if (dequeue_count)
             ++*dequeue_count;
+
+#ifdef FFP_SHOW_AMC_VDPS
+        {
+            if (opaque->benchmark_start_time == 0) {
+                opaque->benchmark_start_time   = SDL_GetTickHR();
+            }
+            opaque->benchmark_frame_count += 1;
+            if (0 == (opaque->benchmark_frame_count % 240)) {
+                Uint64 diff = SDL_GetTickHR() - opaque->benchmark_start_time;
+                double per_frame_ms = ((double) diff) / opaque->benchmark_frame_count;
+                double fps          = ((double) opaque->benchmark_frame_count) * 1000 / diff;
+                ALOGE("%lf fps, %lf ms/frame, %"PRIu64" frames\n",
+                      fps, per_frame_ms, opaque->benchmark_frame_count);
+            }
+        }
+#endif
+#ifdef FFP_AMC_DISABLE_OUTPUT
+        SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
+        goto done;
+#endif
 
         if (opaque->n_buf_out) {
             AMC_Buf_Out *buf_out;
