@@ -118,7 +118,7 @@
 #ifdef FFP_MERGE
 #define CURSOR_HIDE_DELAY 1000000
 
-static int64_t sws_flags = SWS_BICUBIC;
+static unsigned sws_flags = SWS_BICUBIC;
 #endif
 
 typedef struct MyAVPacketList {
@@ -501,7 +501,7 @@ typedef struct FFPlayer {
 #endif
     int autorotate;
 
-    int sws_flags;
+    unsigned sws_flags;
 
     /* current context */
 #ifdef FFP_MERGE
