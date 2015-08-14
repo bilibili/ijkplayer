@@ -741,6 +741,9 @@ static void stream_close(VideoState *is)
 #if !CONFIG_AVFILTER
     sws_freeContext(is->img_convert_ctx);
 #endif
+#ifdef FFP_MERGE
+    sws_freeContext(is->sub_convert_ctx);
+#endif
     av_free(is);
 }
 
@@ -1263,6 +1266,11 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
             dpts = av_q2d(is->video_st->time_base) * frame->pts;
 
         frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(is->ic, is->video_st, frame);
+
+#ifdef FFP_MERGE
+        is->viddec_width  = frame->width;
+        is->viddec_height = frame->height;
+#endif
 
         if (ffp->framedrop>0 || (ffp->framedrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
             if (frame->pts != AV_NOPTS_VALUE) {
@@ -2149,6 +2157,11 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     case AVMEDIA_TYPE_VIDEO:
         is->video_stream = stream_index;
         is->video_st = ic->streams[stream_index];
+
+#ifdef FFP_MERGE
+        is->viddec_width  = avctx->width;
+        is->viddec_height = avctx->height;
+#endif
 
         decoder_init(&is->viddec, avctx, &is->videoq, is->continue_read_thread);
         ffp->node_vdec = ffpipeline_open_video_decoder(ffp->pipeline, ffp);

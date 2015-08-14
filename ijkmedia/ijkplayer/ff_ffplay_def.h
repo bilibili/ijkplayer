@@ -262,6 +262,9 @@ typedef struct VideoState {
     Decoder viddec;
 #ifdef FFP_MERGE
     Decoder subdec;
+
+    int viddec_width;
+    int viddec_height;
 #endif
 
     int audio_stream;
@@ -327,6 +330,7 @@ typedef struct VideoState {
     struct SwsContext *img_convert_ctx;
 #endif
 #ifdef FFP_MERGE
+    struct SwsContext *sub_convert_ctx;
     SDL_Rect last_display_rect;
 #endif
     int eof;
