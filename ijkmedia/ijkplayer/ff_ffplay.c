@@ -70,6 +70,10 @@
 #define AV_CODEC_FLAG2_FAST CODEC_FLAG2_FAST
 #endif
 
+#ifndef AV_CODEC_CAP_DR1
+#define AV_CODEC_CAP_DR1 CODEC_CAP_DR1
+#endif
+
 // FIXME: 9 work around NDKr8e or gcc4.7 bug
 // isnan() may not recognize some double NAN, so we test both double and float
 #if defined(__ANDROID__)
@@ -2069,7 +2073,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     if(stream_lowres) avctx->flags |= CODEC_FLAG_EMU_EDGE;
     if (ffp->fast)
         avctx->flags2 |= AV_CODEC_FLAG2_FAST;
-    if(codec->capabilities & CODEC_CAP_DR1)
+    if(codec->capabilities & AV_CODEC_CAP_DR1)
         avctx->flags |= CODEC_FLAG_EMU_EDGE;
 
     opts = filter_codec_opts(ffp->codec_opts, avctx->codec_id, ic, ic->streams[stream_index], codec);
