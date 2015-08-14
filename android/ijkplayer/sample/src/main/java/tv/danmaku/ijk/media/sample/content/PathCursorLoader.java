@@ -24,7 +24,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import java.io.File;
 
 public class PathCursorLoader extends AsyncTaskLoader<Cursor> {
-    private File path;
+    private File mPath;
 
     public PathCursorLoader(Context context) {
         this(context, Environment.getExternalStorageDirectory());
@@ -32,20 +32,17 @@ public class PathCursorLoader extends AsyncTaskLoader<Cursor> {
 
     public PathCursorLoader(Context context, String path) {
         super(context);
-        this.path = new File(path).getAbsoluteFile();
+        this.mPath = new File(path).getAbsoluteFile();
     }
 
     public PathCursorLoader(Context context, File path) {
         super(context);
-        this.path = path;
+        this.mPath = path;
     }
 
     @Override
     public Cursor loadInBackground() {
-        File[] file_list = path.listFiles();
-        if (file_list == null || file_list.length < 2) {
-            file_list = new File[] {new File("."), new File("..")};
-        }
+        File[] file_list = mPath.listFiles();
         return new PathCursor(file_list);
     }
 

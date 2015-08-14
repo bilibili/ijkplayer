@@ -17,6 +17,7 @@
 package tv.danmaku.ijk.media.sample;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -32,6 +33,17 @@ public class VideoPlayerActivity extends Activity {
     private MediaController mMediaController;
 
     private String mVideoPath;
+
+    public static Intent newIntent(Context context, String videoPath, String videoTitle) {
+        Intent intent = new Intent(context, VideoPlayerActivity.class);
+        intent.putExtra("videoPath", videoPath);
+        intent.putExtra("videoTitle", videoTitle);
+        return intent;
+    }
+
+    public static void intentTo(Context context, String videoPath, String videoTitle) {
+        context.startActivity(newIntent(context, videoPath, videoTitle));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
