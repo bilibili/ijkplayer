@@ -66,6 +66,14 @@
 #include "ijkmeta.h"
 #include "ijksdl/ijksdl_log.h"
 
+#ifndef AV_CODEC_FLAG2_FAST
+#define AV_CODEC_FLAG2_FAST CODEC_FLAG2_FAST
+#endif
+
+#ifndef AV_CODEC_CAP_DR1
+#define AV_CODEC_CAP_DR1 CODEC_CAP_DR1
+#endif
+
 // FIXME: 9 work around NDKr8e or gcc4.7 bug
 // isnan() may not recognize some double NAN, so we test both double and float
 #if defined(__ANDROID__)
@@ -127,6 +135,9 @@ static const AVOption ffp_context_options[] = {
 
     { "max-buffer-size",                    "max buffer size should be pre-read",
         OPTION_OFFSET(max_buffer_size),     OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
+
+    { "packet-buffering",                   "pause output until enough packets have been read after stalling",
+        OPTION_OFFSET(packet_buffering),    OPTION_INT(1, 0, 1) },
 
     // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
@@ -350,6 +361,9 @@ static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *seria
 static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket *pkt, int *serial, int *finished)
 {
     assert(finished);
+    if (!ffp->packet_buffering)
+        return packet_queue_get(q, pkt, 1, serial);
+
     while (1) {
         int new_packet = packet_queue_get(q, pkt, 0, serial);
         if (new_packet < 0)
@@ -727,6 +741,9 @@ static void stream_close(VideoState *is)
 #if !CONFIG_AVFILTER
     sws_freeContext(is->img_convert_ctx);
 #endif
+#ifdef FFP_MERGE
+    sws_freeContext(is->sub_convert_ctx);
+#endif
     av_free(is);
 }
 
@@ -827,11 +844,11 @@ static double get_master_clock(VideoState *is)
 }
 
 static void check_external_clock_speed(VideoState *is) {
-   if ((is->video_stream >= 0 && is->videoq.nb_packets <= MIN_FRAMES / 2) ||
-       (is->audio_stream >= 0 && is->audioq.nb_packets <= MIN_FRAMES / 2)) {
+   if ((is->video_stream >= 0 && is->videoq.nb_packets <= EXTERNAL_CLOCK_MIN_FRAMES) ||
+       (is->audio_stream >= 0 && is->audioq.nb_packets <= EXTERNAL_CLOCK_MIN_FRAMES)) {
        set_clock_speed(&is->extclk, FFMAX(EXTERNAL_CLOCK_SPEED_MIN, is->extclk.speed - EXTERNAL_CLOCK_SPEED_STEP));
-   } else if ((is->video_stream < 0 || is->videoq.nb_packets > MIN_FRAMES * 2) &&
-              (is->audio_stream < 0 || is->audioq.nb_packets > MIN_FRAMES * 2)) {
+   } else if ((is->video_stream < 0 || is->videoq.nb_packets > EXTERNAL_CLOCK_MAX_FRAMES) &&
+              (is->audio_stream < 0 || is->audioq.nb_packets > EXTERNAL_CLOCK_MAX_FRAMES)) {
        set_clock_speed(&is->extclk, FFMIN(EXTERNAL_CLOCK_SPEED_MAX, is->extclk.speed + EXTERNAL_CLOCK_SPEED_STEP));
    } else {
        double speed = is->extclk.speed;
@@ -1250,6 +1267,11 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
 
         frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(is->ic, is->video_st, frame);
 
+#ifdef FFP_MERGE
+        is->viddec_width  = frame->width;
+        is->viddec_height = frame->height;
+#endif
+
         if (ffp->framedrop>0 || (ffp->framedrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
             if (frame->pts != AV_NOPTS_VALUE) {
                 double diff = dpts - get_master_clock(is);
@@ -1320,15 +1342,23 @@ fail:
 static int configure_video_filters(AVFilterGraph *graph, VideoState *is, const char *vfilters, AVFrame *frame)
 {
     static const enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_YUV420P, AV_PIX_FMT_NONE };
-    char sws_flags_str[128];
+    char sws_flags_str[512] = "";
     char buffersrc_args[256];
     int ret;
     AVFilterContext *filt_src = NULL, *filt_out = NULL, *last_filter = NULL;
     AVCodecContext *codec = is->video_st->codec;
     AVRational fr = av_guess_frame_rate(is->ic, is->video_st, NULL);
+    AVDictionaryEntry *e = NULL;
 
-    av_opt_get_int(sws_opts, "sws_flags", 0, &sws_flags);
-    snprintf(sws_flags_str, sizeof(sws_flags_str), "flags=%"PRId64, sws_flags);
+    while ((e = av_dict_get(sws_dict, "", e, AV_DICT_IGNORE_SUFFIX))) {
+        if (!strcmp(e->key, "sws_flags")) {
+            av_strlcatf(sws_flags_str, sizeof(sws_flags_str), "%s=%s:", "flags", e->value);
+        } else
+            av_strlcatf(sws_flags_str, sizeof(sws_flags_str), "%s=%s:", e->key, e->value);
+    }
+    if (strlen(sws_flags_str))
+        sws_flags_str[strlen(sws_flags_str)-1] = '\0';
+
     graph->scale_sws_opts = av_strdup(sws_flags_str);
 
     snprintf(buffersrc_args, sizeof(buffersrc_args),
@@ -1781,6 +1811,13 @@ static int audio_decode_frame(FFPlayer *ffp)
         return -1;
 
     do {
+#if defined(_WIN32)
+        while (frame_queue_nb_remaining(&is->sampq) == 0) {
+            if ((av_gettime_relative() - audio_callback_time) > 1000000LL * is->audio_hw_buf_size / is->audio_tgt.bytes_per_sec / 2)
+                return -1;
+            av_usleep (1000);
+        }
+#endif
         if (!(af = frame_queue_peek_readable(&is->sampq)))
             return -1;
         frame_queue_next(&is->sampq);
@@ -1882,6 +1919,10 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     FFPlayer *ffp = opaque;
     VideoState *is = ffp->is;
     int audio_size, len1;
+    if (!ffp || !is) {
+        memset(stream, 0, len);
+        return;
+    }
 
     ffp->audio_callback_time = av_gettime_relative();
 
@@ -2053,8 +2094,9 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     av_codec_set_lowres(avctx, stream_lowres);
 
     if(stream_lowres) avctx->flags |= CODEC_FLAG_EMU_EDGE;
-    if (ffp->fast)    avctx->flags2 |= CODEC_FLAG2_FAST;
-    if(codec->capabilities & CODEC_CAP_DR1)
+    if (ffp->fast)
+        avctx->flags2 |= AV_CODEC_FLAG2_FAST;
+    if(codec->capabilities & AV_CODEC_CAP_DR1)
         avctx->flags |= CODEC_FLAG_EMU_EDGE;
 
     opts = filter_codec_opts(ffp->codec_opts, avctx->codec_id, ic, ic->streams[stream_index], codec);
@@ -2130,6 +2172,11 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     case AVMEDIA_TYPE_VIDEO:
         is->video_stream = stream_index;
         is->video_st = ic->streams[stream_index];
+
+#ifdef FFP_MERGE
+        is->viddec_width  = avctx->width;
+        is->viddec_height = avctx->height;
+#endif
 
         decoder_init(&is->viddec, avctx, &is->videoq, is->continue_read_thread);
         ffp->node_vdec = ffpipeline_open_video_decoder(ffp->pipeline, ffp);
@@ -2567,7 +2614,8 @@ static int read_thread(void *arg)
             SDL_LockMutex(ffp->is->play_mutex);
             if (ffp->auto_resume) {
                 is->pause_req = 0;
-                is->buffering_on = 1;
+                if (ffp->packet_buffering)
+                    is->buffering_on = 1;
                 ffp->auto_resume = 0;
                 stream_update_pause_l(ffp);
             }
@@ -2717,10 +2765,12 @@ static int read_thread(void *arg)
             av_free_packet(pkt);
         }
 
-        io_tick_counter = SDL_GetTickHR();
-        if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
-            prev_io_tick_counter = io_tick_counter;
-            ffp_check_buffering_l(ffp);
+        if (ffp->packet_buffering) {
+            io_tick_counter = SDL_GetTickHR();
+            if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
+                prev_io_tick_counter = io_tick_counter;
+                ffp_check_buffering_l(ffp);
+            }
         }
     }
     /* wait until the end */
@@ -3040,6 +3090,8 @@ const AVClass ffp_context_class = {
 
 FFPlayer *ffp_create()
 {
+    av_log(NULL, AV_LOG_INFO, "av_version_info: %s\n", av_version_info());
+
     FFPlayer* ffp = (FFPlayer*) av_mallocz(sizeof(FFPlayer));
     if (!ffp)
         return NULL;
@@ -3059,7 +3111,7 @@ void ffp_destroy(FFPlayer *ffp)
     if (!ffp)
         return;
 
-    if (ffp && ffp->is) {
+    if (ffp->is) {
         av_log(NULL, AV_LOG_WARNING, "ffp_destroy_ffplayer: force stream_close()");
         stream_close(ffp->is);
         ffp->is = NULL;
@@ -3069,11 +3121,11 @@ void ffp_destroy(FFPlayer *ffp)
     SDL_AoutFreeP(&ffp->aout);
     ffpipenode_free_p(&ffp->node_vdec);
     ffpipeline_free_p(&ffp->pipeline);
+    ijkmeta_destroy_p(&ffp->meta);
     ffp_reset_internal(ffp);
 
     msg_queue_destroy(&ffp->msg_queue);
 
-    ijkmeta_destroy_p(&ffp->meta);
 
     av_free(ffp);
 }
@@ -3423,6 +3475,9 @@ double ffp_get_master_clock(VideoState *is)
 
 void ffp_toggle_buffering_l(FFPlayer *ffp, int buffering_on)
 {
+    if (!ffp->packet_buffering)
+        return;
+
     VideoState *is = ffp->is;
     if (buffering_on && !is->buffering_on) {
         av_log(ffp, AV_LOG_DEBUG, "ffp_toggle_buffering_l: start\n");

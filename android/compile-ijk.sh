@@ -23,7 +23,9 @@ fi
 
 REQUEST_TARGET=$1
 REQUEST_SUB_CMD=$2
-ALL_ABI="armv5 armv7a x86"
+ACT_ABI_32="armv5 armv7a x86"
+ACT_ABI_64="armv5 armv7a x86 arm64"
+ACT_ABI_ALL=$ALL_ABI_64
 
 do_sub_cmd () {
     SUB_CMD=$1
@@ -60,24 +62,13 @@ do_ndk_build () {
     PARAM_TARGET=$1
     PARAM_SUB_CMD=$2
     case "$PARAM_TARGET" in
-        armv7a)
-            cd ijkplayer/player-armv7a/src/main/jni
+        armv5|armv7a)
+            cd "ijkplayer/player-$PARAM_TARGET/src/main/jni"
             do_sub_cmd $PARAM_SUB_CMD
             cd -
         ;;
-        armv5)
-            cd ijkplayer/player-armv5/src/main/jni
-            do_sub_cmd $PARAM_SUB_CMD
-            cd -
-        ;;
-        x86)
-            cd ijkplayer/player-x86/src/main/jni
-            if [ "$PARAM_SUB_CMD" = 'prof' ]; then PARAM_SUB_CMD=''; fi
-            do_sub_cmd $PARAM_SUB_CMD
-            cd -
-        ;;
-        arm64)
-            cd ijkplayer/player-arm64/src/main/jni
+        x86|arm64)
+            cd "ijkplayer/player-$PARAM_TARGET/src/main/jni"
             if [ "$PARAM_SUB_CMD" = 'prof' ]; then PARAM_SUB_CMD=''; fi
             do_sub_cmd $PARAM_SUB_CMD
             cd -
@@ -93,14 +84,20 @@ case "$REQUEST_TARGET" in
     armv5|armv7a|x86|arm64)
         do_ndk_build $REQUEST_TARGET $REQUEST_SUB_CMD;
     ;;
-    all)
-        for ABI in $ALL_ABI
+    all32)
+        for ABI in $ACT_ABI_32
+        do
+            do_ndk_build "$ABI" $REQUEST_SUB_CMD;
+        done
+    ;;
+    all|all64)
+        for ABI in $ACT_ABI_64
         do
             do_ndk_build "$ABI" $REQUEST_SUB_CMD;
         done
     ;;
     clean)
-        for ABI in $ALL_ABI
+        for ABI in $ACT_ABI_ALL
         do
             do_ndk_build "$ABI" clean;
         done
@@ -108,7 +105,8 @@ case "$REQUEST_TARGET" in
     *)
         echo "Usage:"
         echo "  compile-ijk.sh armv5|armv7a|x86|arm64"
-        echo "  compile-ijk.sh all"
+        echo "  compile-ijk.sh all|all32"
+        echo "  compile-ijk.sh all64"
         echo "  compile-ijk.sh clean"
     ;;
 esac

@@ -29,9 +29,9 @@ static SDL_Class g_pipeline_class = {
     .name = "ffpipeline_ffplay",
 };
 
- typedef struct IJKFF_Pipeline_Opaque {
+struct IJKFF_Pipeline_Opaque {
     FFPlayer *ffp;
-} IJKFF_Pipeline_Opaque;
+};
 
 static void func_destroy(IJKFF_Pipeline *pipeline)
 {

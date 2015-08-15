@@ -24,32 +24,6 @@
 
 @implementation IJKMediaUtils
 
-+ (NSString*)createTempFileNameForFFConcat
-{
-    return [IJKMediaUtils createTempFileNameWithPrefix:@"ffconcat-"];
-}
-
-+ (NSString*)createTempFileNameWithPrefix: (NSString*)aPrefix
-{
-    return [IJKMediaUtils createTempFileNameInDirectory: NSTemporaryDirectory()
-                                             withPrefix: aPrefix];
-}
-
-+ (NSString*)createTempFileNameInDirectory: (NSString*)aDirectory
-                                withPrefix: (NSString*)aPrefix
-{
-    NSString* templateStr = [NSString stringWithFormat:@"%@/%@XXXXXX", aDirectory, aPrefix];
-    char template[templateStr.length + 1];
-    strcpy(template, [templateStr cStringUsingEncoding:NSASCIIStringEncoding]);
-    char* filename = mktemp(template);
-
-    if (filename == NULL) {
-        NSLog(@"Could not create file in directory %@", aDirectory);
-        return nil;
-    }
-    return [NSString stringWithCString:filename encoding:NSASCIIStringEncoding];
-}
-
 + (int)createTempFDForFFConcat
 {
     return [IJKMediaUtils createTempFDWithPrefix:@"ffconcat-"];

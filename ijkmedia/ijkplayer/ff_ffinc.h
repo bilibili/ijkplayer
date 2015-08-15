@@ -34,6 +34,7 @@
 #include "libavutil/base64.h"
 #include "libavutil/error.h"
 #include "libavutil/opt.h"
+#include "libavutil/version.h"
 #include "libswresample/swresample.h"
 
 #include "ijksdl/ijksdl.h"

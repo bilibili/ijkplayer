@@ -64,6 +64,7 @@
 #include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
 #include "ff_ffpipenode.h"
+#include "ijkmeta.h"
 
 #define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
 
@@ -80,7 +81,12 @@
 #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
 
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
+#ifdef FFP_MERGE
+#define MIN_FRAMES 25
+#endif
 #define MIN_FRAMES 50000
+#define EXTERNAL_CLOCK_MIN_FRAMES 2
+#define EXTERNAL_CLOCK_MAX_FRAMES 10
 
 /* Minimum SDL audio buffer size, in samples. */
 #define SDL_AUDIO_MIN_BUFFER_SIZE 512
@@ -117,7 +123,7 @@
 #ifdef FFP_MERGE
 #define CURSOR_HIDE_DELAY 1000000
 
-static int64_t sws_flags = SWS_BICUBIC;
+static unsigned sws_flags = SWS_BICUBIC;
 #endif
 
 typedef struct MyAVPacketList {
@@ -261,6 +267,9 @@ typedef struct VideoState {
     Decoder viddec;
 #ifdef FFP_MERGE
     Decoder subdec;
+
+    int viddec_width;
+    int viddec_height;
 #endif
 
     int audio_stream;
@@ -326,6 +335,7 @@ typedef struct VideoState {
     struct SwsContext *img_convert_ctx;
 #endif
 #ifdef FFP_MERGE
+    struct SwsContext *sub_convert_ctx;
     SDL_Rect last_display_rect;
 #endif
     int eof;
@@ -426,8 +436,8 @@ static SDL_Surface *screen;
  ****************************************************************************/
 
 /* ffplayer */
-typedef struct IjkMediaMeta IjkMediaMeta;
-typedef struct IJKFF_Pipeline IJKFF_Pipeline;
+struct IjkMediaMeta;
+struct IJKFF_Pipeline;
 typedef struct FFPlayer {
     const AVClass *av_class;
 
@@ -496,7 +506,7 @@ typedef struct FFPlayer {
 #endif
     int autorotate;
 
-    int sws_flags;
+    unsigned sws_flags;
 
     /* current context */
 #ifdef FFP_MERGE
@@ -510,8 +520,8 @@ typedef struct FFPlayer {
     /* extra fields */
     SDL_Aout *aout;
     SDL_Vout *vout;
-    IJKFF_Pipeline *pipeline;
-    IJKFF_Pipenode *node_vdec;
+    struct IJKFF_Pipeline *pipeline;
+    struct IJKFF_Pipenode *node_vdec;
     int sar_num;
     int sar_den;
 
@@ -538,6 +548,7 @@ typedef struct FFPlayer {
 
     int64_t playable_duration_ms;
 
+    int packet_buffering;
     int pictq_size;
     int max_fps;
 
@@ -549,7 +560,7 @@ typedef struct FFPlayer {
     int mediacodec;
     int opensles;
 
-    IjkMediaMeta *meta;
+    struct IjkMediaMeta *meta;
 
     ijk_format_control_message format_control_message;
     void *format_control_opaque;
@@ -632,6 +643,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->playable_duration_ms           = 0;
 
+    ffp->packet_buffering               = 1;
     ffp->pictq_size                     = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT; // option
     ffp->max_fps                        = 31; // option
 
@@ -646,7 +658,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->format_control_message = NULL;
     ffp->format_control_opaque  = NULL;
 
-    ffp->meta = NULL;
+    ijkmeta_reset(ffp->meta);
 
     msg_queue_flush(&ffp->msg_queue);
 }

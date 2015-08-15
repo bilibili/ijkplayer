@@ -29,7 +29,7 @@
 #include "ff_ffplay.h"
 #include "ijkplayer.h"
 
-typedef struct IjkMediaPlayer {
+struct IjkMediaPlayer {
     volatile int ref_count;
     pthread_mutex_t mutex;
     FFPlayer *ffplayer;
@@ -45,6 +45,6 @@ typedef struct IjkMediaPlayer {
     int restart_from_beginning;
     int seek_req;
     long seek_msec;
-} IjkMediaPlayer;
+};
 
 #endif

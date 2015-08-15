@@ -33,6 +33,9 @@
 static int g_is_mach_base_info_inited = 0;
 static kern_return_t g_mach_base_info_ret = 0;
 static mach_timebase_info_data_t g_mach_base_info;
+
+/* nanosleep is not included in c99, just a workaround for CocoaPods */
+int nanosleep(const struct timespec *, struct timespec *) __DARWIN_ALIAS_C(nanosleep);
 #endif
 
 void SDL_Delay(Uint32 ms)

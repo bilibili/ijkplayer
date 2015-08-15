@@ -28,15 +28,14 @@
 #include "ijksdl_mutex.h"
 #include "ijksdl_vout_internal.h"
 #include "ijksdl_video.h"
-#include "IJKVideoToolBox.h"
 
 
-typedef struct SDL_VoutOverlay_Opaque {
+struct SDL_VoutOverlay_Opaque {
     SDL_mutex *mutex;
     CVPixelBufferRef pixel_buffer;
     Uint16 pitches[AV_NUM_DATA_POINTERS];
     Uint8 *pixels[AV_NUM_DATA_POINTERS];
-} SDL_VoutOverlay_Opaque;
+};
 
 
 static void overlay_free_l(SDL_VoutOverlay *overlay)
@@ -133,7 +132,7 @@ static SDL_Class g_vout_overlay_videotoolbox_class = {
 static bool check_object(SDL_VoutOverlay* object, const char *func_name)
 {
     if (!object || !object->opaque || !object->opaque_class) {
-        ALOGE("%s.%s: invalid pipeline\n", object->opaque_class->name, func_name);
+        ALOGE("%s: invalid pipeline\n", func_name);
         return false;
     }
 
@@ -175,8 +174,4 @@ SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, Uint3
     overlay->unref = overlay_unref;
     opaque->mutex = SDL_CreateMutex();
     return overlay;
-
-fail:
-    overlay_free_l(overlay);
-    return NULL;
 }

@@ -25,9 +25,6 @@
 
 #include "../ff_ffpipeline.h"
 
-typedef struct FFPlayer       FFPlayer;
-typedef struct IJKFF_Pipeline IJKFF_Pipeline;
-
 // There is no default aout for ffplay.
 // IJKFF_Pipeline *ffpipeline_create_from_ffplay(FFPlayer *ffp);
 

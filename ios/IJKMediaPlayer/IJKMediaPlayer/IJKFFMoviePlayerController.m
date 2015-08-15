@@ -21,6 +21,8 @@
  */
 
 #import "IJKFFMoviePlayerController.h"
+
+#import <UIKit/UIKit.h>
 #import "IJKFFMoviePlayerDef.h"
 #import "IJKMediaPlayback.h"
 #import "IJKMediaModule.h"
@@ -28,6 +30,9 @@
 #import "IJKAudioKit.h"
 
 #include "string.h"
+#include "ijkplayer/version.h"
+
+static const char *kIJKFFRequiredFFmpegVersion = "n2.7-24-g58b28fc";
 
 @interface IJKFFMoviePlayerController()
 
@@ -57,7 +62,8 @@
     BOOL _keepScreenOnWhilePlaying;
     BOOL _pauseInBackground;
     BOOL _isVideoToolboxOpen;
-
+    BOOL _playingBeforeInterruption;
+    
     NSMutableArray *_registeredNotifications;
 }
 
@@ -166,6 +172,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (self) {
         ijkmp_global_init();
 
+        if (options == nil)
+            options = [IJKFFOptions optionsByDefault];
+
         // IJKFFIOStatRegister(IJKFFIOStatDebugCallback);
         // IJKFFIOStatCompleteRegister(IJKFFIOStatCompleteDebugCallback);
 
@@ -188,7 +197,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", _shouldAutoplay ? 1 : 0);
 
         // init video sink
-        _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]
+                                       useRenderQueue:options.useRenderQueue];
         _view   = _glView;
 
         ijkmp_ios_set_glview(_mediaPlayer, _glView);
@@ -201,10 +211,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init audio sink
         [[IJKAudioKit sharedInstance] setupAudioSession];
 
-        // apply ffmpeg options
-        if (options == nil) {
-            options = [IJKFFOptions optionsByDefault];
-        }
         [options applyTo:_mediaPlayer];
         _pauseInBackground = NO;
 
@@ -339,7 +345,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     ijkmp_set_option(_mediaPlayer, getPlayerOption(category), [key UTF8String], [value UTF8String]);
 }
 
-- (void)setOptionIntValue:(NSInteger)value
+- (void)setOptionIntValue:(int64_t)value
                    forKey:(NSString *)key
                ofCategory:(IJKFFOptionCategory)category
 {
@@ -358,6 +364,49 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 + (void)setLogLevel:(IJKLogLevel)logLevel
 {
     ijkmp_global_set_log_level(logLevel);
+}
+
++ (BOOL)checkIfFFmpegVersionMatch:(BOOL)showAlert;
+{
+    const char *actualVersion = av_version_info();
+    const char *expectVersion = kIJKFFRequiredFFmpegVersion;
+    if (0 == strcmp(actualVersion, expectVersion)) {
+        return YES;
+    } else {
+        if (showAlert) {
+            NSString *message = [NSString stringWithFormat:@"actual: %s\n expect: %s\n", actualVersion, expectVersion];
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Unexpected FFmpeg version"
+                                                                message:message
+                                                               delegate:nil
+                                                      cancelButtonTitle:@"OK"
+                                                      otherButtonTitles:nil];
+            [alertView show];
+        }
+        return NO;
+    }
+}
+
++ (BOOL)checkIfPlayerVersionMatch:(BOOL)showAlert
+                            major:(unsigned int)major
+                            minor:(unsigned int)minor
+                            micro:(unsigned int)micro
+{
+    unsigned int actualVersion = ijkmp_version_int();
+    if (actualVersion == AV_VERSION_INT(major, minor, micro)) {
+        return YES;
+    } else {
+        if (showAlert) {
+            NSString *message = [NSString stringWithFormat:@"actual: %s\n expect: %d.%d.%d\n",
+                                 ijkmp_version_ident(), major, minor, micro];
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Unexpected ijkplayer version"
+                                                                message:message
+                                                               delegate:nil
+                                                      cancelButtonTitle:@"OK"
+                                                      otherButtonTitles:nil];
+            [alertView show];
+        }
+        return NO;
+    }
 }
 
 - (void)shutdown
@@ -969,6 +1018,15 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     switch (reason) {
         case AVAudioSessionInterruptionTypeBegan: {
             NSLog(@"IJKFFMoviePlayerController:audioSessionInterrupt: begin\n");
+            switch (self.playbackState) {
+                case MPMoviePlaybackStatePaused:
+                case MPMoviePlaybackStateStopped:
+                    _playingBeforeInterruption = NO;
+                    break;
+                default:
+                    _playingBeforeInterruption = YES;
+                    break;
+            }
             [self pause];
             [[IJKAudioKit sharedInstance] setActive:NO];
             break;
@@ -976,7 +1034,9 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
         case AVAudioSessionInterruptionTypeEnded: {
             NSLog(@"IJKFFMoviePlayerController:audioSessionInterrupt: end\n");
             [[IJKAudioKit sharedInstance] setActive:YES];
-            [self play];
+            if (_playingBeforeInterruption) {
+                [self play];
+            }
             break;
         }
     }

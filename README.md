@@ -5,12 +5,12 @@ ijkplayer
 
 ### My Build Enviroment
 - Common
- - Mac OS X 10.10.3
+ - Mac OS X 10.10.4
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
  - Android Studio 1.2.2
 - iOS
- - Xcode 6.3.2 (6D2105)
+ - Xcode 6.4 (6E35b)
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
  - brew install git
@@ -26,20 +26,20 @@ ijkplayer
  - platform: API 9~22
  - cpu: ARMv7a, x86, ARMv5 (ARMv5 is not tested on real devices)
  - api: [MediaPlayer-like](android/ijkplayer/player-java/src/main/java/tv/danmaku/ijk/media/player/IMediaPlayer.java)
- - video output: NativeWindow
- - audio output: OpenSL ES, AudioTrack
- - hw decoder: MediaCodec (API 16+, Android 4.1+)
+ - video-output: NativeWindow
+ - audio-output: OpenSL ES, AudioTrack
+ - hw-decoder: MediaCodec (API 16+, Android 4.1+)
 - iOS
- - platform: iOS 5.1.1~8.3.x
- - cpu: ARMv7, ARM64, i386, x86_64, (armv7s is obselete)
+ - platform: iOS 6.0~8.4.x
+ - cpu: armv7, arm64, i386, x86_64, (armv7s is obselete)
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
  - video-output: OpenGL ES 2.0 (I420/YV12/NV12 shaders)
  - audio-output: AudioQueue, AudioUnit
- - hw decoder: VideoToolbox (iOS 8+)
+ - hw-decoder: VideoToolbox (iOS 8+)
 
 ### TODO
 - iOS
- - api: AVFoundation-like
+ - api: AVPlayer-like
 
 ### NOT-ON-PLAN
 - obsolete platforms (Android: API-8 and below; iOS: below 5.1.1)

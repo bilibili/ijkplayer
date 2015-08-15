@@ -48,6 +48,8 @@
     [options setSkipLoopFilter:IJK_AVDISCARD_ALL];
     [options setSkipFrame:IJK_AVDISCARD_NONREF];
 
+    options.useRenderQueue = NO;
+
     return options;
 }
 

@@ -30,9 +30,9 @@
 #import "IJKSDLAudioUnitController.h"
 #import "IJKSDLAudioQueueController.h"
 
-typedef struct SDL_Aout_Opaque {
+struct SDL_Aout_Opaque {
     IJKSDLAudioQueueController *aoutController;
-} SDL_Aout_Opaque;
+};
 
 static int aout_open_audio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {

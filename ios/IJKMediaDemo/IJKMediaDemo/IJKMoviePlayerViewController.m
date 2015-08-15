@@ -17,7 +17,6 @@
 #import "IJKMoviePlayerViewController.h"
 #import "IJKMediaControl.h"
 #import "IJKCommon.h"
-#import "IJKMediaPlayer/IJKMediaPlayer.h"
 #import "IJKDemoHistory.h"
 
 @implementation IJKVideoViewController
@@ -53,6 +52,7 @@
     return self;
 }
 
+#define EXPECTED_IJKPLAYER_VERSION (1 << 16) & 0xFF) | 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -68,6 +68,9 @@
     [IJKFFMoviePlayerController setLogReport:NO];
     [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_INFO];
 #endif
+
+    [IJKFFMoviePlayerController checkIfFFmpegVersionMatch:YES];
+    // [IJKFFMoviePlayerController checkIfPlayerVersionMatch:YES major:1 minor:0 micro:0];
 
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:nil];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;

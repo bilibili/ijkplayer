@@ -24,14 +24,16 @@
 #include "IJKVideoToolBox.h"
 #include "ijksdl_vout_overlay_videotoolbox.h"
 #include "ffpipeline_ios.h"
-#import <CoreMedia/CMSampleBuffer.h>
-#import <CoreFoundation/CoreFoundation.h>
-#import <CoreVideo/CVHostTime.h>
 #include <mach/mach_time.h>
 #include "libavformat/avc.h"
 #include "ijksdl_vout_ios_gles2.h"
 #include "h264_sps_parser.h"
 #include "ijkplayer/ff_ffplay_debug.h"
+#import <CoreMedia/CoreMedia.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <CoreVideo/CVHostTime.h>
+#import <Foundation/Foundation.h>
+#import "IJKDeviceModel.h"
 
 #define IJK_VTB_FCC_AVC    SDL_FOURCC('C', 'c', 'v', 'a')
 #define IJK_VTB_FCC_ESD    SDL_FOURCC('s', 'd', 's', 'e')
@@ -404,6 +406,22 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             goto failed;
         }
 
+#ifdef FFP_SHOW_VTB_VDPS
+        {
+            if (ctx->benchmark_start_time == 0) {
+                ctx->benchmark_start_time   = SDL_GetTickHR();
+            }
+            ctx->benchmark_frame_count += 1;
+            if (0 == (ctx->benchmark_frame_count % 240)) {
+                Uint64 diff = SDL_GetTickHR() - ctx->benchmark_start_time;
+                double per_frame_ms = ((double) diff) / ctx->benchmark_frame_count;
+                double fps          = ((double) ctx->benchmark_frame_count) * 1000 / diff;
+                ALOGD("%lf fps, %lf ms/frame, %"PRIu64" frames\n",
+                      fps, per_frame_ms, ctx->benchmark_frame_count);
+            }
+            goto failed;
+        }
+#endif
 
         OSType format_type = CVPixelBufferGetPixelFormatType(imageBuffer);
         if (format_type != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) {
@@ -820,7 +838,7 @@ static void dict_set_object(CFMutableDictionaryRef dict, CFStringRef key, CFType
 static void dict_set_data(CFMutableDictionaryRef dict, CFStringRef key, uint8_t * value, uint64_t length)
 {
     CFDataRef data;
-    data = CFDataCreate(NULL, value, length);
+    data = CFDataCreate(NULL, value, (CFIndex)length);
     CFDictionarySetValue(dict, key, data);
     CFRelease(data);
 }
@@ -916,6 +934,12 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:
+            if ([IJKDeviceModel currentModel].rank >= kIJKDeviceRank_AppleA7Class) {
+                // Apple A7 SoC
+                // Hi10p can be decoded into NV12 ('420v')
+                break;
+            }
+            break;
         case FF_PROFILE_H264_HIGH_10_INTRA:
         case FF_PROFILE_H264_HIGH_422:
         case FF_PROFILE_H264_HIGH_422_INTRA:

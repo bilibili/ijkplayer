@@ -94,6 +94,6 @@ void      ffp_set_video_codec_info(FFPlayer *ffp, const char *module, const char
 void      ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *codec);
 
 // must be freed with free();
-IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp);
+struct IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp);
 
 #endif

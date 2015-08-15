@@ -35,5 +35,9 @@
 // #define FFP_NOTIFY_BUF_BYTES
 
 // #define FFP_SHOW_VTB_IN_DECODING
+// #define FFP_SHOW_VTB_VDPS
+
+// #define FFP_SHOW_AMC_VDPS
+// #define FFP_AMC_DISABLE_OUTPUT
 
 #endif

@@ -27,10 +27,10 @@
 #include "ff_ffplay.h"
 #import "ijksdl/ios/ijksdl_aout_ios_audiounit.h"
 
-typedef struct IJKFF_Pipeline_Opaque {
+struct IJKFF_Pipeline_Opaque {
     FFPlayer    *ffp;
     bool         is_videotoolbox_open;
-} IJKFF_Pipeline_Opaque;
+};
 
 static void func_destroy(IJKFF_Pipeline *pipeline)
 {
@@ -82,7 +82,4 @@ IJKFF_Pipeline *ffpipeline_create_from_ios(FFPlayer *ffp)
     pipeline->func_open_audio_output  = func_open_audio_output;
 
     return pipeline;
-fail:
-    ffpipeline_free_p(&pipeline);
-    return NULL;
 }

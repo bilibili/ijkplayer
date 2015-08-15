@@ -889,22 +889,21 @@ static IJKAVMoviePlayerController* instance;
 {
     if (!_player)
         return NO;
-    return [_player allowsAirPlayVideo];
+    return _player.allowsExternalPlayback;
 }
 
 -(void)setAllowsMediaAirPlay:(BOOL)b
 {
     if (!_player)
         return;
-    [_player setAllowsAirPlayVideo:b];
+    _player.allowsExternalPlayback = b;
 }
 
 -(BOOL)airPlayMediaActive
 {
     if (!_player)
         return NO;
-    
-    return _player.airPlayVideoActive || self.isDanmakuMediaAirPlay;
+    return _player.externalPlaybackActive || self.isDanmakuMediaAirPlay;
 }
 
 - (void)setScalingMode: (MPMovieScalingMode) aScalingMode
