@@ -21,17 +21,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.widget.TextView;
+import android.text.TextUtils;
 
 import java.io.File;
+import java.io.IOException;
 
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.VideoPlayerActivity;
 import tv.danmaku.ijk.media.sample.fragments.FileListFragment;
 
 public class FileExplorerActivity extends AppCompatActivity implements FileListFragment.OnClickFileListener {
-
-    private TextView mPathView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,14 +40,10 @@ public class FileExplorerActivity extends AppCompatActivity implements FileListF
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mPathView = (TextView) findViewById(R.id.path_view);
-
         doOpenDirectory("/", false);
     }
 
     private void doOpenDirectory(String path, boolean addToBackStack) {
-        mPathView.setText(path);
-
         Fragment newFragment = FileListFragment.newInstance(path);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
@@ -61,9 +56,18 @@ public class FileExplorerActivity extends AppCompatActivity implements FileListF
 
     @Override
     public void onClickFile(File f) {
+        try {
+            f = f.getAbsoluteFile();
+            f = f.getCanonicalFile();
+            if (TextUtils.isEmpty(f.toString()))
+                f = new File("/");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (f.isDirectory()) {
             doOpenDirectory(f.toString(), true);
-        } else {
+        } else if (f.exists()){
             VideoPlayerActivity.intentTo(this, f.getPath(), f.getName());
         }
     }

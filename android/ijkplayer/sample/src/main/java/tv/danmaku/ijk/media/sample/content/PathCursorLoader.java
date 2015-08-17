@@ -32,18 +32,18 @@ public class PathCursorLoader extends AsyncTaskLoader<Cursor> {
 
     public PathCursorLoader(Context context, String path) {
         super(context);
-        this.mPath = new File(path).getAbsoluteFile();
+        mPath = new File(path).getAbsoluteFile();
     }
 
     public PathCursorLoader(Context context, File path) {
         super(context);
-        this.mPath = path;
+        mPath = path;
     }
 
     @Override
     public Cursor loadInBackground() {
         File[] file_list = mPath.listFiles();
-        return new PathCursor(file_list);
+        return new PathCursor(mPath, file_list);
     }
 
     @Override

@@ -43,6 +43,7 @@ import tv.danmaku.ijk.media.sample.content.PathCursorLoader;
 public class FileListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String ARG_PATH = "path";
 
+    private TextView mPathView;
     private ListView mFileListView;
     private VideoAdapter mAdapter;
     private String mPath;
@@ -63,6 +64,7 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup viewGroup = (ViewGroup) inflater.inflate(R.layout.fragment_file_list, container, false);
+        mPathView = (TextView) viewGroup.findViewById(R.id.path_view);
         mFileListView = (ListView) viewGroup.findViewById(R.id.file_list_view);
         return viewGroup;
     }
@@ -76,8 +78,11 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
             mOnClickFileListener = (OnClickFileListener) activity;
 
         Bundle bundle = getArguments();
-        if (bundle != null)
+        if (bundle != null) {
             mPath = bundle.getString(ARG_PATH);
+            mPath = new File(mPath).getAbsolutePath();
+            mPathView.setText(mPath);
+        }
 
         mAdapter = new VideoAdapter(activity);
         mFileListView.setAdapter(mAdapter);

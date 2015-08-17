@@ -43,8 +43,12 @@ public class PathCursor extends AbstractCursor {
     public static final int CI_IS_DIRECTORY = 3;
     public static final int CI_IS_VIDEO = 4;
 
-    PathCursor(File[] fileList) {
-        mFileList.add(new FileItem(".."));
+    PathCursor(File parentDirectory, File[] fileList) {
+        if (parentDirectory.getParent() != null) {
+            FileItem parentFile = new FileItem(new File(parentDirectory, ".."));
+            parentFile.isDirectory = true;
+            mFileList.add(parentFile);
+        }
 
         if (fileList != null) {
             for (File file : fileList) {

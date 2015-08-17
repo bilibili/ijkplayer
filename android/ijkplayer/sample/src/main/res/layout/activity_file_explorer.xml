@@ -7,22 +7,10 @@
 
     <include layout="@layout/widget_toolbar" />
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/file_explorer_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="0dp"
-        android:paddingLeft="@dimen/ijk_horizontal_margin"
-        android:paddingRight="@dimen/ijk_horizontal_margin"
-        android:paddingTop="0dp">
-
-        <EditText
-            android:id="@+id/path_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:editable="false"
-            android:lines="1" />
+        android:layout_height="match_parent">
 
         <fragment
             android:id="@+id/file_list_fragment"
@@ -30,5 +18,5 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:layout="@layout/fragment_file_list" />
-    </LinearLayout>
+    </FrameLayout>
 </LinearLayout>
