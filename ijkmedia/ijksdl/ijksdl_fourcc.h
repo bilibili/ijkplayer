@@ -39,18 +39,6 @@
         ((uint16_t)(b) | ((uint16_t)(a) << 8))
 #endif
 
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-#   define SDL_FOURCC(a, b, c, d) \
-        (((uint32_t)a) | (((uint32_t)b) << 8) | (((uint32_t)c) << 16) | (((uint32_t)d) << 24))
-#   define SDL_TWOCC(a, b) \
-        ((uint16_t)(a) | ((uint16_t)(b) << 8))
-#else
-#   define SDL_FOURCC(a, b, c, d) \
-        (((uint32_t)d) | (((uint32_t)c) << 8) | (((uint32_t)b) << 16) | (((uint32_t)a) << 24))
-#   define SDL_TWOCC( a, b ) \
-        ((uint16_t)(b) | ((uint16_t)(a) << 8))
-#endif
-
 /*-
  *  http://www.webartz.com/fourcc/indexyuv.htm
  *  http://www.neuro.sfc.keio.ac.jp/~aly/polygon/info/color-space-faq.html
