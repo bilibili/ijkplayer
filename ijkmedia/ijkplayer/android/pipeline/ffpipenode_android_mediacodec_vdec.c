@@ -263,42 +263,6 @@ static int amc_queue_picture(
            av_get_picture_type_char(src_frame->pict_type), pts);
 #endif
 
-    // FIXME: duplicated code
-    if (output_buffer_index >= 0){
-        double dpts = NAN;
-
-        if (pts != AV_NOPTS_VALUE)
-            dpts = av_q2d(is->video_st->time_base) * pts;
-
-        if (ffp->framedrop>0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
-            if (pts != AV_NOPTS_VALUE) {
-                double diff = dpts - ffp_get_master_clock(is);
-#ifdef FFP_SHOW_AMC_DROPS
-                ALOGE("diff=%f, is->frame_last_filter_delay=%f\n", diff, is->frame_last_filter_delay);
-#endif
-                if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
-                    diff - is->frame_last_filter_delay < 0 &&
-                    is->viddec.pkt_serial == is->vidclk.serial &&
-                    is->videoq.nb_packets) {
-                    is->frame_drops_early++;
-                    is->continuous_frame_drops_early++;
-                    if (is->continuous_frame_drops_early > ffp->framedrop) {
-#ifdef FFP_SHOW_AMC_DROPS
-                        ALOGE("drop %d > %d\n", is->continuous_frame_drops_early, ffp->framedrop);
-#endif
-                        is->continuous_frame_drops_early = 0;
-                    } else {
-#ifdef FFP_SHOW_AMC_DROPS
-                        ALOGE("no drop %d <= %d\n", is->continuous_frame_drops_early, ffp->framedrop);
-#endif
-                        SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
-                        return 0;
-                    }
-                }
-            }
-        }
-    }
-
     if (!(vp = ffp_frame_queue_peek_writable(&is->pictq)))
         return -1;
 
