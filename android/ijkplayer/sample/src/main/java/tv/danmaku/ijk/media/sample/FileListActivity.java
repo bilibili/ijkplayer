@@ -9,7 +9,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,7 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 
-public class FileListActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class FileListActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     ListView fileListView;
     VideoAdapter adapter;

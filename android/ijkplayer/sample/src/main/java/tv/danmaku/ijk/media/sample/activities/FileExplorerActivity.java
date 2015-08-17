@@ -19,7 +19,7 @@ package tv.danmaku.ijk.media.sample.activities;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
@@ -29,7 +29,7 @@ import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.VideoPlayerActivity;
 import tv.danmaku.ijk.media.sample.fragments.FileListFragment;
 
-public class FileExplorerActivity extends ActionBarActivity implements FileListFragment.OnClickFileListener {
+public class FileExplorerActivity extends AppCompatActivity implements FileListFragment.OnClickFileListener {
 
     private TextView mPathView;
 
