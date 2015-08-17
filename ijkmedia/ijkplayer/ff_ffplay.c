@@ -1900,7 +1900,6 @@ static int audio_decode_frame(FFPlayer *ffp)
         is->audio_clock = NAN;
     is->audio_clock_serial = af->serial;
 #ifdef FFP_SHOW_AUDIO_DELAY
-#ifdef DEBUG
     {
         static double last_clock;
         printf("audio: delay=%0.3f clock=%0.3f clock0=%0.3f\n",
@@ -1908,7 +1907,6 @@ static int audio_decode_frame(FFPlayer *ffp)
                is->audio_clock, audio_clock0);
         last_clock = is->audio_clock;
     }
-#endif
 #endif
     return resampled_data_size;
 }

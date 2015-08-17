@@ -820,6 +820,15 @@ IjkMediaPlayer_native_profileEnd(JNIEnv *env, jclass clazz)
     ALOGD("moncleanup\n");
 }
 
+static void
+IjkMediaPlayer_native_setLogLevel(JNIEnv *env, jclass clazz, jint level)
+{
+    MPTRACE("%s(%d)\n", __func__, level);
+    ijkmp_global_set_log_level(level);
+    ALOGD("moncleanup\n");
+}
+
+
 
 
 // ----------------------------------------------------------------------------
@@ -859,6 +868,8 @@ static JNINativeMethod g_methods[] = {
 
     { "native_profileBegin",    "(Ljava/lang/String;)V",    (void *) IjkMediaPlayer_native_profileBegin },
     { "native_profileEnd",      "()V",                      (void *) IjkMediaPlayer_native_profileEnd },
+
+    { "native_setLogLevel",     "(I)V",                     (void *) IjkMediaPlayer_native_setLogLevel },
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)

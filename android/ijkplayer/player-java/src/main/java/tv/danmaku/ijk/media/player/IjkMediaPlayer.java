@@ -65,6 +65,17 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     //----------------------------------------
     // options
+    public static final int IJK_LOG_UNKNOWN = 0;
+    public static final int IJK_LOG_DEFAULT = 1;
+
+    public static final int IJK_LOG_VERBOSE = 2;
+    public static final int IJK_LOG_DEBUG = 3;
+    public static final int IJK_LOG_INFO = 4;
+    public static final int IJK_LOG_WARN = 5;
+    public static final int IJK_LOG_ERROR = 6;
+    public static final int IJK_LOG_FATAL = 7;
+    public static final int IJK_LOG_SILENT = 8;
+
     public static final int OPT_CATEGORY_FORMAT     = 1;
     public static final int OPT_CATEGORY_CODEC      = 2;
     public static final int OPT_CATEGORY_SWS        = 3;
@@ -871,4 +882,5 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     public static native void native_profileBegin(String libName);
     public static native void native_profileEnd();
+    public static native void native_setLogLevel(int level);
 }

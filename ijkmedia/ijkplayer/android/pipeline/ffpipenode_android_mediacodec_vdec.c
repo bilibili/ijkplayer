@@ -273,6 +273,9 @@ static int amc_queue_picture(
         if (ffp->framedrop>0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
             if (pts != AV_NOPTS_VALUE) {
                 double diff = dpts - ffp_get_master_clock(is);
+#ifdef FFP_SHOW_AMC_DROPS
+                ALOGE("diff=%f, is->frame_last_filter_delay=%f\n", diff, is->frame_last_filter_delay);
+#endif
                 if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
                     diff - is->frame_last_filter_delay < 0 &&
                     is->viddec.pkt_serial == is->vidclk.serial &&
@@ -280,8 +283,14 @@ static int amc_queue_picture(
                     is->frame_drops_early++;
                     is->continuous_frame_drops_early++;
                     if (is->continuous_frame_drops_early > ffp->framedrop) {
+#ifdef FFP_SHOW_AMC_DROPS
+                        ALOGE("drop %d > %d\n", is->continuous_frame_drops_early, ffp->framedrop);
+#endif
                         is->continuous_frame_drops_early = 0;
                     } else {
+#ifdef FFP_SHOW_AMC_DROPS
+                        ALOGE("no drop %d <= %d\n", is->continuous_frame_drops_early, ffp->framedrop);
+#endif
                         SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
                         return 0;
                     }
