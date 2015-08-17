@@ -3,20 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".file_explorer_view">
+    tools:context=".app_activity">
 
     <include layout="@layout/widget_toolbar" />
 
     <FrameLayout
         android:id="@+id/file_explorer_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <fragment
-            android:id="@+id/file_list_fragment"
-            android:name="tv.danmaku.ijk.media.sample.fragments.FileListFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:layout="@layout/fragment_file_list" />
-    </FrameLayout>
+        android:layout_height="match_parent" />
 </LinearLayout>

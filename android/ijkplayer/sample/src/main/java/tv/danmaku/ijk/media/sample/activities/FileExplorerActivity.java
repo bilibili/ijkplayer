@@ -19,8 +19,6 @@ package tv.danmaku.ijk.media.sample.activities;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 
 import java.io.File;
@@ -30,15 +28,10 @@ import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.VideoPlayerActivity;
 import tv.danmaku.ijk.media.sample.fragments.FileListFragment;
 
-public class FileExplorerActivity extends AppCompatActivity implements FileListFragment.OnClickFileListener {
-
+public class FileExplorerActivity extends BaseAppActivity implements FileListFragment.OnClickFileListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_file_explorer);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         doOpenDirectory("/", false);
     }
