@@ -3,23 +3,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="0dp"
-    android:paddingLeft="@dimen/ijk_horizontal_margin"
-    android:paddingRight="@dimen/ijk_horizontal_margin"
-    android:paddingTop="0dp"
     tools:context=".file_explorer_view">
 
-    <EditText
-        android:editable="false"
-        android:id="@+id/path_view"
+    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1" />
+        android:background="?attr/colorPrimaryDark"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/file_explorer_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="0dp"
+        android:paddingLeft="@dimen/ijk_horizontal_margin"
+        android:paddingRight="@dimen/ijk_horizontal_margin"
+        android:paddingTop="0dp">
+
+        <EditText
+            android:id="@+id/path_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:editable="false"
+            android:lines="1" />
 
         <fragment
             android:id="@+id/file_list_fragment"
@@ -27,5 +37,5 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:layout="@layout/fragment_file_list" />
-    </FrameLayout>
+    </LinearLayout>
 </LinearLayout>
