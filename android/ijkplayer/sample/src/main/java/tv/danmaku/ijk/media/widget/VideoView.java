@@ -18,9 +18,29 @@
 
 package tv.danmaku.ijk.media.widget;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.media.AudioManager;
+import android.net.Uri;
+import android.text.TextUtils;
+import android.util.AttributeSet;
+import android.util.Pair;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.util.List;
 
+import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnBufferingUpdateListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnCompletionListener;
@@ -30,25 +50,8 @@ import tv.danmaku.ijk.media.player.IMediaPlayer.OnPreparedListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnSeekCompleteListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnVideoSizeChangedListener;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
-import tv.danmaku.ijk.media.player.option.AvFourCC;
-import tv.danmaku.ijk.media.player.option.format.AvFormatOption_HttpDetectRangeSupport;
 import tv.danmaku.ijk.media.sample.R;
-
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.media.AudioManager;
-import android.net.Uri;
-import android.util.AttributeSet;
-import android.util.Pair;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.View;
-import android.view.ViewGroup.LayoutParams;
+import tv.danmaku.ijk.media.sample.application.Settings;
 
 /**
  * Displays a video file. The VideoView class can load images from various
@@ -110,6 +113,7 @@ public class VideoView extends SurfaceView implements
     private boolean mCanSeekBack = true;
     private boolean mCanSeekForward = true;
     private Context mContext;
+    private Settings mSettings;
 
     public VideoView(Context context) {
         super(context);
@@ -201,6 +205,7 @@ public class VideoView extends SurfaceView implements
         mTargetState = STATE_IDLE;
         if (ctx instanceof Activity)
             ((Activity) ctx).setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        mSettings = new Settings(ctx);
     }
 
     public boolean isValid() {
@@ -245,19 +250,40 @@ public class VideoView extends SurfaceView implements
         try {
             mDuration = -1;
             mCurrentBufferPercentage = 0;
-            IjkMediaPlayer ijkMediaPlayer = null;
-            if (mUri != null) {
-                ijkMediaPlayer = new IjkMediaPlayer();
+            if (mSettings.getUsingAndroidPlayer()) {
+                mMediaPlayer = new AndroidMediaPlayer();
+            } else {
+                IjkMediaPlayer ijkMediaPlayer = null;
+                if (mUri != null) {
+                    ijkMediaPlayer = new IjkMediaPlayer();
 
-                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_RV32);
-                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 12);
+                    if (mSettings.getUsingMediaCodec()) {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
+                    } else {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
+                    }
 
-                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
-                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "user_agent", mUserAgent);
+                    if (mSettings.getUsingOpenSLES()) {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
+                    } else {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 0);
+                    }
 
-                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
+                    String pixelFormat = mSettings.getPixelFormat();
+                    if (TextUtils.isEmpty(pixelFormat)) {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_RV32);
+                    } else {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", pixelFormat);
+                    }
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 12);
+
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "user_agent", mUserAgent);
+
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
+                }
+                mMediaPlayer = ijkMediaPlayer;
             }
-            mMediaPlayer = ijkMediaPlayer;
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             mMediaPlayer.setOnCompletionListener(mCompletionListener);

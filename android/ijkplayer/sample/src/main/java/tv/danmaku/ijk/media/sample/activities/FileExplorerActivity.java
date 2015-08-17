@@ -26,9 +26,10 @@ import java.io.IOException;
 
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.VideoPlayerActivity;
+import tv.danmaku.ijk.media.sample.application.AppActivity;
 import tv.danmaku.ijk.media.sample.fragments.FileListFragment;
 
-public class FileExplorerActivity extends BaseAppActivity implements FileListFragment.OnClickFileListener {
+public class FileExplorerActivity extends AppActivity implements FileListFragment.OnClickFileListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +41,7 @@ public class FileExplorerActivity extends BaseAppActivity implements FileListFra
         Fragment newFragment = FileListFragment.newInstance(path);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        transaction.replace(R.id.file_explorer_view, newFragment);
+        transaction.replace(R.id.body, newFragment);
 
         if (addToBackStack)
             transaction.addToBackStack(null);

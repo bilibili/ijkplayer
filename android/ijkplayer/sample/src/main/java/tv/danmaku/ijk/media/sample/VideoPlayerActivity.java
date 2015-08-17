@@ -73,9 +73,10 @@ public class VideoPlayerActivity extends Activity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
 
+        mVideoView.stopPlayback();
         IjkMediaPlayer.native_profileEnd();
     }
 }

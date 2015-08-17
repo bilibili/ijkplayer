@@ -7,6 +7,7 @@
 
     <string name="buffering">buffering</string>
     <string name="sort">Sort</string>
+    <string name="settings">Settings</string>
 
     <string name="vitamio_name">Vitamio</string>
     <string name="vitamio_init_decoders">Initializing decoders…</string>

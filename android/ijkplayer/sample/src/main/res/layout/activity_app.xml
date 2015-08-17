@@ -8,7 +8,7 @@
     <include layout="@layout/widget_toolbar" />
 
     <FrameLayout
-        android:id="@+id/file_explorer_view"
+        android:id="@+id/body"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>

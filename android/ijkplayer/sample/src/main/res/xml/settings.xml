@@ -1,0 +1,40 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory android:title="@string/pref_title_general">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:key="@string/pref_key_using_android_player"
+            android:persistent="true"
+            android:summary="@string/pref_summary_using_android_player"
+            android:title="@string/pref_title_using_android_player" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_title_ijkplayer_video">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="@string/pref_key_using_android_player"
+            android:disableDependentsState="true"
+            android:key="@string/pref_key_using_media_codec"
+            android:persistent="true"
+            android:summary="@string/pref_summary_using_media_codec"
+            android:title="@string/pref_title_using_media_codec" />
+        <tv.danmaku.ijk.media.sample.widget.preference.IjkListPreference
+            android:defaultValue=""
+            android:dependency="@string/pref_key_using_media_codec"
+            android:entries="@array/pref_entries_pixel_format"
+            android:entryValues="@array/pref_entry_values_pixel_format"
+            android:key="@string/pref_key_pixel_format"
+            android:persistent="true"
+            android:title="@string/pref_title_pixel_format"
+            app:entrySummaries="@array/pref_entry_summaries_pixel_format" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_title_ijkplayer_audio">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="@string/pref_key_using_android_player"
+            android:key="@string/pref_key_using_opensl_es"
+            android:persistent="true"
+            android:summary="@string/pref_summary_using_opensl_es"
+            android:title="@string/pref_title_using_opensl_es" />
+    </PreferenceCategory>
+</PreferenceScreen>
