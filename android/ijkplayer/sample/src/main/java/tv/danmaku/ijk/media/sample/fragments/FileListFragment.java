@@ -114,8 +114,7 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
 
     }
 
-    public static interface OnClickFileListener
-    {
+    public static interface OnClickFileListener {
         void onClickFile(File f);
     }
 

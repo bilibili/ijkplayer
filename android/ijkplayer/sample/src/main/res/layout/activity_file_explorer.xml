@@ -1,14 +1,31 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="0dp"
-                android:id="@+id/file_explorer_view"
-                tools:context=".FileList">
-    <fragment
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="0dp"
+    android:paddingLeft="@dimen/ijk_horizontal_margin"
+    android:paddingRight="@dimen/ijk_horizontal_margin"
+    android:paddingTop="0dp"
+    tools:context=".file_explorer_view">
+
+    <EditText
+        android:editable="false"
+        android:id="@+id/path_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/file_list_fragment"
-        android:name="tv.danmaku.ijk.media.sample.fragments.FileListFragment"
-        tools:layout="@layout/fragment_file_list" />
-</RelativeLayout>
+        android:layout_height="wrap_content"
+        android:lines="1" />
+
+    <FrameLayout
+        android:id="@+id/file_explorer_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <fragment
+            android:id="@+id/file_list_fragment"
+            android:name="tv.danmaku.ijk.media.sample.fragments.FileListFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_file_list" />
+    </FrameLayout>
+</LinearLayout>

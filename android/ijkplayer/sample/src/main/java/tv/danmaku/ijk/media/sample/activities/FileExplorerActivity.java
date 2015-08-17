@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
+import android.widget.TextView;
 
 import java.io.File;
 
@@ -28,15 +29,22 @@ import tv.danmaku.ijk.media.sample.VideoPlayerActivity;
 import tv.danmaku.ijk.media.sample.fragments.FileListFragment;
 
 public class FileExplorerActivity extends ActionBarActivity implements FileListFragment.OnClickFileListener {
+
+    private TextView mPathView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_explorer);
 
+        mPathView = (TextView) findViewById(R.id.path_view);
+
         doOpenDirectory("/", false);
     }
 
     private void doOpenDirectory(String path, boolean addToBackStack) {
+        mPathView.setText(path);
+
         Fragment newFragment = FileListFragment.newInstance(path);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 

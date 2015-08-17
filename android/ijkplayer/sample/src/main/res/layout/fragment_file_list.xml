@@ -8,4 +8,4 @@
     android:layout_alignParentStart="true"
     android:layout_alignParentBottom="true"
     android:choiceMode="singleChoice"
-    tools:context=".FileList"/>
+    tools:context=".file_list_view"/>

@@ -46,7 +46,8 @@ public class PathCursorLoader extends AsyncTaskLoader<Cursor> {
         return new PathCursor(file_list);
     }
 
-    @Override protected void onStartLoading() {
+    @Override
+    protected void onStartLoading() {
         forceLoad();
     }
 }

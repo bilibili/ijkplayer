@@ -36,7 +36,7 @@ public class PathCursor extends AbstractCursor {
     public static final String CN_FILE_PATH = "file_path";
     public static final String CN_IS_DIRECTORY = "is_directory";
     public static final String CN_IS_VIDEO = "is_video";
-    public static final String[] columnNames = new String[] {CN_ID, CN_FILE_NAME, CN_FILE_PATH, CN_IS_DIRECTORY, CN_IS_VIDEO};
+    public static final String[] columnNames = new String[]{CN_ID, CN_FILE_NAME, CN_FILE_PATH, CN_IS_DIRECTORY, CN_IS_VIDEO};
     public static final int CI_ID = 0;
     public static final int CI_FILE_NAME = 1;
     public static final int CI_FILE_PATH = 2;
@@ -77,12 +77,12 @@ public class PathCursor extends AbstractCursor {
 
     @Override
     public short getShort(int column) {
-        return (short)getLong(column);
+        return (short) getLong(column);
     }
 
     @Override
     public int getInt(int column) {
-        return (int)getLong(column);
+        return (int) getLong(column);
     }
 
     @Override
@@ -118,13 +118,14 @@ public class PathCursor extends AbstractCursor {
         public int compare(FileItem lhs, FileItem rhs) {
             if (lhs.isDirectory && !rhs.isDirectory)
                 return -1;
-            else if  (!lhs.isDirectory && rhs.isDirectory)
+            else if (!lhs.isDirectory && rhs.isDirectory)
                 return 1;
             return lhs.file.compareTo(rhs.file);
         }
     };
 
     private static Set<String> sMediaExtSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+
     {
         sMediaExtSet.add("flv");
         sMediaExtSet.add("mp4");
