@@ -20,15 +20,32 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+        all32 {}
+        all64 { minSdkVersion 21 }
+        // armv5 {}
+        // armv7a {}
+        // arm64 { minSdkVersion 21 }
+        // x86 {}
+    }
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile project(':player-java')
-    compile project(':player-armv7a')
-    compile project(':player-x86')
-    compile project(':player-armv5')
-    // need API-21
-    // compile project(':player-arm64')
+
+    all32Compile project(':player-armv5')
+    all32Compile project(':player-armv7a')
+    all32Compile project(':player-x86')
+
+    all64Compile project(':player-armv5')
+    all64Compile project(':player-armv7a')
+    all64Compile project(':player-arm64')
+    all64Compile project(':player-x86')
+
+    // armv5Compile project(':player-armv5')
+    // armv7aCompile project(':player-armv7a')
+    // arm64Compile project(':player-arm64')
+    // x86Compile project(':player-x86')
 }
