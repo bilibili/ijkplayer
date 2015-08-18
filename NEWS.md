@@ -1,5 +1,6 @@
 tag next
 --------------------------------
+android: drop support of Eclipse
 
 tag k0.3.1
 --------------------------------

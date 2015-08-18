@@ -9,6 +9,7 @@ ijkplayer
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
  - Android Studio 1.3.1
+ - Android SDK Build Tools 23.0.0
 - iOS
  - Xcode 6.4 (6E35b)
 - [HomeBrew](http://brew.sh)
@@ -24,7 +25,7 @@ ijkplayer
  - workaround for some buggy online video.
 - Android
  - platform: API 9~22
- - cpu: ARMv7a, x86, ARMv5 (ARMv5 is not tested on real devices)
+ - cpu: ARMv7a, ARM64v8a, x86 (ARMv5 is not tested on real devices)
  - api: [MediaPlayer-like](android/ijkplayer/player-java/src/main/java/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - video-output: NativeWindow
  - audio-output: OpenSL ES, AudioTrack
@@ -58,7 +59,7 @@ brew install yasm
 # export ANDROID_SDK=<your sdk path>
 # export ANDROID_NDK=<your ndk path>
 
-# on Cygwin
+# on Cygwin (unmaintained)
 # install git, make, yasm
 ```
 
@@ -105,10 +106,6 @@ cd android/contrib
 cd ..
 ./compile-ijk.sh all
 
-# Eclipse:
-#     File -> New -> Project -> Android Project from Existing Code
-#     Select android/ and import all project
-#
 # Android Studio:
 #     Open an existing Android Studio project
 #     Select android/ijkplayer/ and import
@@ -118,6 +115,12 @@ cd ..
 #       compileSdkVersion = 22       // depending on your sdk version
 #       buildToolsVersion = "22.0.1" // depending on your build tools version
 #     }
+#
+# Eclipse: (obselete)
+#     File -> New -> Project -> Android Project from Existing Code
+#     Select android/ and import all project
+#     Import appcompat-v7
+#     Import preference-v7
 #
 # Gradle
 #     cd ijkplayer
