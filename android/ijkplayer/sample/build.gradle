@@ -24,7 +24,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:appcompat-v7:22.2.1'
     compile project(':player-java')
     compile project(':player-armv7a')
     compile project(':player-x86')
