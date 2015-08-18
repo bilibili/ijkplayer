@@ -16,23 +16,19 @@
 
 package tv.danmaku.ijk.media.sample.fragments;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
+import android.support.v7.preference.PreferenceFragmentCompat;
 
 import tv.danmaku.ijk.media.sample.R;
 
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class SettingsFragment extends PreferenceFragment {
+public class SettingsFragment extends PreferenceFragmentCompat {
     public static SettingsFragment newInstance() {
         SettingsFragment f = new SettingsFragment();
         return f;
     }
 
     @Override
-    public void onCreate(final Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
+    public void onCreatePreferences(Bundle bundle, String s) {
         addPreferencesFromResource(R.xml.settings);
     }
 }

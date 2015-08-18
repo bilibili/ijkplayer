@@ -16,20 +16,17 @@
 
 package tv.danmaku.ijk.media.sample.activities;
 
-import android.annotation.TargetApi;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.fragments.SettingsFragment;
 
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class SettingsActivity extends AppCompatActivity {
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, SettingsActivity.class);
@@ -49,7 +46,7 @@ public class SettingsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Fragment newFragment = SettingsFragment.newInstance();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.body, newFragment);
         transaction.commit();
     }

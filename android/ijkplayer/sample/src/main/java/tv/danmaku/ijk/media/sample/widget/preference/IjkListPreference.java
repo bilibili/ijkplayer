@@ -18,7 +18,7 @@ package tv.danmaku.ijk.media.sample.widget.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.preference.ListPreference;
+import android.support.v7.preference.ListPreference;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 
@@ -37,6 +37,16 @@ public class IjkListPreference extends ListPreference {
         initPreference(context, attrs);
     }
 
+    public IjkListPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        initPreference(context, attrs);
+    }
+
+    public IjkListPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        initPreference(context, attrs);
+    }
+
     private final void initPreference(Context context, AttributeSet attrs) {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.IjkListPreference, 0, 0);
@@ -52,14 +62,18 @@ public class IjkListPreference extends ListPreference {
     @Override
     protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
         super.onSetInitialValue(restoreValue, defaultValue);
-
         syncSummary();
     }
 
     @Override
-    protected void onDialogClosed(boolean positiveResult) {
-        super.onDialogClosed(positiveResult);
+    public void setValue(String value) {
+        super.setValue(value);
+        syncSummary();
+    }
 
+    @Override
+    public void setValueIndex(int index) {
+        super.setValueIndex(index);
         syncSummary();
     }
 

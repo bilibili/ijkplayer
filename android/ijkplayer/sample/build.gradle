@@ -32,7 +32,8 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:appcompat-v7:23.+'
+    compile 'com.android.support:preference-v7:23.+'
     compile project(':player-java')
 
     all32Compile project(':player-armv5')
