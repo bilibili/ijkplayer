@@ -1127,7 +1127,6 @@ display:
     }
 }
 
-// TODO: 9 alloc_picture in video_refresh_thread if overlay referenced by vout
 /* allocate a picture (needs to do that in main thread to avoid
    potential locking problems */
 static void alloc_picture(FFPlayer *ffp)
