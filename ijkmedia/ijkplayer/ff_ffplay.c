@@ -2074,7 +2074,6 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     if (forced_codec_name)
         codec = avcodec_find_decoder_by_name(forced_codec_name);
     if (!codec) {
-        // FIXME: 9 report unknown codec id/name
         if (forced_codec_name) av_log(NULL, AV_LOG_WARNING,
                                       "No codec could be found with name '%s'\n", forced_codec_name);
         else                   av_log(NULL, AV_LOG_WARNING,
