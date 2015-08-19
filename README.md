@@ -167,8 +167,6 @@ ijkplayer is based on or derives from projects below:
   - [kxmovie](https://github.com/kolyvan/kxmovie)
 - zlib license
   - [SDL](http://www.libsdl.org)
-- Apache License v2
-  - [VitamioBundle](https://github.com/yixia/VitamioBundle)
 - BSD-style license
   - [libyuv](https://code.google.com/p/libyuv/)
 - ISC license
