@@ -228,7 +228,7 @@ public class TextureRenderView extends TextureView implements IRenderView{
                 renderCallback.onSurfaceDestroyed(surfaceHolder);
             }
 
-            return false;
+            return true;
         }
 
         @Override
