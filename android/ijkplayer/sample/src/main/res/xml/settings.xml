@@ -8,6 +8,13 @@
             android:persistent="true"
             android:summary="@string/pref_summary_using_android_player"
             android:title="@string/pref_title_using_android_player" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:key="@string/pref_key_using_texture_view"
+            android:persistent="true"
+            android:summary="@string/pref_summary_using_texture_view"
+            android:title="@string/pref_title_using_texture_view" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_title_ijkplayer_video">
         <CheckBoxPreference

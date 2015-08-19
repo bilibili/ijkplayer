@@ -127,8 +127,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
     private void initVideoView(Context context) {
         mAppContext = context.getApplicationContext();
+        mSettings = new Settings(mAppContext);
 
-        if (true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (mSettings.getUsingTextureView() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             TextureRenderView renderView = new TextureRenderView(context);
             mRenderView = renderView;
         } else {
@@ -145,7 +146,6 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         addView(renderView);
 
         mRenderView.addRenderCallback(mSHCallback);
-        mSettings = new Settings(mAppContext);
 
         mVideoWidth = 0;
         mVideoHeight = 0;

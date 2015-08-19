@@ -36,6 +36,11 @@ public class Settings {
         return mSharedPreferences.getBoolean(key, false);
     }
 
+    public boolean getUsingTextureView() {
+        String key = mAppContext.getString(R.string.pref_key_using_texture_view);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
     public boolean getUsingMediaCodec() {
         String key = mAppContext.getString(R.string.pref_key_using_media_codec);
         return mSharedPreferences.getBoolean(key, false);
