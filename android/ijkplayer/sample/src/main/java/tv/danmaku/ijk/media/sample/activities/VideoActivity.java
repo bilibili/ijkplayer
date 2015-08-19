@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.sample;
+package tv.danmaku.ijk.media.sample.activities;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.MediaController;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
-import tv.danmaku.ijk.media.widget.MediaController;
-import tv.danmaku.ijk.media.widget.VideoView;
+import tv.danmaku.ijk.media.sample.R;
+import tv.danmaku.ijk.media.sample.widget.media.IjkVideoView;
 
-public class VideoPlayerActivity extends Activity {
-    private VideoView mVideoView;
-    private View mBufferingIndicator;
-    private MediaController mMediaController;
-
+public class VideoActivity extends Activity {
+    private IjkVideoView mVideoView;
     private String mVideoPath;
 
     public static Intent newIntent(Context context, String videoPath, String videoTitle) {
-        Intent intent = new Intent(context, VideoPlayerActivity.class);
+        Intent intent = new Intent(context, VideoActivity.class);
         intent.putExtra("videoPath", videoPath);
         intent.putExtra("videoTitle", videoTitle);
         return intent;
@@ -61,14 +58,11 @@ public class VideoPlayerActivity extends Activity {
             mVideoPath = intent.getDataString();
         }
 
-        mBufferingIndicator = findViewById(R.id.buffering_indicator);
-        mMediaController = new MediaController(this);
+        MediaController mediaController = new MediaController(this, false);
 
-        mVideoView = (VideoView) findViewById(R.id.video_view);
-        mVideoView.setMediaController(mMediaController);
-        mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
+        mVideoView = (IjkVideoView) findViewById(R.id.video_view);
+        mVideoView.setMediaController(mediaController);
         mVideoView.setVideoPath(mVideoPath);
-        mVideoView.requestFocus();
         mVideoView.start();
     }
 

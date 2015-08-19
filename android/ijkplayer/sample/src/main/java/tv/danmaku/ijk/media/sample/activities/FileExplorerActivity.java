@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 
 import tv.danmaku.ijk.media.sample.R;
-import tv.danmaku.ijk.media.sample.VideoPlayerActivity;
 import tv.danmaku.ijk.media.sample.application.AppActivity;
 import tv.danmaku.ijk.media.sample.fragments.FileListFragment;
 
@@ -62,7 +61,7 @@ public class FileExplorerActivity extends AppActivity implements FileListFragmen
         if (f.isDirectory()) {
             doOpenDirectory(f.toString(), true);
         } else if (f.exists()){
-            VideoPlayerActivity.intentTo(this, f.getPath(), f.getName());
+            VideoActivity.intentTo(this, f.getPath(), f.getName());
         }
     }
 }

@@ -34,6 +34,7 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:23.+'
     compile 'com.android.support:preference-v7:23.+'
+    compile 'com.android.support:support-annotations:23.+'
     compile project(':player-java')
 
     all32Compile project(':player-armv5')
