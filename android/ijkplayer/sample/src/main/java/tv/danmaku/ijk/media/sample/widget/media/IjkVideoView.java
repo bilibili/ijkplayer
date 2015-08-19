@@ -128,15 +128,23 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private void initVideoView(Context context) {
         mAppContext = context.getApplicationContext();
 
-        SurfaceRenderView renderView = new SurfaceRenderView(context);
+        if (true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            TextureRenderView renderView = new TextureRenderView(context);
+            mRenderView = renderView;
+        } else {
+            SurfaceRenderView renderView = new SurfaceRenderView(context);
+            mRenderView = renderView;
+        }
+
+        View renderView = mRenderView.getView();
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 Gravity.CENTER);
         renderView.setLayoutParams(lp);
-        renderView.addRenderCallback(mSHCallback);
         addView(renderView);
-        mRenderView = renderView;
+
+        mRenderView.addRenderCallback(mSHCallback);
         mSettings = new Settings(mAppContext);
 
         mVideoWidth = 0;
@@ -267,7 +275,11 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             // REMOVED: mMediaPlayer.setDataSource(mContext, mUri, mHeaders);
             mMediaPlayer.setDataSource(mUri.toString());
             // REMOVED: mMediaPlayer.setDisplay(mSurfaceHolder);
-            mMediaPlayer.setDisplay(mSurfaceHolder.getSurfaceHolder());
+            if (mSurfaceHolder.getSurfaceHolder() != null) {
+                mMediaPlayer.setDisplay(mSurfaceHolder.getSurfaceHolder());
+            } else {
+                mMediaPlayer.setSurface(mSurfaceHolder.openSurface());
+            }
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.setScreenOnWhilePlaying(true);
             mMediaPlayer.prepareAsync();

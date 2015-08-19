@@ -25,7 +25,7 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -34,26 +34,27 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SurfaceRenderView extends SurfaceView implements IRenderView {
+@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+public class TextureRenderView extends TextureView implements IRenderView{
     private MeasureHelper mMeasureHelper;
 
-    public SurfaceRenderView(Context context) {
+    public TextureRenderView(Context context) {
         super(context);
         initView(context);
     }
 
-    public SurfaceRenderView(Context context, AttributeSet attrs) {
+    public TextureRenderView(Context context, AttributeSet attrs) {
         super(context, attrs);
         initView(context);
     }
 
-    public SurfaceRenderView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TextureRenderView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initView(context);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public SurfaceRenderView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public TextureRenderView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         initView(context);
     }
@@ -61,9 +62,7 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
     private void initView(Context context) {
         mMeasureHelper = new MeasureHelper(this);
         mSurfaceCallback = new SurfaceCallback(this);
-        getHolder().addCallback(mSurfaceCallback);
-        //noinspection deprecation
-        getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        setSurfaceTextureListener(mSurfaceCallback);
     }
 
     public View getView() {
@@ -78,7 +77,7 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
     {
         if (videoWidth > 0 && videoHeight > 0) {
             mMeasureHelper.setVideoSize(videoWidth, videoHeight);
-            getHolder().setFixedSize(videoWidth, videoHeight);
+            getSurfaceTexture().setDefaultBufferSize(videoWidth, videoHeight);
             requestLayout();
         }
     }
@@ -99,41 +98,41 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
     }
 
     //--------------------
-    // SurfaceViewHolder
+    // TextureViewHolder
     //--------------------
 
     private static final class InternalSurfaceHolder implements IRenderView.ISurfaceHolder {
-        private SurfaceRenderView mSurfaceView;
-        private SurfaceHolder mSurfaceHolder;
+        private TextureRenderView mTextureView;
+        private SurfaceTexture mSurfaceTexture;
 
-        public InternalSurfaceHolder(@NonNull SurfaceRenderView surfaceView,
-                                     @Nullable SurfaceHolder surfaceHolder) {
-            mSurfaceView = surfaceView;
-            mSurfaceHolder = surfaceHolder;
+        public InternalSurfaceHolder(@NonNull TextureRenderView textureView,
+                                     @Nullable SurfaceTexture surfaceTexture) {
+            mTextureView = textureView;
+            mSurfaceTexture = surfaceTexture;
         }
 
         @NonNull
         @Override
         public IRenderView getRenderView() {
-            return mSurfaceView;
+            return mTextureView;
         }
 
         @Nullable
         @Override
         public SurfaceHolder getSurfaceHolder() {
-            return mSurfaceHolder;
-        }
-
-        @Nullable
-        @Override
-        public SurfaceTexture getSurfaceTexture() {
             return null;
         }
 
         @Nullable
         @Override
+        public SurfaceTexture getSurfaceTexture() {
+            return mSurfaceTexture;
+        }
+
+        @Nullable
+        @Override
         public Surface openSurface() {
-            return mSurfaceHolder.getSurface();
+            return new Surface(mSurfaceTexture);
         }
     }
 
@@ -153,36 +152,35 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
 
     private SurfaceCallback mSurfaceCallback;
 
-    private static final class SurfaceCallback implements SurfaceHolder.Callback {
-        private SurfaceHolder mSurfaceHolder;
+    private static final class SurfaceCallback implements TextureView.SurfaceTextureListener {
+        private SurfaceTexture mSurfaceTexture;
         private boolean mIsFormatChanged;
-        private int mFormat;
         private int mWidth;
         private int mHeight;
 
-        private WeakReference<SurfaceRenderView> mWeakSurfaceView;
+        private WeakReference<TextureRenderView> mWeakRenderView;
         private Map<IRenderCallback, Object> mRenderCallbackMap = new ConcurrentHashMap<IRenderCallback, Object>();
         private MeasureHelper mMeasureHelper;
 
-        public SurfaceCallback(@NonNull SurfaceRenderView surfaceView) {
-            mWeakSurfaceView = new WeakReference<SurfaceRenderView>(surfaceView);
-            mMeasureHelper = surfaceView.mMeasureHelper;
+        public SurfaceCallback(@NonNull TextureRenderView renderView) {
+            mWeakRenderView = new WeakReference<TextureRenderView>(renderView);
+            mMeasureHelper = renderView.mMeasureHelper;
         }
 
         public void addRenderCallback(@NonNull IRenderCallback callback) {
             mRenderCallbackMap.put(callback, callback);
 
             ISurfaceHolder surfaceHolder = null;
-            if (mSurfaceHolder != null) {
+            if (mSurfaceTexture != null) {
                 if (surfaceHolder == null)
-                    surfaceHolder = new InternalSurfaceHolder(mWeakSurfaceView.get(), mSurfaceHolder);
+                    surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), mSurfaceTexture);
                 callback.onSurfaceCreated(surfaceHolder, mWidth, mHeight);
             }
 
             if (mIsFormatChanged) {
                 if (surfaceHolder == null)
-                    surfaceHolder = new InternalSurfaceHolder(mWeakSurfaceView.get(), mSurfaceHolder);
-                callback.onSurfaceChanged(surfaceHolder, mFormat, mWidth, mHeight);
+                    surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), mSurfaceTexture);
+                callback.onSurfaceChanged(surfaceHolder, 0, mWidth, mHeight);
             }
         }
 
@@ -191,48 +189,50 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
         }
 
         @Override
-        public void surfaceCreated(SurfaceHolder holder) {
-            mSurfaceHolder = holder;
+        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+            mSurfaceTexture = surface;
             mIsFormatChanged = false;
-            mFormat = 0;
             mWidth = 0;
             mHeight = 0;
 
-            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakSurfaceView.get(), mSurfaceHolder);
+            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), surface);
             for (IRenderCallback renderCallback : mRenderCallbackMap.keySet()) {
                 renderCallback.onSurfaceCreated(surfaceHolder, 0, 0);
             }
         }
 
         @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-            mSurfaceHolder = null;
-            mIsFormatChanged = false;
-            mFormat = 0;
-            mWidth = 0;
-            mHeight = 0;
-
-            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakSurfaceView.get(), mSurfaceHolder);
-            for (IRenderCallback renderCallback : mRenderCallbackMap.keySet()) {
-                renderCallback.onSurfaceDestroyed(surfaceHolder);
-            }
-        }
-
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format,
-                                   int width, int height) {
-            mSurfaceHolder = holder;
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+            mSurfaceTexture = surface;
             mIsFormatChanged = true;
-            mFormat = format;
             mWidth = width;
             mHeight = height;
 
             mMeasureHelper.setVideoSize(width, height);
 
-            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakSurfaceView.get(), mSurfaceHolder);
+            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), surface);
             for (IRenderCallback renderCallback : mRenderCallbackMap.keySet()) {
-                renderCallback.onSurfaceChanged(surfaceHolder, format, width, height);
+                renderCallback.onSurfaceChanged(surfaceHolder, 0, width, height);
             }
+        }
+
+        @Override
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+            mSurfaceTexture = surface;
+            mIsFormatChanged = false;
+            mWidth = 0;
+            mHeight = 0;
+
+            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), surface);
+            for (IRenderCallback renderCallback : mRenderCallbackMap.keySet()) {
+                renderCallback.onSurfaceDestroyed(surfaceHolder);
+            }
+
+            return false;
+        }
+
+        @Override
+        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         }
     }
 
@@ -243,15 +243,12 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
-        event.setClassName(SurfaceRenderView.class.getName());
+        event.setClassName(TextureRenderView.class.getName());
     }
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            info.setClassName(SurfaceRenderView.class.getName());
-        }
+        info.setClassName(TextureRenderView.class.getName());
     }
 }
