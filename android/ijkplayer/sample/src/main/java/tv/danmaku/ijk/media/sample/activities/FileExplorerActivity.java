@@ -26,14 +26,25 @@ import java.io.IOException;
 
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.application.AppActivity;
+import tv.danmaku.ijk.media.sample.application.Settings;
 import tv.danmaku.ijk.media.sample.fragments.FileListFragment;
 
 public class FileExplorerActivity extends AppActivity implements FileListFragment.OnClickFileListener {
+    private Settings mSettings;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        doOpenDirectory("/", false);
+        if (mSettings == null) {
+            mSettings = new Settings(this);
+        }
+
+        String lastDirectory = mSettings.getLastDirectory();
+        if (!TextUtils.isEmpty(lastDirectory) && new File(lastDirectory).isDirectory())
+            doOpenDirectory(lastDirectory, false);
+        else
+            doOpenDirectory("/", false);
     }
 
     private void doOpenDirectory(String path, boolean addToBackStack) {
@@ -59,7 +70,9 @@ public class FileExplorerActivity extends AppActivity implements FileListFragmen
         }
 
         if (f.isDirectory()) {
-            doOpenDirectory(f.toString(), true);
+            String path = f.toString();
+            mSettings.setLastDirectory(path);
+            doOpenDirectory(path, true);
         } else if (f.exists()){
             VideoActivity.intentTo(this, f.getPath(), f.getName());
         }

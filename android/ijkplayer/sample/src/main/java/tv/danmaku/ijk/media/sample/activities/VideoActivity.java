@@ -16,18 +16,18 @@
 
 package tv.danmaku.ijk.media.sample.activities;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.MediaController;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.widget.MediaController;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.widget.media.IjkVideoView;
 
-public class VideoActivity extends Activity {
+public class VideoActivity extends AppCompatActivity {
     private IjkVideoView mVideoView;
     private String mVideoPath;
 

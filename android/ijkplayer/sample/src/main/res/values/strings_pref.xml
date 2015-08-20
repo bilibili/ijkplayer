@@ -46,4 +46,7 @@
     <string name="pref_title_using_opensl_es">Using OpenSL ES</string>
     <string name="pref_summary_using_opensl_es"></string>
 
+    <!-- -->
+    <string name="pref_key_last_directory"></string>
+
 </resources>
