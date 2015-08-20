@@ -151,11 +151,11 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
             }
 
             if (isDirectory(position)) {
-                viewHolder.iconImageView.setImageResource(R.drawable.ic_folder);
+                viewHolder.iconImageView.setImageResource(R.drawable.ic_theme_folder);
             } else if (isVideo(position)) {
-                viewHolder.iconImageView.setImageResource(R.drawable.ic_play_arrow);
+                viewHolder.iconImageView.setImageResource(R.drawable.ic_theme_play_arrow);
             } else {
-                viewHolder.iconImageView.setImageResource(R.drawable.ic_description);
+                viewHolder.iconImageView.setImageResource(R.drawable.ic_theme_description);
             }
             viewHolder.nameTextView.setText(getFileName(position));
 
