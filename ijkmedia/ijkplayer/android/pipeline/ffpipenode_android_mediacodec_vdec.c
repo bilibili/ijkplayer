@@ -175,6 +175,13 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
             if (opaque->quirk_reconfigure_with_new_codec) {
                 ALOGI("quirk: reconfigure with new codec");
                 SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
+
+                opaque->acodec = create_codec_l(env, node);
+                if (!opaque->acodec) {
+                    ALOGE("%s:open_video_decoder: create_codec failed\n", __func__);
+                    ret = -1;
+                    goto fail;
+                }
             }
         }
 
