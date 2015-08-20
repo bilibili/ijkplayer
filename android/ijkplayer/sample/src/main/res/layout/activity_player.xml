@@ -22,4 +22,14 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         tools:context=".toolbar_widget" />
 
+    <TextView
+        android:id="@+id/scale_mode_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        android:background="@color/ijk_transparent_dark"
+        android:padding="16dp"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
 </FrameLayout>

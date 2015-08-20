@@ -33,4 +33,9 @@ public interface IMediaController {
     void show(int timeout);
 
     void show();
+
+    //----------
+    // Extends
+    //----------
+    void showOnce(View view);
 }

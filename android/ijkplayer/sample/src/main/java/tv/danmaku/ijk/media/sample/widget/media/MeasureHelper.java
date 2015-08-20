@@ -16,12 +16,18 @@
 
 package tv.danmaku.ijk.media.sample.widget.media;
 
+import android.content.Context;
 import android.view.View;
 
 import java.lang.ref.WeakReference;
 
+import tv.danmaku.ijk.media.sample.R;
+
 public final class MeasureHelper {
     private WeakReference<View> mWeakView;
+
+    private int mParentWidth;
+    private int mParentHeight;
 
     private int mVideoWidth;
     private int mVideoHeight;
@@ -30,6 +36,8 @@ public final class MeasureHelper {
 
     private int mMeasuredWidth;
     private int mMeasuredHeight;
+
+    private int mCurrentAspectRatio = IRenderView.AR_ASPECT_FIT_PARENT;
 
     public MeasureHelper(View view) {
         mWeakView = new WeakReference<View>(view);
@@ -51,8 +59,14 @@ public final class MeasureHelper {
         mVideoSarDen = videoSarDen;
     }
 
+    public void setParentSize(int parentWidth, int parentHeight) {
+        mParentWidth = parentWidth;
+        mParentHeight = parentHeight;
+    }
+
     /**
      * Must be called by View.onMeasure(int, int)
+     *
      * @param widthMeasureSpec
      * @param heightMeasureSpec
      */
@@ -62,23 +76,82 @@ public final class MeasureHelper {
 
         int width = View.getDefaultSize(mVideoWidth, widthMeasureSpec);
         int height = View.getDefaultSize(mVideoHeight, heightMeasureSpec);
-        if (mVideoWidth > 0 && mVideoHeight > 0) {
-
+        if (mCurrentAspectRatio == IRenderView.AR_MATCH_PARENT) {
+            width = widthMeasureSpec;
+            height = heightMeasureSpec;
+        } else if (mVideoWidth > 0 && mVideoHeight > 0) {
             int widthSpecMode = View.MeasureSpec.getMode(widthMeasureSpec);
             int widthSpecSize = View.MeasureSpec.getSize(widthMeasureSpec);
             int heightSpecMode = View.MeasureSpec.getMode(heightMeasureSpec);
             int heightSpecSize = View.MeasureSpec.getSize(heightMeasureSpec);
 
-            if (widthSpecMode == View.MeasureSpec.EXACTLY && heightSpecMode == View.MeasureSpec.EXACTLY) {
+            if (widthSpecMode == View.MeasureSpec.AT_MOST && heightSpecMode == View.MeasureSpec.AT_MOST) {
+                float specAspectRatio = (float) widthSpecSize / (float) heightSpecSize;
+                float displayAspectRatio;
+                switch (mCurrentAspectRatio) {
+                    case IRenderView.AR_16_9_FIT_PARENT:
+                        displayAspectRatio = 16.0f / 9.0f;
+                        break;
+                    case IRenderView.AR_4_3_FIT_PARENT:
+                        displayAspectRatio = 4.0f / 3.0f;
+                        break;
+                    case IRenderView.AR_ASPECT_FIT_PARENT:
+                    case IRenderView.AR_ASPECT_FILL_PARENT:
+                    case IRenderView.AR_ASPECT_WRAP_CONTENT:
+                    default:
+                        displayAspectRatio = (float) mVideoWidth / (float) mVideoHeight;
+                        break;
+                }
+                boolean shouldBeWider = displayAspectRatio > specAspectRatio;
+
+                switch (mCurrentAspectRatio) {
+                    case IRenderView.AR_ASPECT_FIT_PARENT:
+                    case IRenderView.AR_16_9_FIT_PARENT:
+                    case IRenderView.AR_4_3_FIT_PARENT:
+                        if (shouldBeWider) {
+                            // too wide, fix width
+                            width = widthSpecSize;
+                            height = (int) (width / displayAspectRatio);
+                        } else {
+                            // too high, fix height
+                            height = heightSpecSize;
+                            width = (int) (height * displayAspectRatio);
+                        }
+                        break;
+                    case IRenderView.AR_ASPECT_FILL_PARENT:
+                        if (shouldBeWider) {
+                            // not high enough, fix height
+                            height = heightSpecSize;
+                            width = (int) (height * displayAspectRatio);
+                        } else {
+                            // not wide enough, fix width
+                            width = widthSpecSize;
+                            height = (int) (width / displayAspectRatio);
+                        }
+                        break;
+                    case IRenderView.AR_ASPECT_WRAP_CONTENT:
+                    default:
+                        if (shouldBeWider) {
+                            // too wide, fix width
+                            width = Math.min(mVideoWidth, widthSpecSize);
+                            height = (int) (width / displayAspectRatio);
+                        } else {
+                            // too high, fix height
+                            height = Math.min(mVideoHeight, heightSpecSize);
+                            width = (int) (height * displayAspectRatio);
+                        }
+                        break;
+                }
+            } else if (widthSpecMode == View.MeasureSpec.EXACTLY && heightSpecMode == View.MeasureSpec.EXACTLY) {
                 // the size is fixed
                 width = widthSpecSize;
                 height = heightSpecSize;
 
                 // for compatibility, we adjust size based on aspect ratio
-                if ( mVideoWidth * height  < width * mVideoHeight ) {
+                if (mVideoWidth * height < width * mVideoHeight) {
                     //Log.i("@@@", "image too wide, correcting");
                     width = height * mVideoWidth / mVideoHeight;
-                } else if ( mVideoWidth * height  > width * mVideoHeight ) {
+                } else if (mVideoWidth * height > width * mVideoHeight) {
                     //Log.i("@@@", "image too tall, correcting");
                     height = width * mVideoHeight / mVideoWidth;
                 }
@@ -127,5 +200,37 @@ public final class MeasureHelper {
 
     public int getMeasuredHeight() {
         return mMeasuredHeight;
+    }
+
+    public void setAspectRatio(int aspectRatio) {
+        mCurrentAspectRatio = aspectRatio;
+    }
+
+    public static String getAspectRatioText(Context context, int aspectRatio) {
+        String text;
+        switch (aspectRatio) {
+            case IRenderView.AR_ASPECT_FIT_PARENT:
+                text = context.getString(R.string.VideoView_ar_aspect_fit_parent);
+                break;
+            case IRenderView.AR_ASPECT_FILL_PARENT:
+                text = context.getString(R.string.VideoView_ar_aspect_fill_parent);
+                break;
+            case IRenderView.AR_ASPECT_WRAP_CONTENT:
+                text = context.getString(R.string.VideoView_ar_aspect_wrap_content);
+                break;
+            case IRenderView.AR_MATCH_PARENT:
+                text = context.getString(R.string.VideoView_ar_match_parent);
+                break;
+            case IRenderView.AR_16_9_FIT_PARENT:
+                text = context.getString(R.string.VideoView_ar_16_9_fit_parent);
+                break;
+            case IRenderView.AR_4_3_FIT_PARENT:
+                text = context.getString(R.string.VideoView_ar_4_3_fit_parent);
+                break;
+            default:
+                text = context.getString(R.string.N_A);
+                break;
+        }
+        return text;
     }
 }

@@ -23,15 +23,22 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.TextView;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.widget.media.AndroidMediaController;
 import tv.danmaku.ijk.media.sample.widget.media.IjkVideoView;
+import tv.danmaku.ijk.media.sample.widget.media.MeasureHelper;
 
 public class VideoActivity extends AppCompatActivity {
-    private IjkVideoView mVideoView;
     private String mVideoPath;
+
+    private AndroidMediaController mMediaController;
+    private IjkVideoView mVideoView;
+    private TextView mScaleModeTextView;
 
     public static Intent newIntent(Context context, String videoPath, String videoTitle) {
         Intent intent = new Intent(context, VideoActivity.class);
@@ -63,15 +70,17 @@ public class VideoActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
-        AndroidMediaController mediaController = new AndroidMediaController(this, false);
-        mediaController.setSupportActionBar(actionBar);
+        mMediaController = new AndroidMediaController(this, false);
+        mMediaController.setSupportActionBar(actionBar);
+
+        mScaleModeTextView = (TextView) findViewById(R.id.scale_mode_text_view);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
         IjkMediaPlayer.native_profileBegin("libijkplayer.so");
 
         mVideoView = (IjkVideoView) findViewById(R.id.video_view);
-        mVideoView.setMediaController(mediaController);
+        mVideoView.setMediaController(mMediaController);
         mVideoView.setVideoPath(mVideoPath);
         mVideoView.start();
     }
@@ -82,5 +91,25 @@ public class VideoActivity extends AppCompatActivity {
 
         mVideoView.stopPlayback();
         IjkMediaPlayer.native_profileEnd();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_player, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_toggle_ratio) {
+            int aspectRatio = mVideoView.toggleAspectRatio();
+            String aspectRatioText = MeasureHelper.getAspectRatioText(this, aspectRatio);
+            mScaleModeTextView.setText(aspectRatioText);
+            mMediaController.showOnce(mScaleModeTextView);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

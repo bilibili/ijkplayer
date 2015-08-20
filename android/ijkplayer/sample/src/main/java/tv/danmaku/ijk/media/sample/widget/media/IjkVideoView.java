@@ -48,16 +48,16 @@ import tv.danmaku.ijk.media.sample.application.Settings;
 public class IjkVideoView extends FrameLayout implements MediaController.MediaPlayerControl {
     private String TAG = "IjkVideoView";
     // settable by the client
-    private Uri         mUri;
+    private Uri mUri;
     private Map<String, String> mHeaders;
 
     // all possible internal states
-    private static final int STATE_ERROR              = -1;
-    private static final int STATE_IDLE               = 0;
-    private static final int STATE_PREPARING          = 1;
-    private static final int STATE_PREPARED           = 2;
-    private static final int STATE_PLAYING            = 3;
-    private static final int STATE_PAUSED             = 4;
+    private static final int STATE_ERROR = -1;
+    private static final int STATE_IDLE = 0;
+    private static final int STATE_PREPARING = 1;
+    private static final int STATE_PREPARED = 2;
+    private static final int STATE_PLAYING = 3;
+    private static final int STATE_PAUSED = 4;
     private static final int STATE_PLAYBACK_COMPLETED = 5;
 
     // mCurrentState is a VideoView object's current state.
@@ -66,38 +66,40 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     // calling pause() intends to bring the object to a target state
     // of STATE_PAUSED.
     private int mCurrentState = STATE_IDLE;
-    private int mTargetState  = STATE_IDLE;
+    private int mTargetState = STATE_IDLE;
 
     // All the stuff we need for playing and showing a video
     private IRenderView.ISurfaceHolder mSurfaceHolder = null;
     private IMediaPlayer mMediaPlayer = null;
     // private int         mAudioSession;
-    private int         mVideoWidth;
-    private int         mVideoHeight;
-    private int         mSurfaceWidth;
-    private int         mSurfaceHeight;
+    private int mVideoWidth;
+    private int mVideoHeight;
+    private int mSurfaceWidth;
+    private int mSurfaceHeight;
     private IMediaController mMediaController;
     private IMediaPlayer.OnCompletionListener mOnCompletionListener;
     private IMediaPlayer.OnPreparedListener mOnPreparedListener;
-    private int         mCurrentBufferPercentage;
+    private int mCurrentBufferPercentage;
     private IMediaPlayer.OnErrorListener mOnErrorListener;
-    private IMediaPlayer.OnInfoListener  mOnInfoListener;
-    private int         mSeekWhenPrepared;  // recording the seek position while preparing
-    private boolean     mCanPause = true;
-    private boolean     mCanSeekBack;
-    private boolean     mCanSeekForward;
+    private IMediaPlayer.OnInfoListener mOnInfoListener;
+    private int mSeekWhenPrepared;  // recording the seek position while preparing
+    private boolean mCanPause = true;
+    private boolean mCanSeekBack;
+    private boolean mCanSeekForward;
 
     /** Subtitle rendering widget overlaid on top of the video. */
     // private RenderingWidget mSubtitleWidget;
 
-    /** Listener for changes to subtitle data, used to redraw when needed. */
+    /**
+     * Listener for changes to subtitle data, used to redraw when needed.
+     */
     // private RenderingWidget.OnChangedListener mSubtitlesChangedListener;
 
-    private Context     mAppContext;
-    private Settings    mSettings;
+    private Context mAppContext;
+    private Settings mSettings;
     private IRenderView mRenderView;
-    private int         mVideoSarNum;
-    private int         mVideoSarDen;
+    private int mVideoSarNum;
+    private int mVideoSarDen;
 
     public IjkVideoView(Context context) {
         super(context);
@@ -156,7 +158,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         requestFocus();
         // REMOVED: mPendingSubtitleTracks = new Vector<Pair<InputStream, MediaFormat>>();
         mCurrentState = STATE_IDLE;
-        mTargetState  = STATE_IDLE;
+        mTargetState = STATE_IDLE;
     }
 
     /**
@@ -205,7 +207,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mMediaPlayer.release();
             mMediaPlayer = null;
             mCurrentState = STATE_IDLE;
-            mTargetState  = STATE_IDLE;
+            mTargetState = STATE_IDLE;
             AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
             am.abandonAudioFocus(null);
         }
@@ -319,7 +321,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         if (mMediaPlayer != null && mMediaController != null) {
             mMediaController.setMediaPlayer(this);
             View anchorView = this.getParent() instanceof View ?
-                    (View)this.getParent() : this;
+                    (View) this.getParent() : this;
             mMediaController.setAnchorView(anchorView);
             mMediaController.setEnabled(isInPlaybackState());
         }
@@ -409,7 +411,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
     private IMediaPlayer.OnInfoListener mInfoListener =
             new IMediaPlayer.OnInfoListener() {
-                public  boolean onInfo(IMediaPlayer mp, int arg1, int arg2) {
+                public boolean onInfo(IMediaPlayer mp, int arg1, int arg2) {
                     if (mOnInfoListener != null) {
                         mOnInfoListener.onInfo(mp, arg1, arg2);
                     }
@@ -482,8 +484,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
      *
      * @param l The callback that will be run
      */
-    public void setOnPreparedListener(IMediaPlayer.OnPreparedListener l)
-    {
+    public void setOnPreparedListener(IMediaPlayer.OnPreparedListener l) {
         mOnPreparedListener = l;
     }
 
@@ -493,8 +494,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
      *
      * @param l The callback that will be run
      */
-    public void setOnCompletionListener(IMediaPlayer.OnCompletionListener l)
-    {
+    public void setOnCompletionListener(IMediaPlayer.OnCompletionListener l) {
         mOnCompletionListener = l;
     }
 
@@ -506,8 +506,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
      *
      * @param l The callback that will be run
      */
-    public void setOnErrorListener(IMediaPlayer.OnErrorListener l)
-    {
+    public void setOnErrorListener(IMediaPlayer.OnErrorListener l) {
         mOnErrorListener = l;
     }
 
@@ -524,11 +523,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     // REMOVED: mSHCallback
     IRenderView.IRenderCallback mSHCallback = new IRenderView.IRenderCallback() {
         @Override
-        public void onSurfaceChanged(@NonNull IRenderView.ISurfaceHolder holder, int format, int w, int h)
-        {
+        public void onSurfaceChanged(@NonNull IRenderView.ISurfaceHolder holder, int format, int w, int h) {
             mSurfaceWidth = w;
             mSurfaceHeight = h;
-            boolean isValidState =  (mTargetState == STATE_PLAYING);
+            boolean isValidState = (mTargetState == STATE_PLAYING);
             boolean hasValidSize = (mVideoWidth == w && mVideoHeight == h);
             if (mMediaPlayer != null && isValidState && hasValidSize) {
                 if (mSeekWhenPrepared != 0) {
@@ -539,15 +537,13 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         }
 
         @Override
-        public void onSurfaceCreated(@NonNull IRenderView.ISurfaceHolder holder, int width, int height)
-        {
+        public void onSurfaceCreated(@NonNull IRenderView.ISurfaceHolder holder, int width, int height) {
             mSurfaceHolder = holder;
             openVideo();
         }
 
         @Override
-        public void onSurfaceDestroyed(@NonNull IRenderView.ISurfaceHolder holder)
-        {
+        public void onSurfaceDestroyed(@NonNull IRenderView.ISurfaceHolder holder) {
             // after we return from this we can't use the surface any more
             mSurfaceHolder = null;
             if (mMediaController != null) mMediaController.hide();
@@ -566,7 +562,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             // REMOVED: mPendingSubtitleTracks.clear();
             mCurrentState = STATE_IDLE;
             if (cleartargetstate) {
-                mTargetState  = STATE_IDLE;
+                mTargetState = STATE_IDLE;
             }
             AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
             am.abandonAudioFocus(null);
@@ -590,8 +586,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean isKeyCodeSupported = keyCode != KeyEvent.KEYCODE_BACK &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_UP &&
                 keyCode != KeyEvent.KEYCODE_VOLUME_DOWN &&
@@ -670,7 +665,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     @Override
     public int getDuration() {
         if (isInPlaybackState()) {
-            return (int)mMediaPlayer.getDuration();
+            return (int) mMediaPlayer.getDuration();
         }
 
         return -1;
@@ -679,7 +674,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     @Override
     public int getCurrentPosition() {
         if (isInPlaybackState()) {
-            return (int)mMediaPlayer.getCurrentPosition();
+            return (int) mMediaPlayer.getCurrentPosition();
         }
         return 0;
     }
@@ -742,4 +737,27 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     // REMOVED: measureAndLayoutSubtitleWidget();
     // REMOVED: setSubtitleWidget();
     // REMOVED: getSubtitleLooper();
+
+    //-------------------------
+    // Extend: Aspect Ratio
+    //-------------------------
+
+    private static final int[] s_allAspectRatio = {
+            IRenderView.AR_ASPECT_FIT_PARENT,
+            IRenderView.AR_ASPECT_FILL_PARENT,
+            IRenderView.AR_ASPECT_WRAP_CONTENT,
+            IRenderView.AR_MATCH_PARENT,
+            IRenderView.AR_16_9_FIT_PARENT,
+            IRenderView.AR_4_3_FIT_PARENT};
+    private int mCurrentAspectRatioIndex = 0;
+    private int mCurrentAspectRatio = s_allAspectRatio[0];
+
+    public int toggleAspectRatio() {
+        mCurrentAspectRatioIndex++;
+        mCurrentAspectRatioIndex %= s_allAspectRatio.length;
+
+        mCurrentAspectRatio = s_allAspectRatio[mCurrentAspectRatioIndex];
+        mRenderView.setAspectRatio(mCurrentAspectRatio);
+        return mCurrentAspectRatio;
+    }
 }

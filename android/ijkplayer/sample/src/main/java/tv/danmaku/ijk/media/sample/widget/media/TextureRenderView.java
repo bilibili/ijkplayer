@@ -77,7 +77,7 @@ public class TextureRenderView extends TextureView implements IRenderView{
     {
         if (videoWidth > 0 && videoHeight > 0) {
             mMeasureHelper.setVideoSize(videoWidth, videoHeight);
-            getSurfaceTexture().setDefaultBufferSize(videoWidth, videoHeight);
+            // getSurfaceTexture().setDefaultBufferSize(videoWidth, videoHeight);
             requestLayout();
         }
     }
@@ -89,6 +89,12 @@ public class TextureRenderView extends TextureView implements IRenderView{
             mMeasureHelper.setVideoSampleAspectRatio(videoSarNum, videoSarDen);
             requestLayout();
         }
+    }
+
+    @Override
+    public void setAspectRatio(int aspectRatio) {
+        mMeasureHelper.setAspectRatio(aspectRatio);
+        requestLayout();
     }
 
     @Override
