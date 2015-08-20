@@ -1,6 +1,11 @@
 tag next
 --------------------------------
 android: drop support of Eclipse
+android: update to SDK 23
+android/sample: add a file explorer
+android/sample: remove VitamioBundle
+android/sample: new VideoActivity
+android/sample: add preferences
 
 tag k0.3.1
 --------------------------------
