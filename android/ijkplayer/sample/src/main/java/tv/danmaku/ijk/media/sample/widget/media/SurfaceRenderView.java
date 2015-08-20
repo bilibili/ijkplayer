@@ -166,11 +166,9 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
 
         private WeakReference<SurfaceRenderView> mWeakSurfaceView;
         private Map<IRenderCallback, Object> mRenderCallbackMap = new ConcurrentHashMap<IRenderCallback, Object>();
-        private MeasureHelper mMeasureHelper;
 
         public SurfaceCallback(@NonNull SurfaceRenderView surfaceView) {
             mWeakSurfaceView = new WeakReference<SurfaceRenderView>(surfaceView);
-            mMeasureHelper = surfaceView.mMeasureHelper;
         }
 
         public void addRenderCallback(@NonNull IRenderCallback callback) {
@@ -231,7 +229,7 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
             mWidth = width;
             mHeight = height;
 
-            mMeasureHelper.setVideoSize(width, height);
+            // mMeasureHelper.setVideoSize(width, height);
 
             ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakSurfaceView.get(), mSurfaceHolder);
             for (IRenderCallback renderCallback : mRenderCallbackMap.keySet()) {

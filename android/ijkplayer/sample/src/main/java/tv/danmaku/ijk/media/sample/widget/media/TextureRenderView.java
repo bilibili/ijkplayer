@@ -163,11 +163,9 @@ public class TextureRenderView extends TextureView implements IRenderView {
 
         private WeakReference<TextureRenderView> mWeakRenderView;
         private Map<IRenderCallback, Object> mRenderCallbackMap = new ConcurrentHashMap<IRenderCallback, Object>();
-        private MeasureHelper mMeasureHelper;
 
         public SurfaceCallback(@NonNull TextureRenderView renderView) {
             mWeakRenderView = new WeakReference<TextureRenderView>(renderView);
-            mMeasureHelper = renderView.mMeasureHelper;
         }
 
         public void addRenderCallback(@NonNull IRenderCallback callback) {
@@ -210,8 +208,6 @@ public class TextureRenderView extends TextureView implements IRenderView {
             mIsFormatChanged = true;
             mWidth = width;
             mHeight = height;
-
-            mMeasureHelper.setVideoSize(width, height);
 
             ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), surface);
             for (IRenderCallback renderCallback : mRenderCallbackMap.keySet()) {
