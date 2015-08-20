@@ -76,7 +76,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private int         mVideoHeight;
     private int         mSurfaceWidth;
     private int         mSurfaceHeight;
-    private MediaController mMediaController;
+    private IMediaController mMediaController;
     private IMediaPlayer.OnCompletionListener mOnCompletionListener;
     private IMediaPlayer.OnPreparedListener mOnPreparedListener;
     private int         mCurrentBufferPercentage;
@@ -307,7 +307,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         }
     }
 
-    public void setMediaController(MediaController controller) {
+    public void setMediaController(IMediaController controller) {
         if (mMediaController != null) {
             mMediaController.hide();
         }

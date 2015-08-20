@@ -19,12 +19,14 @@ package tv.danmaku.ijk.media.sample.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.widget.MediaController;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.sample.R;
+import tv.danmaku.ijk.media.sample.widget.media.AndroidMediaController;
 import tv.danmaku.ijk.media.sample.widget.media.IjkVideoView;
 
 public class VideoActivity extends AppCompatActivity {
@@ -47,9 +49,7 @@ public class VideoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        IjkMediaPlayer.loadLibrariesOnce(null);
-        IjkMediaPlayer.native_profileBegin("libijkplayer.so");
-
+        // handle arguments
         mVideoPath = getIntent().getStringExtra("videoPath");
 
         Intent intent = getIntent();
@@ -58,7 +58,17 @@ public class VideoActivity extends AppCompatActivity {
             mVideoPath = intent.getDataString();
         }
 
-        MediaController mediaController = new MediaController(this, false);
+        // init UI
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        AndroidMediaController mediaController = new AndroidMediaController(this, false);
+        mediaController.setSupportActionBar(actionBar);
+
+        // init player
+        IjkMediaPlayer.loadLibrariesOnce(null);
+        IjkMediaPlayer.native_profileBegin("libijkplayer.so");
 
         mVideoView = (IjkVideoView) findViewById(R.id.video_view);
         mVideoView.setMediaController(mediaController);
