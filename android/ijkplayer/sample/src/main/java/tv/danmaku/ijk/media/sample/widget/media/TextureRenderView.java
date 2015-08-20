@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class TextureRenderView extends TextureView implements IRenderView{
+public class TextureRenderView extends TextureView implements IRenderView {
     private MeasureHelper mMeasureHelper;
 
     public TextureRenderView(Context context) {
@@ -73,18 +73,15 @@ public class TextureRenderView extends TextureView implements IRenderView{
     // Layout & Measure
     //--------------------
     @Override
-    public void setVideoSize(int videoWidth, int videoHeight)
-    {
+    public void setVideoSize(int videoWidth, int videoHeight) {
         if (videoWidth > 0 && videoHeight > 0) {
             mMeasureHelper.setVideoSize(videoWidth, videoHeight);
-            // getSurfaceTexture().setDefaultBufferSize(videoWidth, videoHeight);
             requestLayout();
         }
     }
 
     @Override
-    public void setVideoSampleAspectRatio(int videoSarNum, int videoSarDen)
-    {
+    public void setVideoSampleAspectRatio(int videoSarNum, int videoSarDen) {
         if (videoSarNum > 0 && videoSarDen > 0) {
             mMeasureHelper.setVideoSampleAspectRatio(videoSarNum, videoSarDen);
             requestLayout();

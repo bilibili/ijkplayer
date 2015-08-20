@@ -59,11 +59,6 @@ public final class MeasureHelper {
         mVideoSarDen = videoSarDen;
     }
 
-    public void setParentSize(int parentWidth, int parentHeight) {
-        mParentWidth = parentWidth;
-        mParentHeight = parentHeight;
-    }
-
     /**
      * Must be called by View.onMeasure(int, int)
      *
