@@ -34,6 +34,7 @@
 typedef struct SDL_Vout_Opaque {
     ANativeWindow   *native_window;
     SDL_AMediaCodec *weak_acodec;
+    int              null_native_window_warned; // reduce log for null window
 } SDL_Vout_Opaque;
 
 static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, Uint32 format, SDL_Vout *vout)
@@ -75,8 +76,9 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     SDL_Vout_Opaque *opaque = vout->opaque;
     ANativeWindow *native_window = opaque->native_window;
 
-    if (!native_window) {
-        ALOGE("voud_display_overlay_l: NULL native_window");
+    if (!native_window && !opaque->null_native_window_warned) {
+        opaque->null_native_window_warned = 1;
+        ALOGW("voud_display_overlay_l: NULL native_window");
         return -1;
     }
 
@@ -141,6 +143,7 @@ static void SDL_VoutAndroid_SetNativeWindow_l(SDL_Vout *vout, ANativeWindow *nat
         ANativeWindow_acquire(native_window);
 
     opaque->native_window = native_window;
+    opaque->null_native_window_warned = 0;
 }
 
 void SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_window)

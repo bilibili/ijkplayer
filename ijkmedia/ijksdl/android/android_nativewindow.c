@@ -202,10 +202,8 @@ int SDL_Android_NativeWindow_display_l(ANativeWindow *native_window, SDL_VoutOve
 {
     int retval;
 
-    if (!native_window) {
-        ALOGE("SDL_Android_NativeWindow_display_l: NULL native_window");
+    if (!native_window)
         return -1;
-    }
 
     if (!overlay) {
         ALOGE("SDL_Android_NativeWindow_display_l: NULL overlay");
