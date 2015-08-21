@@ -152,12 +152,13 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
     public void setRenderView(IRenderView renderView) {
         if (mRenderView != null) {
+            if (mMediaPlayer != null)
+                mMediaPlayer.setDisplay(null);
+
             View renderUIView = mRenderView.getView();
             mRenderView.removeRenderCallback(mSHCallback);
             mRenderView = null;
             removeView(renderUIView);
-            if (mMediaPlayer != null)
-                mMediaPlayer.setDisplay(null);
         }
 
         if (renderView == null)
