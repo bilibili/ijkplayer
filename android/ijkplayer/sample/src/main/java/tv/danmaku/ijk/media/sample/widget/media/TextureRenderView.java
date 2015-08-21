@@ -34,6 +34,8 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import tv.danmaku.ijk.media.player.IMediaPlayer;
+
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class TextureRenderView extends TextureView implements IRenderView {
     private MeasureHelper mMeasureHelper;
@@ -114,6 +116,12 @@ public class TextureRenderView extends TextureView implements IRenderView {
             mSurfaceTexture = surfaceTexture;
         }
 
+        public void bindToMediaPlayer(IMediaPlayer mp) {
+            if (mp != null) {
+                mp.setSurface(openSurface());
+            }
+        }
+
         @NonNull
         @Override
         public IRenderView getRenderView() {
@@ -135,6 +143,8 @@ public class TextureRenderView extends TextureView implements IRenderView {
         @Nullable
         @Override
         public Surface openSurface() {
+            if (mSurfaceTexture == null)
+                return null;
             return new Surface(mSurfaceTexture);
         }
     }

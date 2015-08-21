@@ -37,6 +37,7 @@ import android.widget.FrameLayout;
 import android.widget.MediaController;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
@@ -132,22 +133,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         mSettings = new Settings(mAppContext);
 
         if (mSettings.getUsingTextureView() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            TextureRenderView renderView = new TextureRenderView(context);
-            mRenderView = renderView;
+            setRender(RENDER_TEXTURE_VIEW);
         } else {
-            SurfaceRenderView renderView = new SurfaceRenderView(context);
-            mRenderView = renderView;
+            setRender(RENDER_SURFACE_VIEW);
         }
-
-        View renderView = mRenderView.getView();
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                Gravity.CENTER);
-        renderView.setLayoutParams(lp);
-        addView(renderView);
-
-        mRenderView.addRenderCallback(mSHCallback);
 
         mVideoWidth = 0;
         mVideoHeight = 0;
@@ -159,6 +148,58 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         // REMOVED: mPendingSubtitleTracks = new Vector<Pair<InputStream, MediaFormat>>();
         mCurrentState = STATE_IDLE;
         mTargetState = STATE_IDLE;
+    }
+
+    public void setRenderView(IRenderView renderView) {
+        if (mRenderView != null) {
+            View renderUIView = mRenderView.getView();
+            mRenderView.removeRenderCallback(mSHCallback);
+            mRenderView = null;
+            removeView(renderUIView);
+            if (mMediaPlayer != null)
+                mMediaPlayer.setDisplay(null);
+        }
+
+        if (renderView == null)
+            return;
+
+        mRenderView = renderView;
+        renderView.setAspectRatio(mCurrentAspectRatio);
+        if (mVideoWidth > 0 && mVideoHeight > 0)
+            renderView.setVideoSize(mVideoWidth, mVideoHeight);
+        if (mVideoSarNum > 0 && mVideoHeight > 0)
+            renderView.setVideoSampleAspectRatio(mVideoWidth, mVideoHeight);
+
+        View renderUIView = mRenderView.getView();
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER);
+        renderUIView.setLayoutParams(lp);
+        addView(renderUIView);
+
+        mRenderView.addRenderCallback(mSHCallback);
+    }
+
+    public void setRender(int render) {
+        switch (render) {
+            case RENDER_NONE:
+                setRenderView(null);
+                break;
+            case RENDER_TEXTURE_VIEW: {
+                TextureRenderView renderView = new TextureRenderView(getContext());
+                setRenderView(renderView);
+                break;
+            }
+            case RENDER_SURFACE_VIEW: {
+                SurfaceRenderView renderView = new SurfaceRenderView(getContext());
+                setRenderView(renderView);
+                break;
+            }
+            default:
+                Log.e(TAG, String.format(Locale.getDefault(), "invalid render %d\n", render));
+                break;
+        }
     }
 
     /**
@@ -521,9 +562,26 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     }
 
     // REMOVED: mSHCallback
+    private void bindSurfaceHolder(IMediaPlayer mp, IRenderView.ISurfaceHolder holder) {
+        if (mp == null)
+            return;
+
+        if (holder == null) {
+            mp.setDisplay(null);
+            return;
+        }
+
+        holder.bindToMediaPlayer(mp);
+    }
+
     IRenderView.IRenderCallback mSHCallback = new IRenderView.IRenderCallback() {
         @Override
         public void onSurfaceChanged(@NonNull IRenderView.ISurfaceHolder holder, int format, int w, int h) {
+            if (holder == null || holder.getRenderView() != mRenderView) {
+                Log.e(TAG, "onSurfaceChanged: unmatched render callback\n");
+                return;
+            }
+
             mSurfaceWidth = w;
             mSurfaceHeight = h;
             boolean isValidState = (mTargetState == STATE_PLAYING);
@@ -538,23 +596,42 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
         @Override
         public void onSurfaceCreated(@NonNull IRenderView.ISurfaceHolder holder, int width, int height) {
+            if (holder == null || holder.getRenderView() != mRenderView) {
+                Log.e(TAG, "onSurfaceCreated: unmatched render callback\n");
+                return;
+            }
+
             mSurfaceHolder = holder;
-            openVideo();
+            if (mMediaPlayer != null)
+                bindSurfaceHolder(mMediaPlayer, holder);
+            else
+                openVideo();
         }
 
         @Override
         public void onSurfaceDestroyed(@NonNull IRenderView.ISurfaceHolder holder) {
+            if (holder == null && holder.getRenderView() != mRenderView) {
+                Log.e(TAG, "onSurfaceDestroyed: unmatched render callback\n");
+                return;
+            }
+
             // after we return from this we can't use the surface any more
             mSurfaceHolder = null;
-            if (mMediaController != null) mMediaController.hide();
-            release(true);
+            // REMOVED: if (mMediaController != null) mMediaController.hide();
+            // REMOVED: release(true);
+            releaseWithoutStop();
         }
     };
+
+    public void releaseWithoutStop() {
+        if (mMediaPlayer != null)
+            mMediaPlayer.setDisplay(null);
+    }
 
     /*
      * release the media player in any state
      */
-    private void release(boolean cleartargetstate) {
+    public void release(boolean cleartargetstate) {
         if (mMediaPlayer != null) {
             mMediaPlayer.reset();
             mMediaPlayer.release();
@@ -757,7 +834,52 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         mCurrentAspectRatioIndex %= s_allAspectRatio.length;
 
         mCurrentAspectRatio = s_allAspectRatio[mCurrentAspectRatioIndex];
-        mRenderView.setAspectRatio(mCurrentAspectRatio);
+        if (mRenderView != null)
+            mRenderView.setAspectRatio(mCurrentAspectRatio);
         return mCurrentAspectRatio;
+    }
+
+    //-------------------------
+    // Extend: Render
+    //-------------------------
+    public static final int RENDER_NONE = 0;
+    public static final int RENDER_SURFACE_VIEW = 1;
+    public static final int RENDER_TEXTURE_VIEW = 2;
+
+    private static final int[] s_allRender = {
+            RENDER_SURFACE_VIEW,
+            // RENDER_TEXTURE_VIEW,
+            RENDER_NONE
+    };
+    private int mCurrentRenderIndex = 0;
+    private int mCurrentRender = s_allRender[0];
+
+    public int toggleRender() {
+        mCurrentRenderIndex++;
+        mCurrentRenderIndex %= s_allRender.length;
+
+        mCurrentRender = s_allRender[mCurrentRenderIndex];
+        setRender(mCurrentRender);
+        return mCurrentRender;
+    }
+
+    @NonNull
+    public static String getRenderText(Context context, int render) {
+        String text;
+        switch (render) {
+            case RENDER_NONE:
+                text = context.getString(R.string.VideoView_render_none);
+                break;
+            case RENDER_SURFACE_VIEW:
+                text = context.getString(R.string.VideoView_render_surface_view);
+                break;
+            case RENDER_TEXTURE_VIEW:
+                text = context.getString(R.string.VideoView_render_texture_view);
+                break;
+            default:
+                text = context.getString(R.string.N_A);
+                break;
+        }
+        return text;
     }
 }

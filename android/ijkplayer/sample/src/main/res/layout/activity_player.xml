@@ -23,7 +23,7 @@
         tools:context=".toolbar_widget" />
 
     <TextView
-        android:id="@+id/scale_mode_text_view"
+        android:id="@+id/toast_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="left|center_vertical"

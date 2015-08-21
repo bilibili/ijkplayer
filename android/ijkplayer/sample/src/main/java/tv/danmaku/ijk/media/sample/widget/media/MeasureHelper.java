@@ -17,6 +17,7 @@
 package tv.danmaku.ijk.media.sample.widget.media;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import java.lang.ref.WeakReference;
@@ -201,6 +202,7 @@ public final class MeasureHelper {
         mCurrentAspectRatio = aspectRatio;
     }
 
+    @NonNull
     public static String getAspectRatioText(Context context, int aspectRatio) {
         String text;
         switch (aspectRatio) {

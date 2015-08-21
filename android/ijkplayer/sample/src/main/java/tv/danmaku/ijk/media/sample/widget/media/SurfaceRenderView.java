@@ -34,6 +34,8 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import tv.danmaku.ijk.media.player.IMediaPlayer;
+
 public class SurfaceRenderView extends SurfaceView implements IRenderView {
     private MeasureHelper mMeasureHelper;
 
@@ -116,6 +118,12 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
             mSurfaceHolder = surfaceHolder;
         }
 
+        public void bindToMediaPlayer(IMediaPlayer mp) {
+            if (mp != null) {
+                mp.setDisplay(mSurfaceHolder);
+            }
+        }
+
         @NonNull
         @Override
         public IRenderView getRenderView() {
@@ -137,6 +145,8 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
         @Nullable
         @Override
         public Surface openSurface() {
+            if (mSurfaceHolder == null)
+                return null;
             return mSurfaceHolder.getSurface();
         }
     }

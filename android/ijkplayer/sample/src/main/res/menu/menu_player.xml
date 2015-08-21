@@ -4,8 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".menu_app">
     <item
+        android:id="@+id/action_toggle_render"
+        android:title="@string/toggle_render"
+        android:icon="@drawable/ic_action_dark_filter"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_toggle_ratio"
-        android:title="@string/settings"
+        android:title="@string/toggle_ratio"
         android:icon="@drawable/ic_action_dark_aspect_ratio"
         app:showAsAction="ifRoom" />
 </menu>

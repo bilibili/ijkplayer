@@ -38,7 +38,7 @@ public class VideoActivity extends AppCompatActivity {
 
     private AndroidMediaController mMediaController;
     private IjkVideoView mVideoView;
-    private TextView mScaleModeTextView;
+    private TextView mToastTextView;
 
     public static Intent newIntent(Context context, String videoPath, String videoTitle) {
         Intent intent = new Intent(context, VideoActivity.class);
@@ -73,7 +73,7 @@ public class VideoActivity extends AppCompatActivity {
         mMediaController = new AndroidMediaController(this, false);
         mMediaController.setSupportActionBar(actionBar);
 
-        mScaleModeTextView = (TextView) findViewById(R.id.scale_mode_text_view);
+        mToastTextView = (TextView) findViewById(R.id.toast_text_view);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -90,6 +90,7 @@ public class VideoActivity extends AppCompatActivity {
         super.onStop();
 
         mVideoView.stopPlayback();
+        mVideoView.release(true);
         IjkMediaPlayer.native_profileEnd();
     }
 
@@ -105,8 +106,14 @@ public class VideoActivity extends AppCompatActivity {
         if (id == R.id.action_toggle_ratio) {
             int aspectRatio = mVideoView.toggleAspectRatio();
             String aspectRatioText = MeasureHelper.getAspectRatioText(this, aspectRatio);
-            mScaleModeTextView.setText(aspectRatioText);
-            mMediaController.showOnce(mScaleModeTextView);
+            mToastTextView.setText(aspectRatioText);
+            mMediaController.showOnce(mToastTextView);
+            return true;
+        } else if (id == R.id.action_toggle_render) {
+            int render = mVideoView.toggleRender();
+            String renderText = IjkVideoView.getRenderText(this, render);
+            mToastTextView.setText(renderText);
+            mMediaController.showOnce(mToastTextView);
             return true;
         }
 

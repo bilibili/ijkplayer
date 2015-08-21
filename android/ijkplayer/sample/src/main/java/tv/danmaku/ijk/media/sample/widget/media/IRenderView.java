@@ -23,6 +23,8 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
 
+import tv.danmaku.ijk.media.player.IMediaPlayer;
+
 public interface IRenderView {
     static final int AR_ASPECT_FIT_PARENT = 0; // without clip
     static final int AR_ASPECT_FILL_PARENT = 1; // may clip
@@ -44,6 +46,8 @@ public interface IRenderView {
     void removeRenderCallback(@NonNull IRenderCallback callback);
 
     interface ISurfaceHolder {
+        void bindToMediaPlayer(IMediaPlayer mp);
+
         @NonNull
         IRenderView getRenderView();
 
