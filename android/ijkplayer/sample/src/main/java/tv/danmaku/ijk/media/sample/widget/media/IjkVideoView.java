@@ -377,8 +377,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     mVideoSarNum = mp.getVideoSarNum();
                     mVideoSarDen = mp.getVideoSarDen();
                     if (mVideoWidth != 0 && mVideoHeight != 0) {
-                        mRenderView.setVideoSize(mVideoWidth, mVideoHeight);
-                        mRenderView.setVideoSampleAspectRatio(mVideoSarNum, mVideoSarDen);
+                        if (mRenderView != null) {
+                            mRenderView.setVideoSize(mVideoWidth, mVideoHeight);
+                            mRenderView.setVideoSampleAspectRatio(mVideoSarNum, mVideoSarDen);
+                        }
                         // REMOVED: getHolder().setFixedSize(mVideoWidth, mVideoHeight);
                         requestLayout();
                     }
@@ -408,8 +410,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             if (mVideoWidth != 0 && mVideoHeight != 0) {
                 //Log.i("@@@@", "video size: " + mVideoWidth +"/"+ mVideoHeight);
                 // REMOVED: getHolder().setFixedSize(mVideoWidth, mVideoHeight);
-                mRenderView.setVideoSize(mVideoWidth, mVideoHeight);
-                mRenderView.setVideoSampleAspectRatio(mVideoSarNum, mVideoSarDen);
+                if (mRenderView != null) {
+                    mRenderView.setVideoSize(mVideoWidth, mVideoHeight);
+                    mRenderView.setVideoSampleAspectRatio(mVideoSarNum, mVideoSarDen);
+                }
                 if (mSurfaceWidth == mVideoWidth && mSurfaceHeight == mVideoHeight) {
                     // We didn't actually change the size (it was already at the size
                     // we need), so we won't get a "surface changed" callback, so
