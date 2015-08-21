@@ -17,11 +17,6 @@
 
 package tv.danmaku.ijk.media.player;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-
-import tv.danmaku.ijk.media.player.pragma.DebugLog;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.media.AudioManager;
@@ -31,7 +26,11 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceHolder.Callback;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+
+import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 public class AndroidMediaPlayer extends SimpleMediaPlayer {
     private MediaPlayer mInternalMediaPlayer;
@@ -59,28 +58,9 @@ public class AndroidMediaPlayer extends SimpleMediaPlayer {
         synchronized (mInitLock) {
             if (!mIsReleased) {
                 mInternalMediaPlayer.setDisplay(sh);
-                if (sh != null)
-                    sh.addCallback(mSurfaceCallback);
             }
         }
     }
-
-    private SurfaceHolder.Callback mSurfaceCallback = new Callback() {
-        public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                int height) {
-        }
-
-        public void surfaceCreated(SurfaceHolder holder) {
-        }
-
-        public void surfaceDestroyed(SurfaceHolder holder) {
-            if (mInternalMediaPlayer != null) {
-                if (!mKeepInBackground) {
-                    mInternalMediaPlayer.release();
-                }
-            }
-        }
-    };
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
