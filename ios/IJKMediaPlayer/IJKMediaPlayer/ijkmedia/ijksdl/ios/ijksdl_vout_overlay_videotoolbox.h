@@ -36,6 +36,8 @@ typedef struct VTBPicture {
     CVPixelBufferRef    cvBufferRef;
     uint64_t            width;
     uint64_t            height;
+    int                 sar_num;
+    int                 sar_den;
 } VTBPicture;
 
 SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout);

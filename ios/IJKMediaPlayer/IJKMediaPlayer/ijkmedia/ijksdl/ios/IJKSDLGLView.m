@@ -159,6 +159,8 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     int             _frameWidth;
     int             _frameHeight;
     int             _frameChroma;
+    int             _frameSarNum;
+    int             _frameSarDen;
     int             _rightPaddingPixels;
     GLfloat         _rightPadding;
     int             _bytesPerPixel;
@@ -474,9 +476,14 @@ static int g_ijk_gles_queue_spec_key;
         }
     }
 
-    if (overlay && (_frameWidth != overlay->w || _frameHeight != overlay->h)) {
-        _frameWidth = overlay->w;
+    if (overlay && (_frameWidth  != overlay->w ||
+                    _frameHeight != overlay->h ||
+                    _frameSarNum != overlay->sar_num ||
+                    _frameSarDen != overlay->sar_den)) {
+        _frameWidth  = overlay->w;
         _frameHeight = overlay->h;
+        _frameSarNum = overlay->sar_num;
+        _frameSarDen = overlay->sar_den;
         [self updateVertices];
     }
 
@@ -539,13 +546,17 @@ exit:
 
 - (void)updateVertices
 {
-    const float width           = _frameWidth;
-    const float height          = _frameHeight;
+    float width                 = _frameWidth;
+    float height                = _frameHeight;
     const float dW              = (float)_backingWidth	/ width;
     const float dH              = (float)_backingHeight / height;
     float dd                    = 1.0f;
     float nW                    = 1.0f;
     float nH                    = 1.0f;
+
+    if (_frameSarNum > 0 && _frameSarDen > 0) {
+        width = width * _frameSarNum / _frameSarDen;
+    }
 
     switch (self.contentMode) {
         case UIViewContentModeScaleToFill:
@@ -651,8 +662,10 @@ exit:
 	glUseProgram(_program);
 
     if (overlay) {
-        _frameWidth = overlay->w;
+        _frameWidth  = overlay->w;
         _frameHeight = overlay->h;
+        _frameSarNum = overlay->sar_num;
+        _frameSarDen = overlay->sar_den;
         [_renderer render:overlay];
     }
 

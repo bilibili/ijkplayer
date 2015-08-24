@@ -45,18 +45,16 @@ typedef struct sample_info {
     double  pts;
     int     serial;
 
+    int     sar_num;
+    int     sar_den;
+
     volatile int is_decoding;
 } sample_info;
 
 
 typedef struct sort_queue {
-    double              dts;
-    double              pts;
-    int                 serial;
-    double              sort;
-    int64_t             width;
-    int64_t             height;
-    CVPixelBufferRef    pixel_buffer_ref;
+    VTBPicture pic;
+    int serial;
     volatile struct sort_queue  *nextframe;
 } sort_queue;
 

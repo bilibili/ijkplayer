@@ -41,6 +41,9 @@ struct SDL_VoutOverlay {
 
     int is_private;
 
+    int sar_num;
+    int sar_den;
+
     SDL_Class               *opaque_class;
     SDL_VoutOverlay_Opaque  *opaque;
     void                    (*free_l)(SDL_VoutOverlay *overlay);

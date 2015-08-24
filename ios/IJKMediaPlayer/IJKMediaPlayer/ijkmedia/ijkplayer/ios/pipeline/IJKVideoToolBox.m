@@ -65,7 +65,7 @@ static void SortQueuePop(VideoToolBoxContext* context)
     context->m_sort_queue = context->m_sort_queue->nextframe;
     context->m_queue_depth--;
     pthread_mutex_unlock(&context->m_queue_mutex);
-    CVBufferRelease(top_frame->pixel_buffer_ref);
+    CVBufferRelease(top_frame->pic.cvBufferRef);
     free((void*)top_frame);
 }
 
@@ -243,11 +243,8 @@ static bool GetVTBPicture(VideoToolBoxContext* context, VTBPicture* pVTBPicture)
     pthread_mutex_lock(&context->m_queue_mutex);
 
     volatile sort_queue *sort_queue = context->m_sort_queue;
-    pVTBPicture->dts             = sort_queue->dts;
-    pVTBPicture->pts             = sort_queue->pts;
-    pVTBPicture->width           = sort_queue->width;
-    pVTBPicture->height          = sort_queue->height;
-    pVTBPicture->cvBufferRef     = CVBufferRetain(sort_queue->pixel_buffer_ref);
+    *pVTBPicture             = sort_queue->pic;
+    pVTBPicture->cvBufferRef = CVBufferRetain(sort_queue->pic.cvBufferRef);
 
     pthread_mutex_unlock(&context->m_queue_mutex);
 
@@ -328,6 +325,8 @@ static int vtb_queue_picture(
         vp->duration = duration;
         vp->pos = pos;
         vp->serial = serial;
+        vp->sar.num = vp->bmp->sar_num = picture->sar_num;
+        vp->sar.den = vp->bmp->sar_den = picture->sar_den;
         ffp_frame_queue_push(&is->pictq);
     }
     return 0;
@@ -376,11 +375,13 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         sort_queue *newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
 
         sample_info *sample_info = sourceFrameRefCon;
-        newFrame->pts    = sample_info->pts;
-        newFrame->dts    = sample_info->dts;
-        newFrame->sort   = sample_info->sort;
-        newFrame->serial = sample_info->serial;
-        newFrame->nextframe = NULL;
+        newFrame->pic.pts    = sample_info->pts;
+        newFrame->pic.dts    = sample_info->dts;
+        newFrame->pic.sort   = sample_info->sort;
+        newFrame->serial     = sample_info->serial;
+        newFrame->nextframe  = NULL;
+        newFrame->pic.sar_num = sample_info->sar_num;
+        newFrame->pic.sar_den = sample_info->sar_den;
 #ifdef FFP_SHOW_VTB_IN_DECODING
         ALOGD("VTB: indecoding: %d\n", ctx->sample_infos_in_decoding);
 #endif
@@ -388,7 +389,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         if (ctx->dealloced || is->abort_request || is->viddec.queue->abort_request)
             goto failed;
 
-        ctx->last_sort = newFrame->sort;
+        ctx->last_sort = newFrame->pic.sort;
         if (status != 0) {
             ALOGE("decode callback %d %s\n", (int)status, vtb_get_error_string(status));
             goto failed;
@@ -442,7 +443,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             ctx->new_seg_flag = false;
         }
 
-        if (ctx->m_sort_queue && newFrame->pts < ctx->m_sort_queue->pts) {
+        if (ctx->m_sort_queue && newFrame->pic.pts < ctx->m_sort_queue->pic.pts) {
             goto failed;
         }
 
@@ -450,11 +451,11 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         {
             double dpts = NAN;
 
-            if (newFrame->pts != AV_NOPTS_VALUE)
-                dpts = av_q2d(is->video_st->time_base) * newFrame->pts;
+            if (newFrame->pic.pts != AV_NOPTS_VALUE)
+                dpts = av_q2d(is->video_st->time_base) * newFrame->pic.pts;
 
             if (ffp->framedrop>0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
-                if (newFrame->pts != AV_NOPTS_VALUE) {
+                if (newFrame->pic.pts != AV_NOPTS_VALUE) {
                     double diff = dpts - ffp_get_master_clock(is);
                     if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
                         diff - is->frame_last_filter_delay < 0 &&
@@ -474,23 +475,23 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         }
 
         if (CVPixelBufferIsPlanar(imageBuffer)) {
-            newFrame->width  = CVPixelBufferGetWidthOfPlane(imageBuffer, 0);
-            newFrame->height = CVPixelBufferGetHeightOfPlane(imageBuffer, 0);
+            newFrame->pic.width  = CVPixelBufferGetWidthOfPlane(imageBuffer, 0);
+            newFrame->pic.height = CVPixelBufferGetHeightOfPlane(imageBuffer, 0);
         } else {
-            newFrame->width  = CVPixelBufferGetWidth(imageBuffer);
-            newFrame->height = CVPixelBufferGetHeight(imageBuffer);
+            newFrame->pic.width  = CVPixelBufferGetWidth(imageBuffer);
+            newFrame->pic.height = CVPixelBufferGetHeight(imageBuffer);
         }
 
 
-        newFrame->pixel_buffer_ref = CVBufferRetain(imageBuffer);
-        if (newFrame->pts != AV_NOPTS_VALUE) {
-            newFrame->sort = newFrame->pts;
+        newFrame->pic.cvBufferRef = CVBufferRetain(imageBuffer);
+        if (newFrame->pic.pts != AV_NOPTS_VALUE) {
+            newFrame->pic.sort = newFrame->pic.pts;
         } else {
-            newFrame->sort = newFrame->dts;
+            newFrame->pic.sort = newFrame->pic.dts;
         }
         pthread_mutex_lock(&ctx->m_queue_mutex);
         volatile sort_queue *queueWalker = ctx->m_sort_queue;
-        if (!queueWalker || (newFrame->sort < queueWalker->sort)) {
+        if (!queueWalker || (newFrame->pic.sort < queueWalker->pic.sort)) {
             newFrame->nextframe = queueWalker;
             ctx->m_sort_queue = newFrame;
         } else {
@@ -498,7 +499,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             volatile sort_queue *nextFrame = NULL;
             while (!frameInserted) {
                 nextFrame = queueWalker->nextframe;
-                if (!nextFrame || (newFrame->sort < nextFrame->sort)) {
+                if (!nextFrame || (newFrame->pic.sort < nextFrame->pic.sort)) {
                     newFrame->nextframe = nextFrame;
                     queueWalker->nextframe = newFrame;
                     frameInserted = true;
@@ -701,6 +702,8 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     sample_info->pts    = pts;
     sample_info->dts    = dts;
     sample_info->serial = context->serial;
+    sample_info->sar_num = avctx->sample_aspect_ratio.num;
+    sample_info->sar_den = avctx->sample_aspect_ratio.den;
     sample_info_push(context);
 
     status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)sample_info, 0);
