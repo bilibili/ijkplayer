@@ -96,6 +96,8 @@ public final class MeasureHelper {
                     case IRenderView.AR_ASPECT_WRAP_CONTENT:
                     default:
                         displayAspectRatio = (float) mVideoWidth / (float) mVideoHeight;
+                        if (mVideoSarNum > 0 && mVideoSarDen > 0)
+                            displayAspectRatio = displayAspectRatio * mVideoSarNum / mVideoSarDen;
                         break;
                 }
                 boolean shouldBeWider = displayAspectRatio > specAspectRatio;
