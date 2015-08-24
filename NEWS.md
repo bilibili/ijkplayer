@@ -2,10 +2,8 @@ tag next
 --------------------------------
 android: drop support of Eclipse
 android: update to SDK 23
-android/sample: add a file explorer
-android/sample: remove VitamioBundle
-android/sample: new VideoActivity
-android/sample: add preferences
+android/sample: better UI
+ios: support SAR
 
 tag k0.3.1
 --------------------------------
