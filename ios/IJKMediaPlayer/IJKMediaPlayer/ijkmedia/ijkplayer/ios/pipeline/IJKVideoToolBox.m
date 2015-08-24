@@ -242,11 +242,12 @@ static bool GetVTBPicture(VideoToolBoxContext* context, VTBPicture* pVTBPicture)
     }
     pthread_mutex_lock(&context->m_queue_mutex);
 
-    pVTBPicture->dts             = context->m_sort_queue->dts;
-    pVTBPicture->pts             = context->m_sort_queue->pts;
-    pVTBPicture->width           = context->m_sort_queue->width;
-    pVTBPicture->height          = context->m_sort_queue->height;
-    pVTBPicture->cvBufferRef     = CVBufferRetain(context->m_sort_queue->pixel_buffer_ref);
+    volatile sort_queue *sort_queue = context->m_sort_queue;
+    pVTBPicture->dts             = sort_queue->dts;
+    pVTBPicture->pts             = sort_queue->pts;
+    pVTBPicture->width           = sort_queue->width;
+    pVTBPicture->height          = sort_queue->height;
+    pVTBPicture->cvBufferRef     = CVBufferRetain(sort_queue->pixel_buffer_ref);
 
     pthread_mutex_unlock(&context->m_queue_mutex);
 
