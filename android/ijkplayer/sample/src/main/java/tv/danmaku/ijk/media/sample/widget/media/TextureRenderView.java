@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.ISurfaceTextureHolder;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class TextureRenderView extends TextureView implements IRenderView {
@@ -122,8 +123,23 @@ public class TextureRenderView extends TextureView implements IRenderView {
             mSurfaceTexture = surfaceTexture;
         }
 
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         public void bindToMediaPlayer(IMediaPlayer mp) {
-            if (mp != null) {
+            if (mp == null)
+                return;
+
+            if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) &&
+                    (mp instanceof ISurfaceTextureHolder)) {
+                ISurfaceTextureHolder textureHolder = (ISurfaceTextureHolder) mp;
+                mTextureView.mSurfaceCallback.setOwnSurfaceTecture(false);
+
+                SurfaceTexture surfaceTexture = textureHolder.getSurfaceTexture();
+                if (surfaceTexture != null) {
+                    mTextureView.setSurfaceTexture(surfaceTexture);
+                } else {
+                    textureHolder.setSurfaceTexture(mSurfaceTexture);
+                }
+            } else {
                 mp.setSurface(openSurface());
             }
         }
@@ -177,11 +193,17 @@ public class TextureRenderView extends TextureView implements IRenderView {
         private int mWidth;
         private int mHeight;
 
+        private boolean mOwnSurfaceTecture = true;
+
         private WeakReference<TextureRenderView> mWeakRenderView;
         private Map<IRenderCallback, Object> mRenderCallbackMap = new ConcurrentHashMap<IRenderCallback, Object>();
 
         public SurfaceCallback(@NonNull TextureRenderView renderView) {
             mWeakRenderView = new WeakReference<TextureRenderView>(renderView);
+        }
+
+        public void setOwnSurfaceTecture(boolean ownSurfaceTecture) {
+            mOwnSurfaceTecture = ownSurfaceTecture;
         }
 
         public void addRenderCallback(@NonNull IRenderCallback callback) {
@@ -243,7 +265,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
                 renderCallback.onSurfaceDestroyed(surfaceHolder);
             }
 
-            return true;
+            return mOwnSurfaceTecture;
         }
 
         @Override
