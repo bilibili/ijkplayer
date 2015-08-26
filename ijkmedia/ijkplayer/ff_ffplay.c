@@ -2526,13 +2526,13 @@ static int read_thread(void *arg)
 
     if (!ffp->start_on_prepared)
         toggle_pause(ffp, 1);
-    ffp->prepared = true;
-    ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
     if (is->video_st && is->video_st->codec) {
         AVCodecContext *avctx = is->video_st->codec;
         ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
         ffp_notify_msg3(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
     }
+    ffp->prepared = true;
+    ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
     if (!ffp->start_on_prepared) {
         while (is->pause_req && !is->abort_request) {
             SDL_Delay(100);
