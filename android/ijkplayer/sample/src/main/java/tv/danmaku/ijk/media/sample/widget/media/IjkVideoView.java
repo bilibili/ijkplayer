@@ -48,6 +48,7 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.TextureMediaPlayer;
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.application.Settings;
+import tv.danmaku.ijk.media.sample.services.MediaPlayerService;
 
 public class IjkVideoView extends FrameLayout implements MediaController.MediaPlayerControl {
     private String TAG = "IjkVideoView";
@@ -135,6 +136,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         mAppContext = context.getApplicationContext();
         mSettings = new Settings(mAppContext);
 
+        initBackground();
         initRenders();
 
         mVideoWidth = 0;
@@ -904,5 +906,31 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 break;
         }
         return text;
+    }
+
+    //-------------------------
+    // Extend: Background
+    //-------------------------
+
+    private boolean mEnableBackgroundPlay = false;
+
+    private void initBackground() {
+        mEnableBackgroundPlay = mSettings.getEnableBackgroundPlay();
+        if (mEnableBackgroundPlay) {
+            MediaPlayerService.intentToStart(getContext());
+            mMediaPlayer = MediaPlayerService.getMediaPlayer();
+        }
+    }
+
+    public boolean isBackgroundPlayEnabled() {
+        return mEnableBackgroundPlay;
+    }
+
+    public void enterBackground() {
+        MediaPlayerService.setMediaPlayer(mMediaPlayer);
+    }
+
+    public void stopBackgroundPlay() {
+        MediaPlayerService.setMediaPlayer(null);
     }
 }

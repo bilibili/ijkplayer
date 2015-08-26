@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.sample.R;
+import tv.danmaku.ijk.media.sample.application.Settings;
 import tv.danmaku.ijk.media.sample.widget.media.AndroidMediaController;
 import tv.danmaku.ijk.media.sample.widget.media.IjkVideoView;
 import tv.danmaku.ijk.media.sample.widget.media.MeasureHelper;
@@ -39,6 +40,9 @@ public class VideoActivity extends AppCompatActivity {
     private AndroidMediaController mMediaController;
     private IjkVideoView mVideoView;
     private TextView mToastTextView;
+
+    private Settings mSettings;
+    private boolean mBackPressed;
 
     public static Intent newIntent(Context context, String videoPath, String videoTitle) {
         Intent intent = new Intent(context, VideoActivity.class);
@@ -55,6 +59,8 @@ public class VideoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+
+        mSettings = new Settings(this);
 
         // handle arguments
         mVideoPath = getIntent().getStringExtra("videoPath");
@@ -86,11 +92,23 @@ public class VideoActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        mBackPressed = true;
+
+        super.onBackPressed();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
 
-        mVideoView.stopPlayback();
-        mVideoView.release(true);
+        if (mBackPressed || !mVideoView.isBackgroundPlayEnabled()) {
+            mVideoView.stopPlayback();
+            mVideoView.release(true);
+            mVideoView.stopBackgroundPlay();
+        } else {
+            mVideoView.enterBackground();
+        }
         IjkMediaPlayer.native_profileEnd();
     }
 
