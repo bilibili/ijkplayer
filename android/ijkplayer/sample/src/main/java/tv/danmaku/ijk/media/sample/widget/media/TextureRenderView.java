@@ -67,8 +67,14 @@ public class TextureRenderView extends TextureView implements IRenderView {
         setSurfaceTextureListener(mSurfaceCallback);
     }
 
+    @Override
     public View getView() {
         return this;
+    }
+
+    @Override
+    public boolean shouldWaitForResize() {
+        return false;
     }
 
     //--------------------

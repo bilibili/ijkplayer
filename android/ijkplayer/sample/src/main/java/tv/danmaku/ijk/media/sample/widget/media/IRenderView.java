@@ -35,6 +35,8 @@ public interface IRenderView {
 
     View getView();
 
+    boolean shouldWaitForResize();
+
     void setVideoSize(int videoWidth, int videoHeight);
 
     void setVideoSampleAspectRatio(int videoSarNum, int videoSarDen);

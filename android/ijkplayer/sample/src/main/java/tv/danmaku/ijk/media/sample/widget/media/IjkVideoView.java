@@ -414,7 +414,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     mRenderView.setVideoSize(mVideoWidth, mVideoHeight);
                     mRenderView.setVideoSampleAspectRatio(mVideoSarNum, mVideoSarDen);
                 }
-                if (mSurfaceWidth == mVideoWidth && mSurfaceHeight == mVideoHeight) {
+                if (!mRenderView.shouldWaitForResize() || mSurfaceWidth == mVideoWidth && mSurfaceHeight == mVideoHeight) {
                     // We didn't actually change the size (it was already at the size
                     // we need), so we won't get a "surface changed" callback, so
                     // start the video here instead of in the callback.
@@ -590,7 +590,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mSurfaceWidth = w;
             mSurfaceHeight = h;
             boolean isValidState = (mTargetState == STATE_PLAYING);
-            boolean hasValidSize = (mVideoWidth == w && mVideoHeight == h);
+            boolean hasValidSize = !mRenderView.shouldWaitForResize() || (mVideoWidth == w && mVideoHeight == h);
             if (mMediaPlayer != null && isValidState && hasValidSize) {
                 if (mSeekWhenPrepared != 0) {
                     seekTo(mSeekWhenPrepared);
@@ -853,7 +853,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
     private static final int[] s_allRender = {
             RENDER_SURFACE_VIEW,
-            // RENDER_TEXTURE_VIEW,
+            RENDER_TEXTURE_VIEW,
             RENDER_NONE
     };
     private int mCurrentRenderIndex = 0;

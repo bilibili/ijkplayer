@@ -68,8 +68,14 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
         getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
+    @Override
     public View getView() {
         return this;
+    }
+
+    @Override
+    public boolean shouldWaitForResize() {
+        return true;
     }
 
     //--------------------
