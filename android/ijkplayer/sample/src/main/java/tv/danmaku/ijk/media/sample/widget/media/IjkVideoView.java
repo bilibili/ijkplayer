@@ -37,12 +37,15 @@ import android.widget.FrameLayout;
 import android.widget.MediaController;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+import tv.danmaku.ijk.media.player.TextureMediaPlayer;
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.application.Settings;
 
@@ -132,11 +135,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         mAppContext = context.getApplicationContext();
         mSettings = new Settings(mAppContext);
 
-        if (mSettings.getUsingTextureView() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            setRender(RENDER_TEXTURE_VIEW);
-        } else {
-            setRender(RENDER_SURFACE_VIEW);
-        }
+        initRenders();
 
         mVideoWidth = 0;
         mVideoHeight = 0;
@@ -168,8 +167,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         renderView.setAspectRatio(mCurrentAspectRatio);
         if (mVideoWidth > 0 && mVideoHeight > 0)
             renderView.setVideoSize(mVideoWidth, mVideoHeight);
-        if (mVideoSarNum > 0 && mVideoHeight > 0)
-            renderView.setVideoSampleAspectRatio(mVideoWidth, mVideoHeight);
+        if (mVideoSarNum > 0 && mVideoSarDen > 0)
+            renderView.setVideoSampleAspectRatio(mVideoSarNum, mVideoSarDen);
 
         View renderUIView = mRenderView.getView();
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
@@ -189,6 +188,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 break;
             case RENDER_TEXTURE_VIEW: {
                 TextureRenderView renderView = new TextureRenderView(getContext());
+                if (mMediaPlayer != null) {
+                    renderView.getSurfaceHolder().bindToMediaPlayer(mMediaPlayer);
+                    renderView.setVideoSize(mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight());
+                    renderView.setVideoSampleAspectRatio(mMediaPlayer.getVideoSarNum(), mMediaPlayer.getVideoSarDen());
+                    renderView.setAspectRatio(mCurrentAspectRatio);
+                }
                 setRenderView(renderView);
                 break;
             }
@@ -302,6 +307,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
                 }
                 mMediaPlayer = ijkMediaPlayer;
+            }
+
+            if (mSettings.getEnableBackgroundPlay()) {
+                mMediaPlayer = new TextureMediaPlayer(mMediaPlayer);
             }
 
             // TODO: create SubtitleController in MediaPlayer, but we need
@@ -848,19 +857,31 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     public static final int RENDER_SURFACE_VIEW = 1;
     public static final int RENDER_TEXTURE_VIEW = 2;
 
-    private static final int[] s_allRender = {
-            RENDER_SURFACE_VIEW,
-            RENDER_TEXTURE_VIEW,
-            RENDER_NONE
-    };
+    private List<Integer> mAllRenders = new ArrayList<Integer>();
     private int mCurrentRenderIndex = 0;
-    private int mCurrentRender = s_allRender[0];
+    private int mCurrentRender = RENDER_NONE;
+
+    private void initRenders() {
+        mAllRenders.clear();
+
+        if (mSettings.getEnableSurfaceView())
+            mAllRenders.add(RENDER_SURFACE_VIEW);
+        if (mSettings.getEnableTextureView() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+            mAllRenders.add(RENDER_TEXTURE_VIEW);
+        if (mSettings.getEnableNoView())
+            mAllRenders.add(RENDER_NONE);
+
+        if (mAllRenders.isEmpty())
+            mAllRenders.add(RENDER_SURFACE_VIEW);
+        mCurrentRender = mAllRenders.get(mCurrentRenderIndex);
+        setRender(mCurrentRender);
+    }
 
     public int toggleRender() {
         mCurrentRenderIndex++;
-        mCurrentRenderIndex %= s_allRender.length;
+        mCurrentRenderIndex %= mAllRenders.size();
 
-        mCurrentRender = s_allRender[mCurrentRenderIndex];
+        mCurrentRender = mAllRenders.get(mCurrentRenderIndex);
         setRender(mCurrentRender);
         return mCurrentRender;
     }

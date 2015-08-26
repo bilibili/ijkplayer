@@ -16,6 +16,9 @@
 
 package tv.danmaku.ijk.media.player;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import java.io.IOException;
@@ -30,6 +33,12 @@ public class MediaPlayerProxy extends BaseMediaPlayer {
     @Override
     public void setDisplay(SurfaceHolder sh) {
         mBackEndMediaPlayer.setDisplay(sh);
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @Override
+    public void setSurface(Surface surface) {
+        mBackEndMediaPlayer.setSurface(surface);
     }
 
     @Override

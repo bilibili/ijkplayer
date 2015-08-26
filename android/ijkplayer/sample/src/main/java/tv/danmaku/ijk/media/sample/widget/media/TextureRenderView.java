@@ -113,6 +113,10 @@ public class TextureRenderView extends TextureView implements IRenderView {
     // TextureViewHolder
     //--------------------
 
+    public IRenderView.ISurfaceHolder getSurfaceHolder() {
+        return new InternalSurfaceHolder(this, mSurfaceCallback.mSurfaceTexture);
+    }
+
     private static final class InternalSurfaceHolder implements IRenderView.ISurfaceHolder {
         private TextureRenderView mTextureView;
         private SurfaceTexture mSurfaceTexture;

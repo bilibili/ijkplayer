@@ -4,17 +4,17 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:disableDependentsState="true"
+            android:key="@string/pref_key_enable_background_play"
+            android:persistent="true"
+            android:summary="@string/pref_summary_enable_background_play"
+            android:title="@string/pref_title_enable_background_play" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:disableDependentsState="true"
             android:key="@string/pref_key_using_android_player"
             android:persistent="true"
             android:summary="@string/pref_summary_using_android_player"
             android:title="@string/pref_title_using_android_player" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:disableDependentsState="true"
-            android:key="@string/pref_key_using_texture_view"
-            android:persistent="true"
-            android:summary="@string/pref_summary_using_texture_view"
-            android:title="@string/pref_title_using_texture_view" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_title_ijkplayer_video">
         <CheckBoxPreference
@@ -43,5 +43,25 @@
             android:persistent="true"
             android:summary="@string/pref_summary_using_opensl_es"
             android:title="@string/pref_title_using_opensl_es" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_title_video_output">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_enable_surface_view"
+            android:persistent="true"
+            android:summary="@string/pref_summary_enable_surface_view"
+            android:title="@string/pref_title_enable_surface_view" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_enable_texture_view"
+            android:persistent="true"
+            android:summary="@string/pref_summary_enable_texture_view"
+            android:title="@string/pref_title_enable_texture_view" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_enable_no_view"
+            android:persistent="true"
+            android:summary="@string/pref_summary_enable_no_view"
+            android:title="@string/pref_title_enable_no_view" />
     </PreferenceCategory>
 </PreferenceScreen>

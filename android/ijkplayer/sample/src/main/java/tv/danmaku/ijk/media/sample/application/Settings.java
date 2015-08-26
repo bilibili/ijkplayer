@@ -31,13 +31,13 @@ public class Settings {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mAppContext);
     }
 
-    public boolean getUsingAndroidPlayer() {
-        String key = mAppContext.getString(R.string.pref_key_using_android_player);
+    public boolean getEnableBackgroundPlay() {
+        String key = mAppContext.getString(R.string.pref_key_enable_background_play);
         return mSharedPreferences.getBoolean(key, false);
     }
 
-    public boolean getUsingTextureView() {
-        String key = mAppContext.getString(R.string.pref_key_using_texture_view);
+    public boolean getUsingAndroidPlayer() {
+        String key = mAppContext.getString(R.string.pref_key_using_android_player);
         return mSharedPreferences.getBoolean(key, false);
     }
 
@@ -54,6 +54,21 @@ public class Settings {
     public String getPixelFormat() {
         String key = mAppContext.getString(R.string.pref_key_pixel_format);
         return mSharedPreferences.getString(key, "");
+    }
+
+    public boolean getEnableSurfaceView() {
+        String key = mAppContext.getString(R.string.pref_key_enable_surface_view);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
+    public boolean getEnableTextureView() {
+        String key = mAppContext.getString(R.string.pref_key_enable_texture_view);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
+    public boolean getEnableNoView() {
+        String key = mAppContext.getString(R.string.pref_key_enable_no_view);
+        return mSharedPreferences.getBoolean(key, false);
     }
 
     public String getLastDirectory() {
