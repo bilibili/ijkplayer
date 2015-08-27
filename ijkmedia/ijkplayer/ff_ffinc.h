@@ -45,5 +45,6 @@ typedef int (*ijk_format_control_message)(void *opaque, int type, void *data, si
 #define FFP_OPT_CATEGORY_CODEC  2
 #define FFP_OPT_CATEGORY_SWS    3
 #define FFP_OPT_CATEGORY_PLAYER 4
+#define FFP_OPT_CATEGORY_SWR    5
 
 #endif

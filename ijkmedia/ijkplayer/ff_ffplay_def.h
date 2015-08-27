@@ -332,9 +332,9 @@ typedef struct VideoState {
     PacketQueue videoq;
     int64_t videoq_duration;
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
-#if !CONFIG_AVFILTER
+// #if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;
-#endif
+// #endif
 #ifdef FFP_SUB
     struct SwsContext *sub_convert_ctx;
     SDL_Rect last_display_rect;
@@ -448,8 +448,9 @@ typedef struct FFPlayer {
     /* format/codec options */
     AVDictionary *format_opts;
     AVDictionary *codec_opts;
-    AVDictionary *sws_opts;
+    AVDictionary *sws_dict;
     AVDictionary *player_opts;
+    AVDictionary *swr_opts;
 
     /* ffplay options specified by the user */
 #ifdef FFP_MERGE
@@ -580,8 +581,9 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     /* format/codec options */
     av_dict_free(&ffp->format_opts);
     av_dict_free(&ffp->codec_opts);
-    av_dict_free(&ffp->sws_opts);
+    av_dict_free(&ffp->sws_dict);
     av_dict_free(&ffp->player_opts);
+    av_dict_free(&ffp->swr_opts);
 
     /* ffplay options specified by the user */
     av_freep(&ffp->input_filename);
@@ -607,7 +609,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     av_freep(&ffp->video_codec_name);
     ffp->rdftspeed              = 0.02;
 #if CONFIG_AVFILTER
-    ffp->vfilters_list          = NULL;
+    av_freep(&ffp->vfilters_list);
     ffp->nb_vfilters            = 0;
     ffp->afilters               = NULL;
 #endif

@@ -109,6 +109,13 @@ static int ffp_format_control_message(struct AVFormatContext *s, int type,
     .max = INT_MAX, \
     .flags = AV_OPT_FLAG_DECODING_PARAM
 
+#define OPTION_STR(default__) \
+    .type = AV_OPT_TYPE_STRING, \
+    { .str = default__ }, \
+    .min = 0, \
+    .max = 0, \
+    .flags = AV_OPT_FLAG_DECODING_PARAM
+
 static const AVOption ffp_context_options[] = {
     // original options in ffplay.c
     { "framedrop",                      "drop frames when cpu is too slow",
@@ -142,6 +149,10 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(packet_buffering),    OPTION_INT(1, 0, 1) },
     { "sync-av-start",                      "synchronise a/v start time",
         OPTION_OFFSET(sync_av_start),       OPTION_INT(1, 0, 1) },
+#if CONFIG_AVFILTER
+    { "af",                                 "audio filters",
+        OPTION_OFFSET(afilters),            OPTION_STR(NULL) },
+#endif
 
     // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
@@ -173,8 +184,27 @@ static AVPacket flush_pkt;
 // FFP_MERGE: opt_add_vfilter
 #endif
 
-// FFP_MERGE: cmp_audio_fmts
-// FFP_MERGE: get_valid_channel_layout
+#if CONFIG_AVFILTER
+static inline
+int cmp_audio_fmts(enum AVSampleFormat fmt1, int64_t channel_count1,
+                   enum AVSampleFormat fmt2, int64_t channel_count2)
+{
+    /* If channel count == 1, planar and non-planar formats are the same */
+    if (channel_count1 == 1 && channel_count2 == 1)
+        return av_get_packed_sample_fmt(fmt1) != av_get_packed_sample_fmt(fmt2);
+    else
+        return channel_count1 != channel_count2 || fmt1 != fmt2;
+}
+
+static inline
+int64_t get_valid_channel_layout(int64_t channel_layout, int channels)
+{
+    if (channel_layout && av_get_channel_layout_nb_channels(channel_layout) == channels)
+        return channel_layout;
+    else
+        return 0;
+}
+#endif
 
 static void free_picture(Frame *vp);
 
@@ -753,9 +783,9 @@ static void stream_close(VideoState *is)
 #endif
     SDL_DestroyCond(is->continue_read_thread);
     SDL_DestroyMutex(is->play_mutex);
-#if !CONFIG_AVFILTER
+//#if !CONFIG_AVFILTER
     sws_freeContext(is->img_convert_ctx);
-#endif
+//#endif
 #ifdef FFP_MERGE
     sws_freeContext(is->sub_convert_ctx);
 #endif
@@ -1370,7 +1400,7 @@ fail:
     return ret;
 }
 
-static int configure_video_filters(AVFilterGraph *graph, VideoState *is, const char *vfilters, AVFrame *frame)
+static int configure_video_filters(FFPlayer *ffp, AVFilterGraph *graph, VideoState *is, const char *vfilters, AVFrame *frame)
 {
     static const enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_YUV420P, AV_PIX_FMT_NONE };
     char sws_flags_str[512] = "";
@@ -1381,7 +1411,7 @@ static int configure_video_filters(AVFilterGraph *graph, VideoState *is, const c
     AVRational fr = av_guess_frame_rate(is->ic, is->video_st, NULL);
     AVDictionaryEntry *e = NULL;
 
-    while ((e = av_dict_get(sws_dict, "", e, AV_DICT_IGNORE_SUFFIX))) {
+    while ((e = av_dict_get(ffp->sws_dict, "", e, AV_DICT_IGNORE_SUFFIX))) {
         if (!strcmp(e->key, "sws_flags")) {
             av_strlcatf(sws_flags_str, sizeof(sws_flags_str), "%s=%s:", "flags", e->value);
         } else
@@ -1439,7 +1469,7 @@ static int configure_video_filters(AVFilterGraph *graph, VideoState *is, const c
      * combinations, therefore we crop the picture to an even width/height. */
     INSERT_FILT("crop", "floor(in_w/2)*2:floor(in_h/2)*2");
 
-    if (autorotate) {
+    if (ffp->autorotate) {
         double theta  = get_rotation(is->video_st);
 
         if (fabs(theta - 90) < 1.0) {
@@ -1466,8 +1496,9 @@ fail:
     return ret;
 }
 
-static int configure_audio_filters(VideoState *is, const char *afilters, int force_output_format)
+static int configure_audio_filters(FFPlayer *ffp, const char *afilters, int force_output_format)
 {
+    VideoState *is = ffp->is;
     static const enum AVSampleFormat sample_fmts[] = { AV_SAMPLE_FMT_S16, AV_SAMPLE_FMT_NONE };
     int sample_rates[2] = { 0, -1 };
     int64_t channel_layouts[2] = { 0, -1 };
@@ -1482,7 +1513,7 @@ static int configure_audio_filters(VideoState *is, const char *afilters, int for
     if (!(is->agraph = avfilter_graph_alloc()))
         return AVERROR(ENOMEM);
 
-    while ((e = av_dict_get(swr_opts, "", e, AV_DICT_IGNORE_SUFFIX)))
+    while ((e = av_dict_get(ffp->swr_opts, "", e, AV_DICT_IGNORE_SUFFIX)))
         av_strlcatf(aresample_swr_opts, sizeof(aresample_swr_opts), "%s=%s:", e->key, e->value);
     if (strlen(aresample_swr_opts))
         aresample_swr_opts[strlen(aresample_swr_opts)-1] = '\0';
@@ -1594,7 +1625,7 @@ static int audio_thread(void *arg)
                     is->audio_filter_src.freq           = frame->sample_rate;
                     last_serial                         = is->auddec.pkt_serial;
 
-                    if ((ret = configure_audio_filters(is, afilters, 1)) < 0)
+                    if ((ret = configure_audio_filters(ffp, ffp->afilters, 1)) < 0)
                         goto the_end;
                 }
 
@@ -1692,11 +1723,8 @@ static int ffplay_video_thread(void *arg)
                    (const char *)av_x_if_null(av_get_pix_fmt_name(frame->format), "none"), is->viddec.pkt_serial);
             avfilter_graph_free(&graph);
             graph = avfilter_graph_alloc();
-            if ((ret = configure_video_filters(graph, is, vfilters_list ? vfilters_list[is->vfilter_idx] : NULL, frame)) < 0) {
-                SDL_Event event;
-                event.type = FF_QUIT_EVENT;
-                event.user.data1 = is;
-                SDL_PushEvent(&event);
+            if ((ret = configure_video_filters(ffp, graph, is, ffp->vfilters_list ? ffp->vfilters_list[is->vfilter_idx] : NULL, frame)) < 0) {
+                // FIXME: post error
                 goto the_end;
             }
             filt_in  = is->in_video_filter;
@@ -1719,7 +1747,7 @@ static int ffplay_video_thread(void *arg)
             ret = av_buffersink_get_frame_flags(filt_out, frame, 0);
             if (ret < 0) {
                 if (ret == AVERROR_EOF)
-                    is->video_finished = is->viddec.pkt_serial;
+                    is->viddec.finished = is->viddec.pkt_serial;
                 ret = 0;
                 break;
             }
@@ -2182,7 +2210,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
             is->audio_filter_src.channels       = avctx->channels;
             is->audio_filter_src.channel_layout = get_valid_channel_layout(avctx->channel_layout, avctx->channels);
             is->audio_filter_src.fmt            = avctx->sample_fmt;
-            if ((ret = configure_audio_filters(is, afilters, 0)) < 0)
+            if ((ret = configure_audio_filters(ffp, ffp->afilters, 0)) < 0)
                 goto fail;
             link = is->out_audio_filter->inputs[0];
             sample_rate    = link->sample_rate;
@@ -3080,10 +3108,8 @@ void ffp_global_uninit()
 
     av_lockmgr_register(NULL);
 
-#if CONFIG_AVFILTER
-    avfilter_uninit();
-    av_freep(&vfilters);
-#endif
+    // FFP_MERGE: uninit_opts
+
     avformat_network_deinit();
 
     g_ffmpeg_global_inited = false;
@@ -3205,8 +3231,9 @@ static AVDictionary **ffp_get_opt_dict(FFPlayer *ffp, int opt_category)
     switch (opt_category) {
         case FFP_OPT_CATEGORY_FORMAT:   return &ffp->format_opts;
         case FFP_OPT_CATEGORY_CODEC:    return &ffp->codec_opts;
-        case FFP_OPT_CATEGORY_SWS:      return &ffp->sws_opts;
+        case FFP_OPT_CATEGORY_SWS:      return &ffp->sws_dict;
         case FFP_OPT_CATEGORY_PLAYER:   return &ffp->player_opts;
+        case FFP_OPT_CATEGORY_SWR:      return &ffp->swr_opts;
         default:
             av_log(ffp, AV_LOG_ERROR, "unknown option category %d\n", opt_category);
             return NULL;
@@ -3294,7 +3321,8 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
     ffp_show_dict("player-opts", ffp->player_opts);
     ffp_show_dict("format-opts", ffp->format_opts);
     ffp_show_dict("codec-opts ", ffp->codec_opts);
-    ffp_show_dict("sws-opts   ", ffp->sws_opts);
+    ffp_show_dict("sws-opts   ", ffp->sws_dict);
+    ffp_show_dict("swr-opts   ", ffp->swr_opts);
     av_log(NULL, AV_LOG_INFO, "===================\n");
 
     av_opt_set_dict(ffp, &ffp->player_opts);
