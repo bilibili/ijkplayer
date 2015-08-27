@@ -61,7 +61,6 @@
 
 #include <stdbool.h>
 #include "ff_ffinc.h"
-#include "ff_ffplay_config.h"
 #include "ff_ffmsg_queue.h"
 #include "ff_ffpipenode.h"
 #include "ijkmeta.h"

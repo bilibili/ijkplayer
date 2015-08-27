@@ -21,6 +21,20 @@
 #ifndef FFPLAY__CONFIG_H
 #define FFPLAY__CONFIG_H
 
-// dummy file of ffmpeg/config.h
+#include "libffmpeg/config.h"
+
+// FIXME: merge filter related code and enable it
+#ifdef CONFIG_AVFILTER
+#undef CONFIG_AVFILTER
+#endif
+#define CONFIG_AVFILTER 0
+
+#ifdef FFP_MERGE
+#undef FFP_MERGE
+#endif
+
+#ifndef FFMPEG_LOG_TAG
+#define FFMPEG_LOG_TAG "IJKFFMPEG"
+#endif
 
 #endif//FFPLAY__CONFIG_H

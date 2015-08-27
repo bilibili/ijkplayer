@@ -299,6 +299,8 @@ echo "--------------------"
 cp config.* $FF_PREFIX
 make $FF_MAKEFLAGS
 make install
+mkdir -p $FF_PREFIX/include/libffmpeg
+cp -f config.h $FF_PREFIX/include/libffmpeg/config.h
 
 #--------------------
 echo ""
@@ -326,13 +328,6 @@ mysedi() {
     sed $exp /tmp/$n > $f
     rm /tmp/$n
 }
-
-echo ""
-echo "--------------------"
-echo "[*] install config.h"
-echo "--------------------"
-mkdir -p $FF_PREFIX/include/libffmpeg
-cp -f $FF_PREFIX/config.h $FF_PREFIX/include/libffmpeg/config.h
 
 echo ""
 echo "--------------------"
