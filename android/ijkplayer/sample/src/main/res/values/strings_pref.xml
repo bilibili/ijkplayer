@@ -4,7 +4,7 @@
     <string name="pref_title_general">General</string>
 
     <string name="pref_key_enable_background_play">pref.enable_background_play</string>
-    <string name="pref_title_enable_background_play">Enable Background Play</string>
+    <string name="pref_title_enable_background_play">Enable background play</string>
     <string name="pref_summary_enable_background_play">need Android 4.0+</string>
 
     <string name="pref_key_using_android_player">pref.using_android_player</string>
