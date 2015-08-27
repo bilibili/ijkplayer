@@ -45,7 +45,9 @@
 #include "libavutil/avassert.h"
 #include "libavutil/time.h"
 #include "libavformat/avformat.h"
-// FFP_MERGE: #include "libavdevice/avdevice.h"
+#if CONFIG_AVDEVICE
+#include "libavdevice/avdevice.h"
+#endif
 #include "libswscale/swscale.h"
 #include "libavutil/opt.h"
 #include "libavcodec/avfft.h"
