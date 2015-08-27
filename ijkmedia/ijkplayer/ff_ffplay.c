@@ -690,6 +690,10 @@ static void video_image_display2(FFPlayer *ffp)
         int64_t start = SDL_GetTickHR();
 #endif
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
+        if (!ffp->first_video_frame_pushed) {
+            ffp->first_video_frame_pushed = 1;
+            ffp_notify_msg1(ffp, FFP_MSG_VIDEO_RENDERING_START);
+        }
 #ifdef FFP_SHOW_FPS
         int64_t dur = SDL_GetTickHR() - start;
         g_fps_total_time += dur;

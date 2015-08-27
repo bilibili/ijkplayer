@@ -639,8 +639,10 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
                 return;
 
             case MEDIA_INFO:
-                if (msg.arg1 != MEDIA_INFO_VIDEO_TRACK_LAGGING) {
-                    DebugLog.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
+                switch (msg.arg1) {
+                    case MEDIA_INFO_VIDEO_RENDERING_START:
+                        DebugLog.i(TAG, "Info: MEDIA_INFO_VIDEO_RENDERING_START\n");
+                        break;
                 }
                 player.notifyOnInfo(msg.arg1, msg.arg2);
                 // No real default action so far.

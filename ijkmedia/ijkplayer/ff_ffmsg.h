@@ -30,6 +30,7 @@
 #define FFP_MSG_COMPLETED                   300
 #define FFP_MSG_VIDEO_SIZE_CHANGED          400     /* arg1 = width, arg2 = height */
 #define FFP_MSG_SAR_CHANGED                 401     /* arg1 = sar.num, arg2 = sar.den */
+#define FFP_MSG_VIDEO_RENDERING_START       402
 #define FFP_MSG_BUFFERING_START             500
 #define FFP_MSG_BUFFERING_END               501
 #define FFP_MSG_BUFFERING_UPDATE            502     /* arg1 = buffering head position in time, arg2 = minimum percent in time or bytes */

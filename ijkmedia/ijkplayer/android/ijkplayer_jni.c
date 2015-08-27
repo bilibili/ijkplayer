@@ -720,6 +720,10 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             MPTRACE("FFP_MSG_SAR_CHANGED: %d, %d\n", msg.arg1, msg.arg2);
             post_event(env, weak_thiz, MEDIA_SET_VIDEO_SAR, msg.arg1, msg.arg2);
             break;
+        case FFP_MSG_VIDEO_RENDERING_START:
+            MPTRACE("FFP_MSG_VIDEO_RENDERING_START:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_RENDERING_START, 0);
+            break;
         case FFP_MSG_BUFFERING_START:
             MPTRACE("FFP_MSG_BUFFERING_START:\n");
             post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
