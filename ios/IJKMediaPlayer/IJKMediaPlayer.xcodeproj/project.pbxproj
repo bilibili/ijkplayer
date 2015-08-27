@@ -247,7 +247,6 @@
 		E6903FDA17EAFC6100CFD954 /* ff_ffmsg_queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffmsg_queue.h; sourceTree = "<group>"; };
 		E6903FDB17EAFC6100CFD954 /* ff_ffplay.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_ffplay.c; sourceTree = "<group>"; };
 		E6903FDC17EAFC6100CFD954 /* ff_ffplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffplay.h; sourceTree = "<group>"; };
-		E6903FDD17EAFC6100CFD954 /* ff_ffplay_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffplay_config.h; sourceTree = "<group>"; };
 		E6903FDE17EAFC6100CFD954 /* ff_ffplay_def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_ffplay_def.h; sourceTree = "<group>"; };
 		E6903FF117EAFC6100CFD954 /* image_convert.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = image_convert.c; sourceTree = "<group>"; };
 		E6903FF917EAFC6100CFD954 /* ijksdl_image_convert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijksdl_image_convert.h; sourceTree = "<group>"; };
@@ -568,7 +567,6 @@
 				E67B91AC1A3801DB00717EA9 /* ff_ffpipeline.h */,
 				E67B91AD1A3801DB00717EA9 /* ff_ffpipenode.c */,
 				E67B91AE1A3801DB00717EA9 /* ff_ffpipenode.h */,
-				E6903FDD17EAFC6100CFD954 /* ff_ffplay_config.h */,
 				E6C2FD391B300A390081D321 /* ff_ffplay_debug.h */,
 				E6903FDE17EAFC6100CFD954 /* ff_ffplay_def.h */,
 				E6903FDB17EAFC6100CFD954 /* ff_ffplay.c */,

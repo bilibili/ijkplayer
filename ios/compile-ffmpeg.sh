@@ -77,9 +77,6 @@ do_lipo_ssl () {
     fi
 }
 
-FF_ALL_GEN_HEADER_FILES=
-FF_ALL_GEN_HEADER_FILES="$FF_ALL_GEN_HEADER_FILES include/libavutil/avconfig.h"
-FF_ALL_GEN_HEADER_FILES="$FF_ALL_GEN_HEADER_FILES include/libavutil/ffversion.h"
 do_lipo_all () {
     mkdir -p $UNI_BUILD_ROOT/build/universal/lib
     echo "lipo archs: $FF_ALL_ARCHS"
@@ -105,6 +102,9 @@ do_lipo_all () {
             cp -f tools/avconfig.h                      "$UNI_INC_DIR/libavutil/avconfig.h"
             cp -f "$ARCH_INC_DIR/libavutil/ffversion.h" "$UNI_INC_DIR/libavutil/$ARCH/ffversion.h"
             cp -f tools/ffversion.h                     "$UNI_INC_DIR/libavutil/ffversion.h"
+            mkdir -p "$UNI_INC_DIR/libffmpeg/$ARCH"
+            cp -f "$ARCH_INC_DIR/libffmpeg/config.h"    "$UNI_INC_DIR/libffmpeg/$ARCH/config.h"
+            cp -f tools/config.h                        "$UNI_INC_DIR/libffmpeg/config.h"
         fi
     done
 
