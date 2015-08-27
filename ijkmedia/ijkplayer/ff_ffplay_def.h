@@ -538,6 +538,7 @@ typedef struct FFPlayer {
     int error_count;
     int start_on_prepared;
     int first_video_frame_rendered;
+    int first_audio_frame_rendered;
     int sync_av_start;
 
     MessageQueue msg_queue;

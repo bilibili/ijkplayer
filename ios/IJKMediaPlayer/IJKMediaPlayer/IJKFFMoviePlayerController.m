@@ -591,7 +591,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         case FFP_MSG_FLUSH:
             break;
         case FFP_MSG_ERROR: {
-            NSLog(@"FFP_MSG_ERROR: %d", avmsg->arg1);
+            NSLog(@"FFP_MSG_ERROR: %d\n", avmsg->arg1);
 
             [self setScreenOn:NO];
 
@@ -608,7 +608,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             break;
         }
         case FFP_MSG_PREPARED: {
-            NSLog(@"FFP_MSG_PREPARED:");
+            NSLog(@"FFP_MSG_PREPARED:\n");
 
             IjkMediaMeta *rawMeta = ijkmp_get_meta_l(_mediaPlayer);
             if (rawMeta) {
@@ -712,7 +712,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             break;
         }
         case FFP_MSG_VIDEO_SIZE_CHANGED:
-            NSLog(@"FFP_MSG_VIDEO_SIZE_CHANGED: %d, %d", avmsg->arg1, avmsg->arg2);
+            NSLog(@"FFP_MSG_VIDEO_SIZE_CHANGED: %d, %d\n", avmsg->arg1, avmsg->arg2);
             if (avmsg->arg1 > 0)
                 _videoWidth = avmsg->arg1;
             if (avmsg->arg2 > 0)
@@ -720,14 +720,14 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             // TODO: notify size changed
             break;
         case FFP_MSG_SAR_CHANGED:
-            NSLog(@"FFP_MSG_SAR_CHANGED: %d, %d", avmsg->arg1, avmsg->arg2);
+            NSLog(@"FFP_MSG_SAR_CHANGED: %d, %d\n", avmsg->arg1, avmsg->arg2);
             if (avmsg->arg1 > 0)
                 _sampleAspectRatioNumerator = avmsg->arg1;
             if (avmsg->arg2 > 0)
                 _sampleAspectRatioDenominator = avmsg->arg2;
             break;
         case FFP_MSG_BUFFERING_START: {
-            NSLog(@"FFP_MSG_BUFFERING_START:");
+            NSLog(@"FFP_MSG_BUFFERING_START:\n");
 
             _loadState = MPMovieLoadStateStalled;
 
@@ -737,7 +737,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             break;
         }
         case FFP_MSG_BUFFERING_END: {
-            NSLog(@"FFP_MSG_BUFFERING_END:");
+            NSLog(@"FFP_MSG_BUFFERING_END:\n");
 
             _loadState = MPMovieLoadStatePlayable | MPMovieLoadStatePlaythroughOK;
 
@@ -752,14 +752,14 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         case FFP_MSG_BUFFERING_UPDATE:
             _bufferingPosition = avmsg->arg1;
             _bufferingProgress = avmsg->arg2;
-            // NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %%%d", _bufferingPosition, _bufferingProgress);
+            // NSLog(@"FFP_MSG_BUFFERING_UPDATE: %d, %%%d\n", _bufferingPosition, _bufferingProgress);
             break;
         case FFP_MSG_BUFFERING_BYTES_UPDATE:
-            // NSLog(@"FFP_MSG_BUFFERING_BYTES_UPDATE: %d", avmsg->arg1);
+            // NSLog(@"FFP_MSG_BUFFERING_BYTES_UPDATE: %d\n", avmsg->arg1);
             break;
         case FFP_MSG_BUFFERING_TIME_UPDATE:
             _bufferingTime       = avmsg->arg1;
-            // NSLog(@"FFP_MSG_BUFFERING_TIME_UPDATE: %d", avmsg->arg1);
+            // NSLog(@"FFP_MSG_BUFFERING_TIME_UPDATE: %d\n", avmsg->arg1);
             break;
         case FFP_MSG_PLAYBACK_STATE_CHANGED:
             [[NSNotificationCenter defaultCenter]
@@ -767,20 +767,34 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
              object:self];
             break;
         case FFP_MSG_SEEK_COMPLETE: {
-            NSLog(@"FFP_MSG_SEEK_COMPLETE:");
+            NSLog(@"FFP_MSG_SEEK_COMPLETE:\n");
             _seeking = NO;
             break;
         }
         case FFP_MSG_VIDEO_DECODER_OPEN: {
             _isVideoToolboxOpen = avmsg->arg1;
-            NSLog(@"FFP_MSG_VIDEO_DECODER_OPEN: %@", _isVideoToolboxOpen ? @"true" : @"false");
+            NSLog(@"FFP_MSG_VIDEO_DECODER_OPEN: %@\n", _isVideoToolboxOpen ? @"true" : @"false");
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerVideoDecoderOpenNotification
              object:self];
             break;
         }
+        case FFP_MSG_VIDEO_RENDERING_START: {
+            NSLog(@"FFP_MSG_VIDEO_RENDERING_START:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerFirstVideoFrameRenderedNotification
+             object:self];
+            break;
+        }
+        case FFP_MSG_AUDIO_RENDERING_START: {
+            NSLog(@"FFP_MSG_AUDIO_RENDERING_START:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerFirstAudioFrameRenderedNotification
+             object:self];
+            break;
+        }
         default:
-            // NSLog(@"unknown FFP_MSG_xxx(%d)", avmsg->what);
+            // NSLog(@"unknown FFP_MSG_xxx(%d)\n", avmsg->what);
             break;
     }
 

@@ -1259,7 +1259,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         /* now we can update the picture count */
         frame_queue_push(&is->pictq);
         if (!is->viddec.first_frame_decoded) {
-            ALOGD("avcodec: first frame decoded\n");
+            ALOGD("avcodec/Video: first frame decoded\n");
             is->viddec.first_frame_decoded_time = SDL_GetTickHR();
             is->viddec.first_frame_decoded = 1;
         }
@@ -1939,6 +1939,15 @@ static int audio_decode_frame(FFPlayer *ffp)
         last_clock = is->audio_clock;
     }
 #endif
+    if (!is->auddec.first_frame_decoded) {
+        ALOGD("avcodec/Audio: first frame decoded\n");
+        is->auddec.first_frame_decoded_time = SDL_GetTickHR();
+        is->auddec.first_frame_decoded = 1;
+    }
+    if (!ffp->first_audio_frame_rendered) {
+        ffp->first_audio_frame_rendered = 1;
+        ffp_notify_msg1(ffp, FFP_MSG_AUDIO_RENDERING_START);
+    }
     return resampled_data_size;
 }
 
