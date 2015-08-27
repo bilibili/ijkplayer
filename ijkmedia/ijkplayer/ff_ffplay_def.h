@@ -232,6 +232,8 @@ typedef struct Decoder {
     SDL_Thread _decoder_tid;
 
     SDL_Profiler decode_profiler;
+    Uint64 first_frame_decoded_time;
+    int    first_frame_decoded;
 } Decoder;
 
 typedef struct VideoState {
@@ -535,7 +537,8 @@ typedef struct FFPlayer {
     int error;
     int error_count;
     int start_on_prepared;
-    int first_video_frame_pushed;
+    int first_video_frame_rendered;
+    int sync_av_start;
 
     MessageQueue msg_queue;
 
@@ -633,7 +636,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->error                  = 0;
     ffp->error_count            = 0;
     ffp->start_on_prepared      = 1;
-    ffp->first_video_frame_pushed = 0;
+    ffp->first_video_frame_rendered = 0;
+    ffp->sync_av_start          = 1;
 
     ffp->max_buffer_size                = MAX_QUEUE_SIZE;
     ffp->high_water_mark_in_bytes       = DEFAULT_HIGH_WATER_MARK_IN_BYTES;

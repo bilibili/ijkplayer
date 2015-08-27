@@ -138,6 +138,8 @@ static const AVOption ffp_context_options[] = {
 
     { "packet-buffering",                   "pause output until enough packets have been read after stalling",
         OPTION_OFFSET(packet_buffering),    OPTION_INT(1, 0, 1) },
+    { "sync-av-start",                      "synchronise a/v start time",
+        OPTION_OFFSET(sync_av_start),       OPTION_INT(1, 0, 1) },
 
     // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
@@ -393,6 +395,9 @@ static void decoder_init(Decoder *d, AVCodecContext *avctx, PacketQueue *queue, 
     d->queue = queue;
     d->empty_queue_cond = empty_queue_cond;
     d->start_pts = AV_NOPTS_VALUE;
+
+    d->first_frame_decoded_time = SDL_GetTickHR();
+    d->first_frame_decoded = 0;
 
     SDL_ProfilerReset(&d->decode_profiler, -1);
 }
@@ -690,8 +695,8 @@ static void video_image_display2(FFPlayer *ffp)
         int64_t start = SDL_GetTickHR();
 #endif
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
-        if (!ffp->first_video_frame_pushed) {
-            ffp->first_video_frame_pushed = 1;
+        if (!ffp->first_video_frame_rendered) {
+            ffp->first_video_frame_rendered = 1;
             ffp_notify_msg1(ffp, FFP_MSG_VIDEO_RENDERING_START);
         }
 #ifdef FFP_SHOW_FPS
@@ -1253,6 +1258,11 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
 
         /* now we can update the picture count */
         frame_queue_push(&is->pictq);
+        if (!is->viddec.first_frame_decoded) {
+            ALOGD("avcodec: first frame decoded\n");
+            is->viddec.first_frame_decoded_time = SDL_GetTickHR();
+            is->viddec.first_frame_decoded = 1;
+        }
     }
     return 0;
 }
@@ -1815,6 +1825,21 @@ static int audio_decode_frame(FFPlayer *ffp)
 
     if (is->paused || is->step)
         return -1;
+
+    if (ffp->sync_av_start &&                       /* sync enabled */
+        is->video_st &&                             /* has video stream */
+        !is->viddec.first_frame_decoded &&          /* not hot */
+        is->viddec.finished != is->videoq.serial) { /* not finished */
+        /* waiting for first video frame */
+        Uint64 now = SDL_GetTickHR();
+        if (now < is->viddec.first_frame_decoded_time ||
+            now > is->viddec.first_frame_decoded_time + 2000) {
+            is->viddec.first_frame_decoded = 1;
+        } else {
+            /* video pipeline is not ready yet */
+            return -1;
+        }
+    }
 
     do {
 #if defined(_WIN32)

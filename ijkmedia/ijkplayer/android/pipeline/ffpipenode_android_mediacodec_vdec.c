@@ -320,6 +320,12 @@ static int amc_queue_picture(
 
         /* now we can update the picture count */
         ffp_frame_queue_push(&is->pictq);
+
+        if (!is->viddec.first_frame_decoded) {
+            ALOGD("MediaCodec/Video: first frame decoded\n");
+            is->viddec.first_frame_decoded_time = SDL_GetTickHR();
+            is->viddec.first_frame_decoded = 1;
+        }
     }
     return 0;
 }
