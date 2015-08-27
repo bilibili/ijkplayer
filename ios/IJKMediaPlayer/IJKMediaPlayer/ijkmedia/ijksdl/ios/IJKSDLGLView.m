@@ -210,10 +210,12 @@ static int g_ijk_gles_queue_spec_key;
 
         self->_useRenderQueue = useRenderQueue;
         if (useRenderQueue) {
-            dispatch_queue_attr_t attr =
-            dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL,
-                                                    QOS_CLASS_USER_INTERACTIVE,
-                                                    DISPATCH_QUEUE_PRIORITY_HIGH);
+            dispatch_queue_attr_t attr = NULL;
+            if (isIOS8OrLater()) {
+                attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL,
+                                                               QOS_CLASS_USER_INTERACTIVE,
+                                                               DISPATCH_QUEUE_PRIORITY_HIGH);
+            }
             _renderQueue = dispatch_queue_create("ijk-gles", attr);
             dispatch_queue_set_specific(_renderQueue,
                                         &g_ijk_gles_queue_spec_key,
