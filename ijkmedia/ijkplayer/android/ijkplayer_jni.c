@@ -697,35 +697,35 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
 
         switch (msg.what) {
         case FFP_MSG_FLUSH:
-            MPTRACE("FFP_MSG_FLUSH:");
+            MPTRACE("FFP_MSG_FLUSH:\n");
             post_event(env, weak_thiz, MEDIA_NOP, 0, 0);
             break;
         case FFP_MSG_ERROR:
-            MPTRACE("FFP_MSG_ERROR: %d", msg.arg1);
+            MPTRACE("FFP_MSG_ERROR: %d\n", msg.arg1);
             post_event(env, weak_thiz, MEDIA_ERROR, MEDIA_ERROR_IJK_PLAYER, msg.arg1);
             break;
         case FFP_MSG_PREPARED:
-            MPTRACE("FFP_MSG_PREPARED:");
+            MPTRACE("FFP_MSG_PREPARED:\n");
             post_event(env, weak_thiz, MEDIA_PREPARED, 0, 0);
             break;
         case FFP_MSG_COMPLETED:
-            MPTRACE("FFP_MSG_COMPLETED:");
+            MPTRACE("FFP_MSG_COMPLETED:\n");
             post_event(env, weak_thiz, MEDIA_PLAYBACK_COMPLETE, 0, 0);
             break;
         case FFP_MSG_VIDEO_SIZE_CHANGED:
-            MPTRACE("FFP_MSG_VIDEO_SIZE_CHANGED: %d, %d", msg.arg1, msg.arg2);
+            MPTRACE("FFP_MSG_VIDEO_SIZE_CHANGED: %d, %d\n", msg.arg1, msg.arg2);
             post_event(env, weak_thiz, MEDIA_SET_VIDEO_SIZE, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_SAR_CHANGED:
-            MPTRACE("FFP_MSG_SAR_CHANGED: %d, %d", msg.arg1, msg.arg2);
+            MPTRACE("FFP_MSG_SAR_CHANGED: %d, %d\n", msg.arg1, msg.arg2);
             post_event(env, weak_thiz, MEDIA_SET_VIDEO_SAR, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_BUFFERING_START:
-            MPTRACE("FFP_MSG_BUFFERING_START:");
+            MPTRACE("FFP_MSG_BUFFERING_START:\n");
             post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
             break;
         case FFP_MSG_BUFFERING_END:
-            MPTRACE("FFP_MSG_BUFFERING_END:");
+            MPTRACE("FFP_MSG_BUFFERING_END:\n");
             post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, 0);
             break;
         case FFP_MSG_BUFFERING_UPDATE:
@@ -737,13 +737,13 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
         case FFP_MSG_BUFFERING_TIME_UPDATE:
             break;
         case FFP_MSG_SEEK_COMPLETE:
-            MPTRACE("FFP_MSG_SEEK_COMPLETE:");
+            MPTRACE("FFP_MSG_SEEK_COMPLETE:\n");
             post_event(env, weak_thiz, MEDIA_SEEK_COMPLETE, 0, 0);
             break;
         case FFP_MSG_PLAYBACK_STATE_CHANGED:
             break;
         default:
-            ALOGE("unknown FFP_MSG_xxx(%d)", msg.what);
+            ALOGE("unknown FFP_MSG_xxx(%d)\n", msg.what);
             break;
         }
     }
