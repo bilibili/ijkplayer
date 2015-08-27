@@ -44,7 +44,7 @@
             android:summary="@string/pref_summary_using_opensl_es"
             android:title="@string/pref_title_using_opensl_es" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/pref_title_video_output">
+    <PreferenceCategory android:title="@string/pref_title_render_view">
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/pref_key_enable_surface_view"

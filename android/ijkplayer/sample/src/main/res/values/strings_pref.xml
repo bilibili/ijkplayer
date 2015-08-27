@@ -47,7 +47,7 @@
     <string name="pref_summary_using_opensl_es"></string>
 
     <!-- -->
-    <string name="pref_title_video_output">Render</string>
+    <string name="pref_title_render_view">RenderView</string>
 
     <string name="pref_key_enable_surface_view">pref.enable_surface_view</string>
     <string name="pref_title_enable_surface_view">Enable SurfaceView</string>
