@@ -33,6 +33,10 @@
 #undef FFP_MERGE
 #endif
 
+#ifdef FFP_SUB
+#undef FFP_SUB
+#endif
+
 #ifndef FFMPEG_LOG_TAG
 #define FFMPEG_LOG_TAG "IJKFFMPEG"
 #endif

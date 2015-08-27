@@ -335,7 +335,7 @@ typedef struct VideoState {
 #if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;
 #endif
-#ifdef FFP_MERGE
+#ifdef FFP_SUB
     struct SwsContext *sub_convert_ctx;
     SDL_Rect last_display_rect;
 #endif

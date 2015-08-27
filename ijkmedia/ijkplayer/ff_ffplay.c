@@ -169,6 +169,10 @@ static const AVOption ffp_context_options[] = {
 
 static AVPacket flush_pkt;
 
+#if CONFIG_AVFILTER
+// FFP_MERGE: opt_add_vfilter
+#endif
+
 // FFP_MERGE: cmp_audio_fmts
 // FFP_MERGE: get_valid_channel_layout
 
@@ -1242,6 +1246,15 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         /* get a pointer on the bitmap */
         SDL_VoutLockYUVOverlay(vp->bmp);
 
+#ifdef FFP_MERGE
+#if CONFIG_AVFILTER
+        // FIXME use direct rendering
+        av_picture_copy(&pict, (AVPicture *)src_frame,
+                        src_frame->format, vp->width, vp->height);
+#else
+        // sws_getCachedContext(...);
+#endif
+#endif
         if (SDL_VoutFFmpeg_ConvertFrame(vp->bmp, src_frame,
             &is->img_convert_ctx, ffp->sws_flags) < 0) {
             av_log(NULL, AV_LOG_FATAL, "Cannot initialize the conversion context\n");
@@ -1546,9 +1559,6 @@ static int audio_thread(void *arg)
     int ret = 0;
 
     if (!frame) {
-#if CONFIG_AVFILTER
-        avfilter_graph_free(&graph);
-#endif
         return AVERROR(ENOMEM);
     }
 
@@ -1654,8 +1664,12 @@ static int ffplay_video_thread(void *arg)
 
 #endif
 
-    if (!frame)
+    if (!frame) {
+#if CONFIG_AVFILTER
+        avfilter_graph_free(&graph);
+#endif
         return AVERROR(ENOMEM);
+    }
 
     for (;;) {
         ret = get_video_frame(ffp, frame);
