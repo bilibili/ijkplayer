@@ -329,6 +329,13 @@ mysedi() {
 
 echo ""
 echo "--------------------"
+echo "[*] install config.h"
+echo "--------------------"
+mkdir -p $FF_PREFIX/include/libffmpeg
+cp -f $FF_PREFIX/config.h $FF_PREFIX/include/libffmpeg/config.h
+
+echo ""
+echo "--------------------"
 echo "[*] create files for shared ffmpeg"
 echo "--------------------"
 rm -rf $FF_PREFIX/shared
