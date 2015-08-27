@@ -328,6 +328,12 @@ static int vtb_queue_picture(
         vp->sar.num = vp->bmp->sar_num = picture->sar_num;
         vp->sar.den = vp->bmp->sar_den = picture->sar_den;
         ffp_frame_queue_push(&is->pictq);
+
+        if (!is->viddec.first_frame_decoded) {
+            ALOGD("VideoToolbox: first frame decoded\n");
+            is->viddec.first_frame_decoded_time = SDL_GetTickHR();
+            is->viddec.first_frame_decoded = 1;
+        }
     }
     return 0;
 }
