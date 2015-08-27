@@ -1,9 +1,13 @@
 tag next
 --------------------------------
+
+tag k0.3.2
+--------------------------------
 android: drop support of Eclipse
 android: update to SDK 23
 android/sample: better UI
 ios: support SAR
+android/sample: support background play
 
 tag k0.3.1
 --------------------------------
