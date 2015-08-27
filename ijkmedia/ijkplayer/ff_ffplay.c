@@ -131,7 +131,7 @@ static const AVOption ffp_context_options[] = {
     { "fcc-i420",                       "", 0, OPTION_CONST(SDL_FCC_I420), .unit = "overlay-format" },
     { "fcc-yv12",                       "", 0, OPTION_CONST(SDL_FCC_YV12), .unit = "overlay-format" },
     { "fcc-rv16",                       "", 0, OPTION_CONST(SDL_FCC_RV16), .unit = "overlay-format" },
-    { "fcc-rv23",                       "", 0, OPTION_CONST(SDL_FCC_RV24), .unit = "overlay-format" },
+    { "fcc-rv24",                       "", 0, OPTION_CONST(SDL_FCC_RV24), .unit = "overlay-format" },
     { "fcc-rv32",                       "", 0, OPTION_CONST(SDL_FCC_RV32), .unit = "overlay-format" },
 
     { "start-on-prepared",                  "automatically start playing on prepared",
