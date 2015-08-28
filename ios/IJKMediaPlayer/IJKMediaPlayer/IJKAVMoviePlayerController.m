@@ -122,7 +122,8 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     // while AVPlayer is prerolling, it could resume itself.
     // foring start could
     BOOL _isPrerolling;
-    
+
+    NSTimeInterval _seekingTime;
     BOOL _isSeeking;
     BOOL _isError;
     BOOL _isCompleted;
@@ -323,14 +324,15 @@ static IJKAVMoviePlayerController* instance;
 {
     if (!_player)
         return;
-    
+
+    _seekingTime = aCurrentPlaybackTime;
     _isSeeking = YES;
     [self didPlaybackStateChange];
     [self didLoadStateChange];
     if (_isPrerolling) {
         [_player pause];
     }
-    
+
     [_player seekToTime:CMTimeMakeWithSeconds(aCurrentPlaybackTime, NSEC_PER_SEC)
       completionHandler:^(BOOL finished) {
           dispatch_async(dispatch_get_main_queue(), ^{
@@ -348,7 +350,10 @@ static IJKAVMoviePlayerController* instance;
 {
     if (!_player)
         return 0.0f;
-    
+
+    if (_isSeeking)
+        return _seekingTime;
+
     return CMTimeGetSeconds([_player currentTime]);
 }
 
