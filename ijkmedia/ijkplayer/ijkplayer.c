@@ -504,6 +504,8 @@ int ijkmp_get_state(IjkMediaPlayer *mp)
 
 static long ijkmp_get_current_position_l(IjkMediaPlayer *mp)
 {
+    if (mp->seek_req)
+        return mp->seek_msec;
     return ffp_get_current_position_l(mp->ffplayer);
 }
 
