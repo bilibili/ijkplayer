@@ -2659,6 +2659,7 @@ static int read_thread(void *arg)
             if (ret < 0) {
                 av_log(NULL, AV_LOG_ERROR,
                        "%s: error while seeking\n", is->ic->filename);
+                ffp_notify_msg1(ffp, FFP_MSG_SEEK_COMPLETE);
             } else {
                 if (is->audio_stream >= 0) {
                     packet_queue_flush(&is->audioq);
