@@ -405,16 +405,16 @@ static IJKAVMoviePlayerController* instance;
         return MPMovieLoadStateUnknown;
     
     if (_player != nil && _player.rate > kMinPlayingRate) {
-        NSLog(@"loadState: playing");
+        // NSLog(@"loadState: playing");
         return MPMovieLoadStatePlayable | MPMovieLoadStatePlaythroughOK;
     } else if ([playerItem isPlaybackBufferFull]) {
-        NSLog(@"loadState: isPlaybackBufferFull");
+        // NSLog(@"loadState: isPlaybackBufferFull");
         return MPMovieLoadStatePlayable | MPMovieLoadStatePlaythroughOK;
     } else if ([playerItem isPlaybackLikelyToKeepUp]) {
-        NSLog(@"loadState: isPlaybackLikelyToKeepUp");
+        // NSLog(@"loadState: isPlaybackLikelyToKeepUp");
         return MPMovieLoadStatePlayable | MPMovieLoadStatePlaythroughOK;
     } else if ([playerItem isPlaybackBufferEmpty]) {
-        NSLog(@"loadState: isPlaybackBufferEmpty");
+        // NSLog(@"loadState: isPlaybackBufferEmpty");
         return MPMovieLoadStateStalled;
     } else {
         NSLog(@"loadState: unknown");
