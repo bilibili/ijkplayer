@@ -39,7 +39,7 @@
 
 #include "ijksdl/ijksdl.h"
 
-typedef int (*ijk_format_control_message)(void *opaque, int type, void *data, size_t data_size);
+typedef int (*ijk_inject_callback)(void *opaque, int type, void *data, size_t data_size);
 
 #define FFP_OPT_CATEGORY_FORMAT 1
 #define FFP_OPT_CATEGORY_CODEC  2

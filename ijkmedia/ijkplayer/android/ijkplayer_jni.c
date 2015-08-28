@@ -33,6 +33,7 @@
 #include "ijksdl/android/android_bundle.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_codec_android_mediadef.h"
+#include "ijkplayer/ijkavformat/ijkavformat.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
@@ -62,7 +63,7 @@ typedef struct player_fields_t {
 } player_fields_t;
 static player_fields_t g_clazz;
 
-static int format_control_message(void *opaque, int type, void *data, size_t data_size);
+static int inject_callback(void *opaque, int type, void *data, size_t data_size);
 static bool mediacodec_select_callback(void *opaque, ijkmp_mediacodecinfo_context *mcc);
 
 static IjkMediaPlayer *jni_get_media_player(JNIEnv* env, jobject thiz)
@@ -515,7 +516,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 
     jni_set_media_player(env, thiz, mp);
     ijkmp_set_weak_thiz(mp, (*env)->NewGlobalRef(env, weak_this));
-    ijkmp_set_format_callback(mp, format_control_message, (*env)->NewGlobalRef(env, weak_this));
+    ijkmp_set_inject_opaque(mp, (*env)->NewGlobalRef(env, weak_this));
     ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, (*env)->NewGlobalRef(env, weak_this));
 
 LABEL_RETURN:
@@ -530,32 +531,14 @@ IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz, jobject name, jobject 
 }
 
 static int
-_onNativeControlResolveSegmentConcat(JNIEnv *env, jobject weak_thiz, int type, void *data, size_t data_size)
-{
-    if (weak_thiz == NULL || data == NULL )
-        return -1;
-
-    IJKFormatSegmentConcatContext *fsc_concat = (IJKFormatSegmentConcatContext *) data;
-
-    jint count = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentCount, weak_thiz);
-    if (count <= 0)
-        return -1;
-
-    fsc_concat->count = count;
-    return 0;
-}
-
-static int
 _onNativeControlResolveSegment(JNIEnv *env, jobject weak_thiz, int type, void *data, size_t data_size)
 {
     if (weak_thiz == NULL || data == NULL )
         return -1;
 
-    IJKFormatSegmentContext *fsc = (IJKFormatSegmentContext *) data;
+    IJKAVInject_OnUrlOpenData *real_data = (IJKAVInject_OnUrlOpenData *) data;
 
-    jint duration = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentDuration, weak_thiz, fsc->position);
-
-    jstring url = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentUrl, weak_thiz, fsc->position);
+    jstring url = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentUrl, weak_thiz, real_data->segment_index);
     if (url == NULL )
         return -1;
 
@@ -563,50 +546,16 @@ _onNativeControlResolveSegment(JNIEnv *env, jobject weak_thiz, int type, void *d
     if (c_url == NULL )
         return -1;
 
-    fsc->url = strdup(c_url);
+    strlcpy(real_data->url, c_url, sizeof(real_data->url));
+    real_data->url[sizeof(real_data->url) - 1] = 0;
+
     (*env)->ReleaseStringUTFChars(env, url, c_url);
-
-    if (fsc->url == NULL )
-        return -1;
-
-    fsc->duration = duration;
-    fsc->duration *= 1000;
-    fsc->url_free = free;
-    return 0;
-}
-
-static int
-_onNativeControlResolveSegmentOffline(JNIEnv *env, jobject weak_thiz, int type, void *data, size_t data_size)
-{
-    if (weak_thiz == NULL || data == NULL )
-        return -1;
-
-    IJKFormatSegmentContext *fsc = (IJKFormatSegmentContext *) data;
-    jint duration = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentDuration, weak_thiz, fsc->position);
-
-    jstring mrl = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.jmid_onControlResolveSegmentOfflineMrl, weak_thiz, fsc->position);
-    if (mrl == NULL )
-        return -1;
-
-    const char* c_mrl = (*env)->GetStringUTFChars(env, mrl, NULL );
-    if (c_mrl == NULL )
-        return -1;
-
-    fsc->url = strdup(c_mrl);
-    (*env)->ReleaseStringUTFChars(env, mrl, c_mrl);
-
-    if (fsc->url == NULL )
-        return -1;
-
-    fsc->duration = duration;
-    fsc->duration *= 1000;
-    fsc->url_free = free;
     return 0;
 }
 
 // NOTE: support to be called from read_thread
 static int
-format_control_message(void *opaque, int type, void *data, size_t data_size)
+inject_callback(void *opaque, int message, void *data, size_t data_size)
 {
     JNIEnv *env = NULL;
     SDL_JNI_SetupThreadEnv(&env);
@@ -615,13 +564,9 @@ format_control_message(void *opaque, int type, void *data, size_t data_size)
     if (weak_thiz == NULL )
         return -1;
 
-    switch (type) {
-    case IJKAVF_CM_RESOLVE_SEGMENT_CONCAT:
-        return _onNativeControlResolveSegmentConcat(env, weak_thiz, type, data, data_size);
-    case IJKAVF_CM_RESOLVE_SEGMENT:
-        return _onNativeControlResolveSegment(env, weak_thiz, type, data, data_size);
-    case IJKAVF_CM_RESOLVE_SEGMENT_OFFLINE:
-        return _onNativeControlResolveSegmentOffline(env, weak_thiz, type, data, data_size);
+    switch (message) {
+    case IJKAVINJECT_CONCAT_RESOLVE_SEGMENT:
+        return _onNativeControlResolveSegment(env, weak_thiz, message, data, data_size);
     default: {
         return -1;
     }
@@ -914,6 +859,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
         "onControlResolveSegmentOfflineMrl", "(Ljava/lang/Object;I)Ljava/lang/String;");
 
     ijkmp_global_init();
+    ijkmp_global_set_inject_callback(inject_callback);
 
     FFmpegApi_global_init(env);
 

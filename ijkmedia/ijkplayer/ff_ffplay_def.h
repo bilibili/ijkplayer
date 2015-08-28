@@ -565,10 +565,9 @@ typedef struct FFPlayer {
     int mediacodec;
     int opensles;
 
-    struct IjkMediaMeta *meta;
+    char *iformat_name;
 
-    ijk_format_control_message format_control_message;
-    void *format_control_opaque;
+    struct IjkMediaMeta *meta;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -663,8 +662,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->mediacodec                     = 0; // option
     ffp->opensles                       = 0; // option
 
-    ffp->format_control_message = NULL;
-    ffp->format_control_opaque  = NULL;
+    ffp->iformat_name                   = NULL; // option
 
     ijkmeta_reset(ffp->meta);
 

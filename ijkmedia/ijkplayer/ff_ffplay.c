@@ -60,13 +60,14 @@
 # include "libavfilter/buffersrc.h"
 #endif
 
+#include "ijksdl/ijksdl_log.h"
+#include "ijkavformat/ijkavformat.h"
 #include "ff_cmdutils.h"
 #include "ff_fferror.h"
 #include "ff_ffpipeline.h"
 #include "ff_ffpipenode.h"
 #include "ff_ffplay_debug.h"
 #include "ijkmeta.h"
-#include "ijksdl/ijksdl_log.h"
 
 #ifndef AV_CODEC_FLAG2_FAST
 #define AV_CODEC_FLAG2_FAST CODEC_FLAG2_FAST
@@ -90,9 +91,6 @@
 #endif
 
 #define FFP_IO_STAT_STEP (50 * 1024)
-
-static int ffp_format_control_message(struct AVFormatContext *s, int type,
-                                      void *data, size_t data_size);
 
 #define OPTION_OFFSET(x) offsetof(FFPlayer, x)
 #define OPTION_INT(default__, min__, max__) \
@@ -153,6 +151,8 @@ static const AVOption ffp_context_options[] = {
     { "af",                                 "audio filters",
         OPTION_OFFSET(afilters),            OPTION_STR(NULL) },
 #endif
+    { "iformat",                            "force format",
+        OPTION_OFFSET(iformat_name),        OPTION_STR(NULL) },
 
     // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
@@ -2423,16 +2423,14 @@ static int read_thread(void *arg)
         av_dict_set(&ffp->format_opts, "scan_all_pmts", "1", AV_DICT_DONT_OVERWRITE);
         scan_all_pmts_set = 1;
     }
-    if (ffp->format_control_message) {
-        av_format_set_control_message_cb(ic, ffp_format_control_message);
-        av_format_set_opaque(ic, ffp);
-    }
     if (av_stristart(is->filename, "rtmp", NULL) ||
         av_stristart(is->filename, "rtsp", NULL)) {
         // There is total different meaning for 'timeout' option in rtmp
         av_log(ffp, AV_LOG_WARNING, "remove 'timeout' option for rtmp.\n");
         av_dict_set(&ffp->format_opts, "timeout", NULL, 0);
     }
+    if (ffp->iformat_name)
+        is->iformat = av_find_input_format(ffp->iformat_name);
     err = avformat_open_input(&ic, is->filename, is->iformat, &ffp->format_opts);
     if (err < 0) {
         print_error(is->filename, err);
@@ -2826,6 +2824,21 @@ static int read_thread(void *arg)
         } else {
             is->eof = 0;
         }
+
+        if (pkt->flags & AV_PKT_FLAG_DISCONTINUITY) {
+            if (is->audio_stream >= 0) {
+                packet_queue_put(&is->audioq, &flush_pkt);
+            }
+#ifdef FFP_MERGE
+            if (is->subtitle_stream >= 0) {
+                packet_queue_put(&is->subtitleq, &flush_pkt);
+            }
+#endif
+            if (is->video_stream >= 0) {
+                packet_queue_put(&is->videoq, &flush_pkt);
+            }
+        }
+
         /* check if packet is in play range specified by user, then queue, otherwise discard */
         stream_start_time = ic->streams[pkt->stream_index]->start_time;
         pkt_ts = pkt->pts == AV_NOPTS_VALUE ? pkt->dts : pkt->pts;
@@ -3091,6 +3104,9 @@ void ffp_global_init()
     avfilter_register_all();
 #endif
     av_register_all();
+
+    ijkav_register_all();
+
     avformat_network_init();
 
     av_lockmgr_register(lockmgr);
@@ -3129,6 +3145,11 @@ void ffp_global_set_log_level(int log_level)
 {
     int av_level = log_level_ijk_to_av(log_level);
     av_log_set_level(av_level);
+}
+
+void ffp_global_set_inject_callback(ijk_inject_callback cb)
+{
+    ijkav_register_inject_callback(cb);
 }
 
 void ffp_io_stat_register(void (*cb)(const char *url, int type, int bytes))
@@ -3217,12 +3238,6 @@ void ffp_destroy_p(FFPlayer **pffp)
 
     ffp_destroy(*pffp);
     *pffp = NULL;
-}
-
-void ffp_set_format_callback(FFPlayer *ffp, ijk_format_control_message cb, void *opaque)
-{
-    ffp->format_control_message = cb;
-    ffp->format_control_opaque  = opaque;
 }
 
 static AVDictionary **ffp_get_opt_dict(FFPlayer *ffp, int opt_category)
@@ -3317,6 +3332,22 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
     assert(ffp);
     assert(!ffp->is);
     assert(file_name);
+
+    if (av_stristart(file_name, "rtmp", NULL) ||
+        av_stristart(file_name, "rtsp", NULL)) {
+        // There is total different meaning for 'timeout' option in rtmp
+        av_log(ffp, AV_LOG_WARNING, "remove 'timeout' option for rtmp.\n");
+        av_dict_set(&ffp->format_opts, "timeout", NULL, 0);
+    }
+
+    /* there is a length limit in avformat */
+    if (strlen(file_name) + 1 > 1024) {
+        av_log(ffp, AV_LOG_ERROR, "%s too long url\n", __func__);
+        if (avio_find_protocol_name("ijklongurl:")) {
+            av_dict_set(&ffp->format_opts, "ijklongurl-url", file_name, 0);
+            file_name = "ijklongurl:";
+        }
+    }
 
     av_log(NULL, AV_LOG_INFO, "===== options =====\n");
     ffp_show_dict("player-opts", ffp->player_opts);
@@ -3732,20 +3763,4 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
         return NULL;
 
     return ffp->meta;
-}
-
-static int ffp_format_control_message(struct AVFormatContext *s, int type,
-                                      void *data, size_t data_size)
-{
-    if (s == NULL)
-        return -1;
-
-    FFPlayer *ffp = (FFPlayer *)av_format_get_opaque(s);
-    if (ffp == NULL)
-        return -1;
-
-    if (!ffp->format_control_message)
-        return -1;
-
-    return ffp->format_control_message(ffp->format_control_opaque, type, data, data_size);
 }

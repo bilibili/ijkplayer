@@ -153,6 +153,7 @@ void            ijkmp_global_init();
 void            ijkmp_global_uninit();
 void            ijkmp_global_set_log_report(int use_report);
 void            ijkmp_global_set_log_level(int log_level);   // log_level = AV_LOG_xxx
+void            ijkmp_global_set_inject_callback(ijk_inject_callback cb);
 const char     *ijkmp_version_ident();
 unsigned int    ijkmp_version_int();
 void            ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes));
@@ -162,7 +163,7 @@ void            ijkmp_io_stat_complete_register(void (*cb)(const char *url,
 
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*));
-void            ijkmp_set_format_callback(IjkMediaPlayer *mp, ijk_format_control_message cb, void *opaque);
+void            ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque);
 
 void            ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, const char *value);
 void            ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const char *name, int64_t value);

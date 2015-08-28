@@ -120,6 +120,10 @@ typedef enum IJKLogLevel {
 - (void)setSwsOptionIntValue:       (int64_t)value forKey:(NSString *)key;
 - (void)setPlayerOptionIntValue:    (int64_t)value forKey:(NSString *)key;
 
+@property (nonatomic, weak) id<IJKMediaTcpOpenDelegate>     tcpOpenDelegate;
+@property (nonatomic, weak) id<IJKMediaHttpOpenDelegate>    httpOpenDelegate;
+@property (nonatomic, weak) id<IJKMediaHttpRetryDelegate>   httpRetryDelegate;
+@property (nonatomic, weak) id<IJKMediaLiveRetryDelegate>   liveRetryDelegate;
 
 @end
 

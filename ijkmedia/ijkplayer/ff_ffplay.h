@@ -32,6 +32,7 @@ void      ffp_global_init();
 void      ffp_global_uninit();
 void      ffp_global_set_log_report(int use_report);
 void      ffp_global_set_log_level(int log_level);
+void      ffp_global_set_inject_callback(ijk_inject_callback cb);
 void      ffp_io_stat_register(void (*cb)(const char *url, int type, int bytes));
 void      ffp_io_stat_complete_register(void (*cb)(const char *url,
                                                    int64_t read_bytes, int64_t total_size,
@@ -43,7 +44,6 @@ void      ffp_destroy_p(FFPlayer **pffp);
 void      ffp_reset(FFPlayer *ffp);
 
 /* set options before ffp_prepare_async_l() */
-void      ffp_set_format_callback(FFPlayer *ffp, ijk_format_control_message cb, void *opaque);
 
 void      ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const char *value);
 void      ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64_t value);

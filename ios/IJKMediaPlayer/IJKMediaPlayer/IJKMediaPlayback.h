@@ -90,3 +90,29 @@ IJK_EXTERN NSString *const IJKMoviePlayerFirstAudioFrameRenderedNotification;
 - (NSString *)urlOfSegment:(int)segmentPosition;
 
 @end
+
+#pragma mark IJKMediaIoDelegate
+
+/**
+ * called before tcp connection
+ *
+ * @return
+ *      original url:   continue connect.
+ *      nil:            disconnect.
+ *      new url:        use new url to connect.
+ */
+@protocol IJKMediaTcpOpenDelegate <NSObject>
+- (NSString *)onTcpOpen:(int)streamIndex url:(NSString *)url;
+@end
+
+@protocol IJKMediaHttpOpenDelegate <NSObject>
+- (NSString *)onHttpOpen:(int)streamIndex url:(NSString *)url;
+@end
+
+@protocol IJKMediaHttpRetryDelegate <NSObject>
+- (NSString *)onHttpRetry:(int)streamIndex url:(NSString *)url retryCount:(int)retryCount;
+@end
+
+@protocol IJKMediaLiveRetryDelegate <NSObject>
+- (NSString *)onLiveRetry:(int)streamIndex url:(NSString *)url retryCount:(int)retryCount;
+@end

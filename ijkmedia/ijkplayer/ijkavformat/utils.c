@@ -1,6 +1,7 @@
 /*
- * IJKFFMrl.h
+ * utils.c
  *
+ * Copyright (c) 2003 Fabrice Bellard
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -20,14 +21,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <Foundation/Foundation.h>
+#include <stdlib.h>
+#include "ijkavformat.h"
 
-@interface IJKFFMrl : NSObject
+static IjkAVInjectCallback s_av_inject_callback = NULL;
 
-- (IJKFFMrl *) initWithMrl: (NSString*)aMrl;
-- (void) removeTempFiles;
+IjkAVInjectCallback ijkav_register_inject_callback(IjkAVInjectCallback callback)
+{
+    IjkAVInjectCallback prev_callback = s_av_inject_callback;
+    s_av_inject_callback = callback;
+    return prev_callback;
+}
 
-@property(nonatomic, readonly)  NSString *rawMrl;
-@property(nonatomic, readonly)  NSString *resolvedMrl;
-
-@end
+IjkAVInjectCallback ijkav_get_inject_callback()
+{
+    return s_av_inject_callback;
+}

@@ -81,6 +81,11 @@ void ijkmp_global_set_log_level(int log_level)
     ffp_global_set_log_level(log_level);
 }
 
+void ijkmp_global_set_inject_callback(ijk_inject_callback cb)
+{
+    ffp_global_set_inject_callback(cb);
+}
+
 const char *ijkmp_version_ident()
 {
     return LIBIJKPLAYER_IDENT;
@@ -131,15 +136,20 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
     return NULL;
 }
 
-void ijkmp_set_format_callback(IjkMediaPlayer *mp, ijk_format_control_message cb, void *opaque)
+void ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque)
 {
     assert(mp);
 
-    MPTRACE("ijkmp_set_format_callback(%p, %p)\n", cb, opaque);
-    pthread_mutex_lock(&mp->mutex);
-    ffp_set_format_callback(mp->ffplayer, cb, opaque);
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_set_format_callback()=void\n");
+    MPTRACE("%s(%p)\n", __func__, opaque);
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
+#endif
+    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_FORMAT, "ijkinject-opaque", (int64_t)opaque);
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+    MPTRACE("%s()=void\n", __func__);
 }
 
 void ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, const char *value)
