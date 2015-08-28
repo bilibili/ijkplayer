@@ -17,13 +17,14 @@
 package tv.danmaku.ijk.media.player;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.os.Build;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import java.io.IOException;
 
-public class MediaPlayerProxy extends BaseMediaPlayer {
+public class MediaPlayerProxy implements IMediaPlayer {
     protected IMediaPlayer mBackEndMediaPlayer;
 
     public MediaPlayerProxy(IMediaPlayer backEndMediaPlayer) {
@@ -124,6 +125,16 @@ public class MediaPlayerProxy extends BaseMediaPlayer {
     @Override
     public MediaInfo getMediaInfo() {
         return mBackEndMediaPlayer.getMediaInfo();
+    }
+
+    @Override
+    public void setLogEnabled(boolean enable) {
+
+    }
+
+    @Override
+    public boolean isPlayable() {
+        return false;
     }
 
     @Override
@@ -229,5 +240,30 @@ public class MediaPlayerProxy extends BaseMediaPlayer {
         } else {
             mBackEndMediaPlayer.setOnInfoListener(null);
         }
+    }
+
+    @Override
+    public void setAudioStreamType(int streamtype) {
+        mBackEndMediaPlayer.setAudioStreamType(streamtype);
+    }
+
+    @Override
+    public void setKeepInBackground(boolean keepInBackground) {
+        mBackEndMediaPlayer.setKeepInBackground(keepInBackground);
+    }
+
+    @Override
+    public int getVideoSarNum() {
+        return mBackEndMediaPlayer.getVideoSarNum();
+    }
+
+    @Override
+    public int getVideoSarDen() {
+        return mBackEndMediaPlayer.getVideoSarDen();
+    }
+
+    @Override
+    public void setWakeMode(Context context, int mode) {
+        mBackEndMediaPlayer.setWakeMode(context, mode);
     }
 }
