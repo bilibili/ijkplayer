@@ -613,7 +613,8 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             // }
         }
     }
-
+// add by WilliamShi
+ffp->ab_tm = d->pkt_temp.ab_timestamp;
 fail:
     return ret;
 }

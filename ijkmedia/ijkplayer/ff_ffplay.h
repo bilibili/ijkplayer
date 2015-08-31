@@ -72,6 +72,7 @@ long      ffp_get_playable_duration_l(FFPlayer *ffp);
 // add new API
 int ffp_get_bitRate_l(FFPlayer *ffp);
 char* ffp_get_ipaddress_l(FFPlayer *ffp);
+int64_t ffp_get_abtm_l(FFPlayer *ffp);
 
 /* for internal usage */
 void      ffp_packet_queue_init(PacketQueue *q);

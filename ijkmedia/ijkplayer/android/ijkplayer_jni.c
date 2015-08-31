@@ -233,6 +233,20 @@ IjkMediaPlayer_getCurrentPosition(JNIEnv *env, jobject thiz)
     return retval;
 }
 
+static jlong
+IjkMediaPlayer_getAbsoluteTimestamp(JNIEnv *env, jobject thiz)
+{
+    jlong retval = 0;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getAbsoluteTimestamp: null mp", LABEL_RETURN);
+
+    retval = ijkmp_get_abtm(mp);
+
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return retval;
+}
+
 static int
 IjkMediaPlayer_getDuration(JNIEnv *env, jobject thiz)
 {
@@ -507,6 +521,19 @@ IjkMediaPlayer_setPlayerVolume(JNIEnv *env, jobject thiz,jint volume)
 }
 
 //add by fw------end
+
+static void
+ijkMediaPlayer_setDataCache(JNIEnv *env, jobject thiz,jint cache)
+{
+    MPTRACE("IjkMediaPlayer_setDataCache");
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setDataCache: null mp", LABEL_RETURN);
+
+    ijkmp_set_data_cache(mp, cache);
+    
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
 
 static jstring
 IjkMediaPlayer_getColorFormatName(JNIEnv *env, jclass clazz, jint mediaCodecColorFormat)
@@ -976,11 +1003,14 @@ static JNINativeMethod g_methods[] = {
     { "_setDataSourceType", "(I)V", (void *) IjkMediaPlayer_setDataSourceType },
     { "_setPlayerSpeedMode", "(I)V", (void *) IjkMediaPlayer_setPlayerSpeedMode },
     { "_setPlayerVolume", "(I)V", (void *) IjkMediaPlayer_setPlayerVolume },
+    { "_setDataCache", "(I)V", (void*)ijkMediaPlayer_setDataCache},
 
     { "_getColorFormatName", "(I)Ljava/lang/String;", (void *) IjkMediaPlayer_getColorFormatName },
     { "_getVideoCodecInfo", "()Ljava/lang/String;", (void *) IjkMediaPlayer_getVideoCodecInfo },
     { "_getAudioCodecInfo", "()Ljava/lang/String;", (void *) IjkMediaPlayer_getAudioCodecInfo },
     { "_getMediaMeta", "()Landroid/os/Bundle;", (void *) IjkMediaPlayer_getMediaMeta },
+
+    { "_getAbsoluteTimestamp", "()J", (void *) IjkMediaPlayer_getAbsoluteTimestamp },
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)

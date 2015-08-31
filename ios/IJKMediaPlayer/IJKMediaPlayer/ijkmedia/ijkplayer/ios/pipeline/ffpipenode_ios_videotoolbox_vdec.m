@@ -77,6 +77,8 @@ int decoder_decode_frame_videotoolbox(VideoToolBoxContext* context) {
                 }
             }
         }
+        //add by WilliamShi
+        ffp->ab_tm = d->pkt_temp.ab_timestamp;
     } while (!got_frame && !d->finished);
     return got_frame;
 }

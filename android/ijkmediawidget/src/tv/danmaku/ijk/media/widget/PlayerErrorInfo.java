@@ -7,6 +7,7 @@ public class PlayerErrorInfo {
 	private String br;
 	private String errcode;
 	private String token;
+	private String pf;
 
 	public void setAc(String acString)
 	{
@@ -68,4 +69,13 @@ public class PlayerErrorInfo {
 		return this.token;
 	}
 	
+	public void setPf(String pfString)
+	{
+		this.pf = pfString;
+	}
+	
+	public String getPf()
+	{
+		return this.pf;
+	}
 }

@@ -10,6 +10,8 @@
 		AB09E87B1B3C05DC006E0985 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = AB09E87A1B3C05DC006E0985 /* libxml2.dylib */; };
 		AB09E87F1B3C079E006E0985 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB09E87E1B3C079E006E0985 /* CFNetwork.framework */; };
 		AB4939D61AFB207E00E71A34 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB4939D51AFB207E00E71A34 /* CoreVideo.framework */; };
+		AB49EEDA1B84555300A44BAC /* HPASICommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB49EED91B84555300A44BAC /* HPASICommon.framework */; };
+		AB49EEDB1B84555300A44BAC /* HPASICommon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AB49EED91B84555300A44BAC /* HPASICommon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		AB6319AB1B3D2DFB0025924F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB6319AA1B3D2DFB0025924F /* SystemConfiguration.framework */; };
 		AB6319AD1B3D2E1B0025924F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB6319AC1B3D2E1B0025924F /* Security.framework */; };
 		AB6319AF1B3D2E3A0025924F /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB6319AE1B3D2E3A0025924F /* MobileCoreServices.framework */; };
@@ -69,10 +71,25 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		AB49EEDC1B84555300A44BAC /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				AB49EEDB1B84555300A44BAC /* HPASICommon.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		AB09E87A1B3C05DC006E0985 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		AB09E87E1B3C079E006E0985 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		AB4939D51AFB207E00E71A34 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		AB49EED91B84555300A44BAC /* HPASICommon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HPASICommon.framework; path = ../IJKMediaPlayer/HoopHttp/HPASICommon.framework; sourceTree = "<group>"; };
 		AB6319AA1B3D2DFB0025924F /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		AB6319AC1B3D2E1B0025924F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		AB6319AE1B3D2E3A0025924F /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
@@ -145,6 +162,7 @@
 				E64D4F4E1938CCCC00F1C75D /* CoreGraphics.framework in Frameworks */,
 				E612EAE517F7E0F800BEE660 /* MediaPlayer.framework in Frameworks */,
 				E63FC2B417F172EA003551EB /* OpenGLES.framework in Frameworks */,
+				AB49EEDA1B84555300A44BAC /* HPASICommon.framework in Frameworks */,
 				E63FC29117F04C83003551EB /* AudioToolbox.framework in Frameworks */,
 				E6903F0017EAF70200CFD954 /* UIKit.framework in Frameworks */,
 				E63FC29617F060A7003551EB /* libz.dylib in Frameworks */,
@@ -183,6 +201,7 @@
 		E6903EF317EAF70200CFD954 = {
 			isa = PBXGroup;
 			children = (
+				AB49EED91B84555300A44BAC /* HPASICommon.framework */,
 				E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */,
 				E6903F0517EAF70200CFD954 /* IJKMediaDemo */,
 				E6903EFE17EAF70200CFD954 /* Frameworks */,
@@ -286,6 +305,7 @@
 				E6903EF817EAF70200CFD954 /* Sources */,
 				E6903EF917EAF70200CFD954 /* Frameworks */,
 				E6903EFA17EAF70200CFD954 /* Resources */,
+				AB49EEDC1B84555300A44BAC /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -489,10 +509,15 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/WilliamShi/Desktop/HoopMediaPlayer/ijkplayer/ios/IJKMediaPlayer/HoopHttp,
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -507,10 +532,15 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/WilliamShi/Desktop/HoopMediaPlayer/ijkplayer/ios/IJKMediaPlayer/HoopHttp,
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

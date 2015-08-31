@@ -29,6 +29,7 @@
 #include "libavutil/avstring.h"
 #include "libavutil/time.h"
 #include "libavformat/avformat.h"
+#include "libavformat/url.h"
 #include "libavcodec/avfft.h"
 #include "libswscale/swscale.h"
 #include "libavutil/base64.h"

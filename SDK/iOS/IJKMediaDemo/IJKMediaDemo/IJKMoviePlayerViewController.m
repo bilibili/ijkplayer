@@ -57,7 +57,9 @@
     NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
 
     [IJKFFMoviePlayerController setLogReport:YES];
-    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
+    IJKFFOptions *options = [IJKFFOptions optionsByDefault];
+    options.cache = 10000;
+    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:options];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
 
@@ -314,7 +316,9 @@
         NSURL *theMovieURL = [NSURL URLWithString:self.urlString];
         
         [IJKFFMoviePlayerController setLogReport:YES];
-        self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:[IJKFFOptions optionsByDefault]];
+        IJKFFOptions *options = [IJKFFOptions optionsByDefault];
+        options.cache = 10000;
+        self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:options];
         self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         self.player.view.frame = self.view.bounds;
         

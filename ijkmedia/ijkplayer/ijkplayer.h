@@ -191,6 +191,9 @@ void ijkmp_set_player_volume(IjkMediaPlayer *mp, int volume);
 //2:VOD
 void            ijkmp_set_data_source_type(IjkMediaPlayer *mp, int type);
 
+//set data cache
+void            ijkmp_set_data_cache(IjkMediaPlayer *mp, int cache);
+
 int             ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
 int             ijkmp_prepare_async(IjkMediaPlayer *mp);
 int             ijkmp_start(IjkMediaPlayer *mp);
@@ -206,6 +209,7 @@ long            ijkmp_get_playable_duration(IjkMediaPlayer *mp);
 // add new API
 int             ijkmp_get_bitRate(IjkMediaPlayer *mp);
 char           *ijkmp_get_iPAddress(IjkMediaPlayer *mp);
+int64_t         ijkmp_get_abtm(IjkMediaPlayer *mp);
 
 void           *ijkmp_get_weak_thiz(IjkMediaPlayer *mp);
 void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);

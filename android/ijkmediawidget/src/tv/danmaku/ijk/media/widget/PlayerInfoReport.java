@@ -108,7 +108,7 @@ public class PlayerInfoReport {
 
 		if (serverAddress==null) {
 			try {
-				serverAddress = InetAddress.getByName("cloudci.hupu.com");
+				serverAddress = InetAddress.getByName("liveci.arenacloud.com");
 			} catch (UnknownHostException e) {
 				Log.e("PlayerInfoReport", "UDP Report Fail");
 				return;
@@ -153,6 +153,7 @@ public class PlayerInfoReport {
 		playerInfo.setToken(this.getToken());
 		playerInfo.setOc(this.getOc());
 		playerInfo.setCd(this.getCd());
+		playerInfo.setPf("android");
 
 		return gson.toJson(playerInfo);
 	}
@@ -174,6 +175,7 @@ public class PlayerInfoReport {
 		playerErrorInfo.setBr(this.getBr());
 		playerErrorInfo.setErrcode(this.getErrorCode());
 		playerErrorInfo.setToken(this.getToken());
+		playerErrorInfo.setPf("android");
 		
 		return gson.toJson(playerErrorInfo);
 	}

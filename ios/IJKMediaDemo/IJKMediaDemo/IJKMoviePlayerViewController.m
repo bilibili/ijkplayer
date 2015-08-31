@@ -15,6 +15,8 @@
 {
     IJKMPMovieSourceType mUrlSourceType;
 	int mPlaySpeedMode;
+    
+    NSTimer *timer;
 }
 
 @synthesize urlString = _urlString;
@@ -56,6 +58,7 @@
     IJKFFOptions * options = [IJKFFOptions optionsByDefault];
     options.reportPlayInfo = YES;
     options.sourceType = mUrlSourceType;
+    options.cache = 10000;
     
     [IJKFFMoviePlayerController setLogReport:YES];
 //    self.player = [[IJKFFMoviePlayerController alloc] initWithContentToken:self.urlString withOptions:options];
@@ -68,6 +71,12 @@
     [self removeMovieNotificationObservers];
     if (self.player) {
         [self.player shutdown];
+    }
+    
+    if(timer!=nil)
+    {
+        [timer invalidate];
+        timer = nil;
     }
 }
 
@@ -228,6 +237,18 @@
     self.mediaControl.delegatePlayer = self.player;
     
     [self.player play];
+    
+    timer =  [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(doPrintABTMOnce:) userInfo:nil repeats:YES];
+}
+
+- (void)printABTM
+{
+    NSLog(@"absolute timestamp : %@", [_player absoluteTimeStamp]);
+}
+
+- (void)doPrintABTMOnce:(NSTimer*)theTimer
+{
+    [self performSelectorInBackground:@selector(printABTM) withObject:self];
 }
 
 - (void)moviePlayBackStateDidChange:(NSNotification*)notification

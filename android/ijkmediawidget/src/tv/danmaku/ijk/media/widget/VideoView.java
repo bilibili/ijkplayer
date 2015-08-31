@@ -490,6 +490,7 @@ public class VideoView extends SurfaceView implements
                     }
 				}
                 ijkMediaPlayer.setDataSourceType(mDataSourceType);
+                ijkMediaPlayer.setDataCache(mCache);
                 ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
                 ijkMediaPlayer.setOverlayFormat(AvFourCC.SDL_FCC_RV32);
 
@@ -1175,7 +1176,7 @@ public class VideoView extends SurfaceView implements
     	isMediaCodecEnabled = enable;
     }
     
-    public String getUniqueId()
+    private String getUniqueId()
     {
     	return android.os.Build.MODEL;
     }
@@ -1187,7 +1188,7 @@ public class VideoView extends SurfaceView implements
 //    private String M1_NOTE = "Meizu/meizu_m1note/m1note:4.4.4/KTU84P/m71c.Flyme_OS_4.2.20150312033938:user/release-keys";
     
     private String M1_NOTE_model = "m1 note";
-    private String mI_3_model = "MI 3";
+    private String MI_3_model = "MI 3";
     private String MI_4LTE_model = "MI 4LTE";
     private String SUMSUN_S_IV_model = "GT-I95";
     private String sUMSUN_NOTE_III_model = "SM-N900";
@@ -1196,12 +1197,28 @@ public class VideoView extends SurfaceView implements
     {
     	if (getUniqueId().startsWith(M1_NOTE_model)
     			|| getUniqueId().startsWith(SUMSUN_S_IV_model)
-    			|| getUniqueId().startsWith(mI_3_model)
+    			|| getUniqueId().startsWith(MI_3_model)
     			|| getUniqueId().startsWith(MI_4LTE_model)
     			|| getUniqueId().startsWith(sUMSUN_NOTE_III_model)) {
 			return true;
 		}else {
 			return false;
 		}
+    }
+    
+    //ms
+    private int mCache = 10000;//10ms
+    public void setDataCache(int cache)
+    {
+    	mCache = cache;
+    }
+    
+    public long getAbsoluteTimestamp()
+    {
+    	if (mMediaPlayer!=null) {
+			return mMediaPlayer.getAbsoluteTimestamp();
+		}
+    	
+    	return 0;
     }
 }

@@ -19,6 +19,9 @@ package tv.danmaku.ijk.media.demo;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -52,14 +55,55 @@ public class VideoPlayerActivity extends Activity {
         mVideoView.setOnErrorListener(mErrorListener);
         mVideoView.setOnCompletionListener(mCompletionListener);
         
-        mVideoView.setDataSourceType(VideoView.LOWDELAY_LIVE_STREAMING_TYPE);
+//        mVideoView.setDataSourceType(VideoView.LOWDELAY_LIVE_STREAMING_TYPE);
+        mVideoView.setDataCache(10000);
         
         mVideoView.setMediaController(mMediaController);
         mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
         
         mVideoView.setVideoPath(mVideoPath);
-//        mVideoView.setVideoToken(mVideoPath);        
-}
+//        mVideoView.setVideoToken(mVideoPath);  
+        startPrint();
+    }
+    
+	private HandlerThread handlerThread=null;
+	private Handler handler=null;
+	private Runnable runnable=null;
+	public void startPrint()
+	{
+		if(handlerThread==null)
+		{
+			handlerThread = new HandlerThread("PrintAbsoluteTimestamp");
+			handlerThread.start();
+			Looper looper = handlerThread.getLooper();
+			handler = new Handler(looper);
+			
+			runnable = new Runnable() {
+				
+				@Override
+				public void run() {
+					Log.v("PrintAbsoluteTimestamp", String.valueOf(mVideoView.getAbsoluteTimestamp()));
+					handler.postDelayed(runnable, 3*1000);
+				}
+			};
+			
+			handler.postDelayed(runnable, 3*1000);
+		}
+	}
+	
+	public void endPrint()
+	{
+		if (handlerThread!=null) {
+			
+			if (handler!=null) {
+				handler.removeCallbacks(runnable);
+				handler = null;
+			}
+			
+			handlerThread.quit();
+			handlerThread = null;
+		}
+	}
     
 	private OnPreparedListener mPreparedListener = new OnPreparedListener() {
 
@@ -94,5 +138,12 @@ public class VideoPlayerActivity extends Activity {
     @Override  
     protected void onPause() {
         super.onPause();
-    }  
+    }
+    
+    @Override
+    protected void onDestroy()
+    {
+    	super.onDestroy();
+    	endPrint();
+    }
 }

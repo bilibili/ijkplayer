@@ -76,6 +76,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieSourceType) {
 @property(nonatomic, readonly) NSInteger videoHeight;
 @property(nonatomic, readonly) NSInteger bitRate;
 @property(nonatomic, readonly) NSString* iPAddress;
+@property(nonatomic, readonly) NSString* absoluteTimeStamp;
 
 - (UIImage *)thumbnailImageAtCurrentTime;
 

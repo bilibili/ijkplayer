@@ -85,6 +85,9 @@ public interface IMediaPlayer {
     
     // new API by William Shi
     public abstract int getBitRate();
+    
+    // new API by William Shi
+    public abstract long getAbsoluteTimestamp();
 
     public abstract void release();
 

@@ -880,4 +880,17 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 	}
 	private native void _setPlayerVolume(int volume);
 
+	
+	public void setDataCache(int cache)
+	{
+		_setDataCache(cache);
+	}
+	private native void _setDataCache(int cache);
+	
+	@Override
+	public long getAbsoluteTimestamp()
+	{
+		return _getAbsoluteTimestamp();
+	}
+	private native long _getAbsoluteTimestamp();
 }

@@ -108,6 +108,7 @@
 @property(nonatomic)  NSString* token; //
 @property(nonatomic)  NSString* oc; //stream open count
 @property(nonatomic)  NSString* cd; //stalled time / one minute
+@property(nonatomic, readonly) NSString* pf; //platform:android, ios ...
 
 @end
 

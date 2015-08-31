@@ -46,5 +46,6 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 // new API by WilliamShi
 @property(nonatomic)BOOL reportPlayInfo;
 @property(nonatomic)IJKMPMovieSourceType sourceType;
+@property(nonatomic) int cache; //ms
 
 @end

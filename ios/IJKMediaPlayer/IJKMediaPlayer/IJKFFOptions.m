@@ -25,11 +25,12 @@
 
     options.timeout                 = 30 * 1000 * 1000; // 30 seconds
     options.userAgent               = @"";
-    options.videotoolboxEnabled     = YES;
+    options.videotoolboxEnabled     = NO;
     options.frameMaxWidth           = 960;
     options.autoReconnect           = YES;
     options.reportPlayInfo          = YES;
     options.sourceType  = IJKMPMovieSourceTypeLowDelayLiveStreaming;
+    options.cache = 10000;//default 10s
 
     return options;
 }

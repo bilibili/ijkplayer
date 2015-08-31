@@ -358,6 +358,15 @@ void ijkmp_set_data_source_type(IjkMediaPlayer *mp, int type)
     pthread_mutex_unlock(&mp->mutex);
 }
 
+void ijkmp_set_data_cache(IjkMediaPlayer *mp, int cache)
+{
+    assert(mp);
+    
+    pthread_mutex_lock(&mp->mutex);
+    mp->ffplayer->data_cache = cache;
+    pthread_mutex_unlock(&mp->mutex);
+}
+
 int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
 {
     assert(mp);
@@ -665,6 +674,22 @@ char *ijkmp_get_iPAddress(IjkMediaPlayer *mp)
     pthread_mutex_unlock(&mp->mutex);
     return retval;
 }
+
+static int64_t ijkmp_get_abtm_l(IjkMediaPlayer *mp)
+{
+    return ffp_get_abtm_l(mp->ffplayer);
+}
+
+int64_t ijkmp_get_abtm(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int64_t retval = ijkmp_get_abtm_l(mp);
+//    MPTRACE("ijkmp_get_abtm_l: %lld\n",retval);
+    pthread_mutex_unlock(&mp->mutex);
+    return retval;
+}
+
 
 void *ijkmp_get_weak_thiz(IjkMediaPlayer *mp)
 {

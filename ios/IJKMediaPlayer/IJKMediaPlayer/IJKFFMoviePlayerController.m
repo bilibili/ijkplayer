@@ -29,8 +29,8 @@
 
 #include "string.h"
 
-#import "ASIHTTPRequest.h"
-#import "ASIFormDataRequest.h"
+#import <HPASICommon/ASIHTTPRequest.h>
+#import <HPASICommon/ASIFormDataRequest.h>
 
 #include <netdb.h>
 
@@ -50,6 +50,7 @@
 @end
 
 @implementation IJKFFMoviePlayerController {
+    
     IJKFFMrl *_ffMrl;
     id<IJKMediaSegmentResolver> _segmentResolver;
 
@@ -214,7 +215,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (void)send
 {
-    [udpSocket sendData:[[self getReportInfoWithJsonFormat] dataUsingEncoding:NSUTF8StringEncoding] toHost:@"cloudci.hupu.com" port:33333 withTimeout:-1 tag:tag];
+    [udpSocket sendData:[[self getReportInfoWithJsonFormat] dataUsingEncoding:NSUTF8StringEncoding] toHost:@"liveci.arenacloud.com" port:33333 withTimeout:-1 tag:tag];
     
     tag++;
 }
@@ -226,7 +227,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (void)sendOnError
 {
-    [udpSocket sendData:[[self getReportInfoWithJsonFormatOnError] dataUsingEncoding:NSUTF8StringEncoding] toHost:@"cloudci.hupu.com" port:33333 withTimeout:-1 tag:tag];
+    [udpSocket sendData:[[self getReportInfoWithJsonFormatOnError] dataUsingEncoding:NSUTF8StringEncoding] toHost:@"liveci.arenacloud.com" port:33333 withTimeout:-1 tag:tag];
     
     tag++;
 }
@@ -445,6 +446,8 @@ static NSMutableDictionary *dictionary = nil;
             break;
     }
     
+    ijkmp_set_data_cache(_mediaPlayer, _options.cache);
+    
     [self prepareToPlay];
 }
 
@@ -645,6 +648,8 @@ static NSMutableDictionary *dictionary = nil;
                 ijkmp_set_data_source_type(_mediaPlayer,2);
                 break;
         }
+        
+        ijkmp_set_data_cache(_mediaPlayer, options.cache);
         
         [self prepareToPlay];
         
@@ -931,6 +936,14 @@ static NSMutableDictionary *dictionary = nil;
     return [NSString stringWithUTF8String:ijkmp_get_iPAddress(_mediaPlayer)];
 }
 
+-(NSString*)absoluteTimeStamp
+{
+    if (!_mediaPlayer)
+        return nil;
+    
+    return [NSString stringWithFormat:@"%lld",(long long)ijkmp_get_abtm(_mediaPlayer)];
+}
+
 - (void)setScalingMode: (MPMovieScalingMode) aScalingMode
 {
     MPMovieScalingMode newScalingMode = aScalingMode;
@@ -1140,15 +1153,16 @@ int64_t _systemTime() {
         case FFP_MSG_COMPLETED: {
 
             [self setScreenOn:NO];
-
+            
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerPlaybackStateDidChangeNotification
              object:self];
-
+            
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMoviePlayerPlaybackDidFinishNotification
              object:self
              userInfo:@{MPMoviePlayerPlaybackDidFinishReasonUserInfoKey: @(MPMovieFinishReasonPlaybackEnded)}];
+
             break;
         }
         case FFP_MSG_VIDEO_SIZE_CHANGED:
@@ -1582,6 +1596,11 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
     return retStr;
 }
 
+- (NSString*)pf
+{
+    return @"ios";
+}
+
 - (NSString*)errorcode
 {
     return [NSString stringWithFormat:@"%d",errcode];
@@ -1594,6 +1613,7 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
                               self.rip,@"rip",
                               self.br,@"br",
                               self.errorcode,@"errcode",
+                              self.pf,@"pf",
                               self.token,@"token", nil];
 
     if ([NSJSONSerialization isValidJSONObject:infoDict])
@@ -1636,6 +1656,7 @@ int format_control_message(void *opaque, int type, void *data, size_t data_size)
                               self.br,@"br",
                               self.oc,@"oc",
                               self.cd,@"cd",
+                              self.pf,@"pf",
                               self.token,@"token", nil];
     
     if ([NSJSONSerialization isValidJSONObject:infoDict])

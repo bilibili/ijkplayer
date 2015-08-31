@@ -37,7 +37,7 @@
 #endif
 
 // add by william
-#define REALTIME_DURATION_LWM 500
+#define REALTIME_DURATION_LWM 1000
 #define REALTIME_DURATION_HWM 4000
 
 #define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
@@ -530,6 +530,12 @@ typedef struct FFPlayer {
 
 	int speed_mode;
 	int volume;
+    
+    //add by William
+    int data_cache;
+    
+    //absolute timestamp
+    int64_t ab_tm;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));

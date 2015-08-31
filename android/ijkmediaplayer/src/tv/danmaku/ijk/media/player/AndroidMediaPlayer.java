@@ -349,4 +349,10 @@ public class AndroidMediaPlayer extends SimpleMediaPlayer {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	@Override
+	public long getAbsoluteTimestamp()
+	{
+		return 0;
+	}
 }

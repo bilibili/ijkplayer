@@ -12,6 +12,7 @@ public class PlayerInfo {
 	private String token;
 	private String oc;
 	private String cd;
+	private String pf;
 
 /*
 	public void setVe(String veString)
@@ -123,5 +124,15 @@ public class PlayerInfo {
 	public String getCd()
 	{
 		return this.cd;
+	}
+	
+	public void setPf(String pfString)
+	{
+		this.pf = pfString;
+	}
+	
+	public String getPf()
+	{
+		return this.pf;
 	}
 }
