@@ -88,13 +88,13 @@ do_lipo_all () {
     ANY_ARCH=
     for ARCH in $FF_ALL_ARCHS
     do
-        if [ -z "$ANY_ARCH" ]; then
-            ANY_ARCH=$ARCH
-            cp -R "$UNI_BUILD_ROOT/build/ffmpeg-$ARCH/output/include" "$UNI_BUILD_ROOT/build/universal/"
-        fi
-
         ARCH_INC_DIR="$UNI_BUILD_ROOT/build/ffmpeg-$ARCH/output/include"
         if [ -d "$ARCH_INC_DIR" ]; then
+            if [ -z "$ANY_ARCH" ]; then
+                ANY_ARCH=$ARCH
+                cp -R "$ARCH_INC_DIR" "$UNI_BUILD_ROOT/build/universal/"
+            fi
+
             UNI_INC_DIR="$UNI_BUILD_ROOT/build/universal/include"
 
             mkdir -p "$UNI_INC_DIR/libavutil/$ARCH"
