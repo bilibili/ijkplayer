@@ -34,9 +34,9 @@
  *   - e.g. changing behavior in a previously unspecified situation.
  */
 
-#define LIBIJKPLAYER_VERSION_MAJOR  1
-#define LIBIJKPLAYER_VERSION_MINOR  1
-#define LIBIJKPLAYER_VERSION_MICRO  2
+#define LIBIJKPLAYER_VERSION_MAJOR  2
+#define LIBIJKPLAYER_VERSION_MINOR  0
+#define LIBIJKPLAYER_VERSION_MICRO  0
 
 #define LIBIJKPLAYER_VERSION_INT    AV_VERSION_INT(LIBIJKPLAYER_VERSION_MAJOR, \
                                                    LIBIJKPLAYER_VERSION_MINOR, \
