@@ -119,7 +119,7 @@ static void *async_buffer_task(void *arg)
             }
 
             c->seek_completed = 1;
-            c->seek_ret       = ret;
+            c->seek_ret       = seek_ret;
             c->seek_request   = 0;
 
             av_fifo_reset(fifo);
