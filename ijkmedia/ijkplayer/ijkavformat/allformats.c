@@ -24,13 +24,19 @@
 #include "libavformat/url.h"
 #include "libavformat/version.h"
 
-#define REGISTER_PROTOCOL(x)                                            \
+#define FF_REGISTER_PROTOCOL(x)                                         \
+{                                                                       \
+    extern URLProtocol ff_##x##_protocol;                               \
+    ffurl_register_protocol(&ff_##x##_protocol);                        \
+}
+
+#define IJK_REGISTER_PROTOCOL(x)                                        \
     {                                                                   \
         extern URLProtocol ijkff_##x##_protocol;                        \
         ffurl_register_protocol(&ijkff_##x##_protocol);                 \
     }
 
-#define REGISTER_DEMUXER(x)                                             \
+#define IJK_REGISTER_DEMUXER(x)                                         \
     {                                                                   \
         extern AVInputFormat ijkff_##x##_demuxer;                       \
         av_register_input_format(&ijkff_##x##_demuxer);                 \
@@ -45,13 +51,13 @@ void ijkav_register_all(void)
     initialized = 1;
 
     /* protocols */
-    REGISTER_PROTOCOL(ijkasync);
-    REGISTER_PROTOCOL(ijkhttphook);
-    REGISTER_PROTOCOL(ijkinject);
-    REGISTER_PROTOCOL(ijklongurl);
-    REGISTER_PROTOCOL(ijksegment);
-    REGISTER_PROTOCOL(ijktcphook);
+    FF_REGISTER_PROTOCOL(async);
+    IJK_REGISTER_PROTOCOL(ijkhttphook);
+    IJK_REGISTER_PROTOCOL(ijkinject);
+    IJK_REGISTER_PROTOCOL(ijklongurl);
+    IJK_REGISTER_PROTOCOL(ijksegment);
+    IJK_REGISTER_PROTOCOL(ijktcphook);
 
     /* demuxers */
-    REGISTER_DEMUXER(ijklivehook);
+    IJK_REGISTER_DEMUXER(ijklivehook);
 }

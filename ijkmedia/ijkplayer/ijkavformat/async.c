@@ -34,7 +34,7 @@
 #include "libavutil/fifo.h"
 #include "libavutil/log.h"
 #include "libavutil/opt.h"
-#include "libavformat/url.h"
+#include "url.h"
 #include <stdint.h>
 #include <pthread.h>
 
@@ -50,7 +50,7 @@ typedef struct Context {
     URLContext     *inner;
 
     int             seek_request;
-    int64_t         seek_pos;
+    size_t          seek_pos;
     int             seek_whence;
     int             seek_completed;
     int64_t         seek_ret;
@@ -58,8 +58,8 @@ typedef struct Context {
     int             io_error;
     int             io_eof_reached;
 
-    int64_t         logical_pos;
-    int64_t         logical_size;
+    size_t          logical_pos;
+    size_t          logical_size;
     AVFifoBuffer   *fifo;
 
     pthread_cond_t  cond_wakeup_main;
@@ -91,7 +91,6 @@ static void *async_buffer_task(void *arg)
     Context      *c    = h->priv_data;
     AVFifoBuffer *fifo = c->fifo;
     int           ret  = 0;
-    int64_t       seek_ret;
 
     while (1) {
         int fifo_space, to_copy;
@@ -106,9 +105,8 @@ static void *async_buffer_task(void *arg)
         }
 
         if (c->seek_request) {
-            seek_ret = ffurl_seek(c->inner, c->seek_pos, c->seek_whence);
-            if (seek_ret < 0) {
-                ret = (int)seek_ret;
+            ret = ffurl_seek(c->inner, c->seek_pos, c->seek_whence);
+            if (ret < 0) {
                 c->io_eof_reached = 1;
                 c->io_error       = ret;
             } else {
@@ -160,7 +158,7 @@ static int async_open(URLContext *h, const char *arg, int flags, AVDictionary **
     int              ret;
     AVIOInterruptCB  interrupt_callback = {.callback = async_check_interrupt, .opaque = h};
 
-    av_strstart(arg, "ijkasync:", &arg);
+    av_strstart(arg, "async:", &arg);
 
     c->fifo = av_fifo_alloc(BUFFER_CAPACITY);
     if (!c->fifo) {
@@ -327,7 +325,7 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
         av_log(h, AV_LOG_TRACE, "async_seek: fask_seek %"PRId64" from %d dist:%d/%d\n",
                 new_logical_pos, (int)c->logical_pos,
                 (int)(new_logical_pos - c->logical_pos), fifo_size);
-        async_read_internal(h, NULL, (int)(new_logical_pos - c->logical_pos), 1, fifo_do_not_copy_func);
+        async_read_internal(h, NULL, new_logical_pos - c->logical_pos, 1, fifo_do_not_copy_func);
         return c->logical_pos;
     } else if (c->logical_size <= 0) {
         /* can not seek */
@@ -379,8 +377,8 @@ static const AVClass async_context_class = {
     .version    = LIBAVUTIL_VERSION_INT,
 };
 
-URLProtocol ijkff_ijkasync_protocol = {
-    .name                = "ijkasync",
+URLProtocol ff_async_protocol = {
+    .name                = "async",
     .url_open2           = async_open,
     .url_read            = async_read,
     .url_seek            = async_seek,
@@ -396,8 +394,8 @@ URLProtocol ijkff_ijkasync_protocol = {
 
 typedef struct TestContext {
     AVClass        *class;
-    int64_t         logical_pos;
-    int64_t         logical_size;
+    size_t          logical_pos;
+    size_t          logical_size;
 } TestContext;
 
 static int async_test_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
