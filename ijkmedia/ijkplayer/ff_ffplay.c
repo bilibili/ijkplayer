@@ -153,6 +153,8 @@ static const AVOption ffp_context_options[] = {
 #endif
     { "iformat",                            "force format",
         OPTION_OFFSET(iformat_name),        OPTION_STR(NULL) },
+    { "min-frames",                         "minimal frames to stop pre-reading",
+        OPTION_OFFSET(min_frames),          OPTION_INT(DEFAULT_MIN_FRAMES, MIN_MIN_FRAMES, MAX_MIN_FRAMES) },
 
     // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
@@ -2722,8 +2724,8 @@ static int read_thread(void *arg)
               (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
 #else
               (((is->audioq.size + is->videoq.size > ffp->max_buffer_size)
-                 && (is->audioq.nb_packets > 5 || is->audio_stream < 0 || is->audioq.abort_request)
-                 && (is->videoq.nb_packets > 5 || is->video_stream < 0 || is->videoq.abort_request)
+                 && (is->audioq.nb_packets > MIN_MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
+                 && (is->videoq.nb_packets > MIN_MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)
                 )
 #endif
             || (   (is->audioq   .nb_packets > MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
@@ -3638,9 +3640,10 @@ void ffp_check_buffering_l(FFPlayer *ffp)
             audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
 #ifdef FFP_SHOW_DEMUX_CACHE
             int audio_cached_percent = (int)av_rescale(audio_cached_duration, 1005, hwm_in_ms * 10);
-            av_log(ffp, AV_LOG_DEBUG, "audio cache=%%%d (%d/%d) (%d/%d)\n", audio_cached_percent,
+            av_log(ffp, AV_LOG_DEBUG, "audio cache=%%%d milli:(%d/%d) bytes:(%d/%d) packet:(%d/%d)\n", audio_cached_percent,
                   (int)audio_cached_duration, hwm_in_ms,
-                  is->audioq.size, hwm_in_bytes);
+                  is->audioq.size, hwm_in_bytes,
+                  is->audioq.nb_packets, MIN_FRAMES);
 #endif
         }
 
@@ -3648,9 +3651,10 @@ void ffp_check_buffering_l(FFPlayer *ffp)
             video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
 #ifdef FFP_SHOW_DEMUX_CACHE
             int video_cached_percent = (int)av_rescale(video_cached_duration, 1005, hwm_in_ms * 10);
-            av_log(ffp, AV_LOG_DEBUG, "video cache=%%%d (%d/%d) (%d/%d)\n", video_cached_percent,
+            av_log(ffp, AV_LOG_DEBUG, "video cache=%%%d milli:(%d/%d) bytes:(%d/%d) packet:(%d/%d)\n", video_cached_percent,
                   (int)video_cached_duration, hwm_in_ms,
-                  is->videoq.size, hwm_in_bytes);
+                  is->videoq.size, hwm_in_bytes,
+                  is->audioq.nb_packets, MIN_FRAMES);
 #endif
         }
 
@@ -3725,8 +3729,8 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         ffp->current_high_water_mark_in_ms = hwm_in_ms;
 
         if (is->buffer_indicator_queue && is->buffer_indicator_queue->nb_packets > 0) {
-            if (   (is->audioq.nb_packets > 5 || is->audio_stream < 0 || is->audioq.abort_request)
-                && (is->videoq.nb_packets > 5 || is->video_stream < 0 || is->videoq.abort_request)) {
+            if (   (is->audioq.nb_packets > MIN_MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
+                && (is->videoq.nb_packets > MIN_MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)) {
                 ffp_toggle_buffering(ffp, 0);
             }
         }

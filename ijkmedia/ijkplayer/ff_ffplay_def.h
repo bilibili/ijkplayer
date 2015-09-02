@@ -83,7 +83,10 @@
 #ifdef FFP_MERGE
 #define MIN_FRAMES 25
 #endif
-#define MIN_FRAMES 50000
+#define DEFAULT_MIN_FRAMES  50000
+#define MIN_MIN_FRAMES      5
+#define MAX_MIN_FRAMES      50000
+#define MIN_FRAMES (ffp->min_frames)
 #define EXTERNAL_CLOCK_MIN_FRAMES 2
 #define EXTERNAL_CLOCK_MAX_FRAMES 10
 
@@ -543,6 +546,7 @@ typedef struct FFPlayer {
 
     MessageQueue msg_queue;
 
+    int min_frames;
     int max_buffer_size;
     int high_water_mark_in_bytes;
 
@@ -640,6 +644,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->first_video_frame_rendered = 0;
     ffp->sync_av_start          = 1;
 
+    ffp->min_frames                     = DEFAULT_MIN_FRAMES;
     ffp->max_buffer_size                = MAX_QUEUE_SIZE;
     ffp->high_water_mark_in_bytes       = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
 
