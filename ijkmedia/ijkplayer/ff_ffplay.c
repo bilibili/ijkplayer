@@ -3389,6 +3389,7 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
     }
 
     ffp->is = is;
+    ffp->input_filename = av_strdup(file_name);
     return 0;
 }
 
