@@ -81,6 +81,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private int mVideoHeight;
     private int mSurfaceWidth;
     private int mSurfaceHeight;
+    private int mVideoRotationDegree;
     private IMediaController mMediaController;
     private IMediaPlayer.OnCompletionListener mOnCompletionListener;
     private IMediaPlayer.OnPreparedListener mOnPreparedListener;
@@ -181,6 +182,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         addView(renderUIView);
 
         mRenderView.addRenderCallback(mSHCallback);
+        mRenderView.setVideoRotation(mVideoRotationDegree);
     }
 
     public void setRender(int render) {
@@ -468,6 +470,14 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 public boolean onInfo(IMediaPlayer mp, int arg1, int arg2) {
                     if (mOnInfoListener != null) {
                         mOnInfoListener.onInfo(mp, arg1, arg2);
+                    }
+                    switch (arg1) {
+                        case IMediaPlayer.MEDIA_INFO_VIDEO_ROTATION_CHANGED:
+                            mVideoRotationDegree = arg2;
+                            Log.d(TAG, "MEDIA_INFO_VIDEO_ROTATION_CHANGED: " + arg2);
+                            if (mRenderView != null)
+                                mRenderView.setVideoRotation(arg2);
+                            break;
                     }
                     return true;
                 }

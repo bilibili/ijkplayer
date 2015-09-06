@@ -98,6 +98,12 @@ public class TextureRenderView extends TextureView implements IRenderView {
     }
 
     @Override
+    public void setVideoRotation(int degree) {
+        mMeasureHelper.setVideoRotation(degree);
+        setRotation(degree);
+    }
+
+    @Override
     public void setAspectRatio(int aspectRatio) {
         mMeasureHelper.setAspectRatio(aspectRatio);
         requestLayout();

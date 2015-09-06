@@ -23,6 +23,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -97,6 +98,11 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
             mMeasureHelper.setVideoSampleAspectRatio(videoSarNum, videoSarDen);
             requestLayout();
         }
+    }
+
+    @Override
+    public void setVideoRotation(int degree) {
+        Log.e("", "SurfaceView doesn't support rotation (" + degree + ")!\n");
     }
 
     @Override

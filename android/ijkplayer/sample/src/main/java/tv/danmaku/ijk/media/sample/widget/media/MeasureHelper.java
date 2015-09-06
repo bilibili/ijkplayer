@@ -27,13 +27,12 @@ import tv.danmaku.ijk.media.sample.R;
 public final class MeasureHelper {
     private WeakReference<View> mWeakView;
 
-    private int mParentWidth;
-    private int mParentHeight;
-
     private int mVideoWidth;
     private int mVideoHeight;
     private int mVideoSarNum;
     private int mVideoSarDen;
+
+    private int mVideoRotationDegree;
 
     private int mMeasuredWidth;
     private int mMeasuredHeight;
@@ -60,6 +59,10 @@ public final class MeasureHelper {
         mVideoSarDen = videoSarDen;
     }
 
+    public void setVideoRotation(int videoRotationDegree) {
+        mVideoRotationDegree = videoRotationDegree;
+    }
+
     /**
      * Must be called by View.onMeasure(int, int)
      *
@@ -69,6 +72,11 @@ public final class MeasureHelper {
     public void doMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         //Log.i("@@@@", "onMeasure(" + MeasureSpec.toString(widthMeasureSpec) + ", "
         //        + MeasureSpec.toString(heightMeasureSpec) + ")");
+        if (mVideoRotationDegree == 90 || mVideoRotationDegree == 270) {
+            int tempSpec = widthMeasureSpec;
+            widthMeasureSpec  = heightMeasureSpec;
+            heightMeasureSpec = tempSpec;
+        }
 
         int width = View.getDefaultSize(mVideoWidth, widthMeasureSpec);
         int height = View.getDefaultSize(mVideoHeight, heightMeasureSpec);
@@ -87,9 +95,13 @@ public final class MeasureHelper {
                 switch (mCurrentAspectRatio) {
                     case IRenderView.AR_16_9_FIT_PARENT:
                         displayAspectRatio = 16.0f / 9.0f;
+                        if (mVideoRotationDegree == 90 || mVideoRotationDegree == 270)
+                            displayAspectRatio = 1.0f / displayAspectRatio;
                         break;
                     case IRenderView.AR_4_3_FIT_PARENT:
                         displayAspectRatio = 4.0f / 3.0f;
+                        if (mVideoRotationDegree == 90 || mVideoRotationDegree == 270)
+                            displayAspectRatio = 1.0f / displayAspectRatio;
                         break;
                     case IRenderView.AR_ASPECT_FIT_PARENT:
                     case IRenderView.AR_ASPECT_FILL_PARENT:
