@@ -16,141 +16,141 @@
 
 package tv.danmaku.ijk.media.player;
 
-import java.io.IOException;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import java.io.IOException;
+
 public interface IMediaPlayer {
     /*
      * Do not change these values without updating their counterparts in native
      */
-    public static final int MEDIA_INFO_UNKNOWN = 1;
-    public static final int MEDIA_INFO_STARTED_AS_NEXT = 2;
-    public static final int MEDIA_INFO_VIDEO_RENDERING_START = 3;
-    public static final int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;
-    public static final int MEDIA_INFO_BUFFERING_START = 701;
-    public static final int MEDIA_INFO_BUFFERING_END = 702;
-    public static final int MEDIA_INFO_BAD_INTERLEAVING = 800;
-    public static final int MEDIA_INFO_NOT_SEEKABLE = 801;
-    public static final int MEDIA_INFO_METADATA_UPDATE = 802;
-    public static final int MEDIA_INFO_TIMED_TEXT_ERROR = 900;
+    int MEDIA_INFO_UNKNOWN = 1;
+    int MEDIA_INFO_STARTED_AS_NEXT = 2;
+    int MEDIA_INFO_VIDEO_RENDERING_START = 3;
+    int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;
+    int MEDIA_INFO_BUFFERING_START = 701;
+    int MEDIA_INFO_BUFFERING_END = 702;
+    int MEDIA_INFO_BAD_INTERLEAVING = 800;
+    int MEDIA_INFO_NOT_SEEKABLE = 801;
+    int MEDIA_INFO_METADATA_UPDATE = 802;
+    int MEDIA_INFO_TIMED_TEXT_ERROR = 900;
 
-    public static final int MEDIA_ERROR_UNKNOWN = 1;
-    public static final int MEDIA_ERROR_SERVER_DIED = 100;
-    public static final int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 200;
-    public static final int MEDIA_ERROR_IO = -1004;
-    public static final int MEDIA_ERROR_MALFORMED = -1007;
-    public static final int MEDIA_ERROR_UNSUPPORTED = -1010;
-    public static final int MEDIA_ERROR_TIMED_OUT = -110;
+    int MEDIA_ERROR_UNKNOWN = 1;
+    int MEDIA_ERROR_SERVER_DIED = 100;
+    int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 200;
+    int MEDIA_ERROR_IO = -1004;
+    int MEDIA_ERROR_MALFORMED = -1007;
+    int MEDIA_ERROR_UNSUPPORTED = -1010;
+    int MEDIA_ERROR_TIMED_OUT = -110;
 
-    public abstract void setDisplay(SurfaceHolder sh);
+    void setDisplay(SurfaceHolder sh);
 
-    public abstract void setDataSource(String path) throws IOException,
+    void setDataSource(String path) throws IOException,
             IllegalArgumentException, SecurityException, IllegalStateException;
 
-    public abstract String getDataSource();
+    String getDataSource();
 
-    public abstract void prepareAsync() throws IllegalStateException;
+    void prepareAsync() throws IllegalStateException;
 
-    public abstract void start() throws IllegalStateException;
+    void start() throws IllegalStateException;
 
-    public abstract void stop() throws IllegalStateException;
+    void stop() throws IllegalStateException;
 
-    public abstract void pause() throws IllegalStateException;
+    void pause() throws IllegalStateException;
 
-    public abstract void setScreenOnWhilePlaying(boolean screenOn);
+    void setScreenOnWhilePlaying(boolean screenOn);
 
-    public abstract int getVideoWidth();
+    int getVideoWidth();
 
-    public abstract int getVideoHeight();
+    int getVideoHeight();
 
-    public abstract boolean isPlaying();
+    boolean isPlaying();
 
-    public abstract void seekTo(long msec) throws IllegalStateException;
+    void seekTo(long msec) throws IllegalStateException;
 
-    public abstract long getCurrentPosition();
+    long getCurrentPosition();
 
-    public abstract long getDuration();
+    long getDuration();
 
-    public abstract void release();
+    void release();
 
-    public abstract void reset();
+    void reset();
 
-    public abstract void setVolume(float leftVolume, float rightVolume);
+    void setVolume(float leftVolume, float rightVolume);
 
-    public abstract MediaInfo getMediaInfo();
+    MediaInfo getMediaInfo();
 
-    public abstract void setLogEnabled(boolean enable);
+    void setLogEnabled(boolean enable);
 
-    public abstract boolean isPlayable();
+    boolean isPlayable();
 
-    public abstract void setOnPreparedListener(OnPreparedListener listener);
+    void setOnPreparedListener(OnPreparedListener listener);
 
-    public abstract void setOnCompletionListener(OnCompletionListener listener);
+    void setOnCompletionListener(OnCompletionListener listener);
 
-    public abstract void setOnBufferingUpdateListener(
+    void setOnBufferingUpdateListener(
             OnBufferingUpdateListener listener);
 
-    public abstract void setOnSeekCompleteListener(
+    void setOnSeekCompleteListener(
             OnSeekCompleteListener listener);
 
-    public abstract void setOnVideoSizeChangedListener(
+    void setOnVideoSizeChangedListener(
             OnVideoSizeChangedListener listener);
 
-    public abstract void setOnErrorListener(OnErrorListener listener);
+    void setOnErrorListener(OnErrorListener listener);
 
-    public abstract void setOnInfoListener(OnInfoListener listener);
+    void setOnInfoListener(OnInfoListener listener);
 
     /*--------------------
      * Listeners
      */
-    public static interface OnPreparedListener {
-        public void onPrepared(IMediaPlayer mp);
+    interface OnPreparedListener {
+        void onPrepared(IMediaPlayer mp);
     }
 
-    public static interface OnCompletionListener {
-        public void onCompletion(IMediaPlayer mp);
+    interface OnCompletionListener {
+        void onCompletion(IMediaPlayer mp);
     }
 
-    public static interface OnBufferingUpdateListener {
-        public void onBufferingUpdate(IMediaPlayer mp, int percent);
+    interface OnBufferingUpdateListener {
+        void onBufferingUpdate(IMediaPlayer mp, int percent);
     }
 
-    public static interface OnSeekCompleteListener {
-        public void onSeekComplete(IMediaPlayer mp);
+    interface OnSeekCompleteListener {
+        void onSeekComplete(IMediaPlayer mp);
     }
 
-    public static interface OnVideoSizeChangedListener {
-        public void onVideoSizeChanged(IMediaPlayer mp, int width, int height,
-                int sar_num, int sar_den);
+    interface OnVideoSizeChangedListener {
+        void onVideoSizeChanged(IMediaPlayer mp, int width, int height,
+                                int sar_num, int sar_den);
     }
 
-    public static interface OnErrorListener {
-        public boolean onError(IMediaPlayer mp, int what, int extra);
+    interface OnErrorListener {
+        boolean onError(IMediaPlayer mp, int what, int extra);
     }
 
-    public static interface OnInfoListener {
-        public boolean onInfo(IMediaPlayer mp, int what, int extra);
+    interface OnInfoListener {
+        boolean onInfo(IMediaPlayer mp, int what, int extra);
     }
 
     /*--------------------
      * Optional
      */
-    public abstract void setAudioStreamType(int streamtype);
+    void setAudioStreamType(int streamtype);
 
-    public abstract void setKeepInBackground(boolean keepInBackground);
+    void setKeepInBackground(boolean keepInBackground);
 
-    public abstract int getVideoSarNum();
+    int getVideoSarNum();
 
-    public abstract int getVideoSarDen();
+    int getVideoSarDen();
 
     @Deprecated
-    public abstract void setWakeMode(Context context, int mode);
+    void setWakeMode(Context context, int mode);
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public abstract void setSurface(Surface surface);
+    void setSurface(Surface surface);
 }
