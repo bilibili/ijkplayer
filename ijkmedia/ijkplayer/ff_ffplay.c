@@ -2616,6 +2616,18 @@ static int read_thread(void *arg)
         AVCodecContext *avctx = is->video_st->codec;
         ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
         ffp_notify_msg3(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
+
+        int theta  = (int)((int64_t)round(fabs(get_rotation(is->video_st))) % 360);
+        ALOGD("theta: %lf\n rotate: %d", get_rotation(is->video_st), rotate);
+        if (fabs(theta - 90) < 1.0) {
+            ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 90);
+        } else if (fabs(theta - 180) < 1.0) {
+            ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 180);
+        } else if (fabs(theta - 270) < 1.0) {
+            ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 270);
+        } else if (fabs(theta) < 1.0 || fabs(theta - 360) < 1.0) {
+            ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 0);
+        }
     }
     ffp->prepared = true;
     ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
