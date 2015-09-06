@@ -46,6 +46,11 @@ public class Settings {
         return mSharedPreferences.getBoolean(key, false);
     }
 
+    public boolean getUsingMediaCodecAutoRotate() {
+        String key = mAppContext.getString(R.string.pref_key_using_media_codec_auto_rotate);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
     public boolean getUsingOpenSLES() {
         String key = mAppContext.getString(R.string.pref_key_using_opensl_es);
         return mSharedPreferences.getBoolean(key, false);
