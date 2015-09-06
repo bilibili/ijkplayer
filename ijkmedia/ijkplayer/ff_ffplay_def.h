@@ -565,6 +565,8 @@ typedef struct FFPlayer {
     int vtb_wait_async;
 
     int mediacodec;
+    int mediacodec_auto_rotate;
+
     int opensles;
 
     char *iformat_name;
@@ -663,6 +665,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->vtb_wait_async                 = 0; // option
 
     ffp->mediacodec                     = 0; // option
+    ffp->mediacodec_auto_rotate         = 0; // option
+
     ffp->opensles                       = 0; // option
 
     ffp->iformat_name                   = NULL; // option

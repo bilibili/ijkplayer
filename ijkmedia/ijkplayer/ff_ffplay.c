@@ -167,8 +167,11 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(vtb_wait_async),      OPTION_INT(1, 0, 1) },
 
     // Android only options
-    { "mediacodec",                         "MediaCodec: enable",
-        OPTION_OFFSET(mediacodec),          OPTION_INT(0, 0, 1) },
+    { "mediacodec",                             "MediaCodec: enable",
+        OPTION_OFFSET(mediacodec),              OPTION_INT(0, 0, 1) },
+    { "mediacodec-auto-rotate",                 "MediaCodec: auto rotate frame depending on meta",
+        OPTION_OFFSET(mediacodec_auto_rotate),  OPTION_INT(0, 0, 1) },
+
     { "opensles",                           "OpenSL ES: enable",
         OPTION_OFFSET(opensles),            OPTION_INT(0, 0, 1) },
 
@@ -1694,7 +1697,8 @@ static int ffplay_video_thread(void *arg)
         av_frame_free(&frame);
         return AVERROR(ENOMEM);
     }
-
+#else
+    ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, ffp_get_video_rotate_degrees(ffp));
 #endif
 
     if (!frame) {
@@ -2616,18 +2620,6 @@ static int read_thread(void *arg)
         AVCodecContext *avctx = is->video_st->codec;
         ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
         ffp_notify_msg3(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
-
-        int theta  = (int)((int64_t)round(fabs(get_rotation(is->video_st))) % 360);
-        ALOGD("theta: %lf rotate: %d\n", get_rotation(is->video_st), theta);
-        if (fabs(theta - 90) < 1.0) {
-            ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 90);
-        } else if (fabs(theta - 180) < 1.0) {
-            ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 180);
-        } else if (fabs(theta - 270) < 1.0) {
-            ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 270);
-        } else if (fabs(theta) < 1.0 || fabs(theta - 360) < 1.0) {
-            ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 0);
-        }
     }
     ffp->prepared = true;
     ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
@@ -3776,6 +3768,30 @@ void ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *cod
     av_freep(&ffp->audio_codec_info);
     ffp->audio_codec_info = av_asprintf("%s, %s", module ? module : "", codec ? codec : "");
     av_log(ffp, AV_LOG_INFO, "AudioCodec: %s\n", ffp->audio_codec_info);
+}
+
+int ffp_get_video_rotate_degrees(FFPlayer *ffp)
+{
+    VideoState *is = ffp->is;
+    if (!is)
+        return 0;
+
+    int theta  = (int)((int64_t)round(fabs(get_rotation(is->video_st))) % 360);
+    int degrees = 0;
+    if (fabs(theta - 90) < 1.0) {
+        degrees = 90;
+    } else if (fabs(theta - 180) < 1.0) {
+        degrees = 180;
+    } else if (fabs(theta - 270) < 1.0) {
+        degrees = 270;
+    } else if (fabs(theta) < 1.0 || fabs(theta - 360) < 1.0) {
+        degrees = 0;
+    } else {
+        ALOGW("Unknown rotate degress: %d\n", degrees);
+        degrees = 0;
+    }
+
+    return degrees;
 }
 
 IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)

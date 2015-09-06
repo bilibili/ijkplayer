@@ -63,6 +63,7 @@ typedef struct IJKFF_Pipenode_Opaque {
     char                      acodec_name[128];
     int                       frame_width;
     int                       frame_height;
+    int                       frame_rotate_degrees;
 
     AVCodecContext           *avctx; // not own
     AVBitStreamFilterContext *bsfc;  // own
@@ -949,8 +950,13 @@ static int func_run_sync(IJKFF_Pipenode *node)
         return -1;
     }
 
-    opaque->frame_width  = opaque->avctx->width;
-    opaque->frame_height = opaque->avctx->height;
+    if (opaque->frame_rotate_degrees == 90 || opaque->frame_rotate_degrees == 270) {
+        opaque->frame_width  = opaque->avctx->height;
+        opaque->frame_height = opaque->avctx->width;
+    } else {
+        opaque->frame_width  = opaque->avctx->width;
+        opaque->frame_height = opaque->avctx->height;
+    }
 
     opaque->enqueue_thread = SDL_CreateThreadEx(&opaque->_enqueue_thread, enqueue_thread_func, node, "amediacodec_input_thread");
     if (!opaque->enqueue_thread) {
@@ -1032,6 +1038,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     IJKFF_Pipenode_Opaque *opaque = node->opaque;
     JNIEnv                *env    = NULL;
     int                    ret    = 0;
+    int                    rotate_degrees = 0;
 
     node->func_destroy  = func_destroy;
     node->func_run_sync = func_run_sync;
@@ -1130,6 +1137,18 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         }
     } else {
         ALOGE("no buffer(%d)\n", opaque->avctx->extradata_size);
+    }
+
+    rotate_degrees = ffp_get_video_rotate_degrees(ffp);
+    if (ffp->mediacodec_auto_rotate &&
+        rotate_degrees != 0 &&
+        SDL_Android_GetApiLevel() >= IJK_API_21_LOLLIPOP) {
+        ALOGI("amc: rotate: %d\n", rotate_degrees);
+        opaque->frame_rotate_degrees = rotate_degrees;
+        SDL_AMediaFormat_setInt32(opaque->input_aformat, "rotation-degrees", rotate_degrees);
+        ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 0);
+    } else {
+        ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, rotate_degrees);
     }
 
     ret = reconfigure_codec_l(env, node);
