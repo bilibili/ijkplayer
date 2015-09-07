@@ -427,8 +427,10 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
                 ALOGD("%lf fps, %lf ms/frame, %"PRIu64" frames\n",
                       fps, per_frame_ms, ctx->benchmark_frame_count);
             }
-            goto failed;
         }
+#endif
+#ifdef FFP_VTB_DISABLE_OUTPUT
+        goto failed;
 #endif
 
         OSType format_type = CVPixelBufferGetPixelFormatType(imageBuffer);

@@ -36,6 +36,7 @@
 
 // #define FFP_SHOW_VTB_IN_DECODING
 // #define FFP_SHOW_VTB_VDPS
+// #define FFP_VTB_DISABLE_OUTPUT
 
 // #define FFP_SHOW_AMC_VDPS
 // #define FFP_SHOW_AMC_DROPS
