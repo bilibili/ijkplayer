@@ -415,8 +415,8 @@ URLProtocol ff_async_protocol = {
 
 typedef struct TestContext {
     AVClass        *class;
-    size_t          logical_pos;
-    size_t          logical_size;
+    int64_t         logical_pos;
+    int64_t         logical_size;
 } TestContext;
 
 static int async_test_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
@@ -491,7 +491,7 @@ URLProtocol ff_async_test_protocol = {
     .priv_data_class     = &async_test_context_class,
 };
 
-int main(void)
+int main1(void)
 {
     URLContext   *h = NULL;
     int           i;
