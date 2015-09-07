@@ -118,6 +118,10 @@ static const AVOption ffp_context_options[] = {
     // original options in ffplay.c
     { "framedrop",                      "drop frames when cpu is too slow",
         OPTION_OFFSET(framedrop),       OPTION_INT(0, -1, 120) },
+    { "an",                             "disable audio",
+        OPTION_OFFSET(audio_disable),   OPTION_INT(0, 0, 1) },
+    { "vn",                             "disable video",
+        OPTION_OFFSET(video_disable),   OPTION_INT(0, 0, 1) },
 
     // extended options in ff_ffplay.c
     { "max-fps",                        "drop frames in video whose fps is greater than max-fps",
