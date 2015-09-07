@@ -125,8 +125,25 @@ static const AVOption ffp_context_options[] = {
     // TODO: ss
     { "nodisp",                         "disable graphical display",
         OPTION_OFFSET(display_disable), OPTION_INT(0, 0, 1) },
+    // FFP_MERGE: f, pix_fmt, stats
+    { "fast",                           "non spec compliant optimizations",
+        OPTION_OFFSET(fast),            OPTION_INT(0, 0, 1) },
+    // FFP_MERGE: genpts, drp, lowres, sync, autoexit, exitonkeydown, exitonmousedown
+    // TODO: loop
+    { "infbuf",                         "don't limit the input buffer size (useful with realtime streams)",
+        OPTION_OFFSET(infinite_buffer), OPTION_INT(0, 0, 1) },
     { "framedrop",                      "drop frames when cpu is too slow",
         OPTION_OFFSET(framedrop),       OPTION_INT(0, -1, 120) },
+    // FFP_MERGE: window_title
+#if CONFIG_AVFILTER
+    // FFP_MERGE: vf
+    { "af",                             "audio filters",
+        OPTION_OFFSET(afilters),        OPTION_STR(NULL) },
+#endif
+    { "rdftspeed",                      "rdft speed, in msecs",
+        OPTION_OFFSET(rdftspeed),       OPTION_INT(0, 0, INT_MAX) },
+    // FFP_MERGE: showmode, default, i, codec, acodec, scodec, vcodec
+    // TODO: autorotate
 
     // extended options in ff_ffplay.c
     { "max-fps",                        "drop frames in video whose fps is greater than max-fps",
@@ -156,10 +173,6 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(packet_buffering),    OPTION_INT(1, 0, 1) },
     { "sync-av-start",                      "synchronise a/v start time",
         OPTION_OFFSET(sync_av_start),       OPTION_INT(1, 0, 1) },
-#if CONFIG_AVFILTER
-    { "af",                                 "audio filters",
-        OPTION_OFFSET(afilters),            OPTION_STR(NULL) },
-#endif
     { "iformat",                            "force format",
         OPTION_OFFSET(iformat_name),        OPTION_STR(NULL) },
     { "min-frames",                         "minimal frames to stop pre-reading",
