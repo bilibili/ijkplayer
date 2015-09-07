@@ -36,19 +36,19 @@
 {
     IJKFFOptions *options = [[IJKFFOptions alloc] init];
 
-    [options setMaxFps:30];
-    [options setFrameDrop:0];
-    [options setVideoPictureSize:3];
-    [options setVideoToolboxMaxFrameWidth:960];
+    [options setPlayerOptionIntValue:30     forKey:@"max-fps"];
+    [options setPlayerOptionIntValue:0      forKey:@"framedrop"];
+    [options setPlayerOptionIntValue:3      forKey:@"video-pictq-size"];
+    [options setPlayerOptionIntValue:0      forKey:@"videotoolbox"];
+    [options setPlayerOptionIntValue:960    forKey:@"videotoolbox-max-frame-width"];
 
-    [options setReconnect:1];
-    [options setTimeout:30 * 1000 * 1000];
-    [options setUserAgent:@"ijkplayer"];
+    [options setFormatOptionIntValue:0                  forKey:@"auto_convert"];
+    [options setFormatOptionIntValue:1                  forKey:@"reconnect"];
+    [options setFormatOptionIntValue:30 * 1000 * 1000   forKey:@"timeout"];
+    [options setFormatOptionValue:@"ijkplayer"          forKey:@"user-agent"];
 
-    [options setSkipLoopFilter:IJK_AVDISCARD_ALL];
-    [options setSkipFrame:IJK_AVDISCARD_NONREF];
-
-    [options setOptionIntValue:0 forKey:@"auto_convert" ofCategory:kIJKFFOptionCategoryFormat];
+    [options setCodecOptionIntValue:IJK_AVDISCARD_ALL       forKey:@"skip_loop_filter"];
+    [options setCodecOptionIntValue:IJK_AVDISCARD_NONREF    forKey:@"skip_frame"];
 
     options.useRenderQueue = NO;
 
@@ -163,65 +163,6 @@
 -(void)setPlayerOptionIntValue:(int64_t)value forKey:(NSString *)key
 {
     [self setOptionIntValue:value forKey:key ofCategory:kIJKFFOptionCategoryPlayer];
-}
-
-
-#pragma mark Player options
-
--(void)setMaxFps:(int)value
-{
-    [self setPlayerOptionIntValue:value forKey:@"max-fps"];
-}
-
--(void)setFrameDrop:(int)value
-{
-    [self setPlayerOptionIntValue:value forKey:@"framedrop"];
-}
-
--(void)setVideoPictureSize:(int)value
-{
-    [self setPlayerOptionIntValue:value forKey:@"video-pictq-size"];
-}
-
--(void)setVideoToolboxEnabled:(BOOL)value
-{
-    [self setPlayerOptionIntValue:(value ? 1 : 0) forKey:@"videotoolbox"];
-}
-
--(void)setVideoToolboxMaxFrameWidth:(int)value
-{
-    [self setPlayerOptionIntValue:value forKey:@"videotoolbox-max-frame-width"];
-}
-
-
-#pragma mark Format options
-
--(void)setReconnect:(int)value
-{
-    [self setFormatOptionIntValue:value forKey:@"reconnect"];
-}
-
--(void)setTimeout:(int64_t)value
-{
-    [self setFormatOptionIntValue:value forKey:@"timeout"];
-}
-
--(void)setUserAgent:(NSString *)value
-{
-    [self setFormatOptionValue:value forKey:@"user-agent"];
-}
-
-
-#pragma mark Codec options
-
--(void)setSkipLoopFilter:(IJKAVDiscard)value
-{
-    [self setCodecOptionIntValue:value forKey:@"skip_loop_filter"];
-}
-
--(void)setSkipFrame:(IJKAVDiscard)value
-{
-    [self setCodecOptionIntValue:value forKey:@"skip_frame"];
 }
 
 @end

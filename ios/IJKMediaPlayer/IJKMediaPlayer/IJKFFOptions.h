@@ -68,19 +68,6 @@ struct IjkMediaPlayer;
 -(void)setSwsOptionIntValue:       (int64_t)value forKey:(NSString *)key;
 -(void)setPlayerOptionIntValue:    (int64_t)value forKey:(NSString *)key;
 
--(void)setMaxFps:(int)value;
--(void)setFrameDrop:(int)value;
--(void)setVideoPictureSize:(int)value;
--(void)setVideoToolboxEnabled:(BOOL)value;
--(void)setVideoToolboxMaxFrameWidth:(int)value;
-
--(void)setReconnect:(int)value;
--(void)setTimeout:(int64_t)value;
--(void)setUserAgent:(NSString *)value;
-
--(void)setSkipLoopFilter:(IJKAVDiscard)value;
--(void)setSkipFrame:(IJKAVDiscard)value;
-
 @property(nonatomic) BOOL useRenderQueue;
 
 @end
