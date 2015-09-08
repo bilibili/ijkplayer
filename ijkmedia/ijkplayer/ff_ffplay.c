@@ -3799,7 +3799,6 @@ int ffp_get_video_rotate_degrees(FFPlayer *ffp)
         return 0;
 
     int theta  = abs((int)((int64_t)round(fabs(get_rotation(is->video_st))) % 360));
-    int degrees = 0;
     switch (theta) {
         case 0:
         case 90:
@@ -3807,15 +3806,15 @@ int ffp_get_video_rotate_degrees(FFPlayer *ffp)
         case 270:
             break;
         case 360:
-            degrees = 0;
+            theta = 0;
             break;
         default:
-            ALOGW("Unknown rotate degress: %d\n", degrees);
-            degrees = 0;
+            ALOGW("Unknown rotate degress: %d\n", theta);
+            theta = 0;
             break;
     }
 
-    return degrees;
+    return theta;
 }
 
 IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
