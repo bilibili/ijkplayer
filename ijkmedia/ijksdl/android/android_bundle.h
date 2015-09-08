@@ -29,7 +29,11 @@
 int ASDK_Bundle__loadClass(JNIEnv *env);
 
 jobject ASDK_Bundle__init(JNIEnv *env);
-void    ASDK_Bundle__putString_c(JNIEnv *env, jobject thiz, const char *key, const char *value);
+int     ASDK_Bundle__getInt_c(JNIEnv *env, jobject thiz, const char *key, int defaultValue);
+void    ASDK_Bundle__putInt_c(JNIEnv *env, jobject thiz, const char *key, int value);
 void    ASDK_Bundle__putParcelableArrayList_c(JNIEnv *env, jobject thiz, const char *key, jobject value);
+
+void    ASDK_Bundle__getString_cbuf(JNIEnv *env, jobject thiz, const char *key, char *value, size_t size);
+void    ASDK_Bundle__putString_c(JNIEnv *env, jobject thiz, const char *key, const char *value);
 
 #endif
