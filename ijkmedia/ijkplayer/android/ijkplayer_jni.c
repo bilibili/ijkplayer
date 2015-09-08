@@ -56,10 +56,7 @@ typedef struct player_fields_t {
 
     jmethodID jmid_postEventFromNative;
     jmethodID jmid_onSelectCodec;
-    jmethodID jmid_onControlResolveSegmentCount;
     jmethodID jmid_onControlResolveSegmentUrl;
-    jmethodID jmid_onControlResolveSegmentOfflineMrl;
-    jmethodID jmid_onControlResolveSegmentDuration;
 } player_fields_t;
 static player_fields_t g_clazz;
 
@@ -853,17 +850,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onSelectCodec, g_clazz.clazz,
         "onSelectCodec", "(Ljava/lang/Object;Ljava/lang/String;II)Ljava/lang/String;");
 
-    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onControlResolveSegmentCount, g_clazz.clazz,
-        "onControlResolveSegmentCount", "(Ljava/lang/Object;)I");
-
-    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onControlResolveSegmentDuration, g_clazz.clazz,
-        "onControlResolveSegmentDuration", "(Ljava/lang/Object;I)I");
-
     IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onControlResolveSegmentUrl, g_clazz.clazz,
         "onControlResolveSegmentUrl", "(Ljava/lang/Object;I)Ljava/lang/String;");
-
-    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onControlResolveSegmentOfflineMrl, g_clazz.clazz,
-        "onControlResolveSegmentOfflineMrl", "(Ljava/lang/Object;I)Ljava/lang/String;");
 
     ijkmp_global_init();
     ijkmp_global_set_inject_callback(inject_callback);

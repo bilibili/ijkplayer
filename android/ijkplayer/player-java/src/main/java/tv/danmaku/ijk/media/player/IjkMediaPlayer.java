@@ -704,29 +704,7 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     }
 
     public static interface OnControlMessageListener {
-        public int onControlResolveSegmentCount();
         public String onControlResolveSegmentUrl(int segment);
-        public String onControlResolveSegmentOfflineMrl(int segment);
-        public int onControlResolveSegmentDuration(int segment);
-    }
-
-    @CalledByNative
-    private static int onControlResolveSegmentCount(Object weakThiz) {
-        DebugLog.ifmt(TAG, "onControlResolveSegmentCount");
-        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
-            return -1;
-
-        @SuppressWarnings("unchecked")
-        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
-        IjkMediaPlayer player = weakPlayer.get();
-        if (player == null)
-            return -1;
-
-        OnControlMessageListener listener = player.mOnControlMessageListener;
-        if (listener == null)
-            return -1;
-
-        return listener.onControlResolveSegmentCount();
     }
 
     @CalledByNative
@@ -744,46 +722,8 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         OnControlMessageListener listener = player.mOnControlMessageListener;
         if (listener == null)
             return null;
-        
+
         return listener.onControlResolveSegmentUrl(segment);
-    }
-
-    @CalledByNative
-    private static String onControlResolveSegmentOfflineMrl(Object weakThiz, int segment) {
-        DebugLog.ifmt(TAG, "onControlResolveSegmentOfflineMrl %d", segment);
-        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
-            return null;
-
-        @SuppressWarnings("unchecked")
-        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
-        IjkMediaPlayer player = weakPlayer.get();
-        if (player == null)
-            return null;
-
-        OnControlMessageListener listener = player.mOnControlMessageListener;
-        if (listener == null)
-            return null;
-        
-        return listener.onControlResolveSegmentOfflineMrl(segment);
-    }
-
-    @CalledByNative
-    private static int onControlResolveSegmentDuration(Object weakThiz, int segment) {
-        DebugLog.ifmt(TAG, "onControlResolveSegmentDuration %d", segment);
-        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
-            return -1;
-
-        @SuppressWarnings("unchecked")
-        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
-        IjkMediaPlayer player = weakPlayer.get();
-        if (player == null)
-            return -1;
-
-        OnControlMessageListener listener = player.mOnControlMessageListener;
-        if (listener == null)
-            return -1;
-        
-        return listener.onControlResolveSegmentDuration(segment);
     }
 
     public static interface OnMediaCodecSelectListener {
