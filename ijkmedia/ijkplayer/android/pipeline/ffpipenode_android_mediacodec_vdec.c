@@ -1143,11 +1143,12 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     if (ffp->mediacodec_auto_rotate &&
         rotate_degrees != 0 &&
         SDL_Android_GetApiLevel() >= IJK_API_21_LOLLIPOP) {
-        ALOGI("amc: rotate: %d\n", rotate_degrees);
+        ALOGI("amc: rotate in decoder: %d\n", rotate_degrees);
         opaque->frame_rotate_degrees = rotate_degrees;
         SDL_AMediaFormat_setInt32(opaque->input_aformat, "rotation-degrees", rotate_degrees);
         ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 0);
     } else {
+        ALOGI("amc: rotate notify: %d\n", rotate_degrees);
         ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, rotate_degrees);
     }
 
