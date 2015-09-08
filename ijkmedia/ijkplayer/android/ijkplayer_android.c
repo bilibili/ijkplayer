@@ -48,7 +48,7 @@ IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*))
 
     return mp;
 
-    fail:
+fail:
     ijkmp_dec_ref_p(&mp);
     return NULL;
 }
