@@ -24,7 +24,6 @@ import java.util.Locale;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
 import tv.danmaku.ijk.media.player.annotations.CalledByNative;
-import tv.danmaku.ijk.media.player.option.AvFormatOption;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -107,7 +106,6 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     private int mVideoSarDen;
 
     private String mDataSource;
-    private String mFFConcatContent;
 
     /**
      * Default library loader
@@ -282,17 +280,9 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         return mDataSource;
     }
 
-    public void setDataSourceAsFFConcatContent(String ffConcatContent) {
-        mFFConcatContent = ffConcatContent;
-    }
-
     @Override
     public void prepareAsync() throws IllegalStateException {
-        if (TextUtils.isEmpty(mFFConcatContent)) {
-            _prepareAsync();
-        } else {
-            _prepareAsync();
-        }
+        _prepareAsync();
     }
 
     public native void _prepareAsync() throws IllegalStateException;
@@ -495,51 +485,6 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     public void setOption(int category, String name, long value)
     {
         _setOption(category, name, value);
-    }
-
-    @Deprecated
-    public void setAvOption(AvFormatOption option) {
-        setAvFormatOption(option.getName(), option.getValue());
-    }
-
-    @Deprecated
-    public void setAvFormatOption(String name, String value) {
-        setOption(OPT_CATEGORY_FORMAT, name, value);
-    }
-
-    @Deprecated
-    public void setAvCodecOption(String name, String value) {
-        setOption(OPT_CATEGORY_CODEC, name, value);
-    }
-
-    @Deprecated
-    public void setSwScaleOption(String name, String value) {
-        setOption(OPT_CATEGORY_SWS, name, value);
-    }
-
-    @Deprecated
-    public void setOverlayFormat(int chromaFourCC) {
-        setOption(OPT_CATEGORY_PLAYER, "overlay-format", chromaFourCC);
-    }
-
-    @Deprecated
-    public void setFrameDrop(int frameDrop) {
-        setOption(OPT_CATEGORY_PLAYER, "framedrop", frameDrop);
-    }
-
-    @Deprecated
-    public void setMediaCodecEnabled(boolean enabled) {
-        setOption(OPT_CATEGORY_PLAYER, "mediacodec", enabled ? 1 : 0);
-    }
-
-    @Deprecated
-    public void setOpenSLESEnabled(boolean enabled) {
-        setOption(OPT_CATEGORY_PLAYER, "opengles", enabled ? 1 : 0);
-    }
-
-    @Deprecated
-    public void setAutoPlayOnPrepared(boolean enabled) {
-        setOption(OPT_CATEGORY_PLAYER, "start-on-prepared", enabled ? 1 : 0);
     }
 
     private native void _setOption(int category, String name, String value);
