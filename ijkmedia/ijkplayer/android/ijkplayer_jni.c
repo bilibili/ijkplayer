@@ -57,6 +57,7 @@ typedef struct player_fields_t {
     jmethodID jmid_postEventFromNative;
     jmethodID jmid_onSelectCodec;
     jmethodID jmid_onControlResolveSegmentUrl;
+    jmethodID jmid_onNativeInvoke;
 } player_fields_t;
 static player_fields_t g_clazz;
 
@@ -552,24 +553,53 @@ _onNativeControlResolveSegment(JNIEnv *env, jobject weak_thiz, int type, void *d
 
 // NOTE: support to be called from read_thread
 static int
-inject_callback(void *opaque, int message, void *data, size_t data_size)
+inject_callback(void *opaque, int what, void *data, size_t data_size)
 {
-    JNIEnv *env = NULL;
+    JNIEnv     *env     = NULL;
+    jobject     jbundle = NULL;
+    int         ret     = -1;
     SDL_JNI_SetupThreadEnv(&env);
 
     jobject weak_thiz = (jobject) opaque;
     if (weak_thiz == NULL )
-        return -1;
+        goto fail;
 
-    switch (message) {
-    case IJKAVINJECT_CONCAT_RESOLVE_SEGMENT:
-        return _onNativeControlResolveSegment(env, weak_thiz, message, data, data_size);
+    switch (what) {
+    case IJKAVINJECT_CONCAT_RESOLVE_SEGMENT: {
+        ret = _onNativeControlResolveSegment(env, weak_thiz, what, data, data_size);
+        break;
+    }
+    case IJKAVINJECT_ON_TCP_OPEN:
+    case IJKAVINJECT_ON_HTTP_OPEN:
+    case IJKAVINJECT_ON_HTTP_RETRY:
+    case IJKAVINJECT_ON_LIVE_RETRY: {
+        IJKAVInject_OnUrlOpenData *real_data = (IJKAVInject_OnUrlOpenData *) data;
+        jbundle = ASDK_Bundle__init(env);
+        if (SDL_JNI_CatchException(env) || !jbundle) {
+            ALOGE("%s: ASDK_Bundle__init failed\n", __func__);
+            goto fail;
+        }
+
+        ASDK_Bundle__putString_c(env, jbundle,  "url",           real_data->url);
+        ASDK_Bundle__putInt_c(env, jbundle,     "segment_index", real_data->segment_index);
+        ASDK_Bundle__putInt_c(env, jbundle,     "retry_counter", real_data->retry_counter);
+
+        if (!(*env)->CallStaticBooleanMethod(env, g_clazz.clazz, g_clazz.jmid_onNativeInvoke, weak_thiz, what, jbundle))
+            goto fail;
+
+        ASDK_Bundle__getString_cbuf(env, jbundle, "url", real_data->url, sizeof(real_data->url));
+        ret = 0;
+        break;
+    }
     default: {
-        return -1;
+        goto fail;
     }
     }
 
-    return -1;
+fail:
+    SDL_JNI_CatchException(env);
+    SDL_JNI_DeleteLocalRefP(env, &jbundle);
+    return ret;
 }
 
 static bool mediacodec_select_callback(void *opaque, ijkmp_mediacodecinfo_context *mcc)
@@ -849,6 +879,9 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
     IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onControlResolveSegmentUrl, g_clazz.clazz,
         "onControlResolveSegmentUrl", "(Ljava/lang/Object;I)Ljava/lang/String;");
+
+    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_onNativeInvoke, g_clazz.clazz,
+        "onNativeInvoke", "(Ljava/lang/Object;ILandroid/os/Bundle;)Z");
 
     ijkmp_global_init();
     ijkmp_global_set_inject_callback(inject_callback);

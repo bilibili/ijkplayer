@@ -698,6 +698,10 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         }
     }
 
+    /*
+     * ControlMessage
+     */
+
     private OnControlMessageListener mOnControlMessageListener;
     public void setOnControlMessageListener(OnControlMessageListener listener) {
         mOnControlMessageListener = listener;
@@ -725,6 +729,43 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
         return listener.onControlResolveSegmentUrl(segment);
     }
+
+    /*
+     * NativeInvoke
+     */
+
+    private OnNativeInvokeListener mOnNativeInvokeListener;
+    public void setOnNativeInvokeListener(OnNativeInvokeListener listener) {
+        mOnNativeInvokeListener = listener;
+    }
+
+    public static interface OnNativeInvokeListener {
+        /* return whether invoke is handled */
+        public boolean onNativeInvoke(int what, Bundle args);
+    }
+
+    @CalledByNative
+    private static boolean onNativeInvoke(Object weakThiz, int what, Bundle args) {
+        DebugLog.ifmt(TAG, "onNativeInvoke %d", what);
+        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
+            return false;
+
+        @SuppressWarnings("unchecked")
+        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
+        IjkMediaPlayer player = weakPlayer.get();
+        if (player == null)
+            return false;
+
+        OnNativeInvokeListener listener = player.mOnNativeInvokeListener;
+        if (listener == null)
+            return false;
+
+        return listener.onNativeInvoke(what, args);
+    }
+
+    /*
+     * MediaCodec select
+     */
 
     public static interface OnMediaCodecSelectListener {
         public String onMediaCodecSelect(IMediaPlayer mp, String mimeType, int profile, int level);
