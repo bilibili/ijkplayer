@@ -109,7 +109,7 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
             opaque->need_flush = 0;
             SDL_Android_AudioTrack_flush(env, atrack);
         } else {
-            int written = SDL_Android_AudioTrack_write_byte(env, atrack, buffer, copy_size);
+            int written = SDL_Android_AudioTrack_write(env, atrack, buffer, copy_size);
             if (written != copy_size) {
                 ALOGW("AudioTrack: not all data copied %d/%d", (int)written, (int)copy_size);
             }
