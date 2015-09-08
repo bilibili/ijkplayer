@@ -47,6 +47,8 @@
 #define IJK_API_19_KITKAT                   19  // 4.4
 #define IJK_API_20_KITKAT_WATCH             20  // 4.4W
 #define IJK_API_21_LOLLIPOP                 21  // 5.0
+#define IJK_API_22_LOLLIPOP_MR1             22  // 5.1
+#define IJK_API_23_M                        23  // 6.0
 
 JavaVM *SDL_JNI_GetJvm();
 
