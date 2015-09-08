@@ -105,31 +105,3 @@ void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*cal
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_android_set_mediacodec_select_callback()=void");
 }
-
-void ijkmp_android_set_opensles_enabled(IjkMediaPlayer *mp, bool enabled)
-{
-    if (!mp)
-         return;
-
-    MPTRACE("ijkmp_android_set_opensles_enabled(%d)", enabled ? 1 : 0);
-    pthread_mutex_lock(&mp->mutex);
-
-    if (mp) {
-        if (enabled) {
-            if (!SDL_AoutAndroid_IsObjectOfOpenSLES(mp->ffplayer->aout)) {
-                ALOGI("recreate aout for OpenSL ES\n");
-                SDL_AoutFreeP(&mp->ffplayer->aout);
-                mp->ffplayer->aout = SDL_AoutAndroid_CreateForOpenSLES();
-            }
-        } else {
-            if (!SDL_AoutAndroid_IsObjectOfAudioTrack(mp->ffplayer->aout)) {
-                ALOGI("recreate aout for AudioTrack\n");
-                SDL_AoutFreeP(&mp->ffplayer->aout);
-                mp->ffplayer->aout = SDL_AoutAndroid_CreateForAudioTrack();
-            }
-        }
-    }
-
-    pthread_mutex_unlock(&mp->mutex);
-    MPTRACE("ijkmp_android_set_opensles_enabled()=void");
-}
