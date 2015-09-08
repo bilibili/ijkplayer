@@ -38,7 +38,9 @@ sdl_amedia_status_t SDL_AMediaCodec_deleteP(SDL_AMediaCodec** acodec)
 {
     if (!acodec)
         return SDL_AMEDIA_OK;
-    return SDL_AMediaCodec_delete(*acodec);
+    sdl_amedia_status_t ret = SDL_AMediaCodec_delete(*acodec);
+    *acodec = NULL;
+    return ret;
 }
 
 sdl_amedia_status_t SDL_AMediaCodec_configure(
