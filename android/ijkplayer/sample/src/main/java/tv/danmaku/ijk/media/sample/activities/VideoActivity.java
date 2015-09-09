@@ -30,6 +30,7 @@ import android.widget.TextView;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.application.Settings;
+import tv.danmaku.ijk.media.sample.content.RecentMediaStorage;
 import tv.danmaku.ijk.media.sample.widget.media.AndroidMediaController;
 import tv.danmaku.ijk.media.sample.widget.media.IjkVideoView;
 import tv.danmaku.ijk.media.sample.widget.media.MeasureHelper;
@@ -69,6 +70,10 @@ public class VideoActivity extends AppCompatActivity {
         String intentAction = intent.getAction();
         if (!TextUtils.isEmpty(intentAction) && intentAction.equals(Intent.ACTION_VIEW)) {
             mVideoPath = intent.getDataString();
+        }
+
+        if (!TextUtils.isEmpty(mVideoPath)) {
+            new RecentMediaStorage(this).saveUrlAsync(mVideoPath);
         }
 
         // init UI

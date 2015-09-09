@@ -4,6 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".menu_app">
     <item
+        android:id="@+id/action_recent"
+        android:title="@string/recent"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_settings"
         android:title="@string/settings"
         app:showAsAction="ifRoom" />

@@ -16,6 +16,7 @@
 
 package tv.danmaku.ijk.media.sample.application;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import tv.danmaku.ijk.media.sample.R;
+import tv.danmaku.ijk.media.sample.activities.RecentMediaActivity;
 import tv.danmaku.ijk.media.sample.activities.SettingsActivity;
 
 public class AppActivity extends AppCompatActivity {
@@ -49,8 +51,25 @@ public class AppActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
             SettingsActivity.intentTo(this);
             return true;
+        } else if (id == R.id.action_recent) {
+            RecentMediaActivity.intentTo(this);
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean show = super.onPrepareOptionsMenu(menu);
+        if (!show)
+            return show;
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            MenuItem item = menu.findItem(R.id.action_settings);
+            if (item != null)
+                item.setVisible(false);
+        }
+
+        return true;
     }
 }

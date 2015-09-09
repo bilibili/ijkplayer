@@ -39,6 +39,7 @@ import java.io.File;
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.content.PathCursor;
 import tv.danmaku.ijk.media.sample.content.PathCursorLoader;
+import tv.danmaku.ijk.media.sample.eventbus.FileExplorerEvents;
 
 public class FileListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String ARG_PATH = "path";
@@ -47,7 +48,6 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
     private ListView mFileListView;
     private VideoAdapter mAdapter;
     private String mPath;
-    private OnClickFileListener mOnClickFileListener;
 
     public static FileListFragment newInstance(String path) {
         FileListFragment f = new FileListFragment();
@@ -66,6 +66,9 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
         ViewGroup viewGroup = (ViewGroup) inflater.inflate(R.layout.fragment_file_list, container, false);
         mPathView = (TextView) viewGroup.findViewById(R.id.path_view);
         mFileListView = (ListView) viewGroup.findViewById(R.id.file_list_view);
+
+        mPathView.setVisibility(View.VISIBLE);
+
         return viewGroup;
     }
 
@@ -74,8 +77,6 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
         super.onActivityCreated(savedInstanceState);
 
         Activity activity = getActivity();
-        if (activity instanceof OnClickFileListener)
-            mOnClickFileListener = (OnClickFileListener) activity;
 
         Bundle bundle = getArguments();
         if (bundle != null) {
@@ -89,12 +90,10 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
         mFileListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, final long id) {
-                if (mOnClickFileListener != null) {
-                    String path = mAdapter.getFilePath(position);
-                    if (TextUtils.isEmpty(path))
-                        return;
-                    mOnClickFileListener.onClickFile(new File(path));
-                }
+                String path = mAdapter.getFilePath(position);
+                if (TextUtils.isEmpty(path))
+                    return;
+                FileExplorerEvents.getBus().post(new FileExplorerEvents.OnClickFile(path));
             }
         });
 
@@ -117,10 +116,6 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
-    }
-
-    public static interface OnClickFileListener {
-        void onClickFile(File f);
     }
 
     final class VideoAdapter extends SimpleCursorAdapter {

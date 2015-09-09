@@ -21,15 +21,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 
+import com.squareup.otto.Subscribe;
+
 import java.io.File;
 import java.io.IOException;
 
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.application.AppActivity;
 import tv.danmaku.ijk.media.sample.application.Settings;
+import tv.danmaku.ijk.media.sample.eventbus.FileExplorerEvents;
 import tv.danmaku.ijk.media.sample.fragments.FileListFragment;
 
-public class FileExplorerActivity extends AppActivity implements FileListFragment.OnClickFileListener {
+public class FileExplorerActivity extends AppActivity {
     private Settings mSettings;
 
     @Override
@@ -47,6 +50,20 @@ public class FileExplorerActivity extends AppActivity implements FileListFragmen
             doOpenDirectory("/", false);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        FileExplorerEvents.getBus().register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        FileExplorerEvents.getBus().unregister(this);
+    }
+
     private void doOpenDirectory(String path, boolean addToBackStack) {
         Fragment newFragment = FileListFragment.newInstance(path);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -58,8 +75,9 @@ public class FileExplorerActivity extends AppActivity implements FileListFragmen
         transaction.commit();
     }
 
-    @Override
-    public void onClickFile(File f) {
+    @Subscribe
+    public void onClickFile(FileExplorerEvents.OnClickFile event) {
+        File f = event.mFile;
         try {
             f = f.getAbsoluteFile();
             f = f.getCanonicalFile();
@@ -73,7 +91,7 @@ public class FileExplorerActivity extends AppActivity implements FileListFragmen
             String path = f.toString();
             mSettings.setLastDirectory(path);
             doOpenDirectory(path, true);
-        } else if (f.exists()){
+        } else if (f.exists()) {
             VideoActivity.intentTo(this, f.getPath(), f.getName());
         }
     }

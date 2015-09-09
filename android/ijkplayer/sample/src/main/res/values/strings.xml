@@ -4,6 +4,8 @@
     <string name="app_name">ijkmediademo</string>
 
     <string name="N_A">N/A</string>
+    <string name="exit">Exit</string>
+    <string name="recent">Recent</string>
     <string name="settings">Settings</string>
     <string name="toggle_render">Toggle Render</string>
     <string name="toggle_ratio">Toggle Ratio</string>
