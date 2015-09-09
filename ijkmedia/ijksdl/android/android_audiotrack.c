@@ -631,7 +631,7 @@ int SDL_Android_AudioTrack_write(JNIEnv *env, SDL_Android_AudioTrack *atrack, ui
         if (ret > 0)
             ret *= sizeof(jfloat);
     } else {
-        ret = SDL_Android_AudioTrack_write_byte(env, atrack, data, size_in_byte / sizeof(jfloat));
+        ret = SDL_Android_AudioTrack_write_byte(env, atrack, data, size_in_byte);
     }
     return ret;
 }
