@@ -32,7 +32,7 @@
 #include "ijkplayer/version.h"
 #include "ijkplayer/ijkavformat/ijkavformat.h"
 
-static const char *kIJKFFRequiredFFmpegVersion = "n2.7-29-g33056c9";
+static const char *kIJKFFRequiredFFmpegVersion = "n2.7-30-g250af29";
 
 @interface IJKFFMoviePlayerController()
 
