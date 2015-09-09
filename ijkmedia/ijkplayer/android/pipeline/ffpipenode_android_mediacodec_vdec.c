@@ -778,10 +778,11 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
             goto fail;
         } else {
             AVPacket pkt;
-            if (ffp_packet_queue_get(&opaque->fake_pictq, &pkt, 1, &opaque->fake_pictq_serial) < 0) {
+            int dequeue_ret = ffp_packet_queue_get(&opaque->fake_pictq, &pkt, 0, &opaque->fake_pictq_serial);
+            if (dequeue_ret < 0) {
                 ret = -1;
                 goto fail;
-            } else {
+            } else if (dequeue_ret > 0) {
                 if (!ffp_is_flush_packet(&pkt)) {
                     if (dequeue_count)
                         ++*dequeue_count;
