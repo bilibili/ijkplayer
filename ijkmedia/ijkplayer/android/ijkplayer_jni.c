@@ -24,6 +24,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <jni.h>
+#include <unistd.h>
 #include "ijksdl/ijksdl_log.h"
 #include "../ff_ffplay.h"
 #include "ffmpeg_api_jni.h"
@@ -117,6 +118,30 @@ IjkMediaPlayer_setDataSourceAndHeaders(
     ALOGV("setDataSource: path %s", c_path);
     retval = ijkmp_set_data_source(mp, c_path);
     (*env)->ReleaseStringUTFChars(env, path, c_path);
+
+    IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_setDataSourceFd(
+    JNIEnv *env, jobject thiz, jint fd)
+{
+    MPTRACE("%s\n", __func__);
+    int retval = 0;
+    int dupFd = 0;
+    char uri[128];
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(fd > 0, env, "java/lang/IllegalArgumentException", "mpjni: setDataSourceFd: null fd", LABEL_RETURN);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setDataSourceFd: null mp", LABEL_RETURN);
+
+    dupFd = dup(fd);
+
+    ALOGV("setDataSourceFd: dup(%d)=%d\n", fd, dupFd);
+    snprintf(uri, sizeof(uri), "pipe:%d", dupFd);
+    retval = ijkmp_set_data_source(mp, uri);
 
     IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
 
@@ -822,6 +847,8 @@ static JNINativeMethod g_methods[] = {
         "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
         (void *) IjkMediaPlayer_setDataSourceAndHeaders
     },
+    { "_setDataSourceFd",       "(I)V",   (void *) IjkMediaPlayer_setDataSourceFd },
+
     { "_setVideoSurface",       "(Landroid/view/Surface;)V", (void *) IjkMediaPlayer_setVideoSurface },
     { "_prepareAsync",          "()V",      (void *) IjkMediaPlayer_prepareAsync },
     { "_start",                 "()V",      (void *) IjkMediaPlayer_start },

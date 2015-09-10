@@ -16,9 +16,7 @@
 
 package tv.danmaku.ijk.media.player;
 
-@Deprecated
-public abstract class SimpleMediaPlayer extends BaseMediaPlayer implements
-        IMediaPlayer {
+public abstract class AbstractMediaPlayer implements IMediaPlayer {
     private OnPreparedListener mOnPreparedListener;
     private OnCompletionListener mOnCompletionListener;
     private OnBufferingUpdateListener mOnBufferingUpdateListener;
@@ -67,16 +65,6 @@ public abstract class SimpleMediaPlayer extends BaseMediaPlayer implements
         mOnInfoListener = null;
     }
 
-    public void attachListeners(IMediaPlayer mp) {
-        mp.setOnPreparedListener(mOnPreparedListener);
-        mp.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
-        mp.setOnCompletionListener(mOnCompletionListener);
-        mp.setOnSeekCompleteListener(mOnSeekCompleteListener);
-        mp.setOnVideoSizeChangedListener(mOnVideoSizeChangedListener);
-        mp.setOnErrorListener(mOnErrorListener);
-        mp.setOnInfoListener(mOnInfoListener);
-    }
-
     protected final void notifyOnPrepared() {
         if (mOnPreparedListener != null)
             mOnPreparedListener.onPrepared(this);
@@ -98,7 +86,7 @@ public abstract class SimpleMediaPlayer extends BaseMediaPlayer implements
     }
 
     protected final void notifyOnVideoSizeChanged(int width, int height,
-            int sarNum, int sarDen) {
+                                                  int sarNum, int sarDen) {
         if (mOnVideoSizeChangedListener != null)
             mOnVideoSizeChangedListener.onVideoSizeChanged(this, width, height,
                     sarNum, sarDen);

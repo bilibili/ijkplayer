@@ -1,5 +1,6 @@
 tag next
 --------------------------------
+android: support FileDescriptor as data source
 
 tag k0.3.3
 --------------------------------

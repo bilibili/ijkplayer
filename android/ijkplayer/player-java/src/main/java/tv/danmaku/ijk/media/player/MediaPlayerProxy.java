@@ -18,11 +18,14 @@ package tv.danmaku.ijk.media.player;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.util.Map;
 
 public class MediaPlayerProxy implements IMediaPlayer {
     protected IMediaPlayer mBackEndMediaPlayer;
@@ -40,6 +43,25 @@ public class MediaPlayerProxy implements IMediaPlayer {
     @Override
     public void setSurface(Surface surface) {
         mBackEndMediaPlayer.setSurface(surface);
+    }
+
+    @Override
+    public void setDataSource(Context context, Uri uri)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        mBackEndMediaPlayer.setDataSource(context, uri);
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @Override
+    public void setDataSource(Context context, Uri uri, Map<String, String> headers)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        mBackEndMediaPlayer.setDataSource(context, uri, headers);
+    }
+
+    @Override
+    public void setDataSource(FileDescriptor fd)
+            throws IOException, IllegalArgumentException, IllegalStateException {
+        mBackEndMediaPlayer.setDataSource(fd);
     }
 
     @Override

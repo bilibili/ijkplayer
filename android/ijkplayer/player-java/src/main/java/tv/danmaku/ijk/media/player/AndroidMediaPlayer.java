@@ -27,12 +27,14 @@ import android.text.TextUtils;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.Map;
 
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
-public class AndroidMediaPlayer extends SimpleMediaPlayer {
+public class AndroidMediaPlayer extends AbstractMediaPlayer {
     private MediaPlayer mInternalMediaPlayer;
     private AndroidMediaPlayerListenerHolder mInternalListenerAdapter;
     private String mDataSource;
@@ -66,6 +68,25 @@ public class AndroidMediaPlayer extends SimpleMediaPlayer {
     @Override
     public void setSurface(Surface surface) {
         mInternalMediaPlayer.setSurface(surface);
+    }
+
+    @Override
+    public void setDataSource(Context context, Uri uri)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        mInternalMediaPlayer.setDataSource(context, uri);
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @Override
+    public void setDataSource(Context context, Uri uri, Map<String, String> headers)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        mInternalMediaPlayer.setDataSource(context, uri, headers);
+    }
+
+    @Override
+    public void setDataSource(FileDescriptor fd)
+            throws IOException, IllegalArgumentException, IllegalStateException {
+        mInternalMediaPlayer.setDataSource(fd);
     }
 
     @Override
@@ -204,6 +225,15 @@ public class AndroidMediaPlayer extends SimpleMediaPlayer {
         }
 
         return sMediaInfo;
+    }
+
+    @Override
+    public void setLogEnabled(boolean enable) {
+    }
+
+    @Override
+    public boolean isPlayable() {
+        return true;
     }
 
     /*--------------------

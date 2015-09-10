@@ -17,37 +17,50 @@
 
 package tv.danmaku.ijk.media.player;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Locale;
-
-import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
-import tv.danmaku.ijk.media.player.annotations.CalledByNative;
-import tv.danmaku.ijk.media.player.pragma.DebugLog;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.SurfaceTexture;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Map;
+
+import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
+import tv.danmaku.ijk.media.player.annotations.CalledByNative;
+import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 /**
  * @author bbcallen
  * 
  *         Java wrapper of ffplay.
  */
-public final class IjkMediaPlayer extends SimpleMediaPlayer {
+public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private final static String TAG = IjkMediaPlayer.class.getName();
 
     private static final int MEDIA_NOP = 0; // interface test message
@@ -248,6 +261,78 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
     }
 
     /**
+     * Sets the data source as a content Uri.
+     *
+     * @param context the Context to use when resolving the Uri
+     * @param uri the Content URI of the data you want to play
+     * @throws IllegalStateException if it is called in an invalid state
+     */
+    @Override
+    public void setDataSource(Context context, Uri uri)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        setDataSource(context, uri, null);
+    }
+
+    /**
+     * Sets the data source as a content Uri.
+     *
+     * @param context the Context to use when resolving the Uri
+     * @param uri the Content URI of the data you want to play
+     * @param headers the headers to be sent together with the request for the data
+     *                Note that the cross domain redirection is allowed by default, but that can be
+     *                changed with key/value pairs through the headers parameter with
+     *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
+     *                to disallow or allow cross domain redirection.
+     * @throws IllegalStateException if it is called in an invalid state
+     */
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @Override
+    public void setDataSource(Context context, Uri uri, Map<String, String> headers)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        final String scheme = uri.getScheme();
+        if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            setDataSource(uri.getPath());
+            return;
+        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
+                && Settings.AUTHORITY.equals(uri.getAuthority())) {
+            // Redirect ringtones to go directly to underlying provider
+            uri = RingtoneManager.getActualDefaultRingtoneUri(context,
+                    RingtoneManager.getDefaultType(uri));
+            if (uri == null) {
+                throw new FileNotFoundException("Failed to resolve default ringtone");
+            }
+        }
+
+        AssetFileDescriptor fd = null;
+        try {
+            ContentResolver resolver = context.getContentResolver();
+            fd = resolver.openAssetFileDescriptor(uri, "r");
+            if (fd == null) {
+                return;
+            }
+            // Note: using getDeclaredLength so that our behavior is the same
+            // as previous versions when the content provider is returning
+            // a full file.
+            if (fd.getDeclaredLength() < 0) {
+                setDataSource(fd.getFileDescriptor());
+            } else {
+                setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getDeclaredLength());
+            }
+            return;
+        } catch (SecurityException ex) {
+        } catch (IOException ex) {
+        } finally {
+            if (fd != null) {
+                fd.close();
+            }
+        }
+
+        Log.d(TAG, "Couldn't open file on client side, trying server side");
+
+        setDataSource(uri.toString(), headers);
+    }
+
+    /**
      * Sets the data source (file-path or http/rtsp URL) to use.
      * 
      * @param path
@@ -265,15 +350,91 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
      *             reference a world-readable file.
      */
     @Override
-    public void setDataSource(String path) throws IOException,
-            IllegalArgumentException, SecurityException, IllegalStateException {
+    public void setDataSource(String path)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         mDataSource = path;
         _setDataSource(path, null, null);
     }
 
-    private native void _setDataSource(String path, String[] keys,
-            String[] values) throws IOException, IllegalArgumentException,
-            SecurityException, IllegalStateException;
+    /**
+     * Sets the data source (file-path or http/rtsp URL) to use.
+     *
+     * @param path the path of the file, or the http/rtsp URL of the stream you want to play
+     * @param headers the headers associated with the http request for the stream you want to play
+     * @throws IllegalStateException if it is called in an invalid state
+     * @hide pending API council
+     */
+    public void setDataSource(String path, Map<String, String> headers)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException
+    {
+        if (headers != null && !headers.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for(Map.Entry<String, String> entry: headers.entrySet()) {
+                sb.append(entry.getKey());
+                sb.append(":");
+                String value = entry.getValue();
+                if (!TextUtils.isEmpty(value))
+                    sb.append(entry.getValue());
+                sb.append("\r\n");
+            }
+        }
+        setDataSource(path);
+    }
+
+    /**
+     * Sets the data source (FileDescriptor) to use. It is the caller's responsibility
+     * to close the file descriptor. It is safe to do so as soon as this call returns.
+     *
+     * @param fd the FileDescriptor for the file you want to play
+     * @throws IllegalStateException if it is called in an invalid state
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    @Override
+    public void setDataSource(FileDescriptor fd)
+            throws IOException, IllegalArgumentException, IllegalStateException {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR1) {
+            int native_fd = -1;
+            try {
+                Field f = fd.getClass().getDeclaredField("descriptor"); //NoSuchFieldException
+                f.setAccessible(true);
+                native_fd = f.getInt(fd); //IllegalAccessException
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            _setDataSourceFd(native_fd);
+        } else {
+            ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(fd);
+            try {
+                _setDataSourceFd(pfd.getFd());
+            } finally {
+                pfd.close();
+            }
+        }
+    }
+
+    /**
+     * Sets the data source (FileDescriptor) to use.  The FileDescriptor must be
+     * seekable (N.B. a LocalSocket is not seekable). It is the caller's responsibility
+     * to close the file descriptor. It is safe to do so as soon as this call returns.
+     *
+     * @param fd the FileDescriptor for the file you want to play
+     * @param offset the offset into the file where the data to be played starts, in bytes
+     * @param length the length in bytes of the data to be played
+     * @throws IllegalStateException if it is called in an invalid state
+     */
+    private void setDataSource(FileDescriptor fd, long offset, long length)
+            throws IOException, IllegalArgumentException, IllegalStateException {
+        // FIXME: handle offset, length
+        setDataSource(fd);
+    }
+
+    private native void _setDataSource(String path, String[] keys, String[] values)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
+
+    private native void _setDataSourceFd(int fd)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
     @Override
     public String getDataSource() {
@@ -474,6 +635,16 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
         return mediaInfo;
     }
 
+    @Override
+    public void setLogEnabled(boolean enable) {
+        // do nothing
+    }
+
+    @Override
+    public boolean isPlayable() {
+        return true;
+    }
+
     private native String _getVideoCodecInfo();
     private native String _getAudioCodecInfo();
 
@@ -503,6 +674,11 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 
     @Override
     public void setAudioStreamType(int streamtype) {
+        // do nothing
+    }
+
+    @Override
+    public void setKeepInBackground(boolean keepInBackground) {
         // do nothing
     }
 

@@ -18,11 +18,14 @@ package tv.danmaku.ijk.media.player;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.util.Map;
 
 public interface IMediaPlayer {
     /*
@@ -51,8 +54,18 @@ public interface IMediaPlayer {
 
     void setDisplay(SurfaceHolder sh);
 
-    void setDataSource(String path) throws IOException,
-            IllegalArgumentException, SecurityException, IllegalStateException;
+    void setDataSource(Context context, Uri uri)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    void setDataSource(Context context, Uri uri, Map<String, String> headers)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
+
+    void setDataSource(FileDescriptor fd)
+            throws IOException, IllegalArgumentException, IllegalStateException;
+
+    void setDataSource(String path)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
     String getDataSource();
 
@@ -86,8 +99,10 @@ public interface IMediaPlayer {
 
     MediaInfo getMediaInfo();
 
+    @Deprecated
     void setLogEnabled(boolean enable);
 
+    @Deprecated
     boolean isPlayable();
 
     void setOnPreparedListener(OnPreparedListener listener);
@@ -144,6 +159,7 @@ public interface IMediaPlayer {
      */
     void setAudioStreamType(int streamtype);
 
+    @Deprecated
     void setKeepInBackground(boolean keepInBackground);
 
     int getVideoSarNum();
