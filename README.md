@@ -95,7 +95,7 @@ sudo dpkg-reconfigure dash
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest k0.3.2
+git checkout -B latest k0.3.3
 
 ./init-android.sh
 
