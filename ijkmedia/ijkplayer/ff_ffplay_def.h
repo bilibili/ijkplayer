@@ -580,6 +580,7 @@ typedef struct FFPlayer {
 inline static void ffp_reset_internal(FFPlayer *ffp)
 {
     /* ffp->is closed in stream_close() */
+    av_opt_free(ffp);
 
     /* format/codec options */
     av_dict_free(&ffp->format_opts);
