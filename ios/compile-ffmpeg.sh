@@ -144,6 +144,8 @@ elif [ "$FF_TARGET" = "clean" ]; then
     done
     rm -rf build/ffmpeg-*
     rm -rf build/openssl-*
+    rm -rf build/universal/include
+    rm -rf build/universal/lib
 else
     echo "Usage:"
     echo "  compile-ffmpeg.sh armv7|arm64|i386|x86_64"
