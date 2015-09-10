@@ -11,8 +11,8 @@ android {
         applicationId "tv.danmaku.ijk.media.sample"
         minSdkVersion 9
         targetSdkVersion 22
-        versionCode 302002
-        versionName "0.3.2.2"
+        versionCode 303000
+        versionName "0.3.3"
     }
     buildTypes {
         release {

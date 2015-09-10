@@ -1,5 +1,8 @@
 tag next
 --------------------------------
+
+tag k0.3.3
+--------------------------------
 player: custom protocol as io hook
 android/sample: support rotation meta (TextureView only)
 
