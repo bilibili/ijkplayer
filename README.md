@@ -113,6 +113,8 @@ cd ..
 #     ext {
 #       compileSdkVersion = 23       // depending on your sdk version
 #       buildToolsVersion = "23.0.0" // depending on your build tools version
+#
+#       targetSdkVersion = 23        // depending on your sdk version
 #     }
 #
 # Eclipse: (obselete)

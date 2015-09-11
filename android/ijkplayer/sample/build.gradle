@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId "tv.danmaku.ijk.media.sample"
         minSdkVersion 9
-        targetSdkVersion 22
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
     }

@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 22
+        targetSdkVersion rootProject.ext.targetSdkVersion
     }
     buildTypes {
         release {
