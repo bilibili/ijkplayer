@@ -5,11 +5,10 @@ ijkplayer
 
 ### My Build Enviroment
 - Common
- - Mac OS X 10.10.4
+ - Mac OS X 10.10.5
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
- - Android Studio 1.3.1
- - Android SDK Build Tools 23.0.0
+ - Android Studio 1.3.2
 - iOS
  - Xcode 6.4 (6E35b)
 - [HomeBrew](http://brew.sh)
@@ -95,7 +94,7 @@ sudo dpkg-reconfigure dash
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest k0.3.3
+git checkout -B latest k0.4.0
 
 ./init-android.sh
 
@@ -112,8 +111,8 @@ cd ..
 #
 #     define ext block in your root build.gradle
 #     ext {
-#       compileSdkVersion = 22       // depending on your sdk version
-#       buildToolsVersion = "22.0.1" // depending on your build tools version
+#       compileSdkVersion = 23       // depending on your sdk version
+#       buildToolsVersion = "23.0.0" // depending on your build tools version
 #     }
 #
 # Eclipse: (obselete)
@@ -133,7 +132,7 @@ cd ..
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
-git checkout -B latest k0.3.2
+git checkout -B latest k0.4.0
 
 ./init-ios.sh
 

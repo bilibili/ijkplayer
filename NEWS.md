@@ -1,6 +1,9 @@
 tag next
 --------------------------------
-android: support FileDescriptor as data source
+
+tag k0.4.0
+--------------------------------
+ffmpeg: switch to ffmpeg n2.8
 
 tag k0.3.3
 --------------------------------
