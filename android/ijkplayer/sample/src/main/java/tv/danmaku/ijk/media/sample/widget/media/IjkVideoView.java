@@ -430,21 +430,21 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 if (mRenderView != null) {
                     mRenderView.setVideoSize(mVideoWidth, mVideoHeight);
                     mRenderView.setVideoSampleAspectRatio(mVideoSarNum, mVideoSarDen);
-                }
-                if (!mRenderView.shouldWaitForResize() || mSurfaceWidth == mVideoWidth && mSurfaceHeight == mVideoHeight) {
-                    // We didn't actually change the size (it was already at the size
-                    // we need), so we won't get a "surface changed" callback, so
-                    // start the video here instead of in the callback.
-                    if (mTargetState == STATE_PLAYING) {
-                        start();
-                        if (mMediaController != null) {
-                            mMediaController.show();
-                        }
-                    } else if (!isPlaying() &&
+                    if (!mRenderView.shouldWaitForResize() || mSurfaceWidth == mVideoWidth && mSurfaceHeight == mVideoHeight) {
+                        // We didn't actually change the size (it was already at the size
+                        // we need), so we won't get a "surface changed" callback, so
+                        // start the video here instead of in the callback.
+                        if (mTargetState == STATE_PLAYING) {
+                            start();
+                            if (mMediaController != null) {
+                                mMediaController.show();
+                            }
+                        } else if (!isPlaying() &&
                             (seekToPosition != 0 || getCurrentPosition() > 0)) {
-                        if (mMediaController != null) {
-                            // Show the media controls when we're paused into a video and make 'em stick.
-                            mMediaController.show(0);
+                            if (mMediaController != null) {
+                                // Show the media controls when we're paused into a video and make 'em stick.
+                                mMediaController.show(0);
+                            }
                         }
                     }
                 }
@@ -607,7 +607,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     IRenderView.IRenderCallback mSHCallback = new IRenderView.IRenderCallback() {
         @Override
         public void onSurfaceChanged(@NonNull IRenderView.ISurfaceHolder holder, int format, int w, int h) {
-            if (holder == null || holder.getRenderView() != mRenderView) {
+            if (holder.getRenderView() != mRenderView) {
                 Log.e(TAG, "onSurfaceChanged: unmatched render callback\n");
                 return;
             }
@@ -626,7 +626,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
         @Override
         public void onSurfaceCreated(@NonNull IRenderView.ISurfaceHolder holder, int width, int height) {
-            if (holder == null || holder.getRenderView() != mRenderView) {
+            if (holder.getRenderView() != mRenderView) {
                 Log.e(TAG, "onSurfaceCreated: unmatched render callback\n");
                 return;
             }
@@ -640,7 +640,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
         @Override
         public void onSurfaceDestroyed(@NonNull IRenderView.ISurfaceHolder holder) {
-            if (holder == null && holder.getRenderView() != mRenderView) {
+            if (holder.getRenderView() != mRenderView) {
                 Log.e(TAG, "onSurfaceDestroyed: unmatched render callback\n");
                 return;
             }
