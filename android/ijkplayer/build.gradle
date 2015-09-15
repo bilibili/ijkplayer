@@ -24,6 +24,6 @@ ext {
 
     targetSdkVersion = 23
 
-    versionCode = 400000
-    versionName = "0.4.0"
+    versionCode = 400001
+    versionName = "0.4.0.1.git-SNAPSHOT"
 }
