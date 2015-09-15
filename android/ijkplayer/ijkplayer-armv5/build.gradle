@@ -28,3 +28,4 @@ dependencies {
 }
 
 apply from: '../tools/gradle-mvn-push.gradle'
+apply from: '../tools/gradle-bintray-push.gradle'
