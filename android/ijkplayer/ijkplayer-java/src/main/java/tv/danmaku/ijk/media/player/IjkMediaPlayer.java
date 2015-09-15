@@ -362,7 +362,6 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      * @param path the path of the file, or the http/rtsp URL of the stream you want to play
      * @param headers the headers associated with the http request for the stream you want to play
      * @throws IllegalStateException if it is called in an invalid state
-     * @hide pending API council
      */
     public void setDataSource(String path, Map<String, String> headers)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException
