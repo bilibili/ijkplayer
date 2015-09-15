@@ -1,1 +1,9 @@
-include ':sample', ':player-java', ':player-armv7a', ':player-x86', ':player-armv5', ':player-arm64'
+include ':ijkplayer-armv5'
+include ':ijkplayer-armv7a'
+include ':ijkplayer-arm64'
+include ':ijkplayer-x86'
+
+include ':ijkplayer-java'
+
+include ':ijkplayer-sample'
+
