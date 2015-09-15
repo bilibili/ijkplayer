@@ -1,1 +1,1 @@
-../../../../player-armv7a/src/main/jni/Android.mk
+../../../../ijkplayer-armv7a/src/main/jni/Android.mk
