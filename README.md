@@ -8,7 +8,7 @@ ijkplayer
  - Gradle
 ```
 # required
-compile project('tv.danmaku.ijk.media:ijkplayer-jave:0.4.1')
+compile project('tv.danmaku.ijk.media:ijkplayer-java:0.4.1')
 compile project('tv.danmaku.ijk.media:ijkplayer-armv7a:0.4.1')
 
 # optional
