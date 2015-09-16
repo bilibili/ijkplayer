@@ -29,8 +29,8 @@
 
 #include "string.h"
 
-#import <HPASICommon/ASIHTTPRequest.h>
-#import <HPASICommon/ASIFormDataRequest.h>
+#import "ASIHTTPRequest.h"
+#import "ASIFormDataRequest.h"
 
 #include <netdb.h>
 
@@ -222,7 +222,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (void)doSendOnce:(NSTimer*)theTimer
 {
-    [self performSelectorInBackground:@selector(send) withObject:self];
+//    [self performSelectorInBackground:@selector(send) withObject:self];
+    
+    [self send];
 }
 
 - (void)sendOnError
@@ -237,7 +239,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (udpSocket==nil) {
         udpSocket = [[GCDAsyncUdpSocket alloc] init];
     }
-    [self performSelectorInBackground:@selector(sendOnError) withObject:self];
+//    [self performSelectorInBackground:@selector(sendOnError) withObject:self];
+    
+    [self sendOnError];
 }
 
 - (void)startReport

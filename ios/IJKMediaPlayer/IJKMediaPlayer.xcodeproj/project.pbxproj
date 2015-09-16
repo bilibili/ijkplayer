@@ -14,6 +14,7 @@
 		AB4939CE1AFB1D4B00E71A34 /* ffpipeline_ios.c in Sources */ = {isa = PBXBuildFile; fileRef = AB4939CA1AFB1D4B00E71A34 /* ffpipeline_ios.c */; };
 		AB4939D11AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4939CF1AFB1D6C00E71A34 /* ijksdl_vout_overlay_videotoolbox.m */; };
 		AB98B84C1B3D4A9F00F715BF /* IJKFFMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = AB98B84A1B3D4A9F00F715BF /* IJKFFMoviePlayerController.m */; };
+		ABAE54281BA8FF5100F84305 /* libHPASICommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABAE54271BA8FF5100F84305 /* libHPASICommon.a */; };
 		ABD0B0061AFB463300317F1F /* iOSUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = ABD0B0041AFB463300317F1F /* iOSUtils.m */; };
 		ABF204061B341BAD00C67E5D /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = ABF204041B341BAD00C67E5D /* GCDAsyncUdpSocket.m */; };
 		E62139BE180FA89B00553533 /* IJKFFOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = E62139BD180FA89A00553533 /* IJKFFOptions.m */; };
@@ -107,6 +108,7 @@
 		AB4939D21AFB1DE500E71A34 /* h264_sps_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = h264_sps_parser.h; sourceTree = "<group>"; };
 		AB98B84A1B3D4A9F00F715BF /* IJKFFMoviePlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IJKFFMoviePlayerController.m; sourceTree = "<group>"; };
 		AB98B84B1B3D4A9F00F715BF /* IJKFFMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFMoviePlayerController.h; sourceTree = "<group>"; };
+		ABAE54271BA8FF5100F84305 /* libHPASICommon.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libHPASICommon.a; path = HoopHttp/libHPASICommon.a; sourceTree = "<group>"; };
 		ABD0B0041AFB463300317F1F /* iOSUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = iOSUtils.m; path = ijkmedia/ijkplayer/ios/pipeline/iOSUtils.m; sourceTree = "<group>"; };
 		ABD0B0051AFB463300317F1F /* iOSUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iOSUtils.h; path = ijkmedia/ijkplayer/ios/pipeline/iOSUtils.h; sourceTree = "<group>"; };
 		ABF204041B341BAD00C67E5D /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncUdpSocket.m; path = CocoaAsyncSocket/GCD/GCDAsyncUdpSocket.m; sourceTree = "<group>"; };
@@ -300,6 +302,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABAE54281BA8FF5100F84305 /* libHPASICommon.a in Frameworks */,
 				E6903FC717EAFC2C00CFD954 /* libavcodec.a in Frameworks */,
 				E6903FC817EAFC2C00CFD954 /* libavformat.a in Frameworks */,
 				E6903FC917EAFC2C00CFD954 /* libavutil.a in Frameworks */,
@@ -431,6 +434,7 @@
 		E6903EBB17EAF6C500CFD954 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				ABAE54271BA8FF5100F84305 /* libHPASICommon.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -912,7 +916,7 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -952,7 +956,7 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
 				VALIDATE_PRODUCT = YES;
@@ -965,10 +969,8 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				DSTROOT = /tmp/IJKMediaPlayer.dst;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/HoopHttp",
-				);
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -979,10 +981,12 @@
 					../../ijkmedia,
 					IJKMediaPlayer,
 					"${SDK_DIR}/usr/include/libxml2",
+					HoopHttp/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../build/universal/lib\"",
+					"$(PROJECT_DIR)/HoopHttp",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -996,10 +1000,8 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				DSTROOT = /tmp/IJKMediaPlayer.dst;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/HoopHttp",
-				);
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1010,10 +1012,12 @@
 					../../ijkmedia,
 					IJKMediaPlayer,
 					"${SDK_DIR}/usr/include/libxml2",
+					HoopHttp/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../build/universal/lib\"",
+					"$(PROJECT_DIR)/HoopHttp",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -2987,7 +2987,6 @@ static int read_thread(void *arg)
             continue;
         }
 
-
         if (ret < 0) {
             if (ret == AVERROR_INVALIDDATA && (pkt->flags & AV_PKT_FLAG_MP4_PF)) {
 //                ffp_seek_to_l(ffp, ffp_get_current_position_l(ffp)+1);

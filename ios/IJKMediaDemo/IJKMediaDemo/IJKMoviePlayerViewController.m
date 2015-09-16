@@ -238,7 +238,7 @@
     
     [self.player play];
     
-    timer =  [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(doPrintABTMOnce:) userInfo:nil repeats:YES];
+//    timer =  [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(doPrintABTMOnce:) userInfo:nil repeats:YES];
 }
 
 - (void)printABTM

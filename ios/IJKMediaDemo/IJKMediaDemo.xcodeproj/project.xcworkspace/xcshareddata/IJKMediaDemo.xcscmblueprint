@@ -1,0 +1,37 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "E1679FC111225C1A98EA0394D0D0D5A7DEF963BC",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "3FF119F694270D2A62B97F84FFCC6FC503C3DCC0" : 0,
+    "E1679FC111225C1A98EA0394D0D0D5A7DEF963BC" : 0,
+    "FAF40D7FD305BB7D5BE5F87AE969BD7D31922D57" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "9CDF87FA-F008-4624-86D4-722220549936",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "3FF119F694270D2A62B97F84FFCC6FC503C3DCC0" : "",
+    "E1679FC111225C1A98EA0394D0D0D5A7DEF963BC" : "ijkplayer",
+    "FAF40D7FD305BB7D5BE5F87AE969BD7D31922D57" : "ijkplayerios\/IJKMediaPlayer\/asi-http-request"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "IJKMediaDemo",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "ios\/IJKMediaDemo\/IJKMediaDemo.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:HupuInc\/HoopMediaPlayer.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "3FF119F694270D2A62B97F84FFCC6FC503C3DCC0"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:HupuInc\/ijkplayer.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "E1679FC111225C1A98EA0394D0D0D5A7DEF963BC"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:pokeb\/asi-http-request.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "FAF40D7FD305BB7D5BE5F87AE969BD7D31922D57"
+    }
+  ]
+}

@@ -39,8 +39,8 @@ public class PlayerInfoReport {
 	
 	
 	private HandlerThread handlerThread=null;
-	private Handler handler=null;
-	private Runnable runnable=null;
+	private volatile Handler handler=null;
+	private volatile Runnable runnable=null;
 	public void startReport()
 	{
 		if(handlerThread==null)
@@ -54,15 +54,16 @@ public class PlayerInfoReport {
 				
 				@Override
 				public void run() {
+					if (handler!=null && runnable!=null) {
+						handler.postDelayed(runnable, 60*1000);
+					}
 					String sendData = getPlayerInfoWithJsonFormat();
 					Log.v("PlayerInfoReport", sendData);
 					udpSend(sendData);
-					
-					handler.postDelayed(runnable, 60*1000);
 				}
 			};
 			
-			handler.postDelayed(runnable, 60*1000);
+			handler.post(runnable);
 		}
 	}
 	
@@ -111,17 +112,28 @@ public class PlayerInfoReport {
 				serverAddress = InetAddress.getByName("liveci.arenacloud.com");
 			} catch (UnknownHostException e) {
 				Log.e("PlayerInfoReport", "UDP Report Fail");
+				udpSocket.close();
+				udpSocket = null;
 				return;
 			}
 		}
 		
-		DatagramPacket udpPacket = new DatagramPacket(data.getBytes(), data.length(), serverAddress,
+		byte[] bytes = data.getBytes();
+		if (bytes==null) {
+			Log.e("PlayerInfoReport", "Report Info is null");
+			udpSocket.close();
+			udpSocket = null;
+			return;
+		}
+		DatagramPacket udpPacket = new DatagramPacket(bytes, bytes.length, serverAddress,
                 33333);
 		
 		try {
 			udpSocket.send(udpPacket);
 		} catch (IOException e) {
 			Log.e("PlayerInfoReport", "UDP Report Fail");
+			udpSocket.close();
+			udpSocket = null;
 			return;
 		}
 		
