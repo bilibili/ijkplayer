@@ -1,6 +1,10 @@
 tag next
 --------------------------------
 
+tag k0.4.1
+--------------------------------
+android: support downloading from jcenter
+
 tag k0.4.0
 --------------------------------
 ffmpeg: switch to ffmpeg n2.8
