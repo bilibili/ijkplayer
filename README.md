@@ -1,7 +1,23 @@
 ijkplayer
 =========
 - Video player based on [ffplay](http://ffmpeg.org)
- - Android: [MediaPlayer-like](android/ijkplayer/player-java/src/main/java/tv/danmaku/ijk/media/player/IMediaPlayer.java)
+
+### Download
+
+- Android:
+ - Gradle
+```
+# required
+compile project(':ijkplayer-jave')
+compile project(':ijkplayer-armv7a')
+
+# optional
+compile project(':ijkplayer-armv5')
+compile project(':ijkplayer-arm64')
+compile project(':ijkplayer-x86')
+```
+- iOS
+ - in coming...
 
 ### My Build Enviroment
 - Common
@@ -9,6 +25,7 @@ ijkplayer
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
  - Android Studio 1.3.2
+ - Gradle 2.6
 - iOS
  - Xcode 6.4 (6E35b)
 - [HomeBrew](http://brew.sh)
@@ -23,9 +40,9 @@ ijkplayer
  - remove rarely used ffmpeg components to reduce binary size [config/module-lite.sh](config/module-lite.sh)
  - workaround for some buggy online video.
 - Android
- - platform: API 9~22
+ - platform: API 9~23
  - cpu: ARMv7a, ARM64v8a, x86 (ARMv5 is not tested on real devices)
- - api: [MediaPlayer-like](android/ijkplayer/player-java/src/main/java/tv/danmaku/ijk/media/player/IMediaPlayer.java)
+ - api: [MediaPlayer-like](android/ijkplayer/ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - video-output: NativeWindow
  - audio-output: OpenSL ES, AudioTrack
  - hw-decoder: MediaCodec (API 16+, Android 4.1+)
@@ -94,7 +111,7 @@ sudo dpkg-reconfigure dash
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest k0.4.0
+git checkout -B latest k0.4.1
 
 ./init-android.sh
 
@@ -134,7 +151,7 @@ cd ..
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
-git checkout -B latest k0.4.0
+git checkout -B latest k0.4.1
 
 ./init-ios.sh
 
