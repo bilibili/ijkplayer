@@ -27,7 +27,7 @@ compile project('tv.danmaku.ijk.media:ijkplayer-x86:0.4.1')
  - Android Studio 1.3.2
  - Gradle 2.6
 - iOS
- - Xcode 6.4 (6E35b)
+ - Xcode 7.0 (7A220)
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
  - brew install git
