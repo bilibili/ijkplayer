@@ -108,7 +108,10 @@
 
 - (UIImage *)thumbnailImageAtCurrentTime
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [super thumbnailImageAtTime:self.currentPlaybackTime timeOption:MPMovieTimeOptionExact];
+#pragma clang diagnostic pop
 }
 
 -(BOOL)allowsMediaAirPlay
