@@ -71,7 +71,11 @@ static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDiction
 
     inject_data.size = sizeof(inject_data);
     inject_data.segment_index = c->segment_index;
-    snprintf(inject_data.url, sizeof(inject_data.url), "http:%s", arg);
+    if (av_strstart(arg, "http:", NULL)) {
+        snprintf(inject_data.url, sizeof(inject_data.url), "%s", arg);
+    } else {
+        snprintf(inject_data.url, sizeof(inject_data.url), "http:%s", arg);
+    }
     if (opaque && inject_callback) {
         av_log(h, AV_LOG_INFO, "http-hook %s\n", inject_data.url);
         ret = inject_callback(opaque, IJKAVINJECT_ON_HTTP_OPEN, &inject_data, sizeof(inject_data));
