@@ -31,10 +31,13 @@
 typedef struct Context {
     AVClass        *class;
     URLContext     *inner;
+    int             avio_flag;
 
     int64_t         logic_pos;
     int64_t         logic_size;
     int             seekable;
+
+    IJKAVInject_OnUrlOpenData inject_data;
 
     /* options */
     int             open_flags;
@@ -55,42 +58,84 @@ static void *ijkinject_get_opaque(URLContext *h) {
 #endif
 }
 
-static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
+static int open_inner(URLContext *h)
 {
-    Context *c = h->priv_data;
-    IJKAVInject_OnUrlOpenData inject_data = {0};
-    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
-    void *opaque = ijkinject_get_opaque(h);
-    int ret = 0;
+    Context                *c               = h->priv_data;
+    void                   *opaque          = ijkinject_get_opaque(h);
+    IjkAVInjectCallback     inject_callback = ijkav_get_inject_callback();
+    AVDictionary           *tmp_opts        = NULL;
+    int ret = -1;
 
-    c->open_flags = flags;
-    if (options)
-        av_dict_copy(&c->open_opts, *options, 0);
-
-    av_strstart(arg, "ijkhttphook:", &arg);
-
-    inject_data.size = sizeof(inject_data);
-    inject_data.segment_index = c->segment_index;
-    if (av_strstart(arg, "http:", NULL)) {
-        snprintf(inject_data.url, sizeof(inject_data.url), "%s", arg);
-    } else {
-        snprintf(inject_data.url, sizeof(inject_data.url), "http:%s", arg);
+    if (ff_check_interrupt(&h->interrupt_callback)) {
+        ret = AVERROR_EXIT;
+        goto fail;
     }
-    if (opaque && inject_callback) {
-        av_log(h, AV_LOG_INFO, "http-hook %s\n", inject_data.url);
-        ret = inject_callback(opaque, IJKAVINJECT_ON_HTTP_OPEN, &inject_data, sizeof(inject_data));
-        if (ret)
+
+    if (c->inject_data.retry_counter > 0) {
+        av_log(h, AV_LOG_INFO, "http-hook-retry %s (%d)\n", c->inject_data.url, c->inject_data.retry_counter);
+        ret = inject_callback(opaque, IJKAVINJECT_ON_HTTP_RETRY, &c->inject_data, sizeof(c->inject_data));
+        if (ret || !c->inject_data.url[0]) {
+            ret = AVERROR_EXIT;
             goto fail;
+        }
     }
 
-    av_dict_set_int(options, "ijkinject-opaque",        c->opaque, 0);
-    av_dict_set_int(options, "ijkinject-segment-index", c->segment_index, 0);
-    ret = ffurl_open(&c->inner, inject_data.url, flags, &h->interrupt_callback, options);
+    ffurl_closep(&c->inner);
+
+    if (c->open_opts)
+        av_dict_copy(&tmp_opts, c->open_opts, 0);
+
+    ret = ffurl_open(&c->inner, c->inject_data.url, c->open_flags, &h->interrupt_callback, &tmp_opts);
     if (ret)
         goto fail;
 
     c->logic_size = ffurl_size(c->inner);
     c->seekable   = c->logic_size > 0 ? 1 : 0;
+
+    av_dict_free(&tmp_opts);
+    return 0;
+fail:
+    av_dict_free(&tmp_opts);
+    ffurl_closep(&c->inner);
+    return ret;
+}
+
+static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
+{
+    Context *c = h->priv_data;
+    int ret = 0;
+
+    c->open_flags = flags;
+    if (options) {
+        av_dict_set_int(options, "ijkinject-opaque",        c->opaque, 0);
+        av_dict_set_int(options, "ijkinject-segment-index", c->segment_index, 0);
+        av_dict_copy(&c->open_opts, *options, 0);
+    }
+
+    av_strstart(arg, "ijkhttphook:", &arg);
+
+    c->inject_data.size = sizeof(c->inject_data);
+    c->inject_data.segment_index = c->segment_index;
+    if (av_strstart(arg, "http:", NULL)) {
+        snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s", arg);
+    } else {
+        snprintf(c->inject_data.url, sizeof(c->inject_data.url), "http:%s", arg);
+    }
+
+    ret = open_inner(h);
+    while (ret) {
+        c->inject_data.retry_counter++;
+
+        // no EOF in live mode
+        switch (ret) {
+            case AVERROR_EXIT:
+            case AVERROR_EOF:
+                goto fail;
+        }
+
+        ret = open_inner(h);
+    }
+
 fail:
     av_dict_free(&c->open_opts);
     return ret;
@@ -108,75 +153,94 @@ static int ijkhttphook_close(URLContext *h)
 static int ijkhttphook_read(URLContext *h, unsigned char *buf, int size)
 {
     Context *c = h->priv_data;
-    void *opaque = ijkinject_get_opaque(h);
-    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+    int     ret = AVERROR_EXIT;
+    int64_t seek_ret = -1;
 
-    int read_ret = ffurl_read(c->inner, buf, size);
-    if (opaque && inject_callback && c->seekable) {
-        IJKAVInject_OnUrlOpenData inject_data = {0};
-        inject_data.size = sizeof(inject_data);
-        inject_data.segment_index = c->segment_index;
-        while (read_ret < 0) {
-            AVDictionary *tmp_opts = NULL;
-
-            inject_data.retry_counter++;
-
-            switch (read_ret) {
-                case AVERROR_EOF:
-                case AVERROR_EXIT:
-                    goto fail;
-                case AVERROR(EAGAIN):
-                    goto continue_read;
-            }
-
-            if (ff_check_interrupt(&h->interrupt_callback)) {
-                read_ret = AVERROR_EXIT;
-                goto fail;
-            }
-
-            av_log(h, AV_LOG_INFO, "http-hook-retry %s (%d)\n", inject_data.url, inject_data.retry_counter);
-            int ret = inject_callback(opaque, IJKAVINJECT_ON_HTTP_RETRY, &inject_data, sizeof(inject_data));
-            if (ret || !inject_data.url[0]) {
-                ret = AVERROR_EXIT;
-                goto fail;
-            }
-
-            if (c->open_opts)
-                av_dict_copy(&tmp_opts, c->open_opts, 0);
-
-            av_dict_set_int(&tmp_opts, "ijkinject-opaque",        c->opaque, 0);
-            av_dict_set_int(&tmp_opts, "ijkinject-segment-index", c->segment_index, 0);
-            ret = ffurl_open(&c->inner, inject_data.url, c->open_flags, &h->interrupt_callback, &tmp_opts);
-            av_dict_free(&tmp_opts);
-            if (ret)
-                goto continue_retry;
-
-            c->logic_size = ffurl_size(c->inner);
-            c->seekable   = c->logic_size > 0 ? 1 : 0;
-
-continue_read:
-            read_ret = ffurl_read(c->inner, buf, size);
-
-continue_retry:
-            inject_data.retry_counter++;
-        }
+    if (c->inner) {
+        ret = ffurl_read(c->inner, buf, size);
+        if (ret >= 0)
+            goto success;
     }
 
-    if (read_ret > 0)
-        c->logic_pos += read_ret;
+    while (ret < 0) {
+        // no EOF in live mode
+        switch (ret) {
+            case AVERROR_EXIT:
+            case AVERROR_EOF:
+                goto fail;
+        }
 
+        if (!c->seekable)
+            goto fail;
+
+        c->inject_data.retry_counter++;
+
+        ret = open_inner(h);
+        if (ret)
+            continue;
+
+        seek_ret = ffurl_seek(h, c->logic_pos, SEEK_SET);
+        if (seek_ret < 0) {
+            ret = (int)seek_ret;
+            continue;
+        } else if (seek_ret != c->logic_pos) {
+            ret = AVERROR_INVALIDDATA;
+            continue;
+        }
+
+        ret = ffurl_read(c->inner, buf, size);
+        if (ret >= 0)
+            break;
+    }
+
+success:
+    if (ret > 0)
+        c->logic_pos += ret;
 fail:
-    return read_ret;
+    return ret;
 }
 
 static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
 {
     Context *c = h->priv_data;
+    int64_t seek_ret = AVERROR_EXIT;
 
-    int64_t seek_ret = ffurl_seek(c->inner, pos, whence);
+    if (c->inner) {
+        seek_ret = ffurl_seek(c->inner, pos, whence);
+        if (seek_ret >= 0)
+            goto success;
+    }
+
+    while (seek_ret < 0) {
+        // no EOF in live mode
+        switch (seek_ret) {
+            case AVERROR_EXIT:
+            case AVERROR_EOF:
+                goto fail;
+        }
+
+        if (!c->seekable)
+            goto fail;
+
+        c->inject_data.retry_counter++;
+
+        seek_ret = open_inner(h);
+        if (seek_ret)
+            continue;
+
+        seek_ret = ffurl_seek(h, c->logic_pos, whence);
+        if (seek_ret < 0) {
+            continue;
+        } else if (seek_ret != c->logic_pos) {
+            seek_ret = AVERROR_INVALIDDATA;
+            continue;
+        }
+    }
+
+success:
     if (seek_ret >= 0)
-        c->logic_pos = seek_ret;
-
+        c->logic_pos = ffurl_seek(c->inner, 0, SEEK_CUR);
+fail:
     return seek_ret;
 }
 
