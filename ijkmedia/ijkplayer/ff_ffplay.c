@@ -2813,7 +2813,22 @@ static int read_thread(void *arg)
         pkt->flags = 0;
         ret = av_read_frame(ic, pkt);
         if (ret < 0) {
+            int pb_eof = 0;
+            int pb_error = 0;
             if ((ret == AVERROR_EOF || avio_feof(ic->pb)) && !is->eof) {
+                pb_eof = 1;
+                // check error later
+            }
+            if (ic->pb && ic->pb->error) {
+                pb_eof = 1;
+                pb_error = ic->pb->error;
+            }
+            if (ret == AVERROR_EXIT) {
+                pb_eof = 1;
+                pb_error = AVERROR_EXIT;
+            }
+
+            if (pb_eof) {
                 if (is->video_stream >= 0)
                     packet_queue_put_nullpacket(&is->videoq, is->video_stream);
                 if (is->audio_stream >= 0)
@@ -2824,7 +2839,7 @@ static int read_thread(void *arg)
 #endif
                 is->eof = 1;
             }
-            if (ic->pb && ic->pb->error) {
+            if (pb_error) {
                 if (is->video_stream >= 0)
                     packet_queue_put_nullpacket(&is->videoq, is->video_stream);
                 if (is->audio_stream >= 0)
@@ -2834,7 +2849,7 @@ static int read_thread(void *arg)
                     packet_queue_put_nullpacket(&is->subtitleq, is->subtitle_stream);
 #endif
                 is->eof = 1;
-                ffp->error = ic->pb->error;
+                ffp->error = pb_error;
                 av_log(ffp, AV_LOG_ERROR, "av_read_frame error: %x(%c,%c,%c,%c): %s\n", ffp->error,
                       (char) (0xff & (ffp->error >> 24)),
                       (char) (0xff & (ffp->error >> 16)),
