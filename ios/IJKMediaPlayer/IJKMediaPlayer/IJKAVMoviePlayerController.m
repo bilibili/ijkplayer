@@ -73,6 +73,7 @@
 #import "IJKMediaModule.h"
 #import "IJKMediaUtils.h"
 #import "IJKKVOController.h"
+#include "ijksdl/ios/ijksdl_ios.h"
 
 // avoid float equal compare
 static const float kMinPlayingRate          = 0.00001f;
@@ -1004,6 +1005,13 @@ static IJKAVMoviePlayerController* instance;
     } else {
         if (![self airPlayMediaActive]) {
             [_avView setPlayer:nil];
+            if (isIOS9OrLater()) {
+                if ([self isPlaying]) {
+                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                        [self play];
+                    });
+                }
+            }
         }
     }
 }
