@@ -254,7 +254,6 @@ inline static void msg_queue_remove(MessageQueue *q, int what)
 
             if (msg->what == what) {
                 *p_msg = msg->next;
-                p_msg = &msg->next;
 #ifdef FFP_MERGE
                 av_free(msg);
 #else
