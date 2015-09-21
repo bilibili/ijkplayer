@@ -32,6 +32,7 @@ typedef struct {
 
     IJKAVInject_OnUrlOpenData inject_data;
     int              discontinuity;
+    int              error;
 
     /* options */
     AVDictionary   *open_opts;
@@ -203,17 +204,24 @@ static int ijklivehook_read_packet(AVFormatContext *avf, AVPacket *pkt)
     Context *c   = avf->priv_data;
     int      ret = -1;
 
+    if (c->error)
+        return c->error;
+
     c->inject_data.retry_counter = 0;
 
     if (c->inner)
         ret = av_read_frame(c->inner, pkt);
 
     while (ret < 0) {
+        if (c->inner && c->inner->pb && c->inner->pb->error && avf->pb)
+            avf->pb->error = c->inner->pb->error;
+
         c->inject_data.retry_counter++;
 
         // no EOF in live mode
         switch (ret) {
             case AVERROR_EXIT:
+                c->error = AVERROR_EXIT;
                 goto fail;
             case AVERROR(EAGAIN):
                 goto continue_read;
