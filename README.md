@@ -8,13 +8,21 @@ ijkplayer
  - Gradle
 ```
 # required
-compile project('tv.danmaku.ijk.media:ijkplayer-java:0.4.1')
-compile project('tv.danmaku.ijk.media:ijkplayer-armv7a:0.4.1')
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
 
-# optional
-compile project('tv.danmaku.ijk.media:ijkplayer-armv5:0.4.1')
-compile project('tv.danmaku.ijk.media:ijkplayer-arm64:0.4.1')
-compile project('tv.danmaku.ijk.media:ijkplayer-x86:0.4.1')
+dependencies {
+    compile project('tv.danmaku.ijk.media:ijkplayer-java:0.4.1')
+    compile project('tv.danmaku.ijk.media:ijkplayer-armv7a:0.4.1')
+
+    # optional
+    compile project('tv.danmaku.ijk.media:ijkplayer-armv5:0.4.1')
+    compile project('tv.danmaku.ijk.media:ijkplayer-arm64:0.4.1')
+    compile project('tv.danmaku.ijk.media:ijkplayer-x86:0.4.1')
+}
 ```
 - iOS
  - in coming...
