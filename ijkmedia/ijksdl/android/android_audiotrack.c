@@ -129,6 +129,8 @@ typedef struct AudioTrack_fields_t {
     jmethodID setStereoVolume;
 
     jmethodID write_float;
+
+    jmethodID getAudioSessionId;
 } AudioTrack_fields_t;
 static AudioTrack_fields_t g_clazz;
 
@@ -180,6 +182,9 @@ int SDL_Android_AudioTrack_global_init(JNIEnv *env)
 
     g_clazz.setStereoVolume = (*env)->GetMethodID(env, g_clazz.clazz, "setStereoVolume", "(FF)I");
     IJK_CHECK_RET(g_clazz.setStereoVolume, -1, "missing AudioTrack.setStereoVolume");
+
+    g_clazz.getAudioSessionId = (*env)->GetMethodID(env, g_clazz.clazz, "getAudioSessionId", "()I");
+    IJK_CHECK_RET(g_clazz.getAudioSessionId, -1, "missing AudioTrack.getAudioSessionId");
 
     if (sdk_int >= IJK_API_21_LOLLIPOP) {
         g_clazz.write_float = (*env)->GetMethodID(env, g_clazz.clazz, "write", "([FIII)I");
@@ -634,4 +639,18 @@ int SDL_Android_AudioTrack_write(JNIEnv *env, SDL_Android_AudioTrack *atrack, ui
         ret = SDL_Android_AudioTrack_write_byte(env, atrack, data, size_in_byte);
     }
     return ret;
+}
+
+int SDL_Android_AudioTrack_getAudioSessionId(JNIEnv *env, SDL_Android_AudioTrack *atrack)
+{
+    SDLTRACE("%s", __func__);
+    int audioSessionId = (*env)->CallIntMethod(env, atrack->thiz, g_clazz.getAudioSessionId);
+    SDLTRACE("%s()=void", __func__);
+    if ((*env)->ExceptionCheck(env)) {
+        ALOGE("%s: Exception:", __func__);
+        (*env)->ExceptionDescribe(env);
+        (*env)->ExceptionClear(env);
+        return 0;
+    }
+    return audioSessionId;
 }

@@ -95,3 +95,14 @@ void SDL_AoutSetDefaultLatencySeconds(SDL_Aout *aout, double latency)
         aout->minimal_latency_seconds = latency;
     }
 }
+
+int SDL_AoutGetAudioSessionId(SDL_Aout *aout)
+{
+    if (aout) {
+        if (aout->func_get_audio_session_id) {
+            return aout->func_get_audio_session_id(aout);
+        }
+    }
+    return 0;
+}
+

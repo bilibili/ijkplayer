@@ -319,6 +319,21 @@ LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
 }
 
+static jint
+IjkMediaPlayer_getAudioSessionId(JNIEnv *env, jobject thiz)
+{
+    jint audio_session_id = 0;
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getAudioSessionId: null mp", LABEL_RETURN);
+
+    audio_session_id = ijkmp_android_get_audio_session_id(env, mp);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return audio_session_id;
+}
+
 static void
 IjkMediaPlayer_setOption(JNIEnv *env, jobject thiz, jint category, jobject name, jobject value)
 {
@@ -861,6 +876,7 @@ static JNINativeMethod g_methods[] = {
     { "_release",               "()V",      (void *) IjkMediaPlayer_release },
     { "_reset",                 "()V",      (void *) IjkMediaPlayer_reset },
     { "setVolume",              "(FF)V",    (void *) IjkMediaPlayer_setVolume },
+    { "getAudioSessionId",      "()I",      (void *) IjkMediaPlayer_getAudioSessionId },
     { "native_init",            "()V",      (void *) IjkMediaPlayer_native_init },
     { "native_setup",           "(Ljava/lang/Object;)V", (void *) IjkMediaPlayer_native_setup },
     { "native_finalize",        "()V",      (void *) IjkMediaPlayer_native_finalize },

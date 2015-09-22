@@ -38,6 +38,7 @@ IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*));
 
 void ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface);
 void ijkmp_android_set_volume(JNIEnv *env, IjkMediaPlayer *mp, float left, float right);
+int  ijkmp_android_get_audio_session_id(JNIEnv *env, IjkMediaPlayer *mp);
 void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque);
 
 #endif

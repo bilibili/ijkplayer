@@ -45,6 +45,9 @@ struct SDL_Aout {
 
     double (*func_get_latency_seconds)(SDL_Aout *aout);
     void   (*func_set_default_latency_seconds)(SDL_Aout *aout, double latency);
+
+    // optional
+    int    (*func_get_audio_session_id)(SDL_Aout *aout);
 };
 
 int SDL_AoutOpenAudio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained);
@@ -57,5 +60,9 @@ void SDL_AoutFreeP(SDL_Aout **paout);
 
 double SDL_AoutGetLatencySeconds(SDL_Aout *aout);
 void   SDL_AoutSetDefaultLatencySeconds(SDL_Aout *aout, double latency);
+
+// optional
+// android only
+int    SDL_AoutGetAudioSessionId(SDL_Aout *aout);
 
 #endif

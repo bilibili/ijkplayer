@@ -90,6 +90,25 @@ void ijkmp_android_set_volume(JNIEnv *env, IjkMediaPlayer *mp, float left, float
     MPTRACE("ijkmp_android_set_volume(%f, %f)=void", left, right);
 }
 
+int ijkmp_android_get_audio_session_id(JNIEnv *env, IjkMediaPlayer *mp)
+{
+    int audio_session_id = 0;
+    if (!mp)
+        return audio_session_id;
+
+    MPTRACE("%s()", __func__);
+    pthread_mutex_lock(&mp->mutex);
+
+    if (mp && mp->ffplayer && mp->ffplayer->aout) {
+        audio_session_id = SDL_AoutGetAudioSessionId(mp->ffplayer->aout);
+    }
+
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=%d", __func__, audio_session_id);
+
+    return audio_session_id;
+}
+
 void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque)
 {
     if (!mp)
