@@ -67,7 +67,7 @@ public class SurfaceRenderView extends SurfaceView implements IRenderView {
         mSurfaceCallback = new SurfaceCallback(this);
         getHolder().addCallback(mSurfaceCallback);
         //noinspection deprecation
-        getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        getHolder().setType(SurfaceHolder.SURFACE_TYPE_NORMAL);
     }
 
     @Override
