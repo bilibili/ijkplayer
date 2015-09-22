@@ -145,6 +145,11 @@ public class MediaPlayerProxy implements IMediaPlayer {
     }
 
     @Override
+    public int getAudioSessionId() {
+        return mBackEndMediaPlayer.getAudioSessionId();
+    }
+
+    @Override
     public MediaInfo getMediaInfo() {
         return mBackEndMediaPlayer.getMediaInfo();
     }

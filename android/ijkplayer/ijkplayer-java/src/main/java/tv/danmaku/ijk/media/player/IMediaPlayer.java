@@ -97,6 +97,8 @@ public interface IMediaPlayer {
 
     void setVolume(float leftVolume, float rightVolume);
 
+    int getAudioSessionId();
+
     MediaInfo getMediaInfo();
 
     @Deprecated

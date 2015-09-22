@@ -68,6 +68,11 @@ public abstract class BaseMediaPlayer implements IMediaPlayer {
         return;
     }
 
+    @Override
+    public int getAudioSessionId() {
+        return 0;
+    }
+
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public void setSurface(Surface surface) {

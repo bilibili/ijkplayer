@@ -211,6 +211,11 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
+    public int getAudioSessionId() {
+        return mInternalMediaPlayer.getAudioSessionId();
+    }
+
+    @Override
     public MediaInfo getMediaInfo() {
         if (sMediaInfo == null) {
             MediaInfo module = new MediaInfo();

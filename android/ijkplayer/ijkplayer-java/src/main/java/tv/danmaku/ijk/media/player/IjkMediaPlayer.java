@@ -597,6 +597,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     public native void setVolume(float leftVolume, float rightVolume);
 
+    @Override
     public native int getAudioSessionId();
 
     @Override
