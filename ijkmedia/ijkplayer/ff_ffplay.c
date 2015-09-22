@@ -67,6 +67,7 @@
 #include "ff_ffpipeline.h"
 #include "ff_ffpipenode.h"
 #include "ff_ffplay_debug.h"
+#include "version.h"
 #include "ijkmeta.h"
 
 #ifndef AV_CODEC_FLAG2_FAST
@@ -3365,13 +3366,28 @@ int ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info)
     return 0;
 }
 
-static void ffp_show_dict(const char *tag, AVDictionary *dict)
+static void ffp_show_dict(FFPlayer *ffp, const char *tag, AVDictionary *dict)
 {
     AVDictionaryEntry *t = NULL;
 
     while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
-        av_log(NULL, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 28, t->key, t->value);
+        av_log(ffp, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 28, t->key, t->value);
     }
+}
+
+#define FFP_VERSION_MODULE_NAME_LENGTH 13
+static void ffp_show_version_str(FFPlayer *ffp, const char *module, const char *version)
+{
+        av_log(ffp, AV_LOG_INFO, "%-*s: %s\n", FFP_VERSION_MODULE_NAME_LENGTH, module, version);
+}
+
+static void ffp_show_version_int(FFPlayer *ffp, const char *module, unsigned version)
+{
+    av_log(ffp, AV_LOG_INFO, "%-*s: %u.%u.%u\n",
+           FFP_VERSION_MODULE_NAME_LENGTH, module,
+           (unsigned int)IJKVERSION_GET_MAJOR(version),
+           (unsigned int)IJKVERSION_GET_MINOR(version),
+           (unsigned int)IJKVERSION_GET_MICRO(version));
 }
 
 int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
@@ -3396,12 +3412,19 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
         }
     }
 
+    av_log(NULL, AV_LOG_INFO, "===== versions =====\n");
+    ffp_show_version_str(ffp, "FFmpeg",         av_version_info());
+    ffp_show_version_int(ffp, "libavutil",      avutil_version());
+    ffp_show_version_int(ffp, "libavcodec",     avcodec_version());
+    ffp_show_version_int(ffp, "libavformat",    avformat_version());
+    ffp_show_version_int(ffp, "libswscale",     swscale_version());
+    ffp_show_version_int(ffp, "libswresample",  swresample_version());
     av_log(NULL, AV_LOG_INFO, "===== options =====\n");
-    ffp_show_dict("player-opts", ffp->player_opts);
-    ffp_show_dict("format-opts", ffp->format_opts);
-    ffp_show_dict("codec-opts ", ffp->codec_opts);
-    ffp_show_dict("sws-opts   ", ffp->sws_dict);
-    ffp_show_dict("swr-opts   ", ffp->swr_opts);
+    ffp_show_dict(ffp, "player-opts", ffp->player_opts);
+    ffp_show_dict(ffp, "format-opts", ffp->format_opts);
+    ffp_show_dict(ffp, "codec-opts ", ffp->codec_opts);
+    ffp_show_dict(ffp, "sws-opts   ", ffp->sws_dict);
+    ffp_show_dict(ffp, "swr-opts   ", ffp->swr_opts);
     av_log(NULL, AV_LOG_INFO, "===================\n");
 
     av_opt_set_dict(ffp, &ffp->player_opts);
