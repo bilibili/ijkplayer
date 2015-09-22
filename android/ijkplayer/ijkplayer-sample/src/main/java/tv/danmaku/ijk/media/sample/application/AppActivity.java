@@ -16,8 +16,6 @@
 
 package tv.danmaku.ijk.media.sample.application;
 
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -48,7 +46,6 @@ public class AppActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
             SettingsActivity.intentTo(this);
             return true;
         } else if (id == R.id.action_recent) {
@@ -63,12 +60,6 @@ public class AppActivity extends AppCompatActivity {
         boolean show = super.onPrepareOptionsMenu(menu);
         if (!show)
             return show;
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-            MenuItem item = menu.findItem(R.id.action_settings);
-            if (item != null)
-                item.setVisible(false);
-        }
 
         return true;
     }
