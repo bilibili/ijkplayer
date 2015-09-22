@@ -42,7 +42,7 @@ bintray {
             name = VERSION_NAME
             gpg {
                 sign = true
-                passphrase = GPG_PASSWORD
+                passphrase = project.hasProperty('GPG_PASSWORD') ? GPG_PASSWORD : ''
             }
         }
     }
