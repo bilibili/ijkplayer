@@ -58,7 +58,6 @@
 
     [IJKFFMoviePlayerController setLogReport:YES];
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
-    options.cache = 10000;
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:options];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
@@ -317,7 +316,6 @@
         
         [IJKFFMoviePlayerController setLogReport:YES];
         IJKFFOptions *options = [IJKFFOptions optionsByDefault];
-        options.cache = 10000;
         self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:theMovieURL withOptions:options];
         self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         self.player.view.frame = self.view.bounds;

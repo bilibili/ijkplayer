@@ -58,7 +58,7 @@
     IJKFFOptions * options = [IJKFFOptions optionsByDefault];
     options.reportPlayInfo = YES;
     options.sourceType = mUrlSourceType;
-    options.cache = 10000;
+    options.cache = 6000;
     
     [IJKFFMoviePlayerController setLogReport:YES];
 //    self.player = [[IJKFFMoviePlayerController alloc] initWithContentToken:self.urlString withOptions:options];

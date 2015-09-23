@@ -63,7 +63,7 @@ public class VideoPlayerActivity extends Activity {
         
         mVideoView.setVideoPath(mVideoPath);
 //        mVideoView.setVideoToken(mVideoPath);  
-        startPrint();
+//        startPrint();
     }
     
 	private HandlerThread handlerThread=null;
@@ -144,6 +144,6 @@ public class VideoPlayerActivity extends Activity {
     protected void onDestroy()
     {
     	super.onDestroy();
-    	endPrint();
+//    	endPrint();
     }
 }

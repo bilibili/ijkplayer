@@ -2829,7 +2829,7 @@ static int read_thread(void *arg)
                 
                 drop_audiopacket_timing_now = GetNowMs();
                 
-                if(is->videoq.duration>live_duration_hwm*2/3 && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
+                if(is->videoq.duration>live_duration_hwm*1/2 && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
                 {
                     drop_audiopacket_timing_begin = 0;
                     enable_drop_audiopacket = true;
@@ -2951,10 +2951,10 @@ static int read_thread(void *arg)
             av_free_packet(pkt);
             
 //          printf("isDropAllPackets\n");
-            
+/*
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-            SDL_UnlockMutex(wait_mutex);
+            SDL_UnlockMutex(wait_mutex);*/
             continue;
         }
         if(isFlushing)
@@ -2966,10 +2966,10 @@ static int read_thread(void *arg)
 //                printf("isFlushing\n");
                 
                 av_free_packet(pkt);
-                
+/*
                 SDL_LockMutex(wait_mutex);
                 SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-                SDL_UnlockMutex(wait_mutex);
+                SDL_UnlockMutex(wait_mutex);*/
                 continue;
             }
         }
@@ -2980,10 +2980,10 @@ static int read_thread(void *arg)
             
             printf("drop one audiopacket.\n");
             enable_drop_audiopacket = false;
-            
+/*
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-            SDL_UnlockMutex(wait_mutex);
+            SDL_UnlockMutex(wait_mutex);*/
             continue;
         }
 

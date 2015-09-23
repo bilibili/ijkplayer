@@ -18,7 +18,7 @@ public class MainActivity extends Activity {
         Button btn = (Button) this.findViewById(R.id.StartPlay1);
         final EditText et = (EditText) this.findViewById(R.id.RtmpAddress1);
 
-        et.setText("rtmp://wspub.live.hupucdn.com/prod/slk");
+        et.setText("rtmp://ws.live.hupucdn.com/prod/slk");
         
 
         btn.setOnClickListener(new OnClickListener(){
