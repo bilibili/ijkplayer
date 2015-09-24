@@ -59,8 +59,15 @@ static int ijksegment_open(URLContext *h, const char *arg, int flags, AVDictiona
     void *opaque = ijksegment_get_opaque(h);
     assert(opaque);
 
-    if (!c->opaque || !inject_callback)
+    if (!c->opaque) {
+        av_log(h, AV_LOG_ERROR, "null opaque\n");
         return AVERROR_EXTERNAL;
+    }
+
+    if (!inject_callback) {
+        av_log(h, AV_LOG_ERROR, "null inject_callback\n");
+        return AVERROR_EXTERNAL;
+    }
 
     av_strstart(arg, "ijksegment:", &arg);
     if (!arg || !*arg)
