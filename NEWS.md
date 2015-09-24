@@ -1,6 +1,7 @@
 tag next
 --------------------------------
 ios: support Xcode 7
+ios: drop support of iOS 5.x
 
 tag k0.4.1
 --------------------------------
