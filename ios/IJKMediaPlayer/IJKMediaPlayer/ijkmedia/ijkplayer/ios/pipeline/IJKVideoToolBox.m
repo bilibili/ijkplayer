@@ -951,7 +951,6 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
                 // Hi10p can be decoded into NV12 ('420v')
                 break;
             }
-            break;
         case FF_PROFILE_H264_HIGH_10_INTRA:
         case FF_PROFILE_H264_HIGH_422:
         case FF_PROFILE_H264_HIGH_422_INTRA:
