@@ -1,10 +1,10 @@
 package tv.danmaku.ijk.media.player;
 
-import java.util.ArrayList;
-import java.util.Locale;
-
 import android.os.Bundle;
 import android.text.TextUtils;
+
+import java.util.ArrayList;
+import java.util.Locale;
 
 public class IjkMediaMeta {
     // media meta
@@ -112,7 +112,7 @@ public class IjkMediaMeta {
     public long mStartUS;
     public long mBitrate;
 
-    public ArrayList<IjkStreamMeta> mStreams;
+    public ArrayList<IjkStreamMeta> mStreams = new ArrayList<IjkStreamMeta>();
     public IjkStreamMeta mVideoStream;
     public IjkStreamMeta mAudioStream;
 
@@ -230,6 +230,7 @@ public class IjkMediaMeta {
                     meta.mAudioStream = streamMeta;
                 }
             }
+            meta.mStreams.add(streamMeta);
         }
 
         return meta;

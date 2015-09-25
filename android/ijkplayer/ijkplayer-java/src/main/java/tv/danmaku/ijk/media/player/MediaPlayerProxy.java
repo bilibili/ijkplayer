@@ -27,6 +27,8 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Map;
 
+import tv.danmaku.ijk.media.player.misc.ITrackInfo;
+
 public class MediaPlayerProxy implements IMediaPlayer {
     protected IMediaPlayer mBackEndMediaPlayer;
 
@@ -292,5 +294,10 @@ public class MediaPlayerProxy implements IMediaPlayer {
     @Override
     public void setWakeMode(Context context, int mode) {
         mBackEndMediaPlayer.setWakeMode(context, mode);
+    }
+
+    @Override
+    public ITrackInfo[] getTrackInfo() {
+        return mBackEndMediaPlayer.getTrackInfo();
     }
 }

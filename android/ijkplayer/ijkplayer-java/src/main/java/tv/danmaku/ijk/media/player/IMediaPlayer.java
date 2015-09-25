@@ -27,6 +27,8 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Map;
 
+import tv.danmaku.ijk.media.player.misc.ITrackInfo;
+
 public interface IMediaPlayer {
     /*
      * Do not change these values without updating their counterparts in native
@@ -173,4 +175,6 @@ public interface IMediaPlayer {
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     void setSurface(Surface surface);
+
+    ITrackInfo[] getTrackInfo();
 }

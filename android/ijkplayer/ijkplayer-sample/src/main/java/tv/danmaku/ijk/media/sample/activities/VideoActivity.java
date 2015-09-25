@@ -177,6 +177,8 @@ public class VideoActivity extends AppCompatActivity {
             mToastTextView.setText(renderText);
             mMediaController.showOnce(mToastTextView);
             return true;
+        } else if (id == R.id.action_show_info) {
+            mVideoView.showMediaInfo();
         }
 
         return super.onOptionsItemSelected(item);

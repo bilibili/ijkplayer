@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
+import tv.danmaku.ijk.media.player.misc.AndroidTrackInfo;
+import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 public class AndroidMediaPlayer extends AbstractMediaPlayer {
@@ -53,6 +55,10 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         mInternalMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mInternalListenerAdapter = new AndroidMediaPlayerListenerHolder(this);
         attachInternalListeners();
+    }
+
+    public MediaPlayer getInternalMediaPlayer() {
+        return mInternalMediaPlayer;
     }
 
     @Override
@@ -131,6 +137,11 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     @Override
     public void setScreenOnWhilePlaying(boolean screenOn) {
         mInternalMediaPlayer.setScreenOnWhilePlaying(screenOn);
+    }
+
+    @Override
+    public ITrackInfo[] getTrackInfo() {
+        return AndroidTrackInfo.fromMediaPlayer(mInternalMediaPlayer);
     }
 
     @Override

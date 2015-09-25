@@ -40,9 +40,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -53,6 +51,8 @@ import java.util.Map;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
 import tv.danmaku.ijk.media.player.annotations.CalledByNative;
+import tv.danmaku.ijk.media.player.misc.ITrackInfo;
+import tv.danmaku.ijk.media.player.misc.IjkTrackInfo;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 /**
@@ -522,6 +522,29 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         if (mSurfaceHolder != null) {
             mSurfaceHolder.setKeepScreenOn(mScreenOnWhilePlaying && mStayAwake);
         }
+    }
+
+    public IjkTrackInfo[] getTrackInfo() {
+        Bundle bundle = getMediaMeta();
+        if (bundle == null)
+            return null;
+
+        IjkMediaMeta mediaMeta = IjkMediaMeta.parse(bundle);
+        if (mediaMeta == null || mediaMeta.mStreams == null)
+            return null;
+
+        ArrayList<IjkTrackInfo> trackInfos = new ArrayList<IjkTrackInfo>();
+        for (IjkMediaMeta.IjkStreamMeta streamMeta: mediaMeta.mStreams) {
+            IjkTrackInfo trackInfo = new IjkTrackInfo(streamMeta);
+            if (streamMeta.mType.equalsIgnoreCase(IjkMediaMeta.IJKM_VAL_TYPE__VIDEO)) {
+                trackInfo.setTrackType(ITrackInfo.MEDIA_TRACK_TYPE_VIDEO);
+            } else if (streamMeta.mType.equalsIgnoreCase(IjkMediaMeta.IJKM_VAL_TYPE__AUDIO)) {
+                trackInfo.setTrackType(ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
+            }
+            trackInfos.add(trackInfo);
+        }
+
+        return trackInfos.toArray(new IjkTrackInfo[trackInfos.size()]);
     }
 
     @Override

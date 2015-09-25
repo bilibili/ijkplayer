@@ -4,11 +4,32 @@
     <string name="app_name">ijkmediademo</string>
 
     <string name="N_A">N/A</string>
+    <string name="close">Close</string>
     <string name="exit">Exit</string>
     <string name="recent">Recent</string>
     <string name="settings">Settings</string>
-    <string name="toggle_render">Toggle Render</string>
-    <string name="toggle_ratio">Toggle Ratio</string>
+    <string name="toggle_render">Render</string>
+    <string name="toggle_ratio">Scale</string>
+    <string name="show_info">Info</string>
+
+    <string name="media_information">Media Information</string>
+    <string name="mi_media">Media</string>
+    <string name="mi_resolution">Resolution</string>
+    <string name="mi_length">Length</string>
+    <string name="mi_stream_fmt1">Stream #%d</string>
+    <string name="mi_type">Type</string>
+    <string name="mi_codec">Codec</string>
+    <string name="mi_frame_rate">Frame rate</string>
+    <string name="mi_bit_rate">Bit rate</string>
+    <string name="mi_sample_rate">Sample rate</string>
+    <string name="mi_channels">Channels</string>
+
+    <string name="TrackType_video">Video</string>
+    <string name="TrackType_audio">Audio</string>
+    <string name="TrackType_subtitle">Subtitle</string>
+    <string name="TrackType_timedtext">Timed text</string>
+    <string name="TrackType_metadata">Meta data</string>
+    <string name="TrackType_unknown">Unknown</string>
 
     <string name="VideoView_error_text_invalid_progressive_playback">Invalid progressive playback</string>
     <string name="VideoView_error_text_unknown">Unknown</string>
