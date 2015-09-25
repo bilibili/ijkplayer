@@ -278,7 +278,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
         try {
             if (mSettings.getUsingAndroidPlayer()) {
-                mMediaPlayer = new AndroidMediaPlayer();
+                AndroidMediaPlayer androidMediaPlayer = new AndroidMediaPlayer();
+                mMediaPlayer = androidMediaPlayer;
             } else {
                 IjkMediaPlayer ijkMediaPlayer = null;
                 if (mUri != null) {
