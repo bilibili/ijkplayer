@@ -16,7 +16,7 @@
     <string name="media_information">Media Information</string>
     <string name="mi_player">Player</string>
     <string name="mi_media">Media</string>
-    <string name="mi_profile">Profile</string>
+    <string name="mi_profile_level">Profile level</string>
     <string name="mi_pixel_format">Pixel format</string>
     <string name="mi_resolution">Resolution</string>
     <string name="mi_length">Length</string>
