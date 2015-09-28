@@ -217,6 +217,16 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
+    public void setLooping(boolean looping) {
+        mInternalMediaPlayer.setLooping(looping);
+    }
+
+    @Override
+    public boolean isLooping() {
+        return mInternalMediaPlayer.isLooping();
+    }
+
+    @Override
     public void setVolume(float leftVolume, float rightVolume) {
         mInternalMediaPlayer.setVolume(leftVolume, rightVolume);
     }

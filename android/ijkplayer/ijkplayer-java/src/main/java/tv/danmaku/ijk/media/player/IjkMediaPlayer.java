@@ -623,6 +623,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      *
      * @param looping whether to loop or not
      */
+    @Override
     public void setLooping(boolean looping) {
         int loopCount = looping ? 0 : 1;
         setOption(OPT_CATEGORY_PLAYER, "loop", loopCount);
@@ -636,6 +637,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      *
      * @return true if the MediaPlayer is currently looping, false otherwise
      */
+    @Override
     public boolean isLooping() {
         int loopCount = _getLoopCount();
         return loopCount != 1;

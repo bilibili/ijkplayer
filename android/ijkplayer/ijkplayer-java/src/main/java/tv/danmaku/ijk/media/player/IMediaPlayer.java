@@ -177,4 +177,8 @@ public interface IMediaPlayer {
     void setSurface(Surface surface);
 
     ITrackInfo[] getTrackInfo();
+
+    void setLooping(boolean looping);
+
+    boolean isLooping();
 }

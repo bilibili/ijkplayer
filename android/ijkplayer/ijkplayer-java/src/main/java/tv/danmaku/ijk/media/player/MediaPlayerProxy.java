@@ -300,4 +300,14 @@ public class MediaPlayerProxy implements IMediaPlayer {
     public ITrackInfo[] getTrackInfo() {
         return mBackEndMediaPlayer.getTrackInfo();
     }
+
+    @Override
+    public void setLooping(boolean looping) {
+        mBackEndMediaPlayer.setLooping(looping);
+    }
+
+    @Override
+    public boolean isLooping() {
+        return mBackEndMediaPlayer.isLooping();
+    }
 }
