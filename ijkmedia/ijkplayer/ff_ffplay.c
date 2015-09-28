@@ -2594,11 +2594,6 @@ static int read_thread(void *arg)
                                  st_index[AVMEDIA_TYPE_VIDEO]),
                                 NULL, 0);
 #endif
-    ijkmeta_set_avformat_context_l(ffp->meta, ic);
-    if (st_index[AVMEDIA_TYPE_VIDEO] >= 0)
-        ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_VIDEO_STREAM, st_index[AVMEDIA_TYPE_VIDEO]);
-    if (st_index[AVMEDIA_TYPE_AUDIO] >= 0)
-        ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_AUDIO_STREAM, st_index[AVMEDIA_TYPE_AUDIO]);
 
     is->show_mode = ffp->show_mode;
 #ifdef FFP_MERGE // bbc: dunno if we need this
@@ -2628,6 +2623,11 @@ static int read_thread(void *arg)
         stream_component_open(ffp, st_index[AVMEDIA_TYPE_SUBTITLE]);
     }
 #endif
+    ijkmeta_set_avformat_context_l(ffp->meta, ic);
+    if (st_index[AVMEDIA_TYPE_VIDEO] >= 0)
+        ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_VIDEO_STREAM, st_index[AVMEDIA_TYPE_VIDEO]);
+    if (st_index[AVMEDIA_TYPE_AUDIO] >= 0)
+        ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_AUDIO_STREAM, st_index[AVMEDIA_TYPE_AUDIO]);
 
     if (is->video_stream < 0 && is->audio_stream < 0) {
         av_log(NULL, AV_LOG_FATAL, "Failed to open file '%s' or configure filtergraph\n",

@@ -214,6 +214,7 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
                     ijkmeta_set_string_l(stream_meta, IJKM_KEY_CODEC_PROFILE, profile);
                 if (codec->long_name)
                     ijkmeta_set_string_l(stream_meta, IJKM_KEY_CODEC_LONG_NAME, codec->long_name);
+                ALOGE("????? level=%d\n", avctx->level);
             }
         }
 
