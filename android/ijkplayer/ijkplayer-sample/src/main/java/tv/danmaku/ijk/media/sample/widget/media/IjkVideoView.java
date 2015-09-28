@@ -484,11 +484,44 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                         mOnInfoListener.onInfo(mp, arg1, arg2);
                     }
                     switch (arg1) {
+                        case IMediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING:
+                            Log.d(TAG, "MEDIA_INFO_VIDEO_TRACK_LAGGING:");
+                            break;
+                        case IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
+                            Log.d(TAG, "MEDIA_INFO_VIDEO_RENDERING_START:");
+                            break;
+                        case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
+                            Log.d(TAG, "MEDIA_INFO_BUFFERING_START:");
+                            break;
+                        case IMediaPlayer.MEDIA_INFO_BUFFERING_END:
+                            Log.d(TAG, "MEDIA_INFO_BUFFERING_END:");
+                            break;
+                        case IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH:
+                            Log.d(TAG, "MEDIA_INFO_NETWORK_BANDWIDTH: " + arg2);
+                            break;
+                        case IMediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
+                            Log.d(TAG, "MEDIA_INFO_BAD_INTERLEAVING:");
+                            break;
+                        case IMediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
+                            Log.d(TAG, "MEDIA_INFO_NOT_SEEKABLE:");
+                            break;
+                        case IMediaPlayer.MEDIA_INFO_METADATA_UPDATE:
+                            Log.d(TAG, "MEDIA_INFO_METADATA_UPDATE:");
+                            break;
+                        case IMediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE:
+                            Log.d(TAG, "MEDIA_INFO_UNSUPPORTED_SUBTITLE:");
+                            break;
+                        case IMediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT:
+                            Log.d(TAG, "MEDIA_INFO_SUBTITLE_TIMED_OUT:");
+                            break;
                         case IMediaPlayer.MEDIA_INFO_VIDEO_ROTATION_CHANGED:
                             mVideoRotationDegree = arg2;
                             Log.d(TAG, "MEDIA_INFO_VIDEO_ROTATION_CHANGED: " + arg2);
                             if (mRenderView != null)
                                 mRenderView.setVideoRotation(arg2);
+                            break;
+                        case IMediaPlayer.MEDIA_INFO_AUDIO_RENDERING_START:
+                            Log.d(TAG, "MEDIA_INFO_AUDIO_RENDERING_START:");
                             break;
                     }
                     return true;
