@@ -32,12 +32,16 @@ public class IjkMediaFormat implements IMediaFormat {
     public static final String KEY_IJK_BIT_RATE_UI = "ijk-bit-rate-ui";
 
     // Video
+    public static final String KEY_IJK_CODEC_PROFILE_LEVEL_UI = "ijk-profile-level-ui";
     public static final String KEY_IJK_RESOLUTION_UI = "ijk-resolution-ui";
     public static final String KEY_IJK_FRAME_RATE_UI = "ijk-frame-rate-ui";
 
     // Audio
     public static final String KEY_IJK_SAMPLE_RATE_UI = "ijk-sample-rate-ui";
     public static final String KEY_IJK_CHANNEL_UI = "ijk-channel-ui";
+
+    // Codec
+    public static final String CODEC_NAME_H264 = "h264";
 
     public IjkMediaMeta.IjkStreamMeta mMediaFormat;
 
@@ -106,6 +110,34 @@ public class IjkMediaFormat implements IMediaFormat {
                 } else {
                     return String.format(Locale.US, "%d kb/s", bitRate / 1000);
                 }
+            }
+        });
+        sFormatterMap.put(KEY_IJK_CODEC_PROFILE_LEVEL_UI, new Formatter() {
+            @Override
+            protected String doFormat(IjkMediaFormat mediaFormat) {
+                String profile = mediaFormat.getString(IjkMediaMeta.IJKM_KEY_CODEC_PROFILE);
+                if (TextUtils.isEmpty(profile))
+                    return null;
+
+                StringBuilder sb = new StringBuilder();
+                sb.append(profile);
+
+                String codecName = mediaFormat.getString(IjkMediaMeta.IJKM_KEY_CODEC_NAME);
+                if (TextUtils.isEmpty(codecName)) {
+                } else if (codecName.equalsIgnoreCase(CODEC_NAME_H264)) {
+                    int level = mediaFormat.getInteger(IjkMediaMeta.IJKM_KEY_CODEC_LEVEL);
+                    if (level < 10)
+                        return sb.toString();
+
+                    sb.append(" Profile Level ");
+                    sb.append((level / 10) % 10);
+                    if ((level % 10) != 0) {
+                        sb.append(".");
+                        sb.append(level % 10);
+                    }
+                }
+
+                return sb.toString();
             }
         });
         sFormatterMap.put(KEY_IJK_RESOLUTION_UI, new Formatter() {
