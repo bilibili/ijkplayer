@@ -40,10 +40,11 @@
 #define IJKM_VAL_TYPE__AUDIO    "audio"
 #define IJKM_VAL_TYPE__UNKNOWN  "unknown"
 
-#define IJKM_KEY_CODEC_NAME      "codec_name"
-#define IJKM_KEY_CODEC_PROFILE   "codec_profile"
-#define IJKM_KEY_CODEC_LEVEL     "codec_level"
-#define IJKM_KEY_CODEC_LONG_NAME "codec_long_name"
+#define IJKM_KEY_CODEC_NAME         "codec_name"
+#define IJKM_KEY_CODEC_PROFILE      "codec_profile"
+#define IJKM_KEY_CODEC_LEVEL        "codec_level"
+#define IJKM_KEY_CODEC_LONG_NAME    "codec_long_name"
+#define IJKM_KEY_CODEC_PIXEL_FORMAT "codec_pixel_format"
 
 // stream: video
 #define IJKM_KEY_WIDTH          "width"

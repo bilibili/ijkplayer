@@ -215,6 +215,8 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
                 if (codec->long_name)
                     ijkmeta_set_string_l(stream_meta, IJKM_KEY_CODEC_LONG_NAME, codec->long_name);
                 ijkmeta_set_int64_l(stream_meta, IJKM_KEY_CODEC_LEVEL, avctx->level);
+                if (avctx->pix_fmt != AV_PIX_FMT_NONE)
+                    ijkmeta_set_string_l(stream_meta, IJKM_KEY_CODEC_PIXEL_FORMAT, av_get_pix_fmt_name(avctx->pix_fmt));
             }
         }
 

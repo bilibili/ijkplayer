@@ -25,6 +25,7 @@ public class IjkMediaMeta {
     public static final String IJKM_KEY_CODEC_PROFILE = "codec_profile";
     public static final String IJKM_KEY_CODEC_LEVEL = "codec_level";
     public static final String IJKM_KEY_CODEC_LONG_NAME = "codec_long_name";
+    public static final String IJKM_KEY_CODEC_PIXEL_FORMAT = "codec_pixel_format";
 
     // stream: video
     public static final String IJKM_KEY_WIDTH = "width";

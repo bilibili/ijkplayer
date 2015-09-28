@@ -33,6 +33,7 @@ public class IjkMediaFormat implements IMediaFormat {
 
     // Video
     public static final String KEY_IJK_CODEC_PROFILE_LEVEL_UI = "ijk-profile-level-ui";
+    public static final String KEY_IJK_CODEC_PIXEL_FORMAT_UI = "ijk-pixel-format-ui";
     public static final String KEY_IJK_RESOLUTION_UI = "ijk-resolution-ui";
     public static final String KEY_IJK_FRAME_RATE_UI = "ijk-frame-rate-ui";
 
@@ -138,6 +139,12 @@ public class IjkMediaFormat implements IMediaFormat {
                 }
 
                 return sb.toString();
+            }
+        });
+        sFormatterMap.put(KEY_IJK_CODEC_PIXEL_FORMAT_UI, new Formatter() {
+            @Override
+            protected String doFormat(IjkMediaFormat mediaFormat) {
+                return mediaFormat.getString(IjkMediaMeta.IJKM_KEY_CODEC_PIXEL_FORMAT);
             }
         });
         sFormatterMap.put(KEY_IJK_RESOLUTION_UI, new Formatter() {
