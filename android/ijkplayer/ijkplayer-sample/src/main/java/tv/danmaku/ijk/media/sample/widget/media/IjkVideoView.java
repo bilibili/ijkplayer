@@ -964,6 +964,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             return;
 
         TableDialogBuilder builder = new TableDialogBuilder(getContext());
+        builder.appendSection(R.string.mi_player);
+        builder.appendRow2(R.string.mi_player, mMediaPlayer.getClass().getSimpleName());
         builder.appendSection(R.string.mi_media);
         builder.appendRow2(R.string.mi_resolution, buildResolution(mVideoWidth, mVideoHeight, mVideoSarNum, mVideoSarDen));
         builder.appendRow2(R.string.mi_length, buildTimeMilli(mMediaPlayer.getDuration()));

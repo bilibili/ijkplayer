@@ -13,6 +13,7 @@
     <string name="show_info">Info</string>
 
     <string name="media_information">Media Information</string>
+    <string name="mi_player">Player</string>
     <string name="mi_media">Media</string>
     <string name="mi_resolution">Resolution</string>
     <string name="mi_length">Length</string>
