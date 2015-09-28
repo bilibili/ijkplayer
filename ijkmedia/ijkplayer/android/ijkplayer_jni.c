@@ -766,6 +766,7 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             break;
         case FFP_MSG_AUDIO_RENDERING_START:
             MPTRACE("FFP_MSG_AUDIO_RENDERING_START:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_RENDERING_START, 0);
             break;
         case FFP_MSG_VIDEO_ROTATION_CHANGED:
             MPTRACE("FFP_MSG_VIDEO_ROTATION_CHANGED: %d\n", msg.arg1);
