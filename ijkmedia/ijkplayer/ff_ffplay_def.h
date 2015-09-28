@@ -342,7 +342,7 @@ typedef struct VideoState {
 #endif
     int eof;
 
-    char filename[4096];
+    char *filename;
     int width, height, xleft, ytop;
     int step;
 

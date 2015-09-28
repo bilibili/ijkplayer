@@ -817,6 +817,7 @@ static void stream_close(VideoState *is)
 #ifdef FFP_MERGE
     sws_freeContext(is->sub_convert_ctx);
 #endif
+    av_free(is->filename);
     av_free(is);
 }
 
@@ -2954,7 +2955,9 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     is = av_mallocz(sizeof(VideoState));
     if (!is)
         return NULL;
-    av_strlcpy(is->filename, filename, sizeof(is->filename));
+    is->filename = av_strdup(filename);
+    if (!is->filename)
+        goto fail;
     is->iformat = iformat;
     is->ytop    = 0;
     is->xleft   = 0;
