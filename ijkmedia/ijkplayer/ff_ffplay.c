@@ -992,6 +992,9 @@ static void toggle_pause(FFPlayer *ffp, int pause_on)
     SDL_UnlockMutex(ffp->is->play_mutex);
 }
 
+// FFP_MERGE: toggle_mute
+// FFP_MERGE: update_volume
+
 static void step_to_next_frame_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
@@ -2063,7 +2066,13 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
         len1 = is->audio_buf_size - is->audio_buf_index;
         if (len1 > len)
             len1 = len;
-        memcpy(stream, (uint8_t *)is->audio_buf + is->audio_buf_index, len1);
+        if (!is->muted && is->audio_volume == SDL_MIX_MAXVOLUME)
+            memcpy(stream, (uint8_t *)is->audio_buf + is->audio_buf_index, len1);
+        else {
+            memset(stream, is->silence_buf[0], len1);
+            if (!is->muted)
+                SDL_MixAudio(stream, (uint8_t *)is->audio_buf + is->audio_buf_index, len1, is->audio_volume);
+        }
         len -= len1;
         stream += len1;
         is->audio_buf_index += len1;
@@ -2984,6 +2993,8 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     init_clock(&is->audclk, &is->audioq.serial);
     init_clock(&is->extclk, &is->extclk.serial);
     is->audio_clock_serial = -1;
+    is->audio_volume = SDL_MIX_MAXVOLUME;
+    is->muted = 0;
     is->av_sync_type = ffp->av_sync_type;
 
     is->play_mutex = SDL_CreateMutex();
