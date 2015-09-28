@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.activities.VideoActivity;
@@ -143,10 +142,6 @@ public class RecentMediaListFragment extends Fragment implements LoaderManager.L
                 return "";
 
             return cursor.getString(mIndex_name);
-        }
-
-        final class ViewHolder {
-            public TextView nameTextView;
         }
     }
 }

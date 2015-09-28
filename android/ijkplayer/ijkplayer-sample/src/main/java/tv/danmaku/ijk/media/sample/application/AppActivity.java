@@ -24,6 +24,7 @@ import android.view.MenuItem;
 
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.activities.RecentMediaActivity;
+import tv.danmaku.ijk.media.sample.activities.SampleMediaActivity;
 import tv.danmaku.ijk.media.sample.activities.SettingsActivity;
 
 public class AppActivity extends AppCompatActivity {
@@ -50,6 +51,8 @@ public class AppActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.action_recent) {
             RecentMediaActivity.intentTo(this);
+        } else if (id == R.id.action_sample) {
+            SampleMediaActivity.intentTo(this);
         }
 
         return super.onOptionsItemSelected(item);

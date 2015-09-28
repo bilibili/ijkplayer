@@ -6,6 +6,7 @@
     <string name="N_A">N/A</string>
     <string name="close">Close</string>
     <string name="exit">Exit</string>
+    <string name="sample">Sample</string>
     <string name="recent">Recent</string>
     <string name="settings">Settings</string>
     <string name="toggle_render">Render</string>
