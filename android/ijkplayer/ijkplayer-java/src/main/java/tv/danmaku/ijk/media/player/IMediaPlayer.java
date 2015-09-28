@@ -173,12 +173,17 @@ public interface IMediaPlayer {
     @Deprecated
     void setWakeMode(Context context, int mode);
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    void setSurface(Surface surface);
-
-    ITrackInfo[] getTrackInfo();
-
     void setLooping(boolean looping);
 
     boolean isLooping();
+
+    /*--------------------
+     * AndroidMediaPlayer: ICE_CREAM_SANDWICH:
+     */
+    void setSurface(Surface surface);
+
+    /*--------------------
+     * AndroidMediaPlayer: JELLY_BEAN
+     */
+    ITrackInfo[] getTrackInfo();
 }
