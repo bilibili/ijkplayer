@@ -1058,10 +1058,4 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 return context.getString(R.string.TrackType_unknown);
         }
     }
-
-    private String buildCodec(String codec) {
-        if (TextUtils.isEmpty(codec))
-            return getContext().getString(R.string.N_A);
-        return codec;
-    }
 }
