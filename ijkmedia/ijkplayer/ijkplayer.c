@@ -560,6 +560,23 @@ long ijkmp_get_playable_duration(IjkMediaPlayer *mp)
     return retval;
 }
 
+void ijkmp_set_loop(IjkMediaPlayer *mp, int loop)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_loop(mp->ffplayer, loop);
+    pthread_mutex_unlock(&mp->mutex);
+}
+
+int ijkmp_get_loop(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int loop = ffp_get_loop(mp->ffplayer);
+    pthread_mutex_unlock(&mp->mutex);
+    return loop;
+}
+
 void *ijkmp_get_weak_thiz(IjkMediaPlayer *mp)
 {
     return mp->weak_thiz;

@@ -307,6 +307,34 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
 }
 
 static void
+IjkMediaPlayer_setLoopCount(JNIEnv *env, jobject thiz, jint loop_count)
+{
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setLoopCount: null mp", LABEL_RETURN);
+
+    ijkmp_set_loop(mp, loop_count);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static jint
+IjkMediaPlayer_getLoopCount(JNIEnv *env, jobject thiz)
+{
+    jint loop_count = 1;
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: getLoopCount: null mp", LABEL_RETURN);
+
+    loop_count = ijkmp_get_loop(mp);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return loop_count;
+}
+
+static void
 IjkMediaPlayer_setVolume(JNIEnv *env, jobject thiz, jfloat leftVolume, jfloat rightVolume)
 {
     MPTRACE("%s\n", __func__);
@@ -888,6 +916,8 @@ static JNINativeMethod g_methods[] = {
     { "_getVideoCodecInfo",     "()Ljava/lang/String;",     (void *) IjkMediaPlayer_getVideoCodecInfo },
     { "_getAudioCodecInfo",     "()Ljava/lang/String;",     (void *) IjkMediaPlayer_getAudioCodecInfo },
     { "_getMediaMeta",          "()Landroid/os/Bundle;",    (void *) IjkMediaPlayer_getMediaMeta },
+    { "_setLoopCount",          "(I)V",                     (void *) IjkMediaPlayer_setLoopCount },
+    { "_getLoopCount",          "()I",                      (void *) IjkMediaPlayer_getLoopCount },
 
     { "native_profileBegin",    "(Ljava/lang/String;)V",    (void *) IjkMediaPlayer_native_profileBegin },
     { "native_profileEnd",      "()V",                      (void *) IjkMediaPlayer_native_profileEnd },

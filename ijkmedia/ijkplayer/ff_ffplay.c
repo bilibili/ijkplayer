@@ -130,7 +130,8 @@ static const AVOption ffp_context_options[] = {
     { "fast",                           "non spec compliant optimizations",
         OPTION_OFFSET(fast),            OPTION_INT(0, 0, 1) },
     // FFP_MERGE: genpts, drp, lowres, sync, autoexit, exitonkeydown, exitonmousedown
-    // TODO: loop
+    { "loop",                           "set number of times the playback shall be looped",
+        OPTION_OFFSET(loop),            OPTION_INT(1, INT_MIN, INT_MAX) },
     { "infbuf",                         "don't limit the input buffer size (useful with realtime streams)",
         OPTION_OFFSET(infinite_buffer), OPTION_INT(0, 0, 1) },
     { "framedrop",                      "drop frames when cpu is too slow",
@@ -3601,6 +3602,22 @@ long ffp_get_playable_duration_l(FFPlayer *ffp)
         return 0;
 
     return (long)ffp->playable_duration_ms;
+}
+
+void ffp_set_loop(FFPlayer *ffp, int loop)
+{
+    assert(ffp);
+    if (!ffp)
+        return;
+    ffp->loop = loop;
+}
+
+int ffp_get_loop(FFPlayer *ffp)
+{
+    assert(ffp);
+    if (!ffp)
+        return 1;
+    return ffp->loop;
 }
 
 void ffp_packet_queue_init(PacketQueue *q)

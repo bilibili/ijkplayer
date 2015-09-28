@@ -65,6 +65,8 @@ int       ffp_seek_to_l(FFPlayer *ffp, long msec);
 long      ffp_get_current_position_l(FFPlayer *ffp);
 long      ffp_get_duration_l(FFPlayer *ffp);
 long      ffp_get_playable_duration_l(FFPlayer *ffp);
+void      ffp_set_loop(FFPlayer *ffp, int loop);
+int       ffp_get_loop(FFPlayer *ffp);
 
 /* for internal usage */
 void      ffp_packet_queue_init(PacketQueue *q);

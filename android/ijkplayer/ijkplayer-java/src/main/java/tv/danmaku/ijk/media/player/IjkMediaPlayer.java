@@ -618,6 +618,31 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private native void _reset();
 
+    /**
+     * Sets the player to be looping or non-looping.
+     *
+     * @param looping whether to loop or not
+     */
+    public void setLooping(boolean looping) {
+        int loopCount = looping ? 0 : 1;
+        setOption(OPT_CATEGORY_PLAYER, "loop", loopCount);
+        _setLoopCount(loopCount);
+    }
+
+    private native void _setLoopCount(int loopCount);
+
+    /**
+     * Checks whether the MediaPlayer is looping or non-looping.
+     *
+     * @return true if the MediaPlayer is currently looping, false otherwise
+     */
+    public boolean isLooping() {
+        int loopCount = _getLoopCount();
+        return loopCount != 1;
+    }
+
+    private native int _getLoopCount();
+
     public native void setVolume(float leftVolume, float rightVolume);
 
     @Override
