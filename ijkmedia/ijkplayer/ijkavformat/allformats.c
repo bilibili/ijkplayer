@@ -27,7 +27,8 @@
 #define FF_REGISTER_PROTOCOL(x)                                         \
 {                                                                       \
     extern URLProtocol ff_##x##_protocol;                               \
-    ffurl_register_protocol(&ff_##x##_protocol);                        \
+    if (!ijkav_find_protocol(ff_##x##_protocol.name))                   \
+        ffurl_register_protocol(&ff_##x##_protocol);                    \
 }
 
 #define IJK_REGISTER_PROTOCOL(x)                                        \
@@ -42,6 +43,19 @@
         av_register_input_format(&ijkff_##x##_demuxer);                 \
     }
 
+
+static struct URLProtocol *ijkav_find_protocol(const char *proto_str)
+{
+    URLProtocol *up = NULL;
+
+    while ((up = ffurl_protocol_next(up)) != NULL) {
+        if (!strcmp(proto_str, up->name))
+            break;
+    }
+
+    return up;
+}
+
 void ijkav_register_all(void)
 {
     static int initialized;
@@ -49,6 +63,8 @@ void ijkav_register_all(void)
     if (initialized)
         return;
     initialized = 1;
+
+    av_register_all();
 
     /* protocols */
     FF_REGISTER_PROTOCOL(async);
