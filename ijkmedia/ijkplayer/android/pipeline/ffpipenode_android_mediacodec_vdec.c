@@ -102,8 +102,7 @@ typedef struct IJKFF_Pipenode_Opaque {
     int                       off_buf_out;
     double                    last_queued_pts;
 
-    Uint64                    benchmark_start_time;
-    Uint64                    benchmark_frame_count;
+    SDL_SpeedSampler          sampler;
 } IJKFF_Pipenode_Opaque;
 
 static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
@@ -795,6 +794,8 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
             }
         }
     } else if (output_buffer_index >= 0) {
+        SDL_SpeedSamplerAdd(&opaque->sampler, FFP_SHOW_VDPS_MEDIACODEC, "vdps[MediaCodec]");
+
         if (dequeue_count)
             ++*dequeue_count;
 
@@ -1169,6 +1170,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
             opaque->amc_buf_out[i].pts = AV_NOPTS_VALUE;
     }
 
+    SDL_SpeedSamplerReset(&opaque->sampler);
     return node;
 fail:
     ffpipenode_free_p(&node);
