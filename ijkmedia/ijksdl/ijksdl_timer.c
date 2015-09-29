@@ -121,3 +121,27 @@ int64_t SDL_ProfilerEnd(SDL_Profiler* profiler)
 
     return delta;
 }
+
+void SDL_SampleReset(SDL_SpeedSampler *sampler)
+{
+    memset(sampler, 0, sizeof(SDL_SpeedSampler));
+    sampler->capacity = sizeof(sampler->samples) / sizeof(Uint64);
+}
+
+int64_t SDL_SampleAdd(SDL_SpeedSampler *sampler)
+{
+    Uint64 current = SDL_GetTickHR();
+    sampler->samples[sampler->next_index++] = current;
+    if (sampler->count >= sampler->capacity) {
+        sampler->first_index++;
+        sampler->first_index %= sampler->capacity;
+    } else {
+        sampler->count++;
+    }
+
+    if (sampler->count < 2)
+        return 0;
+
+    int samples_per_second = (int)((current - sampler->samples[sampler->first_index] + 500) / (1000));
+    return samples_per_second;
+}

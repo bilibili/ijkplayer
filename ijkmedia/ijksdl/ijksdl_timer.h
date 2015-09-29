@@ -31,7 +31,8 @@ void SDL_Delay(Uint32 ms);
 Uint64 SDL_GetTickHR(void);
 
 
-typedef struct SDL_Profiler {
+typedef struct SDL_Profiler
+{
     int64_t total_elapsed;
     int     total_counter;
 
@@ -48,5 +49,19 @@ typedef struct SDL_Profiler {
 void    SDL_ProfilerReset(SDL_Profiler* profiler, int max_sample);
 void    SDL_ProfilerBegin(SDL_Profiler* profiler);
 int64_t SDL_ProfilerEnd(SDL_Profiler* profiler);
+
+typedef struct SDL_SpeedSampler
+{
+    Uint64  samples[10];
+
+    int     capacity;
+    int     count;
+    int     first_index;
+    int     next_index;
+} SDL_SpeedSampler;
+
+void    SDL_SampleReset(SDL_SpeedSampler *sampler);
+// return samples per seconds
+int64_t SDL_SampleAdd(SDL_SpeedSampler *sampler);
 
 #endif
