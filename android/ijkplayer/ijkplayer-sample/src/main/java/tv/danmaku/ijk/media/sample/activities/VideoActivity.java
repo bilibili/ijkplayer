@@ -29,6 +29,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -48,6 +49,7 @@ public class VideoActivity extends AppCompatActivity {
     private AndroidMediaController mMediaController;
     private IjkVideoView mVideoView;
     private TextView mToastTextView;
+    private TableLayout mHudView;
 
     private Settings mSettings;
     private boolean mBackPressed;
@@ -115,6 +117,7 @@ public class VideoActivity extends AppCompatActivity {
         mMediaController.setSupportActionBar(actionBar);
 
         mToastTextView = (TextView) findViewById(R.id.toast_text_view);
+        mHudView = (TableLayout) findViewById(R.id.hud_view);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -122,6 +125,7 @@ public class VideoActivity extends AppCompatActivity {
 
         mVideoView = (IjkVideoView) findViewById(R.id.video_view);
         mVideoView.setMediaController(mMediaController);
+        mVideoView.setHudView(mHudView);
         // prefer mVideoPath
         if (mVideoPath != null)
             mVideoView.setVideoPath(mVideoPath);

@@ -98,6 +98,12 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int SDL_FCC_RV32 = 0x32335652; // RGBX8888
     //----------------------------------------
 
+    //----------------------------------------
+    // properties
+    public static final int PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND = 10001;
+    public static final int PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND = 10002;
+    //----------------------------------------
+
     @AccessedByNative
     private long mNativeMediaPlayer;
 
@@ -646,15 +652,14 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private native int _getLoopCount();
 
     public float getVideoOutputFramesPerSecond() {
-        return _getVideoOutputFramesPerSecond();
+        return _getPropertyFloat(PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND, 0.0f);
     }
 
     public float getVideoDecodeFramesPerSecond() {
-        return _getVideoDecodeFramesPerSecond();
+        return _getPropertyFloat(PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND, 0.0f);
     }
 
-    private native float _getVideoOutputFramesPerSecond();
-    private native float _getVideoDecodeFramesPerSecond();
+    private native float _getPropertyFloat(int property, float defaultValue);
 
     public native void setVolume(float leftVolume, float rightVolume);
 

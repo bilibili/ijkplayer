@@ -37,10 +37,6 @@ public class TextureMediaPlayer extends MediaPlayerProxy implements IMediaPlayer
         }
     }
 
-    public IMediaPlayer getInternalMediaPlayer() {
-        return mBackEndMediaPlayer;
-    }
-
     //--------------------
     // IMediaPlayer
     //--------------------

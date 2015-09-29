@@ -3850,18 +3850,16 @@ int ffp_get_video_rotate_degrees(FFPlayer *ffp)
     return theta;
 }
 
-float ffp_get_video_output_frames_per_second(FFPlayer *ffp)
+float ffp_get_property_float(FFPlayer *ffp, int id, float default_value)
 {
-    if (!ffp)
-        return 0.0f;
-    return ffp->vfps;
-}
-
-float ffp_get_video_decode_frames_per_second(FFPlayer *ffp)
-{
-    if (!ffp)
-        return 0.0f;
-    return ffp->vdps;
+    switch (id) {
+        case FFP_PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND:
+            return ffp ? ffp->vdps : default_value;
+        case FFP_PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND:
+            return ffp ? ffp->vfps : default_value;
+        default:
+            return default_value;
+    }
 }
 
 IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)

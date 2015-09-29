@@ -35,6 +35,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
+import android.widget.TableLayout;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -109,6 +110,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private IRenderView mRenderView;
     private int mVideoSarNum;
     private int mVideoSarDen;
+
+    private InfoHudViewHolder mHudViewHolder;
 
     public IjkVideoView(Context context) {
         super(context);
@@ -215,6 +218,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         }
     }
 
+    public void setHudView(TableLayout tableLayout) {
+        mHudViewHolder = new InfoHudViewHolder(getContext(), tableLayout);
+    }
+
     /**
      * Sets video path.
      *
@@ -260,6 +267,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mMediaPlayer.stop();
             mMediaPlayer.release();
             mMediaPlayer = null;
+            if (mHudViewHolder != null)
+                mHudViewHolder.setMediaPlayer(null);
             mCurrentState = STATE_IDLE;
             mTargetState = STATE_IDLE;
             AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
@@ -349,6 +358,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.setScreenOnWhilePlaying(true);
             mMediaPlayer.prepareAsync();
+            if (mHudViewHolder != null)
+                mHudViewHolder.setMediaPlayer(mMediaPlayer);
 
             // REMOVED: mPendingSubtitleTracks
 
@@ -974,6 +985,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         if (mEnableBackgroundPlay) {
             MediaPlayerService.intentToStart(getContext());
             mMediaPlayer = MediaPlayerService.getMediaPlayer();
+            if (mHudViewHolder != null)
+                mHudViewHolder.setMediaPlayer(mMediaPlayer);
         }
     }
 
@@ -996,7 +1009,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         if (mMediaPlayer == null)
             return;
 
-        TableDialogBuilder builder = new TableDialogBuilder(getContext());
+        TableLayoutBinder builder = new TableLayoutBinder(getContext());
         builder.appendSection(R.string.mi_player);
         builder.appendRow2(R.string.mi_player, mMediaPlayer.getClass().getSimpleName());
         builder.appendSection(R.string.mi_media);

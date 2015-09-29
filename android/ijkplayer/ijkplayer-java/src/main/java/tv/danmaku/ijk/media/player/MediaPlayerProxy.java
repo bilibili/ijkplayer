@@ -36,6 +36,10 @@ public class MediaPlayerProxy implements IMediaPlayer {
         mBackEndMediaPlayer = backEndMediaPlayer;
     }
 
+    public IMediaPlayer getInternalMediaPlayer() {
+        return mBackEndMediaPlayer;
+    }
+
     @Override
     public void setDisplay(SurfaceHolder sh) {
         mBackEndMediaPlayer.setDisplay(sh);
