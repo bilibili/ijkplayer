@@ -580,6 +580,9 @@ typedef struct FFPlayer {
 
     SDL_SpeedSampler vfps_sampler;
     SDL_SpeedSampler vdps_sampler;
+
+    float vfps;
+    float vdps;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -684,6 +687,9 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     SDL_SpeedSamplerReset(&ffp->vfps_sampler);
     SDL_SpeedSamplerReset(&ffp->vdps_sampler);
+
+    ffp->vfps                           = 0.0f;
+    ffp->vdps                           = 0.0f;
 
     msg_queue_flush(&ffp->msg_queue);
 }

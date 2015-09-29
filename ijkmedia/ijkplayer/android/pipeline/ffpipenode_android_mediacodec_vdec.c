@@ -699,6 +699,7 @@ static void sort_amc_buf_out(AMC_Buf_Out *buf_out, int size) {
 static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count)
 {
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
+    FFPlayer              *ffp      = opaque->ffp;
     int                    ret      = 0;
     SDL_AMediaCodecBufferInfo bufferInfo;
     ssize_t                   output_buffer_index = 0;
@@ -794,7 +795,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
             }
         }
     } else if (output_buffer_index >= 0) {
-        SDL_SpeedSamplerAdd(&opaque->sampler, FFP_SHOW_VDPS_MEDIACODEC, "vdps[MediaCodec]");
+        ffp->vdps = SDL_SpeedSamplerAdd(&opaque->sampler, FFP_SHOW_VDPS_MEDIACODEC, "vdps[MediaCodec]");
 
         if (dequeue_count)
             ++*dequeue_count;
