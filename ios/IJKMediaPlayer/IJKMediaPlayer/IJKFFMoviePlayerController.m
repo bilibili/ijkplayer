@@ -717,7 +717,10 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
                 _videoWidth = avmsg->arg1;
             if (avmsg->arg2 > 0)
                 _videoHeight = avmsg->arg2;
-            // TODO: notify size changed
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMoviePlayerVideoSizeChangeNotification
+             object:self
+             userInfo:@{@"width":@(_videoWidth), @"height":@(_videoHeight)}];
             break;
         case FFP_MSG_SAR_CHANGED:
             NSLog(@"FFP_MSG_SAR_CHANGED: %d, %d\n", avmsg->arg1, avmsg->arg2);
