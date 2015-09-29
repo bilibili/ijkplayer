@@ -414,21 +414,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             goto failed;
         }
 
-#ifdef FFP_SHOW_VTB_VDPS
-        {
-            if (ctx->benchmark_start_time == 0) {
-                ctx->benchmark_start_time   = SDL_GetTickHR();
-            }
-            ctx->benchmark_frame_count += 1;
-            if (0 == (ctx->benchmark_frame_count % 240)) {
-                Uint64 diff = SDL_GetTickHR() - ctx->benchmark_start_time;
-                double per_frame_ms = ((double) diff) / ctx->benchmark_frame_count;
-                double fps          = ((double) ctx->benchmark_frame_count) * 1000 / diff;
-                ALOGD("%lf fps, %lf ms/frame, %"PRIu64" frames\n",
-                      fps, per_frame_ms, ctx->benchmark_frame_count);
-            }
-        }
-#endif
+        SDL_SpeedSamplerAdd(&ctx->sampler, FFP_SHOW_VDPS_VIDEOTOOLBOX, "vdps[VideoToolbox]");
 #ifdef FFP_VTB_DISABLE_OUTPUT
         goto failed;
 #endif
@@ -1058,6 +1044,8 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
     context_vtb->sample_info_mutex = SDL_CreateMutex();
     context_vtb->sample_info_cond  = SDL_CreateCond();
+
+    SDL_SpeedSamplerReset(&context_vtb->sampler);
     return context_vtb;
 
 failed:

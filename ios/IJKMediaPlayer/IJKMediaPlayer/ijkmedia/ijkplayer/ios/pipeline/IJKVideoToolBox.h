@@ -93,8 +93,7 @@ typedef struct VideoToolBoxContext {
     volatile int                sample_info_id_generator;
     volatile int                sample_infos_in_decoding;
 
-    Uint64                      benchmark_start_time;
-    Uint64                      benchmark_frame_count;
+    SDL_SpeedSampler            sampler;
 } VideoToolBoxContext ;
 
 

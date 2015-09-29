@@ -58,10 +58,12 @@ typedef struct SDL_SpeedSampler
     int     count;
     int     first_index;
     int     next_index;
+
+    Uint64  last_log_time;
 } SDL_SpeedSampler;
 
-void    SDL_SampleReset(SDL_SpeedSampler *sampler);
+void  SDL_SpeedSamplerReset(SDL_SpeedSampler *sampler);
 // return samples per seconds
-int64_t SDL_SampleAdd(SDL_SpeedSampler *sampler);
+float SDL_SpeedSamplerAdd(SDL_SpeedSampler *sampler, int enable_log, const char *log_tag);
 
 #endif

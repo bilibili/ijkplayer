@@ -497,22 +497,9 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
 
         switch (d->avctx->codec_type) {
             case AVMEDIA_TYPE_VIDEO: {
-#ifdef FFP_SHOW_VDPS
-                SDL_ProfilerBegin(&d->decode_profiler);
-#endif
                 ret = avcodec_decode_video2(d->avctx, frame, &got_frame, &d->pkt_temp);
-#ifdef FFP_SHOW_VDPS
-                int64_t delta = SDL_ProfilerEnd(&d->decode_profiler);
-                if (delta >= 30) {
-                    av_log(ffp, AV_LOG_DEBUG,
-                           "vdps[%d]: %"PRId64" ms/frame, vdps=%f, +%"PRId64"\n",
-                           d->decode_profiler.total_counter,
-                           d->decode_profiler.average_elapsed,
-                           d->decode_profiler.sample_per_seconds,
-                           delta);
-                }
-#endif
                 if (got_frame) {
+                    SDL_SpeedSamplerAdd(&ffp->vdps_sampler, FFP_SHOW_VDPS_AVCODEC, "vdps[avcodec]");
                     if (ffp->decoder_reorder_pts == -1) {
                         frame->pts = av_frame_get_best_effort_timestamp(frame);
                     } else if (ffp->decoder_reorder_pts) {
@@ -745,10 +732,6 @@ static void free_picture(Frame *vp)
 // FFP_MERGE: calculate_display_rect
 // FFP_MERGE: video_image_display
 
-#ifdef FFP_SHOW_FPS
-static int g_fps_counter = 0;
-static int64_t g_fps_total_time = 0;
-#endif
 static void video_image_display2(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
@@ -756,31 +739,12 @@ static void video_image_display2(FFPlayer *ffp)
 
     vp = frame_queue_peek(&is->pictq);
     if (vp->bmp) {
-#ifdef FFP_SHOW_FPS
-        int64_t start = SDL_GetTickHR();
-#endif
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
+        SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
         if (!ffp->first_video_frame_rendered) {
             ffp->first_video_frame_rendered = 1;
             ffp_notify_msg1(ffp, FFP_MSG_VIDEO_RENDERING_START);
         }
-#ifdef FFP_SHOW_FPS
-        int64_t dur = SDL_GetTickHR() - start;
-        g_fps_total_time += dur;
-        g_fps_counter++;
-        int64_t avg_frame_time = 0;
-        if (g_fps_counter > 0)
-            avg_frame_time = g_fps_total_time / g_fps_counter;
-        double fps = 0;
-        if (avg_frame_time > 0)
-            fps = 1.0f / avg_frame_time * 1000;
-        av_log(ffp, AV_LOG_DEBUG, "fps:  [%f][%d] %"PRId64" ms/frame, fps=%f, +%"PRId64"\n",
-            vp->pts, g_fps_counter, (int64_t)avg_frame_time, fps, dur);
-        if (g_fps_total_time >= FFP_XPS_PERIOD) {
-            g_fps_total_time -= avg_frame_time;
-            g_fps_counter--;
-        }
-#endif
     }
 }
 

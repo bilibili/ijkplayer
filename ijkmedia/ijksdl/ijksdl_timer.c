@@ -30,6 +30,8 @@
 #if defined(__APPLE__)
 #include <mach/mach_time.h>
 
+#include "ijksdl_log.h"
+
 static int g_is_mach_base_info_inited = 0;
 static kern_return_t g_mach_base_info_ret = 0;
 static mach_timebase_info_data_t g_mach_base_info;
@@ -122,17 +124,19 @@ int64_t SDL_ProfilerEnd(SDL_Profiler* profiler)
     return delta;
 }
 
-void SDL_SampleReset(SDL_SpeedSampler *sampler)
+void SDL_SpeedSamplerReset(SDL_SpeedSampler *sampler)
 {
     memset(sampler, 0, sizeof(SDL_SpeedSampler));
     sampler->capacity = sizeof(sampler->samples) / sizeof(Uint64);
 }
 
-int64_t SDL_SampleAdd(SDL_SpeedSampler *sampler)
+float SDL_SpeedSamplerAdd(SDL_SpeedSampler *sampler, int enable_log, const char *log_tag)
 {
     Uint64 current = SDL_GetTickHR();
-    sampler->samples[sampler->next_index++] = current;
-    if (sampler->count >= sampler->capacity) {
+    sampler->samples[sampler->next_index] = current;
+    sampler->next_index++;
+    sampler->next_index %= sampler->capacity;
+    if (sampler->count + 1 >= sampler->capacity) {
         sampler->first_index++;
         sampler->first_index %= sampler->capacity;
     } else {
@@ -142,6 +146,12 @@ int64_t SDL_SampleAdd(SDL_SpeedSampler *sampler)
     if (sampler->count < 2)
         return 0;
 
-    int samples_per_second = (int)((current - sampler->samples[sampler->first_index] + 500) / (1000));
+    float samples_per_second = 1000.0f * (sampler->count - 1) / (current - sampler->samples[sampler->first_index]);
+
+    if (enable_log && (sampler->last_log_time + 1000 < current || sampler->last_log_time > current)) {
+        sampler->last_log_time = current;
+        ALOGW("%s: %.2f\n", log_tag ? log_tag : "N/A", samples_per_second);
+    }
+
     return samples_per_second;
 }
