@@ -645,6 +645,17 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private native int _getLoopCount();
 
+    public float getVideoOutputFramesPerSecond() {
+        return _getVideoOutputFramesPerSecond();
+    }
+
+    public float getVideoDecodeFramesPerSecond() {
+        return _getVideoDecodeFramesPerSecond();
+    }
+
+    private native float _getVideoOutputFramesPerSecond();
+    private native float _getVideoDecodeFramesPerSecond();
+
     public native void setVolume(float leftVolume, float rightVolume);
 
     @Override

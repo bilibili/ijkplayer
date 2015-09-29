@@ -25,7 +25,7 @@
 
 #define FFP_XPS_PERIOD (3)
 
-#define FFP_SHOW_VPS_DPS            (0
+#define FFP_SHOW_VPS_DPS            (0)
 #define FFP_SHOW_VFPS_FFPLAY        (FFP_SHOW_VPS_DPS)
 #define FFP_SHOW_VDPS_AVCODEC       (FFP_SHOW_VPS_DPS)
 #define FFP_SHOW_VDPS_VIDEOTOOLBOX  (FFP_SHOW_VPS_DPS)

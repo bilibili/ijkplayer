@@ -3850,6 +3850,20 @@ int ffp_get_video_rotate_degrees(FFPlayer *ffp)
     return theta;
 }
 
+float ffp_get_video_output_frames_per_second(FFPlayer *ffp)
+{
+    if (!ffp)
+        return 0.0f;
+    return ffp->vfps;
+}
+
+float ffp_get_video_decode_frames_per_second(FFPlayer *ffp)
+{
+    if (!ffp)
+        return 0.0f;
+    return ffp->vdps;
+}
+
 IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 {
     if (!ffp)

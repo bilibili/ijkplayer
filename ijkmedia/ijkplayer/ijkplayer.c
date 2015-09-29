@@ -198,6 +198,30 @@ int ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info)
     return ret;
 }
 
+float ijkmp_get_video_output_frames_per_second(IjkMediaPlayer *mp)
+{
+    assert(mp);
+
+    MPTRACE("%s\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    float ret = ffp_get_video_output_frames_per_second(mp->ffplayer);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+    return ret;
+}
+
+float ijkmp_get_video_decode_frames_per_second(IjkMediaPlayer *mp)
+{
+    assert(mp);
+
+    MPTRACE("%s\n", __func__);
+    pthread_mutex_lock(&mp->mutex);
+    float ret = ffp_get_video_decode_frames_per_second(mp->ffplayer);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+    return ret;
+}
+
 IjkMediaMeta *ijkmp_get_meta_l(IjkMediaPlayer *mp)
 {
     assert(mp);

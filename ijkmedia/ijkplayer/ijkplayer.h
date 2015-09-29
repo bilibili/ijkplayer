@@ -171,6 +171,9 @@ void            ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const
 int             ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info);
 int             ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info);
 
+float           ijkmp_get_video_output_frames_per_second(IjkMediaPlayer *mp);
+float           ijkmp_get_video_decode_frames_per_second(IjkMediaPlayer *mp);
+
 // must be freed with free();
 IjkMediaMeta   *ijkmp_get_meta_l(IjkMediaPlayer *mp);
 

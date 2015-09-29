@@ -96,6 +96,8 @@ void      ffp_set_video_codec_info(FFPlayer *ffp, const char *module, const char
 void      ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *codec);
 
 int       ffp_get_video_rotate_degrees(FFPlayer *ffp);
+float     ffp_get_video_output_frames_per_second(FFPlayer *ffp);
+float     ffp_get_video_decode_frames_per_second(FFPlayer *ffp);
 
 // must be freed with free();
 struct IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp);
