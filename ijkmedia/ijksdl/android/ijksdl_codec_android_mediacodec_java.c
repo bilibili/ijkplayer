@@ -367,7 +367,7 @@ static uint8_t* SDL_AMediaCodecJava_getInputBuffer(SDL_AMediaCodec* acodec, size
     assert(opaque->input_buffer_array);
     int buffer_count = (*env)->GetArrayLength(env, opaque->input_buffer_array);
     if (SDL_JNI_CatchException(env) || idx < 0 || idx >= buffer_count) {
-        ALOGE("%s: idx(%d) < count(%d)\n", __func__, idx, buffer_count);
+        ALOGE("%s: idx(%d) < count(%d)\n", __func__, (int)idx, (int)buffer_count);
         return NULL;
     }
 
