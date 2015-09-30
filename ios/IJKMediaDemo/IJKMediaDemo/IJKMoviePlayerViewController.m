@@ -72,7 +72,9 @@
     [IJKFFMoviePlayerController checkIfFFmpegVersionMatch:YES];
     // [IJKFFMoviePlayerController checkIfPlayerVersionMatch:YES major:1 minor:0 micro:0];
 
-    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:nil];
+    IJKFFOptions *options = [IJKFFOptions optionsByDefault];
+
+    self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
     self.player.scalingMode = MPMovieScalingModeAspectFit;
