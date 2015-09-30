@@ -511,6 +511,7 @@ typedef struct FFPlayer {
     const char **vfilters_list;
     int nb_vfilters;
     char *afilters;
+    char *vfilter0;
 #endif
     int autorotate;
 
@@ -627,6 +628,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     av_freep(&ffp->vfilters_list);
     ffp->nb_vfilters            = 0;
     ffp->afilters               = NULL;
+    ffp->vfilter0               = NULL;
 #endif
     ffp->autorotate             = 1;
 

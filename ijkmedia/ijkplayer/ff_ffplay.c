@@ -138,9 +138,10 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(framedrop),       OPTION_INT(0, -1, 120) },
     // FFP_MERGE: window_title
 #if CONFIG_AVFILTER
-    // FFP_MERGE: vf
     { "af",                             "audio filters",
         OPTION_OFFSET(afilters),        OPTION_STR(NULL) },
+    { "vf0",                            "video filters 0",
+        OPTION_OFFSET(vfilter0),        OPTION_STR(NULL) },
 #endif
     { "rdftspeed",                      "rdft speed, in msecs",
         OPTION_OFFSET(rdftspeed),       OPTION_INT(0, 0, INT_MAX) },
@@ -3402,6 +3403,11 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
         ffp->aout = ffpipeline_open_audio_output(ffp->pipeline, ffp);
         if (!ffp->aout)
             return -1;
+    }
+
+    if (ffp->vfilter0) {
+        GROW_ARRAY(ffp->vfilters_list, ffp->nb_vfilters);
+        ffp->vfilters_list[ffp->nb_vfilters - 1] = ffp->vfilter0;
     }
 
     VideoState *is = stream_open(ffp, file_name, NULL);
