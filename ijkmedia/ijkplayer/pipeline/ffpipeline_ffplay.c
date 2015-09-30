@@ -22,7 +22,6 @@
 
 #include "ffpipeline_ffplay.h"
 #include "ffpipenode_ffplay_vdec.h"
-#include "ffpipenode_ffplay_vout.h"
 #include "../ff_ffplay.h"
 
 static SDL_Class g_pipeline_class = {
@@ -43,11 +42,6 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
     return ffpipenode_create_video_decoder_from_ffplay(ffp);
 }
 
-static IJKFF_Pipenode *func_open_video_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
-{
-    return ffpipenode_create_video_output_from_ffplay(ffp);
-}
-
 static SDL_Aout *func_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
 {
     return NULL;
@@ -64,7 +58,6 @@ IJKFF_Pipeline *ffpipeline_create_from_ffplay(FFPlayer *ffp)
 
     pipeline->func_destroy            = func_destroy;
     pipeline->func_open_video_decoder = func_open_video_decoder;
-    pipeline->func_open_video_output  = func_open_video_output;
     pipeline->func_open_audio_output  = func_open_audio_output;
 
     return pipeline;

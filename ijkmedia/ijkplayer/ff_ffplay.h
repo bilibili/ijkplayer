@@ -90,7 +90,6 @@ void      ffp_toggle_buffering(FFPlayer *ffp, int start_buffering);
 void      ffp_check_buffering_l(FFPlayer *ffp);
 
 int       ffp_video_thread(FFPlayer *ffp);
-int       ffp_video_refresh_thread(FFPlayer *ffp);
 
 void      ffp_set_video_codec_info(FFPlayer *ffp, const char *module, const char *codec);
 void      ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *codec);

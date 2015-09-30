@@ -23,7 +23,6 @@
 #include "ffpipeline_android.h"
 #include <jni.h>
 #include "ffpipenode_android_mediacodec_vdec.h"
-#include "ffpipenode_android_mediacodec_vout.h"
 #include "../../pipeline/ffpipenode_ffplay_vdec.h"
 #include "../../ff_ffplay.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
@@ -76,11 +75,6 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
     return node;
 }
 
-static IJKFF_Pipenode *func_open_video_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
-{
-    return ffpipenode_create_video_output_from_android_mediacodec(ffp);
-}
-
 static SDL_Aout *func_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
 {
     if (ffp->opensles) {
@@ -123,7 +117,6 @@ IJKFF_Pipeline *ffpipeline_create_from_android(FFPlayer *ffp)
 
     pipeline->func_destroy            = func_destroy;
     pipeline->func_open_video_decoder = func_open_video_decoder;
-    pipeline->func_open_video_output  = func_open_video_output;
     pipeline->func_open_audio_output  = func_open_audio_output;
 
     return pipeline;

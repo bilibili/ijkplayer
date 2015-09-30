@@ -37,7 +37,6 @@ struct IJKFF_Pipeline {
 
     void            (*func_destroy)             (IJKFF_Pipeline *pipeline);
     IJKFF_Pipenode *(*func_open_video_decoder)  (IJKFF_Pipeline *pipeline, FFPlayer *ffp);
-    IJKFF_Pipenode *(*func_open_video_output)   (IJKFF_Pipeline *pipeline, FFPlayer *ffp);
     SDL_Aout       *(*func_open_audio_output)   (IJKFF_Pipeline *pipeline, FFPlayer *ffp);
 };
 
@@ -46,8 +45,6 @@ void ffpipeline_free(IJKFF_Pipeline *pipeline);
 void ffpipeline_free_p(IJKFF_Pipeline **pipeline);
 
 IJKFF_Pipenode *ffpipeline_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlayer *ffp);
-IJKFF_Pipenode *ffpipeline_open_video_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp);
-
 SDL_Aout       *ffpipeline_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp);
 
 #endif

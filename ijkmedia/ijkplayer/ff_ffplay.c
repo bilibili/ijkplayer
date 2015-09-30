@@ -3004,7 +3004,7 @@ fail:
 // FFP_MERGE: options
 // FFP_MERGE: show_usage
 // FFP_MERGE: show_help_default
-static int ffplay_video_refresh_thread(void *arg)
+static int video_refresh_thread(void *arg)
 {
     FFPlayer *ffp = arg;
     VideoState *is = ffp->is;
@@ -3018,15 +3018,6 @@ static int ffplay_video_refresh_thread(void *arg)
     }
 
     return 0;
-}
-static int video_refresh_thread(void *arg)
-{
-    FFPlayer *ffp = (FFPlayer *)arg;
-
-    IJKFF_Pipenode *node = ffpipeline_open_video_output(ffp->pipeline, ffp);
-    int ret = ffpipenode_run_sync(node);
-    ffpipenode_free_p(&node);
-    return ret;
 }
 
 static int lockmgr(void **mtx, enum AVLockOp op)
@@ -3804,11 +3795,6 @@ void ffp_check_buffering_l(FFPlayer *ffp)
 int ffp_video_thread(FFPlayer *ffp)
 {
     return ffplay_video_thread(ffp);
-}
-
-int ffp_video_refresh_thread(FFPlayer *ffp)
-{
-    return ffplay_video_refresh_thread(ffp);
 }
 
 void ffp_set_video_codec_info(FFPlayer *ffp, const char *module, const char *codec)
