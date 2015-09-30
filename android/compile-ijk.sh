@@ -27,6 +27,15 @@ ACT_ABI_32="armv5 armv7a x86"
 ACT_ABI_64="armv5 armv7a x86 arm64"
 ACT_ABI_ALL=$ALL_ABI_64
 
+FF_MAKEFLAGS=
+if which nproc >/dev/null
+then
+    FF_MAKEFLAGS=-j`nproc`
+elif [ "$UNAMES" = "Darwin" ] && which sysctl >/dev/null
+then
+    FF_MAKEFLAGS=-j`sysctl -n machdep.cpu.thread_count`
+fi
+
 do_sub_cmd () {
     SUB_CMD=$1
     if [ -L "./android-ndk-prof" ]; then
@@ -43,17 +52,17 @@ do_sub_cmd () {
 
     case $SUB_CMD in
         prof)
-            $ANDROID_NDK/ndk-build
+            $ANDROID_NDK/ndk-build $FF_MAKEFLAGS
         ;;
         clean)
             $ANDROID_NDK/ndk-build clean
         ;;
         rebuild)
             $ANDROID_NDK/ndk-build clean
-            $ANDROID_NDK/ndk-build
+            $ANDROID_NDK/ndk-build $FF_MAKEFLAGS
         ;;
         *)
-            $ANDROID_NDK/ndk-build
+            $ANDROID_NDK/ndk-build $FF_MAKEFLAGS
         ;;
     esac
 }
