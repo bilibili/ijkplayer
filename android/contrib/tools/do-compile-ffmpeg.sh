@@ -124,7 +124,7 @@ if [ "$FF_ARCH" = "armv7a" ]; then
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS -march=armv7-a -mcpu=cortex-a8 -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb"
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS -Wl,--fix-cortex-a8"
 
-    FF_ASM_OBJ_DIR="libavutil/arm/*.o libavcodec/arm/*.o libswresample/arm/*.o"
+    FF_ASM_OBJ_DIR="libavcodec/arm/*.o libavutil/arm/*.o libswresample/arm/*.o"
 
 elif [ "$FF_ARCH" = "armv5" ]; then
     FF_BUILD_NAME=ffmpeg-armv5
@@ -139,7 +139,7 @@ elif [ "$FF_ARCH" = "armv5" ]; then
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS -march=armv5te -mtune=arm9tdmi -msoft-float"
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
 
-    FF_ASM_OBJ_DIR="libavutil/arm/*.o libavcodec/arm/*.o libswresample/arm/*.o"
+    FF_ASM_OBJ_DIR="libavcodec/arm/*.o libavutil/arm/*.o libswresample/arm/*.o"
 
 elif [ "$FF_ARCH" = "x86" ]; then
     FF_BUILD_NAME=ffmpeg-x86
@@ -154,7 +154,7 @@ elif [ "$FF_ARCH" = "x86" ]; then
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS -march=atom -msse3 -ffast-math -mfpmath=sse"
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
 
-    FF_ASM_OBJ_DIR="libavutil/x86/*.o libavcodec/x86/*.o libswresample/x86/*.o libswscale/x86/*.o"
+    FF_ASM_OBJ_DIR="libavcodec/x86/*.o libavfilter/x86/*.o libavutil/x86/*.o libswresample/x86/*.o libswscale/x86/*.o"
 
 elif [ "$FF_ARCH" = "arm64" ]; then
     FF_ANDROID_PLATFORM=android-21
@@ -171,7 +171,7 @@ elif [ "$FF_ARCH" = "arm64" ]; then
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS"
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
 
-    FF_ASM_OBJ_DIR="libavutil/aarch64/*.o libavcodec/aarch64/*.o libswresample/aarch64/*.o libavcodec/neon/*.o"
+    FF_ASM_OBJ_DIR="libavcodec/aarch64/*.o libavutil/aarch64/*.o libswresample/aarch64/*.o libavcodec/neon/*.o"
 
 else
     echo "unknown architecture $FF_ARCH";
@@ -311,9 +311,10 @@ echo $FF_EXTRA_LDFLAGS
 $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack $FF_EXTRA_LDFLAGS \
     -Wl,-soname,libijkffmpeg.so \
     compat/*.o \
-    libavutil/*.o \
     libavcodec/*.o \
+    libavfilter/*.o \
     libavformat/*.o \
+    libavutil/*.o \
     libswresample/*.o \
     libswscale/*.o \
     $FF_ASM_OBJ_DIR \
@@ -348,6 +349,7 @@ for f in $FF_PREFIX/lib/pkgconfig/*.pc; do
     # OSX sed doesn't have in-place(-i)
     mysedi $f 's/\/output/\/output\/shared/g'
     mysedi $f 's/-lavcodec/-lijkffmpeg/g'
+    mysedi $f 's/-lavfilter/-lijkffmpeg/g'
     mysedi $f 's/-lavformat/-lijkffmpeg/g'
     mysedi $f 's/-lavutil/-lijkffmpeg/g'
     mysedi $f 's/-lswresample/-lijkffmpeg/g'
