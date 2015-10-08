@@ -1670,10 +1670,15 @@ static int audio_thread(void *arg)
     return ret;
 }
 
-static void decoder_start(Decoder *d, int (*fn)(void *), void *arg, const char *name)
+static int decoder_start(Decoder *d, int (*fn)(void *), void *arg, const char *name)
 {
     packet_queue_start(d->queue);
     d->decoder_tid = SDL_CreateThreadEx(&d->_decoder_tid, fn, arg, name);
+    if (!d->decoder_tid) {
+        av_log(d, AV_LOG_ERROR, "SDL_CreateThread(): %s\n", SDL_GetError());
+        return AVERROR(ENOMEM);
+    }
+    return 0;
 }
 
 static int ffplay_video_thread(void *arg)
@@ -2265,7 +2270,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
             is->auddec.start_pts = is->audio_st->start_time;
             is->auddec.start_pts_tb = is->audio_st->time_base;
         }
-        decoder_start(&is->auddec, audio_thread, ffp, "ff_audio_dec");
+        if ((ret = decoder_start(&is->auddec, audio_thread, ffp, "ff_audio_dec")) < 0)
+            goto fail;
         SDL_AoutPauseAudio(ffp->aout, 0);
         break;
     case AVMEDIA_TYPE_VIDEO:
@@ -2281,7 +2287,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         ffp->node_vdec = ffpipeline_open_video_decoder(ffp->pipeline, ffp);
         if (!ffp->node_vdec)
             goto fail;
-        decoder_start(&is->viddec, video_thread, ffp, "ff_video_dec");
+        if ((ret = decoder_start(&is->viddec, video_thread, ffp, "ff_video_dec")) < 0)
+            goto fail;
         is->queue_attachments_req = 1;
 
         if(is->video_st->avg_frame_rate.den && is->video_st->avg_frame_rate.num) {
