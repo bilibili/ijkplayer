@@ -69,7 +69,7 @@ void      ffp_set_loop(FFPlayer *ffp, int loop);
 int       ffp_get_loop(FFPlayer *ffp);
 
 /* for internal usage */
-void      ffp_packet_queue_init(PacketQueue *q);
+int       ffp_packet_queue_init(PacketQueue *q);
 void      ffp_packet_queue_destroy(PacketQueue *q);
 void      ffp_packet_queue_abort(PacketQueue *q);
 void      ffp_packet_queue_start(PacketQueue *q);

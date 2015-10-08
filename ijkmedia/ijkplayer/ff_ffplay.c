@@ -314,12 +314,21 @@ static int packet_queue_put_nullpacket(PacketQueue *q, int stream_index)
 }
 
 /* packet queue handling */
-static void packet_queue_init(PacketQueue *q)
+static int packet_queue_init(PacketQueue *q)
 {
     memset(q, 0, sizeof(PacketQueue));
     q->mutex = SDL_CreateMutex();
+    if (!q->mutex) {
+        av_log(q, AV_LOG_FATAL, "SDL_CreateMutex(): %s\n", SDL_GetError());
+        return AVERROR(ENOMEM);
+    }
     q->cond = SDL_CreateCond();
+    if (!q->cond) {
+        av_log(q, AV_LOG_FATAL, "SDL_CreateCond(): %s\n", SDL_GetError());
+        return AVERROR(ENOMEM);
+    }
     q->abort_request = 1;
+    return 0;
 }
 
 static void packet_queue_flush(PacketQueue *q)
@@ -2947,11 +2956,14 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     if (frame_queue_init(&is->sampq, &is->audioq, SAMPLE_QUEUE_SIZE, 1) < 0)
         goto fail;
 
-    packet_queue_init(&is->videoq);
-    packet_queue_init(&is->audioq);
+    if (packet_queue_init(&is->videoq) < 0 ||
+        packet_queue_init(&is->audioq) < 0 ||
 #ifdef FFP_MERGE
-    packet_queue_init(&is->subtitleq);
+        packet_queue_init(&is->subtitleq) < 0)
+#else
+        0)
 #endif
+        goto fail;
 
     is->continue_read_thread = SDL_CreateCond();
 
@@ -3581,7 +3593,7 @@ int ffp_get_loop(FFPlayer *ffp)
     return ffp->loop;
 }
 
-void ffp_packet_queue_init(PacketQueue *q)
+int ffp_packet_queue_init(PacketQueue *q)
 {
     return packet_queue_init(q);
 }
