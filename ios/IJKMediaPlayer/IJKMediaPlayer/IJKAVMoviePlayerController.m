@@ -76,7 +76,10 @@
 #include "ijksdl/ios/ijksdl_ios.h"
 
 // avoid float equal compare
-static const float kMinPlayingRate          = 0.00001f;
+inline static bool isFloatZero(float value)
+{
+    return fabsf(value) <= 0.00001f;
+}
 
 // resume play after stall
 static const float kMaxHighWaterMarkMilli   = 15 * 1000;
@@ -139,6 +142,8 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     BOOL _playingBeforeInterruption;
     
     NSMutableArray *_registeredNotifications;
+
+    float _playbackRate;
 }
 
 @synthesize view                        = _view;
@@ -185,6 +190,8 @@ static IJKAVMoviePlayerController* instance;
         _playbackLikelyToKeeyUp = NO;
         _playbackBufferEmpty    = YES;
         _playbackBufferFull     = NO;
+
+        _playbackRate           = 1.0f;
 
         // init extra
         [self setScreenOn:YES];
@@ -274,7 +281,7 @@ static IJKAVMoviePlayerController* instance;
 
 - (BOOL)isPlaying
 {
-    if (_player.rate >= kMinPlayingRate) {
+    if (!isFloatZero(_player.rate)) {
         return YES;
     } else {
         if (_isPrerolling) {
@@ -405,7 +412,7 @@ static IJKAVMoviePlayerController* instance;
     if (playerItem == nil)
         return MPMovieLoadStateUnknown;
     
-    if (_player != nil && _player.rate > kMinPlayingRate) {
+    if (_player != nil && !isFloatZero(_player.rate)) {
         // NSLog(@"loadState: playing");
         return MPMovieLoadStatePlayable | MPMovieLoadStatePlaythroughOK;
     } else if ([playerItem isPlaybackBufferFull]) {
@@ -423,7 +430,18 @@ static IJKAVMoviePlayerController* instance;
     }
 }
 
+-(void)setPlaybackRate:(float)playbackRate
+{
+    _playbackRate = playbackRate;
+    if (_player != nil && !isFloatZero(_player.rate)) {
+        _player.rate = _playbackRate;
+    }
+}
 
+-(float)playbackRate
+{
+    return _playbackRate;
+}
 
 
 - (void)didPrepareToPlayAsset:(AVURLAsset *)asset withKeys:(NSArray *)requestedKeys
@@ -603,7 +621,7 @@ static IJKAVMoviePlayerController* instance;
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (self.bufferingProgress > 100) {
                     if ([self isPlaying]) {
-                        _player.rate = 1.0f;
+                        _player.rate = _playbackRate;
                     }
                 }
             });
@@ -791,7 +809,7 @@ static IJKAVMoviePlayerController* instance;
     }
     else if (context == KVO_AVPlayer_rate)
     {
-        if (_player != nil && _player.rate >= kMinPlayingRate)
+        if (_player != nil && !isFloatZero(_player.rate))
             _isPrerolling = NO;
         /* AVPlayer "rate" property value observer. */
         [self didPlaybackStateChange];

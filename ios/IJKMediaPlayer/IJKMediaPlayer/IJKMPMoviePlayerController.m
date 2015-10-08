@@ -148,6 +148,16 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:nil userInfo:nil];
 }
 
+-(void)setPlaybackRate:(float)playbackRate
+{
+    NSLog(@"[MPMoviePlayerController setPlaybackRate] is not supported\n");
+}
+
+-(float)playbackRate
+{
+    return 1.0f;
+}
+
 #pragma mark Movie Notification Handlers
 
 /* Register observers for the various movie object notifications. */

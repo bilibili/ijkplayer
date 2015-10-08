@@ -93,6 +93,8 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff2.8--ijk0.4.1.1--dev0.3.3--r
 
 @synthesize isDanmakuMediaAirPlay = _isDanmakuMediaAirPlay;
 
+@synthesize playbackRate;
+
 #define FFP_IO_STAT_STEP (50 * 1024)
 
 // as an example

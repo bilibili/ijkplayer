@@ -61,6 +61,8 @@
 @property (nonatomic) BOOL isDanmakuMediaAirPlay;
 @property (nonatomic, readonly) BOOL airPlayMediaActive;
 
+@property (nonatomic) float playbackRate;
+
 - (UIImage *)thumbnailImageAtCurrentTime;
 
 #pragma mark Notifications
