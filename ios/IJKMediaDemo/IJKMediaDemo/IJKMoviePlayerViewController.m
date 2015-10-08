@@ -73,7 +73,6 @@
     // [IJKFFMoviePlayerController checkIfPlayerVersionMatch:YES major:1 minor:0 micro:0];
 
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
-    [options setPlayerOptionValue:@"tempo=0.5" forKey:@"af"];
 
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
