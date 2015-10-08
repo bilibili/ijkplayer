@@ -719,6 +719,9 @@ static IJKAVMoviePlayerController* instance;
                 [[NSNotificationCenter defaultCenter]
                  postNotificationName:IJKMediaPlaybackIsPreparedToPlayDidChangeNotification
                  object:self];
+
+                if (_shouldAutoplay)
+                    [_player play];
             }
                 break;
                 
