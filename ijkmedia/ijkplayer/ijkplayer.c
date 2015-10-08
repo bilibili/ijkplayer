@@ -198,6 +198,17 @@ int ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info)
     return ret;
 }
 
+void ijkmp_set_playback_rate(IjkMediaPlayer *mp, float rate)
+{
+    assert(mp);
+
+    MPTRACE("%s(%f)\n", __func__, rate);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_playback_rate(mp->ffplayer, rate);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+}
+
 float ijkmp_get_property_float(IjkMediaPlayer *mp, int id, float default_value)
 {
     assert(mp);

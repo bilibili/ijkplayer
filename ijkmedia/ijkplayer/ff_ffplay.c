@@ -1463,6 +1463,16 @@ static int configure_video_filters(FFPlayer *ffp, AVFilterGraph *graph, VideoSta
         }
     }
 
+    if (fabsf(ffp->pf_playback_rate) > 0.00001 &&
+        fabsf(ffp->pf_playback_rate - 1.0f) > 0.00001) {
+        char setpts_buf[256];
+        float rate = 1.0f / ffp->pf_playback_rate;
+        rate = av_clipf_c(rate, 0.5f, 2.0f);
+        av_log(ffp, AV_LOG_INFO, "vf_rate=%f(1/%f)\n", ffp->pf_playback_rate, rate);
+        snprintf(setpts_buf, sizeof(setpts_buf), "%f*PTS", rate);
+        INSERT_FILT("setpts", setpts_buf);
+    }
+
     if ((ret = configure_filtergraph(graph, vfilters, filt_src, last_filter)) < 0)
         goto fail;
 
@@ -1485,6 +1495,7 @@ static int configure_audio_filters(FFPlayer *ffp, const char *afilters, int forc
     AVDictionaryEntry *e = NULL;
     char asrc_args[256];
     int ret;
+    char afilters_args[4096];
 
     avfilter_graph_free(&is->agraph);
     if (!(is->agraph = avfilter_graph_alloc()))
@@ -1537,8 +1548,20 @@ static int configure_audio_filters(FFPlayer *ffp, const char *afilters, int forc
             goto end;
     }
 
+    afilters_args[0] = 0;
+    if (afilters)
+        snprintf(afilters_args, sizeof(afilters_args), "%s", afilters);
 
-    if ((ret = configure_filtergraph(is->agraph, afilters, filt_asrc, filt_asink)) < 0)
+    if (fabsf(ffp->pf_playback_rate) > 0.00001 &&
+        fabsf(ffp->pf_playback_rate - 1.0f) > 0.00001) {
+        if (afilters_args[0])
+            av_strlcatf(afilters_args, sizeof(afilters_args), ",");
+
+        av_log(ffp, AV_LOG_INFO, "af_rate=%f\n", ffp->pf_playback_rate);
+        av_strlcatf(afilters_args, sizeof(afilters_args), "atempo=%f", ffp->pf_playback_rate);
+    }
+
+    if ((ret = configure_filtergraph(is->agraph, afilters_args[0] ? afilters_args : NULL, filt_asrc, filt_asink)) < 0)
         goto end;
 
     is->in_audio_filter  = filt_asrc;
@@ -1585,9 +1608,12 @@ static int audio_thread(void *arg)
                                    frame->format, av_frame_get_channels(frame))    ||
                     is->audio_filter_src.channel_layout != dec_channel_layout ||
                     is->audio_filter_src.freq           != frame->sample_rate ||
-                    is->auddec.pkt_serial               != last_serial;
+                    is->auddec.pkt_serial               != last_serial        ||
+                    ffp->af_changed;
 
                 if (reconfigure) {
+                    SDL_LockMutex(ffp->af_mutex);
+                    ffp->af_changed = 0;
                     char buf1[1024], buf2[1024];
                     av_get_channel_layout_string(buf1, sizeof(buf1), -1, is->audio_filter_src.channel_layout);
                     av_get_channel_layout_string(buf2, sizeof(buf2), -1, dec_channel_layout);
@@ -1602,8 +1628,11 @@ static int audio_thread(void *arg)
                     is->audio_filter_src.freq           = frame->sample_rate;
                     last_serial                         = is->auddec.pkt_serial;
 
-                    if ((ret = configure_audio_filters(ffp, ffp->afilters, 1)) < 0)
+                    if ((ret = configure_audio_filters(ffp, ffp->afilters, 1)) < 0) {
+                        SDL_UnlockMutex(ffp->af_mutex);
                         goto the_end;
+                    }
+                    SDL_UnlockMutex(ffp->af_mutex);
                 }
 
             if ((ret = av_buffersrc_add_frame(is->in_audio_filter, frame)) < 0)
@@ -1697,7 +1726,10 @@ static int ffplay_video_thread(void *arg)
             || last_h != frame->height
             || last_format != frame->format
             || last_serial != is->viddec.pkt_serial
-            || last_vfilter_idx != is->vfilter_idx) {
+            || last_vfilter_idx != is->vfilter_idx
+            || ffp->vf_changed) {
+            SDL_LockMutex(ffp->vf_mutex);
+            ffp->vf_changed = 0;
             av_log(NULL, AV_LOG_DEBUG,
                    "Video frame changed from size:%dx%d format:%s serial:%d to size:%dx%d format:%s serial:%d\n",
                    last_w, last_h,
@@ -1708,6 +1740,7 @@ static int ffplay_video_thread(void *arg)
             graph = avfilter_graph_alloc();
             if ((ret = configure_video_filters(ffp, graph, is, ffp->vfilters_list ? ffp->vfilters_list[is->vfilter_idx] : NULL, frame)) < 0) {
                 // FIXME: post error
+                SDL_UnlockMutex(ffp->vf_mutex);
                 goto the_end;
             }
             filt_in  = is->in_video_filter;
@@ -1718,6 +1751,7 @@ static int ffplay_video_thread(void *arg)
             last_serial = is->viddec.pkt_serial;
             last_vfilter_idx = is->vfilter_idx;
             frame_rate = filt_out->inputs[0]->frame_rate;
+            SDL_UnlockMutex(ffp->vf_mutex);
         }
 
         ret = av_buffersrc_add_frame(filt_in, frame);
@@ -2203,8 +2237,13 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
             is->audio_filter_src.channels       = avctx->channels;
             is->audio_filter_src.channel_layout = get_valid_channel_layout(avctx->channel_layout, avctx->channels);
             is->audio_filter_src.fmt            = avctx->sample_fmt;
-            if ((ret = configure_audio_filters(ffp, ffp->afilters, 0)) < 0)
+            SDL_LockMutex(ffp->af_mutex);
+            if ((ret = configure_audio_filters(ffp, ffp->afilters, 0)) < 0) {
+                SDL_UnlockMutex(ffp->af_mutex);
                 goto fail;
+            }
+            ffp->af_changed = 0;
+            SDL_UnlockMutex(ffp->af_mutex);
             link = is->out_audio_filter->inputs[0];
             sample_rate    = link->sample_rate;
             nb_channels    = link->channels;
@@ -2422,6 +2461,7 @@ static int read_thread(void *arg)
         ffp->seek_by_bytes = !!(ic->iformat->flags & AVFMT_TS_DISCONT) && strcmp("ogg", ic->iformat->name);
 
     is->max_frame_duration = (ic->iformat->flags & AVFMT_TS_DISCONT) ? 10.0 : 3600.0;
+    is->max_frame_duration = 10.0;
     av_log(ffp, AV_LOG_INFO, "max_frame_duration: %.3f\n", is->max_frame_duration);
 
 #ifdef FFP_MERGE
@@ -3147,6 +3187,9 @@ FFPlayer *ffp_create()
         return NULL;
 
     msg_queue_init(&ffp->msg_queue);
+    ffp->af_mutex = SDL_CreateMutex();
+    ffp->vf_mutex = SDL_CreateMutex();
+
     ffp_reset_internal(ffp);
     ffp->av_class = &ffp_context_class;
     ffp->meta = ijkmeta_create();
@@ -3173,6 +3216,9 @@ void ffp_destroy(FFPlayer *ffp)
     ffpipeline_free_p(&ffp->pipeline);
     ijkmeta_destroy_p(&ffp->meta);
     ffp_reset_internal(ffp);
+
+    SDL_DestroyMutexP(&ffp->af_mutex);
+    SDL_DestroyMutexP(&ffp->vf_mutex);
 
     msg_queue_destroy(&ffp->msg_queue);
 
@@ -3757,6 +3803,20 @@ void ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *cod
     av_log(ffp, AV_LOG_INFO, "AudioCodec: %s\n", ffp->audio_codec_info);
 }
 
+void ffp_set_playback_rate(FFPlayer *ffp, float rate)
+{
+    if (!ffp)
+        return;
+
+    SDL_LockMutex(ffp->af_mutex);
+    SDL_LockMutex(ffp->vf_mutex);
+    ffp->pf_playback_rate = rate;
+    ffp->vf_changed = 1;
+    ffp->af_changed = 1;
+    SDL_UnlockMutex(ffp->vf_mutex);
+    SDL_UnlockMutex(ffp->af_mutex);
+}
+
 int ffp_get_video_rotate_degrees(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
@@ -3789,6 +3849,8 @@ float ffp_get_property_float(FFPlayer *ffp, int id, float default_value)
             return ffp ? ffp->vdps : default_value;
         case FFP_PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND:
             return ffp ? ffp->vfps : default_value;
+        case FFP_PROP_FLOAT_PLAYBACK_RATE:
+            return ffp ? ffp->pf_playback_rate : default_value;
         default:
             return default_value;
     }

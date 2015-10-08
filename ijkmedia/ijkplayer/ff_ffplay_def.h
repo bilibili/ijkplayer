@@ -584,6 +584,13 @@ typedef struct FFPlayer {
 
     float vfps;
     float vdps;
+
+    /* filters */
+    SDL_mutex  *vf_mutex;
+    SDL_mutex  *af_mutex;
+    int         vf_changed;
+    int         af_changed;
+    float       pf_playback_rate;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -692,6 +699,11 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->vfps                           = 0.0f;
     ffp->vdps                           = 0.0f;
+
+    /* filters */
+    ffp->vf_changed                     = 0;
+    ffp->af_changed                     = 0;
+    ffp->pf_playback_rate               = 1.0f;
 
     msg_queue_flush(&ffp->msg_queue);
 }

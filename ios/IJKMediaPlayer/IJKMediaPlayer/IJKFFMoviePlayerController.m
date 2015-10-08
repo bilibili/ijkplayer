@@ -93,8 +93,6 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff2.8--ijk0.4.1.1--dev0.3.3--r
 
 @synthesize isDanmakuMediaAirPlay = _isDanmakuMediaAirPlay;
 
-@synthesize playbackRate;
-
 #define FFP_IO_STAT_STEP (50 * 1024)
 
 // as an example
@@ -588,6 +586,22 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 - (CGFloat)fpsAtOutput
 {
     return _glView.fps;
+}
+
+- (void)setPlaybackRate:(float)playbackRate
+{
+    if (!_mediaPlayer)
+        return;
+
+    return ijkmp_set_playback_rate(_mediaPlayer, playbackRate);
+}
+
+- (float)playbackRate
+{
+    if (!_mediaPlayer)
+        return 0.0f;
+
+    return ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_PLAYBACK_RATE, 0.0f);
 }
 
 inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *rawMeta, const char *name, NSString *defaultValue)
