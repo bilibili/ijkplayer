@@ -51,13 +51,22 @@ typedef struct sample_info {
     volatile int is_decoding;
 } sample_info;
 
+typedef struct VTBPicture {
+    double              pts;
+    double              dts;
+    double              sort;
+    CVPixelBufferRef    cvBufferRef;
+    uint64_t            width;
+    uint64_t            height;
+    int                 sar_num;
+    int                 sar_den;
+} VTBPicture;
 
 typedef struct sort_queue {
     VTBPicture pic;
     int serial;
     volatile struct sort_queue  *nextframe;
 } sort_queue;
-
 
 typedef struct VideoToolBoxContext {
     FFPlayer                   *ffp;
