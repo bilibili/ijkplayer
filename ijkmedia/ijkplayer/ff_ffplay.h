@@ -82,6 +82,8 @@ bool      ffp_is_flush_packet(AVPacket *pkt);
 Frame    *ffp_frame_queue_peek_writable(FrameQueue *f);
 void      ffp_frame_queue_push(FrameQueue *f);
 
+void      ffp_alloc_picture(FFPlayer *ffp, Uint32 overlay_format);
+
 int       ffp_get_master_sync_type(VideoState *is);
 double    ffp_get_master_clock(VideoState *is);
 

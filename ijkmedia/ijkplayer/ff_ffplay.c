@@ -1074,7 +1074,7 @@ display:
 
 /* allocate a picture (needs to do that in main thread to avoid
    potential locking problems */
-static void alloc_picture(FFPlayer *ffp)
+static void alloc_picture(FFPlayer *ffp, Uint32 overlay_format)
 {
     VideoState *is = ffp->is;
     Frame *vp;
@@ -1091,7 +1091,7 @@ static void alloc_picture(FFPlayer *ffp)
 #endif
 
     vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height,
-                                   ffp->overlay_format,
+                                   overlay_format,
                                    ffp->vout);
 #ifdef FFP_MERGE
     bufferdiff = vp->bmp ? FFMAX(vp->bmp->pixels[0], vp->bmp->pixels[1]) - FFMIN(vp->bmp->pixels[0], vp->bmp->pixels[1]) : 0;
@@ -1165,7 +1165,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
 
         /* the allocation must be done in the main thread to avoid
            locking problems. */
-        alloc_picture(ffp);
+        alloc_picture(ffp, ffp->overlay_format);
 
         if (is->videoq.abort_request)
             return -1;
@@ -3561,6 +3561,11 @@ Frame *ffp_frame_queue_peek_writable(FrameQueue *f)
 void ffp_frame_queue_push(FrameQueue *f)
 {
     return frame_queue_push(f);
+}
+
+void ffp_alloc_picture(FFPlayer *ffp, Uint32 overlay_format)
+{
+    return alloc_picture(ffp, overlay_format);
 }
 
 int ffp_get_master_sync_type(VideoState *is)

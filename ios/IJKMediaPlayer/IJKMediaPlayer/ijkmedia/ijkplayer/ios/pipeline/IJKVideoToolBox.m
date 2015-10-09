@@ -251,31 +251,6 @@ static bool GetVTBPicture(VideoToolBoxContext* context, VTBPicture* pVTBPicture)
     return true;
 }
 
-static void vtb_free_picture(Frame *vp)
-{
-    if (vp->bmp) {
-        SDL_VoutFreeYUVOverlay(vp->bmp);
-        vp->bmp = NULL;
-    }
-}
-
-static void vtb_alloc_picture(FFPlayer *ffp)
-{
-    VideoState *is  = ffp->is;
-    Frame *vp       = &is->pictq.queue[is->pictq.windex];
-    vtb_free_picture(vp);
-    vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height, SDL_FCC__VTB, ffp->vout);
-    if (!vp->bmp) {
-        av_log(NULL, AV_LOG_FATAL,
-               "Error: can't alloc nv12 overlay \n");
-        vtb_free_picture(vp);
-    }
-    SDL_LockMutex(is->pictq.mutex);
-    vp->allocated = 1;
-    SDL_CondSignal(is->pictq.cond);
-    SDL_UnlockMutex(is->pictq.mutex);
-}
-
 static int vtb_queue_picture(
                              FFPlayer*       ffp,
                              VTBPicture*     picture,
@@ -308,7 +283,7 @@ static int vtb_queue_picture(
 
         /* the allocation must be done in the main thread to avoid
          locking problems. */
-        vtb_alloc_picture(ffp);
+        ffp_alloc_picture(ffp, SDL_FCC__VTB);
 
         if (is->videoq.abort_request)
             return -1;
