@@ -34,7 +34,6 @@
 #include <stdint.h>
 
 #include "libavutil/avstring.h"
-// FFP_MERGE: #include "libavutil/colorspace.h"
 #include "libavutil/eval.h"
 #include "libavutil/mathematics.h"
 #include "libavutil/pixdesc.h"
