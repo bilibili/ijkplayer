@@ -27,7 +27,7 @@
 
 int ijk_image_convert(int width, int height,
     enum AVPixelFormat dst_format, uint8_t **dst_data, int *dst_linesize,
-    enum AVPixelFormat src_format, const uint8_t **src_data, int *src_linesize)
+    enum AVPixelFormat src_format, const uint8_t **src_data, const int *src_linesize)
 {
 #if defined(__ANDROID__)
     switch (src_format) {
