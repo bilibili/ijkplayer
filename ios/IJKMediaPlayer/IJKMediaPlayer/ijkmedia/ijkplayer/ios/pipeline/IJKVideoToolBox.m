@@ -65,7 +65,7 @@ static void SortQueuePop(VideoToolBoxContext* context)
     context->m_sort_queue = context->m_sort_queue->nextframe;
     context->m_queue_depth--;
     pthread_mutex_unlock(&context->m_queue_mutex);
-    CVBufferRelease(top_frame->pic.cvBufferRef);
+    CVBufferRelease(top_frame->pic.opaque);
     free((void*)top_frame);
 }
 
@@ -233,7 +233,7 @@ static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc,
 
 
 
-static bool GetVTBPicture(VideoToolBoxContext* context, VTBPicture* pVTBPicture)
+static bool GetVTBPicture(VideoToolBoxContext* context, AVFrame* pVTBPicture)
 {
     *pVTBPicture = context->m_videobuffer;
 
@@ -243,8 +243,8 @@ static bool GetVTBPicture(VideoToolBoxContext* context, VTBPicture* pVTBPicture)
     pthread_mutex_lock(&context->m_queue_mutex);
 
     volatile sort_queue *sort_queue = context->m_sort_queue;
-    *pVTBPicture             = sort_queue->pic;
-    pVTBPicture->cvBufferRef = CVBufferRetain(sort_queue->pic.cvBufferRef);
+    *pVTBPicture        = sort_queue->pic;
+    pVTBPicture->opaque = CVBufferRetain(sort_queue->pic.opaque);
 
     pthread_mutex_unlock(&context->m_queue_mutex);
 
@@ -252,7 +252,7 @@ static bool GetVTBPicture(VideoToolBoxContext* context, VTBPicture* pVTBPicture)
 }
 
 void QueuePicture(VideoToolBoxContext* ctx) {
-    VTBPicture picture;
+    AVFrame picture;
     if (true == GetVTBPicture(ctx, &picture)) {
         double pts;
         double duration;
@@ -268,7 +268,7 @@ void QueuePicture(VideoToolBoxContext* ctx) {
             ctx->frame = av_frame_alloc();
 
         ctx->frame->format = SDL_FCC__VTB;
-        ctx->frame->opaque = picture.cvBufferRef;
+        ctx->frame->opaque = picture.opaque;
         ctx->frame->sample_aspect_ratio.num = 1;
         ctx->frame->sample_aspect_ratio.den = 1;
         ctx->frame->width  = (int)picture.width;
@@ -276,7 +276,7 @@ void QueuePicture(VideoToolBoxContext* ctx) {
 
         ffp_queue_picture(ctx->ffp, ctx->frame, pts, duration, 0, ctx->ffp->is->viddec.pkt_serial);
 
-        CVBufferRelease(picture.cvBufferRef);
+        CVBufferRelease(picture.opaque);
 
         SortQueuePop(ctx);
     } else {
@@ -305,13 +305,21 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         sort_queue *newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
 
         sample_info *sample_info = sourceFrameRefCon;
-        newFrame->pic.pts    = sample_info->pts;
-        newFrame->pic.dts    = sample_info->dts;
-        newFrame->pic.sort   = sample_info->sort;
+        newFrame->pic.pkt_pts    = sample_info->pts;
+        newFrame->pic.pkt_dts    = sample_info->dts;
+        newFrame->pic.sample_aspect_ratio.num = sample_info->sar_num;
+        newFrame->pic.sample_aspect_ratio.den = sample_info->sar_den;
         newFrame->serial     = sample_info->serial;
         newFrame->nextframe  = NULL;
-        newFrame->pic.sar_num = sample_info->sar_num;
-        newFrame->pic.sar_den = sample_info->sar_den;
+
+        if (newFrame->pic.pts != AV_NOPTS_VALUE) {
+            newFrame->sort    = newFrame->pic.pkt_pts;
+            newFrame->pic.pts = newFrame->pic.pkt_pts;
+        } else {
+            newFrame->sort    = newFrame->pic.pkt_dts;
+            newFrame->pic.pts = newFrame->pic.pkt_dts;
+        }
+
 #ifdef FFP_SHOW_VTB_IN_DECODING
         ALOGD("VTB: indecoding: %d\n", ctx->sample_infos_in_decoding);
 #endif
@@ -319,7 +327,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         if (ctx->dealloced || is->abort_request || is->viddec.queue->abort_request)
             goto failed;
 
-        ctx->last_sort = newFrame->pic.sort;
+        ctx->last_sort = newFrame->sort;
         if (status != 0) {
             ALOGE("decode callback %d %s\n", (int)status, vtb_get_error_string(status));
             goto failed;
@@ -393,23 +401,18 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         }
 
         if (CVPixelBufferIsPlanar(imageBuffer)) {
-            newFrame->pic.width  = CVPixelBufferGetWidthOfPlane(imageBuffer, 0);
-            newFrame->pic.height = CVPixelBufferGetHeightOfPlane(imageBuffer, 0);
+            newFrame->pic.width  = (int)CVPixelBufferGetWidthOfPlane(imageBuffer, 0);
+            newFrame->pic.height = (int)CVPixelBufferGetHeightOfPlane(imageBuffer, 0);
         } else {
-            newFrame->pic.width  = CVPixelBufferGetWidth(imageBuffer);
-            newFrame->pic.height = CVPixelBufferGetHeight(imageBuffer);
+            newFrame->pic.width  = (int)CVPixelBufferGetWidth(imageBuffer);
+            newFrame->pic.height = (int)CVPixelBufferGetHeight(imageBuffer);
         }
 
 
-        newFrame->pic.cvBufferRef = CVBufferRetain(imageBuffer);
-        if (newFrame->pic.pts != AV_NOPTS_VALUE) {
-            newFrame->pic.sort = newFrame->pic.pts;
-        } else {
-            newFrame->pic.sort = newFrame->pic.dts;
-        }
+        newFrame->pic.opaque = CVBufferRetain(imageBuffer);
         pthread_mutex_lock(&ctx->m_queue_mutex);
         volatile sort_queue *queueWalker = ctx->m_sort_queue;
-        if (!queueWalker || (newFrame->pic.sort < queueWalker->pic.sort)) {
+        if (!queueWalker || (newFrame->sort < queueWalker->sort)) {
             newFrame->nextframe = queueWalker;
             ctx->m_sort_queue = newFrame;
         } else {
@@ -417,7 +420,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             volatile sort_queue *nextFrame = NULL;
             while (!frameInserted) {
                 nextFrame = queueWalker->nextframe;
-                if (!nextFrame || (newFrame->pic.sort < nextFrame->pic.sort)) {
+                if (!nextFrame || (newFrame->sort < nextFrame->sort)) {
                     newFrame->nextframe = nextFrame;
                     queueWalker->nextframe = newFrame;
                     frameInserted = true;
@@ -956,7 +959,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     context_vtb->width = width;
     context_vtb->height = height;
     context_vtb->m_queue_depth = 0;
-    memset(&context_vtb->m_videobuffer, 0, sizeof(VTBPicture));
+    memset(&context_vtb->m_videobuffer, 0, sizeof(AVFrame));
     if (context_vtb->m_max_ref_frames <= 0) {
         context_vtb->m_max_ref_frames = 2;
     }

@@ -51,21 +51,11 @@ typedef struct sample_info {
     volatile int is_decoding;
 } sample_info;
 
-typedef struct VTBPicture {
-    double              pts;
-    double              dts;
-    double              sort;
-    CVPixelBufferRef    cvBufferRef;
-    uint64_t            width;
-    uint64_t            height;
-    int                 sar_num;
-    int                 sar_den;
-} VTBPicture;
-
 typedef struct sort_queue {
-    VTBPicture pic;
+    AVFrame pic;
     int serial;
-    volatile struct sort_queue  *nextframe;
+    int64_t sort;
+    volatile struct sort_queue *nextframe;
 } sort_queue;
 
 typedef struct VideoToolBoxContext {
@@ -81,7 +71,7 @@ typedef struct VideoToolBoxContext {
     VTDecompressionSessionRef   m_vt_session;
     CMFormatDescriptionRef      m_fmt_desc;
     const char                 *m_pformat_name;
-    struct VTBPicture           m_videobuffer;
+    AVFrame                     m_videobuffer;
     double                      m_sort_time_offset;
     pthread_mutex_t             m_queue_mutex;
     volatile sort_queue        *m_sort_queue;
