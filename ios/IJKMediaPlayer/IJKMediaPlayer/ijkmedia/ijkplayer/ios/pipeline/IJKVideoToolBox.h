@@ -60,19 +60,13 @@ typedef struct sort_queue {
 
 typedef struct VideoToolBoxContext {
     FFPlayer                   *ffp;
-    int                         width;
-    int                         height;
     volatile bool               refresh_request;
     volatile bool               new_seg_flag;
     volatile bool               idr_based_identified;
-    int64_t                     last_keyframe_pts;
     volatile bool               refresh_session;
     volatile bool               recovery_drop_packet;
     VTDecompressionSessionRef   m_vt_session;
     CMFormatDescriptionRef      m_fmt_desc;
-    const char                 *m_pformat_name;
-    AVFrame                     m_videobuffer;
-    double                      m_sort_time_offset;
     pthread_mutex_t             m_queue_mutex;
     volatile sort_queue        *m_sort_queue;
     volatile int32_t            m_queue_depth;
@@ -80,7 +74,6 @@ typedef struct VideoToolBoxContext {
     bool                        m_convert_bytestream;
     bool                        m_convert_3byteTo4byteNALSize;
     int                         serial;
-    volatile double             last_sort;
     bool                        dealloced;
     int                         m_buffer_deep;
     AVPacket                    m_buffer_packet[MAX_PKT_QUEUE_DEEP];
@@ -93,7 +86,6 @@ typedef struct VideoToolBoxContext {
     volatile int                sample_infos_in_decoding;
 
     SDL_SpeedSampler            sampler;
-    AVFrame                    *frame;
 } VideoToolBoxContext ;
 
 

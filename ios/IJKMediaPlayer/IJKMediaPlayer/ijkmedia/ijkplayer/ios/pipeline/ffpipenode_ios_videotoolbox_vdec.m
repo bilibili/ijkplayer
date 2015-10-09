@@ -66,7 +66,6 @@ int decoder_decode_frame_videotoolbox(VideoToolBoxContext* context) {
                     context->refresh_request = true;
                     context->serial += 1;
                     d->finished = 0;
-                   // context->last_keyframe_pts = d->pkt.pts;
                      ALOGI("flushed last keyframe pts %lld \n",d->pkt.pts);
                     d->next_pts = d->start_pts;
                     d->next_pts_tb = d->start_pts_tb;

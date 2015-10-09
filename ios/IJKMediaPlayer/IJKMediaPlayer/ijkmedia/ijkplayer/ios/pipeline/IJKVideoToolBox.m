@@ -50,11 +50,6 @@ static const char *vtb_get_error_string(OSStatus status) {
     }
 }
 
-static double GetSystemTime()
-{
-    return ((int64_t)CVGetCurrentHostTime() * 1000.0) / ((int64_t)CVGetHostClockFrequency());
-}
-
 static void SortQueuePop(VideoToolBoxContext* context)
 {
     if (!context->m_sort_queue || context->m_queue_depth == 0) {
@@ -235,8 +230,6 @@ static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc,
 
 static bool GetVTBPicture(VideoToolBoxContext* context, AVFrame* pVTBPicture)
 {
-    *pVTBPicture = context->m_videobuffer;
-
     if (context->m_sort_queue == NULL) {
         return false;
     }
@@ -259,17 +252,11 @@ void QueuePicture(VideoToolBoxContext* ctx) {
         double duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0);
         double pts = (picture.pts == AV_NOPTS_VALUE) ? NAN : picture.pts * av_q2d(tb);
 
-        if (!ctx->frame)
-            ctx->frame = av_frame_alloc();
+        picture.format = SDL_FCC__VTB;
+        picture.sample_aspect_ratio.num = 1;
+        picture.sample_aspect_ratio.den = 1;
 
-        ctx->frame->format = SDL_FCC__VTB;
-        ctx->frame->opaque = picture.opaque;
-        ctx->frame->sample_aspect_ratio.num = 1;
-        ctx->frame->sample_aspect_ratio.den = 1;
-        ctx->frame->width  = (int)picture.width;
-        ctx->frame->height = (int)picture.height;
-
-        ffp_queue_picture(ctx->ffp, ctx->frame, pts, duration, 0, ctx->ffp->is->viddec.pkt_serial);
+        ffp_queue_picture(ctx->ffp, &picture, pts, duration, 0, ctx->ffp->is->viddec.pkt_serial);
 
         CVBufferRelease(picture.opaque);
 
@@ -322,7 +309,6 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         if (ctx->dealloced || is->abort_request || is->viddec.queue->abort_request)
             goto failed;
 
-        ctx->last_sort = newFrame->sort;
         if (status != 0) {
             ALOGE("decode callback %d %s\n", (int)status, vtb_get_error_string(status));
             goto failed;
@@ -514,7 +500,6 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 {
     FFPlayer *ffp                   = context->ffp;
     OSStatus status                 = 0;
-    double sort_time                = GetSystemTime();
     uint32_t decoder_flags          = 0;
     sample_info *sample_info        = NULL;
     CMSampleBufferRef sample_buff   = NULL;
@@ -605,16 +590,12 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         context->new_seg_flag = true;
     }
 
-
-    context->last_keyframe_pts = avpkt->pts;
-
     sample_info = sample_info_peek(context);
     if (!sample_info) {
         ALOGE("%s, failed to peek frame_info\n", __FUNCTION__);
         goto failed;
     }
 
-    sample_info->sort   = sort_time - context->m_sort_time_offset;
     sample_info->pts    = pts;
     sample_info->dts    = dts;
     sample_info->serial = context->serial;
@@ -809,8 +790,6 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
 {
     context->dealloced = true;
 
-    av_frame_free(&context->frame);
-
     while (context && context->m_queue_depth > 0) {
         SortQueuePop(context);
     }
@@ -930,13 +909,11 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
                         goto failed;
                     }
                 }
-            context_vtb->m_pformat_name = "vtb-h264";
             break;
         default:
             goto failed;
     }
     if (context_vtb->m_fmt_desc == NULL) {
-        context_vtb->m_pformat_name = "";
         goto failed;
     }
 
@@ -948,13 +925,9 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
             CFRelease(context_vtb->m_fmt_desc);
             context_vtb->m_fmt_desc = NULL;
         }
-        context_vtb->m_pformat_name = "";
         goto failed;
     }
-    context_vtb->width = width;
-    context_vtb->height = height;
     context_vtb->m_queue_depth = 0;
-    memset(&context_vtb->m_videobuffer, 0, sizeof(AVFrame));
     if (context_vtb->m_max_ref_frames <= 0) {
         context_vtb->m_max_ref_frames = 2;
     }
@@ -963,8 +936,6 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     }
 
     ALOGI("m_max_ref_frames %d \n", context_vtb->m_max_ref_frames);
-
-    context_vtb->m_sort_time_offset = GetSystemTime();
 
     context_vtb->sample_info_mutex = SDL_CreateMutex();
     context_vtb->sample_info_cond  = SDL_CreateCond();
