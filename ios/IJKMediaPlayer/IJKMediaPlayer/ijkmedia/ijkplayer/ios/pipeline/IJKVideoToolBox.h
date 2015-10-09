@@ -94,6 +94,7 @@ typedef struct VideoToolBoxContext {
     volatile int                sample_infos_in_decoding;
 
     SDL_SpeedSampler            sampler;
+    AVFrame                    *frame;
 } VideoToolBoxContext ;
 
 

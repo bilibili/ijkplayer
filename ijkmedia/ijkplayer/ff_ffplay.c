@@ -1165,7 +1165,15 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
 
         /* the allocation must be done in the main thread to avoid
            locking problems. */
-        alloc_picture(ffp, ffp->overlay_format);
+        switch (src_frame->format) {
+            case SDL_FCC__AMC:
+            case SDL_FCC__VTB:
+                alloc_picture(ffp, src_frame->format);
+                break;
+            default:
+                alloc_picture(ffp, ffp->overlay_format);
+                break;
+        }
 
         if (is->videoq.abort_request)
             return -1;
@@ -1204,7 +1212,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         /* now we can update the picture count */
         frame_queue_push(&is->pictq);
         if (!is->viddec.first_frame_decoded) {
-            ALOGD("avcodec/Video: first frame decoded\n");
+            ALOGD("Video: first frame decoded\n");
             is->viddec.first_frame_decoded_time = SDL_GetTickHR();
             is->viddec.first_frame_decoded = 1;
         }
@@ -3566,6 +3574,11 @@ void ffp_frame_queue_push(FrameQueue *f)
 void ffp_alloc_picture(FFPlayer *ffp, Uint32 overlay_format)
 {
     return alloc_picture(ffp, overlay_format);
+}
+
+int ffp_queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial)
+{
+    return queue_picture(ffp, src_frame, pts, duration, pos, serial);
 }
 
 int ffp_get_master_sync_type(VideoState *is)

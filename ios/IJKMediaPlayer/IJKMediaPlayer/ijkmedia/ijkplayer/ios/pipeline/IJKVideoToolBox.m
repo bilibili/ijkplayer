@@ -251,68 +251,6 @@ static bool GetVTBPicture(VideoToolBoxContext* context, VTBPicture* pVTBPicture)
     return true;
 }
 
-static int vtb_queue_picture(
-                             FFPlayer*       ffp,
-                             VTBPicture*     picture,
-                             double          pts,
-                             double          duration,
-                             int64_t         pos,
-                             int             serial)
-{
-    VideoState            *is     = ffp->is;
-    Frame                 *vp;
-
-    if (!(vp = ffp_frame_queue_peek_writable(&is->pictq)))
-        return -1;
-
-    vp->sar.num = 1;
-    vp->sar.den = 1;
-
-    /* alloc or resize hardware picture buffer */
-    if (!vp->bmp || vp->reallocate || !vp->allocated ||
-        vp->width  != picture->width ||
-        vp->height != picture->height) {
-
-        if (vp->width != picture->width || vp->height != picture->height)
-            ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, (int)picture->width, (int)picture->height);
-
-        vp->allocated  = 0;
-        vp->reallocate = 0;
-        vp->width      = (int)picture->width;
-        vp->height     = (int)picture->height;
-
-        /* the allocation must be done in the main thread to avoid
-         locking problems. */
-        ffp_alloc_picture(ffp, SDL_FCC__VTB);
-
-        if (is->videoq.abort_request)
-            return -1;
-    }
-    /* if the frame is not skipped, then display it */
-    if (vp->bmp) {
-        /* get a pointer on the bitmap */
-        SDL_VoutLockYUVOverlay(vp->bmp);
-        SDL_VoutOverlayVideoToolBox_FillFrame(vp->bmp,picture);
-        /* update the bitmap content */
-        SDL_VoutUnlockYUVOverlay(vp->bmp);
-
-        vp->pts = pts;
-        vp->duration = duration;
-        vp->pos = pos;
-        vp->serial = serial;
-        vp->sar.num = vp->bmp->sar_num = picture->sar_num;
-        vp->sar.den = vp->bmp->sar_den = picture->sar_den;
-        ffp_frame_queue_push(&is->pictq);
-
-        if (!is->viddec.first_frame_decoded) {
-            ALOGD("VideoToolbox: first frame decoded\n");
-            is->viddec.first_frame_decoded_time = SDL_GetTickHR();
-            is->viddec.first_frame_decoded = 1;
-        }
-    }
-    return 0;
-}
-
 void QueuePicture(VideoToolBoxContext* ctx) {
     VTBPicture picture;
     if (true == GetVTBPicture(ctx, &picture)) {
@@ -326,7 +264,18 @@ void QueuePicture(VideoToolBoxContext* ctx) {
         duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0);
         pts = (videotoolbox_pts == AV_NOPTS_VALUE) ? NAN : videotoolbox_pts * av_q2d(tb);
 
-        vtb_queue_picture(ctx->ffp, &picture, pts, duration, 0,  ctx->ffp->is->viddec.pkt_serial);
+        if (!ctx->frame)
+            ctx->frame = av_frame_alloc();
+
+        ctx->frame->format = SDL_FCC__VTB;
+        ctx->frame->opaque = picture.cvBufferRef;
+        ctx->frame->sample_aspect_ratio.num = 1;
+        ctx->frame->sample_aspect_ratio.den = 1;
+        ctx->frame->width  = (int)picture.width;
+        ctx->frame->height = (int)picture.height;
+
+        ffp_queue_picture(ctx->ffp, ctx->frame, pts, duration, 0, ctx->ffp->is->viddec.pkt_serial);
+
         CVBufferRelease(picture.cvBufferRef);
 
         SortQueuePop(ctx);
@@ -861,6 +810,8 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
 void dealloc_videotoolbox(VideoToolBoxContext* context)
 {
     context->dealloced = true;
+
+    av_frame_free(&context->frame);
 
     while (context && context->m_queue_depth > 0) {
         SortQueuePop(context);
