@@ -679,9 +679,9 @@ static void stream_close(VideoState *is)
 #endif
     SDL_DestroyCond(is->continue_read_thread);
     SDL_DestroyMutex(is->play_mutex);
-//#if !CONFIG_AVFILTER
+#if !CONFIG_AVFILTER
     sws_freeContext(is->img_convert_ctx);
-//#endif
+#endif
 #ifdef FFP_MERGE
     sws_freeContext(is->sub_convert_ctx);
 #endif
@@ -1185,8 +1185,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         // sws_getCachedContext(...);
 #endif
 #endif
-        if (SDL_VoutFFmpeg_ConvertFrame(vp->bmp, src_frame,
-            &is->img_convert_ctx, ffp->sws_flags) < 0) {
+        if (SDL_VoutFFmpeg_FillFrame(vp->bmp, src_frame) < 0) {
             av_log(NULL, AV_LOG_FATAL, "Cannot initialize the conversion context\n");
             exit(1);
         }

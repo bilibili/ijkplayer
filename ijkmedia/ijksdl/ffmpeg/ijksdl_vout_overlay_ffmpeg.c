@@ -46,6 +46,9 @@ struct SDL_VoutOverlay_Opaque {
     Uint8 *pixels[AV_NUM_DATA_POINTERS];
 
     int no_neon_warned;
+
+    struct SwsContext *img_convert_ctx;
+    int sws_flags;
 };
 
 /* Always assume a linesize alignment of 1 here */
@@ -112,6 +115,8 @@ static void overlay_free_l(SDL_VoutOverlay *overlay)
     if (!opaque)
         return;
 
+    sws_freeContext(opaque->img_convert_ctx);
+
     if (opaque->managed_frame)
         av_frame_free(&opaque->managed_frame);
 
@@ -169,6 +174,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
 
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     opaque->mutex         = SDL_CreateMutex();
+    opaque->sws_flags     = SWS_BILINEAR;
 
     overlay->opaque_class = &g_vout_overlay_ffmpeg_class;
     overlay->format       = format;
@@ -247,12 +253,9 @@ fail:
 }
 #endif//__clang_analyzer__
 
-int SDL_VoutFFmpeg_ConvertFrame(
-    SDL_VoutOverlay *overlay, AVFrame *frame,
-    struct SwsContext **p_sws_ctx, int sws_flags)
+int SDL_VoutFFmpeg_FillFrame(SDL_VoutOverlay *overlay, const AVFrame *frame)
 {
     assert(overlay);
-    assert(p_sws_ctx);
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     AVPicture swscale_dst_pic = { { 0 } };
 
@@ -338,15 +341,15 @@ int SDL_VoutFFmpeg_ConvertFrame(
     } else if (ijk_image_convert(frame->width, frame->height,
         dst_format, swscale_dst_pic.data, swscale_dst_pic.linesize,
         frame->format, (const uint8_t**) frame->data, frame->linesize)) {
-        *p_sws_ctx = sws_getCachedContext(*p_sws_ctx,
+        opaque->img_convert_ctx = sws_getCachedContext(opaque->img_convert_ctx,
             frame->width, frame->height, frame->format, frame->width, frame->height,
-            dst_format, sws_flags, NULL, NULL, NULL);
-        if (*p_sws_ctx == NULL) {
+            dst_format, opaque->sws_flags, NULL, NULL, NULL);
+        if (opaque->img_convert_ctx == NULL) {
             ALOGE("sws_getCachedContext failed");
             return -1;
         }
 
-        sws_scale(*p_sws_ctx, (const uint8_t**) frame->data, frame->linesize,
+        sws_scale(opaque->img_convert_ctx, (const uint8_t**) frame->data, frame->linesize,
             0, frame->height, swscale_dst_pic.data, swscale_dst_pic.linesize);
 
         if (!opaque->no_neon_warned) {
