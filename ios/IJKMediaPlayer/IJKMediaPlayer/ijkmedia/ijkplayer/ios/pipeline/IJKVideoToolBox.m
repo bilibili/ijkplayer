@@ -254,15 +254,10 @@ static bool GetVTBPicture(VideoToolBoxContext* context, AVFrame* pVTBPicture)
 void QueuePicture(VideoToolBoxContext* ctx) {
     AVFrame picture;
     if (true == GetVTBPicture(ctx, &picture)) {
-        double pts;
-        double duration;
-        int64_t vtb_pts_us = (int64_t)picture.pts;
-        int64_t videotoolbox_pts = vtb_pts_us;
-
         AVRational tb = ctx->ffp->is->video_st->time_base;
         AVRational frame_rate = av_guess_frame_rate(ctx->ffp->is->ic, ctx->ffp->is->video_st, NULL);
-        duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0);
-        pts = (videotoolbox_pts == AV_NOPTS_VALUE) ? NAN : videotoolbox_pts * av_q2d(tb);
+        double duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0);
+        double pts = (picture.pts == AV_NOPTS_VALUE) ? NAN : picture.pts * av_q2d(tb);
 
         if (!ctx->frame)
             ctx->frame = av_frame_alloc();
