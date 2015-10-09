@@ -99,3 +99,11 @@ void SDL_VoutUnrefYUVOverlay(SDL_VoutOverlay *overlay)
     if (overlay && overlay->unref)
         overlay->unref(overlay);
 }
+
+int SDL_VoutFillFrameYUVOverlay(SDL_VoutOverlay *overlay, const AVFrame *frame)
+{
+    if (!overlay || !overlay->func_fill_frame)
+        return -1;
+
+    return overlay->func_fill_frame(overlay, frame);
+}
