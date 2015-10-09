@@ -456,7 +456,7 @@ static int g_ijk_gles_queue_spec_key;
     if (_renderer == nil) {
         if (overlay == nil) {
             return NO;
-        } else if (overlay->format == SDL_FCC_NV12) {
+        } else if (overlay->format == SDL_FCC__VTB) {
             _frameChroma = overlay->format;
             _renderer = [[IJKSDLGLRenderNV12 alloc] initWithTextureCache:_textureCache];
             _bytesPerPixel = 1;

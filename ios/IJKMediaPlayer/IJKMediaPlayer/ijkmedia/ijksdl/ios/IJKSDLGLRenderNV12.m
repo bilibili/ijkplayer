@@ -103,7 +103,7 @@ static const GLfloat kColorConversion709[] = {
 - (void) render: (SDL_VoutOverlay *) overlay
 {
     assert(overlay->planes);
-    assert(overlay->format == SDL_FCC_NV12);
+    assert(overlay->format == SDL_FCC__VTB);
     assert(overlay->planes == 2);
 
     if (!overlay->is_private)

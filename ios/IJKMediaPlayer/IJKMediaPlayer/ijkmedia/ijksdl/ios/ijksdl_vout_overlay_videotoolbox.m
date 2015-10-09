@@ -61,7 +61,7 @@ int SDL_VoutOverlayVideoToolBox_FillFrame(SDL_VoutOverlay *overlay, VTBPicture* 
         CVBufferRelease(opaque->pixel_buffer);
     }
     opaque->pixel_buffer = pixel_buffer;
-    overlay->format = SDL_FCC_NV12;
+    overlay->format = SDL_FCC__VTB;
     overlay->planes = 2;
 
 #if 0

@@ -39,7 +39,7 @@ struct SDL_Vout_Opaque {
 
 static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, Uint32 format, SDL_Vout *vout)
 {
-    if (format == SDL_FCC_NV12)
+    if (format == SDL_FCC__VTB)
     {
         return SDL_VoutVideoToolBox_CreateOverlay(width, height, format, vout);
     }

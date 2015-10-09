@@ -264,7 +264,7 @@ static void vtb_alloc_picture(FFPlayer *ffp)
     VideoState *is  = ffp->is;
     Frame *vp       = &is->pictq.queue[is->pictq.windex];
     vtb_free_picture(vp);
-    vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height, SDL_FCC_NV12, ffp->vout);
+    vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height, SDL_FCC__VTB, ffp->vout);
     if (!vp->bmp) {
         av_log(NULL, AV_LOG_FATAL,
                "Error: can't alloc nv12 overlay \n");
