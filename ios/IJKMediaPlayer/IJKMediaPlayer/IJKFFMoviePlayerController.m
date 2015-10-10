@@ -173,6 +173,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         ijkmp_global_init();
         ijkmp_global_set_inject_callback(ijkff_inject_callback);
 
+        [IJKFFMoviePlayerController checkIfFFmpegVersionMatch:NO];
+
         if (options == nil)
             options = [IJKFFOptions optionsByDefault];
 
@@ -373,8 +375,9 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     if (0 == strcmp(actualVersion, expectVersion)) {
         return YES;
     } else {
+        NSString *message = [NSString stringWithFormat:@"actual: %s\n expect: %s\n", actualVersion, expectVersion];
+        NSLog(@"\n!!!!!!!!!!\n%@\n!!!!!!!!!!\n", message);
         if (showAlert) {
-            NSString *message = [NSString stringWithFormat:@"actual: %s\n expect: %s\n", actualVersion, expectVersion];
             UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Unexpected FFmpeg version"
                                                                 message:message
                                                                delegate:nil
