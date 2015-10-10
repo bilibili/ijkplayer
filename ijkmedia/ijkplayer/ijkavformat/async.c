@@ -34,9 +34,9 @@
 #include "libavutil/log.h"
 #include "libavutil/opt.h"
 #include "libavutil/time.h"
+#include "libavutil/thread.h"
 #include "url.h"
 #include <stdint.h>
-#include <pthread.h>
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -508,7 +508,7 @@ URLProtocol ff_async_test_protocol = {
     .priv_data_class     = &async_test_context_class,
 };
 
-int main1(void)
+int main(void)
 {
     URLContext   *h = NULL;
     int           i;
