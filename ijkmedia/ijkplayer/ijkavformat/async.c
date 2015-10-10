@@ -23,6 +23,7 @@
 
  /**
  * @TODO
+ *      support timeout
  *      support backward short seek
  *      support work with concatdec, hls
  */
@@ -70,9 +71,6 @@ typedef struct Context {
 
     int             abort_request;
     AVIOInterruptCB interrupt_callback;
-
-    /* options */
-    int64_t         timeout;
 } Context;
 
 static int async_check_interrupt(void *arg)
@@ -151,6 +149,12 @@ static void *async_buffer_task(void *arg)
         }
         pthread_mutex_unlock(&c->mutex);
 
+        /*
+         * FIXME:
+         *
+         * av_fifo_generic_write() doesn't return immediately if arrived data is less than size,
+         * which may cause seek request is not handled in time.
+         */
         to_copy = FFMIN(4096, fifo_space);
         ret = av_fifo_generic_write(fifo, (void *)h, to_copy, (void *)wrapped_url_read);
 
@@ -263,8 +267,6 @@ static int async_read_internal(URLContext *h, void *dest, int size, int read_com
     AVFifoBuffer *fifo    = c->fifo;
     int           to_read = size;
     int           ret     = 0;
-    int64_t       wait_time = 0;
-    struct timespec tv;
 
     pthread_mutex_lock(&c->mutex);
 
@@ -296,20 +298,7 @@ static int async_read_internal(URLContext *h, void *dest, int size, int read_com
             break;
         }
         pthread_cond_signal(&c->cond_wakeup_background);
-        if (c->timeout < 0) {
-            ret = pthread_cond_wait(&c->cond_wakeup_main, &c->mutex);
-        } else {
-            if (wait_time == 0) {
-                wait_time  = av_gettime() + c->timeout;
-                tv.tv_sec  = (time_t)(wait_time / 1000000),
-                tv.tv_nsec = (long)((wait_time % 1000000) * 1000);
-            }
-            ret = pthread_cond_timedwait(&c->cond_wakeup_main, &c->mutex, &tv);
-        }
-        if (ret) {
-            ret = errno ? AVERROR(errno) : AVERROR_UNKNOWN;
-            break;
-        }
+        pthread_cond_wait(&c->cond_wakeup_main, &c->mutex);
     }
 
     pthread_cond_signal(&c->cond_wakeup_background);
@@ -402,8 +391,6 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
 #define D AV_OPT_FLAG_DECODING_PARAM
 
 static const AVOption options[] = {
-    { "async-timeout",          "set timeout (in microseconds) of I/O operations",
-        OFFSET(timeout),        AV_OPT_TYPE_INT, { .i64 = -1 }, -1, INT_MAX, .flags = D },
     {NULL},
 };
 
