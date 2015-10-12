@@ -654,14 +654,30 @@ static void video_image_display2(FFPlayer *ffp)
 // FFP_MERGE: compute_mod
 // FFP_MERGE: video_audio_display
 
-static void stream_close(VideoState *is)
+static void stream_component_close(FFPlayer *ffp, int stream_index);
+
+static void stream_close(FFPlayer *ffp)
 {
+    VideoState *is = ffp->is;
     /* XXX: use a special url_shutdown call to abort parse cleanly */
     is->abort_request = 1;
     packet_queue_abort(&is->videoq);
     packet_queue_abort(&is->audioq);
     av_log(NULL, AV_LOG_DEBUG, "wait for read_tid\n");
     SDL_WaitThread(is->read_tid, NULL);
+
+    /* close each stream */
+    if (is->audio_stream >= 0)
+        stream_component_close(ffp, is->audio_stream);
+    if (is->video_stream >= 0)
+        stream_component_close(ffp, is->video_stream);
+#ifdef FFP_MERGE
+    if (is->subtitle_stream >= 0)
+        stream_component_close(ffp, is->subtitle_stream);
+#endif
+
+    avformat_close_input(&is->ic);
+
     av_log(NULL, AV_LOG_DEBUG, "wait for video_refresh_tid\n");
     SDL_WaitThread(is->video_refresh_tid, NULL);
 
@@ -2815,26 +2831,11 @@ static int read_thread(void *arg)
             }
         }
     }
-    /* wait until the end */
-    while (!is->abort_request) {
-        SDL_Delay(100);
-    }
 
     ret = 0;
  fail:
-    /* close each stream */
-    if (is->audio_stream >= 0)
-        stream_component_close(ffp, is->audio_stream);
-    if (is->video_stream >= 0)
-        stream_component_close(ffp, is->video_stream);
-#ifdef FFP_MERGE
-    if (is->subtitle_stream >= 0)
-        stream_component_close(ffp, is->subtitle_stream);
-#endif
-    if (ic) {
+    if (ic && !is->ic)
         avformat_close_input(&is->ic);
-        is->ic = NULL;
-    }
 
     if (!ffp->prepared || !is->abort_request) {
         ffp->last_error = last_error;
@@ -2909,7 +2910,7 @@ fail:
         is->abort_request = true;
         if (is->video_refresh_tid)
             SDL_WaitThread(is->video_refresh_tid, NULL);
-        stream_close(is);
+        stream_close(ffp);
         return NULL;
     }
     return is;
@@ -3165,7 +3166,7 @@ void ffp_destroy(FFPlayer *ffp)
 
     if (ffp->is) {
         av_log(NULL, AV_LOG_WARNING, "ffp_destroy_ffplayer: force stream_close()");
-        stream_close(ffp->is);
+        stream_close(ffp);
         ffp->is = NULL;
     }
 
@@ -3415,7 +3416,7 @@ int ffp_wait_stop_l(FFPlayer *ffp)
 
     if (ffp->is) {
         ffp_stop_l(ffp);
-        stream_close(ffp->is);
+        stream_close(ffp);
         ffp->is = NULL;
     }
     return 0;
