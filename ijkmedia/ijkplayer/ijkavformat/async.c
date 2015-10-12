@@ -93,11 +93,10 @@ static int wrapped_url_read(void *src, void *dst, int size)
 {
     URLContext *h   = src;
     Context    *c   = h->priv_data;
-    int         ret = -1;
+    int         ret;
 
-    c->inner_io_error = 0;
     ret = ffurl_read(c->inner, dst, size);
-    c->inner_io_error = ret;
+    c->inner_io_error = ret < 0 ? ret : 0;
 
     return ret;
 }
