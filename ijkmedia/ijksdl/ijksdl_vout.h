@@ -28,7 +28,7 @@
 #include "ijksdl_class.h"
 #include "ijksdl_mutex.h"
 #include "ijksdl_video.h"
-#include "ijksdl_inc_ffmpeg.h"
+#include "ffmpeg/ijksdl_inc_ffmpeg.h"
 
 typedef struct SDL_VoutOverlay_Opaque SDL_VoutOverlay_Opaque;
 typedef struct SDL_VoutOverlay SDL_VoutOverlay;
