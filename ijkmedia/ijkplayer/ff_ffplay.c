@@ -654,7 +654,61 @@ static void video_image_display2(FFPlayer *ffp)
 // FFP_MERGE: compute_mod
 // FFP_MERGE: video_audio_display
 
-static void stream_component_close(FFPlayer *ffp, int stream_index);
+static void stream_component_close(FFPlayer *ffp, int stream_index)
+{
+    VideoState *is = ffp->is;
+    AVFormatContext *ic = is->ic;
+    AVCodecContext *avctx;
+
+    if (stream_index < 0 || stream_index >= ic->nb_streams)
+        return;
+    avctx = ic->streams[stream_index]->codec;
+
+    switch (avctx->codec_type) {
+    case AVMEDIA_TYPE_AUDIO:
+        decoder_abort(&is->auddec, &is->sampq);
+        SDL_AoutCloseAudio(ffp->aout);
+
+        decoder_destroy(&is->auddec);
+        swr_free(&is->swr_ctx);
+        av_freep(&is->audio_buf1);
+        is->audio_buf1_size = 0;
+        is->audio_buf = NULL;
+
+#ifdef FFP_MERGE
+        if (is->rdft) {
+            av_rdft_end(is->rdft);
+            av_freep(&is->rdft_data);
+            is->rdft = NULL;
+            is->rdft_bits = 0;
+        }
+#endif
+        break;
+    case AVMEDIA_TYPE_VIDEO:
+        decoder_abort(&is->viddec, &is->pictq);
+        decoder_destroy(&is->viddec);
+        break;
+        // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
+    default:
+        break;
+    }
+
+    ic->streams[stream_index]->discard = AVDISCARD_ALL;
+    avcodec_close(avctx);
+    switch (avctx->codec_type) {
+    case AVMEDIA_TYPE_AUDIO:
+        is->audio_st = NULL;
+        is->audio_stream = -1;
+        break;
+    case AVMEDIA_TYPE_VIDEO:
+        is->video_st = NULL;
+        is->video_stream = -1;
+        break;
+        // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
+    default:
+        break;
+    }
+}
 
 static void stream_close(FFPlayer *ffp)
 {
@@ -2243,62 +2297,6 @@ fail:
     av_dict_free(&opts);
 
     return ret;
-}
-
-static void stream_component_close(FFPlayer *ffp, int stream_index)
-{
-    VideoState *is = ffp->is;
-    AVFormatContext *ic = is->ic;
-    AVCodecContext *avctx;
-
-    if (stream_index < 0 || stream_index >= ic->nb_streams)
-        return;
-    avctx = ic->streams[stream_index]->codec;
-
-    switch (avctx->codec_type) {
-    case AVMEDIA_TYPE_AUDIO:
-        decoder_abort(&is->auddec, &is->sampq);
-        SDL_AoutCloseAudio(ffp->aout);
-
-        decoder_destroy(&is->auddec);
-        swr_free(&is->swr_ctx);
-        av_freep(&is->audio_buf1);
-        is->audio_buf1_size = 0;
-        is->audio_buf = NULL;
-
-#ifdef FFP_MERGE
-        if (is->rdft) {
-            av_rdft_end(is->rdft);
-            av_freep(&is->rdft_data);
-            is->rdft = NULL;
-            is->rdft_bits = 0;
-        }
-#endif
-        break;
-    case AVMEDIA_TYPE_VIDEO:
-        decoder_abort(&is->viddec, &is->pictq);
-        decoder_destroy(&is->viddec);
-        break;
-    // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
-    default:
-        break;
-    }
-
-    ic->streams[stream_index]->discard = AVDISCARD_ALL;
-    avcodec_close(avctx);
-    switch (avctx->codec_type) {
-    case AVMEDIA_TYPE_AUDIO:
-        is->audio_st = NULL;
-        is->audio_stream = -1;
-        break;
-    case AVMEDIA_TYPE_VIDEO:
-        is->video_st = NULL;
-        is->video_stream = -1;
-        break;
-    // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
-    default:
-        break;
-    }
 }
 
 static int decode_interrupt_cb(void *ctx)
