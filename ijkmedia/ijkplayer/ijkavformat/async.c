@@ -34,7 +34,6 @@
 #include "libavutil/fifo.h"
 #include "libavutil/log.h"
 #include "libavutil/opt.h"
-#include "libavutil/time.h"
 #include "libavutil/thread.h"
 #include "url.h"
 #include <stdint.h>
