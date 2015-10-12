@@ -912,6 +912,18 @@ static IJKAVMoviePlayerController* instance;
     return _player.externalPlaybackActive || self.isDanmakuMediaAirPlay;
 }
 
+- (CGSize)naturalSize
+{
+    if (_playAsset == nil)
+        return CGSizeZero;
+
+    NSArray<AVAssetTrack *> *videoTracks = [_playAsset tracksWithMediaType:AVMediaTypeVideo];
+    if (videoTracks == nil || videoTracks.count <= 0)
+        return CGSizeZero;
+
+    return [videoTracks objectAtIndex:0].naturalSize;
+}
+
 - (void)setScalingMode: (MPMovieScalingMode) aScalingMode
 {
     MPMovieScalingMode newScalingMode = aScalingMode;

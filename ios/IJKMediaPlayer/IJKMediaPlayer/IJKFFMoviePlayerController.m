@@ -80,6 +80,7 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff2.8--ijk0.4.1.1--dev0.3.3--r
 @synthesize loadState = _loadState;
 
 @synthesize controlStyle = _controlStyle;
+@synthesize naturalSize = _naturalSize;
 @synthesize scalingMode = _scalingMode;
 @synthesize shouldAutoplay = _shouldAutoplay;
 
@@ -524,6 +525,22 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     return ret / 1000;
 }
 
+- (CGSize)naturalSize
+{
+    return _naturalSize;
+}
+
+- (void)changeNaturalSize
+{
+    [self willChangeValueForKey:@"naturalSize"];
+    if (_sampleAspectRatioNumerator > 0 && _sampleAspectRatioDenominator > 0) {
+        self->_naturalSize = CGSizeMake(1.0f * _videoWidth * _sampleAspectRatioNumerator / _sampleAspectRatioDenominator, _videoHeight);
+    } else {
+        self->_naturalSize = CGSizeMake(_videoWidth, _videoHeight);
+    }
+    [self didChangeValueForKey:@"naturalSize"];
+}
+
 - (void)setScalingMode: (MPMovieScalingMode) aScalingMode
 {
     MPMovieScalingMode newScalingMode = aScalingMode;
@@ -720,10 +737,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
                 _videoWidth = avmsg->arg1;
             if (avmsg->arg2 > 0)
                 _videoHeight = avmsg->arg2;
-            [[NSNotificationCenter defaultCenter]
-             postNotificationName:IJKMoviePlayerVideoSizeChangeNotification
-             object:self
-             userInfo:@{@"width":@(_videoWidth), @"height":@(_videoHeight)}];
+            [self changeNaturalSize];
             break;
         case FFP_MSG_SAR_CHANGED:
             NSLog(@"FFP_MSG_SAR_CHANGED: %d, %d\n", avmsg->arg1, avmsg->arg2);
@@ -731,6 +745,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
                 _sampleAspectRatioNumerator = avmsg->arg1;
             if (avmsg->arg2 > 0)
                 _sampleAspectRatioDenominator = avmsg->arg2;
+            [self changeNaturalSize];
             break;
         case FFP_MSG_BUFFERING_START: {
             NSLog(@"FFP_MSG_BUFFERING_START:\n");

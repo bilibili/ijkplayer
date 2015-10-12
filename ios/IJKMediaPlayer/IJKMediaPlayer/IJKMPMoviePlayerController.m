@@ -36,6 +36,7 @@
 @dynamic loadState;
 
 @dynamic controlStyle;
+@dynamic naturalSize;
 @dynamic scalingMode;
 @dynamic shouldAutoplay;
 @synthesize isDanmakuMediaAirPlay = _isDanmakuMediaAirPlay;

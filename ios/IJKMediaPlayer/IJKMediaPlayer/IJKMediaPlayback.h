@@ -53,6 +53,7 @@
 @property(nonatomic, readonly) int64_t numberOfBytesTransferred;
 
 @property(nonatomic) MPMovieControlStyle controlStyle;
+@property(nonatomic, readonly) CGSize naturalSize;
 @property(nonatomic) MPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;
 
