@@ -148,12 +148,6 @@ static void *async_buffer_task(void *arg)
         }
         pthread_mutex_unlock(&c->mutex);
 
-        /*
-         * FIXME:
-         *
-         * av_fifo_generic_write() doesn't return immediately if arrived data is less than size,
-         * which may cause seek request is not handled in time.
-         */
         to_copy = FFMIN(4096, fifo_space);
         ret = av_fifo_generic_write(fifo, (void *)h, to_copy, (void *)wrapped_url_read);
 
