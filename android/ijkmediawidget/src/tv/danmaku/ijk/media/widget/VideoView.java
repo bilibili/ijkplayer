@@ -20,17 +20,9 @@ package tv.danmaku.ijk.media.widget;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
-
-import org.apache.http.Header;
-import org.apache.http.protocol.HTTP;
-
-import com.google.gson.Gson;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnBufferingUpdateListener;
@@ -43,8 +35,6 @@ import tv.danmaku.ijk.media.player.IMediaPlayer.OnVideoSizeChangedListener;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.option.AvFourCC;
 import tv.danmaku.ijk.media.player.option.format.AvFormatOption_HttpDetectRangeSupport;
-import android.R.bool;
-import android.R.integer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -55,14 +45,11 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 
 /**
  * Displays a video file. The VideoView class can load images from various
@@ -265,169 +252,10 @@ public class VideoView extends SurfaceView implements
     	return cdnName;
     }
     
-    private String linkAddress = null;
-    private boolean isTokenMode = false;
-    private int rootDataSourceType;
-    public void setVideoToken(String token) {
-    	isTokenMode = true;
-		this.token = token;
-		rootDataSourceType = mDataSourceType;
-		
-		loadVideoToken(this.token);
-	}
-    
-    private void loadVideoToken(String token)
-    {
-		String urlHeaderString = "http://192.168.9.117:8080/live/httpcdn?token=";
-		String tokenEncodedString;
-		try {
-			tokenEncodedString = URLEncoder.encode(token, HTTP.UTF_8);
-		} catch (UnsupportedEncodingException e) {
-			tokenEncodedString = token;
-		}
-		
-		StringBuilder urlStringBuilder = new StringBuilder();
-		String encodedUrlString = urlStringBuilder.append(urlHeaderString).append(tokenEncodedString).toString();
-		Log.v(TAG, encodedUrlString);
-		
-		//async http request
-		AsyncHttpClient client = new AsyncHttpClient();
-		client.setURLEncodingEnabled(false);
-		client.get(encodedUrlString, new AsyncHttpResponseHandler() {
-
-			@Override
-			public void onSuccess(int statusCode, Header[] headers,
-					byte[] responseBody) {
-				Log.v(TAG, "onSuccess");
-				
-				String jsonData = new String(responseBody);
-				Log.v(TAG, jsonData);
-				
-				if (jsonData.isEmpty()) {
-		            if (mOnErrorListener != null) {
-		            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
-		            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
-		            }
-		            return;
-				}
-				
-				Gson gson = new Gson();
-				PlayerUrlInfo urlInfo = new PlayerUrlInfo();
-				urlInfo = gson.fromJson(jsonData, PlayerUrlInfo.class);
-				
-				String cdnString = urlInfo.getCdn();
-				String linkString = urlInfo.getLink();
-				
-				if (cdnString==null || linkString==null) {
-		            if (mOnErrorListener != null) {
-		            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
-		            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
-		            }
-		            return;
-				}
-				
-				cdnName = cdnString;
-				linkAddress = linkString;
-				
-//				try {
-//					Thread.sleep(3000);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-				String playUrl = null;
-				if (isBackPlayMode) {
-					mDataSourceType = VOD_STREAMING_TYPE;
-					
-			    	//get vod url
-			    	String vodUrl = null;
-			    	if (cdnName.equals("ws")) {
-						String baseUrl = linkAddress.substring(0, linkAddress.indexOf("?"));
-						String vodBaseUrl = baseUrl.replace("rtmp://ws", "rtmp://wsshiyi");
-						String tailUrl = linkAddress.substring(linkAddress.indexOf("?")+1,linkAddress.length());
-						StringBuilder stringBuilder = new StringBuilder();
-						vodUrl = stringBuilder.append(vodBaseUrl).append(backPlayUrlField).append(tailUrl).toString();
-					}
-			    	
-
-			    	if (vodUrl==null) {
-			            if (mOnErrorListener != null) {
-			            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
-			            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
-			            }
-			            return;
-					}
-			    	
-			    	playUrl = vodUrl;
-				}else {
-					mDataSourceType = rootDataSourceType;
-					playUrl = linkAddress;
-				}
-				
-				setVideoPath(playUrl);
-			}
-
-			@Override
-			public void onFailure(int statusCode, Header[] headers,
-					byte[] responseBody, Throwable error) {
-				Log.v(TAG, "onFailure");
-
-	            if (mOnErrorListener != null) {
-	            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
-	            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
-	            }
-	            return;
-			}
-		});
-
-    }
-    
-    private boolean isBackPlayMode = false;
-    private String backPlayUrlField = null;
-    //new API for back play
-    public void backPlayWithABS(long absTime) //绝对时间
-    {
-    	if (!isTokenMode) return;
-    	isBackPlayMode = true;
-    	
-    	//release live stream
-    	stopPlayback();
-    	
-    	StringBuilder stringBuilder = new StringBuilder();
-    	backPlayUrlField = stringBuilder.append("?wsStreamTimeABS=").append(absTime).append("&").toString();
-    	
-    	loadVideoToken(token);
-    }
-    
-    public void backPlayWithREL(long relTime) //相对时间
-    {
-    	if (!isTokenMode) return;
-    	isBackPlayMode = true;
-    	
-    	//release live stream
-    	stopPlayback();
-    	
-    	StringBuilder stringBuilder = new StringBuilder();
-    	backPlayUrlField = stringBuilder.append("?wsStreamTimeREL=").append(relTime).append("&").toString();
-    	
-    	loadVideoToken(token);
-    }
-    
-    public void backLivePlay()
-    {
-    	if (!isTokenMode) return;
-    	isBackPlayMode = false;
-    	
-    	//release live stream
-    	stopPlayback();
-
-    	loadVideoToken(token);
-    }
-    //
-    
     public void setVideoPath(String path) {
     	//add by William
     	try {
-			this.token = URLEncoder.encode(path, HTTP.UTF_8);
+			this.token = URLEncoder.encode(path, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			this.token = path;
 		}
@@ -581,10 +409,6 @@ public class VideoView extends SurfaceView implements
         public void onPrepared(IMediaPlayer mp) {
             DebugLog.d(TAG, "onPrepared");
             
-            if (isTokenMode)
-            {
-            }
-            
             //add by William
             addOpenCountWithStream(token);
             
@@ -619,10 +443,7 @@ public class VideoView extends SurfaceView implements
             } else if (mTargetState == STATE_PLAYING) {
                 start();
             }
-            
-            if (isTokenMode) {
 
-			}
             //start info report
             if (playerInfoReport==null) {
             	playerInfoReport = new PlayerInfoReport(VideoView.this);
@@ -800,106 +621,6 @@ public class VideoView extends SurfaceView implements
         mOnInfoListener = l;
     }
     
-    private void openVideoWithToken(String token)
-    {
-		String urlHeaderString = "http://192.168.9.117:8080/live/httpcdn?token=";
-		String tokenEncodedString;
-		try {
-			tokenEncodedString = URLEncoder.encode(token, HTTP.UTF_8);
-		} catch (UnsupportedEncodingException e) {
-			tokenEncodedString = token;
-		}
-		
-		StringBuilder urlStringBuilder = new StringBuilder();
-		String encodedUrlString = urlStringBuilder.append(urlHeaderString).append(tokenEncodedString).toString();
-		Log.v(TAG, encodedUrlString);
-		
-		//async http request
-		AsyncHttpClient client = new AsyncHttpClient();
-		client.setURLEncodingEnabled(false);
-		client.get(encodedUrlString, new AsyncHttpResponseHandler() {
-
-			@Override
-			public void onSuccess(int statusCode, Header[] headers,
-					byte[] responseBody) {
-				Log.v(TAG, "onSuccess");
-				
-				String jsonData = new String(responseBody);
-				Log.v(TAG, jsonData);
-				
-				if (jsonData.isEmpty()) {
-		            if (mOnErrorListener != null) {
-		            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
-		            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
-		            }
-		            return;
-				}
-				
-				Gson gson = new Gson();
-				PlayerUrlInfo urlInfo = new PlayerUrlInfo();
-				urlInfo = gson.fromJson(jsonData, PlayerUrlInfo.class);
-				
-				String cdnString = urlInfo.getCdn();
-				String linkString = urlInfo.getLink();
-				
-				if (cdnString==null || linkString==null) {
-		            if (mOnErrorListener != null) {
-		            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
-		            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
-		            }
-		            return;
-				}
-				
-				cdnName = cdnString;
-				linkAddress = linkString;
-				
-				String playUrl = null;
-				if (isBackPlayMode) {
-					mDataSourceType = VOD_STREAMING_TYPE;
-					
-			    	//get vod url
-			    	String vodUrl = null;
-			    	if (cdnName.equals("ws")) {
-						String baseUrl = linkAddress.substring(0, linkAddress.indexOf("?"));
-						String vodBaseUrl = baseUrl.replace("rtmp://ws", "rtmp://wsshiyi");
-						String tailUrl = linkAddress.substring(linkAddress.indexOf("?")+1,linkAddress.length());
-						StringBuilder stringBuilder = new StringBuilder();
-						vodUrl = stringBuilder.append(vodBaseUrl).append(backPlayUrlField).append(tailUrl).toString();
-					}
-			    	
-
-			    	if (vodUrl==null) {
-			            if (mOnErrorListener != null) {
-			            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
-			            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
-			            }
-			            return;
-					}
-			    	
-			    	playUrl = vodUrl;
-				}else {
-					mDataSourceType = rootDataSourceType;
-					playUrl = linkAddress;
-				}
-				
-				mUri = Uri.parse(playUrl);
-				openVideo();
-			}
-
-			@Override
-			public void onFailure(int statusCode, Header[] headers,
-					byte[] responseBody, Throwable error) {
-				Log.v(TAG, "onFailure");
-
-	            if (mOnErrorListener != null) {
-	            	mOnErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN,
-	            			IMediaPlayer.MEDIA_ERROR_UNSUPPORTED);
-	            }
-	            return;
-			}
-		});
-    }
-    
     SurfaceHolder.Callback mSHCallback = new SurfaceHolder.Callback() {
         public void surfaceChanged(SurfaceHolder holder, int format, int w,
                 int h) {
@@ -931,12 +652,7 @@ public class VideoView extends SurfaceView implements
                 mMediaPlayer.setDisplay(mSurfaceHolder);
                 resume();
             } else {
-//                openVideo();
-            	if (isTokenMode && !isBackPlayMode) {
-            		openVideoWithToken(token);
-				}else {
-					openVideo();
-				}
+                openVideo();
             }
         }
 

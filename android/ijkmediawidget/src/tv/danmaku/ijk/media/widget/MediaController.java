@@ -35,7 +35,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
@@ -103,12 +102,6 @@ public class MediaController extends FrameLayout {
     private static final int SHOW_PROGRESS = 2;
     private boolean mFromXml = false;
     private ImageButton mPauseButton;
-    
-    //new buttons
-    private Button mBackLiveButton;
-    private Button mBackPlayABSButton;
-    private EditText mBackPlayABSTimeEditText;
-    private Button mBackPlayRELButton;
 
     private AudioManager mAM;
 	//add by fw------start
@@ -191,31 +184,6 @@ public class MediaController extends FrameLayout {
             mPauseButton.requestFocus();
             mPauseButton.setOnClickListener(mPauseListener);
         }
-        
-        //for back live play
-        mBackLiveButton = (Button)v.findViewById(R.id.mediacontroller_back_live);
-        if (mBackLiveButton != null) {
-        	mBackLiveButton.requestFocus();
-        	mBackLiveButton.setOnClickListener(mBackLiveListener);
-		}
-        //for back play abs
-        mBackPlayABSButton = (Button)v.findViewById(R.id.mediacontroller_backplay_abs);
-        if (mBackPlayABSButton != null) {
-        	mBackPlayABSButton.requestFocus();
-        	mBackPlayABSButton.setOnClickListener(mBackPlayABSListener);
-		}
-        
-        mBackPlayABSTimeEditText = (EditText)v.findViewById(R.id.mediacontroller_backplay_abstime);
-        if (mBackPlayABSTimeEditText!=null) {
-		}
-        
-        //for back play rel
-        mBackPlayRELButton = (Button)v.findViewById(R.id.mediacontroller_backplay_rel);
-        if (mBackPlayRELButton != null) {
-        	mBackPlayRELButton.requestFocus();
-        	mBackPlayRELButton.setOnClickListener(mBackPlayRELListener);
-		}
-        
 
 		//add by fw---------start
 		mFasterBn = (Button)v.findViewById(R.id.faster);
@@ -314,36 +282,9 @@ public class MediaController extends FrameLayout {
 	    }
 	 
 	    public void onNothingSelected(AdapterView<?> arg0) {
-	        // TODO Auto-generated method stub
-	 
+
 	    }	
 	};
-	
-    private View.OnClickListener mBackLiveListener = new View.OnClickListener() {
-        public void onClick(View v) {
-        	if (mPlayer!=null) {
-        		mPlayer.backLivePlay();
-			}
-        }
-    };
-    private View.OnClickListener mBackPlayABSListener = new View.OnClickListener() {
-        public void onClick(View v) {
-        	if (mPlayer!=null) {
-        		String absTimeString = mBackPlayABSTimeEditText.getText().toString();
-        		
-        		mPlayer.backPlayWithABS( Long.parseLong(absTimeString));
-			}
-        }
-    };
-    private View.OnClickListener mBackPlayRELListener = new View.OnClickListener() {
-        public void onClick(View v) {
-        	if (mPlayer!=null) {
-        		String relTimeString = mBackPlayABSTimeEditText.getText().toString();
-        		
-        		mPlayer.backPlayWithREL( Long.parseLong(relTimeString));
-			}
-        }
-    };
 
     public void setMediaPlayer(MediaPlayerControl player) {
         mPlayer = player;
@@ -721,9 +662,6 @@ public class MediaController extends FrameLayout {
         boolean canSeekForward();
         
         //new API
-        void backPlayWithABS(long absTime);
-        void backPlayWithREL(long relTime);
-        void backLivePlay();
 		void setPlayerSpeedMode(int speedMode);
 		void setPlayerVolume(int volume);
     }
