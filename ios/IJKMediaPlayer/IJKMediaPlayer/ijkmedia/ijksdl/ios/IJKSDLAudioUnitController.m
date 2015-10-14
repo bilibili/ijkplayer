@@ -147,6 +147,11 @@
         NSLog(@"AudioUnit: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
     }
 
+    if (NO == [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:&error]) {
+        
+        NSLog(@"AudioQueue: AVAudioSession.setCategory(AVAudioSessionCategoryAmbient) failed: %@\n", error ? [error localizedDescription] : @"nil");
+    }
+    
     OSStatus status = AudioOutputUnitStart(_auUnit);
     if (status != noErr)
         NSLog(@"AudioUnit: AudioOutputUnitStart failed (%d)\n", (int)status);
