@@ -61,7 +61,6 @@
     options.cache = 6000;
     
     [IJKFFMoviePlayerController setLogReport:YES];
-//    self.player = [[IJKFFMoviePlayerController alloc] initWithContentToken:self.urlString withOptions:options];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURLString:self.urlString withOptions:options withSegmentResolver:nil];
     [self installMovieNotificationObservers];
 }
