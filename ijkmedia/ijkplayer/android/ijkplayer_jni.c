@@ -349,6 +349,19 @@ LABEL_RETURN:
 }
 
 static void
+ijkMediaPlayer_setPropertyFloat(JNIEnv *env, jobject thiz, jint id, jfloat value)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setPropertyFloat: null mp", LABEL_RETURN);
+
+    ijkmp_set_property_float(mp, id, value);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return;
+}
+
+static void
 IjkMediaPlayer_setVolume(JNIEnv *env, jobject thiz, jfloat leftVolume, jfloat rightVolume)
 {
     MPTRACE("%s\n", __func__);
@@ -936,6 +949,7 @@ static JNINativeMethod g_methods[] = {
     { "_setLoopCount",          "(I)V",                     (void *) IjkMediaPlayer_setLoopCount },
     { "_getLoopCount",          "()I",                      (void *) IjkMediaPlayer_getLoopCount },
     { "_getPropertyFloat",      "(IF)F",                    (void *) ijkMediaPlayer_getPropertyFloat },
+    { "_setPropertyFloat",      "(IF)V",                    (void *) ijkMediaPlayer_setPropertyFloat },
 
     { "native_profileBegin",    "(Ljava/lang/String;)V",    (void *) IjkMediaPlayer_native_profileBegin },
     { "native_profileEnd",      "()V",                      (void *) IjkMediaPlayer_native_profileEnd },

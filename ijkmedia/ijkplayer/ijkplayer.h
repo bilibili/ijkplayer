@@ -173,6 +173,7 @@ int             ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info
 void            ijkmp_set_playback_rate(IjkMediaPlayer *mp, float rate);
 
 float           ijkmp_get_property_float(IjkMediaPlayer *mp, int id, float default_value);
+void            ijkmp_set_property_float(IjkMediaPlayer *mp, int id, float default_value);
 
 // must be freed with free();
 IjkMediaMeta   *ijkmp_get_meta_l(IjkMediaPlayer *mp);

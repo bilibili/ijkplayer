@@ -3856,6 +3856,16 @@ float ffp_get_property_float(FFPlayer *ffp, int id, float default_value)
     }
 }
 
+void ffp_set_property_float(FFPlayer *ffp, int id, float value)
+{
+    switch (id) {
+        case FFP_PROP_FLOAT_PLAYBACK_RATE:
+            ffp_set_playback_rate(ffp, value);
+        default:
+            return;
+    }
+}
+
 IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 {
     if (!ffp)

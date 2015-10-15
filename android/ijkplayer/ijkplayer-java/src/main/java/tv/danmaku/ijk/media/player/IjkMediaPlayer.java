@@ -102,6 +102,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     // properties
     public static final int PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND = 10001;
     public static final int PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND = 10002;
+    public static final int FFP_PROP_FLOAT_PLAYBACK_RATE              = 10003;
     //----------------------------------------
 
     @AccessedByNative
@@ -660,6 +661,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     }
 
     private native float _getPropertyFloat(int property, float defaultValue);
+    private native void  _setPropertyFloat(int property, float value);
 
     public native void setVolume(float leftVolume, float rightVolume);
 
