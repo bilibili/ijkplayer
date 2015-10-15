@@ -1218,8 +1218,6 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
     if (!(vp = frame_queue_peek_writable(&is->pictq)))
         return -1;
 
-    vp->sar = src_frame->sample_aspect_ratio;
-
     /* alloc or resize hardware picture buffer */
     if (!vp->bmp || vp->reallocate || !vp->allocated ||
         vp->width  != src_frame->width ||
@@ -1275,6 +1273,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         vp->duration = duration;
         vp->pos = pos;
         vp->serial = serial;
+        vp->sar = src_frame->sample_aspect_ratio;
 
         vp->bmp->sar_num = vp->sar.num;
         vp->bmp->sar_den = vp->sar.den;
