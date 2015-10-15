@@ -304,8 +304,7 @@ static int amc_queue_picture(
         SDL_VoutLockYUVOverlay(vp->bmp);
 
         /* get a pointer on the bitmap */
-        if (SDL_VoutOverlayAMediaCodec_attachFrame(vp->bmp, opaque->acodec,
-            output_buffer_index, buffer_info) < 0) {
+        if (SDL_VoutOverlayAMediaCodec_attachFrame(vp->bmp, opaque->acodec, output_buffer_index) < 0) {
             av_log(NULL, AV_LOG_FATAL, "Cannot initialize the conversion context\n");
             exit(1);
         }

@@ -36,8 +36,7 @@ bool SDL_VoutOverlayAMediaCodec_isKindOf(SDL_VoutOverlay *overlay);
 int  SDL_VoutOverlayAMediaCodec_attachFrame(
      SDL_VoutOverlay *overlay,
      SDL_AMediaCodec *acodec,
-     int output_buffer_index,
-     SDL_AMediaCodecBufferInfo *buffer_info);
+     int output_buffer_index);
 int  SDL_VoutOverlayAMediaCodec_releaseFrame(SDL_VoutOverlay *overlay, SDL_AMediaCodec *acodec, bool render);
 
 #endif

@@ -34,7 +34,6 @@ typedef struct SDL_VoutOverlay_Opaque {
 
     SDL_AMediaCodec          *acodec;
     int                       buffer_index;
-    SDL_AMediaCodecBufferInfo buffer_info;
     volatile bool             is_buffer_own;
 } SDL_VoutOverlay_Opaque;
 
@@ -146,8 +145,7 @@ bool SDL_VoutOverlayAMediaCodec_isKindOf(SDL_VoutOverlay *overlay)
 int SDL_VoutOverlayAMediaCodec_attachFrame(
     SDL_VoutOverlay *overlay,
     SDL_AMediaCodec *acodec,
-    int output_buffer_index,
-    SDL_AMediaCodecBufferInfo *buffer_info)
+    int output_buffer_index)
 {
     if (!check_object(overlay, __func__))
         return -1;
@@ -155,7 +153,6 @@ int SDL_VoutOverlayAMediaCodec_attachFrame(
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     opaque->acodec        = acodec;
     opaque->buffer_index  = output_buffer_index;
-    opaque->buffer_info   = *buffer_info;
     opaque->is_buffer_own = true;
 
     SDL_AMediaCodec_increaseReference(acodec);
