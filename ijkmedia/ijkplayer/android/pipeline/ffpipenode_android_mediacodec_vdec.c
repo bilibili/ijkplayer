@@ -34,7 +34,8 @@
 
 #define AMC_USE_AVBITSTREAM_FILTER 0
 #ifndef AMCTRACE
-#define AMCTRACE(...)
+//#define AMCTRACE(...)
+#define AMCTRACE ALOGE
 #endif
 
 #define AMC_INPUT_TIMEOUT_US  (1000000)
@@ -186,7 +187,6 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
         }
 
         assert(opaque->weak_vout);
-        SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, opaque->acodec);
     }
 
     amc_ret = SDL_AMediaCodec_configure_surface(env, opaque->acodec, opaque->input_aformat, opaque->jsurface, NULL, 0);
@@ -198,6 +198,7 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
 
     SDL_AMediaCodec_start(opaque->acodec);
     opaque->acodec_first_dequeue_output_request = true;
+    SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, opaque->acodec);
 fail:
     return ret;
 }
@@ -304,7 +305,7 @@ static int amc_queue_picture(
         SDL_VoutLockYUVOverlay(vp->bmp);
 
         /* get a pointer on the bitmap */
-        if (SDL_VoutOverlayAMediaCodec_attachFrame(vp->bmp, opaque->acodec, output_buffer_index) < 0) {
+        if (SDL_VoutOverlayAMediaCodec_attachFrame(vp->bmp, output_buffer_index) < 0) {
             av_log(NULL, AV_LOG_FATAL, "Cannot initialize the conversion context\n");
             exit(1);
         }

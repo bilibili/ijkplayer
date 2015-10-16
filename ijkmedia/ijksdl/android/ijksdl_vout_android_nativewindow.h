@@ -32,6 +32,19 @@ typedef struct SDL_AMediaCodec SDL_AMediaCodec;
 
 SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow();
 void SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_window);
-void SDL_VoutAndroid_setAMediaCodec(SDL_Vout *vout, SDL_AMediaCodec *acodec);
+void             SDL_VoutAndroid_setAMediaCodec(SDL_Vout *vout, SDL_AMediaCodec *acodec);
+SDL_AMediaCodec *SDL_VoutAndroid_peekAMediaCodec(SDL_Vout *vout);
+
+/*
+ * MediaCodec buffer proxy
+ */
+
+typedef struct SDL_AMediaCodecBufferProxy SDL_AMediaCodecBufferProxy;
+void SDL_AMediaCodecBufferProxy_lock(SDL_AMediaCodecBufferProxy *proxy);
+void SDL_AMediaCodecBufferProxy_unlock(SDL_AMediaCodecBufferProxy *proxy);
+
+SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy(SDL_Vout *vout, int buffer_index);
+int SDL_VoutAndroid_releaseBufferProxyP(SDL_Vout *vout, SDL_AMediaCodecBufferProxy **proxy, bool render);
+int SDL_VoutAndroid_releaseBufferProxyP_l(SDL_Vout *vout, SDL_AMediaCodecBufferProxy **proxy, bool render);
 
 #endif

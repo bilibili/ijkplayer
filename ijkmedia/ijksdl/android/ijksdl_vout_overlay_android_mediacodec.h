@@ -33,10 +33,7 @@ typedef struct SDL_AMediaCodecBufferInfo SDL_AMediaCodecBufferInfo;
 SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout);
 
 bool SDL_VoutOverlayAMediaCodec_isKindOf(SDL_VoutOverlay *overlay);
-int  SDL_VoutOverlayAMediaCodec_attachFrame(
-     SDL_VoutOverlay *overlay,
-     SDL_AMediaCodec *acodec,
-     int output_buffer_index);
-int  SDL_VoutOverlayAMediaCodec_releaseFrame(SDL_VoutOverlay *overlay, SDL_AMediaCodec *acodec, bool render);
+int  SDL_VoutOverlayAMediaCodec_attachFrame(SDL_VoutOverlay *overlay, int output_buffer_index);
+int  SDL_VoutOverlayAMediaCodec_releaseFrame_l(SDL_VoutOverlay *overlay, SDL_AMediaCodec *acodec, bool render);
 
 #endif

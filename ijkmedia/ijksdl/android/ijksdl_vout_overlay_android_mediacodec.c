@@ -22,19 +22,25 @@
  */
 
 #include "ijksdl_vout_overlay_android_mediacodec.h"
+#include "ijksdl/ijksdl_stdinc.h"
+#include "ijksdl/ijksdl_mutex.h"
+#include "ijksdl/ijksdl_vout_internal.h"
+#include "ijksdl/ijksdl_video.h"
+#include "ijksdl_vout_android_nativewindow.h"
 #include "ijksdl_codec_android_mediacodec.h"
 #include "ijksdl_inc_internal_android.h"
-#include "../ijksdl_stdinc.h"
-#include "../ijksdl_mutex.h"
-#include "../ijksdl_vout_internal.h"
-#include "../ijksdl_video.h"
+
+#ifndef AMCTRACE
+#define AMCTRACE(...)
+#endif
 
 typedef struct SDL_VoutOverlay_Opaque {
     SDL_mutex *mutex;
 
-    SDL_AMediaCodec          *acodec;
-    int                       buffer_index;
-    volatile bool             is_buffer_own;
+    SDL_Vout                   *vout;
+    SDL_AMediaCodec            *acodec;
+
+    SDL_AMediaCodecBufferProxy *buffer_proxy;
 } SDL_VoutOverlay_Opaque;
 
 static int overlay_lock(SDL_VoutOverlay *overlay)
@@ -51,18 +57,14 @@ static int overlay_unlock(SDL_VoutOverlay *overlay)
 
 static void overlay_unref(SDL_VoutOverlay *overlay)
 {
-    // TODO: error handle
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
-    if (opaque->is_buffer_own) {
-        SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, opaque->buffer_index, false);
-        SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
-        opaque->is_buffer_own = false;
-    }
+
+    SDL_VoutAndroid_releaseBufferProxyP(opaque->vout, &opaque->buffer_proxy, false);
 }
 
 static void overlay_free_l(SDL_VoutOverlay *overlay)
 {
-    ALOGE("SDL_Overlay(ffmpeg): overlay_free_l(%p)\n", overlay);
+    AMCTRACE("SDL_Overlay(ffmpeg): overlay_free_l(%p)\n", overlay);
     if (!overlay)
         return;
 
@@ -109,6 +111,9 @@ SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, Uint32
 
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     opaque->mutex         = SDL_CreateMutex();
+    opaque->vout          = vout;
+    opaque->acodec        = NULL;
+    opaque->buffer_proxy  = NULL;
 
     overlay->opaque_class = &g_vout_overlay_amediacodec_class;
     overlay->format       = format;
@@ -142,48 +147,26 @@ bool SDL_VoutOverlayAMediaCodec_isKindOf(SDL_VoutOverlay *overlay)
     return check_object(overlay, __func__);
 }
 
-int SDL_VoutOverlayAMediaCodec_attachFrame(
-    SDL_VoutOverlay *overlay,
-    SDL_AMediaCodec *acodec,
-    int output_buffer_index)
+int SDL_VoutOverlayAMediaCodec_attachFrame(SDL_VoutOverlay *overlay, int output_buffer_index)
 {
+    AMCTRACE("%s(%p, %p, %d)\n", __func__, overlay, acodec, output_buffer_index);
     if (!check_object(overlay, __func__))
         return -1;
 
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
-    opaque->acodec        = acodec;
-    opaque->buffer_index  = output_buffer_index;
-    opaque->is_buffer_own = true;
+    if (opaque->buffer_proxy)
+        SDL_VoutAndroid_releaseBufferProxyP(opaque->vout, &opaque->buffer_proxy, false);
 
-    SDL_AMediaCodec_increaseReference(acodec);
+    opaque->acodec       = SDL_VoutAndroid_peekAMediaCodec(opaque->vout);
+    opaque->buffer_proxy = SDL_VoutAndroid_obtainBufferProxy(opaque->vout, output_buffer_index);
     return 0;
 }
 
-int SDL_VoutOverlayAMediaCodec_releaseFrame(SDL_VoutOverlay *overlay, SDL_AMediaCodec *acodec, bool render)
+int  SDL_VoutOverlayAMediaCodec_releaseFrame_l(SDL_VoutOverlay *overlay, SDL_AMediaCodec *acodec, bool render)
 {
     if (!check_object(overlay, __func__))
         return -1;
 
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
-    if (acodec == NULL) {
-        acodec = opaque->acodec;
-    } else if (acodec != opaque->acodec) {
-        ALOGE("%s: mismatch amediacodec orig:%p real:%p\n", __func__, opaque->acodec, acodec);
-        return -1;
-    }
-
-    if (opaque->buffer_index < 0) {
-        // release fake picture buffer
-        opaque->is_buffer_own = false;
-    } else if (opaque->is_buffer_own) {
-        sdl_amedia_status_t amc_ret = SDL_AMediaCodec_releaseOutputBuffer(acodec, opaque->buffer_index, render);
-        SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
-        opaque->is_buffer_own = false;
-        if (amc_ret != SDL_AMEDIA_OK) {
-            ALOGE("%s: SDL_AMediaCodec_releaseOutputBuffer: failed (%d)\n", __func__, (int)amc_ret);
-            return -1;
-        }
-    }
-
-    return 0;
+    return SDL_VoutAndroid_releaseBufferProxyP_l(opaque->vout, &opaque->buffer_proxy, render);
 }
