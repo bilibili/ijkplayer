@@ -157,7 +157,10 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (aUrl == nil)
         return nil;
 
-    return [self initWithContentURLString:[aUrl absoluteString]
+    // Detect if URL is file path and return proper string for it
+    NSString *aUrlString = [aUrl isFileURL] ? [aUrl path] : [aUrl absoluteString];
+
+    return [self initWithContentURLString:aUrlString
                               withOptions:options
                       withSegmentResolver:segmentResolver];
 }
