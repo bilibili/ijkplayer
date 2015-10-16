@@ -25,11 +25,11 @@
 
 #include <assert.h>
 #include <android/native_window.h>
+#include "ijksdl/ijksdl_vout.h"
+#include "ijksdl/ijksdl_vout_internal.h"
+#include "ijksdl/ffmpeg/ijksdl_vout_overlay_ffmpeg.h"
 #include "ijksdl_vout_overlay_android_mediacodec.h"
 #include "android_nativewindow.h"
-#include "../ijksdl_vout.h"
-#include "../ijksdl_vout_internal.h"
-#include "../ffmpeg/ijksdl_vout_overlay_ffmpeg.h"
 
 typedef struct SDL_Vout_Opaque {
     ANativeWindow   *native_window;
