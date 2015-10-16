@@ -37,7 +37,7 @@ typedef struct SDL_Vout_Opaque {
     int              null_native_window_warned; // reduce log for null window
 } SDL_Vout_Opaque;
 
-static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, Uint32 format, SDL_Vout *vout)
+static SDL_VoutOverlay *func_create_overlay_l(int width, int height, Uint32 format, SDL_Vout *vout)
 {
     switch (format) {
     case SDL_FCC__AMC:
@@ -47,15 +47,15 @@ static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, Uint32 form
     }
 }
 
-static SDL_VoutOverlay *vout_create_overlay(int width, int height, Uint32 format, SDL_Vout *vout)
+static SDL_VoutOverlay *func_create_overlay(int width, int height, Uint32 format, SDL_Vout *vout)
 {
     SDL_LockMutex(vout->mutex);
-    SDL_VoutOverlay *overlay = vout_create_overlay_l(width, height, format, vout);
+    SDL_VoutOverlay *overlay = func_create_overlay_l(width, height, format, vout);
     SDL_UnlockMutex(vout->mutex);
     return overlay;
 }
 
-static void vout_free_l(SDL_Vout *vout)
+static void func_free_l(SDL_Vout *vout)
 {
     if (!vout)
         return;
@@ -71,7 +71,7 @@ static void vout_free_l(SDL_Vout *vout)
     SDL_Vout_FreeInternal(vout);
 }
 
-static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
+static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
     ANativeWindow *native_window = opaque->native_window;
@@ -100,10 +100,10 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     }
 }
 
-static int voud_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
+static int func_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     SDL_LockMutex(vout->mutex);
-    int retval = voud_display_overlay_l(vout, overlay);
+    int retval = func_display_overlay_l(vout, overlay);
     SDL_UnlockMutex(vout->mutex);
     return retval;
 }
@@ -122,9 +122,9 @@ SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
     opaque->native_window = NULL;
 
     vout->opaque_class    = &g_nativewindow_class;
-    vout->create_overlay  = vout_create_overlay;
-    vout->free_l          = vout_free_l;
-    vout->display_overlay = voud_display_overlay;
+    vout->create_overlay  = func_create_overlay;
+    vout->free_l          = func_free_l;
+    vout->display_overlay = func_display_overlay;
 
     return vout;
 }
