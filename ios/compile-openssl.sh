@@ -20,8 +20,9 @@
 
 FF_ALL_ARCHS_IOS6_SDK="armv7 armv7s i386"
 FF_ALL_ARCHS_IOS7_SDK="armv7 armv7s arm64 i386 x86_64"
+FF_ALL_ARCHS_IOS8_SDK="armv7 arm64 i386 x86_64"
 
-FF_ALL_ARCHS=$FF_ALL_ARCHS_IOS7_SDK
+FF_ALL_ARCHS=$FF_ALL_ARCHS_IOS8_SDK
 
 #----------
 UNI_BUILD_ROOT=`pwd`
@@ -92,7 +93,8 @@ elif [ "$FF_TARGET" = "clean" ]; then
     done
 else
     echo "Usage:"
-    echo "  compile-openssl.sh armv7|armv7s|arm64|i386|x86_64"
+    echo "  compile-openssl.sh armv7|arm64|i386|x86_64"
+    echo "  compile-openssl.sh armv7s (obselete)"
     echo "  compile-openssl.sh lipo"
     echo "  compile-openssl.sh all"
     echo "  compile-openssl.sh clean"
