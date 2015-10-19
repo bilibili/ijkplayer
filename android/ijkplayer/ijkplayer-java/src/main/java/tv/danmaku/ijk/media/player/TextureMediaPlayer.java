@@ -25,6 +25,7 @@ import android.view.SurfaceHolder;
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class TextureMediaPlayer extends MediaPlayerProxy implements IMediaPlayer, ISurfaceTextureHolder {
     private SurfaceTexture mSurfaceTexture;
+    private ISurfaceTextureHost mSurfaceTextureHost;
 
     public TextureMediaPlayer(IMediaPlayer backEndMediaPlayer) {
         super(backEndMediaPlayer);
@@ -32,7 +33,11 @@ public class TextureMediaPlayer extends MediaPlayerProxy implements IMediaPlayer
 
     public void releaseSurfaceTexture() {
         if (mSurfaceTexture != null) {
-            mSurfaceTexture.release();
+            if (mSurfaceTextureHost != null) {
+                mSurfaceTextureHost.releaseSurfaceTexture(mSurfaceTexture);
+            } else {
+                mSurfaceTexture.release();
+            }
             mSurfaceTexture = null;
         }
     }
@@ -85,5 +90,10 @@ public class TextureMediaPlayer extends MediaPlayerProxy implements IMediaPlayer
     @Override
     public SurfaceTexture getSurfaceTexture() {
         return mSurfaceTexture;
+    }
+
+    @Override
+    public void setSurfaceTextureHost(ISurfaceTextureHost host) {
+        mSurfaceTextureHost = host;
     }
 }

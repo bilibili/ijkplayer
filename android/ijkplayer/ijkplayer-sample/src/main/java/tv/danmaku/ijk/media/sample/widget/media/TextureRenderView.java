@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.ISurfaceTextureHolder;
+import tv.danmaku.ijk.media.player.ISurfaceTextureHost;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class TextureRenderView extends TextureView implements IRenderView {
@@ -76,6 +77,12 @@ public class TextureRenderView extends TextureView implements IRenderView {
     @Override
     public boolean shouldWaitForResize() {
         return false;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        mSurfaceCallback.onDetachedFromWindow();
+        super.onDetachedFromWindow();
     }
 
     //--------------------
@@ -120,17 +127,20 @@ public class TextureRenderView extends TextureView implements IRenderView {
     //--------------------
 
     public IRenderView.ISurfaceHolder getSurfaceHolder() {
-        return new InternalSurfaceHolder(this, mSurfaceCallback.mSurfaceTexture);
+        return new InternalSurfaceHolder(this, mSurfaceCallback.mSurfaceTexture, mSurfaceCallback);
     }
 
     private static final class InternalSurfaceHolder implements IRenderView.ISurfaceHolder {
         private TextureRenderView mTextureView;
         private SurfaceTexture mSurfaceTexture;
+        private ISurfaceTextureHost mSurfaceTextureHost;
 
         public InternalSurfaceHolder(@NonNull TextureRenderView textureView,
-                                     @Nullable SurfaceTexture surfaceTexture) {
+                                     @Nullable SurfaceTexture surfaceTexture,
+                                     @NonNull ISurfaceTextureHost surfaceTextureHost) {
             mTextureView = textureView;
             mSurfaceTexture = surfaceTexture;
+            mSurfaceTextureHost = surfaceTextureHost;
         }
 
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -148,6 +158,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
                     mTextureView.setSurfaceTexture(surfaceTexture);
                 } else {
                     textureHolder.setSurfaceTexture(mSurfaceTexture);
+                    textureHolder.setSurfaceTextureHost(mSurfaceTextureHost);
                 }
             } else {
                 mp.setSurface(openSurface());
@@ -197,13 +208,14 @@ public class TextureRenderView extends TextureView implements IRenderView {
 
     private SurfaceCallback mSurfaceCallback;
 
-    private static final class SurfaceCallback implements TextureView.SurfaceTextureListener {
+    private static final class SurfaceCallback implements TextureView.SurfaceTextureListener, ISurfaceTextureHost {
         private SurfaceTexture mSurfaceTexture;
         private boolean mIsFormatChanged;
         private int mWidth;
         private int mHeight;
 
         private boolean mOwnSurfaceTexture = true;
+        private boolean mDetachedFromWindow = false;
 
         private WeakReference<TextureRenderView> mWeakRenderView;
         private Map<IRenderCallback, Object> mRenderCallbackMap = new ConcurrentHashMap<IRenderCallback, Object>();
@@ -222,13 +234,13 @@ public class TextureRenderView extends TextureView implements IRenderView {
             ISurfaceHolder surfaceHolder = null;
             if (mSurfaceTexture != null) {
                 if (surfaceHolder == null)
-                    surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), mSurfaceTexture);
+                    surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), mSurfaceTexture, this);
                 callback.onSurfaceCreated(surfaceHolder, mWidth, mHeight);
             }
 
             if (mIsFormatChanged) {
                 if (surfaceHolder == null)
-                    surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), mSurfaceTexture);
+                    surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), mSurfaceTexture, this);
                 callback.onSurfaceChanged(surfaceHolder, 0, mWidth, mHeight);
             }
         }
@@ -244,7 +256,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
             mWidth = 0;
             mHeight = 0;
 
-            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), surface);
+            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), surface, this);
             for (IRenderCallback renderCallback : mRenderCallbackMap.keySet()) {
                 renderCallback.onSurfaceCreated(surfaceHolder, 0, 0);
             }
@@ -257,7 +269,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
             mWidth = width;
             mHeight = height;
 
-            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), surface);
+            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), surface, this);
             for (IRenderCallback renderCallback : mRenderCallbackMap.keySet()) {
                 renderCallback.onSurfaceChanged(surfaceHolder, 0, width, height);
             }
@@ -270,7 +282,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
             mWidth = 0;
             mHeight = 0;
 
-            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), surface);
+            ISurfaceHolder surfaceHolder = new InternalSurfaceHolder(mWeakRenderView.get(), surface, this);
             for (IRenderCallback renderCallback : mRenderCallbackMap.keySet()) {
                 renderCallback.onSurfaceDestroyed(surfaceHolder);
             }
@@ -280,6 +292,26 @@ public class TextureRenderView extends TextureView implements IRenderView {
 
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        }
+
+        protected void onDetachedFromWindow() {
+            mDetachedFromWindow = true;
+        }
+
+        //--------------------
+        // ISurfaceTextureHost
+        //--------------------
+
+        @Override
+        public void releaseSurfaceTexture(SurfaceTexture surfaceTexture) {
+            if (surfaceTexture == null)
+                return;
+
+            if (mDetachedFromWindow) {
+                surfaceTexture.release();
+            } else {
+                setOwnSurfaceTexture(true);
+            }
         }
     }
 
