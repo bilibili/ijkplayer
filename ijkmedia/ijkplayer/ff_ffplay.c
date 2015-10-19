@@ -167,8 +167,7 @@ static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
     q->last_pkt = pkt1;
     q->nb_packets++;
     q->size += pkt1->pkt.size + sizeof(*pkt1);
-    if (pkt1->pkt.duration > 0)
-        q->duration += pkt1->pkt.duration;
+    q->duration = (q->last_pkt->pkt.duration + q->last_pkt->pkt.pts - q->first_pkt->pkt.pts);
     /* XXX: should duplicate packet data in DV case */
     SDL_CondSignal(q->cond);
     return 0;
@@ -300,8 +299,7 @@ static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *seria
                 q->last_pkt = NULL;
             q->nb_packets--;
             q->size -= pkt1->pkt.size + sizeof(*pkt1);
-            if (pkt1->pkt.duration > 0)
-                q->duration -= pkt1->pkt.duration;
+            q->duration = q->last_pkt ? (q->last_pkt->pkt.duration + q->last_pkt->pkt.pts - q->first_pkt->pkt.pts) : 0;
             *pkt = pkt1->pkt;
             if (serial)
                 *serial = pkt1->serial;
@@ -3668,10 +3666,10 @@ void ffp_check_buffering_l(FFPlayer *ffp)
     int buf_size_percent      = -1;
     int buf_time_percent      = -1;
     int hwm_in_bytes          = ffp->high_water_mark_in_bytes;
-    int need_start_buffering  = 0;
     int audio_time_base_valid = 0;
     int video_time_base_valid = 0;
     int64_t buf_time_position = -1;
+    static int need_continue_buffering  = 0;
 
     if(is->audio_st)
         audio_time_base_valid = is->audio_st->time_base.den > 0 && is->audio_st->time_base.num > 0;
@@ -3742,20 +3740,17 @@ void ffp_check_buffering_l(FFPlayer *ffp)
     }
 
     int buf_percent = -1;
-    if (buf_time_percent >= 0) {
-        // alwas depend on cache duration if valid
-        if (buf_time_percent >= 100)
-            need_start_buffering = 1;
-        buf_percent = buf_time_percent;
-    } else {
-        if (buf_size_percent >= 100)
-            need_start_buffering = 1;
-        buf_percent = buf_size_percent;
-    }
-
     if (buf_time_percent >= 0 && buf_size_percent >= 0) {
         buf_percent = FFMIN(buf_time_percent, buf_size_percent);
     }
+    else if (buf_time_percent >= 0) {
+        // alwas depend on cache duration if valid
+        buf_percent = buf_time_percent;
+    } else {
+        buf_percent = buf_size_percent;
+    }
+    need_continue_buffering = (buf_percent < 100);
+    
     if (buf_percent) {
 #ifdef FFP_SHOW_BUF_POS
         av_log(ffp, AV_LOG_DEBUG, "buf pos=%"PRId64", %%%d\n", buf_time_position, buf_percent);
@@ -3763,22 +3758,21 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_UPDATE, (int)buf_time_position, buf_percent);
     }
 
-    if (need_start_buffering) {
+    if (need_continue_buffering) {
         if (hwm_in_ms < ffp->next_high_water_mark_in_ms) {
             hwm_in_ms = ffp->next_high_water_mark_in_ms;
         } else {
             hwm_in_ms *= 2;
         }
-
-        if (hwm_in_ms > ffp->max_high_water_mark_in_ms)
-            hwm_in_ms = ffp->max_high_water_mark_in_ms;
-
-        ffp->current_high_water_mark_in_ms = hwm_in_ms;
-
+        
+        ffp->current_high_water_mark_in_ms = FFMIN(hwm_in_ms, ffp->max_high_water_mark_in_ms);
+    }
+    else{
         if (is->buffer_indicator_queue && is->buffer_indicator_queue->nb_packets > 0) {
             if (   (is->audioq.nb_packets > MIN_MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
                 && (is->videoq.nb_packets > MIN_MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)) {
                 ffp_toggle_buffering(ffp, 0);
+                ffp->current_high_water_mark_in_ms = ffp->start_high_water_mark_in_ms;
             }
         }
     }
