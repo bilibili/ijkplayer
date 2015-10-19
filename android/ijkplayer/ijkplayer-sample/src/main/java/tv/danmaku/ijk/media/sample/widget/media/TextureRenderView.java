@@ -141,7 +141,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
             if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) &&
                     (mp instanceof ISurfaceTextureHolder)) {
                 ISurfaceTextureHolder textureHolder = (ISurfaceTextureHolder) mp;
-                mTextureView.mSurfaceCallback.setOwnSurfaceTecture(false);
+                mTextureView.mSurfaceCallback.setOwnSurfaceTexture(false);
 
                 SurfaceTexture surfaceTexture = textureHolder.getSurfaceTexture();
                 if (surfaceTexture != null) {
@@ -203,7 +203,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
         private int mWidth;
         private int mHeight;
 
-        private boolean mOwnSurfaceTecture = true;
+        private boolean mOwnSurfaceTexture = true;
 
         private WeakReference<TextureRenderView> mWeakRenderView;
         private Map<IRenderCallback, Object> mRenderCallbackMap = new ConcurrentHashMap<IRenderCallback, Object>();
@@ -212,8 +212,8 @@ public class TextureRenderView extends TextureView implements IRenderView {
             mWeakRenderView = new WeakReference<TextureRenderView>(renderView);
         }
 
-        public void setOwnSurfaceTecture(boolean ownSurfaceTecture) {
-            mOwnSurfaceTecture = ownSurfaceTecture;
+        public void setOwnSurfaceTexture(boolean ownSurfaceTexture) {
+            mOwnSurfaceTexture = mOwnSurfaceTexture;
         }
 
         public void addRenderCallback(@NonNull IRenderCallback callback) {
@@ -275,7 +275,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
                 renderCallback.onSurfaceDestroyed(surfaceHolder);
             }
 
-            return mOwnSurfaceTecture;
+            return mOwnSurfaceTexture;
         }
 
         @Override
