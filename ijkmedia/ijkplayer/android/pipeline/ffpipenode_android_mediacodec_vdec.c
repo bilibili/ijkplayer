@@ -214,122 +214,6 @@ static int reconfigure_codec(JNIEnv *env, IJKFF_Pipenode *node)
 }
 #endif
 
-// like ff_ffplay.c: free_picture()
-static void amc_free_picture(Frame *vp)
-{
-    if (vp->bmp) {
-        SDL_VoutFreeYUVOverlay(vp->bmp);
-        vp->bmp = NULL;
-    }
-}
-
-// like ff_ffplay.c: alloc_picture()
-static void amc_alloc_picture(FFPlayer *ffp)
-{
-    VideoState *is = ffp->is;
-    Frame *vp;
-
-    vp = &is->pictq.queue[is->pictq.windex];
-
-    amc_free_picture(vp);
-
-    vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height,
-                                   SDL_FCC__AMC,
-                                   ffp->vout);
-    if (!vp->bmp) {
-        /* SDL allocates a buffer smaller than requested if the video
-         * overlay hardware is unable to support the requested size. */
-        av_log(NULL, AV_LOG_FATAL,
-               "Error: the video system does not support an OPAQ image\n");
-        amc_free_picture(vp);
-    }
-
-    SDL_LockMutex(is->pictq.mutex);
-    vp->allocated = 1;
-    SDL_CondSignal(is->pictq.cond);
-    SDL_UnlockMutex(is->pictq.mutex);
-}
-
-// like ff_ffplay.c: queue_picture()
-static int amc_queue_picture(
-    IJKFF_Pipenode            *node,
-    SDL_AMediaCodec           *acodec,
-    int                        output_buffer_index,
-    SDL_AMediaCodecBufferInfo *buffer_info,
-    double                     pts,
-    double                     duration,
-    int64_t                    pos,
-    int                        serial)
-{
-    IJKFF_Pipenode_Opaque *opaque = node->opaque;
-    FFPlayer              *ffp    = opaque->ffp;
-    VideoState            *is     = ffp->is;
-    Frame                 *vp;
-
-#if defined(DEBUG_SYNC) && 0
-    printf("frame_type=%c pts=%0.3f\n",
-           av_get_picture_type_char(src_frame->pict_type), pts);
-#endif
-
-    if (!(vp = ffp_frame_queue_peek_writable(&is->pictq)))
-        return -1;
-
-    vp->sar.num = 1;
-    vp->sar.den = 1;
-
-    /* alloc or resize hardware picture buffer */
-    if (!vp->bmp || vp->reallocate || !vp->allocated ||
-        vp->width  != opaque->frame_width ||
-        vp->height != opaque->frame_height ||
-        !SDL_VoutOverlayAMediaCodec_isKindOf(vp->bmp)) {
-
-        if (vp->width != opaque->frame_width || vp->height != opaque->frame_height)
-            ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, opaque->frame_width, opaque->frame_height);
-
-        vp->allocated  = 0;
-        vp->reallocate = 0;
-        vp->width      = opaque->frame_width;
-        vp->height     = opaque->frame_height;
-
-        /* the allocation must be done in the main thread to avoid
-           locking problems. */
-        amc_alloc_picture(ffp);
-
-        if (is->videoq.abort_request)
-            return -1;
-    }
-
-    /* if the frame is not skipped, then display it */
-    if (vp->bmp) {
-        /* get a pointer on the bitmap */
-        SDL_VoutLockYUVOverlay(vp->bmp);
-
-        /* get a pointer on the bitmap */
-        if (SDL_VoutOverlayAMediaCodec_attachFrame(vp->bmp, output_buffer_index) < 0) {
-            av_log(NULL, AV_LOG_FATAL, "Cannot initialize the conversion context\n");
-            exit(1);
-        }
-        /* update the bitmap content */
-        SDL_VoutUnlockYUVOverlay(vp->bmp);
-
-        vp->pts = pts;
-        vp->duration = duration;
-        vp->pos = pos;
-        vp->serial = serial;
-        // ALOGE("vp %lf, %lf, %d, %d", pts, duration, (int)pos, (int)serial);
-
-        /* now we can update the picture count */
-        ffp_frame_queue_push(&is->pictq);
-
-        if (!is->viddec.first_frame_decoded) {
-            ALOGD("MediaCodec/Video: first frame decoded\n");
-            is->viddec.first_frame_decoded_time = SDL_GetTickHR();
-            is->viddec.first_frame_decoded = 1;
-        }
-    }
-    return 0;
-}
-
 static int amc_queue_picture_buffer(
     IJKFF_Pipenode            *node,
     int                        output_buffer_index,
@@ -338,14 +222,20 @@ static int amc_queue_picture_buffer(
     IJKFF_Pipenode_Opaque *opaque     = node->opaque;
     FFPlayer              *ffp        = opaque->ffp;
     VideoState            *is         = ffp->is;
-    AVRational             tb         = is->video_st->time_base;
-    AVRational             frame_rate = av_guess_frame_rate(is->ic, is->video_st, NULL);
+    AVFrame     picture;
+    AVRational  tb         = is->video_st->time_base;
+    AVRational  frame_rate = av_guess_frame_rate(is->ic, is->video_st, NULL);
+    double      duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
+    int64_t     amc_pts = av_rescale_q(buffer_info->presentationTimeUs, AV_TIME_BASE_Q, is->video_st->time_base);
+    double      pts = amc_pts < 0 ? NAN : amc_pts * av_q2d(tb);
 
-    double duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
-    int64_t amc_pts = av_rescale_q(buffer_info->presentationTimeUs, AV_TIME_BASE_Q, is->video_st->time_base);
-    double pts = amc_pts < 0 ? NAN : amc_pts * av_q2d(tb);
-    // ALOGE("got_frame: %lld -> %lf", bufferInfo.presentationTimeUs, pts);
-    return amc_queue_picture(node, opaque->acodec, output_buffer_index, buffer_info, pts, duration, 0, is->viddec.pkt_serial);
+    picture.opaque = (void *)(intptr_t)output_buffer_index;
+    picture.width  = opaque->frame_width;
+    picture.height = opaque->frame_height;
+    picture.format = SDL_FCC__AMC;
+    picture.sample_aspect_ratio = opaque->avctx->sample_aspect_ratio;
+
+    return ffp_queue_picture(opaque->ffp, &picture, pts, duration, 0, is->viddec.pkt_serial);
 }
 
 static int amc_queue_picture_fake(IJKFF_Pipenode *node, AVPacket *pkt)

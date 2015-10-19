@@ -22,6 +22,7 @@
  */
 
 #include "ijksdl_vout_overlay_android_mediacodec.h"
+#include <assert.h>
 #include "ijksdl/ijksdl_stdinc.h"
 #include "ijksdl/ijksdl_mutex.h"
 #include "ijksdl/ijksdl_vout_internal.h"
@@ -41,6 +42,9 @@ typedef struct SDL_VoutOverlay_Opaque {
     SDL_AMediaCodec            *acodec;
 
     SDL_AMediaCodecBufferProxy *buffer_proxy;
+
+    Uint16 pitches[AV_NUM_DATA_POINTERS];
+    Uint8 *pixels[AV_NUM_DATA_POINTERS];
 } SDL_VoutOverlay_Opaque;
 
 static int overlay_lock(SDL_VoutOverlay *overlay)
@@ -99,6 +103,36 @@ inline static bool check_object(SDL_VoutOverlay* object, const char *func_name)
     return true;
 }
 
+static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
+{
+    assert(frame->format == SDL_FCC__AMC);
+
+    SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
+    int output_buffer_index = (int)(intptr_t)frame->opaque;
+
+    if (!check_object(overlay, __func__))
+        return -1;
+
+    if (opaque->buffer_proxy)
+        SDL_VoutAndroid_releaseBufferProxyP(opaque->vout, &opaque->buffer_proxy, false);
+
+    opaque->acodec       = SDL_VoutAndroid_peekAMediaCodec(opaque->vout);
+    opaque->buffer_proxy = SDL_VoutAndroid_obtainBufferProxy(opaque->vout, output_buffer_index);
+
+    overlay->opaque_class = &g_vout_overlay_amediacodec_class;
+    overlay->format     = SDL_FCC__AMC;
+    overlay->planes     = 1;
+    overlay->pixels[0]  = NULL;
+    overlay->pixels[1]  = NULL;
+    overlay->pitches[0] = 0;
+    overlay->pitches[1] = 0;
+    overlay->is_private = 1;
+
+    overlay->w = (int)frame->width;
+    overlay->h = (int)frame->height;
+    return 0;
+}
+
 SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout)
 {
     SDLTRACE("SDL_VoutFFmpeg_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, vout=%p)\n",
@@ -117,14 +151,17 @@ SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, Uint32
 
     overlay->opaque_class = &g_vout_overlay_amediacodec_class;
     overlay->format       = format;
-    overlay->pitches      = NULL;
-    overlay->pixels       = NULL;
+    overlay->pitches      = opaque->pitches;
+    overlay->pixels       = opaque->pixels;
     overlay->w            = width;
     overlay->h            = height;
+    overlay->is_private   = 1;
+
     overlay->free_l       = overlay_free_l;
     overlay->lock         = overlay_lock;
     overlay->unlock       = overlay_unlock;
     overlay->unref        = overlay_unref;
+    overlay->func_fill_frame = func_fill_frame;
 
     switch (format) {
     case SDL_FCC__AMC: {
@@ -145,21 +182,6 @@ fail:
 bool SDL_VoutOverlayAMediaCodec_isKindOf(SDL_VoutOverlay *overlay)
 {
     return check_object(overlay, __func__);
-}
-
-int SDL_VoutOverlayAMediaCodec_attachFrame(SDL_VoutOverlay *overlay, int output_buffer_index)
-{
-    AMCTRACE("%s(%p, %p, %d)\n", __func__, overlay, acodec, output_buffer_index);
-    if (!check_object(overlay, __func__))
-        return -1;
-
-    SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
-    if (opaque->buffer_proxy)
-        SDL_VoutAndroid_releaseBufferProxyP(opaque->vout, &opaque->buffer_proxy, false);
-
-    opaque->acodec       = SDL_VoutAndroid_peekAMediaCodec(opaque->vout);
-    opaque->buffer_proxy = SDL_VoutAndroid_obtainBufferProxy(opaque->vout, output_buffer_index);
-    return 0;
 }
 
 int  SDL_VoutOverlayAMediaCodec_releaseFrame_l(SDL_VoutOverlay *overlay, SDL_AMediaCodec *acodec, bool render)
