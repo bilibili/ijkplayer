@@ -558,11 +558,13 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             }
         }
 
+#if 0
         // no need to decode without surface
         if (!opaque->jsurface) {
             ret = amc_decode_picture_fake(node, 1000);
             goto fail;
         }
+#endif
 
         input_buffer_index = SDL_AMediaCodec_dequeueInputBuffer(opaque->acodec, timeUs);
         if (input_buffer_index < 0) {
