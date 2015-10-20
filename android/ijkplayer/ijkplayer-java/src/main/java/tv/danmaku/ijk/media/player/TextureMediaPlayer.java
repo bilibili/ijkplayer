@@ -93,7 +93,7 @@ public class TextureMediaPlayer extends MediaPlayerProxy implements IMediaPlayer
     }
 
     @Override
-    public void setSurfaceTextureHost(ISurfaceTextureHost host) {
-        mSurfaceTextureHost = host;
+    public void setSurfaceTextureHost(ISurfaceTextureHost surfaceTextureHost) {
+        mSurfaceTextureHost = surfaceTextureHost;
     }
 }

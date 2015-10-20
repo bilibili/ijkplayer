@@ -23,5 +23,5 @@ public interface ISurfaceTextureHolder {
 
     SurfaceTexture getSurfaceTexture();
 
-    void setSurfaceTextureHost(ISurfaceTextureHost host);
+    void setSurfaceTextureHost(ISurfaceTextureHost surfaceTextureHost);
 }
