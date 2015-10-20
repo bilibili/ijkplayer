@@ -87,3 +87,12 @@ void SDL_WaitThread(SDL_Thread *thread, int *status)
     if (status)
         *status = thread->retval;
 }
+
+void SDL_DetachThread(SDL_Thread *thread)
+{
+    assert(thread);
+    if (!thread)
+        return;
+
+    pthread_detach(thread->id);
+}

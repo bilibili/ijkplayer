@@ -320,6 +320,14 @@ int ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url)
     return retval;
 }
 
+static int ijkmp_msg_loop(void *arg)
+{
+    IjkMediaPlayer *mp = arg;
+    int ret = mp->msg_loop(arg);
+    SDL_DetachThread(mp->msg_thread);
+    return ret;
+}
+
 static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
 {
     assert(mp);
@@ -343,7 +351,8 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
 
     // released in msg_loop
     ijkmp_inc_ref(mp);
-    mp->msg_thread = SDL_CreateThreadEx(&mp->_msg_thread, mp->msg_loop, mp, "ff_msg_loop");
+    mp->msg_thread = SDL_CreateThreadEx(&mp->_msg_thread, ijkmp_msg_loop, mp, "ff_msg_loop");
+    // msg_thread is detached inside msg_loop
     // TODO: 9 release weak_thiz if pthread_create() failed;
 
     int retval = ffp_prepare_async_l(mp->ffplayer, mp->data_source);
