@@ -124,7 +124,7 @@ public class PathCursor extends AbstractCursor {
                 return -1;
             else if (!lhs.isDirectory && rhs.isDirectory)
                 return 1;
-            return lhs.file.compareTo(rhs.file);
+            return lhs.file.getName().compareToIgnoreCase(rhs.file.getName());
         }
     };
 
