@@ -51,6 +51,12 @@
     <PreferenceCategory android:title="@string/pref_title_render_view">
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="@string/pref_key_enable_no_view"
+            android:persistent="true"
+            android:summary="@string/pref_summary_enable_no_view"
+            android:title="@string/pref_title_enable_no_view" />
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="@string/pref_key_enable_surface_view"
             android:persistent="true"
             android:summary="@string/pref_summary_enable_surface_view"
@@ -63,9 +69,9 @@
             android:title="@string/pref_title_enable_texture_view" />
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="@string/pref_key_enable_no_view"
+            android:key="@string/pref_key_enable_detached_surface_texture"
             android:persistent="true"
-            android:summary="@string/pref_summary_enable_no_view"
-            android:title="@string/pref_title_enable_no_view" />
+            android:summary="@string/pref_summary_enable_detached_surface_texture"
+            android:title="@string/pref_title_enable_detached_surface_texture" />
     </PreferenceCategory>
 </PreferenceScreen>

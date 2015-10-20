@@ -332,7 +332,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 mMediaPlayer = ijkMediaPlayer;
             }
 
-            if (mEnableBackgroundPlay) {
+            if (mSettings.getEnableDetachedSurfaceTextureView()) {
                 mMediaPlayer = new TextureMediaPlayer(mMediaPlayer);
             }
 

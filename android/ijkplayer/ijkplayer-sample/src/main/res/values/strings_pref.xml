@@ -53,6 +53,10 @@
     <!-- -->
     <string name="pref_title_render_view">RenderView</string>
 
+    <string name="pref_key_enable_no_view">pref.enable_no_view</string>
+    <string name="pref_title_enable_no_view">Enable NoView</string>
+    <string name="pref_summary_enable_no_view"></string>
+
     <string name="pref_key_enable_surface_view">pref.enable_surface_view</string>
     <string name="pref_title_enable_surface_view">Enable SurfaceView</string>
     <string name="pref_summary_enable_surface_view"></string>
@@ -61,9 +65,9 @@
     <string name="pref_title_enable_texture_view">Enable TextureView</string>
     <string name="pref_summary_enable_texture_view"></string>
 
-    <string name="pref_key_enable_no_view">pref.enable_no_view</string>
-    <string name="pref_title_enable_no_view">Enable NoView</string>
-    <string name="pref_summary_enable_no_view"></string>
+    <string name="pref_key_enable_detached_surface_texture">pref.enable_detached_surface_texture</string>
+    <string name="pref_title_enable_detached_surface_texture">Enable detached SurfaceTexture</string>
+    <string name="pref_summary_enable_detached_surface_texture"></string>
 
     <!-- -->
     <string name="pref_key_last_directory"></string>
