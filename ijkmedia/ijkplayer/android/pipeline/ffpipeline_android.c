@@ -25,6 +25,7 @@
 #include "ffpipenode_android_mediacodec_vdec.h"
 #include "../../pipeline/ffpipenode_ffplay_vdec.h"
 #include "../../ff_ffplay.h"
+#include "ijksdl/android/android_surface.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_android.h"
 
@@ -179,7 +180,10 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
             }
             opaque->is_surface_need_reconfigure = true;
 
-            SDL_JNI_DeleteGlobalRefP(env, &prev_surface);
+            if (prev_surface != NULL) {
+                ASDK_Surface__release__no_throw(env, prev_surface);
+                SDL_JNI_DeleteGlobalRefP(env, &prev_surface);
+            }
         }
     }
     SDL_UnlockMutex(opaque->surface_mutex);

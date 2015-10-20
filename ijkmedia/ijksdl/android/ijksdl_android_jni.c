@@ -30,6 +30,7 @@
 #include "android_build.h"
 #include "android_bundle.h"
 #include "android_bytebuffer.h"
+#include "android_surface.h"
 #include "ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl_codec_android_mediacodec_java.h"
 
@@ -214,6 +215,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     retval = ASDK_Build__loadClass(env);
     JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
     retval = ASDK_Bundle__loadClass(env);
+    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
+    retval = ASDK_Surface__loadClass(env);
     JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
 
     retval = SDL_Android_AudioTrack_global_init(env);

@@ -25,6 +25,7 @@
 #include "../../ff_ffpipenode.h"
 #include "../../ff_ffplay.h"
 #include "../../ff_ffplay_debug.h"
+#include "ijksdl/android/android_surface.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl/android/ijksdl_codec_android_mediacodec_java.h"
@@ -821,7 +822,10 @@ static void func_destroy(IJKFF_Pipenode *node)
 
     JNIEnv *env = NULL;
     if (JNI_OK == SDL_JNI_SetupThreadEnv(&env)) {
-        SDL_JNI_DeleteGlobalRefP(env, &opaque->jsurface);
+        if (opaque->jsurface != NULL) {
+            ASDK_Surface__release__no_throw(env, opaque->jsurface);
+            SDL_JNI_DeleteGlobalRefP(env, &opaque->jsurface);
+        }
     }
 }
 
