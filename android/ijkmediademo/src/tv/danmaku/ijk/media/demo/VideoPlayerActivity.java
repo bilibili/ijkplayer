@@ -61,6 +61,8 @@ public class VideoPlayerActivity extends Activity {
         mVideoView.setMediaController(mMediaController);
         mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
         
+        mVideoView.setVideoLayout(VideoView.VIDEO_LAYOUT_ZOOM);
+        
         mVideoView.setVideoPath(mVideoPath);
 //        mVideoView.setVideoToken(mVideoPath);  
 //        startPrint();

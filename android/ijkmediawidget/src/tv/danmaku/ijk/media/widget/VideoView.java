@@ -45,11 +45,13 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 
 /**
  * Displays a video file. The VideoView class can load images from various
@@ -83,7 +85,7 @@ public class VideoView extends SurfaceView implements
     private int mCurrentState = STATE_IDLE;
     private int mTargetState = STATE_IDLE;
 
-    private int mVideoLayout = VIDEO_LAYOUT_SCALE;
+    private int mVideoLayout = VIDEO_LAYOUT_ZOOM;
     public static final int VIDEO_LAYOUT_ORIGIN = 0;
     public static final int VIDEO_LAYOUT_SCALE = 1;
     public static final int VIDEO_LAYOUT_STRETCH = 2;
@@ -146,8 +148,83 @@ public class VideoView extends SurfaceView implements
     
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        //Log.i("@@@@", "onMeasure(" + MeasureSpec.toString(widthMeasureSpec) + ", "
+        //        + MeasureSpec.toString(heightMeasureSpec) + ")");
+
         int width = getDefaultSize(mVideoWidth, widthMeasureSpec);
         int height = getDefaultSize(mVideoHeight, heightMeasureSpec);
+        if (mVideoWidth > 0 && mVideoHeight > 0) {
+/*
+            int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
+            int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
+            int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+            int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+
+            if (widthSpecMode == MeasureSpec.EXACTLY && heightSpecMode == MeasureSpec.EXACTLY) {
+                // the size is fixed
+                width = widthSpecSize;
+                height = heightSpecSize;
+
+                // for compatibility, we adjust size based on aspect ratio
+                if ( mVideoWidth * height  < width * mVideoHeight ) {
+                    //Log.i("@@@", "image too wide, correcting");
+                    width = height * mVideoWidth / mVideoHeight;
+                } else if ( mVideoWidth * height  > width * mVideoHeight ) {
+                    //Log.i("@@@", "image too tall, correcting");
+                    height = width * mVideoHeight / mVideoWidth;
+                }
+            } else if (widthSpecMode == MeasureSpec.EXACTLY) {
+                // only the width is fixed, adjust the height to match aspect ratio if possible
+                width = widthSpecSize;
+                height = width * mVideoHeight / mVideoWidth;
+                if (heightSpecMode == MeasureSpec.AT_MOST && height > heightSpecSize) {
+                    // couldn't match aspect ratio within the constraints
+                    height = heightSpecSize;
+                }
+            } else if (heightSpecMode == MeasureSpec.EXACTLY) {
+                // only the height is fixed, adjust the width to match aspect ratio if possible
+                height = heightSpecSize;
+                width = height * mVideoWidth / mVideoHeight;
+                if (widthSpecMode == MeasureSpec.AT_MOST && width > widthSpecSize) {
+                    // couldn't match aspect ratio within the constraints
+                    width = widthSpecSize;
+                }
+            } else {
+                // neither the width nor the height are fixed, try to use actual video size
+                width = mVideoWidth;
+                height = mVideoHeight;
+                if (heightSpecMode == MeasureSpec.AT_MOST && height > heightSpecSize) {
+                    // too tall, decrease both width and height
+                    height = heightSpecSize;
+                    width = height * mVideoWidth / mVideoHeight;
+                }
+                if (widthSpecMode == MeasureSpec.AT_MOST && width > widthSpecSize) {
+                    // too wide, decrease both width and height
+                    width = widthSpecSize;
+                    height = width * mVideoHeight / mVideoWidth;
+                }
+            }*/
+
+        	if (mVideoLayout==VIDEO_LAYOUT_ORIGIN) {
+                width = mVideoWidth;
+                height = mVideoHeight;
+			}else if(mVideoLayout==VIDEO_LAYOUT_SCALE) {
+                if ( mVideoWidth * height  < width * mVideoHeight ) {
+                    width = height * mVideoWidth / mVideoHeight;
+                } else if ( mVideoWidth * height  > width * mVideoHeight ) {
+                    height = width * mVideoHeight / mVideoWidth;
+                }
+			}else if(mVideoLayout==VIDEO_LAYOUT_ZOOM)
+			{
+                if ( mVideoWidth * height  < width * mVideoHeight ) {
+                	height = width * mVideoHeight / mVideoWidth;
+                } else if ( mVideoWidth * height  > width * mVideoHeight ) {
+                	width = height * mVideoWidth / mVideoHeight;
+                }
+			}
+        } else {
+            // no size yet, just adopt the given spec sizes
+        }
         setMeasuredDimension(width, height);
     }
 
@@ -164,7 +241,8 @@ public class VideoView extends SurfaceView implements
      * @param aspectRatio
      *            video aspect ratio, will audo detect if 0.
      */
-    public void setVideoLayout(int layout) {/*
+    public void setVideoLayout(int layout) {
+    	/*
         LayoutParams lp = getLayoutParams();
         Pair<Integer, Integer> res  = ScreenResolution.getResolution(mContext);
         int windowWidth = res.first.intValue(), windowHeight = res.second.intValue();
@@ -202,8 +280,8 @@ public class VideoView extends SurfaceView implements
                     mVideoWidth, mVideoHeight, videoRatio, mVideoSarNum,
                     mVideoSarDen, mSurfaceWidth, mSurfaceHeight, lp.width,
                     lp.height, windowWidth, windowHeight, windowRatio);
-        }
-        mVideoLayout = layout;*/
+        }*/
+        mVideoLayout = layout;
     }
 
     private void initVideoView(Context ctx) {
@@ -400,6 +478,7 @@ public class VideoView extends SurfaceView implements
             mVideoSarDen = sarDen;
 //            if (mVideoWidth != 0 && mVideoHeight != 0)
 //                setVideoLayout(mVideoLayout);
+            requestLayout();
         }
     };
 
@@ -428,6 +507,7 @@ public class VideoView extends SurfaceView implements
                 seekTo(seekToPosition);
             if (mVideoWidth != 0 && mVideoHeight != 0) {
 //                setVideoLayout(mVideoLayout);
+            	requestLayout();
                 if (mSurfaceWidth == mVideoWidth
                         && mSurfaceHeight == mVideoHeight) {
                     if (mTargetState == STATE_PLAYING) {

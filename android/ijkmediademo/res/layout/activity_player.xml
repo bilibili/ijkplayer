@@ -51,8 +51,8 @@
     
     <tv.danmaku.ijk.media.widget.VideoView
         android:id="@+id/video_view"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center" />
     
     <LinearLayout
