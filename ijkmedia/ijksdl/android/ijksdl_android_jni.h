@@ -53,6 +53,7 @@
 JavaVM *SDL_JNI_GetJvm();
 
 jint    SDL_JNI_SetupThreadEnv(JNIEnv **p_env);
+void    SDL_JNI_DetachThreadEnv();
 
 jboolean SDL_JNI_RethrowException(JNIEnv *env);
 jboolean SDL_JNI_CatchException(JNIEnv *env);

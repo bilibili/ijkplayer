@@ -23,6 +23,7 @@
 
 #include "ijksdl_android_jni.h"
 
+#include <unistd.h>
 #include <sys/system_properties.h>
 #include "ijksdl_inc_internal_android.h"
 #include "android_arraylist.h"
@@ -48,6 +49,7 @@ static void SDL_JNI_ThreadDestroyed(void* value)
 {
     JNIEnv *env = (JNIEnv*) value;
     if (env != NULL) {
+        ALOGE("%s: [%d] didn't call SDL_JNI_DetachThreadEnv() explicity\n", __func__, (int)gettid());
         (*g_jvm)->DetachCurrentThread(g_jvm);
         pthread_setspecific(g_thread_key, NULL);
     }
@@ -81,6 +83,25 @@ jint SDL_JNI_SetupThreadEnv(JNIEnv **p_env)
     }
 
     return -1;
+}
+
+void SDL_JNI_DetachThreadEnv()
+{
+    JavaVM *jvm = g_jvm;
+
+    ALOGI("%s: [%d]\n", __func__, (int)gettid());
+
+    pthread_once(&g_key_once, make_thread_key);
+
+    JNIEnv *env = pthread_getspecific(g_thread_key);
+    if (!env)
+        return;
+    pthread_setspecific(g_thread_key, NULL);
+
+    if ((*jvm)->DetachCurrentThread(jvm) == JNI_OK)
+        return;
+
+    return;
 }
 
 jboolean SDL_JNI_RethrowException(JNIEnv *env)
