@@ -32,7 +32,7 @@ dependencies {
  - Mac OS X 10.10.5
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
- - Android Studio 1.3.2
+ - Android Studio 1.4
  - Gradle 2.6
 - iOS
  - Xcode 7.0 (7A220)
