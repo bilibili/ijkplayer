@@ -197,6 +197,12 @@ ijkplayer is based on or derives from projects below:
   - [libyuv](https://code.google.com/p/libyuv/)
 - ISC license
   - [libyuv/source/x86inc.asm](https://code.google.com/p/libyuv/source/browse/trunk/source/x86inc.asm)
+
+android/ijkplayer-exo is based on or derives from projects below:
+- Apache License 2.0
+  - [ExoPlayer](https://github.com/google/ExoPlayer)
+
+android/sample is based on or derives from projects below:
 - Unknown license
   - [iOS7-BarcodeScanner](https://github.com/jpwidmer/iOS7-BarcodeScanner)
 - GPL
