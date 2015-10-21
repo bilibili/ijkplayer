@@ -95,8 +95,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private IMediaPlayer.OnInfoListener mOnInfoListener;
     private int mSeekWhenPrepared;  // recording the seek position while preparing
     private boolean mCanPause = true;
-    private boolean mCanSeekBack;
-    private boolean mCanSeekForward;
+    private boolean mCanSeekBack = true;
+    private boolean mCanSeekForward = true;
 
     /** Subtitle rendering widget overlaid on top of the video. */
     // private RenderingWidget mSubtitleWidget;
