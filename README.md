@@ -186,7 +186,7 @@ Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
 Licensed under LGPLv2.1 or later
 ```
 
-ijkplayer is based on or derives from projects below:
+ijkplayer required features are based on or derives from projects below:
 - LGPL
   - [FFmpeg](http://git.videolan.org/?p=ffmpeg.git)
   - [libVLC](http://git.videolan.org/?p=vlc.git)
@@ -203,10 +203,12 @@ android/ijkplayer-exo is based on or derives from projects below:
   - [ExoPlayer](https://github.com/google/ExoPlayer)
 
 android/sample is based on or derives from projects below:
-- Unknown license
-  - [iOS7-BarcodeScanner](https://github.com/jpwidmer/iOS7-BarcodeScanner)
 - GPL
   - [android-ndk-profiler](https://github.com/richq/android-ndk-profiler) (not included by default)
+
+ios/IJKMediaDemo is based on or derives from projects below:
+- Unknown license
+  - [iOS7-BarcodeScanner](https://github.com/jpwidmer/iOS7-BarcodeScanner)
 
 ijkplayer's build scripts are based on or derives from projects below:
 - [gas-preprocessor](http://git.libav.org/?p=gas-preprocessor.git)
