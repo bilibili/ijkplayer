@@ -4,6 +4,7 @@ ios: support Xcode 7
 ios: drop support of iOS 5.x
 ffmpeg: enable libavfilter
 player: limited support of libavfilter
+android: add ExoPlayer as an alternative backend player
 
 tag k0.4.1
 --------------------------------
