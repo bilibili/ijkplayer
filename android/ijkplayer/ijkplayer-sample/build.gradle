@@ -39,6 +39,7 @@ dependencies {
     compile 'com.squareup:otto:1.3.8'
 
     compile project(':ijkplayer-java')
+    compile project(':ijkplayer-exo')
 
     all32Compile project(':ijkplayer-armv5')
     all32Compile project(':ijkplayer-armv7a')
