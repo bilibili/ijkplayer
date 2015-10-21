@@ -531,6 +531,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         }
     }
 
+    @Override
     public IjkTrackInfo[] getTrackInfo() {
         Bundle bundle = getMediaMeta();
         if (bundle == null)
