@@ -59,9 +59,11 @@
     options.reportPlayInfo = YES;
     options.sourceType = mUrlSourceType;
     options.cache = 6000;
+    options.isEnableAudio = YES;
     
     [IJKFFMoviePlayerController setLogReport:YES];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURLString:self.urlString withOptions:options withSegmentResolver:nil];
+    self.player.scalingMode = MPMovieScalingModeAspectFill;
     [self installMovieNotificationObservers];
 }
 
@@ -127,25 +129,6 @@
 {
     [self.player pause];
     [self.mediaControl refreshMediaControl];
-}
-
-- (IBAction)onClickBackPlayREL:(id)sender
-{
-    [[[UIApplication sharedApplication] keyWindow] endEditing:YES];
-    
-    [self.player backPlayWithREL:[self.relTimeTextField.text doubleValue]];
-}
-
-- (IBAction)onClickBackPlayABS:(id)sender
-{
-    [[[UIApplication sharedApplication] keyWindow] endEditing:YES];
-    
-    [self.player backPlayWithABS:[self.startTimeTextField.text longLongValue]];
-}
-
-- (IBAction)onClickBackLive:(id)sender
-{
-    [self.player backLivePlay];
 }
 
 - (IBAction)onClickSlower:(id)sender {

@@ -186,6 +186,9 @@ void ijkmp_set_player_speed_mode(IjkMediaPlayer *mp, int speed_mode);
 void ijkmp_set_player_volume(IjkMediaPlayer *mp, int volume);
 //add by fw-----end
 
+// new API for enable audio
+void ijkmp_enable_audio(IjkMediaPlayer *mp, bool isEnableAudio);
+
 //0:Low Delay Live
 //1:High Delay Live
 //2:VOD

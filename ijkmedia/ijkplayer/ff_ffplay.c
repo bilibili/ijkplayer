@@ -2631,6 +2631,8 @@ static int read_thread(void *arg)
     bool isDropAllPackets = false;
     //
     
+    bool currentEnableAudioStatus = true;
+    
     for (;;) {
         if (is->abort_request)
             break;
@@ -2910,10 +2912,27 @@ static int read_thread(void *arg)
                 }
             }
         }
+                
+        if(currentEnableAudioStatus!=ffp->isEnableAudio)
+        {
+            packet_queue_flush(&is->audioq);
+            packet_queue_put(&is->audioq, &flush_pkt);
+        }
+                
+        currentEnableAudioStatus = ffp->isEnableAudio;
         
         // read data
         pkt->flags = 0;
         ret = av_read_frame(ic, pkt);
+                
+        if(ret>=0)
+        {
+            if(!ffp->isEnableAudio && pkt->stream_index == is->audio_stream)
+            {
+                av_free_packet(pkt);
+                continue;
+            }
+        }
 
         if(ret>=0)
         {

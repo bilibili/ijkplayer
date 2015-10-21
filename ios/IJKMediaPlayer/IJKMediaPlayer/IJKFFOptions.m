@@ -30,7 +30,8 @@
     options.autoReconnect           = YES;
     options.reportPlayInfo          = YES;
     options.sourceType  = IJKMPMovieSourceTypeLowDelayLiveStreaming;
-    options.cache = 6000;//default 6s
+    options.cache = 10000;//default 10s
+    options.isEnableAudio = YES;
 
     return options;
 }
