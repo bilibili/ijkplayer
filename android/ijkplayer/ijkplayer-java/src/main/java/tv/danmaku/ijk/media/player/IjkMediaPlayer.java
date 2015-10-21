@@ -664,6 +664,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private native float _getPropertyFloat(int property, float defaultValue);
     private native void  _setPropertyFloat(int property, float value);
 
+    @Override
     public native void setVolume(float leftVolume, float rightVolume);
 
     @Override
