@@ -26,6 +26,11 @@ public class Settings {
     private Context mAppContext;
     private SharedPreferences mSharedPreferences;
 
+    public static final int PV_PLAYER__Auto = 0;
+    public static final int PV_PLAYER__AndroidMediaPlayer = 1;
+    public static final int PV_PLAYER__IjkMediaPlayer = 2;
+    public static final int PV_PLAYER__IjkExoMediaPlayer = 3;
+
     public Settings(Context context) {
         mAppContext = context.getApplicationContext();
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mAppContext);
@@ -36,9 +41,14 @@ public class Settings {
         return mSharedPreferences.getBoolean(key, false);
     }
 
-    public boolean getUsingAndroidPlayer() {
-        String key = mAppContext.getString(R.string.pref_key_using_android_player);
-        return mSharedPreferences.getBoolean(key, false);
+    public int getPlayer() {
+        String key = mAppContext.getString(R.string.pref_key_player);
+        String value = mSharedPreferences.getString(key, "");
+        try {
+            return Integer.valueOf(value).intValue();
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     public boolean getUsingMediaCodec() {

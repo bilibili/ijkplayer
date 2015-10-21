@@ -11,6 +11,27 @@
     <string name="pref_title_using_android_player">Using system player</string>
     <string name="pref_summary_using_android_player"></string>
 
+    <string name="pref_key_player">pref.player</string>
+    <string name="pref_title_player">Choose Player</string>
+    <string-array name="pref_entries_player">
+        <item>Auto Select</item>
+        <item>AndroidMediaPlayer</item>
+        <item>IjkMediaPlayer</item>
+        <item>IjkExoMediaPlayer</item>
+    </string-array>
+    <string-array name="pref_entry_values_player">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_player">
+        <item>Auto Select</item>
+        <item>AndroidMediaPlayer</item>
+        <item>IjkMediaPlayer</item>
+        <item>IjkExoMediaPlayer</item>
+    </string-array>
+
     <!-- -->
     <string name="pref_title_ijkplayer_video">Video: ijkplayer</string>
 

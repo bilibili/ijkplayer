@@ -8,18 +8,18 @@
             android:persistent="true"
             android:summary="@string/pref_summary_enable_background_play"
             android:title="@string/pref_title_enable_background_play" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:disableDependentsState="true"
-            android:key="@string/pref_key_using_android_player"
+        <tv.danmaku.ijk.media.sample.widget.preference.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_player"
+            android:entryValues="@array/pref_entry_values_player"
+            android:key="@string/pref_key_player"
             android:persistent="true"
-            android:summary="@string/pref_summary_using_android_player"
-            android:title="@string/pref_title_using_android_player" />
+            android:title="@string/pref_title_player"
+            app:entrySummaries="@array/pref_entry_summaries_player" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_title_ijkplayer_video">
         <CheckBoxPreference
             android:defaultValue="false"
-            android:dependency="@string/pref_key_using_android_player"
             android:key="@string/pref_key_using_media_codec"
             android:persistent="true"
             android:summary="@string/pref_summary_using_media_codec"
@@ -42,7 +42,6 @@
     <PreferenceCategory android:title="@string/pref_title_ijkplayer_audio">
         <CheckBoxPreference
             android:defaultValue="false"
-            android:dependency="@string/pref_key_using_android_player"
             android:key="@string/pref_key_using_opensl_es"
             android:persistent="true"
             android:summary="@string/pref_summary_using_opensl_es"

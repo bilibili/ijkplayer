@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import tv.danmaku.ijk.media.exo.IjkExoMediaPlayer;
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -290,46 +291,57 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
         try {
-            if (mSettings.getUsingAndroidPlayer()) {
-                AndroidMediaPlayer androidMediaPlayer = new AndroidMediaPlayer();
-                mMediaPlayer = androidMediaPlayer;
-            } else {
-                IjkMediaPlayer ijkMediaPlayer = null;
-                if (mUri != null) {
-                    ijkMediaPlayer = new IjkMediaPlayer();
-                    ijkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
+            switch (mSettings.getPlayer()) {
+                case Settings.PV_PLAYER__IjkMediaPlayer: {
+                    IjkMediaPlayer ijkMediaPlayer = null;
+                    if (mUri != null) {
+                        ijkMediaPlayer = new IjkMediaPlayer();
+                        ijkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
 
-                    if (mSettings.getUsingMediaCodec()) {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
-                        if (mSettings.getUsingMediaCodecAutoRotate()) {
-                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1);
+                        if (mSettings.getUsingMediaCodec()) {
+                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
+                            if (mSettings.getUsingMediaCodecAutoRotate()) {
+                                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1);
+                            } else {
+                                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 0);
+                            }
                         } else {
-                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 0);
+                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
                         }
-                    } else {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
+
+                        if (mSettings.getUsingOpenSLES()) {
+                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
+                        } else {
+                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 0);
+                        }
+
+                        String pixelFormat = mSettings.getPixelFormat();
+                        if (TextUtils.isEmpty(pixelFormat)) {
+                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_RV32);
+                        } else {
+                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", pixelFormat);
+                        }
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
+
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
+
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
                     }
-
-                    if (mSettings.getUsingOpenSLES()) {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
-                    } else {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 0);
-                    }
-
-                    String pixelFormat = mSettings.getPixelFormat();
-                    if (TextUtils.isEmpty(pixelFormat)) {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_RV32);
-                    } else {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", pixelFormat);
-                    }
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
-
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
-
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
+                    mMediaPlayer = ijkMediaPlayer;
                 }
-                mMediaPlayer = ijkMediaPlayer;
+                break;
+                case Settings.PV_PLAYER__IjkExoMediaPlayer: {
+                    IjkExoMediaPlayer IjkExoMediaPlayer = new IjkExoMediaPlayer(mAppContext);
+                    mMediaPlayer = IjkExoMediaPlayer;
+                }
+                break;
+                case Settings.PV_PLAYER__AndroidMediaPlayer:
+                default: {
+                    AndroidMediaPlayer androidMediaPlayer = new AndroidMediaPlayer();
+                    mMediaPlayer = androidMediaPlayer;
+                }
+                break;
             }
 
             if (mSettings.getEnableDetachedSurfaceTextureView()) {
@@ -456,7 +468,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                                 mMediaController.show();
                             }
                         } else if (!isPlaying() &&
-                            (seekToPosition != 0 || getCurrentPosition() > 0)) {
+                                (seekToPosition != 0 || getCurrentPosition() > 0)) {
                             if (mMediaController != null) {
                                 // Show the media controls when we're paused into a video and make 'em stick.
                                 mMediaController.show(0);
@@ -1019,7 +1031,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         ITrackInfo trackInfos[] = mMediaPlayer.getTrackInfo();
         if (trackInfos != null) {
             int index = -1;
-            for (ITrackInfo trackInfo: trackInfos) {
+            for (ITrackInfo trackInfo : trackInfos) {
                 index++;
 
                 int trackType = trackInfo.getTrackType();
@@ -1082,7 +1094,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         long seconds = total_seconds % 60;
         if (duration <= 0) {
             return "--:--";
-        } if (hours >= 100) {
+        }
+        if (hours >= 100) {
             return String.format(Locale.US, "%d:%02d:%02d", hours, minutes, seconds);
         } else if (hours > 0) {
             return String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds);
