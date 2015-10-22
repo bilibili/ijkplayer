@@ -21,7 +21,9 @@ android {
         }
     }
     productFlavors {
-        all32 {}
+        // minSdkVersion = 9 need remove :ijkplayer-exo
+        // all32 { minSdkVersion 9 }
+        all32 { minSdkVersion 16 }
         all64 { minSdkVersion 21 }
         // armv5 {}
         // armv7a {}
