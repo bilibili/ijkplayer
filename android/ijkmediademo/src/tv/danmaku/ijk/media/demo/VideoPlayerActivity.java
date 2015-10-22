@@ -57,6 +57,7 @@ public class VideoPlayerActivity extends Activity {
         
 //        mVideoView.setDataSourceType(VideoView.LOWDELAY_LIVE_STREAMING_TYPE);
         mVideoView.setDataCache(10000);
+        mVideoView.setAudioEnabled(true);
         
         mVideoView.setMediaController(mMediaController);
         mVideoView.setMediaBufferingIndicator(mBufferingIndicator);

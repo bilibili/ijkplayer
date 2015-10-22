@@ -397,6 +397,7 @@ public class VideoView extends SurfaceView implements
 				}
                 ijkMediaPlayer.setDataSourceType(mDataSourceType);
                 ijkMediaPlayer.setDataCache(mCache);
+                ijkMediaPlayer.setAudioEnabled(isAudioEnabled);
                 ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
                 ijkMediaPlayer.setOverlayFormat(AvFourCC.SDL_FCC_RV32);
 
@@ -1016,5 +1017,11 @@ public class VideoView extends SurfaceView implements
 		}
     	
     	return 0;
+    }
+    
+    private boolean isAudioEnabled = true;
+    public void setAudioEnabled(boolean enable)
+    {
+    	isAudioEnabled = enable;
     }
 }

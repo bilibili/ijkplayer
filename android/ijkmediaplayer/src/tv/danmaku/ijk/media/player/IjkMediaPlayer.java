@@ -39,6 +39,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.provider.Browser.BookmarkColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Surface;
@@ -886,6 +887,13 @@ public final class IjkMediaPlayer extends SimpleMediaPlayer {
 		_setDataCache(cache);
 	}
 	private native void _setDataCache(int cache);
+	
+	
+	public void setAudioEnabled(boolean enable)
+	{
+		_setAudioEnabled(enable);
+	}
+	private native void _setAudioEnabled(boolean enable);
 	
 	@Override
 	public long getAbsoluteTimestamp()

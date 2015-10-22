@@ -535,6 +535,19 @@ ijkMediaPlayer_setDataCache(JNIEnv *env, jobject thiz,jint cache)
     ijkmp_dec_ref_p(&mp);
 }
 
+static void
+ijkMediaPlayer_setAudioEnabled(JNIEnv *env, jobject thiz, jboolean enabled)
+{
+    MPTRACE("ijkMediaPlayer_setAudioEnabled");
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setAudioEnabled: null mp", LABEL_RETURN);
+
+    ijkmp_enable_audio(mp, enabled);
+    
+    LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
 static jstring
 IjkMediaPlayer_getColorFormatName(JNIEnv *env, jclass clazz, jint mediaCodecColorFormat)
 {
@@ -1004,6 +1017,7 @@ static JNINativeMethod g_methods[] = {
     { "_setPlayerSpeedMode", "(I)V", (void *) IjkMediaPlayer_setPlayerSpeedMode },
     { "_setPlayerVolume", "(I)V", (void *) IjkMediaPlayer_setPlayerVolume },
     { "_setDataCache", "(I)V", (void*)ijkMediaPlayer_setDataCache},
+    { "_setAudioEnabled", "(Z)V", (void*)ijkMediaPlayer_setAudioEnabled},
 
     { "_getColorFormatName", "(I)Ljava/lang/String;", (void *) IjkMediaPlayer_getColorFormatName },
     { "_getVideoCodecInfo", "()Ljava/lang/String;", (void *) IjkMediaPlayer_getVideoCodecInfo },
