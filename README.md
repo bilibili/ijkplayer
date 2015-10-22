@@ -27,7 +27,7 @@ dependencies {
 - iOS
  - in coming...
 
-### My Build Enviroment
+### My Build Environment
 - Common
  - Mac OS X 10.10.5
 - Android
