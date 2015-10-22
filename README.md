@@ -18,10 +18,13 @@ dependencies {
     compile 'tv.danmaku.ijk.media:ijkplayer-java:0.4.2'
     compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.4.2'
 
-    # optional
+    # Other ABIs: optional
     compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.4.2'
     compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.4.2'
     compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.4.2'
+
+    # ExoPlayer as IMediaPlayer: optional, experimental
+    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.4.2'
 }
 ```
 - iOS
