@@ -217,7 +217,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
         private int mWidth;
         private int mHeight;
 
-        private boolean mOwnSurfaceTecture = true;
+        private boolean mOwnSurfaceTexture = true;
         private boolean mWillDetachFromWindow = false;
         private boolean mDidDetachFromWindow = false;
 
@@ -229,7 +229,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
         }
 
         public void setOwnSurfaceTexture(boolean ownSurfaceTexture) {
-            mOwnSurfaceTecture = ownSurfaceTexture;
+            mOwnSurfaceTexture = ownSurfaceTexture;
         }
 
         public void addRenderCallback(@NonNull IRenderCallback callback) {
@@ -291,8 +291,8 @@ public class TextureRenderView extends TextureView implements IRenderView {
                 renderCallback.onSurfaceDestroyed(surfaceHolder);
             }
 
-            Log.d(TAG, "onSurfaceTextureDestroyed: destroy: " + mOwnSurfaceTecture);
-            return mOwnSurfaceTecture;
+            Log.d(TAG, "onSurfaceTextureDestroyed: destroy: " + mOwnSurfaceTexture);
+            return mOwnSurfaceTexture;
         }
 
         @Override
@@ -312,7 +312,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
                 if (surfaceTexture != mSurfaceTexture) {
                     Log.d(TAG, "releaseSurfaceTexture: didDetachFromWindow(): release different SurfaceTexture");
                     surfaceTexture.release();
-                } else if (!mOwnSurfaceTecture) {
+                } else if (!mOwnSurfaceTexture) {
                     Log.d(TAG, "releaseSurfaceTexture: didDetachFromWindow(): release detached SurfaceTexture");
                     surfaceTexture.release();
                 } else {
@@ -322,7 +322,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
                 if (surfaceTexture != mSurfaceTexture) {
                     Log.d(TAG, "releaseSurfaceTexture: willDetachFromWindow(): release different SurfaceTexture");
                     surfaceTexture.release();
-                } else if (!mOwnSurfaceTecture) {
+                } else if (!mOwnSurfaceTexture) {
                     Log.d(TAG, "releaseSurfaceTexture: willDetachFromWindow(): re-attach SurfaceTexture to TextureView");
                     setOwnSurfaceTexture(true);
                 } else {
@@ -332,7 +332,7 @@ public class TextureRenderView extends TextureView implements IRenderView {
                 if (surfaceTexture != mSurfaceTexture) {
                     Log.d(TAG, "releaseSurfaceTexture: alive: release different SurfaceTexture");
                     surfaceTexture.release();
-                } else if (!mOwnSurfaceTecture) {
+                } else if (!mOwnSurfaceTexture) {
                     Log.d(TAG, "releaseSurfaceTexture: alive: re-attach SurfaceTexture to TextureView");
                     setOwnSurfaceTexture(true);
                 } else {
