@@ -54,9 +54,6 @@ typedef NS_ENUM(NSInteger, IJKMPMovieSourceType) {
 //new API for adjust player volume
 -(void)setPlayVolume:(int)volume;
 
-//new API for enable audio
--(void)enableAudio:(BOOL)isEnable;
-
 @property(nonatomic, readonly)  UIView *view;
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;
 @property(nonatomic, readonly)  NSTimeInterval duration;

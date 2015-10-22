@@ -267,15 +267,6 @@ static NSMutableDictionary *dictionary = nil;
 	ijkmp_set_player_volume(_mediaPlayer, volume);
 }
 
--(void)enableAudio:(BOOL)isEnable
-{
-    if(!_mediaPlayer)
-        return;
-    
-    _options.isEnableAudio = isEnable;
-    ijkmp_enable_audio(_mediaPlayer, isEnable);
-}
-
 - (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
 {
     return [self initWithContentURL:aUrl

@@ -16,6 +16,8 @@
     IJKMPMovieSourceType mUrlSourceType;
 	int mPlaySpeedMode;
     
+    BOOL isEnableAudio;
+    
     NSTimer *timer;
 }
 
@@ -58,13 +60,15 @@
     IJKFFOptions * options = [IJKFFOptions optionsByDefault];
     options.reportPlayInfo = YES;
     options.sourceType = mUrlSourceType;
-    options.cache = 6000;
-    options.isEnableAudio = YES;
+    options.cache = 10000;
+    options.isEnableAudio = NO;
     
     [IJKFFMoviePlayerController setLogReport:YES];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURLString:self.urlString withOptions:options withSegmentResolver:nil];
     self.player.scalingMode = MPMovieScalingModeAspectFill;
     [self installMovieNotificationObservers];
+    
+    isEnableAudio = YES;
 }
 
 - (void)dealloc

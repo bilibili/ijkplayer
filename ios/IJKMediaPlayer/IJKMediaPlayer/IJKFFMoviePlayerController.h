@@ -88,9 +88,6 @@
 //new API for slower or faster play
 -(void)setPlaySpeedMode:(int)mode;//mode:1(2倍速快放)，2（4倍速快放），0（正常播放），-1（2倍速慢放），-2（4倍速慢放）
 
-//new API for enable audio
--(void)enableAudio:(BOOL)isEnable;
-
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
 

@@ -2631,8 +2631,6 @@ static int read_thread(void *arg)
     bool isDropAllPackets = false;
     //
     
-    bool currentEnableAudioStatus = true;
-    
     for (;;) {
         if (is->abort_request)
             break;
@@ -2912,15 +2910,7 @@ static int read_thread(void *arg)
                 }
             }
         }
-                
-        if(currentEnableAudioStatus!=ffp->isEnableAudio)
-        {
-            packet_queue_flush(&is->audioq);
-            packet_queue_put(&is->audioq, &flush_pkt);
-        }
-                
-        currentEnableAudioStatus = ffp->isEnableAudio;
-        
+
         // read data
         pkt->flags = 0;
         ret = av_read_frame(ic, pkt);
@@ -2970,10 +2960,6 @@ static int read_thread(void *arg)
             av_free_packet(pkt);
             
 //          printf("isDropAllPackets\n");
-/*
-            SDL_LockMutex(wait_mutex);
-            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-            SDL_UnlockMutex(wait_mutex);*/
             continue;
         }
         if(isFlushing)
@@ -2985,10 +2971,6 @@ static int read_thread(void *arg)
 //                printf("isFlushing\n");
                 
                 av_free_packet(pkt);
-/*
-                SDL_LockMutex(wait_mutex);
-                SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-                SDL_UnlockMutex(wait_mutex);*/
                 continue;
             }
         }
@@ -2999,10 +2981,6 @@ static int read_thread(void *arg)
             
             printf("drop one audiopacket.\n");
             enable_drop_audiopacket = false;
-/*
-            SDL_LockMutex(wait_mutex);
-            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-            SDL_UnlockMutex(wait_mutex);*/
             continue;
         }
 
