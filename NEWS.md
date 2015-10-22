@@ -1,5 +1,8 @@
 tag next
 --------------------------------
+
+tag k0.4.2
+--------------------------------
 - ios: support Xcode 7
 - ios: drop support of iOS 5.x
 - ffmpeg: enable libavfilter
