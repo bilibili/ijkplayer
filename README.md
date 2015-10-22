@@ -15,6 +15,7 @@ allprojects {
 }
 
 dependencies {
+    # required, enough for most devices.
     compile 'tv.danmaku.ijk.media:ijkplayer-java:0.4.2'
     compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.4.2'
 
@@ -65,7 +66,7 @@ dependencies {
  - video-output: OpenGL ES 2.0 (I420/YV12/NV12 shaders)
  - audio-output: AudioQueue, AudioUnit
  - hw-decoder: VideoToolbox (iOS 8+)
- - alternative-backend: AVFoundation.AVPlayer, MediaPlayer.Framework.MPMoviePlayerControlelr (obselete since iOS 8) 
+ - alternative-backend: AVFoundation.Framework.AVPlayer, MediaPlayer.Framework.MPMoviePlayerControlelr (obselete since iOS 8) 
 
 ### TODO
 - iOS
