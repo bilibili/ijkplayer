@@ -57,6 +57,7 @@ dependencies {
  - video-output: NativeWindow
  - audio-output: OpenSL ES, AudioTrack
  - hw-decoder: MediaCodec (API 16+, Android 4.1+)
+ - alternative-backend: android.media.MediaPlayer, ExoPlayer
 - iOS
  - platform: iOS 6.0~8.4.x
  - cpu: armv7, arm64, i386, x86_64, (armv7s is obselete)
@@ -64,6 +65,7 @@ dependencies {
  - video-output: OpenGL ES 2.0 (I420/YV12/NV12 shaders)
  - audio-output: AudioQueue, AudioUnit
  - hw-decoder: VideoToolbox (iOS 8+)
+ - alternative-backend: AVFoundation.AVPlayer, MediaPlayer.Framework.MPMoviePlayerControlelr (obselete since iOS 8) 
 
 ### TODO
 - iOS
