@@ -73,7 +73,7 @@ dependencies {
  - api: AVPlayer-like
 
 ### NOT-ON-PLAN
-- obsolete platforms (Android: API-8 and below; iOS: below 5.1.1)
+- obsolete platforms (Android: API-8 and below; iOS: pre-6.0)
 - obsolete cpu: ARMv5, ARMv6, MIPS (I don't even have these types of devices…)
 - native subtitle render
 - avfilter support
