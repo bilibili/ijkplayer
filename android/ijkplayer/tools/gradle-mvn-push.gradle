@@ -96,6 +96,7 @@ afterEvaluate { project ->
  */
 
     task androidJavadocs(type: Javadoc) {
+        // failOnError false
         source = android.sourceSets.main.java.srcDirs
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     }
