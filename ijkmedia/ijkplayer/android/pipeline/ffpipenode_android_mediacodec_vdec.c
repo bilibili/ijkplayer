@@ -758,7 +758,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                     for (i = opaque->off_buf_out - 1; i >= 0; i--) {
                         buf_out = &opaque->amc_buf_out[i];
                         if (pts > buf_out->pts) {
-                            ret = amc_queue_picture_buffer(node, buf_out->port, opaque->acodec, &buf_out->info);
+                            ret = amc_queue_picture_buffer(node, buf_out->port, buf_out->weak_acodec, &buf_out->info);
                             opaque->last_queued_pts = buf_out->pts;
                             // ALOGD("pts = %f", buf_out->pts);
                             /* replace for sort later */
