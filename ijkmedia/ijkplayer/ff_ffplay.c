@@ -2629,6 +2629,8 @@ static int read_thread(void *arg)
     bool isFlushing = false;
     
     bool isDropAllPackets = false;
+    
+    int64_t currentDuration = 0;
     //
     
     for (;;) {
@@ -2794,8 +2796,15 @@ static int read_thread(void *arg)
                 }
                 av_now_time = GetNowMs();
                 
+                if(is->videoq.duration>is->audioq.duration)
+                {
+                    currentDuration = is->videoq.duration;
+                }else{
+                    currentDuration = is->audioq.duration;
+                }
+                
                 //drop all
-                if(is->videoq.duration>live_duration_hwm && av_now_time - av_flush_time>60*1000)
+                if(currentDuration>live_duration_hwm && av_now_time - av_flush_time>60*1000)
                 {
                     if (is->audio_stream >= 0) {
                         packet_queue_flush(&is->audioq);
@@ -2829,13 +2838,14 @@ static int read_thread(void *arg)
                 
                 drop_audiopacket_timing_now = GetNowMs();
                 
-                if(is->videoq.duration>live_duration_hwm*1/2 && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
+                if(currentDuration>live_duration_hwm*1/2 && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
                 {
                     drop_audiopacket_timing_begin = 0;
                     enable_drop_audiopacket = true;
                 }
 
 //                printf("is->videoq.duration:%lld\n",is->videoq.duration);
+//                printf("is->audioq.duration:%lld\n",is->audioq.duration);
             }
         }
         

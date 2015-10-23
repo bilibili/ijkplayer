@@ -60,8 +60,8 @@
     IJKFFOptions * options = [IJKFFOptions optionsByDefault];
     options.reportPlayInfo = YES;
     options.sourceType = mUrlSourceType;
-    options.cache = 10000;
-    options.isEnableAudio = NO;
+    options.cache = 6000;
+    options.isEnableAudio = YES;
     
     [IJKFFMoviePlayerController setLogReport:YES];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURLString:self.urlString withOptions:options withSegmentResolver:nil];
