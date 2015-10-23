@@ -54,6 +54,7 @@ typedef struct SDL_AMediaCodec
     SDL_AMediaCodec_Opaque *opaque;
     bool                    is_configured;
     bool                    is_started;
+    int                     object_serial;
 
     sdl_amedia_status_t (*func_delete)(SDL_AMediaCodec *acodec);
 
@@ -99,6 +100,8 @@ struct SDL_CodecAndroid_BufferInfo {
 // sdl_amedia_status_t     SDL_AMediaCodec_delete(SDL_AMediaCodec* acodec);
 // sdl_amedia_status_t     SDL_AMediaCodec_deleteP(SDL_AMediaCodec** acodec);
 
+int                     SDL_AMediaCodec_create_object_serial();
+
 sdl_amedia_status_t     SDL_AMediaCodec_configure(
     SDL_AMediaCodec* acodec,
     const SDL_AMediaFormat* aformat,
@@ -136,5 +139,8 @@ SDL_AMediaFormat*       SDL_AMediaCodec_getOutputFormat(SDL_AMediaCodec* acodec)
 sdl_amedia_status_t     SDL_AMediaCodec_releaseOutputBuffer(SDL_AMediaCodec* acodec, size_t idx, bool render);
 
 bool                    SDL_AMediaCodec_isInputBuffersValid(SDL_AMediaCodec* acodec);
+
+int                     SDL_AMediaCodec_getSerial(SDL_AMediaCodec* acodec);
+bool                    SDL_AMediaCodec_isSameSerial(SDL_AMediaCodec* acodec, int acodec_serial);
 
 #endif

@@ -637,6 +637,7 @@ SDL_AMediaCodec* SDL_AMediaCodecJava_createByCodecName(JNIEnv *env, const char *
     }
 
     SDL_AMediaCodec* acodec = SDL_AMediaCodecJava_init(env, local_android_media_codec);
+    acodec->object_serial = SDL_AMediaCodec_create_object_serial();
     SDL_JNI_DeleteLocalRefP(env, &local_android_media_codec);
     return acodec;
 }

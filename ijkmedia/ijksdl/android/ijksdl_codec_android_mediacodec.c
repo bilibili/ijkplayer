@@ -24,6 +24,17 @@
 #include "ijksdl_codec_android_mediacodec.h"
 #include <assert.h>
 
+static int g_amediacodec_object_serial;
+
+// TODO: thread-safe
+int SDL_AMediaCodec_create_object_serial()
+{
+    int object_serial = ++g_amediacodec_object_serial;
+    if (object_serial == 0)
+        object_serial = SDL_AMediaCodec_create_object_serial();
+    return object_serial;
+}
+
 // FIXME: release SDL_AMediaCodec
 sdl_amedia_status_t SDL_AMediaCodec_delete(SDL_AMediaCodec* acodec)
 {
@@ -181,4 +192,18 @@ bool SDL_AMediaCodec_isInputBuffersValid(SDL_AMediaCodec* acodec)
 {
     assert(acodec->func_isInputBuffersValid);
     return acodec->func_isInputBuffersValid(acodec);
+}
+
+int SDL_AMediaCodec_getSerial(SDL_AMediaCodec* acodec)
+{
+    if (!acodec)
+        return 0;
+    return acodec->object_serial;
+}
+
+bool SDL_AMediaCodec_isSameSerial(SDL_AMediaCodec* acodec, int acodec_serial)
+{
+    if (acodec == NULL)
+        return false;
+    return acodec->object_serial == acodec_serial;
 }

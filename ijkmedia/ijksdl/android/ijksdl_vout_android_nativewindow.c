@@ -40,15 +40,15 @@
 
 struct SDL_AMediaCodecBufferProxy
 {
-    int                 buffer_id;
-    int                 buffer_index;
-    SDL_AMediaCodec    *weak_acodec;    // only used for compare
+    int buffer_id;
+    int buffer_index;
+    int acodec_serial;
 };
 
 static void SDL_AMediaCodecBufferProxy_reset(SDL_AMediaCodecBufferProxy *proxy)
 {
-    proxy->buffer_index = -1;
-    proxy->weak_acodec  = NULL;
+    proxy->buffer_index  = -1;
+    proxy->acodec_serial = 0;
 }
 
 static void SDL_AMediaCodecBufferProxy_init(SDL_AMediaCodecBufferProxy *proxy)
@@ -282,7 +282,7 @@ SDL_AMediaCodec *SDL_VoutAndroid_peekAMediaCodec(SDL_Vout *vout)
     return acodec;
 }
 
-static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout *vout, SDL_AMediaCodec *acodec, int buffer_index)
+static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout *vout, int acodec_serial, int buffer_index)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
     SDL_AMediaCodecBufferProxy *proxy = NULL;
@@ -298,18 +298,23 @@ static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout 
         ISDL_Array__push_back(&opaque->overlay_manager, proxy);
     }
 
-    proxy->buffer_id    = opaque->next_buffer_id++;
-    proxy->weak_acodec  = acodec;
-    proxy->buffer_index = buffer_index;
-    AMCTRACE("%s:  [%d] ++++++++ proxy %p: vout: %p idx: %d", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec, proxy->buffer_index);
+    proxy->buffer_id     = opaque->next_buffer_id++;
+    proxy->acodec_serial = acodec_serial;
+    proxy->buffer_index  = buffer_index;
+    AMCTRACE("%s: [%d] ++++++++ proxy %d: vout: %d idx: %d",
+        __func__,
+        proxy->buffer_id,
+        proxy->acodec_serial,
+        SDL_AMediaCodec_getSerial(opaque->acodec),
+        proxy->buffer_index);
     return proxy;
 }
 
-SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy(SDL_Vout *vout, SDL_AMediaCodec *acodec, int buffer_index)
+SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy(SDL_Vout *vout, int acodec_serial, int buffer_index)
 {
     SDL_AMediaCodecBufferProxy *proxy = NULL;
     SDL_LockMutex(vout->mutex);
-    proxy = SDL_VoutAndroid_obtainBufferProxy_l(vout, acodec, buffer_index);
+    proxy = SDL_VoutAndroid_obtainBufferProxy_l(vout, acodec_serial, buffer_index);
     SDL_UnlockMutex(vout->mutex);
     return proxy;
 }
@@ -321,11 +326,23 @@ static int SDL_VoutAndroid_releaseBufferProxy_l(SDL_Vout *vout, SDL_AMediaCodecB
     if (!proxy)
         return 0;
 
-    AMCTRACE("%s: [%d] -------- proxy %p: vout: %p idx: %d render: %s", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec, proxy->buffer_index, render ? "true" : "false");
+    AMCTRACE("%s: [%d] -------- proxy %d: vout: %d idx: %d render: %s",
+        __func__,
+        proxy->buffer_id,
+        proxy->acodec_serial,
+        SDL_AMediaCodec_getSerial(opaque->acodec),
+        proxy->buffer_index, 
+        render ? "true" : "false");
     ISDL_Array__push_back(&opaque->overlay_pool, proxy);
 
-    if (proxy->weak_acodec != opaque->acodec || opaque->acodec == NULL) {
-        ALOGE("%s: [%d] obselete proxy %p: vout: %p\n", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec);
+    if (!SDL_AMediaCodec_isSameSerial(opaque->acodec, proxy->acodec_serial)) {
+        ALOGW("%s: [%d] ???????? proxy %d: vout: %d idx: %d render: %s",
+            __func__,
+            proxy->buffer_id,
+            proxy->acodec_serial,
+            SDL_AMediaCodec_getSerial(opaque->acodec),
+            proxy->buffer_index, 
+            render ? "true" : "false");
         return 0;
     }
 
@@ -334,12 +351,19 @@ static int SDL_VoutAndroid_releaseBufferProxy_l(SDL_Vout *vout, SDL_AMediaCodecB
         return 0;
     }
 
-    sdl_amedia_status_t amc_ret = SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, proxy->buffer_index, render);
-    proxy->buffer_index = -1;
+    sdl_amedia_status_t amc_ret = SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, proxy->buffer_index, render);    
     if (amc_ret != SDL_AMEDIA_OK) {
-        ALOGI("%s: [%d] !!!!!!!! proxy %p: vout: %p idx: %d error: %d\n", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec, proxy->buffer_index, (int)amc_ret);
+        ALOGW("%s: [%d] !!!!!!!! proxy %d: vout: %d idx: %d render: %s",
+            __func__,
+            proxy->buffer_id,
+            proxy->acodec_serial,
+            SDL_AMediaCodec_getSerial(opaque->acodec),
+            proxy->buffer_index, 
+            render ? "true" : "false");
+        proxy->buffer_index = -1;
         return -1;
     }
+    proxy->buffer_index = -1;
 
     return 0;
 }
