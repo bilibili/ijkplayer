@@ -301,6 +301,7 @@ static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout 
     proxy->buffer_id    = opaque->next_buffer_id++;
     proxy->weak_acodec  = acodec;
     proxy->buffer_index = buffer_index;
+    AMCTRACE("%s:  [%d] ++++++++ proxy %p: vout: %p idx: %d", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec, proxy->buffer_index);
     return proxy;
 }
 
@@ -320,10 +321,11 @@ static int SDL_VoutAndroid_releaseBufferProxy_l(SDL_Vout *vout, SDL_AMediaCodecB
     if (!proxy)
         return 0;
 
+    AMCTRACE("%s: [%d] -------- proxy %p: vout: %p idx: %d render: %s", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec, proxy->buffer_index, render ? "true" : "false");
     ISDL_Array__push_back(&opaque->overlay_pool, proxy);
 
     if (proxy->weak_acodec != opaque->acodec || opaque->acodec == NULL) {
-        ALOGE("%s: [%d] obselete AMediaCodec %p: current: %p\n", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec);
+        ALOGE("%s: [%d] obselete proxy %p: vout: %p\n", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec);
         return 0;
     }
 
@@ -335,7 +337,7 @@ static int SDL_VoutAndroid_releaseBufferProxy_l(SDL_Vout *vout, SDL_AMediaCodecB
     sdl_amedia_status_t amc_ret = SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, proxy->buffer_index, render);
     proxy->buffer_index = -1;
     if (amc_ret != SDL_AMEDIA_OK) {
-        ALOGI("%s: [%d] !!!!!!!! AMediaCodec %p: current: %p idx: %d error: %d\n", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec, proxy->buffer_index, (int)amc_ret);
+        ALOGI("%s: [%d] !!!!!!!! proxy %p: vout: %p idx: %d error: %d\n", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec, proxy->buffer_index, (int)amc_ret);
         return -1;
     }
 

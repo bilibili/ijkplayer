@@ -200,6 +200,7 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
 
     SDL_AMediaCodec_start(opaque->acodec);
     opaque->acodec_first_dequeue_output_request = true;
+    ALOGI("%s:new acodec: %p\n", __func__, opaque->acodec);
     SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, opaque->acodec);
 fail:
     return ret;
