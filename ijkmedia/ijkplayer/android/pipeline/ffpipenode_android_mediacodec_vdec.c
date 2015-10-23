@@ -46,6 +46,7 @@
 
 typedef struct AMC_Buf_Out {
     int port;
+    SDL_AMediaCodec *weak_acodec;
     SDL_AMediaCodecBufferInfo info;
     double pts;
 } AMC_Buf_Out;
@@ -218,6 +219,7 @@ static int reconfigure_codec(JNIEnv *env, IJKFF_Pipenode *node)
 static int amc_queue_picture_buffer(
     IJKFF_Pipenode            *node,
     int                        output_buffer_index,
+    SDL_AMediaCodec           *acodec,
     SDL_AMediaCodecBufferInfo *buffer_info)
 {
     IJKFF_Pipenode_Opaque *opaque     = node->opaque;
@@ -230,13 +232,19 @@ static int amc_queue_picture_buffer(
     int64_t     amc_pts = av_rescale_q(buffer_info->presentationTimeUs, AV_TIME_BASE_Q, is->video_st->time_base);
     double      pts = amc_pts < 0 ? NAN : amc_pts * av_q2d(tb);
 
-    picture.opaque = (void *)(intptr_t)output_buffer_index;
+    memset(&picture, 0, sizeof(AVFrame));
+    picture.opaque = SDL_VoutAndroid_obtainBufferProxy(opaque->weak_vout, acodec, output_buffer_index);
     picture.width  = opaque->frame_width;
     picture.height = opaque->frame_height;
     picture.format = SDL_FCC__AMC;
     picture.sample_aspect_ratio = opaque->avctx->sample_aspect_ratio;
 
-    return ffp_queue_picture(opaque->ffp, &picture, pts, duration, 0, is->viddec.pkt_serial);
+    int ret = ffp_queue_picture(opaque->ffp, &picture, pts, duration, 0, is->viddec.pkt_serial);
+    if (ret) {
+        if (picture.opaque && buffer_info >= 0)
+            SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&picture.opaque, false);
+    }
+    return ret;
 }
 
 static int amc_queue_picture_fake(IJKFF_Pipenode *node, AVPacket *pkt)
@@ -257,7 +265,7 @@ static int amc_queue_picture_fake(IJKFF_Pipenode *node, AVPacket *pkt)
     memset(&buffer_info, 0, sizeof(buffer_info));
     buffer_info.presentationTimeUs = time_stamp;
 
-    return amc_queue_picture_buffer(node, -1, &buffer_info);
+    return amc_queue_picture_buffer(node, -1, NULL, &buffer_info);
 }
 
 static int amc_decode_picture_fake(IJKFF_Pipenode *node, uint32_t timeout_milli)
@@ -721,6 +729,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
             if (opaque->off_buf_out < opaque->n_buf_out) {
                 // ALOGD("filling buffer... %d", opaque->off_buf_out);
                 buf_out = &opaque->amc_buf_out[opaque->off_buf_out++];
+                buf_out->weak_acodec = opaque->acodec;
                 buf_out->port = output_buffer_index;
                 buf_out->info = bufferInfo;
                 buf_out->pts = pts_from_buffer_info(node, &bufferInfo);
@@ -739,7 +748,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                 buf_out = &opaque->amc_buf_out[opaque->off_buf_out - 1];
                 /* new picture is the most aged, send now */
                 if (pts < buf_out->pts) {
-                    ret = amc_queue_picture_buffer(node, output_buffer_index, &bufferInfo);
+                    ret = amc_queue_picture_buffer(node, output_buffer_index, opaque->acodec, &bufferInfo);
                     opaque->last_queued_pts = pts;
                     // ALOGD("pts = %f", pts);
                 } else {
@@ -749,10 +758,11 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                     for (i = opaque->off_buf_out - 1; i >= 0; i--) {
                         buf_out = &opaque->amc_buf_out[i];
                         if (pts > buf_out->pts) {
-                            ret = amc_queue_picture_buffer(node, buf_out->port, &buf_out->info);
+                            ret = amc_queue_picture_buffer(node, buf_out->port, opaque->acodec, &buf_out->info);
                             opaque->last_queued_pts = buf_out->pts;
                             // ALOGD("pts = %f", buf_out->pts);
                             /* replace for sort later */
+                            buf_out->weak_acodec = opaque->acodec;
                             buf_out->port = output_buffer_index;
                             buf_out->info = bufferInfo;
                             buf_out->pts = pts_from_buffer_info(node, &bufferInfo);
@@ -769,7 +779,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                 }
             }
         } else {
-            ret = amc_queue_picture_buffer(node, output_buffer_index, &bufferInfo);
+            ret = amc_queue_picture_buffer(node, output_buffer_index, opaque->acodec, &bufferInfo);
         }
     }
 

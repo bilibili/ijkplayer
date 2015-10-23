@@ -108,16 +108,16 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
     assert(frame->format == SDL_FCC__AMC);
 
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
-    int output_buffer_index = (int)(intptr_t)frame->opaque;
 
     if (!check_object(overlay, __func__))
         return -1;
 
     if (opaque->buffer_proxy)
-        SDL_VoutAndroid_releaseBufferProxyP(opaque->vout, &opaque->buffer_proxy, false);
+        SDL_VoutAndroid_releaseBufferProxyP(opaque->vout, (SDL_AMediaCodecBufferProxy **)&opaque->buffer_proxy, false);
 
     opaque->acodec       = SDL_VoutAndroid_peekAMediaCodec(opaque->vout);
-    opaque->buffer_proxy = SDL_VoutAndroid_obtainBufferProxy(opaque->vout, output_buffer_index);
+    // TODO: ref-count buffer_proxy?
+    opaque->buffer_proxy = (SDL_AMediaCodecBufferProxy *)frame->opaque;
 
     overlay->opaque_class = &g_vout_overlay_amediacodec_class;
     overlay->format     = SDL_FCC__AMC;

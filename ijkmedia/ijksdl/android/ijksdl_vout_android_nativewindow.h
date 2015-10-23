@@ -43,7 +43,7 @@ typedef struct SDL_AMediaCodecBufferProxy SDL_AMediaCodecBufferProxy;
 void SDL_AMediaCodecBufferProxy_lock(SDL_AMediaCodecBufferProxy *proxy);
 void SDL_AMediaCodecBufferProxy_unlock(SDL_AMediaCodecBufferProxy *proxy);
 
-SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy(SDL_Vout *vout, int buffer_index);
+SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy(SDL_Vout *vout, SDL_AMediaCodec *acodec, int buffer_index);
 int SDL_VoutAndroid_releaseBufferProxyP(SDL_Vout *vout, SDL_AMediaCodecBufferProxy **proxy, bool render);
 int SDL_VoutAndroid_releaseBufferProxyP_l(SDL_Vout *vout, SDL_AMediaCodecBufferProxy **proxy, bool render);
 

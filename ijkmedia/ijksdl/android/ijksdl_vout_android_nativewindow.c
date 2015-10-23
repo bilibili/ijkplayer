@@ -282,7 +282,7 @@ SDL_AMediaCodec *SDL_VoutAndroid_peekAMediaCodec(SDL_Vout *vout)
     return acodec;
 }
 
-static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout *vout, int buffer_index)
+static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout *vout, SDL_AMediaCodec *acodec, int buffer_index)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
     SDL_AMediaCodecBufferProxy *proxy = NULL;
@@ -299,16 +299,16 @@ static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout 
     }
 
     proxy->buffer_id    = opaque->next_buffer_id++;
-    proxy->weak_acodec  = opaque->acodec;
+    proxy->weak_acodec  = acodec;
     proxy->buffer_index = buffer_index;
     return proxy;
 }
 
-SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy(SDL_Vout *vout, int buffer_index)
+SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy(SDL_Vout *vout, SDL_AMediaCodec *acodec, int buffer_index)
 {
     SDL_AMediaCodecBufferProxy *proxy = NULL;
     SDL_LockMutex(vout->mutex);
-    proxy = SDL_VoutAndroid_obtainBufferProxy_l(vout, buffer_index);
+    proxy = SDL_VoutAndroid_obtainBufferProxy_l(vout, acodec, buffer_index);
     SDL_UnlockMutex(vout->mutex);
     return proxy;
 }
@@ -335,7 +335,7 @@ static int SDL_VoutAndroid_releaseBufferProxy_l(SDL_Vout *vout, SDL_AMediaCodecB
     sdl_amedia_status_t amc_ret = SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, proxy->buffer_index, render);
     proxy->buffer_index = -1;
     if (amc_ret != SDL_AMEDIA_OK) {
-        ALOGI("%s: [%d] !!!!!!!! AMediaCodec %p: current: %p error: %d\n", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec, (int)amc_ret);
+        ALOGI("%s: [%d] !!!!!!!! AMediaCodec %p: current: %p idx: %d error: %d\n", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec, proxy->buffer_index, (int)amc_ret);
         return -1;
     }
 
