@@ -31,7 +31,6 @@
     options.reportPlayInfo          = YES;
     options.sourceType  = IJKMPMovieSourceTypeLowDelayLiveStreaming;
     options.cache = 6000;//default 6s
-    options.isEnableAudio = YES;
 
     return options;
 }

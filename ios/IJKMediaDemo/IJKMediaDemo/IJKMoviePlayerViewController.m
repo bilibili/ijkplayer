@@ -61,7 +61,6 @@
     options.reportPlayInfo = YES;
     options.sourceType = mUrlSourceType;
     options.cache = 6000;
-    options.isEnableAudio = YES;
     
     [IJKFFMoviePlayerController setLogReport:YES];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURLString:self.urlString withOptions:options withSegmentResolver:nil];
@@ -153,8 +152,11 @@
 }
 
 - (IBAction)onClickNormal:(id)sender {
-	mPlaySpeedMode = 0;
-	[self.player setPlaySpeedMode:mPlaySpeedMode];
+//	mPlaySpeedMode = 0;
+//	[self.player setPlaySpeedMode:mPlaySpeedMode];
+    
+    isEnableAudio = !isEnableAudio;
+    [self.player enableAudio:isEnableAudio];
 }
 
 - (IBAction)onClickSetVolume:(id)sender {

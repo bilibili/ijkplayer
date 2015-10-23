@@ -47,6 +47,5 @@ typedef struct IjkMediaPlayer IjkMediaPlayer;
 @property(nonatomic)BOOL reportPlayInfo;
 @property(nonatomic)IJKMPMovieSourceType sourceType;
 @property(nonatomic) int cache; //ms
-@property(nonatomic)BOOL isEnableAudio;
 
 @end

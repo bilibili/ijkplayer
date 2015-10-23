@@ -353,11 +353,11 @@ void ijkmp_enable_audio(IjkMediaPlayer *mp, bool isEnableAudio)
     
     pthread_mutex_lock(&mp->mutex);
     mp->ffplayer->isEnableAudio = isEnableAudio;
-    if (isEnableAudio) {
-        mp->ffplayer->av_sync_type = AV_SYNC_AUDIO_MASTER;
-    }else{
-        mp->ffplayer->av_sync_type = AV_SYNC_VIDEO_MASTER;
-    }
+//    if (isEnableAudio) {
+//        mp->ffplayer->av_sync_type = AV_SYNC_AUDIO_MASTER;
+//    }else{
+//        mp->ffplayer->av_sync_type = AV_SYNC_VIDEO_MASTER;
+//    }
     pthread_mutex_unlock(&mp->mutex);
 }
 

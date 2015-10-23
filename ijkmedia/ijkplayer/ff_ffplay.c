@@ -2386,7 +2386,6 @@ static int read_thread(void *arg)
     int av_bitrate_DataSize = 0;
     //
     
-    
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
     is->last_audio_stream = is->audio_stream = -1;
@@ -2924,15 +2923,6 @@ static int read_thread(void *arg)
         // read data
         pkt->flags = 0;
         ret = av_read_frame(ic, pkt);
-                
-        if(ret>=0)
-        {
-            if(!ffp->isEnableAudio && pkt->stream_index == is->audio_stream)
-            {
-                av_free_packet(pkt);
-                continue;
-            }
-        }
 
         if(ret>=0)
         {

@@ -267,6 +267,14 @@ static NSMutableDictionary *dictionary = nil;
 	ijkmp_set_player_volume(_mediaPlayer, volume);
 }
 
+//new API for enable audio
+-(void)enableAudio:(BOOL)enabled
+{
+    if(!_mediaPlayer)
+        return;
+    ijkmp_enable_audio(_mediaPlayer, enabled);
+}
+
 - (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
 {
     return [self initWithContentURL:aUrl
@@ -361,7 +369,7 @@ static NSMutableDictionary *dictionary = nil;
         
         ijkmp_set_data_cache(_mediaPlayer, options.cache);
         
-        ijkmp_enable_audio(_mediaPlayer, options.isEnableAudio);
+        ijkmp_enable_audio(_mediaPlayer, true);
         
         [self prepareToPlay];
         
