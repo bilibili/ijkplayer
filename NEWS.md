@@ -1,5 +1,6 @@
 tag next
 --------------------------------
+- android: fix several crash when reconfiguring MediaCodec
 
 tag k0.4.2
 --------------------------------
