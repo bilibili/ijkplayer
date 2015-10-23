@@ -114,7 +114,7 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
     ijkmp_mediacodecinfo_context *mcc      = &opaque->mcc;
     SDL_AMediaCodec              *acodec   = NULL;
 
-    if (mcc->codec_name[0] || (ffpipeline_select_mediacodec(pipeline, mcc) && mcc->codec_name[0])) {
+    if (mcc->codec_name[0] || (ffpipeline_select_mediacodec_l(pipeline, mcc) && mcc->codec_name[0])) {
         acodec = SDL_AMediaCodecJava_createByCodecName(env, mcc->codec_name);
         if (acodec) {
             strncpy(opaque->acodec_name, mcc->codec_name, sizeof(opaque->acodec_name) / sizeof(*opaque->acodec_name));
@@ -154,10 +154,10 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
     sdl_amedia_status_t    amc_ret  = 0;
     jobject                prev_jsurface = NULL;
 
-    ffpipeline_set_surface_need_reconfigure(pipeline, false);
+    ffpipeline_set_surface_need_reconfigure_l(pipeline, false);
 
     prev_jsurface = opaque->jsurface;
-    opaque->jsurface = ffpipeline_get_surface_as_global_ref(env, pipeline);
+    opaque->jsurface = ffpipeline_get_surface_as_global_ref_l(env, pipeline);
     SDL_JNI_DeleteGlobalRefP(env, &prev_jsurface);
 
     if (!opaque->acodec) {
@@ -420,13 +420,15 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
     if (d->pkt_temp.data) {
         // reconfigure surface if surface changed
         // NULL surface cause no display
-        if (ffpipeline_is_surface_need_reconfigure(pipeline)) {
+        if (ffpipeline_is_surface_need_reconfigure_l(pipeline)) {
             // request reconfigure before lock, or never get mutex
             opaque->acodec_reconfigure_request = true;
             SDL_LockMutex(opaque->acodec_mutex);
+            ffpipeline_lock_surface(opaque->pipeline);
             ret = reconfigure_codec_l(env, node);
             opaque->acodec_reconfigure_request = false;
             SDL_CondSignal(opaque->acodec_cond);
+            ffpipeline_unlock_surface(opaque->pipeline);
             SDL_UnlockMutex(opaque->acodec_mutex);
             if (ret != 0) {
                 ALOGE("%s: reconfigure_codec failed\n", __func__);
@@ -1051,7 +1053,9 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, rotate_degrees);
     }
 
+    ffpipeline_lock_surface(opaque->pipeline);
     ret = reconfigure_codec_l(env, node);
+    ffpipeline_unlock_surface(opaque->pipeline);
     if (ret != 0)
         goto fail;
 

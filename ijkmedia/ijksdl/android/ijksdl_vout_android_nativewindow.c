@@ -40,6 +40,7 @@
 
 struct SDL_AMediaCodecBufferProxy
 {
+    int                 buffer_id;
     int                 buffer_index;
     SDL_AMediaCodec    *weak_acodec;    // only used for compare
 };
@@ -80,6 +81,7 @@ typedef struct SDL_Vout_Opaque {
     ANativeWindow   *native_window;
     SDL_AMediaCodec *acodec;
     int              null_native_window_warned; // reduce log for null window
+    int              next_buffer_id;
 
     ISDL_Array       overlay_manager;
     ISDL_Array       overlay_pool;
@@ -296,6 +298,7 @@ static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout 
         ISDL_Array__push_back(&opaque->overlay_manager, proxy);
     }
 
+    proxy->buffer_id    = opaque->next_buffer_id++;
     proxy->weak_acodec  = opaque->acodec;
     proxy->buffer_index = buffer_index;
     return proxy;
@@ -320,19 +323,19 @@ static int SDL_VoutAndroid_releaseBufferProxy_l(SDL_Vout *vout, SDL_AMediaCodecB
     ISDL_Array__push_back(&opaque->overlay_pool, proxy);
 
     if (proxy->weak_acodec != opaque->acodec || opaque->acodec == NULL) {
-        ALOGE("%s: obselete AMediaCodec %p: current: %p\n", __func__, proxy->weak_acodec, opaque->acodec);
+        ALOGE("%s: [%d] obselete AMediaCodec %p: current: %p\n", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec);
         return 0;
     }
 
     if (proxy->buffer_index < 0) {
-        ALOGE("%s: invalid AMediaCodec buffer index %d\n", __func__, proxy->buffer_index);
+        ALOGE("%s: [%d] invalid AMediaCodec buffer index %d\n", __func__, proxy->buffer_id, proxy->buffer_index);
         return 0;
     }
 
     sdl_amedia_status_t amc_ret = SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, proxy->buffer_index, render);
     proxy->buffer_index = -1;
     if (amc_ret != SDL_AMEDIA_OK) {
-        ALOGE("%s: SDL_VoutAndroid_renderBufferProxy: failed (%d)\n", __func__, (int)amc_ret);
+        ALOGI("%s: [%d] !!!!!!!! AMediaCodec %p: current: %p error: %d\n", __func__, proxy->buffer_id, proxy->weak_acodec, opaque->acodec, (int)amc_ret);
         return -1;
     }
 

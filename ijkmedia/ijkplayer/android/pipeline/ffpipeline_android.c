@@ -126,7 +126,19 @@ fail:
     return NULL;
 }
 
-jobject ffpipeline_get_surface_as_global_ref(JNIEnv *env, IJKFF_Pipeline* pipeline)
+int ffpipeline_lock_surface(IJKFF_Pipeline* pipeline)
+{
+    IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
+    return SDL_LockMutex(opaque->surface_mutex);
+}
+
+int ffpipeline_unlock_surface(IJKFF_Pipeline* pipeline)
+{
+    IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
+    return SDL_UnlockMutex(opaque->surface_mutex);
+}
+
+jobject ffpipeline_get_surface_as_global_ref_l(JNIEnv *env, IJKFF_Pipeline* pipeline)
 {
     if (!check_ffpipeline(pipeline, __func__))
         return NULL;
@@ -136,12 +148,8 @@ jobject ffpipeline_get_surface_as_global_ref(JNIEnv *env, IJKFF_Pipeline* pipeli
         return NULL;
 
     jobject global_ref = NULL;
-    SDL_LockMutex(opaque->surface_mutex);
-    {
-        if (opaque->jsurface)
-            global_ref = (*env)->NewGlobalRef(env, opaque->jsurface);
-    }
-    SDL_UnlockMutex(opaque->surface_mutex);
+    if (opaque->jsurface)
+        global_ref = (*env)->NewGlobalRef(env, opaque->jsurface);
 
     return global_ref;
 }
@@ -169,6 +177,7 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
     {
         jobject prev_surface = opaque->jsurface;
 
+        SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, NULL);
         if ((surface == prev_surface) ||
             (surface && prev_surface && (*env)->IsSameObject(env, surface, prev_surface))) {
             // same object, no need to reconfigure
@@ -191,7 +200,7 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
     return 0;
 }
 
-bool ffpipeline_is_surface_need_reconfigure(IJKFF_Pipeline* pipeline)
+bool ffpipeline_is_surface_need_reconfigure_l(IJKFF_Pipeline* pipeline)
 {
     if (!check_ffpipeline(pipeline, __func__))
         return false;
@@ -199,7 +208,7 @@ bool ffpipeline_is_surface_need_reconfigure(IJKFF_Pipeline* pipeline)
     return pipeline->opaque->is_surface_need_reconfigure;
 }
 
-void ffpipeline_set_surface_need_reconfigure(IJKFF_Pipeline* pipeline, bool need_reconfigure)
+void ffpipeline_set_surface_need_reconfigure_l(IJKFF_Pipeline* pipeline, bool need_reconfigure)
 {
     ALOGD("%s(%d)\n", __func__, (int)need_reconfigure);
     if (!check_ffpipeline(pipeline, __func__))
@@ -218,7 +227,7 @@ void ffpipeline_set_mediacodec_select_callback(IJKFF_Pipeline* pipeline, bool (*
     pipeline->opaque->mediacodec_select_callback_opaque = opaque;
 }
 
-bool ffpipeline_select_mediacodec(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo_context *mcc)
+bool ffpipeline_select_mediacodec_l(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo_context *mcc)
 {
     ALOGD("%s\n", __func__);
     if (!check_ffpipeline(pipeline, __func__))

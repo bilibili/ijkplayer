@@ -277,7 +277,7 @@ static sdl_amedia_status_t SDL_AMediaCodecJava_configure_surface(
     SDL_AMediaCodec_Opaque *opaque = (SDL_AMediaCodec_Opaque *)acodec->opaque;
     jobject android_media_format = SDL_AMediaFormatJava_getObject(env, aformat);
     jobject android_media_codec  = SDL_AMediaCodecJava_getObject(env, acodec);
-    ALOGE("configure %p %p", android_media_codec, android_media_format);
+    ALOGE("configure acodec:%p format:%p: surface:%p", android_media_codec, android_media_format, android_surface);
     (*env)->CallVoidMethod(env, android_media_codec, g_clazz.jmid_configure, android_media_format, android_surface, crypto, flags);
     if (SDL_JNI_CatchException(env)) {
         return SDL_AMEDIA_ERROR_UNKNOWN;
@@ -537,7 +537,7 @@ sdl_amedia_status_t SDL_AMediaCodecJava_releaseOutputBuffer(SDL_AMediaCodec* aco
 
     JNIEnv *env = NULL;
     if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
-        ALOGE("SDL_AMediaCodecJava_releaseOutputBuffer: SetupThreadEnv failed");
+        ALOGE("%s(%d, %s): SetupThreadEnv failed", __func__, (int)idx, render ? "true" : "false");
         return SDL_AMEDIA_ERROR_UNKNOWN;
     }
 
