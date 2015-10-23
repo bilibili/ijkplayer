@@ -132,10 +132,14 @@ static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     SDL_Vout_Opaque *opaque = vout->opaque;
     ANativeWindow *native_window = opaque->native_window;
 
-    if (!native_window && !opaque->null_native_window_warned) {
-        opaque->null_native_window_warned = 1;
-        ALOGW("voud_display_overlay_l: NULL native_window");
+    if (!native_window) {
+        if (!opaque->null_native_window_warned) {
+            opaque->null_native_window_warned = 1;
+            ALOGW("voud_display_overlay_l: NULL native_window");
+        }
         return -1;
+    } else {
+        opaque->null_native_window_warned = 1;
     }
 
     if (!overlay) {
