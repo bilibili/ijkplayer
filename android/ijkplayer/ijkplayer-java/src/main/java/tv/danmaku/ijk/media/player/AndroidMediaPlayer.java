@@ -210,7 +210,11 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public void reset() {
-        mInternalMediaPlayer.reset();
+        try {
+            mInternalMediaPlayer.reset();
+        } catch (IllegalStateException e) {
+            DebugLog.printStackTrace(e);
+        }
 
         resetListeners();
         attachInternalListeners();
