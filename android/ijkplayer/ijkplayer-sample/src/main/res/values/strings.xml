@@ -9,6 +9,7 @@
     <string name="sample">Sample</string>
     <string name="recent">Recent</string>
     <string name="settings">Settings</string>
+    <string name="toggle_player">Player</string>
     <string name="toggle_render">Render</string>
     <string name="toggle_ratio">Scale</string>
     <string name="show_info">Info</string>
@@ -51,5 +52,10 @@
     <string name="VideoView_render_none">Render: None</string>
     <string name="VideoView_render_surface_view">Render: SurfaceView</string>
     <string name="VideoView_render_texture_view">Render: TextureView</string>
+
+    <string name="VideoView_player_none">Player: None</string>
+    <string name="VideoView_player_AndroidMediaPlayer">Player: AndroidMediaPlayer</string>
+    <string name="VideoView_player_IjkMediaPlayer">Player: IjkMediaPlayer</string>
+    <string name="VideoView_player_IjkExoMediaPlayer">Player: IjkExoMediaPlayer</string>
 
 </resources>

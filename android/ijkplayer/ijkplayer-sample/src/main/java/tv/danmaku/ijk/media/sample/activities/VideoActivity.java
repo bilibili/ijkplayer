@@ -175,6 +175,12 @@ public class VideoActivity extends AppCompatActivity {
             mToastTextView.setText(aspectRatioText);
             mMediaController.showOnce(mToastTextView);
             return true;
+        } else if (id == R.id.action_toggle_player) {
+            int player = mVideoView.togglePlayer();
+            String playerText = IjkVideoView.getPlayerText(this, player);
+            mToastTextView.setText(playerText);
+            mMediaController.showOnce(mToastTextView);
+            return true;
         } else if (id == R.id.action_toggle_render) {
             int render = mVideoView.toggleRender();
             String renderText = IjkVideoView.getRenderText(this, render);
