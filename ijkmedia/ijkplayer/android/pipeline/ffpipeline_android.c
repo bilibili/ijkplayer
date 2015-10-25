@@ -190,7 +190,6 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
             opaque->is_surface_need_reconfigure = true;
 
             if (prev_surface != NULL) {
-                // ASDK_Surface__release__no_throw(env, prev_surface);
                 SDL_JNI_DeleteGlobalRefP(env, &prev_surface);
             }
         }

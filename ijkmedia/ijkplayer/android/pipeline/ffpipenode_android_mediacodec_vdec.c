@@ -836,7 +836,6 @@ static void func_destroy(IJKFF_Pipenode *node)
     JNIEnv *env = NULL;
     if (JNI_OK == SDL_JNI_SetupThreadEnv(&env)) {
         if (opaque->jsurface != NULL) {
-            ASDK_Surface__release__no_throw(env, opaque->jsurface);
             SDL_JNI_DeleteGlobalRefP(env, &opaque->jsurface);
         }
     }
