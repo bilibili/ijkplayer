@@ -169,19 +169,12 @@ static void IJKSDLAudioQueueOuptutCallback(void * inUserData, AudioQueueRef inAQ
     @autoreleasepool {
         IJKSDLAudioQueueController* aqController = (__bridge IJKSDLAudioQueueController *) inUserData;
         
-        FFPlayer *ffp = aqController.spec.userdata;
-        
         if (!aqController) {
             // do nothing;
         } else if (aqController->_isPaused) {
             memset(inBuffer->mAudioData, aqController.spec.silence, inBuffer->mAudioDataByteSize);
         } else {
             (*aqController.spec.callback)(aqController.spec.userdata, inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
-            
-            if(!ffp->isEnableAudio)
-            {
-                memset(inBuffer->mAudioData, aqController.spec.silence, inBuffer->mAudioDataByteSize);
-            }
         }
 
         AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL);

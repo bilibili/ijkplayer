@@ -355,4 +355,10 @@ public class AndroidMediaPlayer extends SimpleMediaPlayer {
 	{
 		return 0;
 	}
+
+	@Override
+	public void setAudioEnabled(boolean enable) {
+		// TODO Auto-generated method stub
+		
+	}
 }

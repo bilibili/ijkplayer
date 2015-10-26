@@ -1023,5 +1023,8 @@ public class VideoView extends SurfaceView implements
     public void setAudioEnabled(boolean enable)
     {
     	isAudioEnabled = enable;
+    	if (mMediaPlayer!=null) {
+    		mMediaPlayer.setAudioEnabled(isAudioEnabled);
+		}
     }
 }

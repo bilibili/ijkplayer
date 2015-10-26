@@ -88,6 +88,9 @@ public interface IMediaPlayer {
     
     // new API by William Shi
     public abstract long getAbsoluteTimestamp();
+    
+    // new API by William Shi
+    public abstract void setAudioEnabled(boolean enable);
 
     public abstract void release();
 

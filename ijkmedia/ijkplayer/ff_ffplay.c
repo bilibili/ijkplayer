@@ -1954,6 +1954,9 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     FFPlayer *ffp = opaque;
     VideoState *is = ffp->is;
     int audio_size, len1;
+    
+    Uint8 *_stream = stream;
+    int _len = len;
 
     ffp->audio_callback_time = av_gettime_relative();
 
@@ -1993,6 +1996,11 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     if (!isnan(is->audio_clock)) {
         set_clock_at(&is->audclk, is->audio_clock - (double)(is->audio_write_buf_size) / is->audio_tgt.bytes_per_sec - SDL_AoutGetLatencySeconds(ffp->aout), is->audio_clock_serial, ffp->audio_callback_time / 1000000.0);
         sync_clock_to_slave(&is->extclk, &is->audclk);
+    }
+    
+    if(!ffp->isEnableAudio)
+    {
+        memset(_stream, 0, _len);
     }
 }
 
@@ -2803,7 +2811,7 @@ static int read_thread(void *arg)
                 }
                 
                 //drop all
-                if(currentDuration>live_duration_hwm && av_now_time - av_flush_time>60*1000)
+                if(currentDuration>live_duration_hwm && av_now_time - av_flush_time>10*1000)
                 {
                     if (is->audio_stream >= 0) {
                         packet_queue_flush(&is->audioq);
