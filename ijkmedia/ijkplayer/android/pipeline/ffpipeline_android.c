@@ -177,11 +177,11 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
     {
         jobject prev_surface = opaque->jsurface;
 
-        SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, NULL);
         if ((surface == prev_surface) ||
             (surface && prev_surface && (*env)->IsSameObject(env, surface, prev_surface))) {
             // same object, no need to reconfigure
         } else {
+            SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, NULL);
             if (surface) {
                 opaque->jsurface = (*env)->NewGlobalRef(env, surface);
             } else {
