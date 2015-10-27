@@ -217,8 +217,10 @@ static int reconfigure_codec(JNIEnv *env, IJKFF_Pipenode *node)
 }
 #endif
 
-static int amc_queue_picture_buffer(
+static int amc_fill_frame(
     IJKFF_Pipenode            *node,
+    AVFrame                   *frame,
+    int                       *got_frame,
     int                        output_buffer_index,
     int                        acodec_serial,
     SDL_AMediaCodecBufferInfo *buffer_info)
@@ -226,29 +228,27 @@ static int amc_queue_picture_buffer(
     IJKFF_Pipenode_Opaque *opaque     = node->opaque;
     FFPlayer              *ffp        = opaque->ffp;
     VideoState            *is         = ffp->is;
-    AVFrame     picture;
-    AVRational  tb         = is->video_st->time_base;
-    AVRational  frame_rate = av_guess_frame_rate(is->ic, is->video_st, NULL);
-    double      duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
-    int64_t     amc_pts = av_rescale_q(buffer_info->presentationTimeUs, AV_TIME_BASE_Q, is->video_st->time_base);
-    double      pts = amc_pts < 0 ? NAN : amc_pts * av_q2d(tb);
 
-    memset(&picture, 0, sizeof(AVFrame));
-    picture.opaque = SDL_VoutAndroid_obtainBufferProxy(opaque->weak_vout, acodec_serial, output_buffer_index);
-    picture.width  = opaque->frame_width;
-    picture.height = opaque->frame_height;
-    picture.format = SDL_FCC__AMC;
-    picture.sample_aspect_ratio = opaque->avctx->sample_aspect_ratio;
+    frame->opaque = SDL_VoutAndroid_obtainBufferProxy(opaque->weak_vout, acodec_serial, output_buffer_index);
+    if (!frame->opaque)
+        goto fail;
 
-    int ret = ffp_queue_picture(opaque->ffp, &picture, pts, duration, 0, is->viddec.pkt_serial);
-    if (ret) {
-        if (picture.opaque && buffer_info >= 0)
-            SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&picture.opaque, false);
-    }
-    return ret;
+    frame->width  = opaque->frame_width;
+    frame->height = opaque->frame_height;
+    frame->format = SDL_FCC__AMC;
+    frame->sample_aspect_ratio = opaque->avctx->sample_aspect_ratio;
+    frame->pts    = av_rescale_q(buffer_info->presentationTimeUs, AV_TIME_BASE_Q, is->video_st->time_base);
+    if (frame->pts < 0)
+        frame->pts = AV_NOPTS_VALUE;
+
+    *got_frame = 1;
+    return 0;
+fail:
+    *got_frame = 0;
+    return -1;
 }
 
-static int amc_queue_picture_fake(IJKFF_Pipenode *node, AVPacket *pkt)
+static int amc_fill_frame_fake(IJKFF_Pipenode *node, AVFrame *frame, int *got_frame, AVPacket *pkt)
 {
     IJKFF_Pipenode_Opaque *opaque     = node->opaque;
     FFPlayer              *ffp        = opaque->ffp;
@@ -266,7 +266,7 @@ static int amc_queue_picture_fake(IJKFF_Pipenode *node, AVPacket *pkt)
     memset(&buffer_info, 0, sizeof(buffer_info));
     buffer_info.presentationTimeUs = time_stamp;
 
-    return amc_queue_picture_buffer(node, -1, 0, &buffer_info);
+    return amc_fill_frame(node, frame, got_frame, -1, 0, &buffer_info);
 }
 
 static int amc_decode_picture_fake(IJKFF_Pipenode *node, uint32_t timeout_milli)
@@ -600,7 +600,7 @@ static void sort_amc_buf_out(AMC_Buf_Out *buf_out, int size) {
     }
 }
 
-static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count)
+static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count, AVFrame *frame, int *got_frame)
 {
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
     FFPlayer              *ffp      = opaque->ffp;
@@ -691,11 +691,10 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                     if (dequeue_count)
                         ++*dequeue_count;
 
-                    ret = amc_queue_picture_fake(node, &pkt);
+                    ret = amc_fill_frame_fake(node, frame, got_frame, &pkt);
                     av_free_packet(&pkt);
                 }
-                ret = 0;
-                goto fail;
+                goto done;
             }
         }
     } else if (output_buffer_index >= 0) {
@@ -749,7 +748,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                 buf_out = &opaque->amc_buf_out[opaque->off_buf_out - 1];
                 /* new picture is the most aged, send now */
                 if (pts < buf_out->pts) {
-                    ret = amc_queue_picture_buffer(node, output_buffer_index, SDL_AMediaCodec_getSerial(opaque->acodec), &bufferInfo);
+                    ret = amc_fill_frame(node, frame, got_frame, output_buffer_index, SDL_AMediaCodec_getSerial(opaque->acodec), &bufferInfo);
                     opaque->last_queued_pts = pts;
                     // ALOGD("pts = %f", pts);
                 } else {
@@ -759,7 +758,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                     for (i = opaque->off_buf_out - 1; i >= 0; i--) {
                         buf_out = &opaque->amc_buf_out[i];
                         if (pts > buf_out->pts) {
-                            ret = amc_queue_picture_buffer(node, buf_out->port, buf_out->acodec_serial, &buf_out->info);
+                            ret = amc_fill_frame(node, frame, got_frame, buf_out->port, buf_out->acodec_serial, &buf_out->info);
                             opaque->last_queued_pts = buf_out->pts;
                             // ALOGD("pts = %f", buf_out->pts);
                             /* replace for sort later */
@@ -780,7 +779,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                 }
             }
         } else {
-            ret = amc_queue_picture_buffer(node, output_buffer_index, SDL_AMediaCodec_getSerial(opaque->acodec), &bufferInfo);
+            ret = amc_fill_frame(node, frame, got_frame, output_buffer_index, SDL_AMediaCodec_getSerial(opaque->acodec), &bufferInfo);
         }
     }
 
@@ -790,7 +789,7 @@ fail:
     return ret;
 }
 
-static int drain_output_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count)
+static int drain_output_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count, AVFrame *frame, int *got_frame)
 {
     IJKFF_Pipenode_Opaque *opaque = node->opaque;
     SDL_LockMutex(opaque->acodec_mutex);
@@ -801,7 +800,7 @@ static int drain_output_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs
         SDL_CondWaitTimeout(opaque->acodec_cond, opaque->acodec_mutex, 100);
     }
 
-    int ret = drain_output_buffer_l(env, node, timeUs, dequeue_count);
+    int ret = drain_output_buffer_l(env, node, timeUs, dequeue_count, frame, got_frame);
     SDL_UnlockMutex(opaque->acodec_mutex);
     return ret;
 }
@@ -851,6 +850,12 @@ static int func_run_sync(IJKFF_Pipenode *node)
     PacketQueue           *q        = d->queue;
     int                    ret      = 0;
     int                    dequeue_count = 0;
+    AVFrame               *frame    = NULL;
+    int                    got_frame = 0;
+    AVRational             tb         = is->video_st->time_base;
+    AVRational             frame_rate = av_guess_frame_rate(is->ic, is->video_st, NULL);
+    double                 duration;
+    double                 pts;
 
     if (!opaque->acodec) {
         return ffp_video_thread(ffp);
@@ -860,6 +865,10 @@ static int func_run_sync(IJKFF_Pipenode *node)
         ALOGE("%s: SetupThreadEnv failed\n", __func__);
         return -1;
     }
+
+    frame = av_frame_alloc();
+    if (!frame)
+        goto fail;
 
     if (opaque->frame_rotate_degrees == 90 || opaque->frame_rotate_degrees == 270) {
         opaque->frame_width  = opaque->avctx->height;
@@ -878,7 +887,8 @@ static int func_run_sync(IJKFF_Pipenode *node)
 
     while (!q->abort_request) {
         int64_t timeUs = opaque->acodec_first_dequeue_output_request ? 0 : AMC_OUTPUT_TIMEOUT_US;
-        ret = drain_output_buffer(env, node, timeUs, &dequeue_count);
+        got_frame = 0;
+        ret = drain_output_buffer(env, node, timeUs, &dequeue_count, frame, &got_frame);
         if (opaque->acodec_first_dequeue_output_request) {
             SDL_LockMutex(opaque->acodec_first_dequeue_output_mutex);
             opaque->acodec_first_dequeue_output_request = false;
@@ -887,11 +897,24 @@ static int func_run_sync(IJKFF_Pipenode *node)
         }
         if (ret != 0) {
             ret = -1;
+            if (got_frame && frame->opaque)
+                SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
             goto fail;
+        }
+        if (got_frame) {
+            duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
+            pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+            ret = ffp_queue_picture(ffp, frame, pts, duration, av_frame_get_pkt_pos(frame), is->viddec.pkt_serial);
+            if (ret) {
+                if (frame->opaque)
+                    SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
+            }
+            av_frame_unref(frame);
         }
     }
 
 fail:
+    av_frame_free(&frame);
     ffp_packet_queue_abort(&opaque->fake_pictq);
     if (opaque->n_buf_out) {
         int i;
