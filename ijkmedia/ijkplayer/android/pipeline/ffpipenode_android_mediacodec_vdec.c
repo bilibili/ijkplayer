@@ -173,6 +173,7 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
     if (SDL_AMediaCodec_isConfigured(opaque->acodec)) {
         if (opaque->acodec) {
             if (SDL_AMediaCodec_isStarted(opaque->acodec)) {
+                SDL_VoutAndroid_invalidateAllBuffers(opaque->weak_vout);
                 SDL_AMediaCodec_stop(opaque->acodec);
             }
             if (opaque->quirk_reconfigure_with_new_codec) {
@@ -919,22 +920,16 @@ fail:
     av_frame_free(&frame);
     ffp_packet_queue_abort(&opaque->fake_pictq);
     if (opaque->n_buf_out) {
-        int i;
-
-        if (opaque->acodec) {
-            for (i = 0; i < opaque->n_buf_out; i++) {
-                if (opaque->amc_buf_out[i].pts != AV_NOPTS_VALUE)
-                    SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, opaque->amc_buf_out[i].port, false);
-            }
-        }
         free(opaque->amc_buf_out);
         opaque->n_buf_out = 0;
         opaque->amc_buf_out = NULL;
         opaque->off_buf_out = 0;
         opaque->last_queued_pts = AV_NOPTS_VALUE;
     }
-    if (opaque->acodec)
+    if (opaque->acodec) {
+        SDL_VoutAndroid_invalidateAllBuffers(opaque->weak_vout);
         SDL_AMediaCodec_stop(opaque->acodec);
+    }
     SDL_WaitThread(opaque->enqueue_thread, NULL);
     ALOGI("MediaCodec: %s: exit: %d", __func__, ret);
     return ret;
