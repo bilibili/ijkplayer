@@ -198,7 +198,7 @@ fail:
     return NULL;
 }
 
-static void SDL_VoutAndroid_InvalidateAllBuffers_l(SDL_Vout *vout)
+static void SDL_VoutAndroid_invalidateAllBuffers_l(SDL_Vout *vout)
 {
     AMCTRACE("%s\n", __func__);
     SDL_Vout_Opaque *opaque = vout->opaque;
@@ -210,10 +210,10 @@ static void SDL_VoutAndroid_InvalidateAllBuffers_l(SDL_Vout *vout)
     }
 }
 
-void SDL_VoutAndroid_InvalidateAllBuffers(SDL_Vout *vout)
+void SDL_VoutAndroid_invalidateAllBuffers(SDL_Vout *vout)
 {
     SDL_LockMutex(vout->mutex);
-    SDL_VoutAndroid_InvalidateAllBuffers_l(vout);
+    SDL_VoutAndroid_invalidateAllBuffers_l(vout);
     SDL_UnlockMutex(vout->mutex);
 }
 
@@ -225,12 +225,12 @@ static void SDL_VoutAndroid_SetNativeWindow_l(SDL_Vout *vout, ANativeWindow *nat
     if (opaque->native_window == native_window) {
         if (native_window == NULL) {
             // always invalidate buffers, if native_window is changed
-            SDL_VoutAndroid_InvalidateAllBuffers_l(vout);
+            SDL_VoutAndroid_invalidateAllBuffers_l(vout);
         }
         return;
     }
 
-    SDL_VoutAndroid_InvalidateAllBuffers_l(vout);
+    SDL_VoutAndroid_invalidateAllBuffers_l(vout);
 
     if (opaque->native_window)
         ANativeWindow_release(opaque->native_window);
@@ -256,7 +256,7 @@ static void SDL_VoutAndroid_setAMediaCodec_l(SDL_Vout *vout, SDL_AMediaCodec *ac
     if (opaque->acodec == acodec)
         return;
 
-    SDL_VoutAndroid_InvalidateAllBuffers_l(vout);
+    SDL_VoutAndroid_invalidateAllBuffers_l(vout);
 
     SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
     opaque->acodec = acodec;
