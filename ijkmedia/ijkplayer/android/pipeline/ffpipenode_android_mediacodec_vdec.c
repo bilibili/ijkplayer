@@ -343,6 +343,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 if (SDL_AMediaCodec_isStarted(opaque->acodec)) {
                     if (opaque->input_packet_count > 0) {
                         // flush empty queue cause error on OMX.SEC.AVC.Decoder (Nexus S)
+                        SDL_VoutAndroid_invalidateAllBuffers(opaque->weak_vout);
                         SDL_AMediaCodec_flush(opaque->acodec);
                         opaque->input_packet_count = 0;
                     }
