@@ -740,9 +740,10 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                 pts = pts_from_buffer_info(node, &bufferInfo);
                 if (opaque->last_queued_pts != AV_NOPTS_VALUE &&
                     pts < opaque->last_queued_pts) {
+                    // FIXME: drop unordered picture to avoid dither
                     // ALOGE("early picture, drop!");
-                    SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
-                    goto done;
+                    // SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
+                    // goto done;
                 }
                 /* already sorted */
                 buf_out = &opaque->amc_buf_out[opaque->off_buf_out - 1];
