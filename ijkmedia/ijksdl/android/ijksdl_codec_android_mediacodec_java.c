@@ -327,6 +327,7 @@ static sdl_amedia_status_t SDL_AMediaCodecJava_stop(SDL_AMediaCodec* acodec)
         return SDL_AMEDIA_ERROR_UNKNOWN;
     }
 
+    acodec->object_serial = SDL_AMediaCodec_create_object_serial();
     return SDL_AMEDIA_OK;
 }
 
@@ -347,6 +348,7 @@ static sdl_amedia_status_t SDL_AMediaCodecJava_flush(SDL_AMediaCodec* acodec)
         return SDL_AMEDIA_ERROR_UNKNOWN;
     }
 
+    acodec->object_serial = SDL_AMediaCodec_create_object_serial();
     return SDL_AMEDIA_OK;
 }
 
