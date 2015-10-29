@@ -132,18 +132,18 @@ public class VideoView extends SurfaceView implements
     private static HashMap<String, Integer> tokenOpenCountHashMap = null; 
     private int addOpenCountWithStream(String token)
     {
-    	if (tokenOpenCountHashMap==null) {
-    		tokenOpenCountHashMap = new HashMap<>();
-		}
-    	
-    	int openCount = 0;
-    	if (tokenOpenCountHashMap.containsKey(token)) {
-    		openCount = tokenOpenCountHashMap.get(token);
-		}
-    	openCount++;
-    	tokenOpenCountHashMap.put(token, openCount);
-    	
-    	return openCount;
+        if (tokenOpenCountHashMap==null) {
+            tokenOpenCountHashMap = new HashMap<>();
+        }
+        
+        int openCount = 0;
+        if (tokenOpenCountHashMap.containsKey(token)) {
+            openCount = tokenOpenCountHashMap.get(token);
+        }
+        openCount++;
+        tokenOpenCountHashMap.put(token, openCount);
+        
+        return openCount;
     }
     
     @Override
@@ -205,22 +205,25 @@ public class VideoView extends SurfaceView implements
                 }
             }*/
 
-        	if (mVideoLayout == VIDEO_LAYOUT_ORIGIN) {
+            if (mVideoLayout == VIDEO_LAYOUT_ORIGIN) {
                 width = mVideoWidth;
                 height = mVideoHeight;
-			} else if (mVideoLayout == VIDEO_LAYOUT_SCALE) {
+
+            } else if (mVideoLayout == VIDEO_LAYOUT_SCALE) {
                 if (mVideoWidth * height < width * mVideoHeight) {
                     width = height * mVideoWidth / mVideoHeight;
                 } else if (mVideoWidth * height  > width * mVideoHeight) {
                     height = width * mVideoHeight / mVideoWidth;
                 }
-			} else if (mVideoLayout == VIDEO_LAYOUT_ZOOM) {
+
+            } else if (mVideoLayout == VIDEO_LAYOUT_ZOOM) {
                 if (mVideoWidth * height < width * mVideoHeight) {
-                	height = width * mVideoHeight / mVideoWidth;
+                    height = width * mVideoHeight / mVideoWidth;
                 } else if (mVideoWidth * height  > width * mVideoHeight) {
-                	width = height * mVideoWidth / mVideoHeight;
+                    width = height * mVideoWidth / mVideoHeight;
                 }
-			}
+            }
+
         } else {
             // no size yet, just adopt the given spec sizes
         }
@@ -241,7 +244,7 @@ public class VideoView extends SurfaceView implements
      *            video aspect ratio, will audo detect if 0.
      */
     public void setVideoLayout(int layout) {
-    	/*
+        /*
         LayoutParams lp = getLayoutParams();
         Pair<Integer, Integer> res  = ScreenResolution.getResolution(mContext);
         int windowWidth = res.first.intValue(), windowHeight = res.second.intValue();
@@ -307,36 +310,36 @@ public class VideoView extends SurfaceView implements
     
     public String getToken()
     {
-    	return token;
+        return token;
     }
     
     public int getStreamOpenCount() {
-    	if (tokenOpenCountHashMap==null) {
-    		tokenOpenCountHashMap = new HashMap<>();
-		}
-    	
-    	int openCount = 0;
-    	if (tokenOpenCountHashMap.containsKey(token)) {
-    		openCount = tokenOpenCountHashMap.get(token);
-		}
-    	
-    	return openCount;
-	}
+        if (tokenOpenCountHashMap==null) {
+            tokenOpenCountHashMap = new HashMap<>();
+        }
+        
+        int openCount = 0;
+        if (tokenOpenCountHashMap.containsKey(token)) {
+            openCount = tokenOpenCountHashMap.get(token);
+        }
+        
+        return openCount;
+    }
     
     private String cdnName = null;
     public String getCdnName()
     {
-    	return cdnName;
+        return cdnName;
     }
     
     public void setVideoPath(String path) {
-    	//add by William
-    	try {
-			this.token = URLEncoder.encode(path, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			this.token = path;
-		}
-    	
+        //add by William
+        try {
+            this.token = URLEncoder.encode(path, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            this.token = path;
+        }
+        
         setVideoURI(Uri.parse(path));
     }
 
@@ -349,7 +352,7 @@ public class VideoView extends SurfaceView implements
     }
 
     public void setUserAgent(String ua) {
-    	mUserAgent = ua;
+        mUserAgent = ua;
     }
     
     public void stopPlayback() {
@@ -363,8 +366,8 @@ public class VideoView extends SurfaceView implements
         
         //end info report
         if (playerInfoReport!=null) {
-        	playerInfoReport.endReport();
-        	playerInfoReport = null;
+            playerInfoReport.endReport();
+            playerInfoReport = null;
         }
     }
 
@@ -386,14 +389,14 @@ public class VideoView extends SurfaceView implements
                 ijkMediaPlayer = new IjkMediaPlayer();
                 if(isMediaCodecEnabled)
                 {
-                	ijkMediaPlayer.setMediaCodecEnabled(true);
+                    ijkMediaPlayer.setMediaCodecEnabled(true);
                 }else {
                     if(isSupportMediaCodec())
                     {
-                    	ijkMediaPlayer.setMediaCodecEnabled(true);
-                    	isMediaCodecEnabled = true;
+                        ijkMediaPlayer.setMediaCodecEnabled(true);
+                        isMediaCodecEnabled = true;
                     }
-				}
+                }
                 ijkMediaPlayer.setDataSourceType(mDataSourceType);
                 ijkMediaPlayer.setDataCache(mCache);
                 ijkMediaPlayer.setAvOption(AvFormatOption_HttpDetectRangeSupport.Disable);
@@ -506,7 +509,7 @@ public class VideoView extends SurfaceView implements
                 seekTo(seekToPosition);
             if (mVideoWidth != 0 && mVideoHeight != 0) {
 //                setVideoLayout(mVideoLayout);
-            	requestLayout();
+                requestLayout();
                 if (mSurfaceWidth == mVideoWidth
                         && mSurfaceHeight == mVideoHeight) {
                     if (mTargetState == STATE_PLAYING) {
@@ -525,8 +528,8 @@ public class VideoView extends SurfaceView implements
 
             //start info report
             if (playerInfoReport==null) {
-            	playerInfoReport = new PlayerInfoReport(VideoView.this);
-			}
+                playerInfoReport = new PlayerInfoReport(VideoView.this);
+            }
             playerInfoReport.startReport();
         }
     };
@@ -547,7 +550,7 @@ public class VideoView extends SurfaceView implements
     private int errorCode = 0;
     public int getErrorCode()
     {
-    	return errorCode;
+        return errorCode;
     }
     
     private OnErrorListener mErrorListener = new OnErrorListener() {
@@ -557,8 +560,8 @@ public class VideoView extends SurfaceView implements
             errorCode = impl_err;
             
             if (playerInfoReport==null) {
-            	playerInfoReport = new PlayerInfoReport(VideoView.this);
-			}
+                playerInfoReport = new PlayerInfoReport(VideoView.this);
+            }
             playerInfoReport.reportError();
             
             mCurrentState = STATE_ERROR;
@@ -608,14 +611,14 @@ public class VideoView extends SurfaceView implements
     
     public int getAllbuffingCount()
     {
-    	return allbuffingCount;
+        return allbuffingCount;
     }
     
     public int getBuffingCountPerMinute() {
-		int tmpbuffingCountPerMinute = buffingCountPerMinute;
-		buffingCountPerMinute = 0;
-		return tmpbuffingCountPerMinute;
-	}
+        int tmpbuffingCountPerMinute = buffingCountPerMinute;
+        buffingCountPerMinute = 0;
+        return tmpbuffingCountPerMinute;
+    }
     
     private boolean isBuffing = false;
     private long buffingTimePerMinute = 0;
@@ -623,16 +626,16 @@ public class VideoView extends SurfaceView implements
     
     public int getBuffingTimePerMinute()
     {
-    	if (isBuffing) {
-    		buffingTimePerMinute += SystemClock.uptimeMillis() - buffingStartTime;
-		}
-    	
-    	long tmpBuffingTimePerMinute = buffingTimePerMinute;
-    	buffingTimePerMinute = 0;
-    	
-    	buffingStartTime = SystemClock.uptimeMillis();
-    	
-    	return (int)tmpBuffingTimePerMinute/1000;
+        if (isBuffing) {
+            buffingTimePerMinute += SystemClock.uptimeMillis() - buffingStartTime;
+        }
+        
+        long tmpBuffingTimePerMinute = buffingTimePerMinute;
+        buffingTimePerMinute = 0;
+        
+        buffingStartTime = SystemClock.uptimeMillis();
+        
+        return (int)tmpBuffingTimePerMinute/1000;
     }
     
     private OnInfoListener mInfoListener = new OnInfoListener() {
@@ -745,7 +748,7 @@ public class VideoView extends SurfaceView implements
     };
 
     private void release(boolean cleartargetstate) {
-    	
+        
         if (mMediaPlayer != null) {
             mMediaPlayer.reset();
             mMediaPlayer.release();
@@ -757,8 +760,8 @@ public class VideoView extends SurfaceView implements
         
         //end info report
         if (playerInfoReport!=null) {
-        	playerInfoReport.endReport();
-        	playerInfoReport = null;
+            playerInfoReport.endReport();
+            playerInfoReport = null;
         }
     }
 
@@ -846,10 +849,10 @@ public class VideoView extends SurfaceView implements
     }
 
     public void black_screen() {
-    	Canvas canvas = this.getHolder().lockCanvas();
-    	canvas.drawARGB(255, 0, 0, 0);
-    	this.getHolder().unlockCanvasAndPost(canvas);
-    	invalidate();
+        Canvas canvas = this.getHolder().lockCanvas();
+        canvas.drawARGB(255, 0, 0, 0);
+        this.getHolder().unlockCanvasAndPost(canvas);
+        invalidate();
     }
     
     @Override
@@ -878,22 +881,22 @@ public class VideoView extends SurfaceView implements
             return (int)mMediaPlayer.getPlayableDuration()/1000;
         }
         return 0;
-	}
+    }
 
     public String getRemoteIpAddress()
     {
-    	if (isInPlaybackState()) {
-			return mMediaPlayer.getRemoteIpAddress();
-		}
-    	return null;
+        if (isInPlaybackState()) {
+            return mMediaPlayer.getRemoteIpAddress();
+        }
+        return null;
     }
     
     public int getBitRate() {
-    	if (isInPlaybackState()) {
-			return mMediaPlayer.getBitRate();
-		}
-    	return 0;
-	}
+        if (isInPlaybackState()) {
+            return mMediaPlayer.getBitRate();
+        }
+        return 0;
+    }
 
     @Override
     public void seekTo(long msec) {
@@ -941,16 +944,16 @@ public class VideoView extends SurfaceView implements
     public boolean canSeekForward() {
         return mCanSeekForward;
     }
-	public void setPlayerSpeedMode(int speedMode)
-	{
-		IjkMediaPlayer ijkMediaPlayer = (IjkMediaPlayer)mMediaPlayer;
-		ijkMediaPlayer.setPlayerSpeedMode(speedMode);
-	}
-	public void setPlayerVolume(int volume)
-	{
-		IjkMediaPlayer ijkMediaPlayer = (IjkMediaPlayer)mMediaPlayer;
-		ijkMediaPlayer.setPlayerVolume(volume);
-	}
+    public void setPlayerSpeedMode(int speedMode)
+    {
+        IjkMediaPlayer ijkMediaPlayer = (IjkMediaPlayer)mMediaPlayer;
+        ijkMediaPlayer.setPlayerSpeedMode(speedMode);
+    }
+    public void setPlayerVolume(int volume)
+    {
+        IjkMediaPlayer ijkMediaPlayer = (IjkMediaPlayer)mMediaPlayer;
+        ijkMediaPlayer.setPlayerVolume(volume);
+    }
     //add by william
     private int mDataSourceType = LOWDELAY_LIVE_STREAMING_TYPE;
     public static final int LOWDELAY_LIVE_STREAMING_TYPE = 0;
@@ -958,22 +961,22 @@ public class VideoView extends SurfaceView implements
     public static final int VOD_STREAMING_TYPE = 2;
     public void setDataSourceType(int type)
     {
-    	mDataSourceType = type;
+        mDataSourceType = type;
     }
     public int getDataSourceType()
     {
-    	return mDataSourceType;
+        return mDataSourceType;
     }
     
     private boolean isMediaCodecEnabled = false;
     public void setMediaCodecEnabled(boolean enable)
     {
-    	isMediaCodecEnabled = enable;
+        isMediaCodecEnabled = enable;
     }
     
     private String getUniqueId()
     {
-    	return android.os.Build.MODEL;
+        return android.os.Build.MODEL;
     }
     
 //    private String SUMSUN_NOTE_III_N9002 = "samsung/h3gduoszn/hlte:4.4.2/KOT49H/N9002ZNUFNK1:user/release-keys";
@@ -990,30 +993,30 @@ public class VideoView extends SurfaceView implements
     
     private boolean isSupportMediaCodec()
     {
-    	if (getUniqueId().startsWith(M1_NOTE_model)
-    			|| getUniqueId().startsWith(SUMSUN_S_IV_model)
-    			|| getUniqueId().startsWith(MI_3_model)
-    			|| getUniqueId().startsWith(MI_4LTE_model)
-    			|| getUniqueId().startsWith(sUMSUN_NOTE_III_model)) {
-			return true;
-		}else {
-			return false;
-		}
+        if (getUniqueId().startsWith(M1_NOTE_model)
+                || getUniqueId().startsWith(SUMSUN_S_IV_model)
+                || getUniqueId().startsWith(MI_3_model)
+                || getUniqueId().startsWith(MI_4LTE_model)
+                || getUniqueId().startsWith(sUMSUN_NOTE_III_model)) {
+            return true;
+        }else {
+            return false;
+        }
     }
     
     //ms
     private int mCache = 10000;//10ms
     public void setDataCache(int cache)
     {
-    	mCache = cache;
+        mCache = cache;
     }
     
     public long getAbsoluteTimestamp()
     {
-    	if (mMediaPlayer!=null) {
-			return mMediaPlayer.getAbsoluteTimestamp();
-		}
-    	
-    	return 0;
+        if (mMediaPlayer!=null) {
+            return mMediaPlayer.getAbsoluteTimestamp();
+        }
+        
+        return 0;
     }
 }
