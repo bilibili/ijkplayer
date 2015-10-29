@@ -135,7 +135,7 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
 
 SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout)
 {
-    SDLTRACE("SDL_VoutFFmpeg_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, vout=%p)\n",
+    SDLTRACE("SDL_VoutAMediaCodec_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, vout=%p)\n",
         width, height, (const char*) &format, format, vout);
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
     if (!overlay) {
