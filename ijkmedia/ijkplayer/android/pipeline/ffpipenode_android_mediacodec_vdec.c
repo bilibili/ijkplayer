@@ -32,6 +32,7 @@
 #include "ijksdl/android/ijksdl_vout_android_nativewindow.h"
 #include "ijksdl/android/ijksdl_vout_overlay_android_mediacodec.h"
 #include "h264_nal.h"
+#include "hevc_nal.h"
 
 #define AMC_USE_AVBITSTREAM_FILTER 0
 #ifndef AMCTRACE
@@ -324,6 +325,8 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
         goto fail;
     }
 
+    opaque->avctx = opaque->decoder->avctx;
+
     if (!d->packet_pending || d->queue->serial != d->pkt_serial) {
 #if AMC_USE_AVBITSTREAM_FILTER
 #else
@@ -399,6 +402,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             d->pkt_temp.data[6],
             d->pkt_temp.data[7]);
 #endif
+    if (opaque->avctx->codec_id == AV_CODEC_ID_H264 || opaque->avctx->codec_id == AV_CODEC_ID_HEVC) {
         convert_h264_to_annexb(d->pkt_temp.data, d->pkt_temp.size, opaque->nal_size, &convert_state);
         int64_t time_stamp = d->pkt_temp.pts;
         if (!time_stamp && d->pkt_temp.dts)
@@ -408,6 +412,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
         } else {
             time_stamp = 0;
         }
+    }
 #if 0
         AMCTRACE("input[%d][%d][%lld,%lld (%d, %d) -> %lld] %02x%02x%02x%02x%02x%02x%02x%02x", (int)d->pkt_temp.size,
             (int)opaque->nal_size,
@@ -996,8 +1001,13 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         opaque->mcc.profile = opaque->avctx->profile;
         opaque->mcc.level   = opaque->avctx->level;
         break;
+    case AV_CODEC_ID_HEVC:
+        strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_HEVC);
+        opaque->mcc.profile = opaque->avctx->profile;
+        opaque->mcc.level   = opaque->avctx->level;
+        break;
     default:
-        ALOGE("%s:create: not H264\n", __func__);
+        ALOGE("%s:create: not H264 or H265/HEVC, codec_id:%d \n", __func__, opaque->avctx->codec_id);
         goto fail;
     }
 
@@ -1022,12 +1032,21 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     ALOGI("AMediaFormat: %s, %dx%d\n", opaque->mcc.mime_type, opaque->avctx->width, opaque->avctx->height);
     opaque->input_aformat = SDL_AMediaFormatJava_createVideoFormat(env, opaque->mcc.mime_type, opaque->avctx->width, opaque->avctx->height);
     if (opaque->avctx->extradata && opaque->avctx->extradata_size > 0) {
-        if (opaque->avctx->codec_id == AV_CODEC_ID_H264 && opaque->avctx->extradata[0] == 1) {
+        if ((opaque->avctx->codec_id == AV_CODEC_ID_H264 || opaque->avctx->codec_id == AV_CODEC_ID_HEVC)
+            && opaque->avctx->extradata[0] == 1) {
 #if AMC_USE_AVBITSTREAM_FILTER
-            opaque->bsfc = av_bitstream_filter_init("h264_mp4toannexb");
-            if (!opaque->bsfc) {
-                ALOGE("Cannot open the h264_mp4toannexb BSF!\n");
-                goto fail;
+            if (opaque->avctx->codec_id == AV_CODEC_ID_H264) {
+                opaque->bsfc = av_bitstream_filter_init("h264_mp4toannexb");
+                if (!opaque->bsfc) {
+                    ALOGE("Cannot open the h264_mp4toannexb BSF!\n");
+                    goto fail;
+                }
+            } else {
+                opaque->bsfc = av_bitstream_filter_init("hevc_mp4toannexb");
+                if (!opaque->bsfc) {
+                    ALOGE("Cannot open the hevc_mp4toannexb BSF!\n");
+                    goto fail;
+                }
             }
 
             opaque->orig_extradata_size = opaque->avctx->extradata_size;
@@ -1049,11 +1068,20 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
                 ALOGE("%s:sps_pps_buffer: alloc failed\n", __func__);
                 goto fail;
             }
-            if (0 != convert_sps_pps(opaque->avctx->extradata, opaque->avctx->extradata_size,
-                                     convert_buffer, convert_size,
-                                     &sps_pps_size, &opaque->nal_size)) {
-                ALOGE("%s:convert_sps_pps: failed\n", __func__);
-                goto fail;
+            if (opaque->avctx->codec_id == AV_CODEC_ID_H264) {
+                if (0 != convert_sps_pps(opaque->avctx->extradata, opaque->avctx->extradata_size,
+                                         convert_buffer, convert_size,
+                                         &sps_pps_size, &opaque->nal_size)) {
+                    ALOGE("%s:convert_sps_pps: failed\n", __func__);
+                    goto fail;
+                }
+            } else {
+                if (0 != convert_hevc_nal_units(opaque->avctx->extradata, opaque->avctx->extradata_size,
+                                         convert_buffer, convert_size,
+                                         &sps_pps_size, &opaque->nal_size)) {
+                    ALOGE("%s:convert_hevc_nal_units: failed\n", __func__);
+                    goto fail;
+                }
             }
             SDL_AMediaFormat_setBuffer(opaque->input_aformat, "csd-0", convert_buffer, sps_pps_size);
             for(int i = 0; i < sps_pps_size; i+=4) {
