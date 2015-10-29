@@ -579,7 +579,7 @@ int SDL_Android_AudioTrack_reserve_float_buffer(JNIEnv *env, SDL_Android_AudioTr
     int capacity = IJKMAX(size_in_float, ((atrack->min_buffer_size + sizeof(jfloat) - 1) / sizeof(jfloat)));
     jbyteArray float_buffer = (*env)->NewFloatArray(env, capacity);
     if (!float_buffer || (*env)->ExceptionCheck(env)) {
-        ALOGE("%s: NewByteArray: Exception:\n", __func__);
+        ALOGE("%s: NewFloatArray: Exception:\n", __func__);
         if ((*env)->ExceptionCheck(env)) {
             (*env)->ExceptionDescribe(env);
             (*env)->ExceptionClear(env);
@@ -606,7 +606,7 @@ int SDL_Android_AudioTrack_write_float(JNIEnv *env, SDL_Android_AudioTrack *atra
 
     (*env)->SetFloatArrayRegion(env, atrack->float_buffer, 0, (int)size_in_float, (jfloat*) data);
     if ((*env)->ExceptionCheck(env)) {
-        ALOGE("%s: SetByteArrayRegion: Exception:\n", __func__);
+        ALOGE("%s: SetFloatArrayRegion: Exception:\n", __func__);
         if ((*env)->ExceptionCheck(env)) {
             (*env)->ExceptionDescribe(env);
             (*env)->ExceptionClear(env);
@@ -617,7 +617,7 @@ int SDL_Android_AudioTrack_write_float(JNIEnv *env, SDL_Android_AudioTrack *atra
     int retval = (*env)->CallIntMethod(env, atrack->thiz, g_clazz.write_float,
         atrack->float_buffer, 0, (int)size_in_float, (int)WRITE_BLOCKING);
     if ((*env)->ExceptionCheck(env)) {
-        ALOGE("%s: write_byte: Exception:\n", __func__);
+        ALOGE("%s: write_float: Exception:\n", __func__);
         if ((*env)->ExceptionCheck(env)) {
             (*env)->ExceptionDescribe(env);
             (*env)->ExceptionClear(env);
