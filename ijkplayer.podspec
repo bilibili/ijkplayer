@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name               = "ijkplayer"
-  s.version            = "1.2.0"
+  s.version            = "1.3.0"
   s.summary            = "Android/iOS video player based on FFmpeg n2.8, with MediaCodec, VideoToolbox support."
   s.homepage           = "https://github.com/ArenaCloud/ijkplayer"
   s.author             = "ArenaCloud"
