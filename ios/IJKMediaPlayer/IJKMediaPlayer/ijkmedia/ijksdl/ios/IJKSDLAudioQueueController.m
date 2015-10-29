@@ -27,6 +27,8 @@
 
 #import <AVFoundation/AVFoundation.h>
 
+#include "ff_ffplay.h"
+
 #define kIJKAudioQueueNumberBuffers (3)
 
 @implementation IJKSDLAudioQueueController {
@@ -166,7 +168,7 @@
 static void IJKSDLAudioQueueOuptutCallback(void * inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer) {
     @autoreleasepool {
         IJKSDLAudioQueueController* aqController = (__bridge IJKSDLAudioQueueController *) inUserData;
-
+        
         if (!aqController) {
             // do nothing;
         } else if (aqController->_isPaused) {

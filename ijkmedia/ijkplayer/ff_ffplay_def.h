@@ -536,6 +536,10 @@ typedef struct FFPlayer {
     
     //absolute timestamp
     int64_t ab_tm;
+    
+    //isEnableAudio
+    bool isEnableAudio;
+    
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));

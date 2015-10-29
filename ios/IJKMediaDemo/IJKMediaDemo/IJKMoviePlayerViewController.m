@@ -16,6 +16,8 @@
     IJKMPMovieSourceType mUrlSourceType;
 	int mPlaySpeedMode;
     
+    BOOL isEnableAudio;
+    
     NSTimer *timer;
 }
 
@@ -62,7 +64,10 @@
     
     [IJKFFMoviePlayerController setLogReport:YES];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURLString:self.urlString withOptions:options withSegmentResolver:nil];
+    self.player.scalingMode = MPMovieScalingModeAspectFill;
     [self installMovieNotificationObservers];
+    
+    isEnableAudio = YES;
 }
 
 - (void)dealloc
@@ -129,25 +134,6 @@
     [self.mediaControl refreshMediaControl];
 }
 
-- (IBAction)onClickBackPlayREL:(id)sender
-{
-    [[[UIApplication sharedApplication] keyWindow] endEditing:YES];
-    
-    [self.player backPlayWithREL:[self.relTimeTextField.text doubleValue]];
-}
-
-- (IBAction)onClickBackPlayABS:(id)sender
-{
-    [[[UIApplication sharedApplication] keyWindow] endEditing:YES];
-    
-    [self.player backPlayWithABS:[self.startTimeTextField.text longLongValue]];
-}
-
-- (IBAction)onClickBackLive:(id)sender
-{
-    [self.player backLivePlay];
-}
-
 - (IBAction)onClickSlower:(id)sender {
 	
 	if(mPlaySpeedMode <=-2)
@@ -166,8 +152,11 @@
 }
 
 - (IBAction)onClickNormal:(id)sender {
-	mPlaySpeedMode = 0;
-	[self.player setPlaySpeedMode:mPlaySpeedMode];
+//	mPlaySpeedMode = 0;
+//	[self.player setPlaySpeedMode:mPlaySpeedMode];
+    
+    isEnableAudio = !isEnableAudio;
+    [self.player enableAudio:isEnableAudio];
 }
 
 - (IBAction)onClickSetVolume:(id)sender {

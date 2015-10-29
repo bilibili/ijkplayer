@@ -346,6 +346,17 @@ void ijkmp_set_player_volume(IjkMediaPlayer *mp, int volume)
 
 //add by fw-----end
 
+// new API for enable audio
+void ijkmp_enable_audio(IjkMediaPlayer *mp, bool isEnableAudio)
+{
+    assert(mp);
+    
+    pthread_mutex_lock(&mp->mutex);
+    mp->ffplayer->isEnableAudio = isEnableAudio;
+    pthread_mutex_unlock(&mp->mutex);
+}
+
+
 //0:Low Delay Live
 //1:High Delay Live
 //2:VOD

@@ -56,7 +56,7 @@ public class VideoPlayerActivity extends Activity {
         mVideoView.setOnCompletionListener(mCompletionListener);
         
 //        mVideoView.setDataSourceType(VideoView.LOWDELAY_LIVE_STREAMING_TYPE);
-        mVideoView.setDataCache(10000);
+        mVideoView.setDataCache(6000);
         
         mVideoView.setMediaController(mMediaController);
         mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
@@ -64,7 +64,6 @@ public class VideoPlayerActivity extends Activity {
         mVideoView.setVideoLayout(VideoView.VIDEO_LAYOUT_ZOOM);
         
         mVideoView.setVideoPath(mVideoPath);
-//        mVideoView.setVideoToken(mVideoPath);  
 //        startPrint();
     }
     

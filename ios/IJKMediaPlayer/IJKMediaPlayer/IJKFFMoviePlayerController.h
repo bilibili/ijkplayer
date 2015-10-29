@@ -80,17 +80,16 @@
 - (void)setPauseInBackground:(BOOL)pause;
 - (BOOL)isVideoToolboxOpen;
 - (void)setMaxBufferSize:(int)maxBufferSize; // -1 for default size
+
 - (void)black_screen;
 
 + (void)setLogReport:(BOOL)preferLogReport;
 
-//new API for back play
-- (void)backPlayWithABS:(long long)absTime;//绝对时间
-- (void)backPlayWithREL:(NSTimeInterval)relTime;//相对时间
-- (void)backLivePlay;
-
 //new API for slower or faster play
 -(void)setPlaySpeedMode:(int)mode;//mode:1(2倍速快放)，2（4倍速快放），0（正常播放），-1（2倍速慢放），-2（4倍速慢放）
+
+//new API for enable audio
+-(void)enableAudio:(BOOL)enabled;
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;

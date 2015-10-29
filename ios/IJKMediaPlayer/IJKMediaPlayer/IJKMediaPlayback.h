@@ -48,16 +48,14 @@ typedef NS_ENUM(NSInteger, IJKMPMovieSourceType) {
 
 - (void)black_screen;
 
-//new API for back play
-- (void)backPlayWithABS:(long long)absTime;//绝对时间
-- (void)backPlayWithREL:(NSTimeInterval)relTime;//相对时间
-- (void)backLivePlay;
-
 //new API for slower or faster play
 - (void)setPlaySpeedMode:(int)mode;//mode:1(2倍速快放)，2（4倍速快放），0（正常播放），-1（2倍速慢放），-2（4倍速慢放）
 
 //new API for adjust player volume
 -(void)setPlayVolume:(int)volume;
+
+//new API for enable audio
+-(void)enableAudio:(BOOL)enabled;
 
 @property(nonatomic, readonly)  UIView *view;
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;

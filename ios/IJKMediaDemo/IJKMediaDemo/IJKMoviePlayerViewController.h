@@ -23,9 +23,6 @@
 - (IBAction)onClickBack:(id)sender;
 - (IBAction)onClickPlay:(id)sender;
 - (IBAction)onClickPause:(id)sender;
-- (IBAction)onClickBackPlayREL:(id)sender;
-- (IBAction)onClickBackPlayABS:(id)sender;
-- (IBAction)onClickBackLive:(id)sender;
 - (IBAction)onClickSlower:(id)sender;
 - (IBAction)onClickFaster:(id)sender;
 - (IBAction)onClickNormal:(id)sender;
@@ -34,9 +31,5 @@
 
 @property(nonatomic,strong) IBOutlet IJKMediaControl *mediaControl;
 @property(nonatomic,strong) NSString *urlString;
-
-@property (nonatomic, strong) IBOutlet UITextField *relTimeTextField;
-@property (nonatomic, strong) IBOutlet UITextField *startTimeTextField;
-@property (nonatomic, strong) IBOutlet UITextField *endTimeTextField;
 
 @end

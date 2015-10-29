@@ -115,7 +115,6 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
             }
         }
 
-        // TODO: 1 if callback return -1 or 0
     }
 
     SDL_Android_AudioTrack_free(env, atrack);

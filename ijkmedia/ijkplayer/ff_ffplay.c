@@ -1954,6 +1954,9 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     FFPlayer *ffp = opaque;
     VideoState *is = ffp->is;
     int audio_size, len1;
+    
+    Uint8 *_stream = stream;
+    int _len = len;
 
     ffp->audio_callback_time = av_gettime_relative();
 
@@ -1993,6 +1996,11 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     if (!isnan(is->audio_clock)) {
         set_clock_at(&is->audclk, is->audio_clock - (double)(is->audio_write_buf_size) / is->audio_tgt.bytes_per_sec - SDL_AoutGetLatencySeconds(ffp->aout), is->audio_clock_serial, ffp->audio_callback_time / 1000000.0);
         sync_clock_to_slave(&is->extclk, &is->audclk);
+    }
+    
+    if(!ffp->isEnableAudio)
+    {
+        memset(_stream, 0, _len);
     }
 }
 
@@ -2386,7 +2394,6 @@ static int read_thread(void *arg)
     int av_bitrate_DataSize = 0;
     //
     
-    
     memset(st_index, -1, sizeof(st_index));
     is->last_video_stream = is->video_stream = -1;
     is->last_audio_stream = is->audio_stream = -1;
@@ -2629,6 +2636,8 @@ static int read_thread(void *arg)
     bool isFlushing = false;
     
     bool isDropAllPackets = false;
+    
+    int64_t currentDuration = 0;
     //
     
     for (;;) {
@@ -2794,8 +2803,15 @@ static int read_thread(void *arg)
                 }
                 av_now_time = GetNowMs();
                 
+                if(is->videoq.duration>is->audioq.duration)
+                {
+                    currentDuration = is->videoq.duration;
+                }else{
+                    currentDuration = is->audioq.duration;
+                }
+                
                 //drop all
-                if(is->videoq.duration>live_duration_hwm && av_now_time - av_flush_time>60*1000)
+                if(currentDuration>live_duration_hwm && av_now_time - av_flush_time>10*1000)
                 {
                     if (is->audio_stream >= 0) {
                         packet_queue_flush(&is->audioq);
@@ -2829,13 +2845,14 @@ static int read_thread(void *arg)
                 
                 drop_audiopacket_timing_now = GetNowMs();
                 
-                if(is->videoq.duration>live_duration_hwm*1/2 && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
+                if(currentDuration>live_duration_hwm*1/2 && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
                 {
                     drop_audiopacket_timing_begin = 0;
                     enable_drop_audiopacket = true;
                 }
 
 //                printf("is->videoq.duration:%lld\n",is->videoq.duration);
+//                printf("is->audioq.duration:%lld\n",is->audioq.duration);
             }
         }
         
@@ -2910,7 +2927,7 @@ static int read_thread(void *arg)
                 }
             }
         }
-        
+
         // read data
         pkt->flags = 0;
         ret = av_read_frame(ic, pkt);
@@ -2951,10 +2968,6 @@ static int read_thread(void *arg)
             av_free_packet(pkt);
             
 //          printf("isDropAllPackets\n");
-/*
-            SDL_LockMutex(wait_mutex);
-            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-            SDL_UnlockMutex(wait_mutex);*/
             continue;
         }
         if(isFlushing)
@@ -2966,10 +2979,6 @@ static int read_thread(void *arg)
 //                printf("isFlushing\n");
                 
                 av_free_packet(pkt);
-/*
-                SDL_LockMutex(wait_mutex);
-                SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-                SDL_UnlockMutex(wait_mutex);*/
                 continue;
             }
         }
@@ -2980,10 +2989,6 @@ static int read_thread(void *arg)
             
             printf("drop one audiopacket.\n");
             enable_drop_audiopacket = false;
-/*
-            SDL_LockMutex(wait_mutex);
-            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-            SDL_UnlockMutex(wait_mutex);*/
             continue;
         }
 
