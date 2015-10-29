@@ -205,20 +205,19 @@ public class VideoView extends SurfaceView implements
                 }
             }*/
 
-        	if (mVideoLayout==VIDEO_LAYOUT_ORIGIN) {
+        	if (mVideoLayout == VIDEO_LAYOUT_ORIGIN) {
                 width = mVideoWidth;
                 height = mVideoHeight;
-			}else if(mVideoLayout==VIDEO_LAYOUT_SCALE) {
-                if ( mVideoWidth * height  < width * mVideoHeight ) {
+			} else if (mVideoLayout == VIDEO_LAYOUT_SCALE) {
+                if (mVideoWidth * height < width * mVideoHeight) {
                     width = height * mVideoWidth / mVideoHeight;
-                } else if ( mVideoWidth * height  > width * mVideoHeight ) {
+                } else if (mVideoWidth * height  > width * mVideoHeight) {
                     height = width * mVideoHeight / mVideoWidth;
                 }
-			}else if(mVideoLayout==VIDEO_LAYOUT_ZOOM)
-			{
-                if ( mVideoWidth * height  < width * mVideoHeight ) {
+			} else if (mVideoLayout == VIDEO_LAYOUT_ZOOM) {
+                if (mVideoWidth * height < width * mVideoHeight) {
                 	height = width * mVideoHeight / mVideoWidth;
-                } else if ( mVideoWidth * height  > width * mVideoHeight ) {
+                } else if (mVideoWidth * height  > width * mVideoHeight) {
                 	width = height * mVideoWidth / mVideoHeight;
                 }
 			}
