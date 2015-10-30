@@ -25,7 +25,6 @@
 #include "ffpipenode_android_mediacodec_vdec.h"
 #include "../../pipeline/ffpipenode_ffplay_vdec.h"
 #include "../../ff_ffplay.h"
-#include "ijksdl/android/android_surface.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_android.h"
 
