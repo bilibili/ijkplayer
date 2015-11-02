@@ -122,10 +122,16 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(vtb_wait_async),      OPTION_INT(1, 0, 1) },
 
     // Android only options
-    { "mediacodec",                             "MediaCodec: enable",
-        OPTION_OFFSET(mediacodec),              OPTION_INT(0, 0, 1) },
+    { "mediacodec",                             "MediaCodec: enable H264 (deprecated by 'mediacodec-avc')",
+        OPTION_OFFSET(mediacodec_avc),          OPTION_INT(0, 0, 1) },
     { "mediacodec-auto-rotate",                 "MediaCodec: auto rotate frame depending on meta",
         OPTION_OFFSET(mediacodec_auto_rotate),  OPTION_INT(0, 0, 1) },
+    { "mediacodec-all-videos",                  "MediaCodec: enable all videos",
+        OPTION_OFFSET(mediacodec_all_videos),   OPTION_INT(0, 0, 1) },
+    { "mediacodec-avc",                         "MediaCodec: enable H264",
+        OPTION_OFFSET(mediacodec_avc),          OPTION_INT(0, 0, 1) },
+    { "mediacodec-hevc",                        "MediaCodec: enable HEVC",
+        OPTION_OFFSET(mediacodec_hevc),         OPTION_INT(0, 0, 1) },
 
     { "opensles",                           "OpenSL ES: enable",
         OPTION_OFFSET(opensles),            OPTION_INT(0, 0, 1) },

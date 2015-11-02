@@ -984,23 +984,31 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     opaque->weak_vout   = vout;
 
     opaque->avctx = opaque->decoder->avctx;
-    switch (opaque->avctx->profile) {
-        case FF_PROFILE_H264_HIGH_10:
-        case FF_PROFILE_H264_HIGH_10_INTRA:
-        case FF_PROFILE_H264_HIGH_422:
-        case FF_PROFILE_H264_HIGH_422_INTRA:
-        case FF_PROFILE_H264_HIGH_444_PREDICTIVE:
-        case FF_PROFILE_H264_HIGH_444_INTRA:
-        case FF_PROFILE_H264_CAVLC_444:
-            goto fail;
-    }
     switch (opaque->avctx->codec_id) {
     case AV_CODEC_ID_H264:
+        if (!ffp->mediacodec_avc && !ffp->mediacodec_all_videos) {
+            ALOGE("%s: MediaCodec/AVC is disabled. codec_id:%d \n", __func__, opaque->avctx->codec_id);
+            goto fail;
+        }
+        switch (opaque->avctx->profile) {
+            case FF_PROFILE_H264_HIGH_10:
+            case FF_PROFILE_H264_HIGH_10_INTRA:
+            case FF_PROFILE_H264_HIGH_422:
+            case FF_PROFILE_H264_HIGH_422_INTRA:
+            case FF_PROFILE_H264_HIGH_444_PREDICTIVE:
+            case FF_PROFILE_H264_HIGH_444_INTRA:
+            case FF_PROFILE_H264_CAVLC_444:
+                goto fail;
+        }
         strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_AVC);
         opaque->mcc.profile = opaque->avctx->profile;
         opaque->mcc.level   = opaque->avctx->level;
         break;
     case AV_CODEC_ID_HEVC:
+        if (!ffp->mediacodec_hevc && !ffp->mediacodec_all_videos) {
+            ALOGE("%s: MediaCodec/HEVC is disabled. codec_id:%d \n", __func__, opaque->avctx->codec_id);
+            goto fail;
+        }
         strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_HEVC);
         opaque->mcc.profile = opaque->avctx->profile;
         opaque->mcc.level   = opaque->avctx->level;
