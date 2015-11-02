@@ -25,12 +25,8 @@
 
 #include <unistd.h>
 #include <sys/system_properties.h>
+#include "ijksdl/android/jjk/c/android/os/Build.h"
 #include "ijksdl_inc_internal_android.h"
-#include "android_arraylist.h"
-#include "android_audiotrack.h"
-#include "android_build.h"
-#include "android_bundle.h"
-#include "android_bytebuffer.h"
 #include "ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl_codec_android_mediacodec_java.h"
 
@@ -208,7 +204,8 @@ int SDL_Android_GetApiLevel()
         return 0;
     }
 
-    SDK_INT = ASDK_Build_VERSION__SDK_INT(env);
+    SDK_INT = JJKC_android_os_Build__VERSION__SDK_INT__get__catchAll(env);
+    ALOGI("API-Level: %d\n", SDK_INT);
     return SDK_INT;
 #if 0
     char value[PROP_VALUE_MAX];
@@ -230,21 +227,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
         return -1;
     }
 
-    retval = ASDK_ArrayList__loadClass(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-    retval = ASDK_Build__loadClass(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-    retval = ASDK_Bundle__loadClass(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-
-    retval = SDL_Android_AudioTrack_global_init(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-
-    retval = ASDK_ByteBuffer__loadClass(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-    retval = SDL_AMediaFormatJava__loadClass(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-    retval = SDL_AMediaCodecJava__loadClass(env);
+    retval = JJK_LoadAll__catchAll(env);
     JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
 
     return JNI_VERSION_1_4;

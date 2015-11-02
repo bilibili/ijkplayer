@@ -24,6 +24,7 @@
 #include "android_audiotrack.h"
 
 #include <assert.h>
+#include "ijksdl/android/jjk/c/android/media/AudioTrack.h"
 #include "ijksdl_android_jni.h"
 #include "../ijksdl_inc_internal.h"
 #include "../ijksdl_audio.h"
@@ -106,94 +107,7 @@ typedef struct SDL_Android_AudioTrack {
     int         min_buffer_size;
     float       max_volume;
     float       min_volume;
-
-    jfloatArray float_buffer;
-    int         float_buffer_capacity;
 } SDL_Android_AudioTrack;
-
-typedef struct AudioTrack_fields_t {
-    jclass clazz;
-
-    jmethodID constructor;
-    jmethodID getMinBufferSize;
-    jmethodID getMaxVolume;
-    jmethodID getMinVolume;
-    jmethodID getNativeOutputSampleRate;
-
-    jmethodID play;
-    jmethodID pause;
-    jmethodID flush;
-    jmethodID stop;
-    jmethodID release;
-    jmethodID write_byte;
-    jmethodID setStereoVolume;
-
-    jmethodID write_float;
-
-    jmethodID getAudioSessionId;
-} AudioTrack_fields_t;
-static AudioTrack_fields_t g_clazz;
-
-int SDL_Android_AudioTrack_global_init(JNIEnv *env)
-{
-    jclass clazz;
-    jint sdk_int = SDL_Android_GetApiLevel();
-
-    clazz = (*env)->FindClass(env, "android/media/AudioTrack");
-    IJK_CHECK_RET(clazz, -1, "missing AudioTrack");
-
-    // FindClass returns LocalReference
-    g_clazz.clazz = (*env)->NewGlobalRef(env, clazz);
-    IJK_CHECK_RET(g_clazz.clazz, -1, "AudioTrack NewGlobalRef failed");
-    (*env)->DeleteLocalRef(env, clazz);
-
-    g_clazz.constructor = (*env)->GetMethodID(env, g_clazz.clazz, "<init>", "(IIIIII)V");
-    IJK_CHECK_RET(g_clazz.constructor, -1, "missing AudioTrack.<init>");
-
-    g_clazz.getMinBufferSize = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getMinBufferSize", "(III)I");
-    IJK_CHECK_RET(g_clazz.getMinBufferSize, -1, "missing AudioTrack.getMinBufferSize");
-
-    g_clazz.getMaxVolume = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getMaxVolume", "()F");
-    IJK_CHECK_RET(g_clazz.getMaxVolume, -1, "missing AudioTrack.getMaxVolume");
-
-    g_clazz.getMinVolume = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getMinVolume", "()F");
-    IJK_CHECK_RET(g_clazz.getMinVolume, -1, "missing AudioTrack.getMinVolume");
-
-    g_clazz.getNativeOutputSampleRate = (*env)->GetStaticMethodID(env, g_clazz.clazz, "getNativeOutputSampleRate", "(I)I");
-    IJK_CHECK_RET(g_clazz.getNativeOutputSampleRate, -1, "missing AudioTrack.getNativeOutputSampleRate");
-
-    g_clazz.play = (*env)->GetMethodID(env, g_clazz.clazz, "play", "()V");
-    IJK_CHECK_RET(g_clazz.play, -1, "missing AudioTrack.play");
-
-    g_clazz.pause = (*env)->GetMethodID(env, g_clazz.clazz, "pause", "()V");
-    IJK_CHECK_RET(g_clazz.pause, -1, "missing AudioTrack.pause");
-
-    g_clazz.flush = (*env)->GetMethodID(env, g_clazz.clazz, "flush", "()V");
-    IJK_CHECK_RET(g_clazz.flush, -1, "missing AudioTrack.flush");
-
-    g_clazz.stop = (*env)->GetMethodID(env, g_clazz.clazz, "stop", "()V");
-    IJK_CHECK_RET(g_clazz.stop, -1, "missing AudioTrack.stop");
-
-    g_clazz.release = (*env)->GetMethodID(env, g_clazz.clazz, "release", "()V");
-    IJK_CHECK_RET(g_clazz.release, -1, "missing AudioTrack.release");
-
-    g_clazz.write_byte = (*env)->GetMethodID(env, g_clazz.clazz, "write", "([BII)I");
-    IJK_CHECK_RET(g_clazz.write_byte, -1, "missing AudioTrack.write(byte[], ...)");
-
-    g_clazz.setStereoVolume = (*env)->GetMethodID(env, g_clazz.clazz, "setStereoVolume", "(FF)I");
-    IJK_CHECK_RET(g_clazz.setStereoVolume, -1, "missing AudioTrack.setStereoVolume");
-
-    g_clazz.getAudioSessionId = (*env)->GetMethodID(env, g_clazz.clazz, "getAudioSessionId", "()I");
-    IJK_CHECK_RET(g_clazz.getAudioSessionId, -1, "missing AudioTrack.getAudioSessionId");
-
-    if (sdk_int >= IJK_API_21_LOLLIPOP) {
-        g_clazz.write_float = (*env)->GetMethodID(env, g_clazz.clazz, "write", "([FIII)I");
-        IJK_CHECK_RET(g_clazz.write_float, -1, "missing AudioTrack.write(float[], ...)");
-    }
-
-    SDLTRACE("android.media.AudioTrack class loaded");
-    return 0;
-}
 
 static void SDL_Android_AudioTrack_get_default_spec(SDL_Android_AudioTrack_Spec *spec)
 {
@@ -206,51 +120,6 @@ static void SDL_Android_AudioTrack_get_default_spec(SDL_Android_AudioTrack_Spec 
     spec->mode = MODE_STREAM;
 }
 
-static int audiotrack_get_min_buffer_size(JNIEnv *env, SDL_Android_AudioTrack_Spec *spec)
-{
-    SDLTRACE("audiotrack_get_min_buffer_size");
-    int retval = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.getMinBufferSize,
-        (int) spec->sample_rate_in_hz,
-        (int) spec->channel_config,
-        (int) spec->audio_format);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("audiotrack_get_min_buffer_size: getMinBufferSize: Exception:");
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
-        return -1;
-    }
-
-    return retval;
-}
-
-static float audiotrack_get_max_volume(JNIEnv *env)
-{
-    SDLTRACE("audiotrack_get_max_volume");
-    float retval = (*env)->CallStaticFloatMethod(env, g_clazz.clazz, g_clazz.getMaxVolume);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("audiotrack_get_max_volume: getMaxVolume: Exception:");
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
-        return -1;
-    }
-
-    return retval;
-}
-
-static float audiotrack_get_min_volume(JNIEnv *env)
-{
-    SDLTRACE("audiotrack_get_min_volume");
-    float retval = (*env)->CallStaticFloatMethod(env, g_clazz.clazz, g_clazz.getMinVolume);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("audiotrack_get_min_volume: getMinVolume: Exception:");
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
-        return -1;
-    }
-
-    return retval;
-}
-
 #define STREAM_MUSIC 3
 int audiotrack_get_native_output_sample_rate(JNIEnv *env)
 {
@@ -261,42 +130,21 @@ int audiotrack_get_native_output_sample_rate(JNIEnv *env)
         }
     }
 
-    SDLTRACE("audiotrack_get_native_output_sample_rate");
-    int retval = (*env)->CallStaticIntMethod(env, g_clazz.clazz, g_clazz.getNativeOutputSampleRate, STREAM_MUSIC);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("audiotrack_get_native_output_sample_rate: getMinVolume: Exception:");
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
+    jint retval = JJKC_AudioTrack__getNativeOutputSampleRate(env, STREAM_MUSIC);
+    if (JJK_ExceptionCheck__catchAll(env) || retval <= 0)
         return -1;
-    }
-
-    return retval;
-}
-
-static int audiotrack_set_stereo_volume(JNIEnv *env, SDL_Android_AudioTrack *atrack, float left, float right)
-{
-    int retval = (*env)->CallIntMethod(env, atrack->thiz, g_clazz.setStereoVolume, left, right);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("audiotrack_set_stereo_volume: write_byte: Exception:");
-        if ((*env)->ExceptionCheck(env)) {
-            (*env)->ExceptionDescribe(env);
-            (*env)->ExceptionClear(env);
-        }
-        return -1;
-    }
 
     return retval;
 }
 
 void SDL_Android_AudioTrack_set_volume(JNIEnv *env, SDL_Android_AudioTrack *atrack, float left_volume, float right_volume)
 {
-    audiotrack_set_stereo_volume(env, atrack, left_volume, right_volume);
+    JJKC_AudioTrack__setStereoVolume__catchAll(env, atrack->thiz, left_volume, right_volume);
 }
 
 SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_spec(JNIEnv *env, SDL_Android_AudioTrack_Spec *spec)
 {
     assert(spec);
-    jint sdk_int = SDL_Android_GetApiLevel();
 
     switch (spec->channel_config) {
     case CHANNEL_OUT_MONO:
@@ -306,7 +154,7 @@ SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_spec(JNIEnv *env, SDL_An
         ALOGI("SDL_Android_AudioTrack: %s", "CHANNEL_OUT_STEREO");
         break;
     default:
-        ALOGE("SDL_Android_AudioTrack_new_from_spec: invalid channel %d", spec->channel_config);
+        ALOGE("%s: invalid channel %d", __func__, spec->channel_config);
         return NULL;
     }
 
@@ -317,6 +165,7 @@ SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_spec(JNIEnv *env, SDL_An
     case ENCODING_PCM_8BIT:
         ALOGI("SDL_Android_AudioTrack: %s", "ENCODING_PCM_8BIT");
         break;
+#if 0
     case ENCODING_PCM_FLOAT:
         ALOGI("SDL_Android_AudioTrack: %s", "ENCODING_PCM_FLOAT");
         if (sdk_int < IJK_API_21_LOLLIPOP) {
@@ -324,66 +173,67 @@ SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_spec(JNIEnv *env, SDL_An
             return NULL;
         }
         break;
+#endif
     default:
-        ALOGE("SDL_Android_AudioTrack_new_from_spec: invalid format %d", spec->audio_format);
+        ALOGE("%s: invalid format %d", __func__, spec->audio_format);
+        return NULL;
+    }
+
+    if (spec->sample_rate_in_hz <= 0) {
+        ALOGE("%s: invalid sample rate %d", __func__, spec->sample_rate_in_hz);
         return NULL;
     }
 
     SDL_Android_AudioTrack *atrack = (SDL_Android_AudioTrack*) mallocz(sizeof(SDL_Android_AudioTrack));
     if (!atrack) {
-        (*env)->CallVoidMethod(env, atrack->thiz, g_clazz.release);
+        ALOGE("%s: mallocz faild.\n", __func__);
         return NULL;
     }
     atrack->spec = *spec;
 
-    if (atrack->spec.sample_rate_in_hz < 4000 || atrack->spec.sample_rate_in_hz > 48000) {
-        int native_sample_rate_in_hz = audiotrack_get_native_output_sample_rate(env);
-        if (native_sample_rate_in_hz > 0) {
-            ALOGE("SDL_Android_AudioTrack_new: cast sample rate %d to %d:",
-                atrack->spec.sample_rate_in_hz,
-                native_sample_rate_in_hz);
-            atrack->spec.sample_rate_in_hz = native_sample_rate_in_hz;
-        }
+    // libswresample is ugly, depending on native resampler
+    while (atrack->spec.sample_rate_in_hz < 4000) {
+        atrack->spec.sample_rate_in_hz *= 2;
+    }
+    while (atrack->spec.sample_rate_in_hz > 48000) {
+        atrack->spec.sample_rate_in_hz /= 2;   
     }
 
-    int min_buffer_size = audiotrack_get_min_buffer_size(env, &atrack->spec);
-    if (min_buffer_size <= 0) {
-        ALOGE("SDL_Android_AudioTrack_new: SDL_Android_AudioTrack_get_min_buffer_size: return %d:", min_buffer_size);
+    int min_buffer_size = JJKC_AudioTrack__getMinBufferSize(env,
+        atrack->spec.sample_rate_in_hz,
+        atrack->spec.channel_config,
+        atrack->spec.audio_format);
+    if (JJK_ExceptionCheck__catchAll(env) || min_buffer_size <= 0) {
+        ALOGE("%s: JJKC_AudioTrack__getMinBufferSize: return %d:", __func__, min_buffer_size);
         free(atrack);
         return NULL;
     }
 
-    jobject thiz = (*env)->NewObject(env, g_clazz.clazz, g_clazz.constructor,
-        (int) atrack->spec.stream_type,
-        (int) atrack->spec.sample_rate_in_hz,
-        (int) atrack->spec.channel_config,
-        (int) atrack->spec.audio_format,
-        (int) min_buffer_size,
-        (int) atrack->spec.mode);
-    if (!thiz || (*env)->ExceptionCheck(env)) {
-        ALOGE("SDL_Android_AudioTrack_new: NewObject: Exception:");
-        if ((*env)->ExceptionCheck(env)) {
-            (*env)->ExceptionDescribe(env);
-            (*env)->ExceptionClear(env);
-        }
+    atrack->thiz = JJKC_AudioTrack__AudioTrack__asGlobalRef__catchAll(env, 
+        atrack->spec.stream_type,
+        atrack->spec.sample_rate_in_hz,
+        atrack->spec.channel_config,
+        atrack->spec.audio_format,
+        min_buffer_size,
+        atrack->spec.mode);
+    if (!atrack->thiz) {
         free(atrack);
         return NULL;
     }
 
     atrack->min_buffer_size = min_buffer_size;
     atrack->spec.buffer_size_in_bytes = min_buffer_size;
-    atrack->max_volume = audiotrack_get_max_volume(env);
-    atrack->min_volume = audiotrack_get_min_volume(env);
-
-    atrack->thiz = (*env)->NewGlobalRef(env, thiz);
-    (*env)->DeleteLocalRef(env, thiz);
+    // atrack->max_volume = JJKC_AudioTrack__getMaxVolume__catchAll(env);
+    // atrack->min_volume = JJKC_AudioTrack__getMinVolume__catchAll(env);
+    atrack->max_volume = 0.0f;
+    atrack->min_volume = 1.0f;
 
     // extra init
     float init_volume = 1.0f;
     init_volume = IJKMIN(init_volume, atrack->max_volume);
     init_volume = IJKMAX(init_volume, atrack->min_volume);
-    ALOGI("SDL_Android_AudioTrack_new: init volume as %f/(%f,%f)", init_volume, atrack->min_volume, atrack->max_volume);
-    audiotrack_set_stereo_volume(env, atrack, init_volume, init_volume);
+    ALOGI("%s: init volume as %f/(%f,%f)", __func__, init_volume, atrack->min_volume, atrack->max_volume);
+    JJKC_AudioTrack__setStereoVolume__catchAll(env, atrack->thiz, init_volume, init_volume);
 
     return atrack;
 }
@@ -403,22 +253,12 @@ SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_sdl_spec(JNIEnv *env, co
 
 void SDL_Android_AudioTrack_free(JNIEnv *env, SDL_Android_AudioTrack* atrack)
 {
-    if (atrack->byte_buffer) {
-        (*env)->DeleteGlobalRef(env, atrack->byte_buffer);
-        atrack->byte_buffer = NULL;
-    }
+    JJK_DeleteGlobalRef__p(env, &atrack->byte_buffer);
     atrack->byte_buffer_capacity = 0;
 
-    if (atrack->float_buffer) {
-        (*env)->DeleteGlobalRef(env, atrack->float_buffer);
-        atrack->float_buffer = NULL;
-    }
-    atrack->float_buffer_capacity = 0;
-
     if (atrack->thiz) {
-        SDL_Android_AudioTrack_release(env, atrack);
-        (*env)->DeleteGlobalRef(env, atrack->thiz);
-        atrack->thiz = NULL;
+        JJKC_AudioTrack__release(env, atrack->thiz);
+        JJK_DeleteGlobalRef__p(env, &atrack->thiz);
     }
 
     free(atrack);
@@ -443,63 +283,26 @@ int SDL_Android_AudioTrack_get_min_buffer_size(SDL_Android_AudioTrack* atrack)
 
 void SDL_Android_AudioTrack_play(JNIEnv *env, SDL_Android_AudioTrack *atrack)
 {
-    SDLTRACE("SDL_Android_AudioTrack_play");
-    (*env)->CallVoidMethod(env, atrack->thiz, g_clazz.play);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("SDL_Android_AudioTrack_play: play: Exception:");
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
-        return;
-    }
+    SDLTRACE("%s", __func__);
+    JJKC_AudioTrack__play__catchAll(env, atrack->thiz);
 }
 
 void SDL_Android_AudioTrack_pause(JNIEnv *env, SDL_Android_AudioTrack *atrack)
 {
-    SDLTRACE("SDL_Android_AudioTrack_pause");
-    (*env)->CallVoidMethod(env, atrack->thiz, g_clazz.pause);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("SDL_Android_AudioTrack_pause: pause: Exception:");
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
-        return;
-    }
+    SDLTRACE("%s", __func__);
+    JJKC_AudioTrack__pause__catchAll(env, atrack->thiz);
 }
 
 void SDL_Android_AudioTrack_flush(JNIEnv *env, SDL_Android_AudioTrack *atrack)
 {
-    SDLTRACE("SDL_Android_AudioTrack_flush");
-    (*env)->CallVoidMethod(env, atrack->thiz, g_clazz.flush);
-    SDLTRACE("SDL_Android_AudioTrack_flush()=void");
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("SDL_Android_AudioTrack_flush: flush: Exception:");
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
-        return;
-    }
+    SDLTRACE("%s", __func__);
+    JJKC_AudioTrack__flush__catchAll(env, atrack->thiz);
 }
 
 void SDL_Android_AudioTrack_stop(JNIEnv *env, SDL_Android_AudioTrack *atrack)
 {
-    SDLTRACE("SDL_Android_AudioTrack_stop");
-    (*env)->CallVoidMethod(env, atrack->thiz, g_clazz.stop);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("SDL_Android_AudioTrack_stop: stop: Exception:");
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
-        return;
-    }
-}
-
-void SDL_Android_AudioTrack_release(JNIEnv *env, SDL_Android_AudioTrack *atrack)
-{
-    SDLTRACE("SDL_Android_AudioTrack_release");
-    (*env)->CallVoidMethod(env, atrack->thiz, g_clazz.release);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("SDL_Android_AudioTrack_release: release: Exception:");
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
-        return;
-    }
+    SDLTRACE("%s", __func__);
+    JJKC_AudioTrack__stop__catchAll(env, atrack->thiz);
 }
 
 int SDL_Android_AudioTrack_reserve_byte_buffer(JNIEnv *env, SDL_Android_AudioTrack *atrack, int size_in_byte)
@@ -507,30 +310,19 @@ int SDL_Android_AudioTrack_reserve_byte_buffer(JNIEnv *env, SDL_Android_AudioTra
     if (atrack->byte_buffer && size_in_byte <= atrack->byte_buffer_capacity)
         return size_in_byte;
 
-    if (atrack->byte_buffer) {
-        (*env)->DeleteGlobalRef(env, atrack->byte_buffer);
-        atrack->byte_buffer = NULL;
-        atrack->byte_buffer_capacity = 0;
-    }
+    JJK_DeleteGlobalRef__p(env, &atrack->byte_buffer);
+    atrack->byte_buffer_capacity = 0;
 
     int capacity = IJKMAX(size_in_byte, atrack->min_buffer_size);
-    jbyteArray byte_buffer = (*env)->NewByteArray(env, capacity);
-    if (!byte_buffer || (*env)->ExceptionCheck(env)) {
-        ALOGE("%s: NewByteArray: Exception:", __func__);
-        if ((*env)->ExceptionCheck(env)) {
-            (*env)->ExceptionDescribe(env);
-            (*env)->ExceptionClear(env);
-        }
+    atrack->byte_buffer = JJK_NewByteArray__asGlobalRef__catchAll(env, capacity);
+    if (!atrack->byte_buffer)
         return -1;
-    }
 
     atrack->byte_buffer_capacity = capacity;
-    atrack->byte_buffer = (*env)->NewGlobalRef(env, byte_buffer);
-    (*env)->DeleteLocalRef(env, byte_buffer);
     return capacity;
 }
 
-int SDL_Android_AudioTrack_write_byte(JNIEnv *env, SDL_Android_AudioTrack *atrack, uint8_t *data, int size_in_byte)
+int SDL_Android_AudioTrack_write(JNIEnv *env, SDL_Android_AudioTrack *atrack, uint8_t *data, int size_in_byte)
 {
     if (size_in_byte <= 0)
         return size_in_byte;
@@ -542,115 +334,22 @@ int SDL_Android_AudioTrack_write_byte(JNIEnv *env, SDL_Android_AudioTrack *atrac
     }
 
     (*env)->SetByteArrayRegion(env, atrack->byte_buffer, 0, (int)size_in_byte, (jbyte*) data);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("%s: SetByteArrayRegion: Exception:\n", __func__);
-        if ((*env)->ExceptionCheck(env)) {
-            (*env)->ExceptionDescribe(env);
-            (*env)->ExceptionClear(env);
-        }
+    if (JJK_ExceptionCheck__catchAll(env))
         return -1;
-    }
 
-    int retval = (*env)->CallIntMethod(env, atrack->thiz, g_clazz.write_byte,
-        atrack->byte_buffer, 0, (int)size_in_byte);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("%s: write_byte: Exception:\n", __func__);
-        if ((*env)->ExceptionCheck(env)) {
-            (*env)->ExceptionDescribe(env);
-            (*env)->ExceptionClear(env);
-        }
+    int retval = JJKC_AudioTrack__write(env, atrack->thiz, atrack->byte_buffer, 0, (int)size_in_byte);
+    if (JJK_ExceptionCheck__catchAll(env))
         return -1;
-    }
 
     return retval;
-}
-
-int SDL_Android_AudioTrack_reserve_float_buffer(JNIEnv *env, SDL_Android_AudioTrack *atrack, int size_in_float)
-{
-    if (atrack->float_buffer && size_in_float <= atrack->float_buffer_capacity)
-        return size_in_float;
-
-    if (atrack->float_buffer) {
-        (*env)->DeleteGlobalRef(env, atrack->float_buffer);
-        atrack->float_buffer = NULL;
-        atrack->float_buffer_capacity = 0;
-    }
-
-    int capacity = IJKMAX(size_in_float, ((atrack->min_buffer_size + sizeof(jfloat) - 1) / sizeof(jfloat)));
-    jbyteArray float_buffer = (*env)->NewFloatArray(env, capacity);
-    if (!float_buffer || (*env)->ExceptionCheck(env)) {
-        ALOGE("%s: NewFloatArray: Exception:\n", __func__);
-        if ((*env)->ExceptionCheck(env)) {
-            (*env)->ExceptionDescribe(env);
-            (*env)->ExceptionClear(env);
-        }
-        return -1;
-    }
-
-    atrack->float_buffer_capacity = capacity;
-    atrack->float_buffer = (*env)->NewGlobalRef(env, float_buffer);
-    (*env)->DeleteLocalRef(env, float_buffer);
-    return capacity;
-}
-
-int SDL_Android_AudioTrack_write_float(JNIEnv *env, SDL_Android_AudioTrack *atrack, uint8_t *data, int size_in_float)
-{
-    if (size_in_float <= 0)
-        return size_in_float;
-
-    int reserved = SDL_Android_AudioTrack_reserve_float_buffer(env, atrack, size_in_float);
-    if (reserved < size_in_float) {
-        ALOGE("%s failed %d < %d\n", __func__, reserved, size_in_float);
-        return -1;
-    }
-
-    (*env)->SetFloatArrayRegion(env, atrack->float_buffer, 0, (int)size_in_float, (jfloat*) data);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("%s: SetFloatArrayRegion: Exception:\n", __func__);
-        if ((*env)->ExceptionCheck(env)) {
-            (*env)->ExceptionDescribe(env);
-            (*env)->ExceptionClear(env);
-        }
-        return -1;
-    }
-
-    int retval = (*env)->CallIntMethod(env, atrack->thiz, g_clazz.write_float,
-        atrack->float_buffer, 0, (int)size_in_float, (int)WRITE_BLOCKING);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("%s: write_float: Exception:\n", __func__);
-        if ((*env)->ExceptionCheck(env)) {
-            (*env)->ExceptionDescribe(env);
-            (*env)->ExceptionClear(env);
-        }
-        return -1;
-    }
-
-    return retval;
-}
-
-int SDL_Android_AudioTrack_write(JNIEnv *env, SDL_Android_AudioTrack *atrack, uint8_t *data, int size_in_byte)
-{
-    int ret = 0;
-    if (atrack->spec.audio_format == ENCODING_PCM_FLOAT) {
-        ret = SDL_Android_AudioTrack_write_float(env, atrack, data, size_in_byte / sizeof(jfloat));
-        if (ret > 0)
-            ret *= sizeof(jfloat);
-    } else {
-        ret = SDL_Android_AudioTrack_write_byte(env, atrack, data, size_in_byte);
-    }
-    return ret;
 }
 
 int SDL_Android_AudioTrack_getAudioSessionId(JNIEnv *env, SDL_Android_AudioTrack *atrack)
 {
     SDLTRACE("%s", __func__);
-    int audioSessionId = (*env)->CallIntMethod(env, atrack->thiz, g_clazz.getAudioSessionId);
-    SDLTRACE("%s()=void", __func__);
-    if ((*env)->ExceptionCheck(env)) {
-        ALOGE("%s: Exception:", __func__);
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
+    int audioSessionId = JJKC_AudioTrack__getAudioSessionId(env, atrack->thiz);
+    if (JJK_ExceptionCheck__catchAll(env))
         return 0;
-    }
+
     return audioSessionId;
 }

@@ -1,8 +1,5 @@
-/*****************************************************************************
- * android_build.h
- *****************************************************************************
- *
- * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
+/*
+ * copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,13 +18,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL_ANDROID__ANDROID_BUILD_H
-#define IJKSDL_ANDROID__ANDROID_BUILD_H
+#ifndef BFC__H
+#define BFC__H
 
-#include "ijksdl_inc_internal_android.h"
+#include "bfc__def.h"
 
-int ASDK_Build__loadClass(JNIEnv *env);
-
-int ASDK_Build_VERSION__SDK_INT(JNIEnv *env);
+#include "bfc_object.h"
+#include "bfc_string.h"
 
 #endif

@@ -1,8 +1,5 @@
-/*****************************************************************************
- * android_arraylist.h
- *****************************************************************************
- *
- * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
+/*
+ * copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,14 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL_ANDROID__ANDROID_ARRAYLIST_H
-#define IJKSDL_ANDROID__ANDROID_ARRAYLIST_H
+#ifndef JJK__android_os_Build__H
+#define JJK__android_os_Build__H
 
-#include "ijksdl_inc_internal_android.h"
+#include "ijksdl/android/jjk/internal/jjk_internal.h"
 
-int ASDK_ArrayList__loadClass(JNIEnv *env);
+jint JJKC_android_os_Build__VERSION__SDK_INT__get(JNIEnv *env);
+jint JJKC_android_os_Build__VERSION__SDK_INT__get__catchAll(JNIEnv *env);
+void JJKC_android_os_Build__VERSION__SDK_INT__set(JNIEnv *env, jint value);
+void JJKC_android_os_Build__VERSION__SDK_INT__set__catchAll(JNIEnv *env, jint value);
+int JJK_loadClass__JJKC_android_os_Build(JNIEnv *env);
 
-jobject  ASDK_ArrayList__init(JNIEnv *env);
-jboolean ASDK_ArrayList__add(JNIEnv *env, jobject thiz, jobject elem);
-
-#endif
+#endif//JJK__android_os_Build__H
