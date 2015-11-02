@@ -987,17 +987,51 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     switch (opaque->avctx->codec_id) {
     case AV_CODEC_ID_H264:
         if (!ffp->mediacodec_avc && !ffp->mediacodec_all_videos) {
-            ALOGE("%s: MediaCodec/AVC is disabled. codec_id:%d \n", __func__, opaque->avctx->codec_id);
+            ALOGE("%s: MediaCodec: AVC/H264 is disabled. codec_id:%d \n", __func__, opaque->avctx->codec_id);
             goto fail;
         }
         switch (opaque->avctx->profile) {
+            case FF_PROFILE_H264_BASELINE:
+                ALOGI("%s: MediaCodec: H264_BASELINE: enabled\n", __func__);
+                break;
+            case FF_PROFILE_H264_CONSTRAINED_BASELINE:
+                ALOGI("%s: MediaCodec: H264_CONSTRAINED_BASELINE: enabled\n", __func__);
+                break;
+            case FF_PROFILE_H264_MAIN:
+                ALOGI("%s: MediaCodec: H264_MAIN: enabled\n", __func__);
+                break;
+            case FF_PROFILE_H264_EXTENDED:
+                ALOGI("%s: MediaCodec: H264_EXTENDED: enabled\n", __func__);
+                break;
+            case FF_PROFILE_H264_HIGH:
+                ALOGI("%s: MediaCodec: H264_HIGH: enabled\n", __func__);
+                break;
             case FF_PROFILE_H264_HIGH_10:
+                ALOGW("%s: MediaCodec: H264_HIGH_10: disabled\n", __func__);
+                goto fail;
             case FF_PROFILE_H264_HIGH_10_INTRA:
+                ALOGW("%s: MediaCodec: H264_HIGH_10_INTRA: disabled\n", __func__);
+                goto fail;
             case FF_PROFILE_H264_HIGH_422:
+                ALOGW("%s: MediaCodec: H264_HIGH_10_422: disabled\n", __func__);
+                goto fail;
             case FF_PROFILE_H264_HIGH_422_INTRA:
+                ALOGW("%s: MediaCodec: H264_HIGH_10_INTRA: disabled\n", __func__);
+                goto fail;
+            case FF_PROFILE_H264_HIGH_444:
+                ALOGW("%s: MediaCodec: H264_HIGH_10_444: disabled\n", __func__);
+                goto fail;
             case FF_PROFILE_H264_HIGH_444_PREDICTIVE:
+                ALOGW("%s: MediaCodec: H264_HIGH_444_PREDICTIVE: disabled\n", __func__);
+                goto fail;
             case FF_PROFILE_H264_HIGH_444_INTRA:
+                ALOGW("%s: MediaCodec: H264_HIGH_444_INTRA: disabled\n", __func__);
+                goto fail;
             case FF_PROFILE_H264_CAVLC_444:
+                ALOGW("%s: MediaCodec: H264_CAVLC_444: disabled\n", __func__);
+                goto fail;
+            default:
+                ALOGW("%s: MediaCodec: (%d) unknown profile: disabled\n", __func__, opaque->avctx->profile);
                 goto fail;
         }
         strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_AVC);
