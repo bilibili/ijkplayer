@@ -67,7 +67,7 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
     IJKFF_Pipenode        *node = NULL;
 
-    if (ffp->mediacodec)
+    if (ffp->mediacodec_all_videos || ffp->mediacodec_avc || ffp->mediacodec_hevc)
         node = ffpipenode_create_video_decoder_from_android_mediacodec(ffp, pipeline, opaque->weak_vout);
     if (!node) {
         node = ffpipenode_create_video_decoder_from_ffplay(ffp);
@@ -190,6 +190,8 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
             opaque->is_surface_need_reconfigure = true;
 
             if (prev_surface != NULL) {
+                //FIXME: for textureView, it must be opened.
+                // ASDK_Surface__release__no_throw(env, prev_surface);
                 SDL_JNI_DeleteGlobalRefP(env, &prev_surface);
             }
         }
