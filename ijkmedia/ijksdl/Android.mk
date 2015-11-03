@@ -47,7 +47,6 @@ LOCAL_SRC_FILES += android/android_build.c
 LOCAL_SRC_FILES += android/android_bundle.c
 LOCAL_SRC_FILES += android/android_bytebuffer.c
 LOCAL_SRC_FILES += android/android_nativewindow.c
-LOCAL_SRC_FILES += android/android_surface.c
 LOCAL_SRC_FILES += android/ijksdl_android_jni.c
 LOCAL_SRC_FILES += android/ijksdl_aout_android_audiotrack.c
 LOCAL_SRC_FILES += android/ijksdl_aout_android_opensles.c

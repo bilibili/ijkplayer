@@ -25,7 +25,6 @@
 #include "../../ff_ffpipenode.h"
 #include "../../ff_ffplay.h"
 #include "../../ff_ffplay_debug.h"
-#include "ijksdl/android/android_surface.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl/android/ijksdl_codec_android_mediacodec_java.h"
