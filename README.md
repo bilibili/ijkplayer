@@ -103,6 +103,16 @@ cd android/contrib
 sh compile-ffmpeg clean
 ```
 
+- If you prefer less codec/format for smaller binary size (include hevc function)
+```
+cd config
+rm module.sh
+ln -s module-lite-hevc.sh module.sh
+cd android/contrib
+# cd ios
+sh compile-ffmpeg clean
+```
+
 - If you prefer less codec/format for smaller binary size (by default)
 ```
 cd config
