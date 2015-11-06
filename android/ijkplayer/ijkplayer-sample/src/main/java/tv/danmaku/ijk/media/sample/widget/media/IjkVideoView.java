@@ -948,13 +948,13 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         String text;
         switch (player) {
             case Settings.PV_PLAYER__AndroidMediaPlayer:
-                text = context.getString(R.string.VideoView_render_none);
+                text = context.getString(R.string.VideoView_player_AndroidMediaPlayer);
                 break;
             case Settings.PV_PLAYER__IjkMediaPlayer:
-                text = context.getString(R.string.VideoView_render_surface_view);
+                text = context.getString(R.string.VideoView_player_IjkExoMediaPlayer);
                 break;
             case Settings.PV_PLAYER__IjkExoMediaPlayer:
-                text = context.getString(R.string.VideoView_render_texture_view);
+                text = context.getString(R.string.VideoView_player_IjkExoMediaPlayer);
                 break;
             default:
                 text = context.getString(R.string.N_A);
