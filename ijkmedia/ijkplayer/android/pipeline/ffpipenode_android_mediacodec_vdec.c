@@ -932,6 +932,7 @@ fail:
         SDL_AMediaCodec_stop(opaque->acodec);
     }
     SDL_WaitThread(opaque->enqueue_thread, NULL);
+    SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
     ALOGI("MediaCodec: %s: exit: %d", __func__, ret);
     return ret;
 #if 0
