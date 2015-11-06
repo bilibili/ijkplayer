@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -35,13 +36,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.IOException;
 
 import tv.danmaku.ijk.media.sample.R;
+import tv.danmaku.ijk.media.sample.activities.MainActivity;
+import tv.danmaku.ijk.media.sample.activities.VideoActivity;
+import tv.danmaku.ijk.media.sample.content.MediaBean;
 import tv.danmaku.ijk.media.sample.content.PathCursor;
 import tv.danmaku.ijk.media.sample.content.PathCursorLoader;
 import tv.danmaku.ijk.media.sample.eventbus.FileExplorerEvents;
 
 public class FileListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    public static final String TAG = FileListFragment.class.getSimpleName();
     private static final String ARG_PATH = "path";
 
     private TextView mPathView;
@@ -93,7 +99,8 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
                 String path = mAdapter.getFilePath(position);
                 if (TextUtils.isEmpty(path))
                     return;
-                FileExplorerEvents.getBus().post(new FileExplorerEvents.OnClickFile(path));
+
+                handleItemClick(new File(path));
             }
         });
 
@@ -116,6 +123,36 @@ public class FileListFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    private void handleItemClick(File f){
+        if (f == null || !f.exists()){
+            return;
+        }
+
+        try {
+            f = f.getAbsoluteFile();
+            f = f.getCanonicalFile();
+            if (TextUtils.isEmpty(f.toString()))
+                f = new File("/");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (f.isDirectory()) {
+            String path = f.toString();
+            Fragment newFragment = FileListFragment.newInstance(path);
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.add(R.id.body, newFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        } else if (f.exists()) {
+//            VideoActivity.intentTo(this, f.getPath(), f.getName());
+            MediaBean bean = new MediaBean();
+            bean.path = f.getPath();
+            bean.fileName = f.getName();
+            MainActivity.PLAYLIST_ITEMS.add(bean);
+        }
     }
 
     final class VideoAdapter extends SimpleCursorAdapter {

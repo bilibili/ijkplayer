@@ -20,6 +20,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -27,9 +29,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import tv.danmaku.ijk.media.sample.R;
-import tv.danmaku.ijk.media.sample.activities.RecentMediaActivity;
 import tv.danmaku.ijk.media.sample.activities.SampleMediaActivity;
 import tv.danmaku.ijk.media.sample.activities.SettingsActivity;
+import tv.danmaku.ijk.media.sample.fragments.PlaylistFragment;
 
 public class AppActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
@@ -82,10 +84,12 @@ public class AppActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             SettingsActivity.intentTo(this);
             return true;
-        } else if (id == R.id.action_recent) {
-            RecentMediaActivity.intentTo(this);
-        } else if (id == R.id.action_sample) {
-            SampleMediaActivity.intentTo(this);
+        } else if (id == R.id.action_playlist) {
+            Fragment newFragment = PlaylistFragment.newInstance();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.add(R.id.body, newFragment)
+                    .addToBackStack(null)
+                    .commit();
         }
 
         return super.onOptionsItemSelected(item);

@@ -55,9 +55,9 @@ public class RecentMediaActivity extends AppActivity {
         if (!show)
             return show;
 
-        MenuItem item = menu.findItem(R.id.action_recent);
-        if (item != null)
-            item.setVisible(false);
+//        MenuItem item = menu.findItem(R.id.action_recent);
+//        if (item != null)
+//            item.setVisible(false);
 
         return true;
     }
