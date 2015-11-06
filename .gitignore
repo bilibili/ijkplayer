@@ -33,3 +33,9 @@ local.properties
 .idea
 .gradle
 build/
+
+# Xcode
+xcuserdata
+xcshareddata
+*.xccheckout
+
