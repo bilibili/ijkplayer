@@ -111,16 +111,13 @@ typedef struct IJKFF_Pipenode_Opaque {
 static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
 {
     IJKFF_Pipenode_Opaque        *opaque   = node->opaque;
-    IJKFF_Pipeline               *pipeline = opaque->pipeline;
     ijkmp_mediacodecinfo_context *mcc      = &opaque->mcc;
     SDL_AMediaCodec              *acodec   = NULL;
 
-    if (mcc->codec_name[0] || (ffpipeline_select_mediacodec_l(pipeline, mcc) && mcc->codec_name[0])) {
-        acodec = SDL_AMediaCodecJava_createByCodecName(env, mcc->codec_name);
-        if (acodec) {
-            strncpy(opaque->acodec_name, mcc->codec_name, sizeof(opaque->acodec_name) / sizeof(*opaque->acodec_name));
-            opaque->acodec_name[sizeof(opaque->acodec_name) / sizeof(*opaque->acodec_name) - 1] = 0;
-        }
+    acodec = SDL_AMediaCodecJava_createByCodecName(env, mcc->codec_name);
+    if (acodec) {
+        strncpy(opaque->acodec_name, mcc->codec_name, sizeof(opaque->acodec_name) / sizeof(*opaque->acodec_name));
+        opaque->acodec_name[sizeof(opaque->acodec_name) / sizeof(*opaque->acodec_name) - 1] = 0;
     }
 
 #if 0
@@ -1150,6 +1147,11 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     } else {
         ALOGI("amc: rotate notify: %d\n", rotate_degrees);
         ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, rotate_degrees);
+    }
+
+    if (!ffpipeline_select_mediacodec_l(pipeline, &opaque->mcc) || !opaque->mcc.codec_name[0]) {
+        ALOGE("amc: no suitable codec\n");
+        goto fail;
     }
 
     ffpipeline_lock_surface(opaque->pipeline);
