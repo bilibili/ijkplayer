@@ -8,6 +8,8 @@
     <string name="exit">Exit</string>
     <string name="sample">Sample</string>
     <string name="recent">Recent</string>
+    <string name="explorer">Explorer</string>
+    <string name="playlist">Playlist</string>
     <string name="settings">Settings</string>
     <string name="toggle_player">Player</string>
     <string name="toggle_render">Render</string>
@@ -57,5 +59,8 @@
     <string name="VideoView_player_AndroidMediaPlayer">Player: AndroidMediaPlayer</string>
     <string name="VideoView_player_IjkMediaPlayer">Player: IjkMediaPlayer</string>
     <string name="VideoView_player_IjkExoMediaPlayer">Player: IjkExoMediaPlayer</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

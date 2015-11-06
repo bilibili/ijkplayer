@@ -55,7 +55,7 @@ public class SampleMediaActivity extends AppActivity  {
         if (!show)
             return show;
 
-        MenuItem item = menu.findItem(R.id.action_recent);
+        MenuItem item = menu.findItem(R.id.action_playlist);
         if (item != null)
             item.setVisible(false);
 

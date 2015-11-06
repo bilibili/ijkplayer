@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".menu_app">
     <item
-        android:id="@+id/action_sample"
-        android:title="@string/sample"
+        android:id="@+id/action_explorer"
+        android:title="@string/explorer"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_recent"
-        android:title="@string/recent"
+        android:id="@+id/action_playlist"
+        android:title="@string/playlist"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_settings"
