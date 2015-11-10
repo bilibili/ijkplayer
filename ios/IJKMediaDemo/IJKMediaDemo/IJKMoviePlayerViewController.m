@@ -78,6 +78,7 @@
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
     self.player.scalingMode = MPMovieScalingModeAspectFit;
+    self.player.shouldAutoplay = YES;
 
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
@@ -92,7 +93,6 @@
     [self installMovieNotificationObservers];
 
     [self.player prepareToPlay];
-    [self.player play];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
