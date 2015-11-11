@@ -62,7 +62,7 @@
     options.sourceType = mUrlSourceType;
     options.cache = 6000;
     
-    [IJKFFMoviePlayerController setLogReport:YES];
+    [IJKFFMoviePlayerController setLogReport:NO];
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURLString:self.urlString withOptions:options withSegmentResolver:nil];
     self.player.scalingMode = MPMovieScalingModeAspectFill;
     [self installMovieNotificationObservers];

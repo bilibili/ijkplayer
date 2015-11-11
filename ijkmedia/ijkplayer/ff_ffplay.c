@@ -2620,7 +2620,7 @@ static int read_thread(void *arg)
     int live_duration_lwm = REALTIME_DURATION_LWM;
     int live_duration_hwm = REALTIME_DURATION_HWM;
     
-    if(ffp->data_cache>REALTIME_DURATION_HWM)
+    if(ffp->data_cache>live_duration_hwm)
     {
         live_duration_hwm = ffp->data_cache;
     }
@@ -2767,6 +2767,7 @@ static int read_thread(void *arg)
             
             if(!is->pause_req)
             {
+                /*
                 // check stall
                 if(av_stalled_begin_time==0)
                 {
@@ -2795,13 +2796,16 @@ static int read_thread(void *arg)
                 {
                     live_duration_lwm = REALTIME_DURATION_LWM;
                 }
+                 */
                 
+                /*
                 // check delay
                 if(av_flush_time==0)
                 {
                     av_flush_time = GetNowMs();
                 }
                 av_now_time = GetNowMs();
+                 */
                 
                 if(is->videoq.duration>is->audioq.duration)
                 {
@@ -2810,6 +2814,7 @@ static int read_thread(void *arg)
                     currentDuration = is->audioq.duration;
                 }
                 
+                /*
                 //drop all
                 if(currentDuration>live_duration_hwm && av_now_time - av_flush_time>10*1000)
                 {
@@ -2835,7 +2840,7 @@ static int read_thread(void *arg)
                     printf("live stream is delay,flush all cached packets...\n");
                     
                     av_flush_time = 0;
-                }
+                }*/
  
                 //drop one audiopacket
                 if(drop_audiopacket_timing_begin==0)
@@ -2845,7 +2850,7 @@ static int read_thread(void *arg)
                 
                 drop_audiopacket_timing_now = GetNowMs();
                 
-                if(currentDuration>live_duration_hwm*1/2 && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
+                if(currentDuration>live_duration_hwm && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
                 {
                     drop_audiopacket_timing_begin = 0;
                     enable_drop_audiopacket = true;
@@ -2993,7 +2998,7 @@ static int read_thread(void *arg)
         }
 
         if (ret < 0) {
-            if (ret == AVERROR_INVALIDDATA && (pkt->flags & AV_PKT_FLAG_MP4_PF)) {
+            if (ret == AVERROR_INVALIDDATA /*&& (pkt->flags & AV_PKT_FLAG_MP4_PF)*/) {
 //                ffp_seek_to_l(ffp, ffp_get_current_position_l(ffp)+1);
                 av_free_packet(pkt);
             }
