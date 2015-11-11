@@ -10,6 +10,7 @@ ALL_SRC = \
 	c/java/nio/ByteBuffer.c \
 	c/java/util/ArrayList.c \
 	c/tv/danmaku/ijk/media/player/IjkMediaPlayer.c \
+	c/tv/danmaku/ijk/media/player/misc/IMediaDataSource.c \
 
 ALL_HEAD := $(ALL_SRC:.c=.h)
 

@@ -51,6 +51,7 @@ import java.util.Map;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
 import tv.danmaku.ijk.media.player.annotations.CalledByNative;
+import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.player.misc.IjkTrackInfo;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
@@ -107,6 +108,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     @AccessedByNative
     private long mNativeMediaPlayer;
+    @AccessedByNative
+    private long mNativeMediaDataSource;
 
     @AccessedByNative
     private int mNativeSurfaceTexture;
@@ -436,11 +439,19 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         setDataSource(fd);
     }
 
+    public void setDataSource(IMediaDataSource mediaDataSource)
+            throws IllegalArgumentException, SecurityException, IllegalStateException {
+        _setDataSource(mediaDataSource);
+    }
+
     private native void _setDataSource(String path, String[] keys, String[] values)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
     private native void _setDataSourceFd(int fd)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
+
+    private native void _setDataSource(IMediaDataSource mediaDataSource)
+            throws IllegalArgumentException, SecurityException, IllegalStateException;
 
     @Override
     public String getDataSource() {

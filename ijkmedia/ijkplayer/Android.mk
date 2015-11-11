@@ -55,6 +55,7 @@ LOCAL_SRC_FILES += ijkavformat/ijkhttphook.c
 LOCAL_SRC_FILES += ijkavformat/ijkinject.c
 LOCAL_SRC_FILES += ijkavformat/ijklivehook.c
 LOCAL_SRC_FILES += ijkavformat/ijklongurl.c
+LOCAL_SRC_FILES += ijkavformat/ijkmediadatasource.c
 LOCAL_SRC_FILES += ijkavformat/ijksegment.c
 LOCAL_SRC_FILES += ijkavformat/ijktcphook.c
 LOCAL_SRC_FILES += ijkavformat/utils.c

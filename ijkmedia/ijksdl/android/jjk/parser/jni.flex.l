@@ -43,6 +43,7 @@ WHITESPACE      ([ \t\v\r\n])
 "static"                    {return T_STATIC;}
 
 "class"                     {return T_CLASS;}
+"interface"                 {return T_INTERFACE;}
 
 \n                          {yylineno++;}
 {WHITESPACE}                {;}

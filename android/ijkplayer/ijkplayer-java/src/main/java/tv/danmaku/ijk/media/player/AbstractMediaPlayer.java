@@ -16,6 +16,8 @@
 
 package tv.danmaku.ijk.media.player;
 
+import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
+
 public abstract class AbstractMediaPlayer implements IMediaPlayer {
     private OnPreparedListener mOnPreparedListener;
     private OnCompletionListener mOnCompletionListener;
@@ -102,5 +104,9 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
         if (mOnInfoListener != null)
             return mOnInfoListener.onInfo(this, what, extra);
         return false;
+    }
+
+    public void setDataSource(IMediaDataSource mediaDataSource) {
+        throw new UnsupportedOperationException();
     }
 }

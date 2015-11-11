@@ -68,6 +68,7 @@ LOCAL_SRC_FILES += android/jjk/c/java/nio/ByteBuffer.c
 LOCAL_SRC_FILES += android/jjk/c/java/nio/ByteBuffer.util.c
 LOCAL_SRC_FILES += android/jjk/c/java/util/ArrayList.c
 LOCAL_SRC_FILES += android/jjk/c/tv/danmaku/ijk/media/player/IjkMediaPlayer.c
+LOCAL_SRC_FILES += android/jjk/c/tv/danmaku/ijk/media/player/misc/IMediaDataSource.c
 
 LOCAL_SHARED_LIBRARIES := ijkffmpeg
 LOCAL_STATIC_LIBRARIES := cpufeatures yuv_static

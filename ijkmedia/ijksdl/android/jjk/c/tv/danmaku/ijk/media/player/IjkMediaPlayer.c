@@ -24,6 +24,7 @@ typedef struct JJKC_IjkMediaPlayer {
     jclass id;
 
     jfieldID field_mNativeMediaPlayer;
+    jfieldID field_mNativeMediaDataSource;
     jmethodID method_postEventFromNative;
     jmethodID method_onSelectCodec;
     jmethodID method_onControlResolveSegmentUrl;
@@ -54,6 +55,32 @@ void JJKC_IjkMediaPlayer__mNativeMediaPlayer__set(JNIEnv *env, jobject thiz, jlo
 void JJKC_IjkMediaPlayer__mNativeMediaPlayer__set__catchAll(JNIEnv *env, jobject thiz, jlong value)
 {
     JJKC_IjkMediaPlayer__mNativeMediaPlayer__set(env, thiz, value);
+    JJK_ExceptionCheck__catchAll(env);
+}
+
+jlong JJKC_IjkMediaPlayer__mNativeMediaDataSource__get(JNIEnv *env, jobject thiz)
+{
+    return (*env)->GetLongField(env, thiz, class_JJKC_IjkMediaPlayer.field_mNativeMediaDataSource);
+}
+
+jlong JJKC_IjkMediaPlayer__mNativeMediaDataSource__get__catchAll(JNIEnv *env, jobject thiz)
+{
+    jlong ret_value = JJKC_IjkMediaPlayer__mNativeMediaDataSource__get(env, thiz);
+    if (JJK_ExceptionCheck__catchAll(env)) {
+        return 0;
+    }
+
+    return ret_value;
+}
+
+void JJKC_IjkMediaPlayer__mNativeMediaDataSource__set(JNIEnv *env, jobject thiz, jlong value)
+{
+    (*env)->SetLongField(env, thiz, class_JJKC_IjkMediaPlayer.field_mNativeMediaDataSource, value);
+}
+
+void JJKC_IjkMediaPlayer__mNativeMediaDataSource__set__catchAll(JNIEnv *env, jobject thiz, jlong value)
+{
+    JJKC_IjkMediaPlayer__mNativeMediaDataSource__set(env, thiz, value);
     JJK_ExceptionCheck__catchAll(env);
 }
 
@@ -369,6 +396,13 @@ int JJK_loadClass__JJKC_IjkMediaPlayer(JNIEnv *env)
     sign     = "J";
     class_JJKC_IjkMediaPlayer.field_mNativeMediaPlayer = JJK_GetFieldID__catchAll(env, class_id, name, sign);
     if (class_JJKC_IjkMediaPlayer.field_mNativeMediaPlayer == NULL)
+        goto fail;
+
+    class_id = class_JJKC_IjkMediaPlayer.id;
+    name     = "mNativeMediaDataSource";
+    sign     = "J";
+    class_JJKC_IjkMediaPlayer.field_mNativeMediaDataSource = JJK_GetFieldID__catchAll(env, class_id, name, sign);
+    if (class_JJKC_IjkMediaPlayer.field_mNativeMediaDataSource == NULL)
         goto fail;
 
     class_id = class_JJKC_IjkMediaPlayer.id;

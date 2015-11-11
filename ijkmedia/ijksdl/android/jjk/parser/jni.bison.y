@@ -28,7 +28,8 @@
 %token <num_int>    T_FINAL
 %token <num_int>    T_STATIC
 
-%token <string>     T_CLASS
+%token <num_int>    T_CLASS
+%token <num_int>    T_INTERFACE
 
 %token <string>     T_INTEGER_LITERAL
 %token <string>     T_ID
@@ -78,6 +79,7 @@
 %type <qualified_identifier>  qualified_identifier
 %type <type>                  reference_type
 %type <type>                  type
+%type <num_int>               t_class_or_interface
 
 
 %destructor { BFC_RELEASE($$); }      T_ID
@@ -105,6 +107,7 @@
 %destructor { BFC_RELEASE($$); }      qualified_identifier
 %destructor { BFC_RELEASE($$); }      reference_type
 %destructor { BFC_RELEASE($$); }      type
+%destructor { $$ = 0;          }      t_class_or_interface
 
 %start compilation_unit
 
@@ -166,13 +169,18 @@ argument_list:
       }
 ;
 
+t_class_or_interface:
+      T_CLASS     {$$ = $1;}
+    | T_INTERFACE {$$ = $1;}
+
 class_identifier:
       reference_type {$$ = ast::ClassIdentifier::make_ptr($1).detach();}
 
 class_head:
       annotations
       modifier_set
-      T_CLASS class_identifier
+      t_class_or_interface
+      class_identifier
       '{' {
           BISON_LOGF("class\n");
 
@@ -180,6 +188,9 @@ class_head:
           ast::Context::instance()->get_local_namespace()->add_class_identifier($4);
 
           $$ = ast::Class::make_ptr($4).detach();
+          if ($3 == T_INTERFACE)
+              $$->set_is_interface(true);
+
           $$->set_annotations($1);
           $$->set_modifier_set($2);
           $$->get_local_namespace()->set_identifier($4);

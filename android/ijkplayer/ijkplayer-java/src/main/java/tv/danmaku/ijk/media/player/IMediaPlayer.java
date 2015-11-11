@@ -27,6 +27,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Map;
 
+import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 
 public interface IMediaPlayer {
@@ -182,12 +183,17 @@ public interface IMediaPlayer {
     boolean isLooping();
 
     /*--------------------
+     * AndroidMediaPlayer: JELLY_BEAN
+     */
+    ITrackInfo[] getTrackInfo();
+
+    /*--------------------
      * AndroidMediaPlayer: ICE_CREAM_SANDWICH:
      */
     void setSurface(Surface surface);
 
     /*--------------------
-     * AndroidMediaPlayer: JELLY_BEAN
+     * AndroidMediaPlayer: M:
      */
-    ITrackInfo[] getTrackInfo();
+    void setDataSource(IMediaDataSource mediaDataSource);
 }

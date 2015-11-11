@@ -107,6 +107,9 @@ void ijkav_register_all(void)
     IJK_REGISTER_PROTOCOL(ijkhttphook);
     IJK_REGISTER_PROTOCOL(ijkinject);
     IJK_REGISTER_PROTOCOL(ijklongurl);
+#ifdef __ANDROID__
+    IJK_REGISTER_PROTOCOL(ijkmediadatasource);
+#endif
     IJK_REGISTER_PROTOCOL(ijksegment);
     IJK_REGISTER_PROTOCOL(ijktcphook);
 

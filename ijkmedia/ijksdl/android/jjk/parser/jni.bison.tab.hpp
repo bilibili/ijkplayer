@@ -67,8 +67,9 @@ extern int yydebug;
     T_FINAL = 270,
     T_STATIC = 271,
     T_CLASS = 272,
-    T_INTEGER_LITERAL = 273,
-    T_ID = 274
+    T_INTERFACE = 273,
+    T_INTEGER_LITERAL = 274,
+    T_ID = 275
   };
 #endif
 
@@ -77,7 +78,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 37 "jni.bison.y" /* yacc.c:1915  */
+#line 38 "jni.bison.y" /* yacc.c:1915  */
 
     int                     num_int;
 
@@ -99,7 +100,7 @@ union YYSTYPE
     ast::Identifier           *qualified_identifier;
     ast::Type                 *type;
 
-#line 103 "jni.bison.tab.hpp" /* yacc.c:1915  */
+#line 104 "jni.bison.tab.hpp" /* yacc.c:1915  */
 };
 
 typedef union YYSTYPE YYSTYPE;

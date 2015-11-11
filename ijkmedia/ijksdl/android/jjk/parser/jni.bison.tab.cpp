@@ -125,8 +125,9 @@ extern int yydebug;
     T_FINAL = 270,
     T_STATIC = 271,
     T_CLASS = 272,
-    T_INTEGER_LITERAL = 273,
-    T_ID = 274
+    T_INTERFACE = 273,
+    T_INTEGER_LITERAL = 274,
+    T_ID = 275
   };
 #endif
 
@@ -135,7 +136,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 37 "jni.bison.y" /* yacc.c:355  */
+#line 38 "jni.bison.y" /* yacc.c:355  */
 
     int                     num_int;
 
@@ -157,7 +158,7 @@ union YYSTYPE
     ast::Identifier           *qualified_identifier;
     ast::Type                 *type;
 
-#line 161 "jni.bison.tab.cpp" /* yacc.c:355  */
+#line 162 "jni.bison.tab.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -174,7 +175,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 178 "jni.bison.tab.cpp" /* yacc.c:358  */
+#line 179 "jni.bison.tab.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -416,21 +417,21 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  11
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   87
+#define YYLAST   89
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  30
+#define YYNTOKENS  31
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  23
+#define YYNNTS  24
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  47
+#define YYNRULES  49
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  76
+#define YYNSTATES  78
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   274
+#define YYMAXUTOK   275
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -443,15 +444,15 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      21,    22,     2,     2,    23,     2,    27,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,    26,
-       2,     2,     2,     2,    20,     2,     2,     2,     2,     2,
+      22,    23,     2,     2,    24,     2,    28,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,    27,
+       2,     2,     2,     2,    21,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,    28,     2,    29,     2,     2,     2,     2,     2,     2,
+       2,    29,     2,    30,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    24,     2,    25,     2,     2,     2,     2,
+       2,     2,     2,    25,     2,    26,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -466,18 +467,18 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19
+      15,    16,    17,    18,    19,    20
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   114,   114,   119,   127,   131,   141,   150,   154,   160,
-     170,   173,   190,   202,   218,   235,   247,   257,   270,   274,
-     281,   288,   298,   299,   300,   301,   302,   303,   307,   311,
-     321,   325,   329,   332,   339,   343,   347,   357,   362,   365,
-     368,   371,   374,   377,   383,   388,   395,   396
+       0,   117,   117,   122,   130,   134,   144,   153,   157,   163,
+     173,   174,   177,   180,   201,   213,   229,   246,   258,   268,
+     281,   285,   292,   299,   309,   310,   311,   312,   313,   314,
+     318,   322,   332,   336,   340,   343,   350,   354,   358,   368,
+     373,   376,   379,   382,   385,   388,   394,   399,   406,   407
 };
 #endif
 
@@ -489,13 +490,14 @@ static const char *const yytname[] =
   "\"end of file\"", "error", "$undefined", "T_PACKAGE", "T_IMPORT",
   "T_BOOLEAN", "T_BYTE", "T_FLOAT", "T_INT", "T_LONG", "T_VOID",
   "T_PRIVATE", "T_PROTECTED", "T_PUBLIC", "T_ABSTRACT", "T_FINAL",
-  "T_STATIC", "T_CLASS", "T_INTEGER_LITERAL", "T_ID", "'@'", "'('", "')'",
-  "','", "'{'", "'}'", "';'", "'.'", "'['", "']'", "$accept", "annotation",
-  "annotations", "argument", "argument_list", "class_identifier",
-  "class_head", "class", "compilation_unit_head", "compilation_unit",
-  "field", "method", "member_list", "modifier", "modifier_set", "package",
-  "identifier", "qualified_identifier", "import", "import_list",
-  "basic_type", "reference_type", "type", YY_NULLPTR
+  "T_STATIC", "T_CLASS", "T_INTERFACE", "T_INTEGER_LITERAL", "T_ID", "'@'",
+  "'('", "')'", "','", "'{'", "'}'", "';'", "'.'", "'['", "']'", "$accept",
+  "annotation", "annotations", "argument", "argument_list",
+  "t_class_or_interface", "class_identifier", "class_head", "class",
+  "compilation_unit_head", "compilation_unit", "field", "method",
+  "member_list", "modifier", "modifier_set", "package", "identifier",
+  "qualified_identifier", "import", "import_list", "basic_type",
+  "reference_type", "type", YY_NULLPTR
 };
 #endif
 
@@ -506,14 +508,15 @@ static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-      64,    40,    41,    44,   123,   125,    59,    46,    91,    93
+     275,    64,    40,    41,    44,   123,   125,    59,    46,    91,
+      93
 };
 # endif
 
-#define YYPACT_NINF -12
+#define YYPACT_NINF -13
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-12)))
+  (!!((Yystate) == (-13)))
 
 #define YYTABLE_NINF -1
 
@@ -524,14 +527,14 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      11,     7,   -12,    18,   -12,   -12,   -12,   -10,    25,   -12,
-      38,   -12,    35,   -12,     7,    27,   -12,    16,    22,   -12,
-       7,   -12,   -12,    28,   -12,   -12,   -12,   -12,   -12,   -12,
-       7,   -12,   -12,    25,   -12,   -12,   -12,    10,    30,    26,
-      24,    29,    -4,   -12,    31,   -12,    23,   -12,   -12,   -12,
-     -12,   -12,   -12,    33,    32,    29,    36,   -12,   -12,    15,
-      34,    14,   -12,    19,    37,   -12,    15,   -12,    39,    15,
-     -12,    21,   -12,   -12,    40,   -12
+      12,     6,   -13,    39,   -13,   -13,   -13,   -10,    25,   -13,
+      40,   -13,    43,   -13,     6,    28,   -13,    16,    23,   -13,
+       6,   -13,   -13,    29,   -13,   -13,   -13,   -13,   -13,   -13,
+     -13,   -13,     6,   -13,   -13,    25,   -13,   -13,   -13,    10,
+      31,    27,    26,    24,    -4,   -13,    32,   -13,    30,   -13,
+     -13,   -13,   -13,   -13,   -13,    34,    33,    24,    37,   -13,
+     -13,    15,    35,    14,   -13,    19,    38,   -13,    15,   -13,
+      36,    15,   -13,    21,   -13,   -13,    41,   -13
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -539,30 +542,30 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     4,     0,    35,    31,    32,     0,    28,    18,
-       0,     1,    13,    30,     0,     0,     5,     0,     4,    14,
-       0,    36,    33,     2,    24,    25,    26,    22,    23,    27,
-       0,    29,    12,    28,    19,    20,    21,     0,     0,     0,
-      45,    10,     0,    34,     0,    11,     0,    38,    39,    40,
-      41,    42,    43,    31,    46,    47,     0,     3,    44,     7,
-       0,     0,     8,     0,     0,    37,     7,    15,     0,     0,
-       6,     0,    17,     9,     0,    16
+       0,     0,     4,     0,    37,    33,    34,     0,    30,    20,
+       0,     1,    15,    32,     0,     0,     5,     0,     4,    16,
+       0,    38,    35,     2,    26,    27,    28,    24,    25,    29,
+      10,    11,     0,    31,    14,    30,    21,    22,    23,     0,
+       0,     0,    47,    12,     0,    36,     0,    13,     0,    40,
+      41,    42,    43,    44,    45,    33,    48,    49,     0,     3,
+      46,     7,     0,     0,     8,     0,     0,    39,     7,    17,
+       0,     0,     6,     0,    19,     9,     0,    18
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -12,   -12,    41,   -11,    -5,   -12,   -12,    44,   -12,   -12,
-     -12,   -12,   -12,   -12,    42,   -12,    50,    -1,   -12,   -12,
-     -12,    43,    45
+     -13,   -13,    46,   -12,    -7,   -13,   -13,   -13,    48,   -13,
+     -13,   -13,   -13,   -13,   -13,    42,   -13,    53,    -1,   -13,
+     -13,   -13,    44,    45
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,    16,     8,    62,    63,    39,     9,    10,     2,     3,
-      35,    36,    18,    31,    17,     4,     6,    40,    21,    12,
-      54,    55,    64
+      -1,    16,     8,    64,    65,    32,    41,     9,    10,     2,
+       3,    37,    38,    18,    33,    17,     4,     6,    42,    21,
+      12,    56,    57,    66
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -570,62 +573,62 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       7,    47,    48,    49,    50,    51,    52,    24,    25,    26,
-      27,    28,    29,    30,     1,    53,    13,    14,    11,    37,
-      47,    48,    49,    50,    51,    52,     5,    24,    25,    26,
-      27,    28,    29,    30,     5,    66,    43,    14,    19,    20,
-      67,    68,    69,    74,    69,    15,    23,    32,    44,    38,
-      45,    14,    58,    57,    59,    61,    70,    46,    73,    33,
-      60,    71,    34,    65,    22,    72,    75,     0,     0,     0,
-       0,     0,     0,    41,     0,    42,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,    56
+       7,    49,    50,    51,    52,    53,    54,    24,    25,    26,
+      27,    28,    29,    30,    31,     1,    55,    13,    14,    39,
+      49,    50,    51,    52,    53,    54,     5,    24,    25,    26,
+      27,    28,    29,    30,    31,     5,    68,    45,    14,    11,
+      19,    69,    70,    71,    76,    71,    15,    20,    23,    34,
+      46,    40,    47,    48,    14,    59,    61,    63,    72,    75,
+      60,    73,    62,    74,    35,    67,    36,    22,    77,     0,
+       0,     0,     0,     0,     0,     0,    43,    44,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    58
 };
 
 static const yytype_int8 yycheck[] =
 {
        1,     5,     6,     7,     8,     9,    10,    11,    12,    13,
-      14,    15,    16,    17,     3,    19,    26,    27,     0,    20,
-       5,     6,     7,     8,     9,    10,    19,    11,    12,    13,
-      14,    15,    16,    17,    19,    21,    26,    27,     0,     4,
-      26,    22,    23,    22,    23,    20,    19,    25,    18,    21,
-      24,    27,    29,    22,    21,    19,    19,    28,    69,    18,
-      28,    66,    18,    29,    14,    26,    26,    -1,    -1,    -1,
-      -1,    -1,    -1,    30,    -1,    33,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    42
+      14,    15,    16,    17,    18,     3,    20,    27,    28,    20,
+       5,     6,     7,     8,     9,    10,    20,    11,    12,    13,
+      14,    15,    16,    17,    18,    20,    22,    27,    28,     0,
+       0,    27,    23,    24,    23,    24,    21,     4,    20,    26,
+      19,    22,    25,    29,    28,    23,    22,    20,    20,    71,
+      30,    68,    29,    27,    18,    30,    18,    14,    27,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    32,    35,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    44
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    38,    39,    45,    19,    46,    47,    32,    36,
-      37,     0,    49,    26,    27,    20,    31,    44,    42,     0,
-       4,    48,    46,    19,    11,    12,    13,    14,    15,    16,
-      17,    43,    25,    32,    37,    40,    41,    47,    21,    35,
-      47,    51,    44,    26,    18,    24,    28,     5,     6,     7,
-       8,     9,    10,    19,    50,    51,    52,    22,    29,    21,
-      28,    19,    33,    34,    52,    29,    21,    26,    22,    23,
-      19,    34,    26,    33,    22,    26
+       0,     3,    40,    41,    47,    20,    48,    49,    33,    38,
+      39,     0,    51,    27,    28,    21,    32,    46,    44,     0,
+       4,    50,    48,    20,    11,    12,    13,    14,    15,    16,
+      17,    18,    36,    45,    26,    33,    39,    42,    43,    49,
+      22,    37,    49,    53,    46,    27,    19,    25,    29,     5,
+       6,     7,     8,     9,    10,    20,    52,    53,    54,    23,
+      30,    22,    29,    20,    34,    35,    54,    30,    22,    27,
+      23,    24,    20,    35,    27,    34,    23,    27
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    30,    31,    31,    32,    32,    33,    34,    34,    34,
-      35,    36,    37,    38,    39,    40,    41,    41,    42,    42,
-      42,    42,    43,    43,    43,    43,    43,    43,    44,    44,
-      45,    46,    47,    47,    48,    49,    49,    50,    50,    50,
-      50,    50,    50,    50,    51,    51,    52,    52
+       0,    31,    32,    32,    33,    33,    34,    35,    35,    35,
+      36,    36,    37,    38,    39,    40,    41,    42,    43,    43,
+      44,    44,    44,    44,    45,    45,    45,    45,    45,    45,
+      46,    46,    47,    48,    49,    49,    50,    51,    51,    52,
+      52,    52,    52,    52,    52,    52,    53,    53,    54,    54
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     2,     5,     0,     2,     2,     0,     1,     3,
-       1,     5,     3,     2,     3,     5,     8,     7,     0,     2,
-       2,     2,     1,     1,     1,     1,     1,     1,     0,     2,
-       3,     1,     1,     3,     3,     0,     2,     3,     1,     1,
-       1,     1,     1,     1,     3,     1,     1,     1
+       1,     1,     1,     5,     3,     2,     3,     5,     8,     7,
+       0,     2,     2,     2,     1,     1,     1,     1,     1,     1,
+       0,     2,     3,     1,     1,     3,     3,     0,     2,     3,
+       1,     1,     1,     1,     1,     1,     3,     1,     1,     1
 };
 
 
@@ -1048,142 +1051,148 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   switch (yytype)
     {
-          case 18: /* T_INTEGER_LITERAL  */
-#line 84 "jni.bison.y" /* yacc.c:1257  */
+          case 19: /* T_INTEGER_LITERAL  */
+#line 86 "jni.bison.y" /* yacc.c:1257  */
       { BFC_RELEASE(((*yyvaluep).string)); }
-#line 1055 "jni.bison.tab.cpp" /* yacc.c:1257  */
+#line 1058 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 19: /* T_ID  */
-#line 83 "jni.bison.y" /* yacc.c:1257  */
+    case 20: /* T_ID  */
+#line 85 "jni.bison.y" /* yacc.c:1257  */
       { BFC_RELEASE(((*yyvaluep).string)); }
-#line 1061 "jni.bison.tab.cpp" /* yacc.c:1257  */
+#line 1064 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 31: /* annotation  */
-#line 87 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).annotation)); }
-#line 1067 "jni.bison.tab.cpp" /* yacc.c:1257  */
-        break;
-
-    case 32: /* annotations  */
-#line 88 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).annotations)); }
-#line 1073 "jni.bison.tab.cpp" /* yacc.c:1257  */
-        break;
-
-    case 33: /* argument  */
+    case 32: /* annotation  */
 #line 89 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).argument)); }
-#line 1079 "jni.bison.tab.cpp" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).annotation)); }
+#line 1070 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 34: /* argument_list  */
+    case 33: /* annotations  */
 #line 90 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).argument_list)); }
-#line 1085 "jni.bison.tab.cpp" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).annotations)); }
+#line 1076 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 35: /* class_identifier  */
-#line 94 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).identifier)); }
-#line 1091 "jni.bison.tab.cpp" /* yacc.c:1257  */
+    case 34: /* argument  */
+#line 91 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).argument)); }
+#line 1082 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 36: /* class_head  */
-#line 93 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).clazz)); }
-#line 1097 "jni.bison.tab.cpp" /* yacc.c:1257  */
-        break;
-
-    case 37: /* class  */
+    case 35: /* argument_list  */
 #line 92 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).clazz)); }
-#line 1103 "jni.bison.tab.cpp" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).argument_list)); }
+#line 1088 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 39: /* compilation_unit  */
-#line 95 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).compilation_unit)); }
-#line 1109 "jni.bison.tab.cpp" /* yacc.c:1257  */
-        break;
-
-    case 40: /* field  */
-#line 99 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).field)); }
-#line 1115 "jni.bison.tab.cpp" /* yacc.c:1257  */
-        break;
-
-    case 41: /* method  */
-#line 101 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).method)); }
-#line 1121 "jni.bison.tab.cpp" /* yacc.c:1257  */
-        break;
-
-    case 42: /* member_list  */
-#line 100 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).member_list)); }
-#line 1127 "jni.bison.tab.cpp" /* yacc.c:1257  */
-        break;
-
-    case 43: /* modifier  */
-#line 102 "jni.bison.y" /* yacc.c:1257  */
+    case 36: /* t_class_or_interface  */
+#line 110 "jni.bison.y" /* yacc.c:1257  */
       { ((*yyvaluep).num_int) = 0;          }
-#line 1133 "jni.bison.tab.cpp" /* yacc.c:1257  */
+#line 1094 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 44: /* modifier_set  */
-#line 103 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).modifier_set)); }
-#line 1139 "jni.bison.tab.cpp" /* yacc.c:1257  */
-        break;
-
-    case 45: /* package  */
-#line 104 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).qualified_identifier)); }
-#line 1145 "jni.bison.tab.cpp" /* yacc.c:1257  */
-        break;
-
-    case 46: /* identifier  */
+    case 37: /* class_identifier  */
 #line 96 "jni.bison.y" /* yacc.c:1257  */
       { BFC_RELEASE(((*yyvaluep).identifier)); }
-#line 1151 "jni.bison.tab.cpp" /* yacc.c:1257  */
+#line 1100 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 47: /* qualified_identifier  */
-#line 105 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).qualified_identifier)); }
-#line 1157 "jni.bison.tab.cpp" /* yacc.c:1257  */
+    case 38: /* class_head  */
+#line 95 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).clazz)); }
+#line 1106 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 48: /* import  */
+    case 39: /* class  */
+#line 94 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).clazz)); }
+#line 1112 "jni.bison.tab.cpp" /* yacc.c:1257  */
+        break;
+
+    case 41: /* compilation_unit  */
 #line 97 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).qualified_identifier)); }
-#line 1163 "jni.bison.tab.cpp" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).compilation_unit)); }
+#line 1118 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 49: /* import_list  */
-#line 98 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).import_list)); }
-#line 1169 "jni.bison.tab.cpp" /* yacc.c:1257  */
+    case 42: /* field  */
+#line 101 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).field)); }
+#line 1124 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 50: /* basic_type  */
-#line 91 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).type)); }
-#line 1175 "jni.bison.tab.cpp" /* yacc.c:1257  */
+    case 43: /* method  */
+#line 103 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).method)); }
+#line 1130 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 51: /* reference_type  */
+    case 44: /* member_list  */
+#line 102 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).member_list)); }
+#line 1136 "jni.bison.tab.cpp" /* yacc.c:1257  */
+        break;
+
+    case 45: /* modifier  */
+#line 104 "jni.bison.y" /* yacc.c:1257  */
+      { ((*yyvaluep).num_int) = 0;          }
+#line 1142 "jni.bison.tab.cpp" /* yacc.c:1257  */
+        break;
+
+    case 46: /* modifier_set  */
+#line 105 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).modifier_set)); }
+#line 1148 "jni.bison.tab.cpp" /* yacc.c:1257  */
+        break;
+
+    case 47: /* package  */
 #line 106 "jni.bison.y" /* yacc.c:1257  */
-      { BFC_RELEASE(((*yyvaluep).type)); }
-#line 1181 "jni.bison.tab.cpp" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).qualified_identifier)); }
+#line 1154 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
-    case 52: /* type  */
+    case 48: /* identifier  */
+#line 98 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).identifier)); }
+#line 1160 "jni.bison.tab.cpp" /* yacc.c:1257  */
+        break;
+
+    case 49: /* qualified_identifier  */
 #line 107 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).qualified_identifier)); }
+#line 1166 "jni.bison.tab.cpp" /* yacc.c:1257  */
+        break;
+
+    case 50: /* import  */
+#line 99 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).qualified_identifier)); }
+#line 1172 "jni.bison.tab.cpp" /* yacc.c:1257  */
+        break;
+
+    case 51: /* import_list  */
+#line 100 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).import_list)); }
+#line 1178 "jni.bison.tab.cpp" /* yacc.c:1257  */
+        break;
+
+    case 52: /* basic_type  */
+#line 93 "jni.bison.y" /* yacc.c:1257  */
       { BFC_RELEASE(((*yyvaluep).type)); }
-#line 1187 "jni.bison.tab.cpp" /* yacc.c:1257  */
+#line 1184 "jni.bison.tab.cpp" /* yacc.c:1257  */
+        break;
+
+    case 53: /* reference_type  */
+#line 108 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).type)); }
+#line 1190 "jni.bison.tab.cpp" /* yacc.c:1257  */
+        break;
+
+    case 54: /* type  */
+#line 109 "jni.bison.y" /* yacc.c:1257  */
+      { BFC_RELEASE(((*yyvaluep).type)); }
+#line 1196 "jni.bison.tab.cpp" /* yacc.c:1257  */
         break;
 
 
@@ -1445,89 +1454,101 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 115 "jni.bison.y" /* yacc.c:1661  */
+#line 118 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("annotation: %s\n", (yyvsp[0].string)->c_str());
           (yyval.annotation) = ast::Annotation::make_ptr((yyvsp[0].string)).detach();
       }
-#line 1454 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1463 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 3:
-#line 120 "jni.bison.y" /* yacc.c:1661  */
+#line 123 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("annotation: %s(%s)\n", (yyvsp[-3].string)->c_str(), (yyvsp[-1].string)->c_str());
           (yyval.annotation) = ast::Annotation::make_ptr((yyvsp[-3].string), (yyvsp[-1].string)).detach();
       }
-#line 1463 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1472 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 4:
-#line 127 "jni.bison.y" /* yacc.c:1661  */
+#line 130 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("annotations: NULL\n");
           (yyval.annotations) = ast::Annotations::make_ptr().detach();
       }
-#line 1472 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1481 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 5:
-#line 133 "jni.bison.y" /* yacc.c:1661  */
+#line 136 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("annotations: ++\n");
           (yyval.annotations) = (yyvsp[-1].annotations);
           (yyval.annotations)->insert((yyvsp[0].annotation));
       }
-#line 1482 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1491 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 6:
-#line 142 "jni.bison.y" /* yacc.c:1661  */
+#line 145 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("argument: %s %s\n", (yyvsp[-1].type)->get_name()->c_str(), (yyvsp[0].string)->c_str());
           (yyval.argument) = ast::Argument::make_ptr((yyvsp[0].string)).detach();
           (yyval.argument)->set_type((yyvsp[-1].type));
       }
-#line 1492 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1501 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 7:
-#line 150 "jni.bison.y" /* yacc.c:1661  */
+#line 153 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("argument_list: NULL\n");
           (yyval.argument_list) = ast::ArgumentList::make_ptr().detach();
       }
-#line 1501 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1510 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 8:
-#line 155 "jni.bison.y" /* yacc.c:1661  */
+#line 158 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("argument_list: << %s %s\n", (yyvsp[0].argument)->get_type()->get_name()->c_str(), (yyvsp[0].argument)->get_name()->c_str());
           (yyval.argument_list) = ast::ArgumentList::make_ptr().detach();
           (yyval.argument_list)->push_back((yyvsp[0].argument));
       }
-#line 1511 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1520 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 9:
-#line 162 "jni.bison.y" /* yacc.c:1661  */
+#line 165 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("argument_list: << , %s %s\n", (yyvsp[0].argument)->get_type()->get_name()->c_str(), (yyvsp[0].argument)->get_name()->c_str());
           (yyval.argument_list) = (yyvsp[-2].argument_list);
           (yyval.argument_list)->push_back((yyvsp[0].argument));
       }
-#line 1521 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1530 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 10:
-#line 170 "jni.bison.y" /* yacc.c:1661  */
-    {(yyval.identifier) = ast::ClassIdentifier::make_ptr((yyvsp[0].type)).detach();}
-#line 1527 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 173 "jni.bison.y" /* yacc.c:1661  */
+    {(yyval.num_int) = (yyvsp[0].num_int);}
+#line 1536 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 11:
-#line 176 "jni.bison.y" /* yacc.c:1661  */
+#line 174 "jni.bison.y" /* yacc.c:1661  */
+    {(yyval.num_int) = (yyvsp[0].num_int);}
+#line 1542 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
+  case 12:
+#line 177 "jni.bison.y" /* yacc.c:1661  */
+    {(yyval.identifier) = ast::ClassIdentifier::make_ptr((yyvsp[0].type)).detach();}
+#line 1548 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
+  case 13:
+#line 184 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("class\n");
 
@@ -1535,16 +1556,19 @@ yyreduce:
           ast::Context::instance()->get_local_namespace()->add_class_identifier((yyvsp[-1].identifier));
 
           (yyval.clazz) = ast::Class::make_ptr((yyvsp[-1].identifier)).detach();
+          if ((yyvsp[-2].num_int) == T_INTERFACE)
+              (yyval.clazz)->set_is_interface(true);
+
           (yyval.clazz)->set_annotations((yyvsp[-4].annotations));
           (yyval.clazz)->set_modifier_set((yyvsp[-3].modifier_set));
           (yyval.clazz)->get_local_namespace()->set_identifier((yyvsp[-1].identifier));
           ast::Context::instance()->push_local_namespace((yyval.clazz)->get_local_namespace());
       }
-#line 1544 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1568 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 12:
-#line 192 "jni.bison.y" /* yacc.c:1661  */
+  case 14:
+#line 203 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("class_body\n");
           (yyval.clazz) = (yyvsp[-2].clazz);
@@ -1552,11 +1576,11 @@ yyreduce:
 
           ast::Context::instance()->pop_local_namespace();
       }
-#line 1556 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1580 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 13:
-#line 203 "jni.bison.y" /* yacc.c:1661  */
+  case 15:
+#line 214 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("compilation_unit_head:\n");
           (yyval.compilation_unit) = ast::CompilationUnit::make_ptr().detach();
@@ -1569,11 +1593,11 @@ yyreduce:
 
           ast::Context::instance()->push_local_namespace((yyval.compilation_unit)->get_local_namespace());
       }
-#line 1573 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1597 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 14:
-#line 220 "jni.bison.y" /* yacc.c:1661  */
+  case 16:
+#line 231 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("compilation_unit_body:\n");
           (yyval.compilation_unit) = (yyvsp[-2].compilation_unit);
@@ -1586,11 +1610,11 @@ yyreduce:
           printf("----------\n");
           (yyval.compilation_unit)->build();
       }
-#line 1590 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1614 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 15:
-#line 237 "jni.bison.y" /* yacc.c:1661  */
+  case 17:
+#line 248 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("method:\n");
           (yyval.field) = ast::Field::make_ptr((yyvsp[-1].string)).detach();
@@ -1598,11 +1622,11 @@ yyreduce:
           (yyval.field)->set_modifier_set((yyvsp[-3].modifier_set));
           (yyval.field)->set_type((yyvsp[-2].type));
       }
-#line 1602 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1626 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 16:
-#line 249 "jni.bison.y" /* yacc.c:1661  */
+  case 18:
+#line 260 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("method:\n");
           (yyval.method) = ast::Method::make_ptr((yyvsp[-4].string)).detach();
@@ -1611,11 +1635,11 @@ yyreduce:
           (yyval.method)->set_type((yyvsp[-5].type));
           (yyval.method)->set_argument_list((yyvsp[-2].argument_list));
       }
-#line 1615 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1639 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 17:
-#line 259 "jni.bison.y" /* yacc.c:1661  */
+  case 19:
+#line 270 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("method:\n");
           (yyval.method) = ast::Constructor::make_ptr((yyvsp[-4].string)).detach();
@@ -1624,248 +1648,248 @@ yyreduce:
           (yyval.method)->set_type(ast::ReferenceType::make_ptr((yyval.method)->get_name()).get());
           (yyval.method)->set_argument_list((yyvsp[-2].argument_list));
       }
-#line 1628 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1652 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 18:
-#line 270 "jni.bison.y" /* yacc.c:1661  */
+  case 20:
+#line 281 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("member_list: NULL\n");
           (yyval.member_list) = ast::MemberList::make_ptr().detach();
       }
-#line 1637 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1661 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 19:
-#line 276 "jni.bison.y" /* yacc.c:1661  */
+  case 21:
+#line 287 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("member_list: + class: %s\n", (yyvsp[0].clazz)->get_name()->c_str());
           (yyval.member_list) = (yyvsp[-1].member_list);
           (yyval.member_list)->push_back((yyvsp[0].clazz));
       }
-#line 1647 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1671 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 20:
-#line 283 "jni.bison.y" /* yacc.c:1661  */
+  case 22:
+#line 294 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("member_list: + field: %s\n", (yyvsp[0].field)->get_name()->c_str());
           (yyval.member_list) = (yyvsp[-1].member_list);
           (yyval.member_list)->push_back((yyvsp[0].field));
       }
-#line 1657 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1681 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 21:
-#line 290 "jni.bison.y" /* yacc.c:1661  */
+  case 23:
+#line 301 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("member_list: + method: %s\n", (yyvsp[0].method)->get_name()->c_str());
           (yyval.member_list) = (yyvsp[-1].member_list);
           (yyval.member_list)->push_back((yyvsp[0].method));
       }
-#line 1667 "jni.bison.tab.cpp" /* yacc.c:1661  */
-    break;
-
-  case 22:
-#line 298 "jni.bison.y" /* yacc.c:1661  */
-    {BISON_LOGF("modifier: T_ABSTRACT\n");  (yyval.num_int) = T_ABSTRACT;}
-#line 1673 "jni.bison.tab.cpp" /* yacc.c:1661  */
-    break;
-
-  case 23:
-#line 299 "jni.bison.y" /* yacc.c:1661  */
-    {BISON_LOGF("modifier: T_FINAL\n");     (yyval.num_int) = T_FINAL;}
-#line 1679 "jni.bison.tab.cpp" /* yacc.c:1661  */
-    break;
-
-  case 24:
-#line 300 "jni.bison.y" /* yacc.c:1661  */
-    {BISON_LOGF("modifier: T_PRIVATE\n");   (yyval.num_int) = T_PRIVATE;}
-#line 1685 "jni.bison.tab.cpp" /* yacc.c:1661  */
-    break;
-
-  case 25:
-#line 301 "jni.bison.y" /* yacc.c:1661  */
-    {BISON_LOGF("modifier: T_PROTECTED\n"); (yyval.num_int) = T_PROTECTED;}
 #line 1691 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 26:
-#line 302 "jni.bison.y" /* yacc.c:1661  */
-    {BISON_LOGF("modifier: T_PUBLIC\n");    (yyval.num_int) = T_PUBLIC;}
+  case 24:
+#line 309 "jni.bison.y" /* yacc.c:1661  */
+    {BISON_LOGF("modifier: T_ABSTRACT\n");  (yyval.num_int) = T_ABSTRACT;}
 #line 1697 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 27:
-#line 303 "jni.bison.y" /* yacc.c:1661  */
-    {BISON_LOGF("modifier: T_STATIC\n");    (yyval.num_int) = T_STATIC;}
+  case 25:
+#line 310 "jni.bison.y" /* yacc.c:1661  */
+    {BISON_LOGF("modifier: T_FINAL\n");     (yyval.num_int) = T_FINAL;}
 #line 1703 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
+  case 26:
+#line 311 "jni.bison.y" /* yacc.c:1661  */
+    {BISON_LOGF("modifier: T_PRIVATE\n");   (yyval.num_int) = T_PRIVATE;}
+#line 1709 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
+  case 27:
+#line 312 "jni.bison.y" /* yacc.c:1661  */
+    {BISON_LOGF("modifier: T_PROTECTED\n"); (yyval.num_int) = T_PROTECTED;}
+#line 1715 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
   case 28:
-#line 307 "jni.bison.y" /* yacc.c:1661  */
+#line 313 "jni.bison.y" /* yacc.c:1661  */
+    {BISON_LOGF("modifier: T_PUBLIC\n");    (yyval.num_int) = T_PUBLIC;}
+#line 1721 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
+  case 29:
+#line 314 "jni.bison.y" /* yacc.c:1661  */
+    {BISON_LOGF("modifier: T_STATIC\n");    (yyval.num_int) = T_STATIC;}
+#line 1727 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
+  case 30:
+#line 318 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("modifier_set: NULL\n");
           (yyval.modifier_set) = ast::ModifierSet::make_ptr().detach();
       }
-#line 1712 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1736 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 29:
-#line 313 "jni.bison.y" /* yacc.c:1661  */
+  case 31:
+#line 324 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("modifier_set: ++\n");
           (yyval.modifier_set) = (yyvsp[-1].modifier_set);
           (yyval.modifier_set)->insert_token((yyvsp[0].num_int));
       }
-#line 1722 "jni.bison.tab.cpp" /* yacc.c:1661  */
-    break;
-
-  case 30:
-#line 321 "jni.bison.y" /* yacc.c:1661  */
-    {(yyval.qualified_identifier) = (yyvsp[-1].qualified_identifier);}
-#line 1728 "jni.bison.tab.cpp" /* yacc.c:1661  */
-    break;
-
-  case 31:
-#line 325 "jni.bison.y" /* yacc.c:1661  */
-    {(yyval.identifier) = ast::Identifier::make_ptr((yyvsp[0].string)).detach();}
-#line 1734 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1746 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 32:
-#line 329 "jni.bison.y" /* yacc.c:1661  */
-    {
-          (yyval.qualified_identifier) = (yyvsp[0].identifier);
-      }
-#line 1742 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 332 "jni.bison.y" /* yacc.c:1661  */
+    {(yyval.qualified_identifier) = (yyvsp[-1].qualified_identifier);}
+#line 1752 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 33:
-#line 332 "jni.bison.y" /* yacc.c:1661  */
-    {
-          (yyval.qualified_identifier) = (yyvsp[0].identifier);
-          (yyval.qualified_identifier)->set_prefix((yyvsp[-2].qualified_identifier));
-      }
-#line 1751 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 336 "jni.bison.y" /* yacc.c:1661  */
+    {(yyval.identifier) = ast::Identifier::make_ptr((yyvsp[0].string)).detach();}
+#line 1758 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 34:
-#line 339 "jni.bison.y" /* yacc.c:1661  */
-    {(yyval.qualified_identifier) = (yyvsp[-1].qualified_identifier);}
-#line 1757 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 340 "jni.bison.y" /* yacc.c:1661  */
+    {
+          (yyval.qualified_identifier) = (yyvsp[0].identifier);
+      }
+#line 1766 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 35:
 #line 343 "jni.bison.y" /* yacc.c:1661  */
     {
-          BISON_LOGF("import_list: NULL\n");
-          (yyval.import_list) = ast::ImportList::make_ptr().detach();
+          (yyval.qualified_identifier) = (yyvsp[0].identifier);
+          (yyval.qualified_identifier)->set_prefix((yyvsp[-2].qualified_identifier));
       }
-#line 1766 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1775 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 36:
-#line 349 "jni.bison.y" /* yacc.c:1661  */
+#line 350 "jni.bison.y" /* yacc.c:1661  */
+    {(yyval.qualified_identifier) = (yyvsp[-1].qualified_identifier);}
+#line 1781 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
+  case 37:
+#line 354 "jni.bison.y" /* yacc.c:1661  */
+    {
+          BISON_LOGF("import_list: NULL\n");
+          (yyval.import_list) = ast::ImportList::make_ptr().detach();
+      }
+#line 1790 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
+  case 38:
+#line 360 "jni.bison.y" /* yacc.c:1661  */
     {
           BISON_LOGF("import_list: ++\n");
           (yyval.import_list) = (yyvsp[-1].import_list);
           (yyval.import_list)->push_back((yyvsp[0].qualified_identifier));
       }
-#line 1776 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1800 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 37:
-#line 357 "jni.bison.y" /* yacc.c:1661  */
+  case 39:
+#line 368 "jni.bison.y" /* yacc.c:1661  */
     {
         (yyval.type) = (yyvsp[-2].type);
         (yyval.type)->set_is_array(true);
         BISON_LOGF("basic_type: %s[]\n", (yyval.type)->get_name()->c_str());
       }
-#line 1786 "jni.bison.tab.cpp" /* yacc.c:1661  */
-    break;
-
-  case 38:
-#line 362 "jni.bison.y" /* yacc.c:1661  */
-    {
-        (yyval.type) = ast::BooleanType::make_ptr().detach();
-        BISON_LOGF("basic_type: %s\n", (yyval.type)->get_name()->c_str()); }
-#line 1794 "jni.bison.tab.cpp" /* yacc.c:1661  */
-    break;
-
-  case 39:
-#line 365 "jni.bison.y" /* yacc.c:1661  */
-    {
-        (yyval.type) = ast::ByteType::make_ptr().detach();
-        BISON_LOGF("basic_type: %s\n", (yyval.type)->get_name()->c_str()); }
-#line 1802 "jni.bison.tab.cpp" /* yacc.c:1661  */
-    break;
-
-  case 40:
-#line 368 "jni.bison.y" /* yacc.c:1661  */
-    {
-        (yyval.type) = ast::FloatType::make_ptr().detach();
-        BISON_LOGF("basic_type: %s\n", (yyval.type)->get_name()->c_str()); }
 #line 1810 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 41:
-#line 371 "jni.bison.y" /* yacc.c:1661  */
+  case 40:
+#line 373 "jni.bison.y" /* yacc.c:1661  */
     {
-        (yyval.type) = ast::IntType::make_ptr().detach();
+        (yyval.type) = ast::BooleanType::make_ptr().detach();
         BISON_LOGF("basic_type: %s\n", (yyval.type)->get_name()->c_str()); }
 #line 1818 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 42:
-#line 374 "jni.bison.y" /* yacc.c:1661  */
+  case 41:
+#line 376 "jni.bison.y" /* yacc.c:1661  */
     {
-        (yyval.type) = ast::LongType::make_ptr().detach();   
+        (yyval.type) = ast::ByteType::make_ptr().detach();
         BISON_LOGF("basic_type: %s\n", (yyval.type)->get_name()->c_str()); }
 #line 1826 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 43:
-#line 377 "jni.bison.y" /* yacc.c:1661  */
+  case 42:
+#line 379 "jni.bison.y" /* yacc.c:1661  */
     {
-        (yyval.type) = ast::VoidType::make_ptr().detach();   
+        (yyval.type) = ast::FloatType::make_ptr().detach();
         BISON_LOGF("basic_type: %s\n", (yyval.type)->get_name()->c_str()); }
 #line 1834 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
-  case 44:
-#line 383 "jni.bison.y" /* yacc.c:1661  */
+  case 43:
+#line 382 "jni.bison.y" /* yacc.c:1661  */
     {
-        (yyval.type) = (yyvsp[-2].type);
-        (yyval.type)->set_is_array(true);
-        BISON_LOGF("reference_type: %s[]\n", (yyval.type)->get_name()->c_str());
-      }
-#line 1844 "jni.bison.tab.cpp" /* yacc.c:1661  */
+        (yyval.type) = ast::IntType::make_ptr().detach();
+        BISON_LOGF("basic_type: %s\n", (yyval.type)->get_name()->c_str()); }
+#line 1842 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
+  case 44:
+#line 385 "jni.bison.y" /* yacc.c:1661  */
+    {
+        (yyval.type) = ast::LongType::make_ptr().detach();   
+        BISON_LOGF("basic_type: %s\n", (yyval.type)->get_name()->c_str()); }
+#line 1850 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 45:
 #line 388 "jni.bison.y" /* yacc.c:1661  */
     {
-        (yyval.type) = ast::ReferenceType::make_ptr((yyvsp[0].qualified_identifier)).detach();
-        BISON_LOGF("reference_type: %s\n", (yyval.type)->get_name()->c_str());
-    }
-#line 1853 "jni.bison.tab.cpp" /* yacc.c:1661  */
+        (yyval.type) = ast::VoidType::make_ptr().detach();   
+        BISON_LOGF("basic_type: %s\n", (yyval.type)->get_name()->c_str()); }
+#line 1858 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 46:
-#line 395 "jni.bison.y" /* yacc.c:1661  */
-    { (yyval.type) = (yyvsp[0].type); }
-#line 1859 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 394 "jni.bison.y" /* yacc.c:1661  */
+    {
+        (yyval.type) = (yyvsp[-2].type);
+        (yyval.type)->set_is_array(true);
+        BISON_LOGF("reference_type: %s[]\n", (yyval.type)->get_name()->c_str());
+      }
+#line 1868 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
   case 47:
-#line 396 "jni.bison.y" /* yacc.c:1661  */
+#line 399 "jni.bison.y" /* yacc.c:1661  */
+    {
+        (yyval.type) = ast::ReferenceType::make_ptr((yyvsp[0].qualified_identifier)).detach();
+        BISON_LOGF("reference_type: %s\n", (yyval.type)->get_name()->c_str());
+    }
+#line 1877 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
+  case 48:
+#line 406 "jni.bison.y" /* yacc.c:1661  */
     { (yyval.type) = (yyvsp[0].type); }
-#line 1865 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1883 "jni.bison.tab.cpp" /* yacc.c:1661  */
+    break;
+
+  case 49:
+#line 407 "jni.bison.y" /* yacc.c:1661  */
+    { (yyval.type) = (yyvsp[0].type); }
+#line 1889 "jni.bison.tab.cpp" /* yacc.c:1661  */
     break;
 
 
-#line 1869 "jni.bison.tab.cpp" /* yacc.c:1661  */
+#line 1893 "jni.bison.tab.cpp" /* yacc.c:1661  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2093,7 +2117,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 398 "jni.bison.y" /* yacc.c:1906  */
+#line 409 "jni.bison.y" /* yacc.c:1906  */
 
 
 int bison_main(int argc, char **argv)

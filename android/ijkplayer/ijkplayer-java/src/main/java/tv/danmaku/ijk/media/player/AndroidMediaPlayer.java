@@ -20,6 +20,7 @@ package tv.danmaku.ijk.media.player;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.media.AudioManager;
+import android.media.MediaDataSource;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -32,7 +33,9 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
+import tv.danmaku.ijk.media.player.misc.AndroidMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.AndroidTrackInfo;
+import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
@@ -40,6 +43,7 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     private MediaPlayer mInternalMediaPlayer;
     private AndroidMediaPlayerListenerHolder mInternalListenerAdapter;
     private String mDataSource;
+    private MediaDataSource mMediaDataSource;
 
     private Object mInitLock = new Object();
     private boolean mIsReleased;
@@ -109,9 +113,29 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    public void setDataSource(IMediaDataSource mediaDataSource) {
+        releaseMediaDataSource();
+
+        mMediaDataSource = new AndroidMediaDataSource(mediaDataSource);
+        mInternalMediaPlayer.setDataSource(mMediaDataSource);
+    }
+
     @Override
     public String getDataSource() {
         return mDataSource;
+    }
+
+    private void releaseMediaDataSource() {
+        if (mMediaDataSource != null) {
+            try {
+                mMediaDataSource.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mMediaDataSource = null;
+        }
     }
 
     @Override
@@ -203,7 +227,7 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     public void release() {
         mIsReleased = true;
         mInternalMediaPlayer.release();
-
+        releaseMediaDataSource();
         resetListeners();
         attachInternalListeners();
     }
@@ -215,7 +239,7 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         } catch (IllegalStateException e) {
             DebugLog.printStackTrace(e);
         }
-
+        releaseMediaDataSource();
         resetListeners();
         attachInternalListeners();
     }

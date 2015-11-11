@@ -27,6 +27,7 @@
 #include "ijksdl/android/jjk/c/android/media/MediaFormat.h"
 #include "ijksdl/android/jjk/c/android/os/Bundle.h"
 #include "ijksdl/android/jjk/c/tv/danmaku/ijk/media/player/IjkMediaPlayer.h"
+#include "ijksdl/android/jjk/c/tv/danmaku/ijk/media/player/misc/IMediaDataSource.h"
 
 #define JJK_LOAD_CLASS(class__) \
     do { \
@@ -50,7 +51,8 @@ int JJK_LoadAll__catchAll(JNIEnv *env)
     JJK_LOAD_CLASS(MediaFormat); // android_media_MediaFormat
     JJK_LOAD_CLASS(Bundle);      // android_os_Bundle
 
-    JJK_LOAD_CLASS(IjkMediaPlayer); // tv_danmaku_ijk_media_player_IjkMediaPlayer
+    JJK_LOAD_CLASS(IjkMediaPlayer);     // tv_danmaku_ijk_media_player_IjkMediaPlayer
+    JJK_LOAD_CLASS(IMediaDataSource);   // tv_danmaku_ijk_media_player_misc_IMediaDataSource
 
 fail:
     return ret;

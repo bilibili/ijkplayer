@@ -29,6 +29,7 @@
 #include "ijksdl/android/jjk/c/java/util/ArrayList.h"
 #include "ijksdl/android/jjk/c/android/os/Bundle.h"
 #include "ijksdl/android/jjk/c/tv/danmaku/ijk/media/player/IjkMediaPlayer.h"
+#include "ijksdl/android/jjk/c/tv/danmaku/ijk/media/player/misc/IMediaDataSource.h"
 #include "../ff_ffplay.h"
 #include "ffmpeg_api_jni.h"
 #include "ijkplayer_android_def.h"
@@ -90,6 +91,33 @@ static IjkMediaPlayer *jni_set_media_player(JNIEnv* env, jobject thiz, IjkMediaP
     return old;
 }
 
+static int64_t jni_set_media_data_source(JNIEnv* env, jobject thiz, jobject media_data_source)
+{
+    int64_t nativeMediaDataSource = 0;
+
+    pthread_mutex_lock(&g_clazz.mutex);
+
+    jobject old = (jobject) (intptr_t) JJKC_IjkMediaPlayer__mNativeMediaDataSource__get__catchAll(env, thiz);
+    if (old) {
+        JJKC_IMediaDataSource__close__catchAll(env, old);
+        JJK_DeleteGlobalRef__p(env, &old);
+        JJKC_IjkMediaPlayer__mNativeMediaDataSource__set__catchAll(env, thiz, 0);
+    }
+
+    if (media_data_source) {
+        jobject global_media_data_source = (*env)->NewGlobalRef(env, media_data_source);
+        if (JJK_ExceptionCheck__catchAll(env) || !global_media_data_source)
+            goto fail;
+
+        nativeMediaDataSource = (int64_t) (intptr_t) global_media_data_source;
+        JJKC_IjkMediaPlayer__mNativeMediaDataSource__set__catchAll(env, thiz, (jlong) nativeMediaDataSource);
+    }
+
+fail:
+    pthread_mutex_unlock(&g_clazz.mutex);
+    return nativeMediaDataSource;
+}
+
 static int message_loop(void *arg);
 
 static void
@@ -118,8 +146,7 @@ LABEL_RETURN:
 }
 
 static void
-IjkMediaPlayer_setDataSourceFd(
-    JNIEnv *env, jobject thiz, jint fd)
+IjkMediaPlayer_setDataSourceFd(JNIEnv *env, jobject thiz, jint fd)
 {
     MPTRACE("%s\n", __func__);
     int retval = 0;
@@ -133,6 +160,31 @@ IjkMediaPlayer_setDataSourceFd(
 
     ALOGV("setDataSourceFd: dup(%d)=%d\n", fd, dupFd);
     snprintf(uri, sizeof(uri), "pipe:%d", dupFd);
+    retval = ijkmp_set_data_source(mp, uri);
+
+    IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_setDataSourceCallback(JNIEnv *env, jobject thiz, jobject callback)
+{
+    MPTRACE("%s\n", __func__);
+    int retval = 0;
+    char uri[128];
+    int64_t nativeMediaDataSource = 0;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(callback, env, "java/lang/IllegalArgumentException", "mpjni: setDataSourceCallback: null fd", LABEL_RETURN);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setDataSourceCallback: null mp", LABEL_RETURN);
+
+    nativeMediaDataSource = jni_set_media_data_source(env, thiz, callback);
+    JNI_CHECK_GOTO(nativeMediaDataSource, env, "java/lang/IllegalStateException", "mpjni: jni_set_media_data_source: NewGlobalRef", LABEL_RETURN);
+
+    ALOGV("setDataSourceCallback: %"PRId64"\n", nativeMediaDataSource);
+    snprintf(uri, sizeof(uri), "ijkmediadatasource:%"PRId64, nativeMediaDataSource);
+
     retval = ijkmp_set_data_source(mp, uri);
 
     IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
@@ -276,7 +328,8 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
     //only delete weak_thiz at release
     jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL );
     (*env)->DeleteGlobalRef(env, weak_thiz);
-    jni_set_media_player(env, thiz, NULL );
+    jni_set_media_player(env, thiz, NULL);
+    jni_set_media_data_source(env, thiz, NULL);
 
     ijkmp_dec_ref_p(&mp);
 }
@@ -881,7 +934,8 @@ static JNINativeMethod g_methods[] = {
         "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
         (void *) IjkMediaPlayer_setDataSourceAndHeaders
     },
-    { "_setDataSourceFd",       "(I)V",   (void *) IjkMediaPlayer_setDataSourceFd },
+    { "_setDataSourceFd",       "(I)V",     (void *) IjkMediaPlayer_setDataSourceFd },
+    { "_setDataSource",         "(Ltv/danmaku/ijk/media/player/misc/IMediaDataSource;)V", (void *)IjkMediaPlayer_setDataSourceCallback },
 
     { "_setVideoSurface",       "(Landroid/view/Surface;)V", (void *) IjkMediaPlayer_setVideoSurface },
     { "_prepareAsync",          "()V",      (void *) IjkMediaPlayer_prepareAsync },

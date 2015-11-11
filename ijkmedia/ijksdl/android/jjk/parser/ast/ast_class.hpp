@@ -31,6 +31,7 @@ class Class: public Member
 {
 public:
     AST_PROPERTY_DEFINE(Namespace*,     local_namespace);
+    AST_PROPERTY_DEFINE(bool,           is_interface);
 
     AST_CHILD_DEFINE(MemberList,        member_list);
 
@@ -108,7 +109,13 @@ public:
     // @Override
     virtual void debug_print(int indent) override {
         get_annotations()->debug_print(indent);
-        get_modifier_set()->debug_print(indent); printf("class "); printf("%s {\n", get_name()->c_str());
+        get_modifier_set()->debug_print(indent);
+        if (get_is_interface()) {
+            printf("class ");
+        } else {
+            printf("interface ");
+        }
+        printf("%s {\n", get_name()->c_str());
         get_member_list()->debug_print(indent + 4);
         print_space(indent); printf("};\n");
     }
@@ -121,6 +128,7 @@ protected:
     explicit Class(Class *other): Member(other) {init(other);}
 private:
     void init(Node *other) {
+        set_is_interface(false);
         set_local_namespace(new Namespace());
     }
 public:

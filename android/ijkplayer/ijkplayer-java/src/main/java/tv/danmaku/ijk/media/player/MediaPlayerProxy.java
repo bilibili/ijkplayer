@@ -27,6 +27,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Map;
 
+import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 
 public class MediaPlayerProxy implements IMediaPlayer {
@@ -73,6 +74,11 @@ public class MediaPlayerProxy implements IMediaPlayer {
     @Override
     public void setDataSource(String path) throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         mBackEndMediaPlayer.setDataSource(path);
+    }
+
+    @Override
+    public void setDataSource(IMediaDataSource mediaDataSource)  {
+        mBackEndMediaPlayer.setDataSource(mediaDataSource);
     }
 
     @Override
