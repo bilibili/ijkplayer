@@ -90,6 +90,8 @@ static int ijkmds_close(URLContext *h)
         return AVERROR(EINVAL);
     }
 
+    JJK_DeleteGlobalRef__p(env, &c->jbuffer);
+
     if (c->media_data_source) {
         JJKC_IMediaDataSource__close__catchAll(env, c->media_data_source);
         JJK_DeleteGlobalRef__p(env, &c->media_data_source);
