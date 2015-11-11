@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
-import tv.danmaku.ijk.media.player.misc.AndroidMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.AndroidTrackInfo;
 import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
@@ -118,8 +117,32 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     public void setDataSource(IMediaDataSource mediaDataSource) {
         releaseMediaDataSource();
 
-        mMediaDataSource = new AndroidMediaDataSource(mediaDataSource);
+        mMediaDataSource = new MediaDataSourceProxy(mediaDataSource);
         mInternalMediaPlayer.setDataSource(mMediaDataSource);
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    public static class MediaDataSourceProxy extends MediaDataSource {
+        private IMediaDataSource mMediaDataSource;
+
+        public MediaDataSourceProxy(IMediaDataSource mediaDataSource) {
+            mMediaDataSource = mediaDataSource;
+        }
+
+        @Override
+        public int readAt(long position, byte[] buffer, int offset, int size) throws IOException {
+            return mMediaDataSource.readAt(position, buffer, offset, size);
+        }
+
+        @Override
+        public long getSize() throws IOException {
+            return mMediaDataSource.getSize();
+        }
+
+        @Override
+        public void close() throws IOException {
+            mMediaDataSource.close();
+        }
     }
 
     @Override
