@@ -122,7 +122,7 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    public static class MediaDataSourceProxy extends MediaDataSource {
+    private static class MediaDataSourceProxy extends MediaDataSource {
         private IMediaDataSource mMediaDataSource;
 
         public MediaDataSourceProxy(IMediaDataSource mediaDataSource) {
