@@ -99,27 +99,6 @@ void SDL_JNI_DetachThreadEnv()
     return;
 }
 
-jboolean SDL_JNI_RethrowException(JNIEnv *env)
-{
-    if ((*env)->ExceptionCheck(env)) {
-        (*env)->ExceptionDescribe(env);
-        return JNI_TRUE;
-    }
-
-    return JNI_FALSE;
-}
-
-jboolean SDL_JNI_CatchException(JNIEnv *env)
-{
-    if ((*env)->ExceptionCheck(env)) {
-        (*env)->ExceptionDescribe(env);
-        (*env)->ExceptionClear(env);
-        return JNI_TRUE;
-    }
-
-    return JNI_FALSE;
-}
-
 int SDL_JNI_ThrowException(JNIEnv* env, const char* className, const char* msg)
 {
     if ((*env)->ExceptionCheck(env)) {
@@ -164,7 +143,7 @@ jobject SDL_JNI_NewObjectAsGlobalRef(JNIEnv *env, jclass clazz, jmethodID method
 
     jobject global_object = NULL;
     jobject local_object = (*env)->NewObjectV(env, clazz, methodID, args);
-    if (!SDL_JNI_RethrowException(env) && local_object) {
+    if (!JJK_ExceptionCheck__throwAny(env) && local_object) {
         global_object = (*env)->NewGlobalRef(env, local_object);
         SDL_JNI_DeleteLocalRefP(env, &local_object);
     }

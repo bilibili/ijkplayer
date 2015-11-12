@@ -91,7 +91,7 @@ static bool SDL_AMediaFormatJava_getInt32(SDL_AMediaFormat* aformat, const char*
     }
 
     jint ret = JJKC_MediaFormat__getInteger__withCString(env, android_media_format, name);
-    if (SDL_JNI_CatchException(env)) {
+    if (JJK_ExceptionCheck__catchAll(env)) {
         ALOGE("%s: CallIntMethod: failed", __func__);
         return false;
     }
@@ -116,7 +116,7 @@ static void SDL_AMediaFormatJava_setInt32(SDL_AMediaFormat* aformat, const char*
     }
 
     JJKC_MediaFormat__setInteger__withCString(env, android_media_format, name, value);
-    if (SDL_JNI_CatchException(env)) {
+    if (JJK_ExceptionCheck__catchAll(env)) {
         ALOGE("%s: CallVoidMethod: failed", __func__);
         return;
     }
@@ -148,7 +148,7 @@ static void SDL_AMediaFormatJava_setBuffer(SDL_AMediaFormat* aformat, const char
     }
 
     JJKC_MediaFormat__setByteBuffer__withCString(env, android_media_format, name, opaque->android_byte_buffer);
-    if (SDL_JNI_CatchException(env)) {
+    if (JJK_ExceptionCheck__catchAll(env)) {
         ALOGE("%s: call jmid_setByteBuffer: failed", __func__);
         return;
     }
@@ -168,7 +168,7 @@ SDL_AMediaFormat *SDL_AMediaFormatJava_init(JNIEnv *env, jobject android_format)
 {
     SDLTRACE("%s", __func__);
     jobject global_android_media_format = (*env)->NewGlobalRef(env, android_format);
-    if (SDL_JNI_CatchException(env) || !global_android_media_format) {
+    if (JJK_ExceptionCheck__catchAll(env) || !global_android_media_format) {
         return NULL;
     }
 
@@ -187,7 +187,7 @@ SDL_AMediaFormat *SDL_AMediaFormatJava_createVideoFormat(JNIEnv *env, const char
     SDLTRACE("%s", __func__);
 
     jobject android_media_format = JJKC_MediaFormat__createVideoFormat__withCString__asGlobalRef__catchAll(env, mime, width, height);
-    if (SDL_JNI_CatchException(env) || !android_media_format) {
+    if (JJK_ExceptionCheck__catchAll(env) || !android_media_format) {
         return NULL;
     }
 
