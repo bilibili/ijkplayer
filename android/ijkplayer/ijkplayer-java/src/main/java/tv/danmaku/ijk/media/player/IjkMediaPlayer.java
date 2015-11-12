@@ -928,9 +928,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public interface OnNativeInvokeListener {
         int ON_CONCAT_RESOLVE_SEGMENT = 0x10000;
         int ON_TCP_OPEN = 0x10001;
-        int ON_ON_HTTP_OPEN = 0x10002;
-        int ON_ON_HTTP_RETRY = 0x10003;
-        int ON_ON_LIVE_RETRY = 0x10004;
+        int ON_HTTP_OPEN = 0x10002;
+        int ON_HTTP_RETRY = 0x10003;
+        int ON_LIVE_RETRY = 0x10004;
 
         String ARG_URL = "url";
         String ARG_SEGMENT_INDEX = "segment_index";
