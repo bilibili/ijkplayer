@@ -83,8 +83,6 @@ public:
     AST_IMPLEMENT(CompilationUnit);
 protected:
     explicit CompilationUnit() {init();}
-    //FIXME: implement
-    explicit CompilationUnit(CompilationUnit *other): Node(other) {init();}
 public:
     static pointer_type make_ptr() {return pointer_type(new CompilationUnit());}
 };

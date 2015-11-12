@@ -86,8 +86,6 @@ public:
     AST_IMPLEMENT(Method);
 protected:
     explicit Method(const bfc::string_ptr &name): Member(name) {;}
-    // FIXME: implement
-    explicit Method(Method *other): Member(other) {;}
 public:
     static pointer_type make_ptr(const bfc::string_ptr& name) {return pointer_type(new Method(name));}
 };

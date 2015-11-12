@@ -44,7 +44,6 @@ public:
 protected:
     explicit Annotation(const bfc::string_ptr &name): Identifier(name) {;}
     explicit Annotation(const bfc::string_ptr &name, const bfc::string_ptr& value): Identifier(name), AST_PROPERTY(value)(value) {;}
-    explicit Annotation(Annotation *other): Identifier(other) {;}
 public:
     static pointer_type make_ptr(const bfc::string_ptr& name) {return pointer_type(new Annotation(name));}
     static pointer_type make_ptr(const bfc::string_ptr& name, const bfc::string_ptr& value) {return pointer_type(new Annotation(name, value));}
@@ -67,7 +66,6 @@ public:
     AST_IMPLEMENT(Annotations);
 protected:
     explicit Annotations() {;}
-    explicit Annotations(Annotations *other): IdentifierMap(other) {;}
 public:
     static pointer_type make_ptr() {return pointer_type(new Annotations());}
 };

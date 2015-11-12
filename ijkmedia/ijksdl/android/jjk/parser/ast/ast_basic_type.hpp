@@ -42,8 +42,6 @@ public:
 protected:
     explicit BasicType(const bfc::string_ptr &name, int token): Type(name), m_token(token) {;}
     explicit BasicType(BasicType *other): Type(other), m_token(other->m_token) {;}
-public:
-    // static pointer_type make_ptr(const bfc::string_ptr &name) {return pointer_type(new NamedNode(name));}
 };
 
 #define AST_DEFINE__BasicType(class__, token_id__, name__, ctype__, c_sign__, c_name_in_call_api, default__) \

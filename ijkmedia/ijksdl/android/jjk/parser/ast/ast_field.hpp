@@ -54,8 +54,6 @@ public:
     AST_IMPLEMENT(Field);
 protected:
     explicit Field(const bfc::string_ptr &name): Member(name) {;}
-    //FIXME: implement
-    explicit Field(Field *other): Member(other) {;}
 public:
     static pointer_type make_ptr(const bfc::string_ptr& name) {return pointer_type(new Field(name));}
 };

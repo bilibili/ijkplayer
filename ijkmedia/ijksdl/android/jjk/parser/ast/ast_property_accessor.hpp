@@ -44,10 +44,6 @@ public:
     AST_IMPLEMENT_ABSTRACT(PropertyAccessor);
 protected:
     explicit PropertyAccessor(const bfc::string_ptr &name, Field *field): Method(name), AST_PROPERTY(field)(field) {_init_with_field(field);}
-    // FIXME: implement
-    explicit PropertyAccessor(PropertyAccessor *other): Method(other), AST_PROPERTY(field)(other->get_field()) {;}
-public:
-    // static pointer_type make_ptr(const bfc::string_ptr& name) {return pointer_type(new PropertyAccessor(name));}
 };
 
 
@@ -69,8 +65,6 @@ private:
 
 protected:
     explicit PropertyGetter(const bfc::string_ptr &name, Field *field): PropertyAccessor(name, field) {_init_with_field(field);}
-    // FIXME: implement
-    explicit PropertyGetter(PropertyGetter *other): PropertyAccessor(other) {;}
 public:
     static pointer_type make_ptr(Field *field)
     {
@@ -94,8 +88,6 @@ public:
 
 protected:
     explicit PropertySetter(const bfc::string_ptr &name, Field *field): PropertyAccessor(name, field) {_init_with_field(field);}
-    // FIXME: implement
-    explicit PropertySetter(PropertySetter *other): PropertyAccessor(other) {;}
 private:
     void _init_with_field(Field *field) {
         set_type(VoidType::make_ptr());

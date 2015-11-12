@@ -50,8 +50,6 @@ public:
     AST_IMPLEMENT(ImportList);
 protected:
     explicit ImportList() {;}
-    // FIXME: implement
-    explicit ImportList(ImportList *other): NodeList(other) {;}
 public:
     static pointer_type make_ptr() {return pointer_type(new ImportList());}
 };

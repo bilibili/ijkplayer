@@ -42,8 +42,6 @@ public:
     AST_IMPLEMENT(Argument);
 protected:
     explicit Argument(const bfc::string_ptr &name): Identifier(name) {;}
-    //FIXME: implement
-    explicit Argument(Argument *other): Identifier(other) {;}
 public:
     static pointer_type make_ptr(const bfc::string_ptr& name) {return pointer_type(new Argument(name));}
 };
@@ -71,8 +69,6 @@ public:
     AST_IMPLEMENT_ABSTRACT(ArgumentList);
 protected:
     explicit ArgumentList() {;}
-    //FIXME: implement
-    explicit ArgumentList(ArgumentList *other): NodeList(other) {;}
 public:
     static pointer_type make_ptr() {return pointer_type(new ArgumentList());}
 };

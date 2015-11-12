@@ -52,8 +52,6 @@ public:
     AST_IMPLEMENT(Constructor);
 protected:
     explicit Constructor(const bfc::string_ptr &name): Method(name) {;}
-    //FIXME: implement
-    explicit Constructor(Constructor *other): Method(other) {;}
 public:
     static pointer_type make_ptr(const bfc::string_ptr& name) {return pointer_type(new Constructor(name));}
 };
