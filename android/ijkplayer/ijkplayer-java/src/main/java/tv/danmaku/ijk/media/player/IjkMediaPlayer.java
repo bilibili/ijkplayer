@@ -45,6 +45,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
@@ -915,25 +916,6 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         public String onControlResolveSegmentUrl(int segment);
     }
 
-    @CalledByNative
-    private static String onControlResolveSegmentUrl(Object weakThiz, int segment) {
-        DebugLog.ifmt(TAG, "onControlResolveSegmentUrl %d", segment);
-        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
-            return null;
-
-        @SuppressWarnings("unchecked")
-        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
-        IjkMediaPlayer player = weakPlayer.get();
-        if (player == null)
-            return null;
-
-        OnControlMessageListener listener = player.mOnControlMessageListener;
-        if (listener == null)
-            return null;
-
-        return listener.onControlResolveSegmentUrl(segment);
-    }
-
     /*
      * NativeInvoke
      */
@@ -965,19 +947,38 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private static boolean onNativeInvoke(Object weakThiz, int what, Bundle args) {
         DebugLog.ifmt(TAG, "onNativeInvoke %d", what);
         if (weakThiz == null || !(weakThiz instanceof WeakReference<?>))
-            return false;
+            throw new IllegalStateException("<null weakThiz>.onNativeInvoke()");
 
         @SuppressWarnings("unchecked")
         WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
         IjkMediaPlayer player = weakPlayer.get();
         if (player == null)
-            return false;
+            throw new IllegalStateException("<null weakPlayer>.onNativeInvoke()");
 
         OnNativeInvokeListener listener = player.mOnNativeInvokeListener;
-        if (listener == null)
-            return false;
+        if (listener != null && listener.onNativeInvoke(what, args))
+            return true;
 
-        return listener.onNativeInvoke(what, args);
+        switch (what) {
+            case OnNativeInvokeListener.ON_CONCAT_RESOLVE_SEGMENT: {
+                OnControlMessageListener onControlMessageListener = player.mOnControlMessageListener;
+                if (onControlMessageListener == null)
+                    return false;
+
+                int segmentIndex = args.getInt(OnNativeInvokeListener.ARG_SEGMENT_INDEX, -1);
+                if (segmentIndex < 0)
+                    throw new InvalidParameterException("onNativeInvoke(invalid segment index)");
+
+                String newUrl = onControlMessageListener.onControlResolveSegmentUrl(segmentIndex);
+                if (newUrl == null)
+                    throw new RuntimeException(new IOException("onNativeInvoke() = <NULL newUrl>"));
+
+                args.putString(OnNativeInvokeListener.ARG_URL, newUrl);
+                return true;
+            }
+            default:
+                return false;
+        }
     }
 
     /*

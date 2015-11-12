@@ -669,21 +669,6 @@ IjkMediaPlayer_native_finalize(JNIEnv *env, jobject thiz, jobject name, jobject 
     IjkMediaPlayer_release(env, thiz);
 }
 
-static int
-_onNativeControlResolveSegment(JNIEnv *env, jobject weak_thiz, int type, void *data, size_t data_size)
-{
-    if (weak_thiz == NULL || data == NULL )
-        return -1;
-
-    IJKAVInject_OnUrlOpenData *real_data = (IJKAVInject_OnUrlOpenData *) data;
-
-    const char *ret_cstr = JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__asCBuffer(env, weak_thiz, real_data->segment_index, real_data->url, sizeof(real_data->url));
-    if (JJK_ExceptionCheck__catchAll(env) || !ret_cstr)
-        return -1;
-
-    return 0;
-}
-
 // NOTE: support to be called from read_thread
 static int
 inject_callback(void *opaque, int what, void *data, size_t data_size)
@@ -698,10 +683,7 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
         goto fail;
 
     switch (what) {
-    case IJKAVINJECT_CONCAT_RESOLVE_SEGMENT: {
-        ret = _onNativeControlResolveSegment(env, weak_thiz, what, data, data_size);
-        break;
-    }
+    case IJKAVINJECT_CONCAT_RESOLVE_SEGMENT:
     case IJKAVINJECT_ON_TCP_OPEN:
     case IJKAVINJECT_ON_HTTP_OPEN:
     case IJKAVINJECT_ON_HTTP_RETRY:

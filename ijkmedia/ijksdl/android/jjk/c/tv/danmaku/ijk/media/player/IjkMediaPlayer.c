@@ -27,7 +27,6 @@ typedef struct JJKC_IjkMediaPlayer {
     jfieldID field_mNativeMediaDataSource;
     jmethodID method_postEventFromNative;
     jmethodID method_onSelectCodec;
-    jmethodID method_onControlResolveSegmentUrl;
     jmethodID method_onNativeInvoke;
 } JJKC_IjkMediaPlayer;
 static JJKC_IjkMediaPlayer class_JJKC_IjkMediaPlayer;
@@ -282,87 +281,6 @@ fail:
     return ret_value;
 }
 
-jstring JJKC_IjkMediaPlayer__onControlResolveSegmentUrl(JNIEnv *env, jobject weakThiz, jint segment)
-{
-    return (*env)->CallStaticObjectMethod(env, class_JJKC_IjkMediaPlayer.id, class_JJKC_IjkMediaPlayer.method_onControlResolveSegmentUrl, weakThiz, segment);
-}
-
-jstring JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__catchAll(JNIEnv *env, jobject weakThiz, jint segment)
-{
-    jstring ret_object = JJKC_IjkMediaPlayer__onControlResolveSegmentUrl(env, weakThiz, segment);
-    if (JJK_ExceptionCheck__catchAll(env) || !ret_object) {
-        return NULL;
-    }
-
-    return ret_object;
-}
-
-jstring JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__asGlobalRef__catchAll(JNIEnv *env, jobject weakThiz, jint segment)
-{
-    jstring ret_object   = NULL;
-    jstring local_object = JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__catchAll(env, weakThiz, segment);
-    if (JJK_ExceptionCheck__catchAll(env) || !local_object) {
-        ret_object = NULL;
-        goto fail;
-    }
-
-    ret_object = JJK_NewGlobalRef__catchAll(env, local_object);
-    if (!ret_object) {
-        ret_object = NULL;
-        goto fail;
-    }
-
-fail:
-    JJK_DeleteLocalRef__p(env, &local_object);
-    return ret_object;
-}
-
-const char *JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__asCBuffer(JNIEnv *env, jobject weakThiz, jint segment, char *out_buf, int out_len)
-{
-    const char *ret_value = NULL;
-    const char *c_str     = NULL;
-    jstring local_string = JJKC_IjkMediaPlayer__onControlResolveSegmentUrl(env, weakThiz, segment);
-    if (JJK_ExceptionCheck__throwAny(env) || !local_string) {
-        goto fail;
-    }
-
-    c_str = (*env)->GetStringUTFChars(env, local_string, NULL );
-    if (JJK_ExceptionCheck__throwAny(env) || !c_str) {
-        goto fail;
-    }
-
-    strlcpy(out_buf, c_str, out_len);
-    ret_value = out_buf;
-
-fail:
-    JJK_ReleaseStringUTFChars__p(env, local_string, &c_str);
-    JJK_DeleteLocalRef__p(env, &local_string);
-    return ret_value;
-}
-
-const char *JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__asCBuffer__catchAll(JNIEnv *env, jobject weakThiz, jint segment, char *out_buf, int out_len)
-{
-    const char *ret_value = NULL;
-    const char *c_str     = NULL;
-    jstring local_string = JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__catchAll(env, weakThiz, segment);
-    if (JJK_ExceptionCheck__catchAll(env) || !local_string) {
-        goto fail;
-    }
-
-    c_str = (*env)->GetStringUTFChars(env, local_string, NULL );
-    if (JJK_ExceptionCheck__catchAll(env) || !c_str) {
-        goto fail;
-    }
-
-    strlcpy(out_buf, c_str, out_len);
-    ret_value = out_buf;
-
-fail:
-    JJK_ReleaseStringUTFChars__p(env, local_string, &c_str);
-    JJK_DeleteLocalRef__p(env, &local_string);
-    return ret_value;
-}
-
 jboolean JJKC_IjkMediaPlayer__onNativeInvoke(JNIEnv *env, jobject weakThiz, jint what, jobject args)
 {
     return (*env)->CallStaticBooleanMethod(env, class_JJKC_IjkMediaPlayer.id, class_JJKC_IjkMediaPlayer.method_onNativeInvoke, weakThiz, what, args);
@@ -417,13 +335,6 @@ int JJK_loadClass__JJKC_IjkMediaPlayer(JNIEnv *env)
     sign     = "(Ljava/lang/Object;Ljava/lang/String;II)Ljava/lang/String;";
     class_JJKC_IjkMediaPlayer.method_onSelectCodec = JJK_GetStaticMethodID__catchAll(env, class_id, name, sign);
     if (class_JJKC_IjkMediaPlayer.method_onSelectCodec == NULL)
-        goto fail;
-
-    class_id = class_JJKC_IjkMediaPlayer.id;
-    name     = "onControlResolveSegmentUrl";
-    sign     = "(Ljava/lang/Object;I)Ljava/lang/String;";
-    class_JJKC_IjkMediaPlayer.method_onControlResolveSegmentUrl = JJK_GetStaticMethodID__catchAll(env, class_id, name, sign);
-    if (class_JJKC_IjkMediaPlayer.method_onControlResolveSegmentUrl == NULL)
         goto fail;
 
     class_id = class_JJKC_IjkMediaPlayer.id;

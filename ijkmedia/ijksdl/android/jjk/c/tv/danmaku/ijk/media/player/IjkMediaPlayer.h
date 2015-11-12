@@ -43,11 +43,6 @@ jstring JJKC_IjkMediaPlayer__onSelectCodec__withCString__catchAll(JNIEnv *env, j
 jstring JJKC_IjkMediaPlayer__onSelectCodec__withCString__asGlobalRef__catchAll(JNIEnv *env, jobject weakThiz, const char *mimeType_cstr__, jint profile, jint level);
 const char *JJKC_IjkMediaPlayer__onSelectCodec__withCString__asCBuffer(JNIEnv *env, jobject weakThiz, const char *mimeType_cstr__, jint profile, jint level, char *out_buf, int out_len);
 const char *JJKC_IjkMediaPlayer__onSelectCodec__withCString__asCBuffer__catchAll(JNIEnv *env, jobject weakThiz, const char *mimeType_cstr__, jint profile, jint level, char *out_buf, int out_len);
-jstring JJKC_IjkMediaPlayer__onControlResolveSegmentUrl(JNIEnv *env, jobject weakThiz, jint segment);
-jstring JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__catchAll(JNIEnv *env, jobject weakThiz, jint segment);
-jstring JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__asGlobalRef__catchAll(JNIEnv *env, jobject weakThiz, jint segment);
-const char *JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__asCBuffer(JNIEnv *env, jobject weakThiz, jint segment, char *out_buf, int out_len);
-const char *JJKC_IjkMediaPlayer__onControlResolveSegmentUrl__asCBuffer__catchAll(JNIEnv *env, jobject weakThiz, jint segment, char *out_buf, int out_len);
 jboolean JJKC_IjkMediaPlayer__onNativeInvoke(JNIEnv *env, jobject weakThiz, jint what, jobject args);
 jboolean JJKC_IjkMediaPlayer__onNativeInvoke__catchAll(JNIEnv *env, jobject weakThiz, jint what, jobject args);
 int JJK_loadClass__JJKC_IjkMediaPlayer(JNIEnv *env);
