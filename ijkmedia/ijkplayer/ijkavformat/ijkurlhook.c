@@ -32,18 +32,23 @@ typedef struct Context {
     AVClass        *class;
     URLContext     *inner;
 
+    char           *inner_url;
+    int64_t         logical_pos;
+    int64_t         logical_size;
+
+    IJKAVInject_OnUrlOpenData inject_data;
+    const char     *scheme;
+    const char     *inner_scheme;
+    int             open_callback_id;
+
     /* options */
+    int             inner_flags;
+    AVDictionary   *inner_options;
     int64_t         opaque;
     int             segment_index;
 #ifdef DEBUG
     int64_t         test_fail_point;
 #endif
-    int64_t         logical_pos;
-    int64_t         logical_size;
-
-    const char     *scheme;
-    const char     *inner_scheme;
-    int             open_callback_id;
 } Context;
 
 static void *ijkinject_get_opaque(URLContext *h) {
@@ -58,44 +63,62 @@ static void *ijkinject_get_opaque(URLContext *h) {
 #endif
 }
 
-static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
+static int ijkurlhook_connect(URLContext *h)
 {
     Context *c = h->priv_data;
-    IJKAVInject_OnUrlOpenData inject_data = {0};
     IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
     void *opaque = ijkinject_get_opaque(h);
     int ret = 0;
-
-    av_strstart(arg, c->scheme, &arg);
-
-    inject_data.size = sizeof(inject_data);
-    inject_data.segment_index = c->segment_index;
-    if (av_strstart(arg, c->inner_scheme, NULL)) {
-        snprintf(inject_data.url, sizeof(inject_data.url), "%s", arg);
-    } else {
-        snprintf(inject_data.url, sizeof(inject_data.url), "%s%s", c->inner_scheme, arg);
-    }
-    snprintf(inject_data.url, sizeof(inject_data.url), "%s%s", c->inner_scheme, arg);
+    AVDictionary *inner_options = NULL;
 
     if (opaque && inject_callback) {
-        av_log(h, AV_LOG_INFO, "url-hook %s\n", inject_data.url);
-        ret = inject_callback(opaque, c->open_callback_id, &inject_data, sizeof(inject_data));
-        if (ret || !inject_data.url[0]) {
+        av_log(h, AV_LOG_INFO, "url-hook %s\n", c->inject_data.url);
+        ret = inject_callback(opaque, c->open_callback_id, &c->inject_data, sizeof(c->inject_data));
+        if (ret || !c->inject_data.url[0]) {
             ret = AVERROR_EXIT;
             goto fail;
         }
     }
 
-    av_dict_set_int(options, "ijkinject-opaque",        c->opaque, 0);
-    av_dict_set_int(options, "ijkinject-segment-index", c->segment_index, 0);
-    ret = ffurl_open(&c->inner, inject_data.url, flags, &h->interrupt_callback, options);
+    assert(c->inner_options);
+    av_dict_copy(&inner_options, c->inner_options, 0);
+
+    ret = ffurl_open(&c->inner, c->inject_data.url, c->inner_flags, &h->interrupt_callback, &inner_options);
     if (ret)
         goto fail;
 
     c->logical_size = ffurl_seek(c->inner, 0, AVSEEK_SIZE);
     h->is_streamed  = c->inner->is_streamed;
 fail:
+    av_dict_free(&inner_options);
     return ret;
+}
+
+static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
+{
+    Context *c = h->priv_data;
+
+    av_strstart(arg, c->scheme, &arg);
+
+    c->inner_flags = flags;
+
+    if (options)
+        av_dict_copy(&c->inner_options, *options, 0);
+    av_dict_set_int(&c->inner_options, "ijkinject-opaque",        c->opaque, 0);
+    av_dict_set_int(&c->inner_options, "ijkinject-segment-index", c->segment_index, 0);
+
+    c->inject_data.size = sizeof(c->inject_data);
+    c->inject_data.segment_index = c->segment_index;
+    strlcpy(c->inject_data.url, arg, sizeof(c->inject_data.url));
+
+    if (av_strstart(arg, c->inner_scheme, NULL)) {
+        snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s", c->inject_data.url);
+    } else {
+        snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s%s", c->inner_scheme, c->inject_data.url);
+    }
+    snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s%s", c->inner_scheme, arg);
+
+    return ijkurlhook_connect(h);
 }
 
 static int ijktcphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
@@ -120,6 +143,7 @@ static int ijkurlhook_close(URLContext *h)
 {
     Context *c = h->priv_data;
 
+    av_dict_free(&c->inner_options);
     return ffurl_close(c->inner);
 }
 
