@@ -82,6 +82,7 @@ protected:
     explicit Member(Node *other): Identifier(other) {init(other);}
 private:
     void init(Node *other) {
+        set_build_indent(0);
     }
 public:
     // static pointer_type make_ptr(const bfc::string_ptr& name) {return pointer_type(new Member(name));}
