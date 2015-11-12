@@ -699,10 +699,14 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
         JJKC_Bundle__putInt__withCString__catchAll(env, jbundle,     "segment_index", real_data->segment_index);
         JJKC_Bundle__putInt__withCString__catchAll(env, jbundle,     "retry_counter", real_data->retry_counter);
 
-        if (!JJKC_IjkMediaPlayer__onNativeInvoke__catchAll(env, weak_thiz, what, jbundle))
+        JJKC_IjkMediaPlayer__onNativeInvoke__catchAll(env, weak_thiz, what, jbundle);
+        if (JJK_ExceptionCheck__catchAll(env))
             goto fail;
 
-        JJKC_Bundle__getString__withCString__asCBuffer__catchAll(env, jbundle, "url", real_data->url, sizeof(real_data->url));
+        JJKC_Bundle__getString__withCString__asCBuffer(env, jbundle, "url", real_data->url, sizeof(real_data->url));
+        if (JJK_ExceptionCheck__catchAll(env))
+            goto fail;
+
         ret = 0;
         break;
     }
@@ -712,7 +716,6 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
     }
 
 fail:
-    JJK_ExceptionCheck__catchAll(env);
     SDL_JNI_DeleteLocalRefP(env, &jbundle);
     return ret;
 }
