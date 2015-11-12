@@ -25,7 +25,7 @@ dependencies {
     compile 'com.google.android.exoplayer:exoplayer:r1.5.1'
 
     compile project(':ijkplayer-java')
-    // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.4.3'
+    // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.4.3.1'
 }
 
 // apply from: '../tools/gradle-mvn-push.gradle'
