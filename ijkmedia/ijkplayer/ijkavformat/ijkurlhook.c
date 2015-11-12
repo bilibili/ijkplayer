@@ -39,6 +39,7 @@ typedef struct Context {
     int64_t         test_fail_point;
 #endif
     int64_t         logical_pos;
+    int64_t         logical_size;
 
     const char     *scheme;
     const char     *inner_scheme;
@@ -91,6 +92,7 @@ static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictiona
     if (ret)
         goto fail;
 
+    c->logical_size = ffurl_seek(c->inner, 0, AVSEEK_SIZE);
 fail:
     return ret;
 }
