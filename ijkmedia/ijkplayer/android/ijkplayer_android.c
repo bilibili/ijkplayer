@@ -82,8 +82,8 @@ void ijkmp_android_set_volume(JNIEnv *env, IjkMediaPlayer *mp, float left, float
     MPTRACE("ijkmp_android_set_volume(%f, %f)", left, right);
     pthread_mutex_lock(&mp->mutex);
 
-    if (mp && mp->ffplayer && mp->ffplayer->aout) {
-        SDL_AoutSetStereoVolume(mp->ffplayer->aout, left, right);
+    if (mp && mp->ffplayer && mp->ffplayer->pipeline) {
+        ffpipeline_set_volume(mp->ffplayer->pipeline, left, right);
     }
 
     pthread_mutex_unlock(&mp->mutex);

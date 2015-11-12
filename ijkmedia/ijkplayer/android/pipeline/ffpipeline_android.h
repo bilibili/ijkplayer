@@ -48,4 +48,6 @@ void    ffpipeline_set_surface_need_reconfigure_l(IJKFF_Pipeline* pipeline, bool
 void    ffpipeline_set_mediacodec_select_callback(IJKFF_Pipeline* pipeline, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque);
 bool    ffpipeline_select_mediacodec_l(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo_context *mcc);
 
+void    ffpipeline_set_volume(IJKFF_Pipeline* pipeline, float left, float right);
+
 #endif

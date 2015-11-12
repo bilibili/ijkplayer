@@ -42,6 +42,9 @@ typedef struct IJKFF_Pipeline_Opaque {
     void          *mediacodec_select_callback_opaque;
 
     SDL_Vout      *weak_vout;
+
+    float          left_volume;
+    float          right_volume;
 } IJKFF_Pipeline_Opaque;
 
 static void func_destroy(IJKFF_Pipeline *pipeline)
@@ -77,11 +80,15 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
 
 static SDL_Aout *func_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
 {
+    SDL_Aout *aout = NULL;
     if (ffp->opensles) {
-        return SDL_AoutAndroid_CreateForOpenSLES();
+        aout = SDL_AoutAndroid_CreateForOpenSLES();
     } else {
-        return SDL_AoutAndroid_CreateForAudioTrack();
+        aout = SDL_AoutAndroid_CreateForAudioTrack();
     }
+    if (aout)
+        SDL_AoutSetStereoVolume(aout, pipeline->opaque->left_volume, pipeline->opaque->right_volume);
+    return aout;
 }
 
 
@@ -110,6 +117,8 @@ IJKFF_Pipeline *ffpipeline_create_from_android(FFPlayer *ffp)
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
     opaque->ffp                   = ffp;
     opaque->surface_mutex         = SDL_CreateMutex();
+    opaque->left_volume           = 1.0f;
+    opaque->right_volume          = 1.0f;
     if (!opaque->surface_mutex) {
         ALOGE("ffpipeline-android:create SDL_CreateMutex failed\n");
         goto fail;
@@ -235,4 +244,19 @@ bool ffpipeline_select_mediacodec_l(IJKFF_Pipeline* pipeline, ijkmp_mediacodecin
         return false;
 
     return pipeline->opaque->mediacodec_select_callback(pipeline->opaque->mediacodec_select_callback_opaque, mcc);
+}
+
+void ffpipeline_set_volume(IJKFF_Pipeline* pipeline, float left, float right)
+{
+    ALOGD("%s\n", __func__);
+    if (!check_ffpipeline(pipeline, __func__))
+        return;
+
+    IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
+    opaque->left_volume  = left;
+    opaque->right_volume = right;
+
+    if (opaque->ffp && opaque->ffp->aout) {
+        SDL_AoutSetStereoVolume(opaque->ffp->aout, left, right);
+    }
 }
