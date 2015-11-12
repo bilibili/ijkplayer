@@ -164,11 +164,7 @@ protected:
         iterator end   = this->end();
 
         for (NULL; begin != end; ++begin) {
-            typename T::pointer_type node = begin->second->make_clone();
-            if (!node.is_null())
-                continue;
-
-            insert(node);
+            insert(begin->second);
         }
     }
 public:

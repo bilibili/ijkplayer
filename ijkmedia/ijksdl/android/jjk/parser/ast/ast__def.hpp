@@ -75,18 +75,10 @@
 
 #define AST_IMPLEMENT_ABSTRACT(class__) \
 public: \
-    typedef bfc::rc_ptr<class__> pointer_type; \
-    pointer_type make_clone() { \
-        Node::pointer_type node = _make_clone_node(); \
-        return pointer_type((class__ *)node.get()); \
-    } 
+    typedef bfc::rc_ptr<class__> pointer_type;
 
 #define AST_IMPLEMENT(class__) \
 public: \
-    AST_IMPLEMENT_ABSTRACT(class__) \
-protected: \
-    virtual Node::pointer_type _make_clone_node() override { \
-        return Node::pointer_type((Node *)new class__(this)); \
-    }
+    AST_IMPLEMENT_ABSTRACT(class__)
 
 #endif

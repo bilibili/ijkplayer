@@ -35,8 +35,8 @@ public:
 
 private:
     void _init_with_field(Field *field) {
-        set_annotations(field->get_annotations()->make_clone().get());
-        set_modifier_set(field->get_modifier_set()->make_clone().get());
+        set_annotations(field->get_annotations());
+        set_modifier_set(field->get_modifier_set());
         set_parent(field->get_parent());
     }
 
