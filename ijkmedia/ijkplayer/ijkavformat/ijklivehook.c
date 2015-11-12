@@ -108,13 +108,11 @@ static int open_inner(AVFormatContext *avf)
         goto fail;
     }
 
-    if (c->inject_data.retry_counter > 0) {
-        av_log(avf, AV_LOG_INFO, "live-hook-retry %s (%d)\n", c->inject_data.url, c->inject_data.retry_counter);
-        ret = inject_callback(opaque, IJKAVINJECT_ON_LIVE_RETRY, &c->inject_data, sizeof(c->inject_data));
-        if (ret || !c->inject_data.url[0]) {
-            ret = AVERROR_EXIT;
-            goto fail;
-        }
+    av_log(avf, AV_LOG_INFO, "live-hook-retry %s (%d)\n", c->inject_data.url, c->inject_data.retry_counter);
+    ret = inject_callback(opaque, IJKAVINJECT_ON_LIVE_RETRY, &c->inject_data, sizeof(c->inject_data));
+    if (ret || !c->inject_data.url[0]) {
+        ret = AVERROR_EXIT;
+        goto fail;
     }
 
     avformat_close_input(&c->inner);
