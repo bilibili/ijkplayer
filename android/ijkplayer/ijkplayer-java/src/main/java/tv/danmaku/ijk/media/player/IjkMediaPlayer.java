@@ -943,9 +943,22 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         mOnNativeInvokeListener = listener;
     }
 
-    public static interface OnNativeInvokeListener {
-        /* return whether invoke is handled */
-        public boolean onNativeInvoke(int what, Bundle args);
+    public interface OnNativeInvokeListener {
+        int ON_CONCAT_RESOLVE_SEGMENT = 0x10000;
+        int ON_TCP_OPEN = 0x10001;
+        int ON_ON_HTTP_OPEN = 0x10002;
+        int ON_ON_HTTP_RETRY = 0x10003;
+        int ON_ON_LIVE_RETRY = 0x10004;
+
+        String ARG_URL = "url";
+        String ARG_SEGMENT_INDEX = "segment_index";
+        String ARG_RETRY_COUNTER = "retry_counter";
+
+        /*
+         * @return true if invoke is handled
+         * @throws Exception on any error
+         */
+        boolean onNativeInvoke(int what, Bundle args);
     }
 
     @CalledByNative
