@@ -35,8 +35,10 @@ typedef struct Context {
     /* options */
     int64_t         opaque;
     int             segment_index;
+#ifdef DEBUG
     int64_t         test_fail_point;
-    int64_t         read_bytes;
+#endif
+    int64_t         logical_pos;
 
     const char     *scheme;
     const char     *inner_scheme;
@@ -123,13 +125,13 @@ static int ijkurlhook_read(URLContext *h, unsigned char *buf, int size)
     Context *c = h->priv_data;
     int ret = ffurl_read(c->inner, buf, size);
 
-#ifdef DEBUG
     if (ret > 0) {
-        c->read_bytes += ret;
-        if (c->test_fail_point > 0 && c->read_bytes >= c->test_fail_point)
+        c->logical_pos += ret;
+#ifdef DEBUG
+        if (c->test_fail_point > 0 && c->logical_pos >= c->test_fail_point)
             return AVERROR(EIO);
-    }
 #endif
+    }
 
     return ret;
 }
@@ -156,8 +158,10 @@ static const AVOption ijktcphook_options[] = {
         OFFSET(opaque),             IJKAV_OPTION_INT64(0, INT64_MIN, INT64_MAX) },
     { "ijkinject-segment-index",    "segment index of current url",
         OFFSET(segment_index),      IJKAV_OPTION_INT(0, 0, INT_MAX) },
+#ifdef DEBUG
     { "ijkurlhook-test-fail-point", "test fail point, in bytes",
         OFFSET(test_fail_point),    IJKAV_OPTION_INT(0, 0, INT_MAX) },
+#endif
     { NULL }
 };
 
@@ -166,8 +170,10 @@ static const AVOption ijkhttphook_options[] = {
         OFFSET(opaque),             IJKAV_OPTION_INT64(0, INT64_MIN, INT64_MAX) },
     { "ijkinject-segment-index",    "segment index of current url",
         OFFSET(segment_index),      IJKAV_OPTION_INT(0, 0, INT_MAX) },
+#ifdef DEBUG
     { "ijkurlhook-test-fail-point", "test fail point, in bytes",
         OFFSET(test_fail_point),    IJKAV_OPTION_INT(0, 0, INT_MAX) },
+#endif
     { NULL }
 };
 
