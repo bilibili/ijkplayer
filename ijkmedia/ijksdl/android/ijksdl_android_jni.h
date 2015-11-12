@@ -25,6 +25,7 @@
 #define IJKSDL_ANDROID__IJKSDL_ANDROID_JNI_H
 
 #include <jni.h>
+#include "ijksdl/android/jjk/internal/jjk_internal.h"
 
 #define IJK_API_1_BASE                      1   // 1.0
 #define IJK_API_2_BASE_1_1                  2   // 1.1
@@ -55,8 +56,6 @@ JavaVM *SDL_JNI_GetJvm();
 jint    SDL_JNI_SetupThreadEnv(JNIEnv **p_env);
 void    SDL_JNI_DetachThreadEnv();
 
-jboolean SDL_JNI_RethrowException(JNIEnv *env);
-jboolean SDL_JNI_CatchException(JNIEnv *env);
 int      SDL_JNI_ThrowException(JNIEnv *env, const char *exception, const char* msg);
 int      SDL_JNI_ThrowIllegalStateException(JNIEnv *env, const char* msg);
 
@@ -70,12 +69,12 @@ int     SDL_Android_GetApiLevel();
 #define IJK_FIND_JAVA_CLASS(env__, var__, classsign__) \
     do { \
         jclass clazz = (*env__)->FindClass(env__, classsign__); \
-        if (SDL_JNI_CatchException(env) || !(clazz)) { \
+        if (JJK_ExceptionCheck__catchAll(env) || !(clazz)) { \
             ALOGE("FindClass failed: %s", classsign__); \
             return -1; \
         } \
         var__ = (*env__)->NewGlobalRef(env__, clazz); \
-        if (SDL_JNI_CatchException(env) || !(var__)) { \
+        if (JJK_ExceptionCheck__catchAll(env) || !(var__)) { \
             ALOGE("FindClass::NewGlobalRef failed: %s", classsign__); \
             (*env__)->DeleteLocalRef(env__, clazz); \
             return -1; \

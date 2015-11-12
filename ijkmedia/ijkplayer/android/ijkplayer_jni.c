@@ -566,7 +566,7 @@ IjkMediaPlayer_getMediaMeta(JNIEnv *env, jobject thiz)
     is_locked = true;
 
     jlocal_bundle = JJKC_Bundle__Bundle(env);
-    if (SDL_JNI_RethrowException(env)) {
+    if (JJK_ExceptionCheck__throwAny(env)) {
         goto LABEL_RETURN;
     }
 
@@ -579,7 +579,7 @@ IjkMediaPlayer_getMediaMeta(JNIEnv *env, jobject thiz)
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_AUDIO_STREAM, "-1");
 
     jarray_list = JJKC_ArrayList__ArrayList(env);
-    if (SDL_JNI_RethrowException(env)) {
+    if (JJK_ExceptionCheck__throwAny(env)) {
         goto LABEL_RETURN;
     }
 
@@ -588,7 +588,7 @@ IjkMediaPlayer_getMediaMeta(JNIEnv *env, jobject thiz)
         IjkMediaMeta *streamRawMeta = ijkmeta_get_child_l(meta, i);
         if (streamRawMeta) {
             jstream_bundle = JJKC_Bundle__Bundle(env);
-            if (SDL_JNI_RethrowException(env)) {
+            if (JJK_ExceptionCheck__throwAny(env)) {
                 goto LABEL_RETURN;
             }
 
@@ -616,7 +616,7 @@ IjkMediaPlayer_getMediaMeta(JNIEnv *env, jobject thiz)
                     fillMetaInternal(env, jstream_bundle, streamRawMeta, IJKM_KEY_CHANNEL_LAYOUT, NULL );
                 }
                 JJKC_ArrayList__add(env, jarray_list, jstream_bundle);
-                if (SDL_JNI_RethrowException(env)) {
+                if (JJK_ExceptionCheck__throwAny(env)) {
                     goto LABEL_RETURN;
                 }
             }
@@ -707,8 +707,8 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
     case IJKAVINJECT_ON_HTTP_RETRY:
     case IJKAVINJECT_ON_LIVE_RETRY: {
         IJKAVInject_OnUrlOpenData *real_data = (IJKAVInject_OnUrlOpenData *) data;
-        jbundle = JJKC_Bundle__Bundle(env);
-        if (SDL_JNI_CatchException(env) || !jbundle) {
+        jbundle = JJKC_Bundle__Bundle__catchAll(env);
+        if (!jbundle) {
             ALOGE("%s: ASDK_Bundle__init failed\n", __func__);
             goto fail;
         }
@@ -730,7 +730,7 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
     }
 
 fail:
-    SDL_JNI_CatchException(env);
+    JJK_ExceptionCheck__catchAll(env);
     SDL_JNI_DeleteLocalRefP(env, &jbundle);
     return ret;
 }
