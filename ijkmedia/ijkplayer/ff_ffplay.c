@@ -2850,7 +2850,7 @@ static int read_thread(void *arg)
                 
                 drop_audiopacket_timing_now = GetNowMs();
                 
-                if(currentDuration>live_duration_hwm && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>10*1000)
+                if(currentDuration>live_duration_hwm && drop_audiopacket_timing_now-drop_audiopacket_timing_begin>1*1000)
                 {
                     drop_audiopacket_timing_begin = 0;
                     enable_drop_audiopacket = true;
