@@ -93,6 +93,7 @@ static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictiona
         goto fail;
 
     c->logical_size = ffurl_seek(c->inner, 0, AVSEEK_SIZE);
+    h->is_streamed  = c->inner->is_streamed;
 fail:
     return ret;
 }
