@@ -59,8 +59,8 @@ public:
 public:
     AST_IMPLEMENT_ABSTRACT(Type);
 protected:
-    explicit Type(const bfc::string_ptr &name): Identifier(name) {;}
-    explicit Type(Node *other): Identifier(other) {;}
+    explicit Type(const bfc::string_ptr &name): Identifier(name) {init(NULL);}
+    explicit Type(Node *other): Identifier(other) {init(other);}
 private:
     void init(Node *other) {
         set_is_array(false);
