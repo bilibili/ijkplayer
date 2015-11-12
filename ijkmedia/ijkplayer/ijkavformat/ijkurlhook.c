@@ -37,6 +37,10 @@ typedef struct Context {
     int             segment_index;
     int64_t         test_fail_point;
     int64_t         read_bytes;
+
+    const char     *scheme;
+    const char     *inner_scheme;
+    int             open_callback_id;
 } Context;
 
 static void *ijkinject_get_opaque(URLContext *h) {
@@ -51,7 +55,7 @@ static void *ijkinject_get_opaque(URLContext *h) {
 #endif
 }
 
-static int ijktcphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
+static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
 {
     Context *c = h->priv_data;
     IJKAVInject_OnUrlOpenData inject_data = {0};
@@ -59,15 +63,20 @@ static int ijktcphook_open(URLContext *h, const char *arg, int flags, AVDictiona
     void *opaque = ijkinject_get_opaque(h);
     int ret = 0;
 
-    av_strstart(arg, "ijktcphook:", &arg);
+    av_strstart(arg, c->scheme, &arg);
 
     inject_data.size = sizeof(inject_data);
     inject_data.segment_index = c->segment_index;
-    snprintf(inject_data.url, sizeof(inject_data.url), "tcp:%s", arg);
+    if (av_strstart(arg, c->inner_scheme, NULL)) {
+        snprintf(inject_data.url, sizeof(inject_data.url), "%s", arg);
+    } else {
+        snprintf(inject_data.url, sizeof(inject_data.url), "%s%s", c->inner_scheme, arg);
+    }
+    snprintf(inject_data.url, sizeof(inject_data.url), "%s%s", c->inner_scheme, arg);
 
     if (opaque && inject_callback) {
-        av_log(h, AV_LOG_INFO, "tcp-hook %s\n", inject_data.url);
-        ret = inject_callback(opaque, IJKAVINJECT_ON_TCP_OPEN, &inject_data, sizeof(inject_data));
+        av_log(h, AV_LOG_INFO, "url-hook %s\n", inject_data.url);
+        ret = inject_callback(opaque, c->open_callback_id, &inject_data, sizeof(inject_data));
         if (ret || !inject_data.url[0]) {
             ret = AVERROR_EXIT;
             goto fail;
@@ -84,14 +93,32 @@ fail:
     return ret;
 }
 
-static int ijktcphook_close(URLContext *h)
+static int ijktcphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
+{
+    Context *c = h->priv_data;
+    c->scheme = "ijktcphook:";
+    c->inner_scheme = "tcp:";
+    c->open_callback_id = IJKAVINJECT_ON_TCP_OPEN;
+    return ijkurlhook_open(h, arg, flags, options);
+}
+
+static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
+{
+    Context *c = h->priv_data;
+    c->scheme = "ijkhttphook:";
+    c->inner_scheme = "http:";
+    c->open_callback_id = IJKAVINJECT_ON_HTTP_OPEN;
+    return ijkurlhook_open(h, arg, flags, options);
+}
+
+static int ijkurlhook_close(URLContext *h)
 {
     Context *c = h->priv_data;
 
     return ffurl_close(c->inner);
 }
 
-static int ijktcphook_read(URLContext *h, unsigned char *buf, int size)
+static int ijkurlhook_read(URLContext *h, unsigned char *buf, int size)
 {
     Context *c = h->priv_data;
     int ret = ffurl_read(c->inner, buf, size);
@@ -107,14 +134,14 @@ static int ijktcphook_read(URLContext *h, unsigned char *buf, int size)
     return ret;
 }
 
-static int ijktcphook_write(URLContext *h, const unsigned char *buf, int size)
+static int ijkurlhook_write(URLContext *h, const unsigned char *buf, int size)
 {
     Context *c = h->priv_data;
 
     return ffurl_write(c->inner, buf, size);
 }
 
-static int64_t ijktcphook_seek(URLContext *h, int64_t pos, int whence)
+static int64_t ijkurlhook_seek(URLContext *h, int64_t pos, int whence)
 {
     Context *c = h->priv_data;
 
@@ -124,12 +151,22 @@ static int64_t ijktcphook_seek(URLContext *h, int64_t pos, int whence)
 #define OFFSET(x) offsetof(Context, x)
 #define D AV_OPT_FLAG_DECODING_PARAM
 
-static const AVOption options[] = {
+static const AVOption ijktcphook_options[] = {
     { "ijkinject-opaque",           "private data of user, passed with custom callback",
         OFFSET(opaque),             IJKAV_OPTION_INT64(0, INT64_MIN, INT64_MAX) },
     { "ijkinject-segment-index",    "segment index of current url",
         OFFSET(segment_index),      IJKAV_OPTION_INT(0, 0, INT_MAX) },
-    { "ijktcphook-test-fail-point", "test fail point, in bytes",
+    { "ijkurlhook-test-fail-point", "test fail point, in bytes",
+        OFFSET(test_fail_point),    IJKAV_OPTION_INT(0, 0, INT_MAX) },
+    { NULL }
+};
+
+static const AVOption ijkhttphook_options[] = {
+    { "ijkinject-opaque",           "private data of user, passed with custom callback",
+        OFFSET(opaque),             IJKAV_OPTION_INT64(0, INT64_MIN, INT64_MAX) },
+    { "ijkinject-segment-index",    "segment index of current url",
+        OFFSET(segment_index),      IJKAV_OPTION_INT(0, 0, INT_MAX) },
+    { "ijkurlhook-test-fail-point", "test fail point, in bytes",
         OFFSET(test_fail_point),    IJKAV_OPTION_INT(0, 0, INT_MAX) },
     { NULL }
 };
@@ -140,17 +177,35 @@ static const AVOption options[] = {
 static const AVClass ijktcphook_context_class = {
     .class_name = "TcpHook",
     .item_name  = av_default_item_name,
-    .option     = options,
+    .option     = ijktcphook_options,
     .version    = LIBAVUTIL_VERSION_INT,
 };
 
 URLProtocol ijkff_ijktcphook_protocol = {
     .name                = "ijktcphook",
     .url_open2           = ijktcphook_open,
-    .url_read            = ijktcphook_read,
-    .url_write           = ijktcphook_write,
-    .url_seek            = ijktcphook_seek,
-    .url_close           = ijktcphook_close,
+    .url_read            = ijkurlhook_read,
+    .url_write           = ijkurlhook_write,
+    .url_seek            = ijkurlhook_seek,
+    .url_close           = ijkurlhook_close,
     .priv_data_size      = sizeof(Context),
     .priv_data_class     = &ijktcphook_context_class,
+};
+
+static const AVClass ijkhttphook_context_class = {
+    .class_name = "HttpHook",
+    .item_name  = av_default_item_name,
+    .option     = ijkhttphook_options,
+    .version    = LIBAVUTIL_VERSION_INT,
+};
+
+URLProtocol ijkff_ijkhttphook_protocol = {
+    .name                = "ijkhttphook",
+    .url_open2           = ijkhttphook_open,
+    .url_read            = ijkurlhook_read,
+    .url_write           = ijkurlhook_write,
+    .url_seek            = ijkurlhook_seek,
+    .url_close           = ijkurlhook_close,
+    .priv_data_size      = sizeof(Context),
+    .priv_data_class     = &ijkhttphook_context_class,
 };

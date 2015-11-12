@@ -933,25 +933,23 @@ static int onInjectTcpOpen(IJKFFMoviePlayerController *mpc, int type, void *data
     return 0;
 }
 
-static int onInjectHttpRetry(IJKFFMoviePlayerController *mpc, int type, void *data, size_t data_size)
+static int onInjectHttpOpen(IJKFFMoviePlayerController *mpc, int type, void *data, size_t data_size)
 {
     if (mpc == nil)
         return -1;
 
     IJKAVInject_OnUrlOpenData *realData = data;
     if (realData == NULL || sizeof(IJKAVInject_OnUrlOpenData) != data_size) {
-        NSLog(@"onInjectHttpRetry: invalid call\n");
+        NSLog(@"onInjectHttpOpen: invalid call\n");
         return -1;
     }
 
-    // always try first time
-    if (mpc.httpRetryDelegate == nil)
-        return realData->retry_counter ? -1 : 0;
+    // no retry
+    if (mpc.httpOpenDelegate == nil)
+        return 0;
 
     NSString *url = [NSString stringWithUTF8String:realData->url];
-    NSString *newUrl = [mpc.httpRetryDelegate onHttpRetry:realData->segment_index
-                                                      url:url
-                                               retryCount:realData->retry_counter];
+    NSString *newUrl = [mpc.httpOpenDelegate onHttpOpen:realData->segment_index url:url];
     if (newUrl == nil)
         return -1;
 
@@ -960,7 +958,7 @@ static int onInjectHttpRetry(IJKFFMoviePlayerController *mpc, int type, void *da
         strlcpy(realData->url, newUrlUTF8, sizeof(realData->url));
         realData->url[sizeof(realData->url) - 1] = 0;
     }
-
+    
     return 0;
 }
 
@@ -1006,8 +1004,8 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
             return onInjectConcatResolveSegment(mpc, message, data, data_size);
         case IJKAVINJECT_ON_TCP_OPEN:
             return onInjectTcpOpen(mpc, message, data, data_size);
-        case IJKAVINJECT_ON_HTTP_RETRY:
-            return onInjectHttpRetry(mpc, message, data, data_size);
+        case IJKAVINJECT_ON_HTTP_OPEN:
+            return onInjectHttpOpen(mpc, message, data, data_size);
         case IJKAVINJECT_ON_LIVE_RETRY:
             return onInjectLiveRetry(mpc, message, data, data_size);
         default: {
