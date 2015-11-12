@@ -112,7 +112,7 @@ void Method::_build_c_call_jni_statement(std::ostream &os, int flags)
         os << ", " << (*begin)->get_name();
     }
 
-    os << ");";
+    os << ")";
 }
 
 void Method::_build_c_func_name(std::ostream &os, int flags)
@@ -315,7 +315,7 @@ void Method::_build_c_func_impl_void_type_statement(std::ostream &os, int flags)
         os << "    "; _build_c_func_call_statement(os, flags & ~FLAG_CATCH_ALL); os << ";" << std::endl;
         os << "    JJK_ExceptionCheck__catchAll(env);" << std::endl;
     } else {
-        os << "    "; _build_c_call_jni_statement(os, flags); os << std::endl;
+        os << "    "; _build_c_call_jni_statement(os, flags); os << ";" << std::endl;
     }
     os << "}" << std::endl;
 }
@@ -445,7 +445,7 @@ void Method::_build_c_func_impl_reference_type_statement(std::ostream &os, int f
         os << std::endl;
         os << "    return ret_object;" << std::endl;
     } else {
-        os << "    return "; _build_c_call_jni_statement(os, flags); os << "\n";
+        os << "    return "; _build_c_call_jni_statement(os, flags); os << ";" << std::endl;
     }
     os << "}" << std::endl;
 }

@@ -69,7 +69,7 @@ fail:
 
 jint JJKC_Bundle__getInt(JNIEnv *env, jobject thiz, jstring key, jint defaultValue)
 {
-    return (*env)->CallIntMethod(env, thiz, class_JJKC_Bundle.method_getInt, key, defaultValue);;
+    return (*env)->CallIntMethod(env, thiz, class_JJKC_Bundle.method_getInt, key, defaultValue);
 }
 
 jint JJKC_Bundle__getInt__catchAll(JNIEnv *env, jobject thiz, jstring key, jint defaultValue)

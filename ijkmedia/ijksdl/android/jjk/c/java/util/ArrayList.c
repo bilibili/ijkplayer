@@ -65,7 +65,7 @@ fail:
 
 jboolean JJKC_ArrayList__add(JNIEnv *env, jobject thiz, jobject object)
 {
-    return (*env)->CallBooleanMethod(env, thiz, class_JJKC_ArrayList.method_add, object);;
+    return (*env)->CallBooleanMethod(env, thiz, class_JJKC_ArrayList.method_add, object);
 }
 
 jboolean JJKC_ArrayList__add__catchAll(JNIEnv *env, jobject thiz, jobject object)

@@ -51,7 +51,7 @@ static JJKC_MediaCodec class_JJKC_MediaCodec;
 
 jint JJKC_MediaCodec__BufferInfo__flags__get(JNIEnv *env, jobject thiz)
 {
-    return (*env)->GetIntField(env, thiz, class_JJKC_MediaCodec__BufferInfo.field_flags);;
+    return (*env)->GetIntField(env, thiz, class_JJKC_MediaCodec__BufferInfo.field_flags);
 }
 
 jint JJKC_MediaCodec__BufferInfo__flags__get__catchAll(JNIEnv *env, jobject thiz)
@@ -77,7 +77,7 @@ void JJKC_MediaCodec__BufferInfo__flags__set__catchAll(JNIEnv *env, jobject thiz
 
 jint JJKC_MediaCodec__BufferInfo__offset__get(JNIEnv *env, jobject thiz)
 {
-    return (*env)->GetIntField(env, thiz, class_JJKC_MediaCodec__BufferInfo.field_offset);;
+    return (*env)->GetIntField(env, thiz, class_JJKC_MediaCodec__BufferInfo.field_offset);
 }
 
 jint JJKC_MediaCodec__BufferInfo__offset__get__catchAll(JNIEnv *env, jobject thiz)
@@ -103,7 +103,7 @@ void JJKC_MediaCodec__BufferInfo__offset__set__catchAll(JNIEnv *env, jobject thi
 
 jlong JJKC_MediaCodec__BufferInfo__presentationTimeUs__get(JNIEnv *env, jobject thiz)
 {
-    return (*env)->GetLongField(env, thiz, class_JJKC_MediaCodec__BufferInfo.field_presentationTimeUs);;
+    return (*env)->GetLongField(env, thiz, class_JJKC_MediaCodec__BufferInfo.field_presentationTimeUs);
 }
 
 jlong JJKC_MediaCodec__BufferInfo__presentationTimeUs__get__catchAll(JNIEnv *env, jobject thiz)
@@ -129,7 +129,7 @@ void JJKC_MediaCodec__BufferInfo__presentationTimeUs__set__catchAll(JNIEnv *env,
 
 jint JJKC_MediaCodec__BufferInfo__size__get(JNIEnv *env, jobject thiz)
 {
-    return (*env)->GetIntField(env, thiz, class_JJKC_MediaCodec__BufferInfo.field_size);;
+    return (*env)->GetIntField(env, thiz, class_JJKC_MediaCodec__BufferInfo.field_size);
 }
 
 jint JJKC_MediaCodec__BufferInfo__size__get__catchAll(JNIEnv *env, jobject thiz)
@@ -420,7 +420,7 @@ fail:
 
 jint JJKC_MediaCodec__dequeueInputBuffer(JNIEnv *env, jobject thiz, jlong timeoutUs)
 {
-    return (*env)->CallIntMethod(env, thiz, class_JJKC_MediaCodec.method_dequeueInputBuffer, timeoutUs);;
+    return (*env)->CallIntMethod(env, thiz, class_JJKC_MediaCodec.method_dequeueInputBuffer, timeoutUs);
 }
 
 jint JJKC_MediaCodec__dequeueInputBuffer__catchAll(JNIEnv *env, jobject thiz, jlong timeoutUs)
@@ -446,7 +446,7 @@ void JJKC_MediaCodec__queueInputBuffer__catchAll(JNIEnv *env, jobject thiz, jint
 
 jint JJKC_MediaCodec__dequeueOutputBuffer(JNIEnv *env, jobject thiz, jobject info, jlong timeoutUs)
 {
-    return (*env)->CallIntMethod(env, thiz, class_JJKC_MediaCodec.method_dequeueOutputBuffer, info, timeoutUs);;
+    return (*env)->CallIntMethod(env, thiz, class_JJKC_MediaCodec.method_dequeueOutputBuffer, info, timeoutUs);
 }
 
 jint JJKC_MediaCodec__dequeueOutputBuffer__catchAll(JNIEnv *env, jobject thiz, jobject info, jlong timeoutUs)

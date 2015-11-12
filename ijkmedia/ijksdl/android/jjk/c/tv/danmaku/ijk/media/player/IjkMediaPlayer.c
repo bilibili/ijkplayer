@@ -34,7 +34,7 @@ static JJKC_IjkMediaPlayer class_JJKC_IjkMediaPlayer;
 
 jlong JJKC_IjkMediaPlayer__mNativeMediaPlayer__get(JNIEnv *env, jobject thiz)
 {
-    return (*env)->GetLongField(env, thiz, class_JJKC_IjkMediaPlayer.field_mNativeMediaPlayer);;
+    return (*env)->GetLongField(env, thiz, class_JJKC_IjkMediaPlayer.field_mNativeMediaPlayer);
 }
 
 jlong JJKC_IjkMediaPlayer__mNativeMediaPlayer__get__catchAll(JNIEnv *env, jobject thiz)
@@ -365,7 +365,7 @@ fail:
 
 jboolean JJKC_IjkMediaPlayer__onNativeInvoke(JNIEnv *env, jobject weakThiz, jint what, jobject args)
 {
-    return (*env)->CallStaticBooleanMethod(env, class_JJKC_IjkMediaPlayer.id, class_JJKC_IjkMediaPlayer.method_onNativeInvoke, weakThiz, what, args);;
+    return (*env)->CallStaticBooleanMethod(env, class_JJKC_IjkMediaPlayer.id, class_JJKC_IjkMediaPlayer.method_onNativeInvoke, weakThiz, what, args);
 }
 
 jboolean JJKC_IjkMediaPlayer__onNativeInvoke__catchAll(JNIEnv *env, jobject weakThiz, jint what, jobject args)

@@ -31,7 +31,7 @@ static JJKC_IMediaDataSource class_JJKC_IMediaDataSource;
 
 jint JJKC_IMediaDataSource__readAt(JNIEnv *env, jobject thiz, jlong position, jbyteArray buffer, jint offset, jint size)
 {
-    return (*env)->CallIntMethod(env, thiz, class_JJKC_IMediaDataSource.method_readAt, position, buffer, offset, size);;
+    return (*env)->CallIntMethod(env, thiz, class_JJKC_IMediaDataSource.method_readAt, position, buffer, offset, size);
 }
 
 jint JJKC_IMediaDataSource__readAt__catchAll(JNIEnv *env, jobject thiz, jlong position, jbyteArray buffer, jint offset, jint size)
@@ -46,7 +46,7 @@ jint JJKC_IMediaDataSource__readAt__catchAll(JNIEnv *env, jobject thiz, jlong po
 
 jlong JJKC_IMediaDataSource__getSize(JNIEnv *env, jobject thiz)
 {
-    return (*env)->CallLongMethod(env, thiz, class_JJKC_IMediaDataSource.method_getSize);;
+    return (*env)->CallLongMethod(env, thiz, class_JJKC_IMediaDataSource.method_getSize);
 }
 
 jlong JJKC_IMediaDataSource__getSize__catchAll(JNIEnv *env, jobject thiz)

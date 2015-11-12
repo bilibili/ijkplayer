@@ -163,7 +163,7 @@ fail:
 
 jint JJKC_MediaFormat__getInteger(JNIEnv *env, jobject thiz, jstring name)
 {
-    return (*env)->CallIntMethod(env, thiz, class_JJKC_MediaFormat.method_getInteger, name);;
+    return (*env)->CallIntMethod(env, thiz, class_JJKC_MediaFormat.method_getInteger, name);
 }
 
 jint JJKC_MediaFormat__getInteger__catchAll(JNIEnv *env, jobject thiz, jstring name)

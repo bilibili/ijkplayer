@@ -35,7 +35,7 @@ static JJKC_android_os_Build class_JJKC_android_os_Build;
 
 jint JJKC_android_os_Build__VERSION__SDK_INT__get(JNIEnv *env)
 {
-    return (*env)->GetStaticIntField(env, class_JJKC_android_os_Build__VERSION.id, class_JJKC_android_os_Build__VERSION.field_SDK_INT);;
+    return (*env)->GetStaticIntField(env, class_JJKC_android_os_Build__VERSION.id, class_JJKC_android_os_Build__VERSION.field_SDK_INT);
 }
 
 jint JJKC_android_os_Build__VERSION__SDK_INT__get__catchAll(JNIEnv *env)

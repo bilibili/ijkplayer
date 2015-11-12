@@ -76,7 +76,7 @@ fail:
 
 jint JJKC_AudioTrack__getMinBufferSize(JNIEnv *env, jint sampleRateInHz, jint channelConfig, jint audioFormat)
 {
-    return (*env)->CallStaticIntMethod(env, class_JJKC_AudioTrack.id, class_JJKC_AudioTrack.method_getMinBufferSize, sampleRateInHz, channelConfig, audioFormat);;
+    return (*env)->CallStaticIntMethod(env, class_JJKC_AudioTrack.id, class_JJKC_AudioTrack.method_getMinBufferSize, sampleRateInHz, channelConfig, audioFormat);
 }
 
 jint JJKC_AudioTrack__getMinBufferSize__catchAll(JNIEnv *env, jint sampleRateInHz, jint channelConfig, jint audioFormat)
@@ -91,7 +91,7 @@ jint JJKC_AudioTrack__getMinBufferSize__catchAll(JNIEnv *env, jint sampleRateInH
 
 jfloat JJKC_AudioTrack__getMaxVolume(JNIEnv *env)
 {
-    return (*env)->CallStaticFloatMethod(env, class_JJKC_AudioTrack.id, class_JJKC_AudioTrack.method_getMaxVolume);;
+    return (*env)->CallStaticFloatMethod(env, class_JJKC_AudioTrack.id, class_JJKC_AudioTrack.method_getMaxVolume);
 }
 
 jfloat JJKC_AudioTrack__getMaxVolume__catchAll(JNIEnv *env)
@@ -106,7 +106,7 @@ jfloat JJKC_AudioTrack__getMaxVolume__catchAll(JNIEnv *env)
 
 jfloat JJKC_AudioTrack__getMinVolume(JNIEnv *env)
 {
-    return (*env)->CallStaticFloatMethod(env, class_JJKC_AudioTrack.id, class_JJKC_AudioTrack.method_getMinVolume);;
+    return (*env)->CallStaticFloatMethod(env, class_JJKC_AudioTrack.id, class_JJKC_AudioTrack.method_getMinVolume);
 }
 
 jfloat JJKC_AudioTrack__getMinVolume__catchAll(JNIEnv *env)
@@ -121,7 +121,7 @@ jfloat JJKC_AudioTrack__getMinVolume__catchAll(JNIEnv *env)
 
 jint JJKC_AudioTrack__getNativeOutputSampleRate(JNIEnv *env, jint streamType)
 {
-    return (*env)->CallStaticIntMethod(env, class_JJKC_AudioTrack.id, class_JJKC_AudioTrack.method_getNativeOutputSampleRate, streamType);;
+    return (*env)->CallStaticIntMethod(env, class_JJKC_AudioTrack.id, class_JJKC_AudioTrack.method_getNativeOutputSampleRate, streamType);
 }
 
 jint JJKC_AudioTrack__getNativeOutputSampleRate__catchAll(JNIEnv *env, jint streamType)
@@ -191,7 +191,7 @@ void JJKC_AudioTrack__release__catchAll(JNIEnv *env, jobject thiz)
 
 jint JJKC_AudioTrack__write(JNIEnv *env, jobject thiz, jbyteArray audioData, jint offsetInBytes, jint sizeInBytes)
 {
-    return (*env)->CallIntMethod(env, thiz, class_JJKC_AudioTrack.method_write, audioData, offsetInBytes, sizeInBytes);;
+    return (*env)->CallIntMethod(env, thiz, class_JJKC_AudioTrack.method_write, audioData, offsetInBytes, sizeInBytes);
 }
 
 jint JJKC_AudioTrack__write__catchAll(JNIEnv *env, jobject thiz, jbyteArray audioData, jint offsetInBytes, jint sizeInBytes)
@@ -206,7 +206,7 @@ jint JJKC_AudioTrack__write__catchAll(JNIEnv *env, jobject thiz, jbyteArray audi
 
 jint JJKC_AudioTrack__setStereoVolume(JNIEnv *env, jobject thiz, jfloat leftGain, jfloat rightGain)
 {
-    return (*env)->CallIntMethod(env, thiz, class_JJKC_AudioTrack.method_setStereoVolume, leftGain, rightGain);;
+    return (*env)->CallIntMethod(env, thiz, class_JJKC_AudioTrack.method_setStereoVolume, leftGain, rightGain);
 }
 
 jint JJKC_AudioTrack__setStereoVolume__catchAll(JNIEnv *env, jobject thiz, jfloat leftGain, jfloat rightGain)
@@ -221,7 +221,7 @@ jint JJKC_AudioTrack__setStereoVolume__catchAll(JNIEnv *env, jobject thiz, jfloa
 
 jint JJKC_AudioTrack__getAudioSessionId(JNIEnv *env, jobject thiz)
 {
-    return (*env)->CallIntMethod(env, thiz, class_JJKC_AudioTrack.method_getAudioSessionId);;
+    return (*env)->CallIntMethod(env, thiz, class_JJKC_AudioTrack.method_getAudioSessionId);
 }
 
 jint JJKC_AudioTrack__getAudioSessionId__catchAll(JNIEnv *env, jobject thiz)
