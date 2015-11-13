@@ -655,7 +655,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 
     jni_set_media_player(env, thiz, mp);
     ijkmp_set_weak_thiz(mp, (*env)->NewGlobalRef(env, weak_this));
-    ijkmp_set_inject_opaque(mp, (*env)->NewGlobalRef(env, weak_this));
+    ijkmp_set_inject_opaque(mp, ijkmp_get_weak_thiz(mp));
     ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, (*env)->NewGlobalRef(env, weak_this));
 
 LABEL_RETURN:
