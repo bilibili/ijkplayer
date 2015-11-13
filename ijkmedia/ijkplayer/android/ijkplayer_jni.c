@@ -676,6 +676,7 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
     JNIEnv     *env     = NULL;
     jobject     jbundle = NULL;
     int         ret     = -1;
+    int         is_handled = 0;
     SDL_JNI_SetupThreadEnv(&env);
 
     jobject weak_thiz = (jobject) opaque;
@@ -689,6 +690,8 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
     case IJKAVINJECT_ON_HTTP_RETRY:
     case IJKAVINJECT_ON_LIVE_RETRY: {
         IJKAVInject_OnUrlOpenData *real_data = (IJKAVInject_OnUrlOpenData *) data;
+        real_data->is_handled = 0;
+
         jbundle = JJKC_Bundle__Bundle__catchAll(env);
         if (!jbundle) {
             ALOGE("%s: ASDK_Bundle__init failed\n", __func__);
@@ -699,7 +702,7 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
         JJKC_Bundle__putInt__withCString__catchAll(env, jbundle,     "segment_index", real_data->segment_index);
         JJKC_Bundle__putInt__withCString__catchAll(env, jbundle,     "retry_counter", real_data->retry_counter);
 
-        JJKC_IjkMediaPlayer__onNativeInvoke__catchAll(env, weak_thiz, what, jbundle);
+        is_handled = JJKC_IjkMediaPlayer__onNativeInvoke__catchAll(env, weak_thiz, what, jbundle);
         if (JJK_ExceptionCheck__catchAll(env))
             goto fail;
 
@@ -707,6 +710,7 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
         if (JJK_ExceptionCheck__catchAll(env))
             goto fail;
 
+        real_data->is_handled = is_handled;
         ret = 0;
         break;
     }
