@@ -186,8 +186,32 @@ static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDiction
         goto fail;
 
     ret = ijkurlhook_reconnect(h, NULL);
-    if (ret)
-        goto fail;
+    while (ret) {
+        switch (ret) {
+            case AVERROR_EXIT:
+                goto fail;
+        }
+
+        if (ff_check_interrupt(&h->interrupt_callback)) {
+            ret = AVERROR_EXIT;
+            goto fail;
+        }
+
+        ret = ijkurlhook_call_inject(h);
+        if (ret) {
+            ret = AVERROR_EXIT;
+            goto fail;
+        }
+
+        if (!c->inject_data.is_handled)
+            goto fail;
+
+        av_log(h, AV_LOG_INFO, "%s: will reconnect at start\n", __func__);
+        ret = ijkurlhook_reconnect(h, NULL);
+        av_log(h, AV_LOG_INFO, "%s: did reconnect at start: %d\n", __func__, ret);
+        if (ret)
+            c->inject_data.retry_counter++;
+    }
 
 fail:
     return ret;
