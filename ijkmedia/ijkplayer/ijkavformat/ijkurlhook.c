@@ -46,6 +46,7 @@ typedef struct Context {
     int64_t         opaque;
     int             segment_index;
     int64_t         test_fail_point;
+    int64_t         test_fail_point_next;
 } Context;
 
 static void *ijkinject_get_opaque(URLContext *h) {
@@ -112,6 +113,16 @@ fail:
     return ret;
 }
 
+static int ijkhttphook_reconnect_at(URLContext *h, int64_t offset)
+{
+    AVDictionary *extra_opts = NULL;
+
+    av_dict_set_int(&extra_opts, "offset", offset, 0);
+    int ret = ijkurlhook_reconnect(h, extra_opts);
+    av_dict_free(&extra_opts);
+    return ret;
+}
+
 static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
 {
     Context *c = h->priv_data;
@@ -120,6 +131,7 @@ static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictiona
     av_strstart(arg, c->scheme, &arg);
 
     c->inner_flags = flags;
+    c->test_fail_point_next = c->test_fail_point;
 
     if (options)
         av_dict_copy(&c->inner_options, *options, 0);
@@ -128,6 +140,7 @@ static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictiona
 
     c->inject_data.size = sizeof(c->inject_data);
     c->inject_data.segment_index = c->segment_index;
+    c->inject_data.retry_counter = 0;
 
     if (av_strstart(arg, c->inner_scheme, NULL)) {
         snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s", arg);
@@ -180,8 +193,11 @@ static int ijkurlhook_read(URLContext *h, unsigned char *buf, int size)
 
     if (ret > 0) {
         c->logical_pos += ret;
-        if (c->test_fail_point > 0 && c->logical_pos >= c->test_fail_point)
+        if (c->test_fail_point_next > 0 && c->logical_pos >= c->test_fail_point_next) {
+            av_log(h, AV_LOG_ERROR, "test fail point:%"PRId64"\n", c->test_fail_point_next);
+            c->test_fail_point_next += c->test_fail_point;
             return AVERROR(EIO);
+        }
     }
 
     return ret;
@@ -207,11 +223,43 @@ static int64_t ijkurlhook_seek(URLContext *h, int64_t pos, int whence)
     return seek_ret;
 }
 
+static int ijkhttphook_read(URLContext *h, unsigned char *buf, int size)
+{
+    Context *c = h->priv_data;
+    int ret = 0;
+    int read_ret = AVERROR(EIO);
+
+    c->inject_data.retry_counter = 0;
+
+    read_ret = ijkurlhook_read(h, buf, size);
+    while (read_ret < 0 && !h->is_streamed && c->logical_pos < c->logical_size) {
+        c->inject_data.retry_counter++;
+        ret = ijkurlhook_call_inject(h);
+        if (ret)
+            goto fail;
+
+        if (!c->inject_data.is_handled)
+            goto fail;
+
+        av_log(h, AV_LOG_INFO, "%s: will reconnect at%"PRId64"\n", __func__, c->logical_pos);
+        ret = ijkhttphook_reconnect_at(h, c->logical_pos);
+        av_log(h, AV_LOG_INFO, "%s: did reconnect at%"PRId64": %d\n", __func__, c->logical_pos, ret);
+        if (ret)
+            continue;
+
+        read_ret = ijkurlhook_read(h, buf, size);
+    }
+
+fail:
+    return read_ret;
+}
+
 static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
 {
     Context *c = h->priv_data;
     int ret = 0;
-    AVDictionary *extra_opts = NULL;
+
+    c->inject_data.retry_counter = 0;
 
     if (whence == AVSEEK_SIZE)
         return c->logical_size;
@@ -237,15 +285,24 @@ static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
     if (pos < 0)
         return AVERROR(EINVAL);
 
-    av_dict_set_int(&extra_opts, "offset", pos, 0);
-    ret = ijkurlhook_reconnect(h, extra_opts);
-    if (ret)
-        goto fail;
+    ret = ijkhttphook_reconnect_at(h, pos);
+    while (ret) {
+        ret = ijkurlhook_call_inject(h);
+        if (ret)
+            goto fail;
 
-    av_dict_free(&extra_opts);
+        if (!c->inject_data.is_handled)
+            goto fail;
+
+        av_log(h, AV_LOG_INFO, "%s: will reconnect at%"PRId64"\n", __func__, c->logical_pos);
+        ret = ijkhttphook_reconnect_at(h, c->logical_pos);
+        av_log(h, AV_LOG_INFO, "%s: did reconnect at%"PRId64": %d\n", __func__, c->logical_pos, ret);
+        if (ret)
+            c->inject_data.retry_counter++;
+    }
+
     return c->logical_pos;
 fail:
-    av_dict_free(&extra_opts);
     return ret;
 }
 
@@ -293,7 +350,7 @@ static const AVClass ijkhttphook_context_class = {
 URLProtocol ijkff_ijkhttphook_protocol = {
     .name                = "ijkhttphook",
     .url_open2           = ijkhttphook_open,
-    .url_read            = ijkurlhook_read,
+    .url_read            = ijkhttphook_read,
     .url_write           = ijkurlhook_write,
     .url_seek            = ijkhttphook_seek,
     .url_close           = ijkurlhook_close,
