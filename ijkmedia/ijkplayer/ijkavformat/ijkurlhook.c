@@ -60,17 +60,16 @@ static void *ijkinject_get_opaque(URLContext *h) {
 #endif
 }
 
-static int ijkurlhook_reconnect(URLContext *h)
+static int ijkurlhook_call_inject(URLContext *h)
 {
     Context *c = h->priv_data;
     IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
     void *opaque = ijkinject_get_opaque(h);
     int ret = 0;
-    URLContext *new_url = NULL;
-    AVDictionary *inner_options = NULL;
 
     if (opaque && inject_callback) {
         av_log(h, AV_LOG_INFO, "url-hook %s\n", c->inject_data.url);
+        c->inject_data.is_handled = 0;
         ret = inject_callback(opaque, c->open_callback_id, &c->inject_data, sizeof(c->inject_data));
         if (ret || !c->inject_data.url[0]) {
             ret = AVERROR_EXIT;
@@ -78,8 +77,21 @@ static int ijkurlhook_reconnect(URLContext *h)
         }
     }
 
+fail:
+    return ret;
+}
+
+static int ijkurlhook_reconnect(URLContext *h, AVDictionary *extra)
+{
+    Context *c = h->priv_data;
+    int ret = 0;
+    URLContext *new_url = NULL;
+    AVDictionary *inner_options = NULL;
+
     assert(c->inner_options);
     av_dict_copy(&inner_options, c->inner_options, 0);
+    if (extra)
+        av_dict_copy(&inner_options, extra, 0);
 
     ret = ffurl_open(&new_url, c->inject_data.url, c->inner_flags, &h->interrupt_callback, &inner_options);
     if (ret)
@@ -87,9 +99,14 @@ static int ijkurlhook_reconnect(URLContext *h)
 
     ffurl_closep(&c->inner);
 
-    c->inner = new_url;
-    c->logical_size = ffurl_seek(c->inner, 0, AVSEEK_SIZE);
+    c->inner        = new_url;
     h->is_streamed  = c->inner->is_streamed;
+    c->logical_pos  = ffurl_seek(c->inner, 0, SEEK_CUR);
+    if (c->inner->is_streamed)
+        c->logical_size = -1;
+    else
+        c->logical_size = ffurl_seek(c->inner, 0, AVSEEK_SIZE);
+    
 fail:
     av_dict_free(&inner_options);
     return ret;
@@ -98,6 +115,7 @@ fail:
 static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
 {
     Context *c = h->priv_data;
+    int ret = 0;
 
     av_strstart(arg, c->scheme, &arg);
 
@@ -110,16 +128,23 @@ static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictiona
 
     c->inject_data.size = sizeof(c->inject_data);
     c->inject_data.segment_index = c->segment_index;
-    strlcpy(c->inject_data.url, arg, sizeof(c->inject_data.url));
 
     if (av_strstart(arg, c->inner_scheme, NULL)) {
-        snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s", c->inject_data.url);
+        snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s", arg);
     } else {
-        snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s%s", c->inner_scheme, c->inject_data.url);
+        snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s%s", c->inner_scheme, arg);
     }
-    snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s%s", c->inner_scheme, arg);
 
-    return ijkurlhook_reconnect(h);
+    ret = ijkurlhook_call_inject(h);
+    if (ret)
+        goto fail;
+
+    ret = ijkurlhook_reconnect(h, NULL);
+    if (ret)
+        goto fail;
+
+fail:
+    return ret;
 }
 
 static int ijktcphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
@@ -172,8 +197,56 @@ static int ijkurlhook_write(URLContext *h, const unsigned char *buf, int size)
 static int64_t ijkurlhook_seek(URLContext *h, int64_t pos, int whence)
 {
     Context *c = h->priv_data;
+    int64_t seek_ret = 0;
 
-    return ffurl_seek(c->inner, pos, whence);
+    seek_ret = ffurl_seek(c->inner, pos, whence);
+    if (seek_ret < 0)
+        return seek_ret;
+
+    c->logical_pos = seek_ret;
+    return seek_ret;
+}
+
+static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
+{
+    Context *c = h->priv_data;
+    int ret = 0;
+    AVDictionary *extra_opts = NULL;
+
+    if (whence == AVSEEK_SIZE)
+        return c->logical_size;
+    else if ((whence == SEEK_CUR && pos == 0) ||
+             (whence == SEEK_SET && pos == c->logical_pos))
+        return c->logical_pos;
+    else if ((c->logical_size < 0 && whence == SEEK_END) || h->is_streamed)
+        return AVERROR(ENOSYS);
+
+    ret = ijkurlhook_call_inject(h);
+    if (ret)
+        goto fail;
+
+    if (!c->inject_data.is_handled)
+        return ijkurlhook_seek(c->inner, pos, whence);
+
+    if (whence == SEEK_CUR)
+        pos += c->logical_pos;
+    else if (whence == SEEK_END)
+        pos += c->logical_size;
+    else if (whence != SEEK_SET)
+        return AVERROR(EINVAL);
+    if (pos < 0)
+        return AVERROR(EINVAL);
+
+    av_dict_set_int(&extra_opts, "offset", pos, 0);
+    ret = ijkurlhook_reconnect(h, extra_opts);
+    if (ret)
+        goto fail;
+
+    av_dict_free(&extra_opts);
+    return c->logical_pos;
+fail:
+    av_dict_free(&extra_opts);
+    return ret;
 }
 
 #define OFFSET(x) offsetof(Context, x)
@@ -222,7 +295,7 @@ URLProtocol ijkff_ijkhttphook_protocol = {
     .url_open2           = ijkhttphook_open,
     .url_read            = ijkurlhook_read,
     .url_write           = ijkurlhook_write,
-    .url_seek            = ijkurlhook_seek,
+    .url_seek            = ijkhttphook_seek,
     .url_close           = ijkurlhook_close,
     .priv_data_size      = sizeof(Context),
     .priv_data_class     = &ijkhttphook_context_class,
