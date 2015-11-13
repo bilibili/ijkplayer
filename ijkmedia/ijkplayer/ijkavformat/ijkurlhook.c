@@ -116,7 +116,7 @@ static int ijkhttphook_reconnect_at(URLContext *h, int64_t offset)
     return ret;
 }
 
-static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
+static int ijkurlhook_init(URLContext *h, const char *arg, int flags, AVDictionary **options)
 {
     Context *c = h->priv_data;
     int ret = 0;
@@ -141,6 +141,21 @@ static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictiona
         snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s%s", c->inner_scheme, arg);
     }
 
+    return ret;
+}
+
+static int ijktcphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
+{
+    Context *c = h->priv_data;
+    int ret = 0;
+
+    c->scheme = "ijktcphook:";
+    c->inner_scheme = "tcp:";
+    c->open_callback_id = IJKAVINJECT_ON_TCP_OPEN;
+    ret = ijkurlhook_init(h, arg, flags, options);
+    if (ret)
+        goto fail;
+
     ret = ijkurlhook_call_inject(h);
     if (ret)
         goto fail;
@@ -153,22 +168,29 @@ fail:
     return ret;
 }
 
-static int ijktcphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
-{
-    Context *c = h->priv_data;
-    c->scheme = "ijktcphook:";
-    c->inner_scheme = "tcp:";
-    c->open_callback_id = IJKAVINJECT_ON_TCP_OPEN;
-    return ijkurlhook_open(h, arg, flags, options);
-}
-
 static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
 {
     Context *c = h->priv_data;
+    int ret = 0;
+
     c->scheme = "ijkhttphook:";
     c->inner_scheme = "http:";
     c->open_callback_id = IJKAVINJECT_ON_HTTP_OPEN;
-    return ijkurlhook_open(h, arg, flags, options);
+
+    ret = ijkurlhook_init(h, arg, flags, options);
+    if (ret)
+        goto fail;
+
+    ret = ijkurlhook_call_inject(h);
+    if (ret)
+        goto fail;
+
+    ret = ijkurlhook_reconnect(h, NULL);
+    if (ret)
+        goto fail;
+
+fail:
+    return ret;
 }
 
 static int ijkurlhook_close(URLContext *h)
