@@ -32,7 +32,6 @@ typedef struct Context {
     AVClass        *class;
     URLContext     *inner;
 
-    char           *inner_url;
     int64_t         logical_pos;
     int64_t         logical_size;
 
@@ -61,12 +60,13 @@ static void *ijkinject_get_opaque(URLContext *h) {
 #endif
 }
 
-static int ijkurlhook_connect(URLContext *h)
+static int ijkurlhook_reconnect(URLContext *h)
 {
     Context *c = h->priv_data;
     IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
     void *opaque = ijkinject_get_opaque(h);
     int ret = 0;
+    URLContext *new_url = NULL;
     AVDictionary *inner_options = NULL;
 
     if (opaque && inject_callback) {
@@ -81,10 +81,13 @@ static int ijkurlhook_connect(URLContext *h)
     assert(c->inner_options);
     av_dict_copy(&inner_options, c->inner_options, 0);
 
-    ret = ffurl_open(&c->inner, c->inject_data.url, c->inner_flags, &h->interrupt_callback, &inner_options);
+    ret = ffurl_open(&new_url, c->inject_data.url, c->inner_flags, &h->interrupt_callback, &inner_options);
     if (ret)
         goto fail;
 
+    ffurl_closep(&c->inner);
+
+    c->inner = new_url;
     c->logical_size = ffurl_seek(c->inner, 0, AVSEEK_SIZE);
     h->is_streamed  = c->inner->is_streamed;
 fail:
@@ -116,7 +119,7 @@ static int ijkurlhook_open(URLContext *h, const char *arg, int flags, AVDictiona
     }
     snprintf(c->inject_data.url, sizeof(c->inject_data.url), "%s%s", c->inner_scheme, arg);
 
-    return ijkurlhook_connect(h);
+    return ijkurlhook_reconnect(h);
 }
 
 static int ijktcphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
@@ -142,7 +145,7 @@ static int ijkurlhook_close(URLContext *h)
     Context *c = h->priv_data;
 
     av_dict_free(&c->inner_options);
-    return ffurl_close(c->inner);
+    return ffurl_closep(&c->inner);
 }
 
 static int ijkurlhook_read(URLContext *h, unsigned char *buf, int size)
