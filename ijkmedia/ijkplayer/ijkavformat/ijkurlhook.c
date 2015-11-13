@@ -46,9 +46,7 @@ typedef struct Context {
     AVDictionary   *inner_options;
     int64_t         opaque;
     int             segment_index;
-#ifdef DEBUG
     int64_t         test_fail_point;
-#endif
 } Context;
 
 static void *ijkinject_get_opaque(URLContext *h) {
@@ -154,10 +152,8 @@ static int ijkurlhook_read(URLContext *h, unsigned char *buf, int size)
 
     if (ret > 0) {
         c->logical_pos += ret;
-#ifdef DEBUG
         if (c->test_fail_point > 0 && c->logical_pos >= c->test_fail_point)
             return AVERROR(EIO);
-#endif
     }
 
     return ret;
@@ -180,27 +176,13 @@ static int64_t ijkurlhook_seek(URLContext *h, int64_t pos, int whence)
 #define OFFSET(x) offsetof(Context, x)
 #define D AV_OPT_FLAG_DECODING_PARAM
 
-static const AVOption ijktcphook_options[] = {
+static const AVOption ijkurlhook_options[] = {
     { "ijkinject-opaque",           "private data of user, passed with custom callback",
         OFFSET(opaque),             IJKAV_OPTION_INT64(0, INT64_MIN, INT64_MAX) },
     { "ijkinject-segment-index",    "segment index of current url",
         OFFSET(segment_index),      IJKAV_OPTION_INT(0, 0, INT_MAX) },
-#ifdef DEBUG
     { "ijkurlhook-test-fail-point", "test fail point, in bytes",
         OFFSET(test_fail_point),    IJKAV_OPTION_INT(0, 0, INT_MAX) },
-#endif
-    { NULL }
-};
-
-static const AVOption ijkhttphook_options[] = {
-    { "ijkinject-opaque",           "private data of user, passed with custom callback",
-        OFFSET(opaque),             IJKAV_OPTION_INT64(0, INT64_MIN, INT64_MAX) },
-    { "ijkinject-segment-index",    "segment index of current url",
-        OFFSET(segment_index),      IJKAV_OPTION_INT(0, 0, INT_MAX) },
-#ifdef DEBUG
-    { "ijkurlhook-test-fail-point", "test fail point, in bytes",
-        OFFSET(test_fail_point),    IJKAV_OPTION_INT(0, 0, INT_MAX) },
-#endif
     { NULL }
 };
 
@@ -210,7 +192,7 @@ static const AVOption ijkhttphook_options[] = {
 static const AVClass ijktcphook_context_class = {
     .class_name = "TcpHook",
     .item_name  = av_default_item_name,
-    .option     = ijktcphook_options,
+    .option     = ijkurlhook_options,
     .version    = LIBAVUTIL_VERSION_INT,
 };
 
@@ -228,7 +210,7 @@ URLProtocol ijkff_ijktcphook_protocol = {
 static const AVClass ijkhttphook_context_class = {
     .class_name = "HttpHook",
     .item_name  = av_default_item_name,
-    .option     = ijkhttphook_options,
+    .option     = ijkurlhook_options,
     .version    = LIBAVUTIL_VERSION_INT,
 };
 
