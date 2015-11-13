@@ -61,6 +61,11 @@ static int ijkurlhook_call_inject(URLContext *h)
     void *opaque = ijkinject_get_opaque(h);
     int ret = 0;
 
+    if (ff_check_interrupt(&h->interrupt_callback)) {
+        ret = AVERROR_EXIT;
+        goto fail;
+    }
+
     if (opaque && inject_callback) {
         av_log(h, AV_LOG_INFO, "url-hook %s\n", c->inject_data.url);
         c->inject_data.is_handled = 0;
@@ -69,6 +74,11 @@ static int ijkurlhook_call_inject(URLContext *h)
             ret = AVERROR_EXIT;
             goto fail;
         }
+    }
+
+    if (ff_check_interrupt(&h->interrupt_callback)) {
+        ret = AVERROR_EXIT;
+        goto fail;
     }
 
 fail:
@@ -192,11 +202,7 @@ static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDiction
                 goto fail;
         }
 
-        if (ff_check_interrupt(&h->interrupt_callback)) {
-            ret = AVERROR_EXIT;
-            goto fail;
-        }
-
+        c->inject_data.retry_counter++;
         ret = ijkurlhook_call_inject(h);
         if (ret) {
             ret = AVERROR_EXIT;
@@ -280,11 +286,6 @@ static int ijkhttphook_read(URLContext *h, unsigned char *buf, int size)
                 goto fail;
         }
 
-        if (ff_check_interrupt(&h->interrupt_callback)) {
-            read_ret = AVERROR_EXIT;
-            goto fail;
-        }
-
         c->inject_data.retry_counter++;
         ret = ijkurlhook_call_inject(h);
         if (ret) {
@@ -346,11 +347,6 @@ static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
                 goto fail;
         }
 
-        if (ff_check_interrupt(&h->interrupt_callback)) {
-            ret = AVERROR_EXIT;
-            goto fail;
-        }
-
         ret = ijkurlhook_call_inject(h);
         if (ret) {
             ret = AVERROR_EXIT;
@@ -363,8 +359,8 @@ static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
         av_log(h, AV_LOG_INFO, "%s: will reconnect at %"PRId64"\n", __func__, c->logical_pos);
         ret = ijkhttphook_reconnect_at(h, c->logical_pos);
         av_log(h, AV_LOG_INFO, "%s: did reconnect at %"PRId64": %d\n", __func__, c->logical_pos, ret);
-        if (ret)
-            c->inject_data.retry_counter++;
+
+        c->inject_data.retry_counter++;
     }
 
     if (c->test_fail_point)
