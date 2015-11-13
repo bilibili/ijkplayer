@@ -51,14 +51,7 @@ typedef struct Context {
 
 static void *ijkinject_get_opaque(URLContext *h) {
     Context *c = h->priv_data;
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
-#endif
-    return (void *)c->opaque;
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
+    return (void *) (intptr_t) c->opaque;
 }
 
 static int ijkurlhook_call_inject(URLContext *h)
@@ -236,10 +229,22 @@ static int ijkhttphook_read(URLContext *h, unsigned char *buf, int size)
 
     read_ret = ijkurlhook_read(h, buf, size);
     while (read_ret < 0 && !h->is_streamed && c->logical_pos < c->logical_size) {
+        switch (read_ret) {
+            case AVERROR_EXIT:
+                goto fail;
+        }
+
+        if (ff_check_interrupt(&h->interrupt_callback)) {
+            read_ret = AVERROR_EXIT;
+            goto fail;
+        }
+
         c->inject_data.retry_counter++;
         ret = ijkurlhook_call_inject(h);
-        if (ret)
+        if (ret) {
+            read_ret = AVERROR_EXIT;
             goto fail;
+        }
 
         if (!c->inject_data.is_handled)
             goto fail;
@@ -290,9 +295,21 @@ static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
 
     ret = ijkhttphook_reconnect_at(h, pos);
     while (ret) {
-        ret = ijkurlhook_call_inject(h);
-        if (ret)
+        switch (ret) {
+            case AVERROR_EXIT:
+                goto fail;
+        }
+
+        if (ff_check_interrupt(&h->interrupt_callback)) {
+            ret = AVERROR_EXIT;
             goto fail;
+        }
+
+        ret = ijkurlhook_call_inject(h);
+        if (ret) {
+            ret = AVERROR_EXIT;
+            goto fail;
+        }
 
         if (!c->inject_data.is_handled)
             goto fail;
