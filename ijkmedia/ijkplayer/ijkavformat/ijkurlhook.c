@@ -221,6 +221,8 @@ static int64_t ijkurlhook_seek(URLContext *h, int64_t pos, int whence)
         return seek_ret;
 
     c->logical_pos = seek_ret;
+    if (c->test_fail_point)
+        c->test_fail_point_next = c->logical_pos + c->test_fail_point;
     return seek_ret;
 }
 
@@ -302,6 +304,8 @@ static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
             c->inject_data.retry_counter++;
     }
 
+    if (c->test_fail_point)
+        c->test_fail_point_next = c->logical_pos + c->test_fail_point;
     return c->logical_pos;
 fail:
     return ret;
