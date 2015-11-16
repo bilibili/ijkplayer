@@ -16,16 +16,16 @@ allprojects {
 
 dependencies {
     # required, enough for most devices.
-    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.4.3.9'
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.4.3.9'
+    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.4.3.10'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.4.3.10'
 
     # Other ABIs: optional
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.4.3.9'
-    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.4.3.9'
-    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.4.3.9'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.4.3.10'
+    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.4.3.10'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.4.3.10'
 
     # ExoPlayer as IMediaPlayer: optional, experimental
-    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.4.3.9'
+    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.4.3.10'
 }
 ```
 - iOS
@@ -135,7 +135,7 @@ sudo dpkg-reconfigure dash
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest k0.4.3.9
+git checkout -B latest k0.4.3.10
 
 ./init-android.sh
 
@@ -175,7 +175,7 @@ cd ..
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
-git checkout -B latest k0.4.3.9
+git checkout -B latest k0.4.3.10
 
 ./init-ios.sh
 
