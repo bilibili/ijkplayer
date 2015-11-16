@@ -88,15 +88,13 @@ afterEvaluate { project ->
         }
     }
 
-/*
     signing {
-        required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+        required { isReleaseBuild() && (gradle.taskGraph.hasTask("uploadArchives") || gradle.taskGraph.hasTask("bintrayUpload")) }
         sign configurations.archives
     }
- */
 
     task androidJavadocs(type: Javadoc) {
-        // failOnError false
+        failOnError false
         source = android.sourceSets.main.java.srcDirs
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     }
