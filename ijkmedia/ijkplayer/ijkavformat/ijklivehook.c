@@ -115,8 +115,9 @@ static int copy_stream_props(AVStream *st, AVStream *source_st)
 
 static int open_inner(AVFormatContext *avf)
 {
-    Context      *c         = avf->priv_data;
-    AVDictionary *tmp_opts  = NULL;
+    Context         *c          = avf->priv_data;
+    AVDictionary    *tmp_opts   = NULL;
+    AVFormatContext *new_avf    = NULL;
     int ret = -1;
     int i   = 0;
 
@@ -126,10 +127,8 @@ static int open_inner(AVFormatContext *avf)
         goto fail;
     }
 
-    avformat_close_input(&c->inner);
-
-    c->inner = avformat_alloc_context();
-    if (!c->inner) {
+    new_avf = avformat_alloc_context();
+    if (!new_avf) {
         ret = AVERROR(ENOMEM);
         goto fail;
     }
@@ -137,32 +136,34 @@ static int open_inner(AVFormatContext *avf)
     if (c->open_opts)
         av_dict_copy(&tmp_opts, c->open_opts, 0);
 
-    c->inner->interrupt_callback = avf->interrupt_callback;
-    ret = avformat_open_input(&c->inner, c->inject_data.url, NULL, &tmp_opts);
+    new_avf->interrupt_callback = avf->interrupt_callback;
+    ret = avformat_open_input(&new_avf, c->inject_data.url, NULL, &tmp_opts);
     if (ret < 0)
         goto fail;
 
-    ret = avformat_find_stream_info(c->inner, NULL);
+    ret = avformat_find_stream_info(new_avf, NULL);
     if (ret < 0)
         goto fail;
 
-    for (i = 0; i < c->inner->nb_streams; i++) {
+    for (i = 0; i < new_avf->nb_streams; i++) {
         AVStream *st = avformat_new_stream(avf, NULL);
         if (!st) {
             ret = AVERROR(ENOMEM);
             goto fail;
         }
 
-        ret = copy_stream_props(st, c->inner->streams[i]);
+        ret = copy_stream_props(st, new_avf->streams[i]);
         if (ret < 0)
             goto fail;
     }
 
-    av_dict_free(&tmp_opts);
-    return 0;
+    avformat_close_input(&c->inner);
+    c->inner = new_avf;
+    new_avf = NULL;
+    ret = 0;
 fail:
     av_dict_free(&tmp_opts);
-    avformat_close_input(&c->inner);
+    avformat_close_input(&new_avf);
     return ret;
 }
 
