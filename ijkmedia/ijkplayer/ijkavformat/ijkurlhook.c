@@ -87,6 +87,8 @@ static int ijkurlhook_reconnect(URLContext *h, AVDictionary *extra)
     URLContext *new_url = NULL;
     AVDictionary *inner_options = NULL;
 
+    c->test_fail_point_next += c->test_fail_point;
+
     assert(c->inner_options);
     av_dict_copy(&inner_options, c->inner_options, 0);
     if (extra)
@@ -119,7 +121,6 @@ static int ijkurlhook_init(URLContext *h, const char *arg, int flags, AVDictiona
     av_strstart(arg, c->scheme, &arg);
 
     c->inner_flags = flags;
-    c->test_fail_point_next = c->test_fail_point;
 
     if (options)
         av_dict_copy(&c->inner_options, *options, 0);
@@ -178,7 +179,6 @@ static int ijkurlhook_read(URLContext *h, unsigned char *buf, int size)
 
     if (c->test_fail_point_next > 0 && c->logical_pos >= c->test_fail_point_next) {
         av_log(h, AV_LOG_ERROR, "test fail point:%"PRId64"\n", c->test_fail_point_next);
-        c->test_fail_point_next += c->test_fail_point;
         return AVERROR(EIO);
     }
 
