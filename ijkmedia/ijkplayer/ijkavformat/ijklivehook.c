@@ -294,4 +294,3 @@ AVInputFormat ijkff_ijklivehook_demuxer = {
     .read_close     = ijklivehook_read_close,
     .priv_class     = &ijklivehook_class,
 };
-
