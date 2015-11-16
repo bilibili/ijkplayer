@@ -121,12 +121,6 @@ static int open_inner(AVFormatContext *avf)
     int ret = -1;
     int i   = 0;
 
-    ret = ijkurlhook_call_inject(avf);
-    if (ret) {
-        ret = AVERROR_EXIT;
-        goto fail;
-    }
-
     new_avf = avformat_alloc_context();
     if (!new_avf) {
         ret = AVERROR(ENOMEM);
