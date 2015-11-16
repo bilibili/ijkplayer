@@ -62,13 +62,22 @@ static int ijkurlhook_call_inject(URLContext *h)
     }
 
     if (opaque && inject_callback) {
-        av_log(h, AV_LOG_INFO, "%s %s\n", h->prot->name, c->inject_data.url);
+        IJKAVInject_OnUrlOpenData inject_data_backup = c->inject_data;
+
         c->inject_data.is_handled = 0;
+        c->inject_data.is_url_changed = 0;
         ret = inject_callback(opaque, c->open_callback_id, &c->inject_data, sizeof(c->inject_data));
         if (ret || !c->inject_data.url[0]) {
             ret = AVERROR_EXIT;
             goto fail;
         }
+
+        if (!c->inject_data.is_url_changed && strcmp(inject_data_backup.url, c->inject_data.url)) {
+            // force a url compare
+            c->inject_data.is_url_changed = 1;
+        }
+
+        av_log(h, AV_LOG_INFO, "%s %s (%s)\n", h->prot->name, c->inject_data.url, c->inject_data.is_url_changed ? "changed" : "remain");
     }
 
     if (ff_check_interrupt(&h->interrupt_callback)) {
@@ -291,9 +300,9 @@ static int ijkhttphook_read(URLContext *h, unsigned char *buf, int size)
         if (!c->inject_data.is_handled)
             goto fail;
 
-        av_log(h, AV_LOG_INFO, "%s: will reconnect at %"PRId64"\n", __func__, c->logical_pos);
+        av_log(h, AV_LOG_INFO, "%s: will reconnect(%d) at %"PRId64"\n", __func__, c->inject_data.retry_counter, c->logical_pos);
         ret = ijkhttphook_reconnect_at(h, c->logical_pos);
-        av_log(h, AV_LOG_INFO, "%s: did reconnect at %"PRId64": %d\n", __func__, c->logical_pos, ret);
+        av_log(h, AV_LOG_INFO, "%s: did reconnect(%d) at %"PRId64": %d\n", __func__, c->inject_data.retry_counter, c->logical_pos, ret);
         if (ret)
             continue;
 
@@ -304,27 +313,13 @@ fail:
     return read_ret;
 }
 
-static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
+static int64_t ijkhttphook_reseek_at(URLContext *h, int64_t pos, int whence, int force_reconnect)
 {
     Context *c = h->priv_data;
     int ret = 0;
 
-    c->inject_data.retry_counter = 0;
-
-    if (whence == AVSEEK_SIZE)
-        return c->logical_size;
-    else if ((whence == SEEK_CUR && pos == 0) ||
-             (whence == SEEK_SET && pos == c->logical_pos))
-        return c->logical_pos;
-    else if ((c->logical_size < 0 && whence == SEEK_END) || h->is_streamed)
-        return AVERROR(ENOSYS);
-
-    ret = ijkurlhook_call_inject(h);
-    if (ret)
-        goto fail;
-
-    if (!c->inject_data.is_handled)
-        return ijkurlhook_seek(c->inner, pos, whence);
+    if (!force_reconnect)
+        return ijkurlhook_seek(h, pos, whence);
 
     if (whence == SEEK_CUR)
         pos += c->logical_pos;
@@ -336,12 +331,42 @@ static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
         return AVERROR(EINVAL);
 
     ret = ijkhttphook_reconnect_at(h, pos);
-    while (ret) {
-        switch (ret) {
+    if (ret)
+        return ret;
+
+    return c->logical_pos;
+}
+
+static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
+{
+    Context *c = h->priv_data;
+    int     ret      = 0;
+    int64_t seek_ret = -1;
+
+    if (whence == AVSEEK_SIZE)
+        return c->logical_size;
+    else if ((whence == SEEK_CUR && pos == 0) ||
+             (whence == SEEK_SET && pos == c->logical_pos))
+        return c->logical_pos;
+    else if ((c->logical_size < 0 && whence == SEEK_END) || h->is_streamed)
+        return AVERROR(ENOSYS);
+
+    c->inject_data.retry_counter = 0;
+    ret = ijkurlhook_call_inject(h);
+    if (ret) {
+        ret = AVERROR_EXIT;
+        goto fail;
+    }
+
+    seek_ret = ijkhttphook_reseek_at(h, pos, whence, c->inject_data.is_url_changed);
+    while (seek_ret < 0) {
+        switch (seek_ret) {
             case AVERROR_EXIT:
+            case AVERROR_EOF:
                 goto fail;
         }
 
+        c->inject_data.retry_counter++;
         ret = ijkurlhook_call_inject(h);
         if (ret) {
             ret = AVERROR_EXIT;
@@ -351,11 +376,9 @@ static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
         if (!c->inject_data.is_handled)
             goto fail;
 
-        av_log(h, AV_LOG_INFO, "%s: will reconnect at %"PRId64"\n", __func__, c->logical_pos);
-        ret = ijkhttphook_reconnect_at(h, c->logical_pos);
-        av_log(h, AV_LOG_INFO, "%s: did reconnect at %"PRId64": %d\n", __func__, c->logical_pos, ret);
-
-        c->inject_data.retry_counter++;
+        av_log(h, AV_LOG_INFO, "%s: will reseek(%d) at pos=%"PRId64", whence=%d\n", __func__, c->inject_data.retry_counter, pos, whence);
+        seek_ret = ijkhttphook_reseek_at(h, pos, whence, c->inject_data.is_url_changed);
+        av_log(h, AV_LOG_INFO, "%s: did reseek(%d) at pos=%"PRId64", whence=%d: %"PRId64"\n", __func__, c->inject_data.retry_counter, pos, whence, seek_ret);
     }
 
     if (c->test_fail_point)

@@ -34,10 +34,12 @@ void ijkav_register_all(void);
 
 typedef struct IJKAVInject_OnUrlOpenData {
     size_t  size;
-    int     is_handled;     /* out, default = false */
     char    url[4096];      /* in, out */
     int     segment_index;  /* in, default = 0 */
     int     retry_counter;  /* in */
+
+    int     is_handled;     /* out, default = false */
+    int     is_url_changed; /* out, default = false */
 } IJKAVInject_OnUrlOpenData;
 
 /**
