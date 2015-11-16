@@ -111,16 +111,6 @@ fail:
     return ret;
 }
 
-static int ijkhttphook_reconnect_at(URLContext *h, int64_t offset)
-{
-    AVDictionary *extra_opts = NULL;
-
-    av_dict_set_int(&extra_opts, "offset", offset, 0);
-    int ret = ijkurlhook_reconnect(h, extra_opts);
-    av_dict_free(&extra_opts);
-    return ret;
-}
-
 static int ijkurlhook_init(URLContext *h, const char *arg, int flags, AVDictionary **options)
 {
     Context *c = h->priv_data;
@@ -173,51 +163,6 @@ fail:
     return ret;
 }
 
-static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
-{
-    Context *c = h->priv_data;
-    int ret = 0;
-
-    c->scheme = "ijkhttphook:";
-    c->inner_scheme = "http:";
-    c->open_callback_id = IJKAVINJECT_ON_HTTP_OPEN;
-
-    ret = ijkurlhook_init(h, arg, flags, options);
-    if (ret)
-        goto fail;
-
-    ret = ijkurlhook_call_inject(h);
-    if (ret)
-        goto fail;
-
-    ret = ijkurlhook_reconnect(h, NULL);
-    while (ret) {
-        switch (ret) {
-            case AVERROR_EXIT:
-                goto fail;
-        }
-
-        c->inject_data.retry_counter++;
-        ret = ijkurlhook_call_inject(h);
-        if (ret) {
-            ret = AVERROR_EXIT;
-            goto fail;
-        }
-
-        if (!c->inject_data.is_handled)
-            goto fail;
-
-        av_log(h, AV_LOG_INFO, "%s: will reconnect at start\n", __func__);
-        ret = ijkurlhook_reconnect(h, NULL);
-        av_log(h, AV_LOG_INFO, "%s: did reconnect at start: %d\n", __func__, ret);
-        if (ret)
-            c->inject_data.retry_counter++;
-    }
-
-fail:
-    return ret;
-}
-
 static int ijkurlhook_close(URLContext *h)
 {
     Context *c = h->priv_data;
@@ -264,6 +209,61 @@ static int64_t ijkurlhook_seek(URLContext *h, int64_t pos, int whence)
     if (c->test_fail_point)
         c->test_fail_point_next = c->logical_pos + c->test_fail_point;
     return seek_ret;
+}
+
+static int ijkhttphook_reconnect_at(URLContext *h, int64_t offset)
+{
+    AVDictionary *extra_opts = NULL;
+
+    av_dict_set_int(&extra_opts, "offset", offset, 0);
+    int ret = ijkurlhook_reconnect(h, extra_opts);
+    av_dict_free(&extra_opts);
+    return ret;
+}
+
+static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
+{
+    Context *c = h->priv_data;
+    int ret = 0;
+
+    c->scheme = "ijkhttphook:";
+    c->inner_scheme = "http:";
+    c->open_callback_id = IJKAVINJECT_ON_HTTP_OPEN;
+
+    ret = ijkurlhook_init(h, arg, flags, options);
+    if (ret)
+        goto fail;
+
+    ret = ijkurlhook_call_inject(h);
+    if (ret)
+        goto fail;
+
+    ret = ijkurlhook_reconnect(h, NULL);
+    while (ret) {
+        switch (ret) {
+            case AVERROR_EXIT:
+                goto fail;
+        }
+
+        c->inject_data.retry_counter++;
+        ret = ijkurlhook_call_inject(h);
+        if (ret) {
+            ret = AVERROR_EXIT;
+            goto fail;
+        }
+
+        if (!c->inject_data.is_handled)
+            goto fail;
+
+        av_log(h, AV_LOG_INFO, "%s: will reconnect at start\n", __func__);
+        ret = ijkurlhook_reconnect(h, NULL);
+        av_log(h, AV_LOG_INFO, "%s: did reconnect at start: %d\n", __func__, ret);
+        if (ret)
+            c->inject_data.retry_counter++;
+    }
+
+fail:
+    return ret;
 }
 
 static int ijkhttphook_read(URLContext *h, unsigned char *buf, int size)
