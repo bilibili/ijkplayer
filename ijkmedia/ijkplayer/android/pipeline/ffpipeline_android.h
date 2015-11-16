@@ -41,6 +41,7 @@ int     ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject su
 int     ffpipeline_lock_surface(IJKFF_Pipeline* pipeline);
 int     ffpipeline_unlock_surface(IJKFF_Pipeline* pipeline);
 jobject ffpipeline_get_surface_as_global_ref_l(JNIEnv *env, IJKFF_Pipeline* pipeline);
+jobject ffpipeline_get_surface_as_global_ref(JNIEnv *env, IJKFF_Pipeline* pipeline);
 
 bool    ffpipeline_is_surface_need_reconfigure_l(IJKFF_Pipeline* pipeline);
 void    ffpipeline_set_surface_need_reconfigure_l(IJKFF_Pipeline* pipeline, bool need_reconfigure);

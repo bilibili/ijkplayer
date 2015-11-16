@@ -162,6 +162,14 @@ jobject ffpipeline_get_surface_as_global_ref_l(JNIEnv *env, IJKFF_Pipeline* pipe
     return global_ref;
 }
 
+jobject ffpipeline_get_surface_as_global_ref(JNIEnv *env, IJKFF_Pipeline* pipeline)
+{
+    ffpipeline_lock_surface(pipeline);
+    jobject new_surface = ffpipeline_get_surface_as_global_ref_l(env, pipeline);
+    ffpipeline_unlock_surface(pipeline);
+    return new_surface;
+}
+
 void ffpipeline_set_vout(IJKFF_Pipeline* pipeline, SDL_Vout *vout)
 {
     if (!check_ffpipeline(pipeline, __func__))
@@ -181,7 +189,7 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
     if (!opaque->surface_mutex)
         return -1;
 
-    SDL_LockMutex(opaque->surface_mutex);
+    ffpipeline_lock_surface(pipeline);
     {
         jobject prev_surface = opaque->jsurface;
 
@@ -202,7 +210,7 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
             }
         }
     }
-    SDL_UnlockMutex(opaque->surface_mutex);
+    ffpipeline_unlock_surface(pipeline);
 
     return 0;
 }

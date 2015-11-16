@@ -144,18 +144,22 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
     return acodec;
 }
 
-static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
+static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node, jobject new_surface)
 {
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
-    IJKFF_Pipeline        *pipeline = opaque->pipeline;
     int                    ret      = 0;
     sdl_amedia_status_t    amc_ret  = 0;
     jobject                prev_jsurface = NULL;
 
-    ffpipeline_set_surface_need_reconfigure_l(pipeline, false);
-
     prev_jsurface = opaque->jsurface;
-    opaque->jsurface = ffpipeline_get_surface_as_global_ref_l(env, pipeline);
+    if (new_surface) {
+        opaque->jsurface = (*env)->NewGlobalRef(env, new_surface);
+        if (JJK_ExceptionCheck__catchAll(env) || !opaque->jsurface)
+            goto fail;
+    } else {
+        opaque->jsurface = NULL;
+    }
+
     SDL_JNI_DeleteGlobalRefP(env, &prev_jsurface);
 
     if (!opaque->acodec) {
@@ -433,33 +437,47 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
         // reconfigure surface if surface changed
         // NULL surface cause no display
         if (ffpipeline_is_surface_need_reconfigure_l(pipeline)) {
+            jobject new_surface = NULL;
+
             // request reconfigure before lock, or never get mutex
-            opaque->acodec_reconfigure_request = true;
-            SDL_LockMutex(opaque->acodec_mutex);
-            ffpipeline_lock_surface(opaque->pipeline);
-            ret = reconfigure_codec_l(env, node);
-            opaque->acodec_reconfigure_request = false;
-            SDL_CondSignal(opaque->acodec_cond);
-            ffpipeline_unlock_surface(opaque->pipeline);
-            SDL_UnlockMutex(opaque->acodec_mutex);
-            if (ret != 0) {
-                ALOGE("%s: reconfigure_codec failed\n", __func__);
-                ret = 0;
-                goto fail;
-            }
+            ffpipeline_lock_surface(pipeline);
+            ffpipeline_set_surface_need_reconfigure_l(pipeline, false);
+            new_surface = ffpipeline_get_surface_as_global_ref_l(env, pipeline);
+            ffpipeline_unlock_surface(pipeline);
 
-            SDL_LockMutex(opaque->acodec_first_dequeue_output_mutex);
-            while (!q->abort_request &&
-                !opaque->acodec_reconfigure_request &&
-                !opaque->acodec_flush_request &&
-                opaque->acodec_first_dequeue_output_request) {
-                SDL_CondWaitTimeout(opaque->acodec_first_dequeue_output_cond, opaque->acodec_first_dequeue_output_mutex, 1000);
-            }
-            SDL_UnlockMutex(opaque->acodec_first_dequeue_output_mutex);
+            if (opaque->jsurface == new_surface ||
+                (opaque->jsurface && new_surface && (*env)->IsSameObject(env, new_surface, opaque->jsurface))) {
+                ALOGI("%s: same surface, reuse previous surface\n", __func__);
+                JJK_DeleteGlobalRef__p(env, &new_surface);
+            } else {
+                opaque->acodec_reconfigure_request = true;
+                SDL_LockMutex(opaque->acodec_mutex);
+                ret = reconfigure_codec_l(env, node, new_surface);
+                opaque->acodec_reconfigure_request = false;
+                SDL_CondSignal(opaque->acodec_cond);
+                SDL_UnlockMutex(opaque->acodec_mutex);
 
-            if (q->abort_request || opaque->acodec_reconfigure_request || opaque->acodec_flush_request) {
-                ret = 0;
-                goto fail;
+                JJK_DeleteGlobalRef__p(env, &new_surface);
+
+                if (ret != 0) {
+                    ALOGE("%s: reconfigure_codec failed\n", __func__);
+                    ret = 0;
+                    goto fail;
+                }
+
+                SDL_LockMutex(opaque->acodec_first_dequeue_output_mutex);
+                while (!q->abort_request &&
+                    !opaque->acodec_reconfigure_request &&
+                    !opaque->acodec_flush_request &&
+                    opaque->acodec_first_dequeue_output_request) {
+                    SDL_CondWaitTimeout(opaque->acodec_first_dequeue_output_cond, opaque->acodec_first_dequeue_output_mutex, 1000);
+                }
+                SDL_UnlockMutex(opaque->acodec_first_dequeue_output_mutex);
+
+                if (q->abort_request || opaque->acodec_reconfigure_request || opaque->acodec_flush_request) {
+                    ret = 0;
+                    goto fail;
+                }
             }
         }
 
@@ -972,6 +990,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     JNIEnv                *env    = NULL;
     int                    ret    = 0;
     int                    rotate_degrees = 0;
+    jobject                jsurface = NULL;
 
     node->func_destroy  = func_destroy;
     node->func_run_sync = func_run_sync;
@@ -1155,9 +1174,9 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         goto fail;
     }
 
-    ffpipeline_lock_surface(opaque->pipeline);
-    ret = reconfigure_codec_l(env, node);
-    ffpipeline_unlock_surface(opaque->pipeline);
+    jsurface = ffpipeline_get_surface_as_global_ref(env, pipeline);
+    ret = reconfigure_codec_l(env, node, jsurface);
+    JJK_DeleteGlobalRef__p(env, &jsurface);
     if (ret != 0)
         goto fail;
 
