@@ -403,7 +403,6 @@ URLProtocol ijkff_ijktcphook_protocol = {
     .url_open2           = ijktcphook_open,
     .url_read            = ijkurlhook_read,
     .url_write           = ijkurlhook_write,
-    .url_seek            = ijkurlhook_seek,
     .url_close           = ijkurlhook_close,
     .priv_data_size      = sizeof(Context),
     .priv_data_class     = &ijktcphook_context_class,
