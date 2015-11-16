@@ -49,16 +49,11 @@ typedef struct Context {
     int64_t         test_fail_point_next;
 } Context;
 
-static void *ijkinject_get_opaque(URLContext *h) {
-    Context *c = h->priv_data;
-    return (void *) (intptr_t) c->opaque;
-}
-
 static int ijkurlhook_call_inject(URLContext *h)
 {
     Context *c = h->priv_data;
     IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
-    void *opaque = ijkinject_get_opaque(h);
+    void *opaque = (void *) (intptr_t) c->opaque;
     int ret = 0;
 
     if (ff_check_interrupt(&h->interrupt_callback)) {
