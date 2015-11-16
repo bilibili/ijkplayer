@@ -62,7 +62,7 @@ static int ijkurlhook_call_inject(URLContext *h)
     }
 
     if (opaque && inject_callback) {
-        av_log(h, AV_LOG_INFO, "url-hook %s\n", c->inject_data.url);
+        av_log(h, AV_LOG_INFO, "%s %s\n", h->prot->name, c->inject_data.url);
         c->inject_data.is_handled = 0;
         ret = inject_callback(opaque, c->open_callback_id, &c->inject_data, sizeof(c->inject_data));
         if (ret || !c->inject_data.url[0]) {
