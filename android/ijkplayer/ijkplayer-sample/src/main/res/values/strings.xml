@@ -30,6 +30,8 @@
     <string name="mi_bit_rate">Bit rate</string>
     <string name="mi_sample_rate">Sample rate</string>
     <string name="mi_channels">Channels</string>
+    <string name="mi__selected_video_track">(selected video track)</string>
+    <string name="mi__selected_audio_track">(selected audio track)</string>
 
     <string name="TrackType_video">Video</string>
     <string name="TrackType_audio">Audio</string>
