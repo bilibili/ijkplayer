@@ -1063,7 +1063,19 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
         TableLayoutBinder builder = new TableLayoutBinder(getContext());
         builder.appendSection(R.string.mi_player);
-        builder.appendRow2(R.string.mi_player, mMediaPlayer.getClass().getSimpleName());
+        if (mMediaPlayer instanceof TextureMediaPlayer) {
+            StringBuilder sb = new StringBuilder("TextureMediaPlayer <");
+            IMediaPlayer internalMediaPlayer = ((TextureMediaPlayer) mMediaPlayer).getInternalMediaPlayer();
+            if (internalMediaPlayer == null) {
+                sb.append("null>");
+            } else {
+                sb.append(internalMediaPlayer.getClass().getSimpleName());
+                sb.append(">");
+            }
+            builder.appendRow2(R.string.mi_player, sb.toString());
+        } else {
+            builder.appendRow2(R.string.mi_player, mMediaPlayer.getClass().getSimpleName());
+        }
         builder.appendSection(R.string.mi_media);
         builder.appendRow2(R.string.mi_resolution, buildResolution(mVideoWidth, mVideoHeight, mVideoSarNum, mVideoSarDen));
         builder.appendRow2(R.string.mi_length, buildTimeMilli(mMediaPlayer.getDuration()));
