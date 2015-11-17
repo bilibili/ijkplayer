@@ -40,16 +40,36 @@ public class MediaPlayerCompat {
         }
     }
 
-    public static int getSelectedTrack(IMediaPlayer mp, int trackType) {
+    public static IjkMediaPlayer getIjkMediaPlayer(IMediaPlayer mp) {
         IjkMediaPlayer ijkMediaPlayer = null;
-        if (mp instanceof IjkMediaPlayer) {
+        if (mp == null) {
+            return null;
+        } if (mp instanceof IjkMediaPlayer) {
             ijkMediaPlayer = (IjkMediaPlayer) mp;
         } else if (mp instanceof MediaPlayerProxy && ((MediaPlayerProxy) mp).getInternalMediaPlayer() instanceof IjkMediaPlayer) {
             ijkMediaPlayer = (IjkMediaPlayer) ((MediaPlayerProxy) mp).getInternalMediaPlayer();
         }
-        if (ijkMediaPlayer != null) {
-            return ijkMediaPlayer.getSelectedTrack(trackType);
-        }
-        return -1;
+        return ijkMediaPlayer;
+    }
+
+    public static void selectTrack(IMediaPlayer mp, int stream) {
+        IjkMediaPlayer ijkMediaPlayer = getIjkMediaPlayer(mp);
+        if (ijkMediaPlayer == null)
+            return;
+        ijkMediaPlayer.selectTrack(stream);
+    }
+
+    public static void deselectTrack(IMediaPlayer mp, int stream) {
+        IjkMediaPlayer ijkMediaPlayer = getIjkMediaPlayer(mp);
+        if (ijkMediaPlayer == null)
+            return;
+        ijkMediaPlayer.deselectTrack(stream);
+    }
+
+    public static int getSelectedTrack(IMediaPlayer mp, int trackType) {
+        IjkMediaPlayer ijkMediaPlayer = getIjkMediaPlayer(mp);
+        if (ijkMediaPlayer == null)
+            return -1;
+        return ijkMediaPlayer.getSelectedTrack(trackType);
     }
 }

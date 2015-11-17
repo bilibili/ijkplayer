@@ -434,6 +434,24 @@ LABEL_RETURN:
 }
 
 static void
+ijkMediaPlayer_setStreamSelected(JNIEnv *env, jobject thiz, jint stream, jboolean selected)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    int ret = 0;
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setStreamSelected: null mp", LABEL_RETURN);
+
+    ret = ijkmp_set_stream_selected(mp, stream, selected);
+    if (ret < 0) {
+        ALOGE("failed to %s %d", selected ? "select" : "deselect", stream);
+        goto LABEL_RETURN;
+    }
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return;
+}
+
+static void
 IjkMediaPlayer_setVolume(JNIEnv *env, jobject thiz, jfloat leftVolume, jfloat rightVolume)
 {
     MPTRACE("%s\n", __func__);
@@ -983,6 +1001,7 @@ static JNINativeMethod g_methods[] = {
     { "_setPropertyFloat",      "(IF)V",                    (void *) ijkMediaPlayer_setPropertyFloat },
     { "_getPropertyLong",       "(IJ)J",                    (void *) ijkMediaPlayer_getPropertyLong },
     { "_setPropertyLong",       "(IJ)V",                    (void *) ijkMediaPlayer_setPropertyLong },
+    { "_setStreamSelected",     "(IZ)V",                    (void *) ijkMediaPlayer_setStreamSelected },
 
     { "native_profileBegin",    "(Ljava/lang/String;)V",    (void *) IjkMediaPlayer_native_profileBegin },
     { "native_profileEnd",      "()V",                      (void *) IjkMediaPlayer_native_profileEnd },

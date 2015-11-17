@@ -314,6 +314,14 @@ public class IjkMediaMeta {
             }
         }
 
+        public String getCodecShortNameInline() {
+            if (!TextUtils.isEmpty(mCodecName)) {
+                return mCodecName;
+            } else {
+                return "N/A";
+            }
+        }
+
         public String getResolutionInline() {
             if (mWidth <= 0 || mHeight <= 0) {
                 return "N/A";

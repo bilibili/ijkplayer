@@ -76,7 +76,7 @@ public class AndroidTrackInfo implements ITrackInfo {
     @Override
     public String toString() {
         StringBuilder out = new StringBuilder(128);
-        out.append(getClass().getName());
+        out.append(getClass().getSimpleName());
         out.append('{');
         if (mTrackInfo != null) {
             out.append(mTrackInfo.toString());
@@ -85,5 +85,10 @@ public class AndroidTrackInfo implements ITrackInfo {
         }
         out.append('}');
         return out.toString();
+    }
+
+    @Override
+    public String getInfoInline() {
+        return mTrackInfo.toString();
     }
 }

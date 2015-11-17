@@ -19,4 +19,8 @@
         android:id="@+id/action_show_info"
         android:title="@string/show_info"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_show_tracks"
+        android:title="@string/tracks"
+        app:showAsAction="ifRoom" />
 </menu>

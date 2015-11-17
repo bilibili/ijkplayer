@@ -209,6 +209,18 @@ void ijkmp_set_playback_rate(IjkMediaPlayer *mp, float rate)
     MPTRACE("%s()=void\n", __func__);
 }
 
+int ijkmp_set_stream_selected(IjkMediaPlayer *mp, int stream, int selected)
+{
+    assert(mp);
+
+    MPTRACE("%s(%d, %d)\n", __func__, stream, selected);
+    pthread_mutex_lock(&mp->mutex);
+    int ret = ffp_set_stream_selected(mp->ffplayer, stream, selected);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s(%d, %d)=%d\n", __func__, stream, selected, ret);
+    return ret;
+}
+
 float ijkmp_get_property_float(IjkMediaPlayer *mp, int id, float default_value)
 {
     assert(mp);

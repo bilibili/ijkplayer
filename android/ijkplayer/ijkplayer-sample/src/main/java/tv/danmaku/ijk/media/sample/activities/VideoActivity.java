@@ -19,9 +19,13 @@ package tv.danmaku.ijk.media.sample.activities;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -29,18 +33,21 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.sample.R;
 import tv.danmaku.ijk.media.sample.application.Settings;
 import tv.danmaku.ijk.media.sample.content.RecentMediaStorage;
+import tv.danmaku.ijk.media.sample.fragments.TracksFragment;
 import tv.danmaku.ijk.media.sample.widget.media.AndroidMediaController;
 import tv.danmaku.ijk.media.sample.widget.media.IjkVideoView;
 import tv.danmaku.ijk.media.sample.widget.media.MeasureHelper;
 
-public class VideoActivity extends AppCompatActivity {
+public class VideoActivity extends AppCompatActivity implements TracksFragment.ITrackHolder {
     private static final String TAG = "VideoActivity";
 
     private String mVideoPath;
@@ -50,6 +57,8 @@ public class VideoActivity extends AppCompatActivity {
     private IjkVideoView mVideoView;
     private TextView mToastTextView;
     private TableLayout mHudView;
+    private DrawerLayout mDrawerLayout;
+    private ViewGroup mRightDrawer;
 
     private Settings mSettings;
     private boolean mBackPressed;
@@ -118,6 +127,10 @@ public class VideoActivity extends AppCompatActivity {
 
         mToastTextView = (TextView) findViewById(R.id.toast_text_view);
         mHudView = (TableLayout) findViewById(R.id.hud_view);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mRightDrawer = (ViewGroup) findViewById(R.id.right_drawer);
+
+        mDrawerLayout.setScrimColor(Color.TRANSPARENT);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -189,8 +202,50 @@ public class VideoActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.action_show_info) {
             mVideoView.showMediaInfo();
+        } else if (id == R.id.action_show_tracks) {
+            if (mDrawerLayout.isDrawerOpen(mRightDrawer)) {
+                Fragment f = getSupportFragmentManager().findFragmentById(R.id.right_drawer);
+                if (f != null) {
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.remove(f);
+                    transaction.commit();
+                }
+                mDrawerLayout.closeDrawer(mRightDrawer);
+            } else {
+                Fragment f = TracksFragment.newInstance();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.right_drawer, f);
+                transaction.commit();
+                mDrawerLayout.openDrawer(mRightDrawer);
+            }
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public ITrackInfo[] getTrackInfo() {
+        if (mVideoView == null)
+            return null;
+
+        return mVideoView.getTrackInfo();
+    }
+
+    @Override
+    public void selectTrack(int stream) {
+        mVideoView.selectTrack(stream);
+    }
+
+    @Override
+    public void deselectTrack(int stream) {
+        mVideoView.deselectTrack(stream);
+    }
+
+    @Override
+    public int getSelectedTrack(int trackType) {
+        if (mVideoView == null)
+            return -1;
+
+        return mVideoView.getSelectedTrack(trackType);
     }
 }

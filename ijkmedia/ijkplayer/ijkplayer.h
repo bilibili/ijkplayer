@@ -171,6 +171,7 @@ void            ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const
 int             ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info);
 int             ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info);
 void            ijkmp_set_playback_rate(IjkMediaPlayer *mp, float rate);
+int             ijkmp_set_stream_selected(IjkMediaPlayer *mp, int stream, int selected);
 
 float           ijkmp_get_property_float(IjkMediaPlayer *mp, int id, float default_value);
 void            ijkmp_set_property_float(IjkMediaPlayer *mp, int id, float value);

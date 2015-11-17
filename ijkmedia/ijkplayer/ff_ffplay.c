@@ -3850,6 +3850,57 @@ int ffp_get_video_rotate_degrees(FFPlayer *ffp)
     return theta;
 }
 
+int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
+{
+    VideoState      *is = ffp->is;
+    AVFormatContext *ic = NULL;
+    AVCodecContext  *avctx = NULL;
+    if (!is)
+        return -1;
+    ic = is->ic;
+    if (!ic)
+        return -1;
+
+    if (stream < 0 || stream >= ic->nb_streams) {
+        av_log(ffp, AV_LOG_ERROR, "invalid stream index %d >= stream number (%d)\n", stream, ic->nb_streams);
+        return -1;
+    }
+
+    avctx = ic->streams[stream]->codec;
+
+    if (selected) {
+        switch (avctx->codec_type) {
+            case AVMEDIA_TYPE_VIDEO:
+                if (stream != is->video_stream && is->video_stream >= 0)
+                    stream_component_close(ffp, is->video_stream);
+                break;
+            case AVMEDIA_TYPE_AUDIO:
+                if (stream != is->audio_stream && is->audio_stream >= 0)
+                    stream_component_close(ffp, is->audio_stream);
+                break;
+            default:
+                av_log(ffp, AV_LOG_ERROR, "select invalid stream %d of video type %d\n", stream, avctx->codec_type);
+                return -1;
+        }
+        return stream_component_open(ffp, stream);
+    } else {
+        switch (avctx->codec_type) {
+            case AVMEDIA_TYPE_VIDEO:
+                if (stream == is->video_stream)
+                    stream_component_close(ffp, is->video_stream);
+                break;
+            case AVMEDIA_TYPE_AUDIO:
+                if (stream == is->audio_stream)
+                    stream_component_close(ffp, is->audio_stream);
+                break;
+            default:
+                av_log(ffp, AV_LOG_ERROR, "select invalid stream %d of audio type %d\n", stream, avctx->codec_type);
+                return -1;
+        }
+        return 0;
+    }
+}
+
 float ffp_get_property_float(FFPlayer *ffp, int id, float default_value)
 {
     switch (id) {
