@@ -47,7 +47,6 @@ import tv.danmaku.ijk.media.exo.IjkExoMediaPlayer;
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
-import tv.danmaku.ijk.media.player.MediaPlayerProxy;
 import tv.danmaku.ijk.media.player.TextureMediaPlayer;
 import tv.danmaku.ijk.media.player.misc.IMediaFormat;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
@@ -1062,36 +1061,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         if (mMediaPlayer == null)
             return;
 
-        int selectedVideoTrack = -1;
-        int selectedAudioTrack = -1;
-        {
-            IjkMediaPlayer ijkMediaPlayer = null;
-            if (mMediaPlayer instanceof IjkMediaPlayer) {
-                ijkMediaPlayer = (IjkMediaPlayer) mMediaPlayer;
-            } else if (mMediaPlayer instanceof MediaPlayerProxy && ((MediaPlayerProxy) mMediaPlayer).getInternalMediaPlayer() instanceof IjkMediaPlayer) {
-                ijkMediaPlayer = (IjkMediaPlayer) ((MediaPlayerProxy) mMediaPlayer).getInternalMediaPlayer();
-            }
-            if (ijkMediaPlayer != null) {
-                selectedVideoTrack = ijkMediaPlayer.getSelectedTrack(ITrackInfo.MEDIA_TRACK_TYPE_VIDEO);
-                selectedAudioTrack = ijkMediaPlayer.getSelectedTrack(ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
-            }
-        }
+        int selectedVideoTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_VIDEO);
+        int selectedAudioTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
 
         TableLayoutBinder builder = new TableLayoutBinder(getContext());
         builder.appendSection(R.string.mi_player);
-        if (mMediaPlayer instanceof TextureMediaPlayer) {
-            StringBuilder sb = new StringBuilder("TextureMediaPlayer <");
-            IMediaPlayer internalMediaPlayer = ((TextureMediaPlayer) mMediaPlayer).getInternalMediaPlayer();
-            if (internalMediaPlayer == null) {
-                sb.append("null>");
-            } else {
-                sb.append(internalMediaPlayer.getClass().getSimpleName());
-                sb.append(">");
-            }
-            builder.appendRow2(R.string.mi_player, sb.toString());
-        } else {
-            builder.appendRow2(R.string.mi_player, mMediaPlayer.getClass().getSimpleName());
-        }
+        builder.appendRow2(R.string.mi_player, MediaPlayerCompat.getName(mMediaPlayer));
         builder.appendSection(R.string.mi_media);
         builder.appendRow2(R.string.mi_resolution, buildResolution(mVideoWidth, mVideoHeight, mVideoSarNum, mVideoSarDen));
         builder.appendRow2(R.string.mi_length, buildTimeMilli(mMediaPlayer.getDuration()));
