@@ -228,6 +228,25 @@ void ijkmp_set_property_float(IjkMediaPlayer *mp, int id, float value)
     pthread_mutex_unlock(&mp->mutex);
 }
 
+int64_t ijkmp_get_property_int64(IjkMediaPlayer *mp, int id, int64_t default_value)
+{
+    assert(mp);
+
+    pthread_mutex_lock(&mp->mutex);
+    int64_t ret = ffp_get_property_int64(mp->ffplayer, id, default_value);
+    pthread_mutex_unlock(&mp->mutex);
+    return ret;
+}
+
+void ijkmp_set_property_int64(IjkMediaPlayer *mp, int id, int64_t value)
+{
+    assert(mp);
+
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_property_int64(mp->ffplayer, id, value);
+    pthread_mutex_unlock(&mp->mutex);
+}
+
 IjkMediaMeta *ijkmp_get_meta_l(IjkMediaPlayer *mp)
 {
     assert(mp);

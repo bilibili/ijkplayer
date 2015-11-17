@@ -3874,6 +3874,32 @@ void ffp_set_property_float(FFPlayer *ffp, int id, float value)
     }
 }
 
+int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
+{
+    switch (id) {
+        case FFP_PROP_INT64_SELECTED_VIDEO_STREAM:
+            if (!ffp || !ffp->is)
+                return default_value;
+            return ffp->is->video_stream;
+        case FFP_PROP_INT64_SELECTED_AUDIO_STREAM:
+            if (!ffp || !ffp->is)
+                return default_value;
+            return ffp->is->audio_stream;
+        default:
+            return default_value;
+    }
+}
+
+void ffp_set_property_int64(FFPlayer *ffp, int id, int64_t value)
+{
+    switch (id) {
+        // case FFP_PROP_INT64_SELECTED_VIDEO_STREAM:
+        // case FFP_PROP_INT64_SELECTED_AUDIO_STREAM:
+        default:
+            break;
+    }
+}
+
 IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 {
     if (!ffp)
