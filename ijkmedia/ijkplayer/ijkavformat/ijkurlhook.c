@@ -34,6 +34,7 @@ typedef struct Context {
 
     int64_t         logical_pos;
     int64_t         logical_size;
+    int             io_error;
 
     IJKAVInject_OnUrlOpenData inject_data;
     const char     *scheme;
@@ -116,7 +117,8 @@ static int ijkurlhook_reconnect(URLContext *h, AVDictionary *extra)
         c->logical_size = -1;
     else
         c->logical_size = ffurl_seek(c->inner, 0, AVSEEK_SIZE);
-    
+
+    c->io_error = 0;
 fail:
     av_dict_free(&inner_options);
     return ret;
@@ -186,14 +188,20 @@ static int ijkurlhook_read(URLContext *h, unsigned char *buf, int size)
     Context *c = h->priv_data;
     int ret = 0;
 
+    if (c->io_error < 0)
+        return c->io_error;
+
     if (c->test_fail_point_next > 0 && c->logical_pos >= c->test_fail_point_next) {
         av_log(h, AV_LOG_ERROR, "test fail point:%"PRId64"\n", c->test_fail_point_next);
+        c->io_error = AVERROR(EIO);
         return AVERROR(EIO);
     }
 
     ret = ffurl_read(c->inner, buf, size);
     if (ret > 0)
         c->logical_pos += ret;
+    else
+        c->io_error = ret;
 
     return ret;
 }
@@ -211,12 +219,16 @@ static int64_t ijkurlhook_seek(URLContext *h, int64_t pos, int whence)
     int64_t seek_ret = 0;
 
     seek_ret = ffurl_seek(c->inner, pos, whence);
-    if (seek_ret < 0)
+    if (seek_ret < 0) {
+        c->io_error = seek_ret;
         return seek_ret;
+    }
 
     c->logical_pos = seek_ret;
     if (c->test_fail_point)
         c->test_fail_point_next = c->logical_pos + c->test_fail_point;
+
+    c->io_error = 0;
     return seek_ret;
 }
 
@@ -285,6 +297,7 @@ static int ijkhttphook_read(URLContext *h, unsigned char *buf, int size)
 
     read_ret = ijkurlhook_read(h, buf, size);
     while (read_ret < 0 && !h->is_streamed && c->logical_pos < c->logical_size) {
+        c->io_error = read_ret;
         switch (read_ret) {
             case AVERROR_EXIT:
                 goto fail;
@@ -331,9 +344,12 @@ static int64_t ijkhttphook_reseek_at(URLContext *h, int64_t pos, int whence, int
         return AVERROR(EINVAL);
 
     ret = ijkhttphook_reconnect_at(h, pos);
-    if (ret)
+    if (ret) {
+        c->io_error = ret;
         return ret;
+    }
 
+    c->io_error = 0;
     return c->logical_pos;
 }
 
@@ -383,6 +399,7 @@ static int64_t ijkhttphook_seek(URLContext *h, int64_t pos, int whence)
 
     if (c->test_fail_point)
         c->test_fail_point_next = c->logical_pos + c->test_fail_point;
+    c->io_error = 0;
     return c->logical_pos;
 fail:
     return ret;
