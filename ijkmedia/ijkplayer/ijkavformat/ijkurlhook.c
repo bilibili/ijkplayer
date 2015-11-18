@@ -220,7 +220,7 @@ static int64_t ijkurlhook_seek(URLContext *h, int64_t pos, int whence)
 
     seek_ret = ffurl_seek(c->inner, pos, whence);
     if (seek_ret < 0) {
-        c->io_error = seek_ret;
+        c->io_error = (int)seek_ret;
         return seek_ret;
     }
 
