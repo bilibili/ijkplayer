@@ -59,61 +59,51 @@ inline static void IJKDeviceRegister(NSMutableDictionary *dict,
         NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
 
         // http://en.wikipedia.org/wiki/List_of_iOS_devices
+        // http://www.everyiphone.com
         // Simulator
         IJKDeviceRegister(dict, @"i386",        @"Simulator",       kIJKDeviceRank_Simulator);
         IJKDeviceRegister(dict, @"x86_64",      @"Simulator 64",    kIJKDeviceRank_Simulator);
 
         // iPhone
-        IJKDeviceRegister(dict, @"iPhone1",     @"iPhone",          kIJKDeviceRank_Baseline);
         IJKDeviceRegister(dict, @"iPhone1,1",   @"iPhone",          kIJKDeviceRank_Baseline);
         IJKDeviceRegister(dict, @"iPhone1,2",   @"iPhone 3G",       kIJKDeviceRank_Baseline);
-        IJKDeviceRegister(dict, @"iPhone2",     @"iPhone 3GS",      kIJKDeviceRank_Baseline);
+
         IJKDeviceRegister(dict, @"iPhone2,1",   @"iPhone 3GS",      kIJKDeviceRank_Baseline);
 
-        IJKDeviceRegister(dict, @"iPhone3",     @"iPhone 4",        kIJKDeviceRank_AppleA4Class);
         IJKDeviceRegister(dict, @"iPhone3,1",   @"iPhone 4",        kIJKDeviceRank_AppleA4Class);
         IJKDeviceRegister(dict, @"iPhone3,2",   @"iPhone 4",        kIJKDeviceRank_AppleA4Class);
         IJKDeviceRegister(dict, @"iPhone3,3",   @"iPhone 4",        kIJKDeviceRank_AppleA4Class);
 
-        IJKDeviceRegister(dict, @"iPhone4",     @"iPhone 4s",       kIJKDeviceRank_AppleA5Class);
         IJKDeviceRegister(dict, @"iPhone4,1",   @"iPhone 4s",       kIJKDeviceRank_AppleA5Class);
 
-        IJKDeviceRegister(dict, @"iPhone5",     @"iPhone 5/5c",     kIJKDeviceRank_AppleA6Class);
         IJKDeviceRegister(dict, @"iPhone5,1",   @"iPhone 5",        kIJKDeviceRank_AppleA6Class);
         IJKDeviceRegister(dict, @"iPhone5,2",   @"iPhone 5",        kIJKDeviceRank_AppleA6Class);
         IJKDeviceRegister(dict, @"iPhone5,3",   @"iPhone 5c",       kIJKDeviceRank_AppleA6Class);
         IJKDeviceRegister(dict, @"iPhone5,4",   @"iPhone 5c",       kIJKDeviceRank_AppleA6Class);
 
-        IJKDeviceRegister(dict, @"iPhone6",     @"iPhone 5s",       kIJKDeviceRank_AppleA7Class);
         IJKDeviceRegister(dict, @"iPhone6,1",   @"iPhone 5s",       kIJKDeviceRank_AppleA7Class);
         IJKDeviceRegister(dict, @"iPhone6,2",   @"iPhone 5s",       kIJKDeviceRank_AppleA7Class);
 
-        IJKDeviceRegister(dict, @"iPhone7",     @"iPhone 6",        kIJKDeviceRank_AppleA8Class);
         IJKDeviceRegister(dict, @"iPhone7,1",   @"iPhone 6 Plus",   kIJKDeviceRank_AppleA8Class);
         IJKDeviceRegister(dict, @"iPhone7,2",   @"iPhone 6",        kIJKDeviceRank_AppleA8Class);
 
+        IJKDeviceRegister(dict, @"iPhone8,1",   @"iPhone 6S",       kIJKDeviceRank_AppleA9Class);
+        IJKDeviceRegister(dict, @"iPhone8,2",   @"iPhone 6S Plus",  kIJKDeviceRank_AppleA9Class);
+
         // iPod Touch
-        IJKDeviceRegister(dict, @"iPod1",       @"iPod Touch",      kIJKDeviceRank_Baseline);
         IJKDeviceRegister(dict, @"iPod1,1",     @"iPod Touch",      kIJKDeviceRank_Baseline);
-        IJKDeviceRegister(dict, @"iPod2",       @"iPod Touch 2G",   kIJKDeviceRank_Baseline);
         IJKDeviceRegister(dict, @"iPod2,1",     @"iPod Touch 2G",   kIJKDeviceRank_Baseline);
-        IJKDeviceRegister(dict, @"iPod3",       @"iPod Touch 3G",   kIJKDeviceRank_Baseline);
         IJKDeviceRegister(dict, @"iPod3,1",     @"iPod Touch 3G",   kIJKDeviceRank_Baseline);
 
-        IJKDeviceRegister(dict, @"iPod4",       @"iPod Touch 4G",   kIJKDeviceRank_AppleA4Class);
         IJKDeviceRegister(dict, @"iPod4,1",     @"iPod Touch 4G",   kIJKDeviceRank_AppleA4Class);
 
-        IJKDeviceRegister(dict, @"iPod5",       @"iPod Touch 5G",   kIJKDeviceRank_AppleA5Class);
         IJKDeviceRegister(dict, @"iPod5,1",     @"iPod Touch 5G",   kIJKDeviceRank_AppleA5Class);
 
-        IJKDeviceRegister(dict, @"iPod7",       @"iPod Touch 6G",   kIJKDeviceRank_AppleA8LowClass);
         IJKDeviceRegister(dict, @"iPod7,1",     @"iPod Touch 6G",   kIJKDeviceRank_AppleA8LowClass);
 
         // iPad / iPad mini
-        IJKDeviceRegister(dict, @"iPad1",       @"iPad",            kIJKDeviceRank_AppleA4Class);
         IJKDeviceRegister(dict, @"iPad1,1",     @"iPad",            kIJKDeviceRank_AppleA4Class);
 
-        IJKDeviceRegister(dict, @"iPad2",       @"iPad 2/mini",     kIJKDeviceRank_AppleA5Class);
         IJKDeviceRegister(dict, @"iPad2,1",     @"iPad 2",          kIJKDeviceRank_AppleA5Class);
         IJKDeviceRegister(dict, @"iPad2,2",     @"iPad 2",          kIJKDeviceRank_AppleA5Class);
         IJKDeviceRegister(dict, @"iPad2,3",     @"iPad 2",          kIJKDeviceRank_AppleA5Class);
@@ -131,7 +121,6 @@ inline static void IJKDeviceRegister(NSMutableDictionary *dict,
         IJKDeviceRegister(dict, @"iPad3,5",     @"iPad 4G",         kIJKDeviceRank_AppleA6XClass);
         IJKDeviceRegister(dict, @"iPad3,6",     @"iPad 4G",         kIJKDeviceRank_AppleA6XClass);
 
-        IJKDeviceRegister(dict, @"iPad4",       @"iPad Air/Mini 2G/3G",   kIJKDeviceRank_AppleA7Class);
         IJKDeviceRegister(dict, @"iPad4,1",     @"iPad Air",        kIJKDeviceRank_AppleA7Class);
         IJKDeviceRegister(dict, @"iPad4,2",     @"iPad Air",        kIJKDeviceRank_AppleA7Class);
         IJKDeviceRegister(dict, @"iPad4,3",     @"iPad Air",        kIJKDeviceRank_AppleA7Class);
@@ -143,9 +132,13 @@ inline static void IJKDeviceRegister(NSMutableDictionary *dict,
         IJKDeviceRegister(dict, @"iPad4,8",     @"iPad mini 3",     kIJKDeviceRank_AppleA7Class);
         IJKDeviceRegister(dict, @"iPad4,9",     @"iPad mini 3",     kIJKDeviceRank_AppleA7Class);
 
-        IJKDeviceRegister(dict, @"iPad5",       @"iPad Air 2",      kIJKDeviceRank_AppleA8XClass);
+        IJKDeviceRegister(dict, @"iPad5,1",     @"iPad mini 4",     kIJKDeviceRank_AppleA8XClass);
+        IJKDeviceRegister(dict, @"iPad5,2",     @"iPad mini 4",     kIJKDeviceRank_AppleA8XClass);
         IJKDeviceRegister(dict, @"iPad5,3",     @"iPad Air 2",      kIJKDeviceRank_AppleA8XClass);
         IJKDeviceRegister(dict, @"iPad5,4",     @"iPad Air 2",      kIJKDeviceRank_AppleA8XClass);
+
+        IJKDeviceRegister(dict, @"iPad6,7",     @"iPad Pro",        kIJKDeviceRank_AppleA9XClass);
+        IJKDeviceRegister(dict, @"iPad6,8",     @"iPad Pro",        kIJKDeviceRank_AppleA9XClass);
 
         sModelDictionary = dict;
 

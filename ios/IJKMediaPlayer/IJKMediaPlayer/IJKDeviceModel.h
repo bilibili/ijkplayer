@@ -33,6 +33,8 @@
 #define kIJKDeviceRank_AppleA8LowClass                  55   // ARM64 class
 #define kIJKDeviceRank_AppleA8Class                     60   // ARM64 class
 #define kIJKDeviceRank_AppleA8XClass                    61   // ARM64 class
+#define kIJKDeviceRank_AppleA9Class                     70   // ARM64 class
+#define kIJKDeviceRank_AppleA9XClass                    71   // ARM64 class
 #define kIJKDeviceRank_LatestUnknown                    90
 #define kIJKDeviceRank_Simulator                        100
 
