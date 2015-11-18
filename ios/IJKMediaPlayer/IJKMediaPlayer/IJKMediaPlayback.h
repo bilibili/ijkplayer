@@ -149,36 +149,35 @@ IJK_EXTERN NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification;
 
 @end
 
-#pragma mark IJKMediaResource
+#pragma mark IJKMediaUrlOpenDelegate
 
-@protocol IJKMediaSegmentResolver <NSObject>
+typedef NS_ENUM(NSInteger, IJKMediaUrlOpenType) {
+    IJKMediaUrlOpenEvent_ConcatResolveSegment = 0x10000,
+    IJKMediaUrlOpenEvent_TcpOpen = 0x10001,
+    IJKMediaUrlOpenEvent_HttpOpen = 0x10002,
+    IJKMediaUrlOpenEvent_LiveOpen = 0x10004,
+};
 
-- (NSString *)urlOfSegment:(int)segmentPosition;
+@interface IJKMediaUrlOpenData: NSObject
+
+- (id)initWithUrl:(NSString *)url
+         openType:(IJKMediaUrlOpenType)openType
+     segmentIndex:(int)segmentIndex
+     retryCounter:(int)retryCounter;
+
+@property(nonatomic, readonly) IJKMediaUrlOpenType openType;
+@property(nonatomic, readonly) int segmentIndex;
+@property(nonatomic, readonly) int retryCounter;
+
+@property(nonatomic, retain) NSString *url;
+@property(nonatomic) int error; // set a negative value to indicate an error has occured.
+@property(nonatomic, getter=isHandled)    BOOL handled;     // auto set to YES if url changed
+@property(nonatomic, getter=isUrlChanged) BOOL urlChanged;  // auto set to YES by url changed
 
 @end
 
-#pragma mark IJKMediaIoDelegate
+@protocol IJKMediaUrlOpenDelegate <NSObject>
 
-/**
- * called before tcp connection
- *
- * @return
- *      original url:   continue connect.
- *      nil:            disconnect.
- *      new url:        use new url to connect.
- */
-@protocol IJKMediaTcpOpenDelegate <NSObject>
-- (NSString *)onTcpOpen:(int)streamIndex url:(NSString *)url;
-@end
+- (void)willOpenUrl:(IJKMediaUrlOpenData*) urlOpenData;
 
-@protocol IJKMediaHttpOpenDelegate <NSObject>
-- (NSString *)onHttpOpen:(int)streamIndex url:(NSString *)url;
-@end
-
-@protocol IJKMediaHttpRetryDelegate <NSObject>
-- (NSString *)onHttpRetry:(int)streamIndex url:(NSString *)url retryCount:(int)retryCount;
-@end
-
-@protocol IJKMediaLiveRetryDelegate <NSObject>
-- (NSString *)onLiveRetry:(int)streamIndex url:(NSString *)url retryCount:(int)retryCount;
 @end

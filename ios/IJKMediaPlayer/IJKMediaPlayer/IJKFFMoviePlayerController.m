@@ -43,8 +43,6 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff2.8--ijk0.4.1.1--dev0.3.3--r
 @end
 
 @implementation IJKFFMoviePlayerController {
-    id<IJKMediaSegmentResolver> _segmentResolver;
-
     IjkMediaPlayer *_mediaPlayer;
     IJKSDLGLView *_glView;
     IJKFFMoviePlayerMessagePool *_msgPool;
@@ -142,16 +140,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     ijkmp_io_stat_complete_register(cb);
 }
 
-- (id)initWithContentURL:(NSURL *)aUrl withOptions:(IJKFFOptions *)options
-{
-    return [self initWithContentURL:aUrl
-                        withOptions:options
-                withSegmentResolver:nil];
-}
-
 - (id)initWithContentURL:(NSURL *)aUrl
              withOptions:(IJKFFOptions *)options
-     withSegmentResolver:(id<IJKMediaSegmentResolver>)segmentResolver
 {
     if (aUrl == nil)
         return nil;
@@ -160,13 +150,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     NSString *aUrlString = [aUrl isFileURL] ? [aUrl path] : [aUrl absoluteString];
 
     return [self initWithContentURLString:aUrlString
-                              withOptions:options
-                      withSegmentResolver:segmentResolver];
+                              withOptions:options];
 }
 
 - (id)initWithContentURLString:(NSString *)aUrlString
                    withOptions:(IJKFFOptions *)options
-           withSegmentResolver:(id<IJKMediaSegmentResolver>)segmentResolver
 {
     if (aUrlString == nil)
         return nil;
@@ -190,7 +178,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         // init media resource
         _urlString = aUrlString;
-        _segmentResolver = segmentResolver;
         _mediaMeta = [[NSDictionary alloc] init];
 
         // init player
@@ -884,117 +871,37 @@ int media_player_msg_loop(void* arg)
 
 #pragma mark av_format_control_message
 
-int onInjectConcatResolveSegment(IJKFFMoviePlayerController *mpc, int type, void *data, size_t data_size)
+static int onInjectUrlOpen(id<IJKMediaUrlOpenDelegate> delegate, int type, void *data, size_t data_size)
 {
-    if (mpc == nil)
-        return -1;
-
     IJKAVInject_OnUrlOpenData *realData = data;
-    if (realData == NULL || sizeof(IJKAVInject_OnUrlOpenData) != data_size) {
-        NSLog(@"onInjectConcatResolveSegment: invalid call\n");
-        return -1;
-    }
+    assert(realData);
+    assert(sizeof(IJKAVInject_OnUrlOpenData) == data_size);
+    realData->is_handled     = NO;
+    realData->is_url_changed = NO;
 
-    NSString *url = [mpc->_segmentResolver urlOfSegment:realData->segment_index];
-    if (url == nil)
-        return -1;
-
-    const char *rawUrl = [url UTF8String];
-    if (rawUrl == NULL)
-        return -1;
-
-    strlcpy(realData->url, rawUrl, sizeof(realData->url));
-    realData->url[sizeof(realData->url) - 1] = 0;
-    return 0;
-}
-
-static int onInjectTcpOpen(IJKFFMoviePlayerController *mpc, int type, void *data, size_t data_size)
-{
-    if (mpc == nil)
-        return -1;
-
-    IJKAVInject_OnUrlOpenData *realData = data;
-    if (realData == NULL || sizeof(IJKAVInject_OnUrlOpenData) != data_size) {
-        NSLog(@"onInjectTcpOpen: invalid call\n");
-        return -1;
-    }
-
-    // no retry
-    if (mpc.tcpOpenDelegate == nil)
+    if (delegate == nil)
         return 0;
 
-    NSString *url = [NSString stringWithUTF8String:realData->url];
-    NSString *newUrl = [mpc.tcpOpenDelegate onTcpOpen:realData->segment_index url:url];
-    if (newUrl == nil)
+    IJKMediaUrlOpenData *openData =
+    [[IJKMediaUrlOpenData alloc] initWithUrl:[NSString stringWithUTF8String:realData->url]
+                                    openType:(IJKMediaUrlOpenType)type
+                                segmentIndex:realData->segment_index
+                                retryCounter:realData->retry_counter];
+
+    [delegate willOpenUrl:openData];
+    if (openData.error < 0)
         return -1;
 
-    if (newUrl != url) {
-        const char *newUrlUTF8 = [newUrl UTF8String];
-        strlcpy(realData->url, newUrlUTF8, sizeof(realData->url));
-        realData->url[sizeof(realData->url) - 1] = 0;
-    }
-
-    return 0;
-}
-
-static int onInjectHttpOpen(IJKFFMoviePlayerController *mpc, int type, void *data, size_t data_size)
-{
-    if (mpc == nil)
-        return -1;
-
-    IJKAVInject_OnUrlOpenData *realData = data;
-    if (realData == NULL || sizeof(IJKAVInject_OnUrlOpenData) != data_size) {
-        NSLog(@"onInjectHttpOpen: invalid call\n");
-        return -1;
-    }
-
-    // no retry
-    if (mpc.httpOpenDelegate == nil)
-        return 0;
-
-    NSString *url = [NSString stringWithUTF8String:realData->url];
-    NSString *newUrl = [mpc.httpOpenDelegate onHttpOpen:realData->segment_index url:url];
-    if (newUrl == nil)
-        return -1;
-
-    if (newUrl != url) {
-        const char *newUrlUTF8 = [newUrl UTF8String];
-        strlcpy(realData->url, newUrlUTF8, sizeof(realData->url));
-        realData->url[sizeof(realData->url) - 1] = 0;
+    if (openData.isHandled) {
+        realData->is_handled = YES;
+        if (openData.isUrlChanged && openData.url != nil) {
+            realData->is_url_changed = YES;
+            const char *newUrlUTF8 = [openData.url UTF8String];
+            strlcpy(realData->url, newUrlUTF8, sizeof(realData->url));
+            realData->url[sizeof(realData->url) - 1] = 0;
+        }
     }
     
-    return 0;
-}
-
-
-static int onInjectLiveRetry(IJKFFMoviePlayerController *mpc, int type, void *data, size_t data_size)
-{
-    if (mpc == nil)
-        return -1;
-
-    IJKAVInject_OnUrlOpenData *realData = data;
-    if (realData == NULL || sizeof(IJKAVInject_OnUrlOpenData) != data_size) {
-        NSLog(@"onInjectHttpRetry: invalid call\n");
-        return -1;
-    }
-
-    // always try first time
-    if (mpc.liveRetryDelegate == nil)
-        return realData->retry_counter ? -1 : 0;
-
-    NSString *url = [NSString stringWithUTF8String:realData->url];
-    NSString *newUrl = [mpc.liveRetryDelegate onLiveRetry:realData->segment_index
-                                                      url:url
-                                               retryCount:realData->retry_counter];
-    if (newUrl == nil)
-        return -1;
-
-    if (newUrl != url) {
-        const char *newUrlUTF8 = [newUrl UTF8String];
-        strlcpy(realData->url, newUrlUTF8, sizeof(realData->url));
-        realData->url[sizeof(realData->url) - 1] = 0;
-    }
-
     return 0;
 }
 
@@ -1005,15 +912,15 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
 
     switch (message) {
         case IJKAVINJECT_CONCAT_RESOLVE_SEGMENT:
-            return onInjectConcatResolveSegment(mpc, message, data, data_size);
+            return onInjectUrlOpen(mpc.segmentOpenDelegate, message, data, data_size);
         case IJKAVINJECT_ON_TCP_OPEN:
-            return onInjectTcpOpen(mpc, message, data, data_size);
+            return onInjectUrlOpen(mpc.tcpOpenDelegate, message, data, data_size);
         case IJKAVINJECT_ON_HTTP_OPEN:
-            return onInjectHttpOpen(mpc, message, data, data_size);
+            return onInjectUrlOpen(mpc.httpOpenDelegate, message, data, data_size);
         case IJKAVINJECT_ON_LIVE_RETRY:
-            return onInjectLiveRetry(mpc, message, data, data_size);
+            return onInjectUrlOpen(mpc.liveOpenDelegate, message, data, data_size);
         default: {
-            return -1;
+            return 0;
         }
     }
 }

@@ -91,14 +91,9 @@
     self.mediaControl.delegatePlayer = self.player;
 }
 
-- (NSString *)onHttpOpen:(int)streamIndex url:(NSString *)url
+- (BOOL)willOpenUrl:(IJKMediaUrlOpenData*) urlOpenData
 {
-    return url;
-}
-
-- (NSString *)onTcpOpen:(int)streamIndex url:(NSString *)url
-{
-    return url;
+    return YES;
 }
 
 - (void)viewWillAppear:(BOOL)animated {

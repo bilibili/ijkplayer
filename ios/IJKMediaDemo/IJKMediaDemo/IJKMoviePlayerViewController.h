@@ -18,7 +18,7 @@
 #import <IJKMediaFramework/IJKMediaFramework.h>
 @class IJKMediaControl;
 
-@interface IJKVideoViewController : UIViewController <IJKMediaHttpOpenDelegate, IJKMediaTcpOpenDelegate>
+@interface IJKVideoViewController : UIViewController <IJKMediaUrlOpenDelegate>
 
 @property(atomic,strong) NSURL *url;
 @property(atomic, retain) id<IJKMediaPlayback> player;

@@ -38,3 +38,65 @@ NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification = @"IJKMPMoviePlaye
 
 NSString *const IJKMPMoviePlayerFirstVideoFrameRenderedNotification = @"IJKMPMoviePlayerFirstVideoFrameRenderedNotification";
 NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification = @"IJKMPMoviePlayerFirstAudioFrameRenderedNotification";
+
+@implementation IJKMediaUrlOpenData {
+    NSString *_url;
+    BOOL _handled;
+    BOOL _urlChanged;
+}
+
+- (id)initWithUrl:(NSString *)url
+         openType:(IJKMediaUrlOpenType)openType
+     segmentIndex:(int)segmentIndex
+     retryCounter:(int)retryCounter
+{
+    self = [super init];
+    if (self) {
+        self->_url          = url;
+        self->_openType     = openType;
+        self->_segmentIndex = segmentIndex;
+        self->_retryCounter = retryCounter;
+
+        self->_error        = 0;
+        self->_handled      = NO;
+        self->_urlChanged   = NO;
+    }
+    return self;
+}
+
+- (void)setHandled:(BOOL)handled
+{
+    _handled = handled;
+}
+
+- (BOOL)isHandled
+{
+    return _handled;
+}
+
+- (BOOL)isUrlChanged
+{
+    return _urlChanged;
+}
+
+- (NSString *)url
+{
+    return _url;
+}
+
+- (void)setUrl:(NSString *)url
+{
+    assert(url);
+
+    _handled = YES;
+
+    if (url == _url)
+        return;
+
+    if ([self.url compare:url]) {
+        _urlChanged = YES;
+        _url = url;
+    }
+}
+
+@end
