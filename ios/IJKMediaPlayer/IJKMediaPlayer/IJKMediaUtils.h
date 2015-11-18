@@ -24,11 +24,6 @@
 
 @interface IJKMediaUtils : NSObject
 
-+ (int)createTempFDForFFConcat;
-+ (int)createTempFDWithPrefix: (NSString*)aPrefix;
-+ (int)createTempFDInDirectory: (NSString*)aDirectory
-                    withPrefix: (NSString*)aPrefix;
-
 + (NSError*)createErrorWithDomain: (NSString*)domain
                              code: (NSInteger)code
                       description: (NSString*)description
