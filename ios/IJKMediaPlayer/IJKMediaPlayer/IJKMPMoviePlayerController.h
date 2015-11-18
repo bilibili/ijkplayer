@@ -21,6 +21,7 @@
  */
 
 #import "IJKMediaPlayback.h"
+#import <MediaPlayer/MediaPlayer.h>
 
 @interface IJKMPMoviePlayerController : MPMoviePlayerController <IJKMediaPlayback>
 

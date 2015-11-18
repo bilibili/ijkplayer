@@ -22,11 +22,45 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <MediaPlayer/MediaPlayer.h>
 
+typedef NS_ENUM(NSInteger, IJKMPMovieScalingMode) {
+    IJKMPMovieScalingModeNone,       // No scaling
+    IJKMPMovieScalingModeAspectFit,  // Uniform scale until one dimension fits
+    IJKMPMovieScalingModeAspectFill, // Uniform scale until the movie fills the visible bounds. One dimension may have clipped contents
+    IJKMPMovieScalingModeFill        // Non-uniform scale. Both render dimensions will exactly match the visible bounds
+};
+
+typedef NS_ENUM(NSInteger, IJKMPMoviePlaybackState) {
+    IJKMPMoviePlaybackStateStopped,
+    IJKMPMoviePlaybackStatePlaying,
+    IJKMPMoviePlaybackStatePaused,
+    IJKMPMoviePlaybackStateInterrupted,
+    IJKMPMoviePlaybackStateSeekingForward,
+    IJKMPMoviePlaybackStateSeekingBackward
+};
+
+typedef NS_OPTIONS(NSUInteger, IJKMPMovieLoadState) {
+    IJKMPMovieLoadStateUnknown        = 0,
+    IJKMPMovieLoadStatePlayable       = 1 << 0,
+    IJKMPMovieLoadStatePlaythroughOK  = 1 << 1, // Playback will be automatically started in this state when shouldAutoplay is YES
+    IJKMPMovieLoadStateStalled        = 1 << 2, // Playback will be automatically paused in this state, if started
+};
+
+typedef NS_ENUM(NSInteger, IJKMPMovieFinishReason) {
+    IJKMPMovieFinishReasonPlaybackEnded,
+    IJKMPMovieFinishReasonPlaybackError,
+    IJKMPMovieFinishReasonUserExited
+};
+
+// -----------------------------------------------------------------------------
+// Thumbnails
+
+typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
+    IJKMPMovieTimeOptionNearestKeyFrame,
+    IJKMPMovieTimeOptionExact
+};
 
 @protocol IJKMediaPlayback;
-
 
 #pragma mark IJKMediaPlayback
 
@@ -47,14 +81,13 @@
 @property(nonatomic, readonly)  NSInteger bufferingProgress;
 
 @property(nonatomic, readonly)  BOOL isPreparedToPlay;
-@property(nonatomic, readonly)  MPMoviePlaybackState playbackState;
-@property(nonatomic, readonly)  MPMovieLoadState loadState;
+@property(nonatomic, readonly)  IJKMPMoviePlaybackState playbackState;
+@property(nonatomic, readonly)  IJKMPMovieLoadState loadState;
 
 @property(nonatomic, readonly) int64_t numberOfBytesTransferred;
 
-@property(nonatomic) MPMovieControlStyle controlStyle;
 @property(nonatomic, readonly) CGSize naturalSize;
-@property(nonatomic) MPMovieScalingMode scalingMode;
+@property(nonatomic) IJKMPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;
 
 @property (nonatomic) BOOL allowsMediaAirPlay;
@@ -73,18 +106,19 @@
 #define IJK_EXTERN extern __attribute__((visibility ("default")))
 #endif
 
-IJK_EXTERN NSString *const IJKMediaPlaybackIsPreparedToPlayDidChangeNotification;
+IJK_EXTERN NSString *const IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification;
 
-IJK_EXTERN NSString *const IJKMoviePlayerLoadStateDidChangeNotification;
-IJK_EXTERN NSString *const IJKMoviePlayerPlaybackDidFinishNotification;
-IJK_EXTERN NSString *const IJKMoviePlayerPlaybackStateDidChangeNotification;
-IJK_EXTERN NSString *const IJKMoviePlayerVideoSizeChangeNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerLoadStateDidChangeNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerPlaybackDidFinishNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey;
+IJK_EXTERN NSString *const IJKMPMoviePlayerPlaybackStateDidChangeNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerVideoSizeChangeNotification;
 
-IJK_EXTERN NSString *const IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification;
-IJK_EXTERN NSString *const IJKMoviePlayerVideoDecoderOpenNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification;
 
-IJK_EXTERN NSString *const IJKMoviePlayerFirstVideoFrameRenderedNotification;
-IJK_EXTERN NSString *const IJKMoviePlayerFirstAudioFrameRenderedNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerFirstVideoFrameRenderedNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification;
 @end
 
 #pragma mark IJKMediaResource
