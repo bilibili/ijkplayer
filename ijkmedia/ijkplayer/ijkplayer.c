@@ -44,6 +44,10 @@ inline static void ijkmp_destroy(IjkMediaPlayer *mp)
         return;
 
     ffp_destroy_p(&mp->ffplayer);
+    if (mp->msg_thread) {
+        SDL_WaitThread(mp->msg_thread, NULL);
+        mp->msg_thread = NULL;
+    }
 
     pthread_mutex_destroy(&mp->mutex);
 
@@ -355,7 +359,6 @@ static int ijkmp_msg_loop(void *arg)
 {
     IjkMediaPlayer *mp = arg;
     int ret = mp->msg_loop(arg);
-    SDL_DetachThread(mp->msg_thread);
     return ret;
 }
 
