@@ -81,7 +81,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (IOS_NEWER_OR_EQUAL_TO_7) {
+    if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_7_0) {
         return self.sampleList.count;
     } else {
         return self.sampleList.count - 1;
