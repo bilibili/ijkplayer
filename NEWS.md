@@ -1,5 +1,7 @@
 tag next
 --------------------------------
+- ios: replace MPMoviePlayerXXX with IJKMPMoviePlayerXXX
+- ios: remove target 'IjkMediaPlayer'. 'IjkMediaFramework' should be used instead.
 
 tag k0.4.3
 --------------------------------
