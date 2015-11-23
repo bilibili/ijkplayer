@@ -6,7 +6,8 @@ android:
     - build-tools-23.0.0
     - android-23
     - extra-android-support
+    - extra-android-m2repository
 
 script:
     - cd android/ijkplayer
-    - ./gradlew assembleRelease
+    - ./gradlew assemble
