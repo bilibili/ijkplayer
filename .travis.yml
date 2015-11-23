@@ -9,4 +9,4 @@ android:
 
 script:
     - cd android/ijkplayer
-    - ./gradlew
+    - ./gradlew assembleRelease
