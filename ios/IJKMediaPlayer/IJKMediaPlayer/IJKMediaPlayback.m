@@ -24,13 +24,15 @@
 
 NSString *const IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification = @"IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification";
 
-NSString *const IJKMPMoviePlayerLoadStateDidChangeNotification = @"IJKMPMoviePlayerLoadStateDidChangeNotification";
 NSString *const IJKMPMoviePlayerPlaybackDidFinishNotification = @"IJKMPMoviePlayerPlaybackDidFinishNotification";
 NSString *const IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey =
     @"IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey";
 NSString *const IJKMPMoviePlayerPlaybackStateDidChangeNotification = @"IJKMPMoviePlayerPlaybackStateDidChangeNotification";
+NSString *const IJKMPMoviePlayerLoadStateDidChangeNotification = @"IJKMPMoviePlayerLoadStateDidChangeNotification";
 
 NSString *const IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification = @"IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification";
+
+NSString *const IJKMPMovieNaturalSizeAvailableNotification = @"IJKMPMovieNaturalSizeAvailableNotification";
 
 NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification = @"IJKMPMoviePlayerVideoDecoderOpenNotification";
 

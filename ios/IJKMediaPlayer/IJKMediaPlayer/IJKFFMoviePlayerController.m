@@ -540,6 +540,12 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
         self->_naturalSize = CGSizeMake(_videoWidth, _videoHeight);
     }
     [self didChangeValueForKey:@"naturalSize"];
+
+    if (self->_naturalSize.width > 0 && self->_naturalSize.height > 0) {
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:IJKMPMovieNaturalSizeAvailableNotification
+         object:self];
+    }
 }
 
 - (void)setScalingMode: (IJKMPMovieScalingMode) aScalingMode

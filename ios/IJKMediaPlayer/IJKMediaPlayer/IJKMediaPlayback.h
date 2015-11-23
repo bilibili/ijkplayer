@@ -106,19 +106,47 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 #define IJK_EXTERN extern __attribute__((visibility ("default")))
 #endif
 
+// -----------------------------------------------------------------------------
+//  MPMediaPlayback.h
+
+// Posted when the prepared state changes of an object conforming to the MPMediaPlayback protocol changes.
+// This supersedes MPMoviePlayerContentPreloadDidFinishNotification.
 IJK_EXTERN NSString *const IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification;
 
-IJK_EXTERN NSString *const IJKMPMoviePlayerLoadStateDidChangeNotification;
-IJK_EXTERN NSString *const IJKMPMoviePlayerPlaybackDidFinishNotification;
-IJK_EXTERN NSString *const IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey;
-IJK_EXTERN NSString *const IJKMPMoviePlayerPlaybackStateDidChangeNotification;
-IJK_EXTERN NSString *const IJKMPMoviePlayerVideoSizeChangeNotification;
+// -----------------------------------------------------------------------------
+//  MPMoviePlayerController.h
+//  Movie Player Notifications
 
-IJK_EXTERN NSString *const IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification;
+// Posted when the scaling mode changes.
+IJK_EXTERN NSString* const IJKMPMoviePlayerScalingModeDidChangeNotification;
+
+// Posted when movie playback ends or a user exits playback.
+IJK_EXTERN NSString* const IJKMPMoviePlayerPlaybackDidFinishNotification;
+IJK_EXTERN NSString* const IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey; // NSNumber (IJKMPMovieFinishReason)
+
+// Posted when the playback state changes, either programatically or by the user.
+IJK_EXTERN NSString* const IJKMPMoviePlayerPlaybackStateDidChangeNotification;
+
+// Posted when the network load state changes.
+IJK_EXTERN NSString* const IJKMPMoviePlayerLoadStateDidChangeNotification;
+
+// Posted when the movie player begins or ends playing video via AirPlay.
+IJK_EXTERN NSString* const IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification;
+
+// -----------------------------------------------------------------------------
+// Movie Property Notifications
+
+// Calling -prepareToPlay on the movie player will begin determining movie properties asynchronously.
+// These notifications are posted when the associated movie property becomes available.
+IJK_EXTERN NSString* const IJKMPMovieNaturalSizeAvailableNotification;
+
+// -----------------------------------------------------------------------------
+//  Extend Notifications
+
 IJK_EXTERN NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification;
-
 IJK_EXTERN NSString *const IJKMPMoviePlayerFirstVideoFrameRenderedNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification;
+
 @end
 
 #pragma mark IJKMediaResource
