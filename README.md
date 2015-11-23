@@ -1,6 +1,6 @@
-ijkplayer
-=========
-- Video player based on [ffplay](http://ffmpeg.org)
+# ijkplayer [![Build Status](https://travis-ci.org/Bilibili/ijkplayer.svg?branch=master)](https://travis-ci.org/Bilibili/ijkplayer)
+
+Video player based on [ffplay](http://ffmpeg.org)
 
 ### Download
 
