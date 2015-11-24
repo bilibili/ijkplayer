@@ -261,14 +261,16 @@ static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDiction
 
     ret = ijkurlhook_reconnect(h, NULL);
     while (ret) {
+        int inject_ret = 0;
+
         switch (ret) {
             case AVERROR_EXIT:
                 goto fail;
         }
 
         c->inject_data.retry_counter++;
-        ret = ijkurlhook_call_inject(h);
-        if (ret) {
+        inject_ret = ijkurlhook_call_inject(h);
+        if (inject_ret) {
             ret = AVERROR_EXIT;
             goto fail;
         }
