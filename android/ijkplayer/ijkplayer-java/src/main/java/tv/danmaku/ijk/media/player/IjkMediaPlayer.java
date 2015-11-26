@@ -806,7 +806,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private native void native_message_loop(Object IjkMediaPlayer_this);
 
-    protected void finalize() {
+    protected void finalize() throws Throwable {
         super.finalize();
         native_finalize();
     }

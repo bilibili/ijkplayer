@@ -35,13 +35,13 @@ public class DebugLog {
         }
     }
 
-    public static int e(String tag, String msg, Throwable tr) {
+    public static void e(String tag, String msg, Throwable tr) {
         if (ENABLE_ERROR) {
             Log.e(tag, msg, tr);
         }
     }
 
-    public static int efmt(String tag, String fmt, Object... args) {
+    public static void efmt(String tag, String fmt, Object... args) {
         if (ENABLE_ERROR) {
             String msg = String.format(Locale.US, fmt, args);
             Log.e(tag, msg);
