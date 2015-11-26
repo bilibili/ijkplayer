@@ -31,7 +31,7 @@ public class AndroidTrackInfo implements ITrackInfo {
         return null;
     }
 
-    public static AndroidTrackInfo[] fromTrackInfo(MediaPlayer.TrackInfo[] trackInfos) {
+    private static AndroidTrackInfo[] fromTrackInfo(MediaPlayer.TrackInfo[] trackInfos) {
         if (trackInfos == null)
             return null;
 
@@ -43,7 +43,7 @@ public class AndroidTrackInfo implements ITrackInfo {
         return androidTrackInfo;
     }
 
-    public AndroidTrackInfo(MediaPlayer.TrackInfo trackInfo) {
+    private AndroidTrackInfo(MediaPlayer.TrackInfo trackInfo) {
         mTrackInfo = trackInfo;
     }
 
