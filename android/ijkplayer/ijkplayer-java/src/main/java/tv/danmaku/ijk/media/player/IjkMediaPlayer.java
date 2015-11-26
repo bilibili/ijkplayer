@@ -389,6 +389,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 if (!TextUtils.isEmpty(value))
                     sb.append(entry.getValue());
                 sb.append("\r\n");
+                setOption(OPT_CATEGORY_FORMAT, "headers", sb.toString());
             }
         }
         setDataSource(path);
