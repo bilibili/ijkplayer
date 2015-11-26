@@ -21,7 +21,7 @@ import java.util.Locale;
 
 import android.util.Log;
 
-@SuppressWarnings("SameParameterValue")
+@SuppressWarnings({"SameParameterValue", "WeakerAccess"})
 public class DebugLog {
     public static final boolean ENABLE_ERROR = Pragma.ENABLE_VERBOSE;
     public static final boolean ENABLE_INFO = Pragma.ENABLE_VERBOSE;
