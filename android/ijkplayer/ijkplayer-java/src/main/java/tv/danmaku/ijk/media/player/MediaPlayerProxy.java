@@ -31,7 +31,7 @@ import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 
 public class MediaPlayerProxy implements IMediaPlayer {
-    protected IMediaPlayer mBackEndMediaPlayer;
+    protected final IMediaPlayer mBackEndMediaPlayer;
 
     public MediaPlayerProxy(IMediaPlayer backEndMediaPlayer) {
         mBackEndMediaPlayer = backEndMediaPlayer;

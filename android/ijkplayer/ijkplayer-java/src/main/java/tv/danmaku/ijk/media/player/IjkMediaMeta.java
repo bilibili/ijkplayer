@@ -115,7 +115,7 @@ public class IjkMediaMeta {
     public long mStartUS;
     public long mBitrate;
 
-    public ArrayList<IjkStreamMeta> mStreams = new ArrayList<IjkStreamMeta>();
+    public final ArrayList<IjkStreamMeta> mStreams = new ArrayList<IjkStreamMeta>();
     public IjkStreamMeta mVideoStream;
     public IjkStreamMeta mAudioStream;
 
@@ -242,7 +242,7 @@ public class IjkMediaMeta {
     public static class IjkStreamMeta {
         public Bundle mMeta;
 
-        public int mIndex;
+        public final int mIndex;
         public String mType;
 
         // common

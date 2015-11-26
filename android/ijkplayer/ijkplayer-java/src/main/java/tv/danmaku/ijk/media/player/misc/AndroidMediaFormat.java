@@ -21,7 +21,7 @@ import android.media.MediaFormat;
 import android.os.Build;
 
 public class AndroidMediaFormat implements IMediaFormat {
-    private MediaFormat mMediaFormat;
+    private final MediaFormat mMediaFormat;
 
     public AndroidMediaFormat(MediaFormat mediaFormat) {
         mMediaFormat = mediaFormat;

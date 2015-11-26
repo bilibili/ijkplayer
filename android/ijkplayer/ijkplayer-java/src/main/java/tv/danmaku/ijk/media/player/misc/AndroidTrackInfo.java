@@ -22,7 +22,7 @@ import android.media.MediaPlayer;
 import android.os.Build;
 
 public class AndroidTrackInfo implements ITrackInfo {
-    private MediaPlayer.TrackInfo mTrackInfo;
+    private final MediaPlayer.TrackInfo mTrackInfo;
 
     public static AndroidTrackInfo[] fromMediaPlayer(MediaPlayer mp) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)

@@ -138,7 +138,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      * Default library loader
      * Load them by yourself, if your libraries are not installed at default place.
      */
-    private static IjkLibLoader sLocalLibLoader = new IjkLibLoader() {
+    private static final IjkLibLoader sLocalLibLoader = new IjkLibLoader() {
         @Override
         public void loadLibrary(String libName) throws UnsatisfiedLinkError, SecurityException {
             System.loadLibrary(libName);
@@ -810,7 +810,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     }
 
     private static class EventHandler extends Handler {
-        private WeakReference<IjkMediaPlayer> mWeakPlayer;
+        private final WeakReference<IjkMediaPlayer> mWeakPlayer;
 
         public EventHandler(IjkMediaPlayer mp, Looper looper) {
             super(looper);
@@ -1047,7 +1047,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     }
 
     public static class DefaultMediaCodecSelector implements OnMediaCodecSelectListener {
-        public static DefaultMediaCodecSelector sInstance = new DefaultMediaCodecSelector();
+        public static final DefaultMediaCodecSelector sInstance = new DefaultMediaCodecSelector();
 
         @SuppressWarnings("deprecation")
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
