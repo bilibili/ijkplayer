@@ -47,8 +47,6 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     private Object mInitLock = new Object();
     private boolean mIsReleased;
 
-    private boolean mKeepInBackground;
-
     private static MediaInfo sMediaInfo;
 
     public AndroidMediaPlayer() {
@@ -328,7 +326,6 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public void setKeepInBackground(boolean keepInBackground) {
-        mKeepInBackground = keepInBackground;
     }
 
     /*--------------------
