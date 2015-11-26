@@ -18,6 +18,7 @@ package tv.danmaku.ijk.media.player.misc;
 
 import java.io.IOException;
 
+@SuppressWarnings("RedundantThrows")
 public interface IMediaDataSource {
     int	 readAt(long position, byte[] buffer, int offset, int size) throws IOException;
 
