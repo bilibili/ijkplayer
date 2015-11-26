@@ -333,8 +333,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getDeclaredLength());
             }
             return;
-        } catch (SecurityException ex) {
-        } catch (IOException ex) {
+        } catch (SecurityException ignored) {
+        } catch (IOException ignored) {
         } finally {
             if (fd != null) {
                 fd.close();
