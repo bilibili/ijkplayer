@@ -86,6 +86,7 @@ public class IjkMediaFormat implements IMediaFormat {
 
         protected abstract String doFormat(IjkMediaFormat mediaFormat);
 
+        @SuppressWarnings("SameReturnValue")
         protected String getDefaultString() {
             return "N/A";
         }
