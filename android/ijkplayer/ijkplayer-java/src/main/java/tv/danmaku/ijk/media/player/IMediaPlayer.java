@@ -108,6 +108,7 @@ public interface IMediaPlayer {
 
     MediaInfo getMediaInfo();
 
+    @SuppressWarnings("EmptyMethod")
     @Deprecated
     void setLogEnabled(boolean enable);
 
