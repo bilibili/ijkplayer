@@ -87,8 +87,13 @@ public class AndroidTrackInfo implements ITrackInfo {
         return out.toString();
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public String getInfoInline() {
-        return mTrackInfo.toString();
+        if (mTrackInfo != null) {
+            return mTrackInfo.toString();
+        } else {
+            return "null";
+        }
     }
 }
