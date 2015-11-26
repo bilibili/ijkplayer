@@ -18,6 +18,7 @@ package tv.danmaku.ijk.media.player;
 
 import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 
+@SuppressWarnings("WeakerAccess")
 public abstract class AbstractMediaPlayer implements IMediaPlayer {
     private OnPreparedListener mOnPreparedListener;
     private OnCompletionListener mOnCompletionListener;
