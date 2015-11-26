@@ -29,129 +29,99 @@ public class DebugLog {
     public static final boolean ENABLE_DEBUG = Pragma.ENABLE_VERBOSE;
     public static final boolean ENABLE_VERBOSE = Pragma.ENABLE_VERBOSE;
 
-    public static int e(String tag, String msg) {
+    public static void e(String tag, String msg) {
         if (ENABLE_ERROR) {
-            return Log.e(tag, msg);
+            Log.e(tag, msg);
         }
-
-        return 0;
     }
 
     public static int e(String tag, String msg, Throwable tr) {
         if (ENABLE_ERROR) {
-            return Log.e(tag, msg, tr);
+            Log.e(tag, msg, tr);
         }
-
-        return 0;
     }
 
     public static int efmt(String tag, String fmt, Object... args) {
         if (ENABLE_ERROR) {
             String msg = String.format(Locale.US, fmt, args);
-            return Log.e(tag, msg);
+            Log.e(tag, msg);
         }
-
-        return 0;
     }
 
-    public static int i(String tag, String msg) {
+    public static void i(String tag, String msg) {
         if (ENABLE_INFO) {
-            return Log.i(tag, msg);
+            Log.i(tag, msg);
         }
-
-        return 0;
     }
 
-    public static int i(String tag, String msg, Throwable tr) {
+    public static void i(String tag, String msg, Throwable tr) {
         if (ENABLE_INFO) {
-            return Log.i(tag, msg, tr);
+            Log.i(tag, msg, tr);
         }
-
-        return 0;
     }
 
-    public static int ifmt(String tag, String fmt, Object... args) {
+    public static void ifmt(String tag, String fmt, Object... args) {
         if (ENABLE_INFO) {
             String msg = String.format(Locale.US, fmt, args);
-            return Log.i(tag, msg);
+            Log.i(tag, msg);
         }
-
-        return 0;
     }
 
-    public static int w(String tag, String msg) {
+    public static void w(String tag, String msg) {
         if (ENABLE_WARN) {
-            return Log.w(tag, msg);
+            Log.w(tag, msg);
         }
-
-        return 0;
     }
 
-    public static int w(String tag, String msg, Throwable tr) {
+    public static void w(String tag, String msg, Throwable tr) {
         if (ENABLE_WARN) {
-            return Log.w(tag, msg, tr);
+            Log.w(tag, msg, tr);
         }
-
-        return 0;
     }
 
-    public static int wfmt(String tag, String fmt, Object... args) {
+    public static void wfmt(String tag, String fmt, Object... args) {
         if (ENABLE_WARN) {
             String msg = String.format(Locale.US, fmt, args);
-            return Log.w(tag, msg);
+            Log.w(tag, msg);
         }
-
-        return 0;
     }
 
-    public static int d(String tag, String msg) {
+    public static void d(String tag, String msg) {
         if (ENABLE_DEBUG) {
-            return Log.d(tag, msg);
+            Log.d(tag, msg);
         }
-
-        return 0;
     }
 
-    public static int d(String tag, String msg, Throwable tr) {
+    public static void d(String tag, String msg, Throwable tr) {
         if (ENABLE_DEBUG) {
-            return Log.d(tag, msg, tr);
+            Log.d(tag, msg, tr);
         }
-
-        return 0;
     }
 
-    public static int dfmt(String tag, String fmt, Object... args) {
+    public static void dfmt(String tag, String fmt, Object... args) {
         if (ENABLE_DEBUG) {
             String msg = String.format(Locale.US, fmt, args);
-            return Log.d(tag, msg);
+            Log.d(tag, msg);
         }
-
-        return 0;
     }
 
-    public static int v(String tag, String msg) {
+    public static void v(String tag, String msg) {
         if (ENABLE_VERBOSE) {
-            return Log.v(tag, msg);
+            Log.v(tag, msg);
         }
-
-        return 0;
     }
 
-    public static int v(String tag, String msg, Throwable tr) {
+    public static void v(String tag, String msg, Throwable tr) {
         if (ENABLE_VERBOSE) {
-            return Log.v(tag, msg, tr);
+            Log.v(tag, msg, tr);
         }
-
-        return 0;
     }
 
-    public static int vfmt(String tag, String fmt, Object... args) {
+    public static void vfmt(String tag, String fmt, Object... args) {
         if (ENABLE_VERBOSE) {
             String msg = String.format(Locale.US, fmt, args);
-            return Log.v(tag, msg);
+            Log.v(tag, msg);
         }
-
-        return 0;
     }
 
     public static void printStackTrace(Throwable e) {
