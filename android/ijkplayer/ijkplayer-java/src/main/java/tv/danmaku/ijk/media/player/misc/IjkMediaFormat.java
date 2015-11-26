@@ -125,8 +125,7 @@ public class IjkMediaFormat implements IMediaFormat {
                 sb.append(profile);
 
                 String codecName = mediaFormat.getString(IjkMediaMeta.IJKM_KEY_CODEC_NAME);
-                if (TextUtils.isEmpty(codecName)) {
-                } else if (codecName.equalsIgnoreCase(CODEC_NAME_H264)) {
+                if (!TextUtils.isEmpty(codecName) && codecName.equalsIgnoreCase(CODEC_NAME_H264)) {
                     int level = mediaFormat.getInteger(IjkMediaMeta.IJKM_KEY_CODEC_LEVEL);
                     if (level < 10)
                         return sb.toString();
