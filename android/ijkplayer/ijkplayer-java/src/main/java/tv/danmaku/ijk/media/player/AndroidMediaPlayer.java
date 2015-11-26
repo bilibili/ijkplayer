@@ -359,19 +359,15 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         @Override
         public boolean onInfo(MediaPlayer mp, int what, int extra) {
             AndroidMediaPlayer self = mWeakMediaPlayer.get();
-            if (self == null)
-                return false;
+            return self != null && notifyOnInfo(what, extra);
 
-            return notifyOnInfo(what, extra);
         }
 
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
             AndroidMediaPlayer self = mWeakMediaPlayer.get();
-            if (self == null)
-                return false;
+            return self != null && notifyOnError(what, extra);
 
-            return notifyOnError(what, extra);
         }
 
         @Override
