@@ -899,7 +899,6 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
             default:
                 DebugLog.e(TAG, "Unknown message type " + msg.what);
-                return;
             }
         }
     }
@@ -943,8 +942,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         mOnControlMessageListener = listener;
     }
 
-    public static interface OnControlMessageListener {
-        public String onControlResolveSegmentUrl(int segment);
+    public interface OnControlMessageListener {
+        String onControlResolveSegmentUrl(int segment);
     }
 
     /*
@@ -1016,8 +1015,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      * MediaCodec select
      */
 
-    public static interface OnMediaCodecSelectListener {
-        public String onMediaCodecSelect(IMediaPlayer mp, String mimeType, int profile, int level);
+    public interface OnMediaCodecSelectListener {
+        String onMediaCodecSelect(IMediaPlayer mp, String mimeType, int profile, int level);
     }
     private OnMediaCodecSelectListener mOnMediaCodecSelectListener;
     public void setOnMediaCodecSelectListener(OnMediaCodecSelectListener listener) {
