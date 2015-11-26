@@ -46,12 +46,7 @@ public class IjkTrackInfo implements ITrackInfo {
 
     @Override
     public String toString() {
-        StringBuilder out = new StringBuilder(128);
-        out.append(getClass().getSimpleName());
-        out.append('{');
-        out.append(getInfoInline());
-        out.append("}");
-        return out.toString();
+        return getClass().getSimpleName() + '{' + getInfoInline() + "}";
     }
 
     @Override
