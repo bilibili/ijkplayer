@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.Locale;
 
+@SuppressWarnings("SameParameterValue")
 public class IjkMediaMeta {
     // media meta
     public static final String IJKM_KEY_FORMAT = "format";
