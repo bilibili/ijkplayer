@@ -232,7 +232,6 @@ static IJKAVMoviePlayerController* instance;
 - (void)setScreenOn: (BOOL)on
 {
     [IJKMediaModule sharedModule].mediaModuleIdleTimerDisabled = on;
-    // [UIApplication sharedApplication].idleTimerDisabled = on;
 }
 
 - (void)dealloc
@@ -274,6 +273,7 @@ static IJKAVMoviePlayerController* instance;
 - (void)stop
 {
     [_player pause];
+    [self setScreenOn:NO];
     _isCompleted = YES;
 }
 
@@ -644,7 +644,8 @@ static IJKAVMoviePlayerController* instance;
     dispatch_async(dispatch_get_main_queue(), ^{
         [self didPlaybackStateChange];
         [self didLoadStateChange];
-        
+        [self setScreenOn:NO];
+ 
         if (blockError == nil) {
             blockError = [[NSError alloc] init];
         }
@@ -685,7 +686,8 @@ static IJKAVMoviePlayerController* instance;
     dispatch_async(dispatch_get_main_queue(), ^{
         [self didPlaybackStateChange];
         [self didLoadStateChange];
-        
+        [self setScreenOn:NO];
+ 
         [[NSNotificationCenter defaultCenter]
          postNotificationName:IJKMPMoviePlayerPlaybackDidFinishNotification
          object:self
