@@ -124,6 +124,8 @@ static void func_free_l(SDL_Vout *vout)
             ANativeWindow_release(opaque->native_window);
             opaque->native_window = NULL;
         }
+
+        SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
     }
 
     SDL_Vout_FreeInternal(vout);
