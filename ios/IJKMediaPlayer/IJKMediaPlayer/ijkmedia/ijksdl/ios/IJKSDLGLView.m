@@ -647,8 +647,8 @@ exit:
     }
 
     if (_didRelayoutSubViews) {
-        [self layoutOnDisplayThread];
         _didRelayoutSubViews = NO;
+        [self layoutOnDisplayThread];
     }
 
     if (_didSetContentMode || _didPaddingChanged) {
