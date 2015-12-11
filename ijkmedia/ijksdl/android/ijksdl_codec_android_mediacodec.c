@@ -23,6 +23,7 @@
 
 #include "ijksdl_codec_android_mediacodec.h"
 #include <assert.h>
+#include "ijksdl/ijksdl_log.h"
 
 static int g_amediacodec_object_serial;
 
@@ -86,7 +87,8 @@ sdl_amedia_status_t SDL_AMediaCodec_configure_surface(
 void SDL_AMediaCodec_increaseReference(SDL_AMediaCodec *acodec)
 {
     assert(acodec);
-    __sync_fetch_and_add(&acodec->ref_count, 1);
+    int ref_count = __sync_add_and_fetch(&acodec->ref_count, 1);
+    ALOGD("%s(): ref=%d\n", __func__, ref_count);
 }
 
 void SDL_AMediaCodec_decreaseReference(SDL_AMediaCodec *acodec)
@@ -95,8 +97,8 @@ void SDL_AMediaCodec_decreaseReference(SDL_AMediaCodec *acodec)
         return;
 
     int ref_count = __sync_sub_and_fetch(&acodec->ref_count, 1);
+    ALOGD("%s(): ref=%d\n", __func__, ref_count);
     if (ref_count == 0) {
-        AMCTRACE("%s(): ref=0\n", __func__);
         if (SDL_AMediaCodec_isStarted(acodec)) {
             SDL_AMediaCodec_stop(acodec);
         }
