@@ -32,9 +32,11 @@
 - (void) display: (SDL_VoutOverlay *) overlay;
 
 - (UIImage*) snapshot;
+- (void)setHudValue:(NSString *)value forKey:(NSString *)key;
 
 @property(nonatomic,strong) NSLock  *appActivityLock;
 @property(nonatomic)        CGFloat  fps;
 @property(nonatomic)        CGFloat  scaleFactor;
+@property(nonatomic)        BOOL     shouldShowHudView;
 
 @end

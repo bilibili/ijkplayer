@@ -69,5 +69,6 @@ struct IjkMediaPlayer;
 -(void)setPlayerOptionIntValue:    (int64_t)value forKey:(NSString *)key;
 
 @property(nonatomic) BOOL useRenderQueue;
+@property(nonatomic) BOOL showHudView;
 
 @end

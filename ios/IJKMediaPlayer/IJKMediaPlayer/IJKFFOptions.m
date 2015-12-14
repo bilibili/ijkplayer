@@ -51,6 +51,7 @@
     [options setCodecOptionIntValue:IJK_AVDISCARD_NONREF    forKey:@"skip_frame"];
 
     options.useRenderQueue = NO;
+    options.showHudView   = NO;
 
     return options;
 }

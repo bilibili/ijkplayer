@@ -30,7 +30,7 @@
 #import "IJKSDLGLRenderNV12.h"
 #include "ijksdl/ijksdl_timer.h"
 #include "ijksdl/ios/ijksdl_ios.h"
-
+#import "IJKSDLHudViewController.h"
 
 static NSString *const g_vertexShaderString = IJK_SHADER_STRING
 (
@@ -184,6 +184,8 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
 
     BOOL                _useRenderQueue;
     dispatch_queue_t    _renderQueue;
+
+    IJKSDLHudViewController *_hudViewController;
 }
 
 enum {
@@ -225,6 +227,9 @@ static int g_ijk_gles_queue_spec_key;
 
         _didSetupGL = NO;
         [self setupGLOnce];
+
+        _hudViewController = [[IJKSDLHudViewController alloc] init];
+        [self addSubview:_hudViewController.tableView];
     }
 
     return self;
@@ -411,6 +416,19 @@ static int g_ijk_gles_queue_spec_key;
 
 - (void)layoutSubviews
 {
+    [super layoutSubviews];
+
+    CGRect selfFrame = self.frame;
+    CGRect newFrame  = selfFrame;
+
+    newFrame.size.width   = selfFrame.size.width * 1 / 3;
+    newFrame.origin.x     = selfFrame.size.width * 2 / 3;
+
+    newFrame.size.height  = selfFrame.size.height * 6 / 8;
+    newFrame.origin.y    += selfFrame.size.height * 1 / 8;
+
+    _hudViewController.tableView.frame = newFrame;
+
     _didRelayoutSubViews = YES;
 }
 
@@ -928,6 +946,28 @@ exit:
     CGImageRelease(iref);
 
     return image;
+}
+
+#pragma mark IJKFFHudController
+- (void)setHudValue:(NSString *)value forKey:(NSString *)key
+{
+    if ([[NSThread currentThread] isMainThread]) {
+        [_hudViewController setHudValue:value forKey:key];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self setHudValue:value forKey:key];
+        });
+    }
+}
+
+- (void)setShouldShowHudView:(BOOL)shouldShowHudView
+{
+    _hudViewController.tableView.hidden = !shouldShowHudView;
+}
+
+- (BOOL)shouldShowHudView
+{
+    return !_hudViewController.tableView.hidden;
 }
 
 @end

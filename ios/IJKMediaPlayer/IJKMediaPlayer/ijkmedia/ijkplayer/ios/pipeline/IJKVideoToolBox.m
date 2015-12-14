@@ -327,7 +327,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             goto failed;
         }
 
-        ffp->vdps = SDL_SpeedSamplerAdd(&ctx->sampler, FFP_SHOW_VDPS_VIDEOTOOLBOX, "vdps[VideoToolbox]");
+        ffp->stat.vdps = SDL_SpeedSamplerAdd(&ctx->sampler, FFP_SHOW_VDPS_VIDEOTOOLBOX, "vdps[VideoToolbox]");
 #ifdef FFP_VTB_DISABLE_OUTPUT
         goto failed;
 #endif

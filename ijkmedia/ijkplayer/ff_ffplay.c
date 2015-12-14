@@ -398,7 +398,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
             case AVMEDIA_TYPE_VIDEO: {
                 ret = avcodec_decode_video2(d->avctx, frame, &got_frame, &d->pkt_temp);
                 if (got_frame) {
-                    ffp->vdps = SDL_SpeedSamplerAdd(&ffp->vdps_sampler, FFP_SHOW_VDPS_AVCODEC, "vdps[avcodec]");
+                    ffp->stat.vdps = SDL_SpeedSamplerAdd(&ffp->vdps_sampler, FFP_SHOW_VDPS_AVCODEC, "vdps[avcodec]");
                     if (ffp->decoder_reorder_pts == -1) {
                         frame->pts = av_frame_get_best_effort_timestamp(frame);
                     } else if (ffp->decoder_reorder_pts) {
@@ -651,7 +651,7 @@ static void video_image_display2(FFPlayer *ffp)
     vp = frame_queue_peek(&is->pictq);
     if (vp->bmp) {
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
-        ffp->vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
+        ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
         if (!ffp->first_video_frame_rendered) {
             ffp->first_video_frame_rendered = 1;
             ffp_notify_msg1(ffp, FFP_MSG_VIDEO_RENDERING_START);
@@ -950,7 +950,7 @@ static void step_to_next_frame_l(FFPlayer *ffp)
     is->step = 1;
 }
 
-static double compute_target_delay(double delay, VideoState *is)
+static double compute_target_delay(FFPlayer *ffp, double delay, VideoState *is)
 {
     double sync_threshold, diff = 0;
 
@@ -974,6 +974,10 @@ static double compute_target_delay(double delay, VideoState *is)
         }
     }
 
+    if (ffp) {
+        ffp->stat.avdelay = delay;
+        ffp->stat.avdiff  = diff;
+    }
 #ifdef FFP_SHOW_AUDIO_DELAY
     av_log(NULL, AV_LOG_TRACE, "video: delay=%0.3f A-V=%f\n",
             delay, -diff);
@@ -1055,7 +1059,7 @@ retry:
             if (redisplay)
                 delay = 0.0;
             else
-                delay = compute_target_delay(last_duration, is);
+                delay = compute_target_delay(ffp, last_duration, is);
 
             time= av_gettime_relative()/1000000.0;
             if (isnan(is->frame_timer) || time < is->frame_timer)
@@ -3691,6 +3695,11 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         int64_t audio_cached_duration = -1;
         int64_t video_cached_duration = -1;
 
+        ffp->stat.video_cached_bytes   = is->videoq.size;
+        ffp->stat.audio_cached_bytes   = is->audioq.size;
+        ffp->stat.video_cached_packets = is->videoq.nb_packets;
+        ffp->stat.audio_cached_packets = is->audioq.nb_packets;
+
         if (is->audio_st && audio_time_base_valid) {
             audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
 #ifdef FFP_SHOW_DEMUX_CACHE
@@ -3715,6 +3724,8 @@ void ffp_check_buffering_l(FFPlayer *ffp)
 
         is->audioq_duration = audio_cached_duration;
         is->videoq_duration = video_cached_duration;
+        ffp->stat.audio_cached_duration = audio_cached_duration;
+        ffp->stat.video_cached_duration = video_cached_duration;
 
         if (video_cached_duration > 0 && audio_cached_duration > 0) {
             cached_duration_in_ms = (int)IJKMIN(video_cached_duration, audio_cached_duration);
@@ -3905,11 +3916,15 @@ float ffp_get_property_float(FFPlayer *ffp, int id, float default_value)
 {
     switch (id) {
         case FFP_PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND:
-            return ffp ? ffp->vdps : default_value;
+            return ffp ? ffp->stat.vdps : default_value;
         case FFP_PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND:
-            return ffp ? ffp->vfps : default_value;
+            return ffp ? ffp->stat.vfps : default_value;
         case FFP_PROP_FLOAT_PLAYBACK_RATE:
             return ffp ? ffp->pf_playback_rate : default_value;
+        case FFP_PROP_FLOAT_AVDELAY:
+            return ffp ? ffp->stat.avdelay : default_value;
+        case FFP_PROP_FLOAT_AVDIFF:
+            return ffp ? ffp->stat.avdiff : default_value;
         default:
             return default_value;
     }
@@ -3936,6 +3951,37 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             if (!ffp || !ffp->is)
                 return default_value;
             return ffp->is->audio_stream;
+        case FFP_PROP_INT64_VIDEO_DECODER:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.vdec_type;
+        case FFP_PROP_INT64_AUDIO_DECODER:
+            return FFP_PROPV_DECODER_AVCODEC;
+
+        case FFP_PROP_INT64_VIDEO_CACHED_DURATION:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.video_cached_duration;
+        case FFP_PROP_INT64_AUDIO_CACHED_DURATION:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.audio_cached_duration;
+        case FFP_PROP_INT64_VIDEO_CACHED_BYTES:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.video_cached_bytes;
+        case FFP_PROP_INT64_AUDIO_CACHED_BYTES:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.audio_cached_bytes;
+        case FFP_PROP_INT64_VIDEO_CACHED_PACKETS:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.video_cached_packets;
+        case FFP_PROP_INT64_AUDIO_CACHED_PACKETS:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.audio_cached_packets;
         default:
             return default_value;
     }

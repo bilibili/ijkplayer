@@ -444,6 +444,22 @@ static SDL_Surface *screen;
  * end at line 330 in ffplay.c
  * near packet_queue_put
  ****************************************************************************/
+typedef struct FFStatistic
+{
+    int64_t vdec_type;
+
+    float vfps;
+    float vdps;
+    float avdelay;
+    float avdiff;
+
+    int64_t video_cached_duration;
+    int64_t audio_cached_duration;
+    int64_t video_cached_bytes;
+    int64_t audio_cached_bytes;
+    int64_t video_cached_packets;
+    int64_t audio_cached_packets;
+} FFStatistic;
 
 /* ffplayer */
 struct IjkMediaMeta;
@@ -587,15 +603,14 @@ typedef struct FFPlayer {
     SDL_SpeedSampler vfps_sampler;
     SDL_SpeedSampler vdps_sampler;
 
-    float vfps;
-    float vdps;
-
     /* filters */
     SDL_mutex  *vf_mutex;
     SDL_mutex  *af_mutex;
     int         vf_changed;
     int         af_changed;
     float       pf_playback_rate;
+
+    FFStatistic stat;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -704,15 +719,14 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     SDL_SpeedSamplerReset(&ffp->vfps_sampler);
     SDL_SpeedSamplerReset(&ffp->vdps_sampler);
 
-    ffp->vfps                           = 0.0f;
-    ffp->vdps                           = 0.0f;
-
     /* filters */
     ffp->vf_changed                     = 0;
     ffp->af_changed                     = 0;
     ffp->pf_playback_rate               = 1.0f;
 
     msg_queue_flush(&ffp->msg_queue);
+
+    memset(&ffp->stat, 0, sizeof(ffp->stat));
 }
 
 inline static void ffp_notify_msg1(FFPlayer *ffp, int what) {
