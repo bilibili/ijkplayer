@@ -1086,6 +1086,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     builder.appendSection(getContext().getString(R.string.mi_stream_fmt1, index));
                 }
                 builder.appendRow2(R.string.mi_type, buildTrackType(trackType));
+                builder.appendRow2(R.string.mi_language, buildLanguage(trackInfo.getLanguage()));
 
                 IMediaFormat mediaFormat = trackInfo.getFormat();
                 if (mediaFormat == null) {
@@ -1170,6 +1171,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             default:
                 return context.getString(R.string.TrackType_unknown);
         }
+    }
+
+    private String buildLanguage(String language) {
+        if (TextUtils.isEmpty(language))
+            return "und";
+        return language;
     }
 
     public ITrackInfo[] getTrackInfo() {

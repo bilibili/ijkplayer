@@ -65,6 +65,15 @@ public class AndroidTrackInfo implements ITrackInfo {
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
+    public String getLanguage() {
+        if (mTrackInfo == null)
+            return "und";
+
+        return mTrackInfo.getLanguage();
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Override
     public int getTrackType() {
         if (mTrackInfo == null)
             return MEDIA_TRACK_TYPE_UNKNOWN;

@@ -26,6 +26,7 @@
     <string name="mi_length">Length</string>
     <string name="mi_stream_fmt1">Stream #%d</string>
     <string name="mi_type">Type</string>
+    <string name="mi_language">Language</string>
     <string name="mi_codec">Codec</string>
     <string name="mi_frame_rate">Frame rate</string>
     <string name="mi_bit_rate">Bit rate</string>

@@ -39,6 +39,7 @@
 #define IJKM_VAL_TYPE__VIDEO    "video"
 #define IJKM_VAL_TYPE__AUDIO    "audio"
 #define IJKM_VAL_TYPE__UNKNOWN  "unknown"
+#define IJKM_KEY_LANGUAGE       "language"
 
 #define IJKM_KEY_CODEC_NAME         "codec_name"
 #define IJKM_KEY_CODEC_PROFILE      "codec_profile"
