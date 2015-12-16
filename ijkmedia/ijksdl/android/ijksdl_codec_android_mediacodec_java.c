@@ -107,8 +107,6 @@ inline static int getInputBuffers(JNIEnv *env, SDL_AMediaCodec* acodec)
     SDL_AMediaCodec_Opaque *opaque = (SDL_AMediaCodec_Opaque *)acodec->opaque;
     jobject android_media_codec = opaque->android_media_codec;
     SDL_JNI_DeleteGlobalRefP(env, &opaque->input_buffer_array);
-    if (opaque->input_buffer_array)
-        return 0;
 
     opaque->input_buffer_array = JJKC_MediaCodec__getInputBuffers__asGlobalRef__catchAll(env, android_media_codec);
     if (!opaque->input_buffer_array)
