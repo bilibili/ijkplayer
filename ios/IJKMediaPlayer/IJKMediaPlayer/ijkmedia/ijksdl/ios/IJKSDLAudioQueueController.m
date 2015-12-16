@@ -70,6 +70,14 @@
             return nil;
         }
 
+        UInt32 propValue = 1;
+        AudioQueueSetProperty(audioQueueRef, kAudioQueueProperty_EnableTimePitch, &propValue, sizeof(propValue));
+        propValue = 1;
+        AudioQueueSetProperty(_audioQueueRef, kAudioQueueProperty_TimePitchBypass, &propValue, sizeof(propValue));
+        propValue = kAudioQueueTimePitchAlgorithm_Spectral;
+        AudioQueueSetProperty(_audioQueueRef, kAudioQueueProperty_TimePitchAlgorithm, &propValue, sizeof(propValue));
+
+
         status = AudioQueueStart(audioQueueRef, NULL);
         if (status != noErr) {
             NSLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
@@ -177,6 +185,19 @@
 {
     [self stop];
     _audioQueueRef = nil;
+}
+
+- (void)setPlaybackRate:(float)playbackRate
+{
+    if (fabsf(playbackRate - 1.0f) <= 0.000001) {
+        UInt32 propValue = 1;
+        AudioQueueSetProperty(_audioQueueRef, kAudioQueueProperty_TimePitchBypass, &propValue, sizeof(propValue));
+        AudioQueueSetParameter(_audioQueueRef, kAudioQueueParam_PlayRate, 1.0f);
+    } else {
+        UInt32 propValue = 0;
+        AudioQueueSetProperty(_audioQueueRef, kAudioQueueProperty_TimePitchBypass, &propValue, sizeof(propValue));
+        AudioQueueSetParameter(_audioQueueRef, kAudioQueueParam_PlayRate, playbackRate);
+    }
 }
 
 static void IJKSDLAudioQueueOuptutCallback(void * inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer) {

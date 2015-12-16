@@ -96,6 +96,14 @@ void SDL_AoutSetDefaultLatencySeconds(SDL_Aout *aout, double latency)
     }
 }
 
+void SDL_AoutSetPlaybackRate(SDL_Aout *aout, float playbackRate)
+{
+    if (aout) {
+        if (aout->func_set_playback_rate)
+            aout->func_set_playback_rate(aout, playbackRate);
+    }
+}
+
 int SDL_AoutGetAudioSessionId(SDL_Aout *aout)
 {
     if (aout) {

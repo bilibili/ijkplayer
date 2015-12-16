@@ -624,6 +624,7 @@ typedef struct FFPlayer {
     int         vf_changed;
     int         af_changed;
     float       pf_playback_rate;
+    int         pf_playback_rate_changed;
 
     FFStatistic         stat;
     FFDemuxCacheControl dcc;
@@ -730,6 +731,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->vf_changed                     = 0;
     ffp->af_changed                     = 0;
     ffp->pf_playback_rate               = 1.0f;
+    ffp->pf_playback_rate_changed       = 0;
 
     msg_queue_flush(&ffp->msg_queue);
 

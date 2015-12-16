@@ -1475,6 +1475,7 @@ static int configure_video_filters(FFPlayer *ffp, AVFilterGraph *graph, VideoSta
         }
     }
 
+#ifdef FFP_AVFILTER_PLAYBACK_RATE
     if (fabsf(ffp->pf_playback_rate) > 0.00001 &&
         fabsf(ffp->pf_playback_rate - 1.0f) > 0.00001) {
         char setpts_buf[256];
@@ -1484,6 +1485,7 @@ static int configure_video_filters(FFPlayer *ffp, AVFilterGraph *graph, VideoSta
         snprintf(setpts_buf, sizeof(setpts_buf), "%f*PTS", rate);
         INSERT_FILT("setpts", setpts_buf);
     }
+#endif
 
     if ((ret = configure_filtergraph(graph, vfilters, filt_src, last_filter)) < 0)
         goto fail;
@@ -1564,6 +1566,7 @@ static int configure_audio_filters(FFPlayer *ffp, const char *afilters, int forc
     if (afilters)
         snprintf(afilters_args, sizeof(afilters_args), "%s", afilters);
 
+#ifdef FFP_AVFILTER_PLAYBACK_RATE
     if (fabsf(ffp->pf_playback_rate) > 0.00001 &&
         fabsf(ffp->pf_playback_rate - 1.0f) > 0.00001) {
         if (afilters_args[0])
@@ -1572,6 +1575,7 @@ static int configure_audio_filters(FFPlayer *ffp, const char *afilters, int forc
         av_log(ffp, AV_LOG_INFO, "af_rate=%f\n", ffp->pf_playback_rate);
         av_strlcatf(afilters_args, sizeof(afilters_args), "atempo=%f", ffp->pf_playback_rate);
     }
+#endif
 
     if ((ret = configure_filtergraph(is->agraph, afilters_args[0] ? afilters_args : NULL, filt_asrc, filt_asink)) < 0)
         goto end;
@@ -2036,6 +2040,11 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     }
 
     ffp->audio_callback_time = av_gettime_relative();
+
+    if (ffp->pf_playback_rate_changed) {
+        ffp->pf_playback_rate_changed = 0;
+        SDL_AoutSetPlaybackRate(ffp->aout, ffp->pf_playback_rate);
+    }
 
     while (len > 0) {
         if (is->audio_buf_index >= is->audio_buf_size) {
@@ -3827,13 +3836,8 @@ void ffp_set_playback_rate(FFPlayer *ffp, float rate)
     if (!ffp)
         return;
 
-    SDL_LockMutex(ffp->af_mutex);
-    SDL_LockMutex(ffp->vf_mutex);
     ffp->pf_playback_rate = rate;
-    ffp->vf_changed = 1;
-    ffp->af_changed = 1;
-    SDL_UnlockMutex(ffp->vf_mutex);
-    SDL_UnlockMutex(ffp->af_mutex);
+    ffp->pf_playback_rate_changed = 1;
 }
 
 int ffp_get_video_rotate_degrees(FFPlayer *ffp)

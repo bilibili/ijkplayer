@@ -80,6 +80,14 @@ static void aout_close_audio(SDL_Aout *aout)
     [opaque->aoutController close];
 }
 
+static void aout_set_playback_rate(SDL_Aout *aout, float playbackRate)
+{
+    SDLTRACE("aout_close_audio()\n");
+    SDL_Aout_Opaque *opaque = aout->opaque;
+
+    [opaque->aoutController setPlaybackRate:playbackRate];
+}
+
 static void aout_free_l(SDL_Aout *aout)
 {
     if (!aout)
@@ -109,6 +117,8 @@ SDL_Aout *SDL_AoutIos_CreateForAudioUnit()
     aout->pause_audio = aout_pause_audio;
     aout->flush_audio = aout_flush_audio;
     aout->close_audio = aout_close_audio;
+
+    aout->func_set_playback_rate = aout_set_playback_rate;
 
     return aout;
 }

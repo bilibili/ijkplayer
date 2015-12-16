@@ -35,6 +35,7 @@
 - (void)flush;
 - (void)stop;
 - (void)close;
+- (void)setPlaybackRate:(float)playbackRate;
 
 @property (nonatomic, readonly) SDL_AudioSpec spec;
     
