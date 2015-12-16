@@ -323,8 +323,8 @@ IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
         return;
 
     // explicit shutdown mp, in case it is not the last mp-ref here
-    ijkmp_android_set_surface(env, mp, NULL );
     ijkmp_shutdown(mp);
+    ijkmp_android_set_surface(env, mp, NULL);
     //only delete weak_thiz at release
     jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL );
     (*env)->DeleteGlobalRef(env, weak_thiz);
