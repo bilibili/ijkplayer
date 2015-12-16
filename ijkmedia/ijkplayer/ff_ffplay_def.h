@@ -70,9 +70,9 @@
  * NEXT:  buffering for the second time after START
  * MAX:   ...
  */
-#define DEFAULT_START_HIGH_WATER_MARK_IN_MS     (100)
+#define DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS     (100)
 #define DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS      (1 * 1000)
-#define DEFAULT_MAX_HIGH_WATER_MARK_IN_MS       (5 * 1000)
+#define DEFAULT_LAST_HIGH_WATER_MARK_IN_MS      (5 * 1000)
 
 #define BUFFERING_CHECK_PER_BYTES               (512)
 #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
@@ -84,7 +84,7 @@
 #define DEFAULT_MIN_FRAMES  50000
 #define MIN_MIN_FRAMES      5
 #define MAX_MIN_FRAMES      50000
-#define MIN_FRAMES (ffp->min_frames)
+#define MIN_FRAMES (ffp->dcc.min_frames)
 #define EXTERNAL_CLOCK_MIN_FRAMES 2
 #define EXTERNAL_CLOCK_MAX_FRAMES 10
 
@@ -461,6 +461,30 @@ typedef struct FFStatistic
     int64_t audio_cached_packets;
 } FFStatistic;
 
+typedef struct FFDemuxCacheControl
+{
+    int min_frames;
+    int max_buffer_size;
+    int high_water_mark_in_bytes;
+
+    int first_high_water_mark_in_ms;
+    int next_high_water_mark_in_ms;
+    int last_high_water_mark_in_ms;
+    int current_high_water_mark_in_ms;
+} FFDemuxCacheControl;
+
+inline static void ffp_reset_demux_cache_control(FFDemuxCacheControl *dcc)
+{
+    dcc->min_frames                = DEFAULT_MIN_FRAMES;
+    dcc->max_buffer_size           = MAX_QUEUE_SIZE;
+    dcc->high_water_mark_in_bytes  = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
+
+    dcc->first_high_water_mark_in_ms    = DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS;
+    dcc->next_high_water_mark_in_ms     = DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS;
+    dcc->last_high_water_mark_in_ms     = DEFAULT_LAST_HIGH_WATER_MARK_IN_MS;
+    dcc->current_high_water_mark_in_ms  = DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS;
+}
+
 /* ffplayer */
 struct IjkMediaMeta;
 struct IJKFF_Pipeline;
@@ -569,15 +593,6 @@ typedef struct FFPlayer {
 
     MessageQueue msg_queue;
 
-    int min_frames;
-    int max_buffer_size;
-    int high_water_mark_in_bytes;
-
-    int start_high_water_mark_in_ms;
-    int next_high_water_mark_in_ms;
-    int max_high_water_mark_in_ms;
-    int current_high_water_mark_in_ms;
-
     int64_t playable_duration_ms;
 
     int packet_buffering;
@@ -610,7 +625,8 @@ typedef struct FFPlayer {
     int         af_changed;
     float       pf_playback_rate;
 
-    FFStatistic stat;
+    FFStatistic         stat;
+    FFDemuxCacheControl dcc;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -685,15 +701,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->first_video_frame_rendered = 0;
     ffp->sync_av_start          = 1;
 
-    ffp->min_frames                     = DEFAULT_MIN_FRAMES;
-    ffp->max_buffer_size                = MAX_QUEUE_SIZE;
-    ffp->high_water_mark_in_bytes       = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
-
-    ffp->start_high_water_mark_in_ms    = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
-    ffp->next_high_water_mark_in_ms     = DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS;
-    ffp->max_high_water_mark_in_ms      = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS;
-    ffp->current_high_water_mark_in_ms  = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
-
     ffp->playable_duration_ms           = 0;
 
     ffp->packet_buffering               = 1;
@@ -727,6 +734,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     msg_queue_flush(&ffp->msg_queue);
 
     memset(&ffp->stat, 0, sizeof(ffp->stat));
+    ffp_reset_demux_cache_control(&ffp->dcc);
 }
 
 inline static void ffp_notify_msg1(FFPlayer *ffp, int what) {

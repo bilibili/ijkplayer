@@ -2679,7 +2679,7 @@ static int read_thread(void *arg)
                    set_clock(&is->extclk, seek_target / (double)AV_TIME_BASE, 0);
                 }
             }
-            ffp->current_high_water_mark_in_ms = ffp->start_high_water_mark_in_ms;
+            ffp->dcc.current_high_water_mark_in_ms = ffp->dcc.first_high_water_mark_in_ms;
             is->seek_req = 0;
             is->queue_attachments_req = 1;
             is->eof = 0;
@@ -2718,7 +2718,7 @@ static int read_thread(void *arg)
 #ifdef FFP_MERGE
               (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
 #else
-              (((is->audioq.size + is->videoq.size > ffp->max_buffer_size)
+              (((is->audioq.size + is->videoq.size > ffp->dcc.max_buffer_size)
                  && (is->audioq.nb_packets > MIN_MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
                  && (is->videoq.nb_packets > MIN_MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)
                 )
@@ -3676,10 +3676,10 @@ void ffp_toggle_buffering(FFPlayer *ffp, int start_buffering)
 void ffp_check_buffering_l(FFPlayer *ffp)
 {
     VideoState *is            = ffp->is;
-    int hwm_in_ms             = ffp->current_high_water_mark_in_ms; // use fast water mark for first loading
+    int hwm_in_ms             = ffp->dcc.current_high_water_mark_in_ms; // use fast water mark for first loading
     int buf_size_percent      = -1;
     int buf_time_percent      = -1;
-    int hwm_in_bytes          = ffp->high_water_mark_in_bytes;
+    int hwm_in_bytes          = ffp->dcc.high_water_mark_in_bytes;
     int need_start_buffering  = 0;
     int audio_time_base_valid = 0;
     int video_time_base_valid = 0;
@@ -3783,16 +3783,16 @@ void ffp_check_buffering_l(FFPlayer *ffp)
     }
 
     if (need_start_buffering) {
-        if (hwm_in_ms < ffp->next_high_water_mark_in_ms) {
-            hwm_in_ms = ffp->next_high_water_mark_in_ms;
+        if (hwm_in_ms < ffp->dcc.next_high_water_mark_in_ms) {
+            hwm_in_ms = ffp->dcc.next_high_water_mark_in_ms;
         } else {
             hwm_in_ms *= 2;
         }
 
-        if (hwm_in_ms > ffp->max_high_water_mark_in_ms)
-            hwm_in_ms = ffp->max_high_water_mark_in_ms;
+        if (hwm_in_ms > ffp->dcc.last_high_water_mark_in_ms)
+            hwm_in_ms = ffp->dcc.last_high_water_mark_in_ms;
 
-        ffp->current_high_water_mark_in_ms = hwm_in_ms;
+        ffp->dcc.current_high_water_mark_in_ms = hwm_in_ms;
 
         if (is->buffer_indicator_queue && is->buffer_indicator_queue->nb_packets > 0) {
             if (   (is->audioq.nb_packets > MIN_MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
