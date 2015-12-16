@@ -312,9 +312,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
     sdl_amedia_status_t    amc_ret  = 0;
     int                    ret      = 0;
     ssize_t  input_buffer_index = 0;
-    uint8_t* input_buffer_ptr   = NULL;
-    size_t   input_buffer_size  = 0;
-    size_t   copy_size          = 0;
+    ssize_t  copy_size          = 0;
     int64_t  time_stamp         = 0;
 
     if (enqueue_count)
@@ -506,15 +504,12 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 ffp_packet_queue_flush(&opaque->fake_pictq);
         }
 
-        input_buffer_ptr = SDL_AMediaCodec_getInputBuffer(opaque->acodec, input_buffer_index, &input_buffer_size);
-        if (!input_buffer_ptr) {
+        copy_size = SDL_AMediaCodec_writeInputData(opaque->acodec, input_buffer_index, d->pkt_temp.data, d->pkt_temp.size);
+        if (!copy_size) {
             ALOGE("%s: SDL_AMediaCodec_getInputBuffer failed\n", __func__);
             ret = -1;
             goto fail;
         }
-
-        copy_size = FFMIN(input_buffer_size, d->pkt_temp.size);
-        memcpy(input_buffer_ptr, d->pkt_temp.data, copy_size);
 
         time_stamp = d->pkt_temp.pts;
         if (!time_stamp && d->pkt_temp.dts)
@@ -537,7 +532,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             ++*enqueue_count;
     }
 
-    if (input_buffer_size < 0) {
+    if (copy_size < 0) {
         d->packet_pending = 0;
     } else {
         d->pkt_temp.dts =

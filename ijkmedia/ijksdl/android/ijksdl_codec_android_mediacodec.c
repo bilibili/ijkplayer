@@ -148,16 +148,10 @@ sdl_amedia_status_t SDL_AMediaCodec_flush(SDL_AMediaCodec* acodec)
     return acodec->func_flush(acodec);
 }
 
-uint8_t* SDL_AMediaCodec_getInputBuffer(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size)
+ssize_t SDL_AMediaCodec_writeInputData(SDL_AMediaCodec* acodec, size_t idx, const uint8_t *data, size_t size)
 {
-    assert(acodec->func_getInputBuffer);
-    return acodec->func_getInputBuffer(acodec, idx, out_size);
-}
-
-uint8_t* SDL_AMediaCodec_getOutputBuffer(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size)
-{
-    assert(acodec->func_getOutputBuffer);
-    return acodec->func_getOutputBuffer(acodec, idx, out_size);
+    assert(acodec->func_writeInputData);
+    return acodec->func_writeInputData(acodec, idx, data, size);
 }
 
 ssize_t SDL_AMediaCodec_dequeueInputBuffer(SDL_AMediaCodec* acodec, int64_t timeoutUs)

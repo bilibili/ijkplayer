@@ -36,8 +36,6 @@ static SDL_Class g_amediacodec_class = {
 typedef struct SDL_AMediaCodec_Opaque {
     jobject android_media_codec;
 
-    jobjectArray    input_buffer_array;
-    jobject         input_buffer;
     jobject         output_buffer_info;
 
     bool            is_input_buffer_valid;
@@ -93,26 +91,11 @@ static sdl_amedia_status_t SDL_AMediaCodecJava_delete(SDL_AMediaCodec* acodec)
         }
 
         SDL_JNI_DeleteGlobalRefP(env, &opaque->output_buffer_info);
-        SDL_JNI_DeleteGlobalRefP(env, &opaque->input_buffer);
-        SDL_JNI_DeleteGlobalRefP(env, &opaque->input_buffer_array);
         SDL_JNI_DeleteGlobalRefP(env, &opaque->android_media_codec);
     }
 
     SDL_AMediaCodec_FreeInternal(acodec);
     return SDL_AMEDIA_OK;
-}
-
-inline static int getInputBuffers(JNIEnv *env, SDL_AMediaCodec* acodec)
-{
-    SDL_AMediaCodec_Opaque *opaque = (SDL_AMediaCodec_Opaque *)acodec->opaque;
-    jobject android_media_codec = opaque->android_media_codec;
-    SDL_JNI_DeleteGlobalRefP(env, &opaque->input_buffer_array);
-
-    opaque->input_buffer_array = JJKC_MediaCodec__getInputBuffers__asGlobalRef__catchAll(env, android_media_codec);
-    if (!opaque->input_buffer_array)
-        return -1;
-
-    return 0;
 }
 
 static sdl_amedia_status_t SDL_AMediaCodecJava_configure_surface(
@@ -135,7 +118,6 @@ static sdl_amedia_status_t SDL_AMediaCodecJava_configure_surface(
     }
 
     opaque->is_input_buffer_valid = true;
-    SDL_JNI_DeleteGlobalRefP(env, &opaque->input_buffer_array);
     return SDL_AMEDIA_OK;
 }
 
@@ -202,46 +184,48 @@ static sdl_amedia_status_t SDL_AMediaCodecJava_flush(SDL_AMediaCodec* acodec)
     return SDL_AMEDIA_OK;
 }
 
-static uint8_t* SDL_AMediaCodecJava_getInputBuffer(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size)
+static ssize_t SDL_AMediaCodecJava_writeInputData(SDL_AMediaCodec* acodec, size_t idx, const uint8_t *data, size_t size)
 {
     AMCTRACE("%s", __func__);
+    ssize_t write_ret = -1;
+    jobject input_buffer_array = NULL;
+    jobject input_buffer = NULL;
 
     JNIEnv *env = NULL;
     if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
         ALOGE("%s: SetupThreadEnv failed", __func__);
-        return NULL;
+        return -1;
     }
 
     SDL_AMediaCodec_Opaque *opaque = (SDL_AMediaCodec_Opaque *)acodec->opaque;
-    if (0 != getInputBuffers(env, acodec))
-        return NULL;
+    input_buffer_array = JJKC_MediaCodec__getInputBuffers__catchAll(env, opaque->android_media_codec);
+    if (!input_buffer_array)
+        return -1;
 
-    assert(opaque->input_buffer_array);
-    int buffer_count = (*env)->GetArrayLength(env, opaque->input_buffer_array);
+    int buffer_count = (*env)->GetArrayLength(env, input_buffer_array);
     if (JJK_ExceptionCheck__catchAll(env) || idx < 0 || idx >= buffer_count) {
         ALOGE("%s: idx(%d) < count(%d)\n", __func__, (int)idx, (int)buffer_count);
-        return NULL;
+        goto fail;
     }
 
-    SDL_JNI_DeleteGlobalRefP(env, &opaque->input_buffer);
-    jobject local_input_buffer = (*env)->GetObjectArrayElement(env, opaque->input_buffer_array, idx);
-    if (JJK_ExceptionCheck__catchAll(env) || !local_input_buffer) {
+    input_buffer = (*env)->GetObjectArrayElement(env, input_buffer_array, idx);
+    if (JJK_ExceptionCheck__catchAll(env) || !input_buffer) {
         ALOGE("%s: GetObjectArrayElement failed\n", __func__);
-        return NULL;
-    }
-    opaque->input_buffer = (*env)->NewGlobalRef(env, local_input_buffer);
-    SDL_JNI_DeleteLocalRefP(env, &local_input_buffer);
-    if (JJK_ExceptionCheck__catchAll(env) || !opaque->input_buffer) {
-        ALOGE("%s: GetObjectArrayElement.NewGlobalRef failed\n", __func__);
-        return NULL;
+        goto fail;
     }
 
-    jlong size = (*env)->GetDirectBufferCapacity(env, opaque->input_buffer);
-    void *ptr  = (*env)->GetDirectBufferAddress(env, opaque->input_buffer);
+    {
+        jlong buf_size = (*env)->GetDirectBufferCapacity(env, input_buffer);
+        void *buf_ptr  = (*env)->GetDirectBufferAddress(env, input_buffer);
 
-    if (out_size)
-        *out_size = size;
-    return ptr;
+        write_ret = size < buf_size ? size : buf_size;
+        memcpy(buf_ptr, data, write_ret);
+    }
+
+fail:
+    SDL_JNI_DeleteLocalRefP(env, &input_buffer);
+    SDL_JNI_DeleteLocalRefP(env, &input_buffer_array);
+    return write_ret;
 }
 
 ssize_t SDL_AMediaCodecJava_dequeueInputBuffer(SDL_AMediaCodec* acodec, int64_t timeoutUs)
@@ -321,7 +305,6 @@ ssize_t SDL_AMediaCodecJava_dequeueOutputBuffer(SDL_AMediaCodec* acodec, SDL_AMe
         }
         if (idx == AMEDIACODEC__INFO_OUTPUT_BUFFERS_CHANGED) {
             ALOGI("%s: INFO_OUTPUT_BUFFERS_CHANGED\n", __func__);
-            SDL_JNI_DeleteGlobalRefP(env, &opaque->input_buffer_array);
             continue;
         } else if (idx == AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED) {
             ALOGI("%s: INFO_OUTPUT_FORMAT_CHANGED\n", __func__);
@@ -394,7 +377,7 @@ static SDL_AMediaCodec* SDL_AMediaCodecJava_init(JNIEnv *env, jobject android_me
     acodec->func_stop                   = SDL_AMediaCodecJava_stop;
     acodec->func_flush                  = SDL_AMediaCodecJava_flush;
 
-    acodec->func_getInputBuffer         = SDL_AMediaCodecJava_getInputBuffer;
+    acodec->func_writeInputData         = SDL_AMediaCodecJava_writeInputData;
 
     acodec->func_dequeueInputBuffer     = SDL_AMediaCodecJava_dequeueInputBuffer;
     acodec->func_queueInputBuffer       = SDL_AMediaCodecJava_queueInputBuffer;

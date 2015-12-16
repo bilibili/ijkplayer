@@ -76,8 +76,7 @@ typedef struct SDL_AMediaCodec
     sdl_amedia_status_t     (*func_stop)(SDL_AMediaCodec* acodec);
     sdl_amedia_status_t     (*func_flush)(SDL_AMediaCodec* acodec);
 
-    uint8_t*                (*func_getInputBuffer)(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size);
-    uint8_t*                (*func_getOutputBuffer)(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size);
+    ssize_t                 (*func_writeInputData)(SDL_AMediaCodec* acodec, size_t idx, const uint8_t *data, size_t size);
 
     ssize_t                 (*func_dequeueInputBuffer)(SDL_AMediaCodec* acodec, int64_t timeoutUs);
     sdl_amedia_status_t     (*func_queueInputBuffer)(SDL_AMediaCodec* acodec, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags);
@@ -128,8 +127,7 @@ sdl_amedia_status_t     SDL_AMediaCodec_start(SDL_AMediaCodec* acodec);
 sdl_amedia_status_t     SDL_AMediaCodec_stop(SDL_AMediaCodec* acodec);
 sdl_amedia_status_t     SDL_AMediaCodec_flush(SDL_AMediaCodec* acodec);
 
-uint8_t*                SDL_AMediaCodec_getInputBuffer(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size);
-// uint8_t*                SDL_AMediaCodec_getOutputBuffer(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size);
+ssize_t                 SDL_AMediaCodec_writeInputData(SDL_AMediaCodec* acodec, size_t idx, const uint8_t *data, size_t size);
 
 ssize_t                 SDL_AMediaCodec_dequeueInputBuffer(SDL_AMediaCodec* acodec, int64_t timeoutUs);
 sdl_amedia_status_t     SDL_AMediaCodec_queueInputBuffer(SDL_AMediaCodec* acodec, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags);
