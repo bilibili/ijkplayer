@@ -25,14 +25,13 @@
 #include <assert.h>
 #include "ijksdl/ijksdl_log.h"
 
-static int g_amediacodec_object_serial;
+static volatile int g_amediacodec_object_serial;
 
-// TODO: thread-safe
 int SDL_AMediaCodec_create_object_serial()
 {
-    int object_serial = ++g_amediacodec_object_serial;
+    int object_serial = __sync_add_and_fetch(&g_amediacodec_object_serial, 1);
     if (object_serial == 0)
-        object_serial = SDL_AMediaCodec_create_object_serial();
+        object_serial = __sync_add_and_fetch(&g_amediacodec_object_serial, 1);
     return object_serial;
 }
 
