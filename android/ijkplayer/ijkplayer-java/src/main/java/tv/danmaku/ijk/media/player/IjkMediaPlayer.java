@@ -108,6 +108,19 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     public static final int FFP_PROP_INT64_SELECTED_VIDEO_STREAM      = 20001;
     public static final int FFP_PROP_INT64_SELECTED_AUDIO_STREAM      = 20002;
+
+    public static final int FFP_PROP_INT64_VIDEO_DECODER              = 20003;
+    public static final int FFP_PROP_INT64_AUDIO_DECODER              = 20004;
+    public static final int     FFP_PROPV_DECODER_UNKNOWN             = 0;
+    public static final int     FFP_PROPV_DECODER_AVCODEC             = 1;
+    public static final int     FFP_PROPV_DECODER_MEDIACODEC          = 2;
+    public static final int     FFP_PROPV_DECODER_VIDEOTOOLBOX        = 3;
+    public static final int FFP_PROP_INT64_VIDEO_CACHED_DURATION      = 20005;
+    public static final int FFP_PROP_INT64_AUDIO_CACHED_DURATION      = 20006;
+    public static final int FFP_PROP_INT64_VIDEO_CACHED_BYTES         = 20007;
+    public static final int FFP_PROP_INT64_AUDIO_CACHED_BYTES         = 20008;
+    public static final int FFP_PROP_INT64_VIDEO_CACHED_PACKETS       = 20009;
+    public static final int FFP_PROP_INT64_AUDIO_CACHED_PACKETS       = 20010;
     //----------------------------------------
 
     @AccessedByNative
@@ -701,6 +714,30 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     public float getVideoDecodeFramesPerSecond() {
         return _getPropertyFloat(PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND, 0.0f);
+    }
+
+    public long getVideoCachedDuration() {
+        return _getPropertyLong(FFP_PROP_INT64_VIDEO_CACHED_DURATION, 0);
+    }
+
+    public long getAudioCachedDuration() {
+        return _getPropertyLong(FFP_PROP_INT64_AUDIO_CACHED_DURATION, 0);
+    }
+
+    public long getVideoCachedBytes() {
+        return _getPropertyLong(FFP_PROP_INT64_VIDEO_CACHED_BYTES, 0);
+    }
+
+    public long getAudioCachedBytes() {
+        return _getPropertyLong(FFP_PROP_INT64_AUDIO_CACHED_BYTES, 0);
+    }
+
+    public long getVideoCachedPackets() {
+        return _getPropertyLong(FFP_PROP_INT64_VIDEO_CACHED_PACKETS, 0);
+    }
+
+    public long getAudioCachedPackets() {
+        return _getPropertyLong(FFP_PROP_INT64_AUDIO_CACHED_PACKETS, 0);
     }
 
     private native float _getPropertyFloat(int property, float defaultValue);

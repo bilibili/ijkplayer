@@ -16,6 +16,8 @@
     <string name="show_info">Info</string>
     <string name="fps_output">fps (output)</string>
     <string name="fps_decode">fps (decode)</string>
+    <string name="v_cache">v-cache</string>
+    <string name="a_cache">a-cache</string>
 
     <string name="media_information">Media Information</string>
     <string name="mi_player">Player</string>

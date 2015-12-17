@@ -80,6 +80,14 @@ public class InfoHudViewHolder {
                     setRowValue(R.string.fps_decode, String.format(Locale.US, "%.2f", fpsDecode));
                     setRowValue(R.string.fps_output, String.format(Locale.US, "%.2f", fpsOutput));
 
+                    long videoCachedDuration = mp.getVideoCachedDuration();
+                    long audioCachedDuration = mp.getAudioCachedDuration();
+                    long videoCachedBytes    = mp.getVideoCachedBytes();
+                    long audioCachedBytes    = mp.getAudioCachedBytes();
+
+                    setRowValue(R.string.v_cache, String.format(Locale.US, "%d ms, %d B", videoCachedDuration, videoCachedBytes));
+                    setRowValue(R.string.a_cache, String.format(Locale.US, "%d ms, %d B", audioCachedDuration, audioCachedBytes));
+
                     mHandler.removeMessages(MSG_UPDATE_HUD);
                     mHandler.sendEmptyMessageDelayed(MSG_UPDATE_HUD, 500);
                 }
