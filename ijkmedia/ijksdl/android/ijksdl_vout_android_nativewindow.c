@@ -43,10 +43,12 @@ struct SDL_AMediaCodecBufferProxy
     int buffer_id;
     int buffer_index;
     int acodec_serial;
+    SDL_AMediaCodecBufferInfo buffer_info;
 };
 
 static void SDL_AMediaCodecBufferProxy_reset(SDL_AMediaCodecBufferProxy *proxy)
 {
+    memset(proxy, 0, sizeof(SDL_AMediaCodecBufferProxy));
     proxy->buffer_index  = -1;
     proxy->acodec_serial = 0;
 }
@@ -284,7 +286,7 @@ SDL_AMediaCodec *SDL_VoutAndroid_peekAMediaCodec(SDL_Vout *vout)
     return acodec;
 }
 
-static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout *vout, int acodec_serial, int buffer_index)
+static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout *vout, int acodec_serial, int buffer_index, SDL_AMediaCodecBufferInfo *buffer_info)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
     SDL_AMediaCodecBufferProxy *proxy = NULL;
@@ -303,20 +305,22 @@ static SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy_l(SDL_Vout 
     proxy->buffer_id     = opaque->next_buffer_id++;
     proxy->acodec_serial = acodec_serial;
     proxy->buffer_index  = buffer_index;
-    AMCTRACE("%s: [%d] ++++++++ proxy %d: vout: %d idx: %d",
+    proxy->buffer_info   = *buffer_info;
+    AMCTRACE("%s: [%d] ++++++++ proxy %d: vout: %d idx: %d fake: %s",
         __func__,
         proxy->buffer_id,
         proxy->acodec_serial,
         SDL_AMediaCodec_getSerial(opaque->acodec),
-        proxy->buffer_index);
+        proxy->buffer_index,
+        (proxy->buffer_info.flags & AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME) ? "YES" : "NO");
     return proxy;
 }
 
-SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy(SDL_Vout *vout, int acodec_serial, int buffer_index)
+SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy(SDL_Vout *vout, int acodec_serial, int buffer_index, SDL_AMediaCodecBufferInfo *buffer_info)
 {
     SDL_AMediaCodecBufferProxy *proxy = NULL;
     SDL_LockMutex(vout->mutex);
-    proxy = SDL_VoutAndroid_obtainBufferProxy_l(vout, acodec_serial, buffer_index);
+    proxy = SDL_VoutAndroid_obtainBufferProxy_l(vout, acodec_serial, buffer_index, buffer_info);
     SDL_UnlockMutex(vout->mutex);
     return proxy;
 }
@@ -328,40 +332,46 @@ static int SDL_VoutAndroid_releaseBufferProxy_l(SDL_Vout *vout, SDL_AMediaCodecB
     if (!proxy)
         return 0;
 
-    AMCTRACE("%s: [%d] -------- proxy %d: vout: %d idx: %d render: %s",
+    AMCTRACE("%s: [%d] -------- proxy %d: vout: %d idx: %d render: %s fake: %s",
         __func__,
         proxy->buffer_id,
         proxy->acodec_serial,
         SDL_AMediaCodec_getSerial(opaque->acodec),
-        proxy->buffer_index, 
-        render ? "true" : "false");
+        proxy->buffer_index,
+        render ? "true" : "false",
+        (proxy->buffer_info.flags & AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME) ? "YES" : "NO");
     ISDL_Array__push_back(&opaque->overlay_pool, proxy);
 
     if (!SDL_AMediaCodec_isSameSerial(opaque->acodec, proxy->acodec_serial)) {
-        ALOGW("%s: [%d] ???????? proxy %d: vout: %d idx: %d render: %s",
+        ALOGW("%s: [%d] ???????? proxy %d: vout: %d idx: %d render: %s fake: %s",
             __func__,
             proxy->buffer_id,
             proxy->acodec_serial,
             SDL_AMediaCodec_getSerial(opaque->acodec),
             proxy->buffer_index, 
-            render ? "true" : "false");
+            render ? "true" : "false",
+            (proxy->buffer_info.flags & AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME) ? "YES" : "NO");
         return 0;
     }
 
     if (proxy->buffer_index < 0) {
         ALOGE("%s: [%d] invalid AMediaCodec buffer index %d\n", __func__, proxy->buffer_id, proxy->buffer_index);
         return 0;
+    } else if (proxy->buffer_info.flags & AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME) {
+        proxy->buffer_index = -1;
+        return 0;
     }
 
     sdl_amedia_status_t amc_ret = SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, proxy->buffer_index, render);    
     if (amc_ret != SDL_AMEDIA_OK) {
-        ALOGW("%s: [%d] !!!!!!!! proxy %d: vout: %d idx: %d render: %s",
+        ALOGW("%s: [%d] !!!!!!!! proxy %d: vout: %d idx: %d render: %s, fake: %s",
             __func__,
             proxy->buffer_id,
             proxy->acodec_serial,
             SDL_AMediaCodec_getSerial(opaque->acodec),
             proxy->buffer_index, 
-            render ? "true" : "false");
+            render ? "true" : "false",
+            (proxy->buffer_info.flags & AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME) ? "YES" : "NO");
         proxy->buffer_index = -1;
         return -1;
     }
