@@ -3402,10 +3402,12 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
             return -1;
     }
 
+#if CONFIG_AVFILTER
     if (ffp->vfilter0) {
         GROW_ARRAY(ffp->vfilters_list, ffp->nb_vfilters);
         ffp->vfilters_list[ffp->nb_vfilters - 1] = ffp->vfilter0;
     }
+#endif
 
     VideoState *is = stream_open(ffp, file_name, NULL);
     if (!is) {
