@@ -82,18 +82,12 @@
     self.player.shouldAutoplay = YES;
 
     IJKFFMoviePlayerController *ffp = self.player;
-    ffp.httpOpenDelegate = self;
 
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
     [self.view addSubview:self.mediaControl];
 
     self.mediaControl.delegatePlayer = self.player;
-}
-
-- (BOOL)willOpenUrl:(IJKMediaUrlOpenData*) urlOpenData
-{
-    return YES;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
