@@ -66,9 +66,11 @@ void CompilationUnit::do_build(std::ostream &h_os, std::ostream &c_os)
 
     clazz->build_c_func_decl(h_os);
     h_os << std::endl;
-    if (clazz->is_include_util()) {
+    if (clazz->is_simple_c_class_name()) {
         h_os << "#define JJK_HAVE__" << clazz->get_c_class_name() << std::endl;
         h_os << std::endl;
+    }
+    if (clazz->is_include_util()) {
         h_os << "#include \"" << clazz->get_name() << ".util.h\"" << std::endl;
         h_os << std::endl;
     }

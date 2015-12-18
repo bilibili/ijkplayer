@@ -36,6 +36,8 @@ typedef struct JJKC_AudioTrack {
     jmethodID method_write;
     jmethodID method_setStereoVolume;
     jmethodID method_getAudioSessionId;
+    jmethodID method_getPlaybackParams;
+    jmethodID method_setPlaybackParams;
 } JJKC_AudioTrack;
 static JJKC_AudioTrack class_JJKC_AudioTrack;
 
@@ -234,6 +236,52 @@ jint JJKC_AudioTrack__getAudioSessionId__catchAll(JNIEnv *env, jobject thiz)
     return ret_value;
 }
 
+jobject JJKC_AudioTrack__getPlaybackParams(JNIEnv *env, jobject thiz)
+{
+    return (*env)->CallObjectMethod(env, thiz, class_JJKC_AudioTrack.method_getPlaybackParams);
+}
+
+jobject JJKC_AudioTrack__getPlaybackParams__catchAll(JNIEnv *env, jobject thiz)
+{
+    jobject ret_object = JJKC_AudioTrack__getPlaybackParams(env, thiz);
+    if (JJK_ExceptionCheck__catchAll(env) || !ret_object) {
+        return NULL;
+    }
+
+    return ret_object;
+}
+
+jobject JJKC_AudioTrack__getPlaybackParams__asGlobalRef__catchAll(JNIEnv *env, jobject thiz)
+{
+    jobject ret_object   = NULL;
+    jobject local_object = JJKC_AudioTrack__getPlaybackParams__catchAll(env, thiz);
+    if (JJK_ExceptionCheck__catchAll(env) || !local_object) {
+        ret_object = NULL;
+        goto fail;
+    }
+
+    ret_object = JJK_NewGlobalRef__catchAll(env, local_object);
+    if (!ret_object) {
+        ret_object = NULL;
+        goto fail;
+    }
+
+fail:
+    JJK_DeleteLocalRef__p(env, &local_object);
+    return ret_object;
+}
+
+void JJKC_AudioTrack__setPlaybackParams(JNIEnv *env, jobject thiz, jobject params)
+{
+    (*env)->CallVoidMethod(env, thiz, class_JJKC_AudioTrack.method_setPlaybackParams, params);
+}
+
+void JJKC_AudioTrack__setPlaybackParams__catchAll(JNIEnv *env, jobject thiz, jobject params)
+{
+    JJKC_AudioTrack__setPlaybackParams(env, thiz, params);
+    JJK_ExceptionCheck__catchAll(env);
+}
+
 int JJK_loadClass__JJKC_AudioTrack(JNIEnv *env)
 {
     int         ret                   = -1;
@@ -337,6 +385,24 @@ int JJK_loadClass__JJKC_AudioTrack(JNIEnv *env)
     class_JJKC_AudioTrack.method_getAudioSessionId = JJK_GetMethodID__catchAll(env, class_id, name, sign);
     if (class_JJKC_AudioTrack.method_getAudioSessionId == NULL)
         goto fail;
+
+    if (JJK_GetSystemAndroidApiLevel(env) >= 23) {
+        class_id = class_JJKC_AudioTrack.id;
+        name     = "getPlaybackParams";
+        sign     = "()Landroid/media/PlaybackParams;";
+        class_JJKC_AudioTrack.method_getPlaybackParams = JJK_GetMethodID__catchAll(env, class_id, name, sign);
+        if (class_JJKC_AudioTrack.method_getPlaybackParams == NULL)
+            goto fail;
+    }
+
+    if (JJK_GetSystemAndroidApiLevel(env) >= 23) {
+        class_id = class_JJKC_AudioTrack.id;
+        name     = "setPlaybackParams";
+        sign     = "(Landroid/media/PlaybackParams;)V";
+        class_JJKC_AudioTrack.method_setPlaybackParams = JJK_GetMethodID__catchAll(env, class_id, name, sign);
+        if (class_JJKC_AudioTrack.method_setPlaybackParams == NULL)
+            goto fail;
+    }
 
     ALOGD("JJKLoader: OK: '%s' loaded\n", "android.media.AudioTrack");
     ret = 0;

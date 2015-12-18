@@ -4,6 +4,7 @@ ALL_SRC = \
 	c/android/media/AudioTrack.c \
 	c/android/media/MediaCodec.c \
 	c/android/media/MediaFormat.c \
+	c/android/media/PlaybackParams.c \
 	c/android/os/Build.c \
 	c/android/os/Bundle.c \
 	c/java/nio/Buffer.c \

@@ -50,6 +50,15 @@ jint JJKC_AudioTrack__setStereoVolume(JNIEnv *env, jobject thiz, jfloat leftGain
 jint JJKC_AudioTrack__setStereoVolume__catchAll(JNIEnv *env, jobject thiz, jfloat leftGain, jfloat rightGain);
 jint JJKC_AudioTrack__getAudioSessionId(JNIEnv *env, jobject thiz);
 jint JJKC_AudioTrack__getAudioSessionId__catchAll(JNIEnv *env, jobject thiz);
+jobject JJKC_AudioTrack__getPlaybackParams(JNIEnv *env, jobject thiz);
+jobject JJKC_AudioTrack__getPlaybackParams__catchAll(JNIEnv *env, jobject thiz);
+jobject JJKC_AudioTrack__getPlaybackParams__asGlobalRef__catchAll(JNIEnv *env, jobject thiz);
+void JJKC_AudioTrack__setPlaybackParams(JNIEnv *env, jobject thiz, jobject params);
+void JJKC_AudioTrack__setPlaybackParams__catchAll(JNIEnv *env, jobject thiz, jobject params);
 int JJK_loadClass__JJKC_AudioTrack(JNIEnv *env);
+
+#define JJK_HAVE__JJKC_AudioTrack
+
+#include "AudioTrack.util.h"
 
 #endif//JJK__android_media_AudioTrack__H

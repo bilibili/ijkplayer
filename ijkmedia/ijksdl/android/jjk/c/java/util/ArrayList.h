@@ -30,4 +30,6 @@ jboolean JJKC_ArrayList__add(JNIEnv *env, jobject thiz, jobject object);
 jboolean JJKC_ArrayList__add__catchAll(JNIEnv *env, jobject thiz, jobject object);
 int JJK_loadClass__JJKC_ArrayList(JNIEnv *env);
 
+#define JJK_HAVE__JJKC_ArrayList
+
 #endif//JJK__java_util_ArrayList__H

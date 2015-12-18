@@ -25,6 +25,7 @@
 #include "ijksdl/android/jjk/c/android/media/AudioTrack.h"
 #include "ijksdl/android/jjk/c/android/media/MediaCodec.h"
 #include "ijksdl/android/jjk/c/android/media/MediaFormat.h"
+#include "ijksdl/android/jjk/c/android/media/PlaybackParams.h"
 #include "ijksdl/android/jjk/c/android/os/Bundle.h"
 #include "ijksdl/android/jjk/c/tv/danmaku/ijk/media/player/IjkMediaPlayer.h"
 #include "ijksdl/android/jjk/c/tv/danmaku/ijk/media/player/misc/IMediaDataSource.h"
@@ -46,10 +47,11 @@ int JJK_LoadAll__catchAll(JNIEnv *env)
     // must load before all other android classes
     JJK_LOAD_CLASS(android_os_Build);
 
-    JJK_LOAD_CLASS(AudioTrack);  // android_media_AudioTrack
-    JJK_LOAD_CLASS(MediaCodec);  // android_media_MediaCodec
-    JJK_LOAD_CLASS(MediaFormat); // android_media_MediaFormat
-    JJK_LOAD_CLASS(Bundle);      // android_os_Bundle
+    JJK_LOAD_CLASS(AudioTrack);     // android_media_AudioTrack
+    JJK_LOAD_CLASS(MediaCodec);     // android_media_MediaCodec
+    JJK_LOAD_CLASS(MediaFormat);    // android_media_MediaFormat
+    JJK_LOAD_CLASS(PlaybackParams); // android_media_PlaybackParams
+    JJK_LOAD_CLASS(Bundle);         // android_os_Bundle
 
     JJK_LOAD_CLASS(IjkMediaPlayer);     // tv_danmaku_ijk_media_player_IjkMediaPlayer
     JJK_LOAD_CLASS(IMediaDataSource);   // tv_danmaku_ijk_media_player_misc_IMediaDataSource

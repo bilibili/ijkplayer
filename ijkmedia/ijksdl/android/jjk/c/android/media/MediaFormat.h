@@ -46,4 +46,6 @@ void JJKC_MediaFormat__setByteBuffer__withCString(JNIEnv *env, jobject thiz, con
 void JJKC_MediaFormat__setByteBuffer__withCString__catchAll(JNIEnv *env, jobject thiz, const char *name_cstr__, jobject bytes);
 int JJK_loadClass__JJKC_MediaFormat(JNIEnv *env);
 
+#define JJK_HAVE__JJKC_MediaFormat
+
 #endif//JJK__android_media_MediaFormat__H

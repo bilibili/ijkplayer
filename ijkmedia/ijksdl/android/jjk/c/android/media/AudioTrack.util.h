@@ -18,19 +18,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef JJK__tv_danmaku_ijk_media_player_misc_IMediaDataSource__H
-#define JJK__tv_danmaku_ijk_media_player_misc_IMediaDataSource__H
+#ifndef JJK__android_media_AudioTrack__UTIL__H
+#define JJK__android_media_AudioTrack__UTIL__H
 
 #include "ijksdl/android/jjk/internal/jjk_internal.h"
+#include "AudioTrack.h"
 
-jint JJKC_IMediaDataSource__readAt(JNIEnv *env, jobject thiz, jlong position, jbyteArray buffer, jint offset, jint size);
-jint JJKC_IMediaDataSource__readAt__catchAll(JNIEnv *env, jobject thiz, jlong position, jbyteArray buffer, jint offset, jint size);
-jlong JJKC_IMediaDataSource__getSize(JNIEnv *env, jobject thiz);
-jlong JJKC_IMediaDataSource__getSize__catchAll(JNIEnv *env, jobject thiz);
-void JJKC_IMediaDataSource__close(JNIEnv *env, jobject thiz);
-void JJKC_IMediaDataSource__close__catchAll(JNIEnv *env, jobject thiz);
-int JJK_loadClass__JJKC_IMediaDataSource(JNIEnv *env);
+void JJKC_android_media_AudioTrack__setSpeed(JNIEnv *env, jobject thiz, jfloat speed);
+void JJKC_android_media_AudioTrack__setSpeed__catchAll(JNIEnv *env, jobject thiz, jfloat speed);
 
-#define JJK_HAVE__JJKC_IMediaDataSource
+#ifdef JJK_HAVE__JJKC_AudioTrack
+inline static void JJKC_AudioTrack__setSpeed(JNIEnv *env, jobject thiz, jfloat speed) {JJKC_android_media_AudioTrack__setSpeed(env, thiz, speed);}
+inline static void JJKC_AudioTrack__setSpeed__catchAll(JNIEnv *env, jobject thiz, jfloat speed) {JJKC_android_media_AudioTrack__setSpeed__catchAll(env, thiz, speed);}
+#endif
 
-#endif//JJK__tv_danmaku_ijk_media_player_misc_IMediaDataSource__H
+#endif

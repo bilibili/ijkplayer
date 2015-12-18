@@ -54,4 +54,6 @@ void JJKC_Bundle__putParcelableArrayList__withCString(JNIEnv *env, jobject thiz,
 void JJKC_Bundle__putParcelableArrayList__withCString__catchAll(JNIEnv *env, jobject thiz, const char *key_cstr__, jobject value);
 int JJK_loadClass__JJKC_Bundle(JNIEnv *env);
 
+#define JJK_HAVE__JJKC_Bundle
+
 #endif//JJK__android_os_Bundle__H

@@ -47,4 +47,6 @@ jboolean JJKC_IjkMediaPlayer__onNativeInvoke(JNIEnv *env, jobject weakThiz, jint
 jboolean JJKC_IjkMediaPlayer__onNativeInvoke__catchAll(JNIEnv *env, jobject weakThiz, jint what, jobject args);
 int JJK_loadClass__JJKC_IjkMediaPlayer(JNIEnv *env);
 
+#define JJK_HAVE__JJKC_IjkMediaPlayer
+
 #endif//JJK__tv_danmaku_ijk_media_player_IjkMediaPlayer__H

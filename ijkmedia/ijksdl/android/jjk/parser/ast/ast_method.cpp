@@ -244,6 +244,13 @@ void Method::build_c_member_id_decl(std::ostream &os)
 void Method::build_c_member_id_load(std::ostream &os)
 {
     os << std::endl;
+
+    Annotation *annotation = get_annotation_at("MinApi");
+    if (annotation) {
+        os << build_indent() << "if (JJK_GetSystemAndroidApiLevel(env) >= " << annotation->get_value() << ") {" << std::endl;
+        increase_build_indent(4);
+    }
+
     os << build_indent() << "class_id = " << get_this_class()->get_c_jni_id() << ";\n";
     os << build_indent() << "name     = \"" << get_c_jni_method_name() << "\";\n";
     os << build_indent() << "sign     = \"" << get_c_jni_sign() << "\";\n";
@@ -251,6 +258,11 @@ void Method::build_c_member_id_load(std::ostream &os)
                             << "(env, class_id, name, sign);\n";
     os << build_indent() << "if (" << get_c_jni_id() << " == NULL)\n";
     os << build_indent() << "    goto fail;\n";
+
+    if (annotation) {
+        increase_build_indent(-4);
+        os << build_indent() << "}" << std::endl;
+    }
 }
 
 void Method::_build_c_func_string_argument_cast_statements(std::ostream &os, int flags)

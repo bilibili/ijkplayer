@@ -1,6 +1,7 @@
 package android.media;
 
 @SimpleCClassName
+@IncludeUtil
 public class AudioTrack {
     public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int bufferSizeInBytes, int mode);
 
@@ -19,4 +20,9 @@ public class AudioTrack {
 
     public int setStereoVolume(float leftGain, float rightGain);
     public int getAudioSessionId();
+
+    @MinApi(23)
+    public PlaybackParams getPlaybackParams();
+    @MinApi(23)
+    void setPlaybackParams(PlaybackParams params);
 }

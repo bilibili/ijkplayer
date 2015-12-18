@@ -74,4 +74,6 @@ void JJKC_MediaCodec__release(JNIEnv *env, jobject thiz);
 void JJKC_MediaCodec__release__catchAll(JNIEnv *env, jobject thiz);
 int JJK_loadClass__JJKC_MediaCodec(JNIEnv *env);
 
+#define JJK_HAVE__JJKC_MediaCodec
+
 #endif//JJK__android_media_MediaCodec__H
