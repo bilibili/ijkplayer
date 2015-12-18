@@ -21,18 +21,18 @@
  */
 
 #include "ffpipenode_android_mediacodec_vdec.h"
-#include "ffpipeline_android.h"
-#include "../../ff_ffpipenode.h"
-#include "../../ff_ffplay.h"
-#include "../../ff_ffplay_debug.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl/android/ijksdl_codec_android_mediacodec_java.h"
 #include "ijksdl/android/ijksdl_codec_android_mediacodec_dummy.h"
 #include "ijksdl/android/ijksdl_vout_android_nativewindow.h"
 #include "ijksdl/android/ijksdl_vout_overlay_android_mediacodec.h"
+#include "ijkplayer/ff_ffpipenode.h"
+#include "ijkplayer/ff_ffplay.h"
+#include "ijkplayer/ff_ffplay_debug.h"
 #include "h264_nal.h"
 #include "hevc_nal.h"
+#include "ffpipeline_android.h"
 
 #define AMC_USE_AVBITSTREAM_FILTER 0
 #ifndef AMCTRACE
@@ -1127,6 +1127,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     }
 
     SDL_SpeedSamplerReset(&opaque->sampler);
+    ffp->stat.vdec_type = FFP_PROPV_DECODER_MEDIACODEC;
     return node;
 fail:
     ffpipenode_free_p(&node);
