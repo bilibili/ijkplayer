@@ -51,6 +51,24 @@ public class InfoHudViewHolder {
         }
     }
 
+    private static String formatedDurationMilli(long duration) {
+        if (duration >=  1000) {
+            return String.format(Locale.US, "%.2f sec", ((float)duration) / 1000);
+        } else {
+            return String.format(Locale.US, "%d msec", duration);
+        }
+    }
+
+    private static String formatedSize(long bytes) {
+        if (bytes >= 100 * 1000) {
+            return String.format(Locale.US, "%.2f MB", ((float)bytes) / 1000 / 1000);
+        } else if (bytes >= 100) {
+            return String.format(Locale.US, "%.1f KB", ((float)bytes) / 1000);
+        } else {
+            return String.format(Locale.US, "%d B", bytes);
+        }
+    }
+
     private static final int MSG_UPDATE_HUD = 1;
     private Handler mHandler = new Handler() {
         @Override
@@ -94,8 +112,8 @@ public class InfoHudViewHolder {
                     long videoCachedBytes    = mp.getVideoCachedBytes();
                     long audioCachedBytes    = mp.getAudioCachedBytes();
 
-                    setRowValue(R.string.v_cache, String.format(Locale.US, "%d ms, %d B", videoCachedDuration, videoCachedBytes));
-                    setRowValue(R.string.a_cache, String.format(Locale.US, "%d ms, %d B", audioCachedDuration, audioCachedBytes));
+                    setRowValue(R.string.v_cache, String.format(Locale.US, "%s, %s", formatedDurationMilli(videoCachedDuration), formatedSize(videoCachedBytes)));
+                    setRowValue(R.string.a_cache, String.format(Locale.US, "%s, %s", formatedDurationMilli(audioCachedDuration), formatedSize(audioCachedBytes)));
 
                     mHandler.removeMessages(MSG_UPDATE_HUD);
                     mHandler.sendEmptyMessageDelayed(MSG_UPDATE_HUD, 500);
