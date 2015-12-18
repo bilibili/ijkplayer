@@ -14,8 +14,7 @@
     <string name="toggle_render">Render</string>
     <string name="toggle_ratio">Scale</string>
     <string name="show_info">Info</string>
-    <string name="fps_output">fps (output)</string>
-    <string name="fps_decode">fps (decode)</string>
+    <string name="fps">fps</string>
     <string name="v_cache">v-cache</string>
     <string name="a_cache">a-cache</string>
 

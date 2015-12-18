@@ -21,9 +21,6 @@ public class InfoHudViewHolder {
 
     public InfoHudViewHolder(Context context, TableLayout tableLayout) {
         mTableLayoutBinder = new TableLayoutBinder(context, tableLayout);
-
-        appendRow(R.string.fps_decode);
-        appendRow(R.string.fps_output);
     }
 
     private void appendSection(int nameId) {
@@ -77,8 +74,7 @@ public class InfoHudViewHolder {
 
                     float fpsOutput = mp.getVideoOutputFramesPerSecond();
                     float fpsDecode = mp.getVideoDecodeFramesPerSecond();
-                    setRowValue(R.string.fps_decode, String.format(Locale.US, "%.2f", fpsDecode));
-                    setRowValue(R.string.fps_output, String.format(Locale.US, "%.2f", fpsOutput));
+                    setRowValue(R.string.fps, String.format(Locale.US, "%.2f / %.2f", fpsDecode, fpsOutput));
 
                     long videoCachedDuration = mp.getVideoCachedDuration();
                     long audioCachedDuration = mp.getAudioCachedDuration();
