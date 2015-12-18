@@ -209,6 +209,11 @@ SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_spec(JNIEnv *env, SDL_An
         return NULL;
     }
 
+    if (JJK_GetSystemAndroidApiLevel(env) >= 23) {
+        // for fast playback
+        min_buffer_size *= 2;
+    }
+
     atrack->thiz = JJKC_AudioTrack__AudioTrack__asGlobalRef__catchAll(env, 
         atrack->spec.stream_type,
         atrack->spec.sample_rate_in_hz,
@@ -352,4 +357,13 @@ int SDL_Android_AudioTrack_getAudioSessionId(JNIEnv *env, SDL_Android_AudioTrack
         return 0;
 
     return audioSessionId;
+}
+
+void SDL_Android_AudioTrack_setSpeed(JNIEnv *env, SDL_Android_AudioTrack *atrack, float speed)
+{
+    JJKC_AudioTrack__setSpeed(env, atrack->thiz, speed);
+    if (JJK_ExceptionCheck__catchAll(env))
+        return;
+
+    return;
 }
