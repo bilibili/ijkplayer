@@ -72,6 +72,19 @@ public class InfoHudViewHolder {
                     if (mp == null)
                         break;
 
+                    int vdec = mp.getVideoDecoder();
+                    switch (vdec) {
+                        case IjkMediaPlayer.FFP_PROPV_DECODER_AVCODEC:
+                            setRowValue(R.string.vdec, "avcodec");
+                            break;
+                        case IjkMediaPlayer.FFP_PROPV_DECODER_MEDIACODEC:
+                            setRowValue(R.string.vdec, "MediaCodec");
+                            break;
+                        default:
+                            setRowValue(R.string.vdec, "");
+                            break;
+                    }
+
                     float fpsOutput = mp.getVideoOutputFramesPerSecond();
                     float fpsDecode = mp.getVideoDecodeFramesPerSecond();
                     setRowValue(R.string.fps, String.format(Locale.US, "%.2f / %.2f", fpsDecode, fpsOutput));
