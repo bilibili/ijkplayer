@@ -3300,6 +3300,11 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
         case SDL_FCC_RV32:
             ffp->overlay_format = chroma_fourcc;
             break;
+#ifdef __APPLE__
+        case SDL_FCC_I444P10LE:
+            ffp->overlay_format = chroma_fourcc;
+            break;
+#endif
         default:
             av_log(ffp, AV_LOG_ERROR, "ffp_set_overlay_format: unknown chroma fourcc: %d\n", chroma_fourcc);
             break;

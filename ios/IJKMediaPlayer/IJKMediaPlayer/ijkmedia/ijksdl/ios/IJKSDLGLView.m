@@ -28,6 +28,7 @@
 #import "IJKSDLGLRenderI420.h"
 #import "IJKSDLGLRenderRV24.h"
 #import "IJKSDLGLRenderNV12.h"
+#import "IJKSDLGLRenderI444P10LE.h"
 #include "ijksdl/ijksdl_timer.h"
 #include "ijksdl/ios/ijksdl_ios.h"
 #import "IJKSDLHudViewController.h"
@@ -489,6 +490,11 @@ static int g_ijk_gles_queue_spec_key;
             _renderer = [[IJKSDLGLRenderRV24 alloc] init];
             _bytesPerPixel = 3;
             NSLog(@"OK use RV24 GL renderer");
+        } else if (overlay->format == SDL_FCC_I444P10LE) {
+            _frameChroma = overlay->format;
+            _renderer = [[IJKSDLGLRenderI444P10LE alloc] init];
+            _bytesPerPixel = 2;
+            NSLog(@"OK use I444 GL renderer");
         }
 
         if (![self loadShaders]) {
