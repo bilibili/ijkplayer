@@ -70,13 +70,6 @@
 			remoteGlobalIDString = E654EA891B6B27E600B0F2D0;
 			remoteInfo = IJKMediaFramework;
 		};
-		E6D74F2D18A5F94B00165BFD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E6903EB917EAF6C500CFD954;
-			remoteInfo = IJKMediaPlayer;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -276,7 +269,6 @@
 		E6D74F2A18A5F94B00165BFD /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E6D74F2E18A5F94B00165BFD /* libIJKMediaPlayer.a */,
 				E654EAD71B6B28B100B0F2D0 /* IJKMediaFramework.framework */,
 				E654EAD91B6B28B100B0F2D0 /* IJKMediaFrameworkTests.xctest */,
 			);
@@ -313,11 +305,6 @@
 				CLASSPREFIX = IJK;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = bilibili;
-				TargetAttributes = {
-					E6903EFB17EAF70200CFD954 = {
-						DevelopmentTeam = 746845GC96;
-					};
-				};
 			};
 			buildConfigurationList = E6903EF717EAF70200CFD954 /* Build configuration list for PBXProject "IJKMediaDemo" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -355,13 +342,6 @@
 			fileType = wrapper.cfbundle;
 			path = IJKMediaFrameworkTests.xctest;
 			remoteRef = E654EAD81B6B28B100B0F2D0 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E6D74F2E18A5F94B00165BFD /* libIJKMediaPlayer.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libIJKMediaPlayer.a;
-			remoteRef = E6D74F2D18A5F94B00165BFD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
