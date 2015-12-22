@@ -168,6 +168,11 @@ static int64_t ijkmds_seek(URLContext *h, int64_t pos, int whence)
     if (!c->media_data_source) 
         return AVERROR(EINVAL);
 
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        av_log(h, AV_LOG_ERROR, "%s: SDL_JNI_SetupThreadEnv: failed", __func__);
+        return AVERROR(EINVAL);
+    }
+
     if (whence == AVSEEK_SIZE) {
         av_log(h, AV_LOG_TRACE, "%s: AVSEEK_SIZE: %"PRId64"\n", __func__, (int64_t)c->logical_size);
         return c->logical_size;
