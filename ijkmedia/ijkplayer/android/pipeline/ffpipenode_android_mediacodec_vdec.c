@@ -888,7 +888,9 @@ fail:
     }
     if (opaque->acodec) {
         SDL_VoutAndroid_invalidateAllBuffers(opaque->weak_vout);
+        SDL_LockMutex(opaque->acodec_mutex);
         SDL_AMediaCodec_stop(opaque->acodec);
+        SDL_UnlockMutex(opaque->acodec_mutex);
     }
     SDL_WaitThread(opaque->enqueue_thread, NULL);
     SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
