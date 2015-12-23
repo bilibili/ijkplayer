@@ -680,6 +680,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
         return;
 
     if ([[NSThread currentThread] isMainThread]) {
+        _glView.shouldShowHudView = YES;
         _hudTimer = [NSTimer scheduledTimerWithTimeInterval:.5f
                                                      target:self
                                                    selector:@selector(refreshHudView)
@@ -698,6 +699,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
         return;
 
     if ([[NSThread currentThread] isMainThread]) {
+        _glView.shouldShowHudView = NO;
         [_hudTimer invalidate];
         _hudTimer = nil;
     } else {
