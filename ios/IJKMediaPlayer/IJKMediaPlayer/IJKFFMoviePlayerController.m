@@ -467,6 +467,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 
     ijkmp_stop(_mediaPlayer);
     ijkmp_shutdown(_mediaPlayer);
+
     [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
 }
 
@@ -474,6 +475,11 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 {
     if (!_mediaPlayer)
         return;
+
+    _segmentOpenDelegate    = nil;
+    _tcpOpenDelegate        = nil;
+    _httpOpenDelegate       = nil;
+    _liveOpenDelegate       = nil;
 
     ijkmp_dec_ref_p(&_mediaPlayer);
 }
