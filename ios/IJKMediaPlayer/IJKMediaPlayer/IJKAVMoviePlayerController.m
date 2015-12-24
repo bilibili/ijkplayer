@@ -741,7 +741,7 @@ static IJKAVMoviePlayerController* instance;
                      postNotificationName:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification
                      object:self];
                     
-                    if (_shouldAutoplay)
+                    if (_shouldAutoplay && (!_pauseInBackground || [UIApplication sharedApplication].applicationState == UIApplicationStateActive))
                         [_player play];
                 });
             }
