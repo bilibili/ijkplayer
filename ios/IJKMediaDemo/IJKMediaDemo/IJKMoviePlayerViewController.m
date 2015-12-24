@@ -129,10 +129,18 @@
     [self.mediaControl hide];
 }
 
-- (IBAction)onClickBack:(id)sender
+- (IBAction)onClickDone:(id)sender
 {
-    if (self.presentingViewController) {
-        [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+    [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (IBAction)onClickHUD:(UIBarButtonItem *)sender
+{
+    if ([self.player isKindOfClass:[IJKFFMoviePlayerController class]]) {
+        IJKFFMoviePlayerController *player = self.player;
+        player.shouldShowHudView = !player.shouldShowHudView;
+        
+        sender.title = (player.shouldShowHudView ? @"HUD On" : @"HUD Off");
     }
 }
 

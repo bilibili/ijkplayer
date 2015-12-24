@@ -179,7 +179,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init fields
         _scalingMode = IJKMPMovieScalingModeAspectFit;
         _shouldAutoplay = YES;
-        _shouldShowHudView = options.showHudView;
 
         // init media resource
         _urlString = aUrlString;
@@ -196,11 +195,14 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init video sink
         _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]
                                        useRenderQueue:options.useRenderQueue];
+        _glView.shouldShowHudView = NO;
         _view   = _glView;
         [_glView setHudValue:nil forKey:@"scheme"];
         [_glView setHudValue:nil forKey:@"host"];
         [_glView setHudValue:nil forKey:@"path"];
         [_glView setHudValue:nil forKey:@"ip"];
+        
+        self.shouldShowHudView = options.showHudView;
 
         ijkmp_ios_set_glview(_mediaPlayer, _glView);
         ijkmp_set_option(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", "fcc-i420");
@@ -717,6 +719,9 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 
 - (void)setShouldShowHudView:(BOOL)shouldShowHudView
 {
+    if (shouldShowHudView == _shouldShowHudView) {
+        return;
+    }
     _shouldShowHudView = shouldShowHudView;
     if (shouldShowHudView)
         [self startHudTimer];
