@@ -1,0 +1,39 @@
+apply plugin: 'com.android.library'
+
+android {
+    // http://tools.android.com/tech-docs/new-build-system/tips
+    //noinspection GroovyAssignabilityCheck
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    //noinspection GroovyAssignabilityCheck
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion rootProject.ext.targetSdkVersion
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets.main {
+        jniLibs.srcDirs 'src/main/libs'
+        jni.srcDirs = [] // This prevents the auto generation of Android.mk
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+ext {
+    optionalPlugins = ['tools/gradle-mvn-push.gradle', 'tools/gradle-bintray-upload.gradle'];
+}
+
+ext.optionalPlugins.each{ value ->
+    def plugin_file = new File(rootProject.projectDir, value);
+    if (plugin_file.exists()) {
+        apply from: plugin_file
+    }
+}

@@ -156,6 +156,23 @@ elif [ "$FF_ARCH" = "x86" ]; then
 
     FF_ASM_OBJ_DIR="libavcodec/x86/*.o libavfilter/x86/*.o libavutil/x86/*.o libswresample/x86/*.o libswscale/x86/*.o"
 
+elif [ "$FF_ARCH" = "x86_64" ]; then
+    FF_ANDROID_PLATFORM=android-21
+
+    FF_BUILD_NAME=ffmpeg-x86_64
+    FF_BUILD_NAME_OPENSSL=openssl-x86_64
+    FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
+
+    FF_CROSS_PREFIX=x86_64-linux-android
+    FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_64_VER}
+
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --arch=x86_64 --enable-yasm"
+
+    FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS"
+    FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
+
+    FF_ASM_OBJ_DIR="libavcodec/x86/*.o libavfilter/x86/*.o libavutil/x86/*.o libswresample/x86/*.o libswscale/x86/*.o"
+
 elif [ "$FF_ARCH" = "arm64" ]; then
     FF_ANDROID_PLATFORM=android-21
 
