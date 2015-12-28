@@ -3563,17 +3563,11 @@ long ffp_get_duration_l(FFPlayer *ffp)
     if (!is || !is->ic)
         return 0;
 
-    int64_t start_time = is->ic->start_time;
-    int64_t start_diff = 0;
-    if (start_time > 0 && start_time != AV_NOPTS_VALUE)
-        start_diff = fftime_to_milliseconds(start_time);
-
     int64_t duration = fftime_to_milliseconds(is->ic->duration);
-    if (duration < 0 || duration < start_diff)
+    if (duration < 0)
         return 0;
 
-    int64_t adjust_duration = duration - start_diff;
-    return (long)adjust_duration;
+    return (long)duration;
 }
 
 long ffp_get_playable_duration_l(FFPlayer *ffp)
