@@ -2881,6 +2881,22 @@ static int read_thread(void *arg)
             av_free_packet(pkt);
         }
 
+        ffp->stat.video_cached_bytes   = is->videoq.size;
+        ffp->stat.audio_cached_bytes   = is->audioq.size;
+        ffp->stat.video_cached_packets = is->videoq.nb_packets;
+        ffp->stat.audio_cached_packets = is->audioq.nb_packets;
+
+        if (is->video_st &&
+            is->video_st->time_base.den > 0 &&
+            is->video_st->time_base.num > 0) {
+            ffp->stat.video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
+        }
+        if (is->audio_st &&
+            is->audio_st->time_base.den > 0 &&
+            is->audio_st->time_base.num > 0) {
+            ffp->stat.audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
+        }
+
         if (ffp->packet_buffering) {
             io_tick_counter = SDL_GetTickHR();
             if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
@@ -3711,13 +3727,8 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         int64_t audio_cached_duration = -1;
         int64_t video_cached_duration = -1;
 
-        ffp->stat.video_cached_bytes   = is->videoq.size;
-        ffp->stat.audio_cached_bytes   = is->audioq.size;
-        ffp->stat.video_cached_packets = is->videoq.nb_packets;
-        ffp->stat.audio_cached_packets = is->audioq.nb_packets;
-
         if (is->audio_st && audio_time_base_valid) {
-            audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
+            audio_cached_duration = ffp->stat.audio_cached_duration;
 #ifdef FFP_SHOW_DEMUX_CACHE
             int audio_cached_percent = (int)av_rescale(audio_cached_duration, 1005, hwm_in_ms * 10);
             av_log(ffp, AV_LOG_DEBUG, "audio cache=%%%d milli:(%d/%d) bytes:(%d/%d) packet:(%d/%d)\n", audio_cached_percent,
@@ -3728,7 +3739,7 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         }
 
         if (is->video_st && video_time_base_valid) {
-            video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
+            video_cached_duration = ffp->stat.video_cached_duration;
 #ifdef FFP_SHOW_DEMUX_CACHE
             int video_cached_percent = (int)av_rescale(video_cached_duration, 1005, hwm_in_ms * 10);
             av_log(ffp, AV_LOG_DEBUG, "video cache=%%%d milli:(%d/%d) bytes:(%d/%d) packet:(%d/%d)\n", video_cached_percent,
@@ -3737,11 +3748,6 @@ void ffp_check_buffering_l(FFPlayer *ffp)
                   is->audioq.nb_packets, MIN_FRAMES);
 #endif
         }
-
-        is->audioq_duration = audio_cached_duration;
-        is->videoq_duration = video_cached_duration;
-        ffp->stat.audio_cached_duration = audio_cached_duration;
-        ffp->stat.video_cached_duration = video_cached_duration;
 
         if (video_cached_duration > 0 && audio_cached_duration > 0) {
             cached_duration_in_ms = (int)IJKMIN(video_cached_duration, audio_cached_duration);

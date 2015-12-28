@@ -292,7 +292,6 @@ typedef struct VideoState {
     int audio_diff_avg_count;
     AVStream *audio_st;
     PacketQueue audioq;
-    int64_t audioq_duration;
     int audio_hw_buf_size;
     uint8_t silence_buf[SDL_AUDIO_MIN_BUFFER_SIZE];
     uint8_t *audio_buf;
@@ -339,7 +338,6 @@ typedef struct VideoState {
     int video_stream;
     AVStream *video_st;
     PacketQueue videoq;
-    int64_t videoq_duration;
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
 #if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;
