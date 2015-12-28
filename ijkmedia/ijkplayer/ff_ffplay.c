@@ -2758,6 +2758,7 @@ static int read_thread(void *arg)
                 ret = AVERROR_EOF;
                 goto fail;
             } else {
+                ffp_statistic_l(ffp);
                 if (completed) {
                     av_log(ffp, AV_LOG_INFO, "ffp_toggle_buffering: eof\n");
                     SDL_LockMutex(wait_mutex);
@@ -2841,6 +2842,7 @@ static int read_thread(void *arg)
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
             SDL_UnlockMutex(wait_mutex);
+            ffp_statistic_l(ffp);
             continue;
         } else {
             is->eof = 0;
@@ -2881,21 +2883,7 @@ static int read_thread(void *arg)
             av_free_packet(pkt);
         }
 
-        ffp->stat.video_cached_bytes   = is->videoq.size;
-        ffp->stat.audio_cached_bytes   = is->audioq.size;
-        ffp->stat.video_cached_packets = is->videoq.nb_packets;
-        ffp->stat.audio_cached_packets = is->audioq.nb_packets;
-
-        if (is->video_st &&
-            is->video_st->time_base.den > 0 &&
-            is->video_st->time_base.num > 0) {
-            ffp->stat.video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
-        }
-        if (is->audio_st &&
-            is->audio_st->time_base.den > 0 &&
-            is->audio_st->time_base.num > 0) {
-            ffp->stat.audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
-        }
+        ffp_statistic_l(ffp);
 
         if (ffp->packet_buffering) {
             io_tick_counter = SDL_GetTickHR();
@@ -3697,6 +3685,27 @@ void ffp_toggle_buffering(FFPlayer *ffp, int start_buffering)
     SDL_LockMutex(ffp->is->play_mutex);
     ffp_toggle_buffering_l(ffp, start_buffering);
     SDL_UnlockMutex(ffp->is->play_mutex);
+}
+
+void ffp_statistic_l(FFPlayer *ffp)
+{
+    VideoState *is = ffp->is;
+
+    ffp->stat.video_cached_bytes   = is->videoq.size;
+    ffp->stat.audio_cached_bytes   = is->audioq.size;
+    ffp->stat.video_cached_packets = is->videoq.nb_packets;
+    ffp->stat.audio_cached_packets = is->audioq.nb_packets;
+
+    if (is->video_st &&
+        is->video_st->time_base.den > 0 &&
+        is->video_st->time_base.num > 0) {
+        ffp->stat.video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
+    }
+    if (is->audio_st &&
+        is->audio_st->time_base.den > 0 &&
+        is->audio_st->time_base.num > 0) {
+        ffp->stat.audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
+    }
 }
 
 void ffp_check_buffering_l(FFPlayer *ffp)
