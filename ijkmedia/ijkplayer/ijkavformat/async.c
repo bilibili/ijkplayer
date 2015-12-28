@@ -37,6 +37,9 @@
 #include "url.h"
 #include <stdint.h>
 
+#include "ijkplayer/ijkavutil/opt.h"
+#include "ijkavformat.h"
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -78,6 +81,9 @@ typedef struct Context {
 
     int             abort_request;
     AVIOInterruptCB interrupt_callback;
+
+    /* options */
+    int64_t         opaque;
 } Context;
 
 static int ring_init(RingBuffer *ring, unsigned int capacity, int read_back_capacity)
@@ -173,6 +179,23 @@ static int wrapped_url_read(void *src, void *dst, int size)
     return ret;
 }
 
+static void call_inject(URLContext *h)
+{
+    Context *c = h->priv_data;
+    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+    void *opaque = (void *) (intptr_t) c->opaque;
+
+    if (opaque && inject_callback) {
+        IJKAVInject_AsyncStatistic stat;
+        stat.size = sizeof(stat);
+        stat.buf_forwards  = ring_size(&c->ring);
+        stat.buf_backwards = ring_size_of_read_back(&c->ring);
+        stat.buf_capacity  = BUFFER_CAPACITY + READ_BACK_CAPACITY;
+
+        inject_callback(opaque, IJKAVINJECT_ASYNC_STATISTIC, &stat, sizeof(stat));
+    }
+}
+
 static void *async_buffer_task(void *arg)
 {
     URLContext   *h    = arg;
@@ -235,6 +258,8 @@ static void *async_buffer_task(void *arg)
 
         pthread_cond_signal(&c->cond_wakeup_main);
         pthread_mutex_unlock(&c->mutex);
+
+        call_inject(h);
     }
 
     return NULL;
@@ -251,6 +276,9 @@ static int async_open(URLContext *h, const char *arg, int flags, AVDictionary **
     ret = ring_init(&c->ring, BUFFER_CAPACITY, READ_BACK_CAPACITY);
     if (ret < 0)
         goto fifo_fail;
+
+    if (c->opaque)
+        av_dict_set_int(options, "ijkinject-opaque", c->opaque, 0);
 
     /* wrap interrupt callback */
     c->interrupt_callback = h->interrupt_callback;
@@ -370,6 +398,7 @@ static int async_read_internal(URLContext *h, void *dest, int size, int read_com
     pthread_cond_signal(&c->cond_wakeup_background);
     pthread_mutex_unlock(&c->mutex);
 
+    call_inject(h);
     return ret;
 }
 
@@ -425,6 +454,7 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
         } else {
             // fast seek backwards
             ring_drain(ring, pos_delta);
+            call_inject(h);
             c->logical_pos = new_logical_pos;
         }
 
@@ -462,6 +492,7 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
 
     pthread_mutex_unlock(&c->mutex);
 
+    call_inject(h);
     return ret;
 }
 
@@ -469,6 +500,8 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
 #define D AV_OPT_FLAG_DECODING_PARAM
 
 static const AVOption options[] = {
+    { "ijkinject-opaque",           "private data of user, passed with custom callback",
+        OFFSET(opaque),             IJKAV_OPTION_INT64(0, INT64_MIN, INT64_MAX) },
     {NULL},
 };
 

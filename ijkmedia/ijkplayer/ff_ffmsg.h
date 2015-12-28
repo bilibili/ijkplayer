@@ -68,4 +68,6 @@
 #define FFP_PROP_INT64_VIDEO_CACHED_PACKETS             20009
 #define FFP_PROP_INT64_AUDIO_CACHED_PACKETS             20010
 
+#define FFP_PROP_INT64_BIT_RATE                         20100
+
 #endif

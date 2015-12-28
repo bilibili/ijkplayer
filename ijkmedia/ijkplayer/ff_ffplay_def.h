@@ -450,6 +450,7 @@ typedef struct FFStatistic
     float vdps;
     float avdelay;
     float avdiff;
+    int   bit_rate;
 
     int64_t video_cached_duration;
     int64_t audio_cached_duration;

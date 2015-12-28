@@ -2586,6 +2586,7 @@ static int read_thread(void *arg)
     }
 #endif
     ijkmeta_set_avformat_context_l(ffp->meta, ic);
+    ffp->stat.bit_rate = ic->bit_rate;
     if (st_index[AVMEDIA_TYPE_VIDEO] >= 0)
         ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_VIDEO_STREAM, st_index[AVMEDIA_TYPE_VIDEO]);
     if (st_index[AVMEDIA_TYPE_AUDIO] >= 0)
@@ -4002,6 +4003,8 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             if (!ffp)
                 return default_value;
             return ffp->stat.audio_cached_packets;
+        case FFP_PROP_INT64_BIT_RATE:
+            return ffp ? ffp->stat.bit_rate : default_value;
         default:
             return default_value;
     }
