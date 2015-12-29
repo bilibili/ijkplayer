@@ -648,12 +648,19 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     return _glView.fps;
 }
 
-inline static NSString *formatedDurationMilli(long duration) {
+inline static NSString *formatedDurationMilli(int64_t duration) {
     if (duration >=  1000) {
         return [NSString stringWithFormat:@"%.2f sec", ((float)duration) / 1000];
     } else {
-        return [NSString stringWithFormat:@"%ld msec", duration];
+        return [NSString stringWithFormat:@"%ld msec", (long)duration];
     }
+}
+
+inline static NSString *formatedDurationBytesAndBitrate(int64_t bytes, int64_t bitRate) {
+    if (bitRate <= 0) {
+        return @"inf";
+    }
+    return formatedDurationMilli(((float)bytes) * 8 * 1000 / bitRate);
 }
 
 inline static NSString *formatedSize(int64_t bytes) {
@@ -714,14 +721,14 @@ inline static NSString *formatedSize(int64_t bytes) {
     float avdiff  = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_AVDIFF, .0f);
     [_glView setHudValue:[NSString stringWithFormat:@"%.3f %.3f", avdelay, -avdiff] forKey:@"delay"];
 
-    int64_t bit_rate = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_BIT_RATE, 0);
+    int64_t bitRate = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_BIT_RATE, 0);
     [_glView setHudValue:[NSString stringWithFormat:@"-%@, %@",
                           formatedSize(_asyncStat.buf_backwards),
-                          formatedDurationMilli(((float)_asyncStat.buf_backwards) * 8 * 1000 / bit_rate)]
+                          formatedDurationBytesAndBitrate(_asyncStat.buf_backwards, bitRate)]
                   forKey:@"async-backward"];
     [_glView setHudValue:[NSString stringWithFormat:@"+%@, %@",
                           formatedSize(_asyncStat.buf_forwards),
-                          formatedDurationMilli(((float)_asyncStat.buf_forwards) * 8 * 1000 / bit_rate)]
+                          formatedDurationBytesAndBitrate(_asyncStat.buf_forwards, bitRate)]
                   forKey:@"async-forward"];
 }
 
