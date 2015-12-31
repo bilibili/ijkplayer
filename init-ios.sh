@@ -27,14 +27,19 @@ IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 set -e
 TOOLS=tools
 
+FF_ALL_ARCHS_IOS6_SDK="armv7 armv7s i386"
+FF_ALL_ARCHS_IOS7_SDK="armv7 armv7s arm64 i386 x86_64"
+FF_ALL_ARCHS_IOS8_SDK="armv7 arm64 i386 x86_64"
+FF_ALL_ARCHS=$FF_ALL_ARCHS_IOS8_SDK
+FF_TARGET=$1
+
 echo "== pull gas-preprocessor base =="
 sh $TOOLS/pull-repo-base.sh https://github.com/Bilibili/gas-preprocessor.git extra/gas-preprocessor
 
 echo "== pull ffmpeg base =="
 sh $TOOLS/pull-repo-base.sh $IJK_FFMPEG_UPSTREAM $IJK_FFMPEG_LOCAL_REPO
 
-function pull_fork()
-{
+function pull_fork() {
     echo "== pull ffmpeg fork $1 =="
     sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK ios/ffmpeg-$1 ${IJK_FFMPEG_LOCAL_REPO}
     cd ios/ffmpeg-$1
@@ -42,8 +47,19 @@ function pull_fork()
     cd -
 }
 
-pull_fork "armv7"
-pull_fork "armv7s"
-pull_fork "arm64"
-pull_fork "i386"
-pull_fork "x86_64"
+function pull_fork_all() {
+    for ARCH in $FF_ALL_ARCHS
+    do
+        pull_fork $ARCH
+    done
+}
+
+#----------
+case "$FF_TARGET" in
+    armv7|armv7s|arm64|i386|x86_64)
+        pull_fork $FF_TARGET
+    ;;
+    all|*)
+        pull_fork_all
+    ;;
+esac
