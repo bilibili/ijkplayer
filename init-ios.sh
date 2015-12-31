@@ -33,11 +33,17 @@ FF_ALL_ARCHS_IOS8_SDK="armv7 arm64 i386 x86_64"
 FF_ALL_ARCHS=$FF_ALL_ARCHS_IOS8_SDK
 FF_TARGET=$1
 
-echo "== pull gas-preprocessor base =="
-sh $TOOLS/pull-repo-base.sh https://github.com/Bilibili/gas-preprocessor.git extra/gas-preprocessor
+function echo_ffmpeg_version() {
+    echo $IJK_FFMPEG_COMMIT
+}
 
-echo "== pull ffmpeg base =="
-sh $TOOLS/pull-repo-base.sh $IJK_FFMPEG_UPSTREAM $IJK_FFMPEG_LOCAL_REPO
+function pull_common() {
+    echo "== pull gas-preprocessor base =="
+    sh $TOOLS/pull-repo-base.sh https://github.com/Bilibili/gas-preprocessor.git extra/gas-preprocessor
+
+    echo "== pull ffmpeg base =="
+    sh $TOOLS/pull-repo-base.sh $IJK_FFMPEG_UPSTREAM $IJK_FFMPEG_LOCAL_REPO
+}
 
 function pull_fork() {
     echo "== pull ffmpeg fork $1 =="
@@ -56,10 +62,15 @@ function pull_fork_all() {
 
 #----------
 case "$FF_TARGET" in
+    ffmpeg-version)
+        echo_ffmpeg_version
+    ;;
     armv7|armv7s|arm64|i386|x86_64)
+        pull_common
         pull_fork $FF_TARGET
     ;;
     all|*)
+        pull_common
         pull_fork_all
     ;;
 esac
