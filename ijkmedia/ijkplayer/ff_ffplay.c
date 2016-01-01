@@ -2586,6 +2586,7 @@ static int read_thread(void *arg)
     }
 #endif
     ijkmeta_set_avformat_context_l(ffp->meta, ic);
+    ffp->stat.bit_rate = ic->bit_rate;
     if (st_index[AVMEDIA_TYPE_VIDEO] >= 0)
         ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_VIDEO_STREAM, st_index[AVMEDIA_TYPE_VIDEO]);
     if (st_index[AVMEDIA_TYPE_AUDIO] >= 0)
@@ -2758,6 +2759,7 @@ static int read_thread(void *arg)
                 ret = AVERROR_EOF;
                 goto fail;
             } else {
+                ffp_statistic_l(ffp);
                 if (completed) {
                     av_log(ffp, AV_LOG_INFO, "ffp_toggle_buffering: eof\n");
                     SDL_LockMutex(wait_mutex);
@@ -2841,6 +2843,7 @@ static int read_thread(void *arg)
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
             SDL_UnlockMutex(wait_mutex);
+            ffp_statistic_l(ffp);
             continue;
         } else {
             is->eof = 0;
@@ -2880,6 +2883,8 @@ static int read_thread(void *arg)
         } else {
             av_free_packet(pkt);
         }
+
+        ffp_statistic_l(ffp);
 
         if (ffp->packet_buffering) {
             io_tick_counter = SDL_GetTickHR();
@@ -3300,6 +3305,11 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
         case SDL_FCC_RV32:
             ffp->overlay_format = chroma_fourcc;
             break;
+#ifdef __APPLE__
+        case SDL_FCC_I444P10LE:
+            ffp->overlay_format = chroma_fourcc;
+            break;
+#endif
         default:
             av_log(ffp, AV_LOG_ERROR, "ffp_set_overlay_format: unknown chroma fourcc: %d\n", chroma_fourcc);
             break;
@@ -3542,17 +3552,11 @@ long ffp_get_duration_l(FFPlayer *ffp)
     if (!is || !is->ic)
         return 0;
 
-    int64_t start_time = is->ic->start_time;
-    int64_t start_diff = 0;
-    if (start_time > 0 && start_time != AV_NOPTS_VALUE)
-        start_diff = fftime_to_milliseconds(start_time);
-
     int64_t duration = fftime_to_milliseconds(is->ic->duration);
-    if (duration < 0 || duration < start_diff)
+    if (duration < 0)
         return 0;
 
-    int64_t adjust_duration = duration - start_diff;
-    return (long)adjust_duration;
+    return (long)duration;
 }
 
 long ffp_get_playable_duration_l(FFPlayer *ffp)
@@ -3684,6 +3688,27 @@ void ffp_toggle_buffering(FFPlayer *ffp, int start_buffering)
     SDL_UnlockMutex(ffp->is->play_mutex);
 }
 
+void ffp_statistic_l(FFPlayer *ffp)
+{
+    VideoState *is = ffp->is;
+
+    ffp->stat.video_cached_bytes   = is->videoq.size;
+    ffp->stat.audio_cached_bytes   = is->audioq.size;
+    ffp->stat.video_cached_packets = is->videoq.nb_packets;
+    ffp->stat.audio_cached_packets = is->audioq.nb_packets;
+
+    if (is->video_st &&
+        is->video_st->time_base.den > 0 &&
+        is->video_st->time_base.num > 0) {
+        ffp->stat.video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
+    }
+    if (is->audio_st &&
+        is->audio_st->time_base.den > 0 &&
+        is->audio_st->time_base.num > 0) {
+        ffp->stat.audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
+    }
+}
+
 void ffp_check_buffering_l(FFPlayer *ffp)
 {
     VideoState *is            = ffp->is;
@@ -3706,13 +3731,8 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         int64_t audio_cached_duration = -1;
         int64_t video_cached_duration = -1;
 
-        ffp->stat.video_cached_bytes   = is->videoq.size;
-        ffp->stat.audio_cached_bytes   = is->audioq.size;
-        ffp->stat.video_cached_packets = is->videoq.nb_packets;
-        ffp->stat.audio_cached_packets = is->audioq.nb_packets;
-
         if (is->audio_st && audio_time_base_valid) {
-            audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
+            audio_cached_duration = ffp->stat.audio_cached_duration;
 #ifdef FFP_SHOW_DEMUX_CACHE
             int audio_cached_percent = (int)av_rescale(audio_cached_duration, 1005, hwm_in_ms * 10);
             av_log(ffp, AV_LOG_DEBUG, "audio cache=%%%d milli:(%d/%d) bytes:(%d/%d) packet:(%d/%d)\n", audio_cached_percent,
@@ -3723,7 +3743,7 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         }
 
         if (is->video_st && video_time_base_valid) {
-            video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
+            video_cached_duration = ffp->stat.video_cached_duration;
 #ifdef FFP_SHOW_DEMUX_CACHE
             int video_cached_percent = (int)av_rescale(video_cached_duration, 1005, hwm_in_ms * 10);
             av_log(ffp, AV_LOG_DEBUG, "video cache=%%%d milli:(%d/%d) bytes:(%d/%d) packet:(%d/%d)\n", video_cached_percent,
@@ -3732,11 +3752,6 @@ void ffp_check_buffering_l(FFPlayer *ffp)
                   is->audioq.nb_packets, MIN_FRAMES);
 #endif
         }
-
-        is->audioq_duration = audio_cached_duration;
-        is->videoq_duration = video_cached_duration;
-        ffp->stat.audio_cached_duration = audio_cached_duration;
-        ffp->stat.video_cached_duration = video_cached_duration;
 
         if (video_cached_duration > 0 && audio_cached_duration > 0) {
             cached_duration_in_ms = (int)IJKMIN(video_cached_duration, audio_cached_duration);
@@ -3988,6 +4003,8 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             if (!ffp)
                 return default_value;
             return ffp->stat.audio_cached_packets;
+        case FFP_PROP_INT64_BIT_RATE:
+            return ffp ? ffp->stat.bit_rate : default_value;
         default:
             return default_value;
     }

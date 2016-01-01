@@ -91,6 +91,7 @@ double    ffp_get_master_clock(VideoState *is);
 void      ffp_toggle_buffering_l(FFPlayer *ffp, int start_buffering);
 void      ffp_toggle_buffering(FFPlayer *ffp, int start_buffering);
 void      ffp_check_buffering_l(FFPlayer *ffp);
+void      ffp_statistic_l(FFPlayer *ffp);
 
 int       ffp_video_thread(FFPlayer *ffp);
 

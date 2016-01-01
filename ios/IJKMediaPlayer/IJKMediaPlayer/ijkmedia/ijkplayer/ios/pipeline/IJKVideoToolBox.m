@@ -832,7 +832,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
     context_vtb->idr_based_identified = true;
     context_vtb->ffp = ffp;
-
+#if 0
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:
             if ([IJKDeviceModel currentModel].rank >= kIJKDeviceRank_AppleA7Class) {
@@ -848,7 +848,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
         case FF_PROFILE_H264_CAVLC_444:
             goto failed;
     }
-
+#endif
     if (width < 0 || height < 0) {
         goto failed;
     }

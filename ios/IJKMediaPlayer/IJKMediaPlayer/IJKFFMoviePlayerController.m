@@ -65,6 +65,7 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff2.8--ijk0.4.1.1--dev0.3.3--r
     
     NSMutableArray *_registeredNotifications;
 
+    IJKAVInject_AsyncStatistic _asyncStat;
     BOOL _shouldShowHudView;
     NSTimer *_hudTimer;
 }
@@ -179,7 +180,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init fields
         _scalingMode = IJKMPMovieScalingModeAspectFit;
         _shouldAutoplay = YES;
-        _shouldShowHudView = options.showHudView;
+        memset(&_asyncStat, 0, sizeof(_asyncStat));
 
         // init media resource
         _urlString = aUrlString;
@@ -196,11 +197,14 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init video sink
         _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]
                                        useRenderQueue:options.useRenderQueue];
+        _glView.shouldShowHudView = NO;
         _view   = _glView;
         [_glView setHudValue:nil forKey:@"scheme"];
         [_glView setHudValue:nil forKey:@"host"];
         [_glView setHudValue:nil forKey:@"path"];
         [_glView setHudValue:nil forKey:@"ip"];
+        
+        self.shouldShowHudView = options.showHudView;
 
         ijkmp_ios_set_glview(_mediaPlayer, _glView);
         ijkmp_set_option(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", "fcc-i420");
@@ -564,8 +568,18 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     if (!_mediaPlayer)
         return 0.0f;
 
-    NSTimeInterval ret = ijkmp_get_playable_duration(_mediaPlayer);
-    return ret / 1000;
+    NSTimeInterval demux_cache = ((NSTimeInterval)ijkmp_get_playable_duration(_mediaPlayer)) / 1000;
+
+    int64_t buf_forwards = _asyncStat.buf_forwards;
+    if (buf_forwards > 0) {
+        int64_t bit_rate = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_BIT_RATE, 0);
+        if (bit_rate > 0) {
+            NSTimeInterval io_cache = ((float)buf_forwards) * 8 / bit_rate;
+            return io_cache + demux_cache;
+        }
+    }
+
+    return demux_cache;
 }
 
 - (CGSize)naturalSize
@@ -634,6 +648,31 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     return _glView.fps;
 }
 
+inline static NSString *formatedDurationMilli(int64_t duration) {
+    if (duration >=  1000) {
+        return [NSString stringWithFormat:@"%.2f sec", ((float)duration) / 1000];
+    } else {
+        return [NSString stringWithFormat:@"%ld msec", (long)duration];
+    }
+}
+
+inline static NSString *formatedDurationBytesAndBitrate(int64_t bytes, int64_t bitRate) {
+    if (bitRate <= 0) {
+        return @"inf";
+    }
+    return formatedDurationMilli(((float)bytes) * 8 * 1000 / bitRate);
+}
+
+inline static NSString *formatedSize(int64_t bytes) {
+    if (bytes >= 100 * 1000) {
+        return [NSString stringWithFormat:@"%.2f MB", ((float)bytes) / 1000 / 1000];
+    } else if (bytes >= 100) {
+        return [NSString stringWithFormat:@"%.1f KB", ((float)bytes) / 1000];
+    } else {
+        return [NSString stringWithFormat:@"%ld B", (long)bytes];
+    }
+}
+
 - (void)refreshHudView
 {
     if (_mediaPlayer == nil)
@@ -667,14 +706,30 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     int64_t acached = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_AUDIO_CACHED_DURATION, 0);
     int64_t vcachep = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_VIDEO_CACHED_PACKETS, 0);
     int64_t acachep = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_AUDIO_CACHED_PACKETS, 0);
-    [_glView setHudValue:[NSString stringWithFormat:@"%"PRId64" ms, %"PRId64" bytes, %"PRId64" packets", vcached, vcacheb, vcachep]
+    [_glView setHudValue:[NSString stringWithFormat:@"%@, %@, %"PRId64" packets",
+                          formatedDurationMilli(vcached),
+                          formatedSize(vcacheb),
+                          vcachep]
                   forKey:@"v-cache"];
-    [_glView setHudValue:[NSString stringWithFormat:@"%"PRId64" ms, %"PRId64" bytes, %"PRId64" packets", acached, acacheb, acachep]
+    [_glView setHudValue:[NSString stringWithFormat:@"%@, %@, %"PRId64" packets",
+                          formatedDurationMilli(acached),
+                          formatedSize(acacheb),
+                          acachep]
                   forKey:@"a-cache"];
 
     float avdelay = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_AVDELAY, .0f);
     float avdiff  = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_AVDIFF, .0f);
     [_glView setHudValue:[NSString stringWithFormat:@"%.3f %.3f", avdelay, -avdiff] forKey:@"delay"];
+
+    int64_t bitRate = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_BIT_RATE, 0);
+    [_glView setHudValue:[NSString stringWithFormat:@"-%@, %@",
+                          formatedSize(_asyncStat.buf_backwards),
+                          formatedDurationBytesAndBitrate(_asyncStat.buf_backwards, bitRate)]
+                  forKey:@"async-backward"];
+    [_glView setHudValue:[NSString stringWithFormat:@"+%@, %@",
+                          formatedSize(_asyncStat.buf_forwards),
+                          formatedDurationBytesAndBitrate(_asyncStat.buf_forwards, bitRate)]
+                  forKey:@"async-forward"];
 }
 
 - (void)startHudTimer
@@ -717,6 +772,9 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 
 - (void)setShouldShowHudView:(BOOL)shouldShowHudView
 {
+    if (shouldShowHudView == _shouldShowHudView) {
+        return;
+    }
     _shouldShowHudView = shouldShowHudView;
     if (shouldShowHudView)
         [self startHudTimer];
@@ -1066,6 +1124,16 @@ static int onInjectUrlOpen(IJKFFMoviePlayerController *mpc, id<IJKMediaUrlOpenDe
     return 0;
 }
 
+static int onInjectAsyncStatistic(IJKFFMoviePlayerController *mpc, int type, void *data, size_t data_size)
+{
+    IJKAVInject_AsyncStatistic *realData = data;
+    assert(realData);
+    assert(sizeof(IJKAVInject_AsyncStatistic) == data_size);
+
+    mpc->_asyncStat = *realData;
+    return 0;
+}
+
 // NOTE: could be called from multiple thread
 static int ijkff_inject_callback(void *opaque, int message, void *data, size_t data_size)
 {
@@ -1080,6 +1148,8 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
             return onInjectUrlOpen(mpc, mpc.httpOpenDelegate, message, data, data_size);
         case IJKAVINJECT_ON_LIVE_RETRY:
             return onInjectUrlOpen(mpc, mpc.liveOpenDelegate, message, data, data_size);
+        case IJKAVINJECT_ASYNC_STATISTIC:
+            return onInjectAsyncStatistic(mpc, message, data, data_size);
         default: {
             return 0;
         }
