@@ -190,7 +190,7 @@ elif [ "$FF_ARCH" = "arm64" ]; then
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS"
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
 
-    FF_ASSEMBLER_SUB_DIRS="aarch64"
+    FF_ASSEMBLER_SUB_DIRS="aarch64 neon"
 
 else
     echo "unknown architecture $FF_ARCH";
