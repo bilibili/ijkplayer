@@ -61,18 +61,18 @@ echo_nextstep_help() {
 case "$FF_TARGET" in
     "")
         echo_archs armv7a
-        sh tools/do-compile-ffmpeg.sh armv7a
+        bash tools/do-compile-ffmpeg.sh armv7a
     ;;
     armv5|armv7a|arm64|x86|x86_64)
         echo_archs $FF_TARGET
-        sh tools/do-compile-ffmpeg.sh $FF_TARGET
+        bash tools/do-compile-ffmpeg.sh $FF_TARGET
         echo_nextstep_help
     ;;
     all32)
         echo_archs $FF_ACT_ARCHS_32
         for ARCH in $FF_ACT_ARCHS_32
         do
-            sh tools/do-compile-ffmpeg.sh $ARCH
+            bash tools/do-compile-ffmpeg.sh $ARCH
         done
         echo_nextstep_help
     ;;
@@ -80,7 +80,7 @@ case "$FF_TARGET" in
         echo_archs $FF_ACT_ARCHS_64
         for ARCH in $FF_ACT_ARCHS_64
         do
-            sh tools/do-compile-ffmpeg.sh $ARCH
+            bash tools/do-compile-ffmpeg.sh $ARCH
         done
         echo_nextstep_help
     ;;
