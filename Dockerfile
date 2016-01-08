@@ -34,7 +34,7 @@ RUN rm android-sdk_r23-linux.tgz
 ENV PATH ${PATH}:/usr/local/android-sdk/tools
 COPY tools/android-accept-licenses.sh /usr/local/android-sdk/tools
 RUN ls -laih /usr/local/android-sdk/tools
-RUN ["android-accept-licenses.sh", "android update sdk --all --no-ui --filter platform-tools,tools,build-tools-21,build-tools-21.0.1,build-tools-21.0.2,build-tools-21.1,build-tools-21.1.1,build-tools-21.1.2,build-tools-22,build-tools-22.0.1,android-21,android-22,addon-google_apis_x86-google-21,extra-android-support,extra-android-m2repository,extra-google-m2repository,extra-google-google_play_services,sys-img-armeabi-v7a-android-21"]
+RUN ["android-accept-licenses.sh", "android update sdk --all --no-ui --filter platform-tools,tools,build-tools-21,build-tools-21.0.1,build-tools-21.0.2,build-tools-21.1,build-tools-21.1.1,build-tools-21.1.2,build-tools-22,build-tools-22.0.1,android-19,android-20,android-21,android-22,addon-google_apis_x86-google-21,extra-android-support,extra-android-m2repository,extra-google-m2repository,extra-google-google_play_services,sys-img-armeabi-v7a-android-21"]
 
 # Install Android NDK
 RUN wget http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin
@@ -44,10 +44,10 @@ RUN mv android-ndk-r10e /usr/local/android-ndk
 RUN rm android-ndk-r10e-linux-x86_64.bin
 
 # Install Gradle
-RUN wget https://downloads.gradle.org/distributions/gradle-1.10-bin.zip
-RUN unzip gradle-1.10-bin.zip
-RUN mv gradle-1.10 /usr/local/gradle
-RUN rm gradle-1.10-bin.zip
+RUN wget https://downloads.gradle.org/distributions/gradle-2.9-bin.zip
+RUN unzip gradle-2.9-bin.zip
+RUN mv gradle-2.9 /usr/local/gradle
+RUN rm gradle-2.9-bin.zip
 
 # get ijkplayer sources
 RUN mkdir /player-sources
