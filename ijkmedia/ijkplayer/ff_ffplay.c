@@ -3538,6 +3538,14 @@ long ffp_get_current_position_l(FFPlayer *ffp)
         pos = pos_clock * 1000;
     }
 
+    // If using REAL time and not ajusted, then return the real pos as calculated from the stream
+    // the use case for this is primarily when using a custom non-seekable data source that starts
+    // with a buffer that is NOT the start of the stream.  We want the get_current_position to
+    // return the time in the stream, and not the player's internal clock.
+    if (ffp->no_time_adjust) {
+        return pos;
+    }
+
     if (pos < 0 || pos < start_diff)
         return 0;
 
