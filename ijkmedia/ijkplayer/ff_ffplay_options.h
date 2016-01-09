@@ -128,8 +128,11 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(sync_av_start),       OPTION_INT(1, 0, 1) },
     { "iformat",                            "force format",
         OPTION_OFFSET(iformat_name),        OPTION_STR(NULL) },
+    { "no-time-adjust",                     "return player's real time from the media stream instead of the adjusted time",
+      OPTION_OFFSET(no_time_adjust),   OPTION_INT(0, 0, 1) },
 
-    // iOS only options
+
+        // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
         OPTION_OFFSET(videotoolbox),        OPTION_INT(0, 0, 1) },
     { "videotoolbox-max-frame-width",       "VideoToolbox: max width of output frame",
