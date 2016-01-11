@@ -79,6 +79,7 @@ void ijkmeta_destroy(IjkMediaMeta *meta)
     }
 
     SDL_DestroyMutexP(&meta->mutex);
+    free(meta);
 }
 
 void ijkmeta_destroy_p(IjkMediaMeta **meta)
