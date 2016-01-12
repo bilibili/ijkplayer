@@ -160,7 +160,7 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node, jobject new_su
     prev_jsurface = opaque->jsurface;
     if (new_surface) {
         opaque->jsurface = (*env)->NewGlobalRef(env, new_surface);
-        if (JJK_ExceptionCheck__catchAll(env) || !opaque->jsurface)
+        if (J4A_ExceptionCheck__catchAll(env) || !opaque->jsurface)
             goto fail;
     } else {
         opaque->jsurface = NULL;
@@ -409,7 +409,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             if (opaque->jsurface == new_surface ||
                 (opaque->jsurface && new_surface && (*env)->IsSameObject(env, new_surface, opaque->jsurface))) {
                 ALOGI("%s: same surface, reuse previous surface\n", __func__);
-                JJK_DeleteGlobalRef__p(env, &new_surface);
+                J4A_DeleteGlobalRef__p(env, &new_surface);
             } else {
                 opaque->acodec_reconfigure_request = true;
                 SDL_LockMutex(opaque->acodec_mutex);
@@ -418,7 +418,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 SDL_CondSignal(opaque->acodec_cond);
                 SDL_UnlockMutex(opaque->acodec_mutex);
 
-                JJK_DeleteGlobalRef__p(env, &new_surface);
+                J4A_DeleteGlobalRef__p(env, &new_surface);
 
                 if (ret != 0) {
                     ALOGE("%s: reconfigure_codec failed\n", __func__);
@@ -1118,7 +1118,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
 
     jsurface = ffpipeline_get_surface_as_global_ref(env, pipeline);
     ret = reconfigure_codec_l(env, node, jsurface);
-    JJK_DeleteGlobalRef__p(env, &jsurface);
+    J4A_DeleteGlobalRef__p(env, &jsurface);
     if (ret != 0)
         goto fail;
 
