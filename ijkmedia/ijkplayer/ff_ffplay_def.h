@@ -612,6 +612,8 @@ typedef struct FFPlayer {
 
     char *iformat_name;
 
+    int no_time_adjust;
+
     struct IjkMediaMeta *meta;
 
     SDL_SpeedSampler vfps_sampler;
@@ -720,6 +722,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->opensles                       = 0; // option
 
     ffp->iformat_name                   = NULL; // option
+
+    ffp->no_time_adjust                 = 0; // option
 
     ijkmeta_reset(ffp->meta);
 
