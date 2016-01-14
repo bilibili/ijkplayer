@@ -964,7 +964,8 @@ static double compute_target_delay(FFPlayer *ffp, double delay, VideoState *is)
            delay to compute the threshold. I still don't know
            if it is the best guess */
         sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
-        if (!isnan(diff) && fabs(diff) < is->max_frame_duration) {
+        /* -- by bbcallen: replace is->max_frame_duration with AV_NOSYNC_THRESHOLD */
+        if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD) {
             if (diff <= -sync_threshold)
                 delay = FFMAX(0, delay + diff);
             else if (diff >= sync_threshold && delay > AV_SYNC_FRAMEDUP_THRESHOLD)
