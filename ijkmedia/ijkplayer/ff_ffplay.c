@@ -3543,7 +3543,7 @@ long ffp_get_current_position_l(FFPlayer *ffp)
     // with a buffer that is NOT the start of the stream.  We want the get_current_position to
     // return the time in the stream, and not the player's internal clock.
     if (ffp->no_time_adjust) {
-        return pos;
+        return (long)pos;
     }
 
     if (pos < 0 || pos < start_diff)
