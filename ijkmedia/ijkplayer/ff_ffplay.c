@@ -1307,6 +1307,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
     VideoState *is = ffp->is;
     int got_picture;
 
+    ffp_video_statistic_l(ffp);
     if ((got_picture = decoder_decode_frame(ffp, &is->viddec, frame, NULL)) < 0)
         return -1;
 
@@ -1611,6 +1612,7 @@ static int audio_thread(void *arg)
     }
 
     do {
+        ffp_audio_statistic_l(ffp);
         if ((got_frame = decoder_decode_frame(ffp, &is->auddec, frame, NULL)) < 0)
             goto the_end;
 
@@ -3711,12 +3713,22 @@ void ffp_track_statistic_l(FFPlayer *ffp, AVStream *st, PacketQueue *q, FFTrackC
     }
 }
 
-void ffp_statistic_l(FFPlayer *ffp)
+void ffp_audio_statistic_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
-
-    ffp_track_statistic_l(ffp, is->video_st, &is->videoq, &ffp->stat.video_cache);
     ffp_track_statistic_l(ffp, is->audio_st, &is->audioq, &ffp->stat.audio_cache);
+}
+
+void ffp_video_statistic_l(FFPlayer *ffp)
+{
+    VideoState *is = ffp->is;
+    ffp_track_statistic_l(ffp, is->video_st, &is->videoq, &ffp->stat.video_cache);
+}
+
+void ffp_statistic_l(FFPlayer *ffp)
+{
+    ffp_audio_statistic_l(ffp);
+    ffp_video_statistic_l(ffp);
 }
 
 void ffp_check_buffering_l(FFPlayer *ffp)

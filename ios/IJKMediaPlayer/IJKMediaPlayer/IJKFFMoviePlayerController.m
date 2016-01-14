@@ -318,7 +318,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (!_mediaPlayer)
         return;
 
-    [self stopHudTimer];
+//    [self stopHudTimer];
     ijkmp_pause(_mediaPlayer);
 }
 
