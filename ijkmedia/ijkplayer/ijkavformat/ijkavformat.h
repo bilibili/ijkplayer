@@ -76,6 +76,15 @@ typedef struct IJKAVInject_AsyncStatistic {
 
 #define IJKAVINJECT_ASYNC_STATISTIC     0x11000
 
+typedef struct IJKAVInject_AsyncReadSpeed {
+    size_t  size;
+    int     is_full_speed;
+    int64_t io_bytes;
+    int64_t elapsed_milli;
+} IJKAVInject_AsyncReadSpeed;
+
+#define IJKAVINJECT_ASYNC_READ_SPEED    0x11001
+
 typedef int (*IjkAVInjectCallback)(void *opaque, int message, void *data, size_t data_size);
 
 IjkAVInjectCallback ijkav_register_inject_callback(IjkAVInjectCallback callback);

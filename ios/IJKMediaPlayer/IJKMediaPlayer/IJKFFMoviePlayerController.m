@@ -66,6 +66,8 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff2.8--ijk0.4.4.1--dev0.3.3--r
     NSMutableArray *_registeredNotifications;
 
     IJKAVInject_AsyncStatistic _asyncStat;
+    IJKAVInject_AsyncReadSpeed _asyncReadSpeedStartup;
+    IJKAVInject_AsyncReadSpeed _asyncReadSpeed;
     BOOL _shouldShowHudView;
     NSTimer *_hudTimer;
 }
@@ -673,6 +675,25 @@ inline static NSString *formatedSize(int64_t bytes) {
     }
 }
 
+inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
+    if (elapsed_milli <= 0) {
+        return @"N/A";
+    }
+
+    if (bytes <= 0) {
+        return @"0";
+    }
+
+    float bytes_per_sec = ((float)bytes) * 1000.f /  elapsed_milli;
+    if (bytes_per_sec >= 1000 * 1000) {
+        return [NSString stringWithFormat:@"%.2f MB/s", ((float)bytes_per_sec) / 1000 / 1000];
+    } else if (bytes_per_sec >= 1000) {
+        return [NSString stringWithFormat:@"%.1f KB/s", ((float)bytes_per_sec) / 1000];
+    } else {
+        return [NSString stringWithFormat:@"%ld B/s", (long)bytes_per_sec];
+    }
+}
+
 - (void)refreshHudView
 {
     if (_mediaPlayer == nil)
@@ -730,6 +751,11 @@ inline static NSString *formatedSize(int64_t bytes) {
                           formatedSize(_asyncStat.buf_forwards),
                           formatedDurationBytesAndBitrate(_asyncStat.buf_forwards, bitRate)]
                   forKey:@"async-forward"];
+
+    [_glView setHudValue:[NSString stringWithFormat:@"%@, %@",
+                          formatedSpeed(_asyncReadSpeedStartup.io_bytes, _asyncReadSpeedStartup.elapsed_milli),
+                          formatedSpeed(_asyncReadSpeed.io_bytes, _asyncReadSpeed.elapsed_milli)]
+                  forKey:@"async-speed"];
 }
 
 - (void)startHudTimer
@@ -1134,6 +1160,20 @@ static int onInjectAsyncStatistic(IJKFFMoviePlayerController *mpc, int type, voi
     return 0;
 }
 
+static int onInjectReadSpeed(IJKFFMoviePlayerController *mpc, int type, void *data, size_t data_size)
+{
+    IJKAVInject_AsyncReadSpeed *realData = data;
+    assert(realData);
+    assert(sizeof(IJKAVInject_AsyncReadSpeed) == data_size);
+
+    mpc->_asyncReadSpeed = *realData;
+    if (mpc->_asyncReadSpeedStartup.elapsed_milli == 0 && realData->is_full_speed) {
+        mpc->_asyncReadSpeedStartup = *realData;
+    }
+
+    return 0;
+}
+
 // NOTE: could be called from multiple thread
 static int ijkff_inject_callback(void *opaque, int message, void *data, size_t data_size)
 {
@@ -1150,6 +1190,8 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
             return onInjectUrlOpen(mpc, mpc.liveOpenDelegate, message, data, data_size);
         case IJKAVINJECT_ASYNC_STATISTIC:
             return onInjectAsyncStatistic(mpc, message, data, data_size);
+        case IJKAVINJECT_ASYNC_READ_SPEED:
+            return onInjectReadSpeed(mpc, message, data, data_size);
         default: {
             return 0;
         }
