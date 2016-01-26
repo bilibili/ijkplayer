@@ -34,6 +34,7 @@
 #include "libavutil/log.h"
 #include "libavutil/opt.h"
 #include "libavutil/thread.h"
+#include "libavutil/time.h"
 #include "url.h"
 #include <stdint.h>
 
@@ -179,7 +180,7 @@ static int wrapped_url_read(void *src, void *dst, int size)
     return ret;
 }
 
-static void call_inject(URLContext *h)
+static void call_inject_statistic(URLContext *h)
 {
     Context *c = h->priv_data;
     IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
@@ -196,6 +197,24 @@ static void call_inject(URLContext *h)
     }
 }
 
+static void call_inject_async_fill_speed(URLContext *h, int is_full_speed, int64_t bytes, int64_t elapsed_micro)
+{
+    Context *c = h->priv_data;
+    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+    void *opaque = (void *) (intptr_t) c->opaque;
+    int64_t elapsed_milli = elapsed_micro / 1000;
+
+    if (opaque && inject_callback && bytes > 0 && elapsed_milli > 0) {
+        IJKAVInject_AsyncReadSpeed stat;
+        stat.size = sizeof(stat);
+        stat.is_full_speed = is_full_speed;
+        stat.io_bytes      = bytes;
+        stat.elapsed_milli = elapsed_milli;
+
+        inject_callback(opaque, IJKAVINJECT_ASYNC_READ_SPEED, &stat, sizeof(stat));
+    }
+}
+
 static void *async_buffer_task(void *arg)
 {
     URLContext   *h    = arg;
@@ -203,6 +222,9 @@ static void *async_buffer_task(void *arg)
     RingBuffer   *ring = &c->ring;
     int           ret  = 0;
     int64_t       seek_ret;
+    int           is_full_speed = 1;
+    int64_t       count_bytes = 0;
+    int64_t       count_start_time_micro = av_gettime_relative();
 
     while (1) {
         int fifo_space, to_copy;
@@ -234,6 +256,8 @@ static void *async_buffer_task(void *arg)
 
             pthread_cond_signal(&c->cond_wakeup_main);
             pthread_mutex_unlock(&c->mutex);
+
+            is_full_speed = 0;
             continue;
         }
 
@@ -242,12 +266,23 @@ static void *async_buffer_task(void *arg)
             pthread_cond_signal(&c->cond_wakeup_main);
             pthread_cond_wait(&c->cond_wakeup_background, &c->mutex);
             pthread_mutex_unlock(&c->mutex);
+            is_full_speed = 0;
             continue;
         }
         pthread_mutex_unlock(&c->mutex);
 
         to_copy = FFMIN(4096, fifo_space);
         ret = ring_generic_write(ring, (void *)h, to_copy, (void *)wrapped_url_read);
+        if (ret > 0) {
+            count_bytes += ret;
+            if (count_bytes > FFMIN((1 * 1024 * 1024), c->forwards_capacity)) {
+                int64_t now = av_gettime_relative();
+                call_inject_async_fill_speed(h, is_full_speed, count_bytes, now - count_start_time_micro);
+                is_full_speed = 1;
+                count_bytes = 0;
+                count_start_time_micro = now;
+            }
+        }
 
         pthread_mutex_lock(&c->mutex);
         if (ret <= 0) {
@@ -259,7 +294,7 @@ static void *async_buffer_task(void *arg)
         pthread_cond_signal(&c->cond_wakeup_main);
         pthread_mutex_unlock(&c->mutex);
 
-        call_inject(h);
+        call_inject_statistic(h);
     }
 
     return NULL;
@@ -398,7 +433,7 @@ static int async_read_internal(URLContext *h, void *dest, int size, int read_com
     pthread_cond_signal(&c->cond_wakeup_background);
     pthread_mutex_unlock(&c->mutex);
 
-    call_inject(h);
+    call_inject_statistic(h);
     return ret;
 }
 
@@ -454,7 +489,7 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
         } else {
             // fast seek backwards
             ring_drain(ring, pos_delta);
-            call_inject(h);
+            call_inject_statistic(h);
             c->logical_pos = new_logical_pos;
         }
 
@@ -492,7 +527,7 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
 
     pthread_mutex_unlock(&c->mutex);
 
-    call_inject(h);
+    call_inject_statistic(h);
     return ret;
 }
 

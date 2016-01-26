@@ -47,9 +47,6 @@
     [options setFormatOptionIntValue:30 * 1000 * 1000   forKey:@"timeout"];
     [options setFormatOptionValue:@"ijkplayer"          forKey:@"user-agent"];
 
-    [options setCodecOptionIntValue:IJK_AVDISCARD_ALL       forKey:@"skip_loop_filter"];
-    [options setCodecOptionIntValue:IJK_AVDISCARD_NONREF    forKey:@"skip_frame"];
-
     options.useRenderQueue = NO;
     options.showHudView   = NO;
 

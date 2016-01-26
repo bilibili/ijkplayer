@@ -442,6 +442,13 @@ static SDL_Surface *screen;
  * end at line 330 in ffplay.c
  * near packet_queue_put
  ****************************************************************************/
+typedef struct FFTrackCacheStatistic
+{
+    int64_t duration;
+    int64_t bytes;
+    int64_t packets;
+} FFTrackCacheStatistic;
+
 typedef struct FFStatistic
 {
     int64_t vdec_type;
@@ -452,12 +459,8 @@ typedef struct FFStatistic
     float avdiff;
     int   bit_rate;
 
-    int64_t video_cached_duration;
-    int64_t audio_cached_duration;
-    int64_t video_cached_bytes;
-    int64_t audio_cached_bytes;
-    int64_t video_cached_packets;
-    int64_t audio_cached_packets;
+    FFTrackCacheStatistic video_cache;
+    FFTrackCacheStatistic audio_cache;
 } FFStatistic;
 
 typedef struct FFDemuxCacheControl
