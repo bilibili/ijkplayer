@@ -127,6 +127,15 @@ int64_t get_valid_channel_layout(int64_t channel_layout, int channels)
 
 static void free_picture(Frame *vp);
 
+//add by feng for [download speed]
+static void flush_speed(void *ffp, int64_t bytes, int64_t elapsed_milli)
+{
+    FFPlayer *lffp = (FFPlayer *)ffp;
+    if(lffp != NULL)
+       ffp_notify_msg3(lffp, FFP_MSG_BUFFERING_SPEED, bytes, elapsed_milli);
+//    ALOGE("realtime calc net speed:%f",speed);
+}
+
 static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
 {
     MyAVPacketList *pkt1;
@@ -2456,6 +2465,12 @@ static int read_thread(void *arg)
 #endif
     }
     is->ic = ic;
+    
+    //add by feng for [download speed]
+    if (ic->pb){
+        ic->pb->flush_speed = flush_speed;
+        ic->pb->ffp_opaque = ffp;
+    }
 
     if (ffp->genpts)
         ic->flags |= AVFMT_FLAG_GENPTS;

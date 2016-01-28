@@ -57,6 +57,8 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff2.8--ijk0.4.4.1--dev0.3.3--r
     BOOL      _seeking;
     NSInteger _bufferingTime;
     NSInteger _bufferingPosition;
+    NSInteger _lastSecBufferingByte;
+    NSInteger _lastSecBufferingElapsedMilli;
 
     BOOL _keepScreenOnWhilePlaying;
     BOOL _pauseInBackground;
@@ -77,7 +79,8 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff2.8--ijk0.4.4.1--dev0.3.3--r
 @synthesize duration;
 @synthesize playableDuration;
 @synthesize bufferingProgress = _bufferingProgress;
-
+@synthesize lastSecBufferingByte = _lastSecBufferingByte;
+@synthesize lastSecBufferingElapsedMilli = _lastSecBufferingElapsedMilli;
 @synthesize numberOfBytesTransferred = _numberOfBytesTransferred;
 
 @synthesize isPreparedToPlay = _isPreparedToPlay;
@@ -681,7 +684,7 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     }
 
     if (bytes <= 0) {
-        return @"0";
+        return @"0 KB/s";
     }
 
     float bytes_per_sec = ((float)bytes) * 1000.f /  elapsed_milli;
@@ -756,6 +759,10 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
                           formatedSpeed(_asyncReadSpeedStartup.io_bytes, _asyncReadSpeedStartup.elapsed_milli),
                           formatedSpeed(_asyncReadSpeed.io_bytes, _asyncReadSpeed.elapsed_milli)]
                   forKey:@"async-speed"];
+    
+    [_glView setHudValue:[NSString stringWithFormat:@"%@",
+                          formatedSpeed(_lastSecBufferingByte, _lastSecBufferingElapsedMilli)]
+                  forKey:@"speed"];
 }
 
 - (void)startHudTimer
@@ -1058,6 +1065,14 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
              postNotificationName:IJKMPMoviePlayerFirstAudioFrameRenderedNotification
              object:self];
             break;
+        }
+        case FFP_MSG_BUFFERING_SPEED:
+        {
+            _lastSecBufferingByte = avmsg->arg1;
+            _lastSecBufferingElapsedMilli = avmsg->arg2;
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerBufferSpeedChangedNotification
+             object:self];
         }
         default:
             // NSLog(@"unknown FFP_MSG_xxx(%d)\n", avmsg->what);

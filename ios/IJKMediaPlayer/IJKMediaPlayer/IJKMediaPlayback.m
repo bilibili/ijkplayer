@@ -39,6 +39,8 @@ NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification = @"IJKMPMoviePlaye
 NSString *const IJKMPMoviePlayerFirstVideoFrameRenderedNotification = @"IJKMPMoviePlayerFirstVideoFrameRenderedNotification";
 NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification = @"IJKMPMoviePlayerFirstAudioFrameRenderedNotification";
 
+NSString *const IJKMPMoviePlayerBufferSpeedChangedNotification = @"IJKMPMoviePlayerBufferSpeedChangedNotification";
+
 @implementation IJKMediaUrlOpenData {
     NSString *_url;
     BOOL _handled;
