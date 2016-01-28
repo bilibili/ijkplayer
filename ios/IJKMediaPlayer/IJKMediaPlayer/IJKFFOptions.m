@@ -47,7 +47,6 @@
     [options setFormatOptionIntValue:30 * 1000 * 1000   forKey:@"timeout"];
     [options setFormatOptionValue:@"ijkplayer"          forKey:@"user-agent"];
 
-    options.useRenderQueue = NO;
     options.showHudView   = NO;
 
     return options;
