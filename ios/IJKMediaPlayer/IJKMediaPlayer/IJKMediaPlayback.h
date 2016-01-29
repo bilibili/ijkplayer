@@ -79,6 +79,8 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property(nonatomic, readonly)  NSTimeInterval duration;
 @property(nonatomic, readonly)  NSTimeInterval playableDuration;
 @property(nonatomic, readonly)  NSInteger bufferingProgress;
+@property(nonatomic, readonly)  NSInteger lastSecBufferingByte;
+@property(nonatomic, readonly)  NSInteger lastSecBufferingElapsedMilli;
 
 @property(nonatomic, readonly)  BOOL isPreparedToPlay;
 @property(nonatomic, readonly)  IJKMPMoviePlaybackState playbackState;
@@ -147,6 +149,7 @@ IJK_EXTERN NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerFirstVideoFrameRenderedNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification;
 
+IJK_EXTERN NSString *const IJKMPMoviePlayerBufferSpeedChangedNotification;
 @end
 
 #pragma mark IJKMediaUrlOpenDelegate
