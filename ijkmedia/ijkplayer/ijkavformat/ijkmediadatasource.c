@@ -30,8 +30,8 @@
 #include "ijkplayer/ijkavutil/opt.h"
 #include "ijkavformat.h"
 
+#include "j4a/class/tv/danmaku/ijk/media/player/misc/IMediaDataSource.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
-#include "ijksdl/android/jjk/c/tv/danmaku/ijk/media/player/misc/IMediaDataSource.h"
 
 typedef struct Context {
     AVClass        *class;
@@ -64,8 +64,8 @@ static int ijkmds_open(URLContext *h, const char *arg, int flags, AVDictionary *
         return AVERROR(EINVAL);
     }
 
-    c->logical_size = JJKC_IMediaDataSource__getSize(env, media_data_source);
-    if (JJK_ExceptionCheck__catchAll(env)) {
+    c->logical_size = J4AC_IMediaDataSource__getSize(env, media_data_source);
+    if (J4A_ExceptionCheck__catchAll(env)) {
         return AVERROR(EINVAL);
     } else if (c->logical_size < 0) {
         h->is_streamed = 1;
@@ -73,7 +73,7 @@ static int ijkmds_open(URLContext *h, const char *arg, int flags, AVDictionary *
     }
 
     c->media_data_source = (*env)->NewGlobalRef(env, media_data_source);
-    if (JJK_ExceptionCheck__catchAll(env) || !c->media_data_source) {
+    if (J4A_ExceptionCheck__catchAll(env) || !c->media_data_source) {
         return AVERROR(ENOMEM);
     }
 
@@ -90,11 +90,11 @@ static int ijkmds_close(URLContext *h)
         return AVERROR(EINVAL);
     }
 
-    JJK_DeleteGlobalRef__p(env, &c->jbuffer);
+    J4A_DeleteGlobalRef__p(env, &c->jbuffer);
 
     if (c->media_data_source) {
-        JJKC_IMediaDataSource__close__catchAll(env, c->media_data_source);
-        JJK_DeleteGlobalRef__p(env, &c->media_data_source);
+        J4AC_IMediaDataSource__close__catchAll(env, c->media_data_source);
+        J4A_DeleteGlobalRef__p(env, &c->media_data_source);
     }
     c->media_data_source_ptr = 0;
 
@@ -109,11 +109,11 @@ static jobject jbuffer_grow(JNIEnv *env, URLContext *h, int new_capacity) {
 
     new_capacity = FFMAX(new_capacity, c->jbuffer_capacity * 2);
 
-    JJK_DeleteGlobalRef__p(env, &c->jbuffer);
+    J4A_DeleteGlobalRef__p(env, &c->jbuffer);
     c->jbuffer_capacity = 0;
 
-    c->jbuffer = JJK_NewByteArray__asGlobalRef__catchAll(env, new_capacity);
-    if (JJK_ExceptionCheck__catchAll(env) || !c->jbuffer) {
+    c->jbuffer = J4A_NewByteArray__asGlobalRef__catchAll(env, new_capacity);
+    if (J4A_ExceptionCheck__catchAll(env) || !c->jbuffer) {
         c->jbuffer = NULL;
         return NULL;
     }
@@ -141,8 +141,8 @@ static int ijkmds_read(URLContext *h, unsigned char *buf, int size)
     if (!jbuffer)
         return AVERROR(ENOMEM);
 
-    ret = JJKC_IMediaDataSource__readAt(env, c->media_data_source, c->logical_pos, jbuffer, 0, size);
-    if (JJK_ExceptionCheck__catchAll(env))
+    ret = J4AC_IMediaDataSource__readAt(env, c->media_data_source, c->logical_pos, jbuffer, 0, size);
+    if (J4A_ExceptionCheck__catchAll(env))
         return AVERROR(EIO);
     else if (ret < 0)
         return AVERROR_EOF;
@@ -150,7 +150,7 @@ static int ijkmds_read(URLContext *h, unsigned char *buf, int size)
         return AVERROR(EAGAIN);
 
     (*env)->GetByteArrayRegion(env, jbuffer, 0, ret, (jbyte*)buf);
-    if (JJK_ExceptionCheck__catchAll(env))
+    if (J4A_ExceptionCheck__catchAll(env))
         return AVERROR(EIO);
 
     c->logical_pos += ret;
@@ -192,8 +192,8 @@ static int64_t ijkmds_seek(URLContext *h, int64_t pos, int whence)
     if (!jbuffer)
         return AVERROR(ENOMEM);
 
-    ret = JJKC_IMediaDataSource__readAt(env, c->media_data_source, new_logical_pos, jbuffer, 0, 0);
-    if (JJK_ExceptionCheck__catchAll(env))
+    ret = J4AC_IMediaDataSource__readAt(env, c->media_data_source, new_logical_pos, jbuffer, 0, 0);
+    if (J4A_ExceptionCheck__catchAll(env))
         return AVERROR(EIO);
     else if (ret < 0)
         return AVERROR_EOF;

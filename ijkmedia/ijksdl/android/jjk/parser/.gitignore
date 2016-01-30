@@ -1,8 +1,0 @@
-jjk
-jni.bison.tab.cpp
-jni.bison.tab.hpp
-jni.flex.yy.cpp
-
-*.d
-*.o
-*.output

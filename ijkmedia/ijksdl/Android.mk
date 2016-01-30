@@ -26,6 +26,7 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
 LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
 LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/../ijkyuv/include)
+LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/../ijkj4a)
 
 LOCAL_SRC_FILES += ijksdl_aout.c
 LOCAL_SRC_FILES += ijksdl_audio.c
@@ -57,24 +58,7 @@ LOCAL_SRC_FILES += android/ijksdl_vout_android_nativewindow.c
 LOCAL_SRC_FILES += android/ijksdl_vout_android_surface.c
 LOCAL_SRC_FILES += android/ijksdl_vout_overlay_android_mediacodec.c
 
-# TODO: move to individual lib
-LOCAL_SRC_FILES += android/jjk/internal/jjk_allclasses.c
-LOCAL_SRC_FILES += android/jjk/internal/jjk_internal.c
-LOCAL_SRC_FILES += android/jjk/c/android/media/AudioTrack.c
-LOCAL_SRC_FILES += android/jjk/c/android/media/AudioTrack.util.c
-LOCAL_SRC_FILES += android/jjk/c/android/media/MediaCodec.c
-LOCAL_SRC_FILES += android/jjk/c/android/media/MediaFormat.c
-LOCAL_SRC_FILES += android/jjk/c/android/media/PlaybackParams.c
-LOCAL_SRC_FILES += android/jjk/c/android/os/Build.c
-LOCAL_SRC_FILES += android/jjk/c/android/os/Bundle.c
-LOCAL_SRC_FILES += android/jjk/c/java/nio/Buffer.c
-LOCAL_SRC_FILES += android/jjk/c/java/nio/ByteBuffer.c
-LOCAL_SRC_FILES += android/jjk/c/java/nio/ByteBuffer.util.c
-LOCAL_SRC_FILES += android/jjk/c/java/util/ArrayList.c
-LOCAL_SRC_FILES += android/jjk/c/tv/danmaku/ijk/media/player/IjkMediaPlayer.c
-LOCAL_SRC_FILES += android/jjk/c/tv/danmaku/ijk/media/player/misc/IMediaDataSource.c
-
-LOCAL_SHARED_LIBRARIES := ijkffmpeg
+LOCAL_SHARED_LIBRARIES := ijkffmpeg ijkj4a
 LOCAL_STATIC_LIBRARIES := cpufeatures yuv_static
 
 LOCAL_MODULE := ijksdl

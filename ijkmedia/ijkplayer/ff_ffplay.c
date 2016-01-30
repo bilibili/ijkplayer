@@ -964,7 +964,8 @@ static double compute_target_delay(FFPlayer *ffp, double delay, VideoState *is)
            delay to compute the threshold. I still don't know
            if it is the best guess */
         sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
-        if (!isnan(diff) && fabs(diff) < is->max_frame_duration) {
+        /* -- by bbcallen: replace is->max_frame_duration with AV_NOSYNC_THRESHOLD */
+        if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD) {
             if (diff <= -sync_threshold)
                 delay = FFMAX(0, delay + diff);
             else if (diff >= sync_threshold && delay > AV_SYNC_FRAMEDUP_THRESHOLD)
@@ -1306,6 +1307,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
     VideoState *is = ffp->is;
     int got_picture;
 
+    ffp_video_statistic_l(ffp);
     if ((got_picture = decoder_decode_frame(ffp, &is->viddec, frame, NULL)) < 0)
         return -1;
 
@@ -1610,6 +1612,7 @@ static int audio_thread(void *arg)
     }
 
     do {
+        ffp_audio_statistic_l(ffp);
         if ((got_frame = decoder_decode_frame(ffp, &is->auddec, frame, NULL)) < 0)
             goto the_end;
 
@@ -3538,6 +3541,14 @@ long ffp_get_current_position_l(FFPlayer *ffp)
         pos = pos_clock * 1000;
     }
 
+    // If using REAL time and not ajusted, then return the real pos as calculated from the stream
+    // the use case for this is primarily when using a custom non-seekable data source that starts
+    // with a buffer that is NOT the start of the stream.  We want the get_current_position to
+    // return the time in the stream, and not the player's internal clock.
+    if (ffp->no_time_adjust) {
+        return (long)pos;
+    }
+
     if (pos < 0 || pos < start_diff)
         return 0;
 
@@ -3688,25 +3699,36 @@ void ffp_toggle_buffering(FFPlayer *ffp, int start_buffering)
     SDL_UnlockMutex(ffp->is->play_mutex);
 }
 
-void ffp_statistic_l(FFPlayer *ffp)
+void ffp_track_statistic_l(FFPlayer *ffp, AVStream *st, PacketQueue *q, FFTrackCacheStatistic *cache)
+{
+    assert(cache);
+
+    if (q) {
+        cache->bytes   = q->size;
+        cache->packets = q->nb_packets;
+    }
+
+    if (st && st->time_base.den > 0 && st->time_base.num > 0) {
+        cache->duration = q->duration * av_q2d(st->time_base) * 1000;
+    }
+}
+
+void ffp_audio_statistic_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
+    ffp_track_statistic_l(ffp, is->audio_st, &is->audioq, &ffp->stat.audio_cache);
+}
 
-    ffp->stat.video_cached_bytes   = is->videoq.size;
-    ffp->stat.audio_cached_bytes   = is->audioq.size;
-    ffp->stat.video_cached_packets = is->videoq.nb_packets;
-    ffp->stat.audio_cached_packets = is->audioq.nb_packets;
+void ffp_video_statistic_l(FFPlayer *ffp)
+{
+    VideoState *is = ffp->is;
+    ffp_track_statistic_l(ffp, is->video_st, &is->videoq, &ffp->stat.video_cache);
+}
 
-    if (is->video_st &&
-        is->video_st->time_base.den > 0 &&
-        is->video_st->time_base.num > 0) {
-        ffp->stat.video_cached_duration = is->videoq.duration * av_q2d(is->video_st->time_base) * 1000;
-    }
-    if (is->audio_st &&
-        is->audio_st->time_base.den > 0 &&
-        is->audio_st->time_base.num > 0) {
-        ffp->stat.audio_cached_duration = is->audioq.duration * av_q2d(is->audio_st->time_base) * 1000;
-    }
+void ffp_statistic_l(FFPlayer *ffp)
+{
+    ffp_audio_statistic_l(ffp);
+    ffp_video_statistic_l(ffp);
 }
 
 void ffp_check_buffering_l(FFPlayer *ffp)
@@ -3732,7 +3754,7 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         int64_t video_cached_duration = -1;
 
         if (is->audio_st && audio_time_base_valid) {
-            audio_cached_duration = ffp->stat.audio_cached_duration;
+            audio_cached_duration = ffp->stat.audio_cache.duration;
 #ifdef FFP_SHOW_DEMUX_CACHE
             int audio_cached_percent = (int)av_rescale(audio_cached_duration, 1005, hwm_in_ms * 10);
             av_log(ffp, AV_LOG_DEBUG, "audio cache=%%%d milli:(%d/%d) bytes:(%d/%d) packet:(%d/%d)\n", audio_cached_percent,
@@ -3743,7 +3765,7 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         }
 
         if (is->video_st && video_time_base_valid) {
-            video_cached_duration = ffp->stat.video_cached_duration;
+            video_cached_duration = ffp->stat.video_cache.duration;
 #ifdef FFP_SHOW_DEMUX_CACHE
             int video_cached_percent = (int)av_rescale(video_cached_duration, 1005, hwm_in_ms * 10);
             av_log(ffp, AV_LOG_DEBUG, "video cache=%%%d milli:(%d/%d) bytes:(%d/%d) packet:(%d/%d)\n", video_cached_percent,
@@ -3982,27 +4004,27 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
         case FFP_PROP_INT64_VIDEO_CACHED_DURATION:
             if (!ffp)
                 return default_value;
-            return ffp->stat.video_cached_duration;
+            return ffp->stat.video_cache.duration;
         case FFP_PROP_INT64_AUDIO_CACHED_DURATION:
             if (!ffp)
                 return default_value;
-            return ffp->stat.audio_cached_duration;
+            return ffp->stat.audio_cache.duration;
         case FFP_PROP_INT64_VIDEO_CACHED_BYTES:
             if (!ffp)
                 return default_value;
-            return ffp->stat.video_cached_bytes;
+            return ffp->stat.video_cache.bytes;
         case FFP_PROP_INT64_AUDIO_CACHED_BYTES:
             if (!ffp)
                 return default_value;
-            return ffp->stat.audio_cached_bytes;
+            return ffp->stat.audio_cache.bytes;
         case FFP_PROP_INT64_VIDEO_CACHED_PACKETS:
             if (!ffp)
                 return default_value;
-            return ffp->stat.video_cached_packets;
+            return ffp->stat.video_cache.packets;
         case FFP_PROP_INT64_AUDIO_CACHED_PACKETS:
             if (!ffp)
                 return default_value;
-            return ffp->stat.audio_cached_packets;
+            return ffp->stat.audio_cache.packets;
         case FFP_PROP_INT64_BIT_RATE:
             return ffp ? ffp->stat.bit_rate : default_value;
         default:

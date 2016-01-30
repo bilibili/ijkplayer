@@ -888,8 +888,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 return;
 
             case MEDIA_PLAYBACK_COMPLETE:
-                player.notifyOnCompletion();
                 player.stayAwake(false);
+                player.notifyOnCompletion();
                 return;
 
             case MEDIA_BUFFERING_UPDATE:

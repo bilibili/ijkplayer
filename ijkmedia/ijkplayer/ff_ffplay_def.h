@@ -442,6 +442,13 @@ static SDL_Surface *screen;
  * end at line 330 in ffplay.c
  * near packet_queue_put
  ****************************************************************************/
+typedef struct FFTrackCacheStatistic
+{
+    int64_t duration;
+    int64_t bytes;
+    int64_t packets;
+} FFTrackCacheStatistic;
+
 typedef struct FFStatistic
 {
     int64_t vdec_type;
@@ -452,12 +459,8 @@ typedef struct FFStatistic
     float avdiff;
     int   bit_rate;
 
-    int64_t video_cached_duration;
-    int64_t audio_cached_duration;
-    int64_t video_cached_bytes;
-    int64_t audio_cached_bytes;
-    int64_t video_cached_packets;
-    int64_t audio_cached_packets;
+    FFTrackCacheStatistic video_cache;
+    FFTrackCacheStatistic audio_cache;
 } FFStatistic;
 
 typedef struct FFDemuxCacheControl
@@ -612,6 +615,8 @@ typedef struct FFPlayer {
 
     char *iformat_name;
 
+    int no_time_adjust;
+
     struct IjkMediaMeta *meta;
 
     SDL_SpeedSampler vfps_sampler;
@@ -720,6 +725,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->opensles                       = 0; // option
 
     ffp->iformat_name                   = NULL; // option
+
+    ffp->no_time_adjust                 = 0; // option
 
     ijkmeta_reset(ffp->meta);
 
