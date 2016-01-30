@@ -25,11 +25,11 @@
 
 // FIXME: merge filter related code and enable it
 // remove these lines to enable avfilter
-#ifdef CONFIG_AVFILTER
-#undef CONFIG_AVFILTER
-#endif
-#define CONFIG_AVFILTER 0
-
+//#ifdef CONFIG_AVFILTER
+//#undef CONFIG_AVFILTER
+//#endif
+#define CONFIG_AVFILTER 1
+#define FFP_AVFILTER_PLAYBACK_RATE 1
 #ifdef FFP_MERGE
 #undef FFP_MERGE
 #endif
