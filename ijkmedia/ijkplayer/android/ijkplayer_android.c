@@ -90,6 +90,22 @@ void ijkmp_android_set_volume(JNIEnv *env, IjkMediaPlayer *mp, float left, float
     MPTRACE("ijkmp_android_set_volume(%f, %f)=void", left, right);
 }
 
+void ijkmp_android_set_play_back_speed(JNIEnv *env, IjkMediaPlayer *mp, float speed)
+{
+    if (!mp)
+        return;
+
+    MPTRACE("ijkmp_android_set_speed(%f)", speed);
+    pthread_mutex_lock(&mp->mutex);
+
+    if (mp && mp->ffplayer && mp->ffplayer->pipeline) {
+        ffpipeline_set_speed(mp->ffplayer->pipeline,speed);
+    }
+
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_android_set_speed(%f)=void", speed);
+}
+
 int ijkmp_android_get_audio_session_id(JNIEnv *env, IjkMediaPlayer *mp)
 {
     int audio_session_id = 0;

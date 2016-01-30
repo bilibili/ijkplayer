@@ -268,3 +268,15 @@ void ffpipeline_set_volume(IJKFF_Pipeline* pipeline, float left, float right)
         SDL_AoutSetStereoVolume(opaque->ffp->aout, left, right);
     }
 }
+void ffpipeline_set_speed(IJKFF_Pipeline* pipeline, float speed)
+{
+    ALOGD("%s\n", __func__);
+    if (!check_ffpipeline(pipeline, __func__))
+        return;
+    IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
+    if (opaque->ffp && opaque->ffp->aout) {
+        ffp_set_playback_rate(opaque->ffp,speed);
+        SDL_AoutSetPlaybackRate(opaque->ffp->aout, speed);
+    }
+}
+
