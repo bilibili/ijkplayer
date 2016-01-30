@@ -750,6 +750,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     @Override
     public void start() {
         if (isInPlaybackState()) {
+            mMediaPlayer.setPlayBackSpeed(0.65f);
             mMediaPlayer.start();
             mCurrentState = STATE_PLAYING;
         }
@@ -792,6 +793,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         return 0;
     }
 
+    public void setPlayBackSpeed(float speed) {
+        mMediaPlayer.setPlayBackSpeed(speed);
+    }
     @Override
     public void seekTo(int msec) {
         if (isInPlaybackState()) {
