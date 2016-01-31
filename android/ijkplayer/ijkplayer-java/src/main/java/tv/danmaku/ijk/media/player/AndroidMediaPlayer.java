@@ -280,6 +280,10 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         mInternalMediaPlayer.setVolume(leftVolume, rightVolume);
     }
 
+    public void setPlayBackSpeed(float speed) {
+
+    }
+
     @Override
     public int getAudioSessionId() {
         return mInternalMediaPlayer.getAudioSessionId();

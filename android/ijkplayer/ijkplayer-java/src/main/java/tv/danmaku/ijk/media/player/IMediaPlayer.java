@@ -104,6 +104,8 @@ public interface IMediaPlayer {
 
     void setVolume(float leftVolume, float rightVolume);
 
+    void setPlayBackSpeed(float speed);
+
     int getAudioSessionId();
 
     MediaInfo getMediaInfo();

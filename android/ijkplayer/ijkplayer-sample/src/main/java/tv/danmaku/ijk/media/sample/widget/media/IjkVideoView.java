@@ -792,6 +792,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         return 0;
     }
 
+    public void setPlayBackSpeed(float speed) {
+        mMediaPlayer.setPlayBackSpeed(speed);
+    }
     @Override
     public void seekTo(int msec) {
         if (isInPlaybackState()) {
