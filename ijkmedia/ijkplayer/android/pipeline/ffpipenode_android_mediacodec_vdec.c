@@ -249,7 +249,7 @@ static int amc_fill_frame(
 
     frame->width  = opaque->frame_width;
     frame->height = opaque->frame_height;
-    frame->format = SDL_FCC__AMC;
+    frame->format = IJK_AV_PIX_FMT__ANDROID_MEDIACODEC;
     frame->sample_aspect_ratio = opaque->avctx->sample_aspect_ratio;
     frame->pts    = av_rescale_q(buffer_info->presentationTimeUs, AV_TIME_BASE_Q, is->video_st->time_base);
     if (frame->pts < 0)

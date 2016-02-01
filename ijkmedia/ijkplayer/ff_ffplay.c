@@ -1157,7 +1157,7 @@ display:
 
 /* allocate a picture (needs to do that in main thread to avoid
    potential locking problems */
-static void alloc_picture(FFPlayer *ffp, Uint32 overlay_format)
+static void alloc_picture(FFPlayer *ffp, int frame_format)
 {
     VideoState *is = ffp->is;
     Frame *vp;
@@ -1173,8 +1173,9 @@ static void alloc_picture(FFPlayer *ffp, Uint32 overlay_format)
     video_open(ffp, 0, vp);
 #endif
 
+    SDL_VoutSetOverlayFormat(ffp->vout, ffp->overlay_format);
     vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height,
-                                   overlay_format,
+                                   frame_format,
                                    ffp->vout);
 #ifdef FFP_MERGE
     bufferdiff = vp->bmp ? FFMAX(vp->bmp->pixels[0], vp->bmp->pixels[1]) - FFMIN(vp->bmp->pixels[0], vp->bmp->pixels[1]) : 0;
@@ -1246,15 +1247,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
 
         /* the allocation must be done in the main thread to avoid
            locking problems. */
-        switch (src_frame->format) {
-            case SDL_FCC__AMC:
-            case SDL_FCC__VTB:
-                alloc_picture(ffp, src_frame->format);
-                break;
-            default:
-                alloc_picture(ffp, ffp->overlay_format);
-                break;
-        }
+        alloc_picture(ffp, src_frame->format);
 
         if (is->videoq.abort_request)
             return -1;
@@ -3301,6 +3294,7 @@ void ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64
 void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
 {
     switch (chroma_fourcc) {
+        case SDL_FCC__GLES2:
         case SDL_FCC_I420:
         case SDL_FCC_YV12:
         case SDL_FCC_RV16:
@@ -3651,11 +3645,6 @@ Frame *ffp_frame_queue_peek_writable(FrameQueue *f)
 void ffp_frame_queue_push(FrameQueue *f)
 {
     return frame_queue_push(f);
-}
-
-void ffp_alloc_picture(FFPlayer *ffp, Uint32 overlay_format)
-{
-    return alloc_picture(ffp, overlay_format);
 }
 
 int ffp_queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial)

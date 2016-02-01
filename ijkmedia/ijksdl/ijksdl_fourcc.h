@@ -63,8 +63,15 @@
 // opaque formats
 #define SDL_FCC__AMC    SDL_FOURCC('_', 'A', 'M', 'C')    /**< Android MediaCodec */
 #define SDL_FCC__VTB    SDL_FOURCC('_', 'V', 'T', 'B')    /**< iOS VideoToolbox */
+#define SDL_FCC__GLES2  SDL_FOURCC('_', 'E', 'S', '2')    /**< let Vout choose format */
 
 // undefine
 #define SDL_FCC_UNDF    SDL_FOURCC('U', 'N', 'D', 'F')    /**< undefined */
+
+enum {
+    IJK_AV_PIX_FMT__START = 10000,
+    IJK_AV_PIX_FMT__ANDROID_MEDIACODEC,
+    IJK_AV_PIX_FMT__VIDEO_TOOLBOX,
+};
 
 #endif

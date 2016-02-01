@@ -20,7 +20,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_CFLAGS += -std=c99
-LOCAL_LDLIBS += -llog -landroid -lOpenSLES
+LOCAL_LDLIBS += -llog -landroid -lOpenSLES -lEGL -lGLESv2
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
@@ -30,12 +30,22 @@ LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/../ijkj4a)
 
 LOCAL_SRC_FILES += ijksdl_aout.c
 LOCAL_SRC_FILES += ijksdl_audio.c
+LOCAL_SRC_FILES += ijksdl_egl.c
 LOCAL_SRC_FILES += ijksdl_error.c
 LOCAL_SRC_FILES += ijksdl_mutex.c
 LOCAL_SRC_FILES += ijksdl_stdinc.c
 LOCAL_SRC_FILES += ijksdl_thread.c
 LOCAL_SRC_FILES += ijksdl_timer.c
 LOCAL_SRC_FILES += ijksdl_vout.c
+LOCAL_SRC_FILES += gles2/color.c
+LOCAL_SRC_FILES += gles2/common.c
+LOCAL_SRC_FILES += gles2/renderer.c
+LOCAL_SRC_FILES += gles2/renderer_yuv420p.c
+LOCAL_SRC_FILES += gles2/renderer_yuv444p10le.c
+LOCAL_SRC_FILES += gles2/shader.c
+LOCAL_SRC_FILES += gles2/fsh/yuv420p.fsh.c
+LOCAL_SRC_FILES += gles2/fsh/yuv444p10le.fsh.c
+LOCAL_SRC_FILES += gles2/vsh/mvp.vsh.c
 
 LOCAL_SRC_FILES += dummy/ijksdl_vout_dummy.c
 

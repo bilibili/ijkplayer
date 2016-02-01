@@ -252,7 +252,7 @@ void QueuePicture(VideoToolBoxContext* ctx) {
         double duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0);
         double pts = (picture.pts == AV_NOPTS_VALUE) ? NAN : picture.pts * av_q2d(tb);
 
-        picture.format = SDL_FCC__VTB;
+        picture.format = IJK_AV_PIX_FMT__VIDEO_TOOLBOX;
         picture.sample_aspect_ratio.num = 1;
         picture.sample_aspect_ratio.den = 1;
 

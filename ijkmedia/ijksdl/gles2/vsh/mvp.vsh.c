@@ -1,8 +1,5 @@
-/*****************************************************************************
- * ijksdl_vout_overlay_ffmpeg.h
- *****************************************************************************
- *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+/*
+ * copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,14 +18,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__FFMPEG__IJKSDL_VOUT_OVERLAY_FFMPEG_H
-#define IJKSDL__FFMPEG__IJKSDL_VOUT_OVERLAY_FFMPEG_H
+#include "ijksdl/gles2/internal.h"
 
-#include "../ijksdl_stdinc.h"
-#include "../ijksdl_vout.h"
-#include "ijksdl_inc_ffmpeg.h"
+static const char g_shader[] = IJK_GLES_STRING(
+    precision highp float;
+    varying   highp vec2 vv2_Texcoord;
+    attribute highp vec4 av4_Position;
+    attribute highp vec2 av2_Texcoord;
+    uniform         mat4 um4_ModelViewProjection;
 
-// TODO: 9 alignment to speed up memcpy when display
-SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, int frame_format, SDL_Vout *vout);
+    void main()
+    {
+        gl_Position  = um4_ModelViewProjection * av4_Position;
+        vv2_Texcoord = av2_Texcoord.xy;
+    }
+);
 
-#endif
+const char *IJK_GLES2_getVertexShader_default()
+{
+    return g_shader;
+}

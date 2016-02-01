@@ -1,8 +1,5 @@
-/*****************************************************************************
- * ijksdl_vout_overlay_ffmpeg.h
- *****************************************************************************
- *
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+/*
+ * copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,14 +18,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL__FFMPEG__IJKSDL_VOUT_OVERLAY_FFMPEG_H
-#define IJKSDL__FFMPEG__IJKSDL_VOUT_OVERLAY_FFMPEG_H
+#include "internal.h"
 
-#include "../ijksdl_stdinc.h"
-#include "../ijksdl_vout.h"
-#include "ijksdl_inc_ffmpeg.h"
+// BT.709, which is the standard for HDTV.
+static const GLfloat g_bt709[] = {
+    1.164,  1.164,  1.164,
+    0.0,   -0.213,  2.112,
+    1.793, -0.533,  0.0,
+};
+const GLfloat *IJK_GLES2_getColorMatrix_bt709()
+{
+    return g_bt709;
+}
 
-// TODO: 9 alignment to speed up memcpy when display
-SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, int frame_format, SDL_Vout *vout);
+static const GLfloat g_bt601[] = {
+    1.164,  1.164, 1.164,
+    0.0,   -0.392, 2.017,
+    1.596, -0.813, 0.0,
+};
+const GLfloat *IJK_GLES2_getColorMatrix_bt601()
+{
+    return g_bt709;
+}
 
-#endif
+
