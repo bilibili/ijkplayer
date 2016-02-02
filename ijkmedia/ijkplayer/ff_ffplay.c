@@ -2901,7 +2901,7 @@ static int read_thread(void *arg)
     ret = 0;
  fail:
     if (ic && !is->ic)
-        avformat_close_input(&is->ic);
+        avformat_close_input(&ic);
 
     if (!ffp->prepared || !is->abort_request) {
         ffp->last_error = last_error;
