@@ -1007,6 +1007,16 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         opaque->mcc.profile = opaque->avctx->profile;
         opaque->mcc.level   = opaque->avctx->level;
         break;
+    case AV_CODEC_ID_MPEG2VIDEO:
+        if (!ffp->mediacodec_mpeg2 && !ffp->mediacodec_all_videos) {
+            ALOGE("%s: MediaCodec/MPEG2VIDEO is disabled. codec_id:%d \n", __func__, opaque->avctx->codec_id);
+            goto fail;
+        }
+        strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_MPEG2VIDEO);
+        opaque->mcc.profile = opaque->avctx->profile;
+        opaque->mcc.level   = opaque->avctx->level;
+        break;
+
     default:
         ALOGE("%s:create: not H264 or H265/HEVC, codec_id:%d \n", __func__, opaque->avctx->codec_id);
         goto fail;
