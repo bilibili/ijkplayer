@@ -154,7 +154,7 @@ static const AVOption ffp_context_options[] = {
     { "mediacodec-hevc",                        "MediaCodec: enable HEVC",
         OPTION_OFFSET(mediacodec_hevc),         OPTION_INT(0, 0, 1) },
     { "mediacodec-mpeg2",                       "MediaCodec: enable MPEG2VIDEO",
-        OPTION_OFFSET(mediacodec_mpeg2),         OPTION_INT(0, 0, 1) },
+        OPTION_OFFSET(mediacodec_mpeg2),        OPTION_INT(0, 0, 1) },
     { "opensles",                           "OpenSL ES: enable",
         OPTION_OFFSET(opensles),            OPTION_INT(0, 0, 1) },
     
