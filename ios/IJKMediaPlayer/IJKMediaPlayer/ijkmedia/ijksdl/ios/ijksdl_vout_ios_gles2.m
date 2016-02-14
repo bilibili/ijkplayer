@@ -47,10 +47,10 @@ static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, int frame_f
     }
 }
 
-static SDL_VoutOverlay *vout_create_overlay(int width, int height, Uint32 format, SDL_Vout *vout)
+static SDL_VoutOverlay *vout_create_overlay(int width, int height, int frame_format, SDL_Vout *vout)
 {
     SDL_LockMutex(vout->mutex);
-    SDL_VoutOverlay *overlay = vout_create_overlay_l(width, height, format, vout);
+    SDL_VoutOverlay *overlay = vout_create_overlay_l(width, height, frame_format, vout);
     SDL_UnlockMutex(vout->mutex);
     return overlay;
 }

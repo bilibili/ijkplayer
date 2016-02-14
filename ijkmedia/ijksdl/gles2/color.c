@@ -38,7 +38,5 @@ static const GLfloat g_bt601[] = {
 };
 const GLfloat *IJK_GLES2_getColorMatrix_bt601()
 {
-    return g_bt709;
+    return g_bt601;
 }
-
-

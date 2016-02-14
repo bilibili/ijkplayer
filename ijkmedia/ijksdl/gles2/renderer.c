@@ -35,7 +35,7 @@ static void IJK_GLES2_printProgramInfo(GLuint program)
     char    buf_stack[32];
     char   *buf_heap = NULL;
     char   *buf      = buf_stack;
-    size_t  buf_len  = sizeof(buf_stack) - 1;
+    GLsizei buf_len  = sizeof(buf_stack) - 1;
     if (info_len > sizeof(buf_stack)) {
         buf_heap = (char*) malloc(info_len + 1);
         if (buf_heap) {
@@ -51,7 +51,7 @@ static void IJK_GLES2_printProgramInfo(GLuint program)
         free(buf_heap);
 }
 
-void IJK_GLES2_Render_reset(IJK_GLES2_Renderer *renderer)
+void IJK_GLES2_Renderer_reset(IJK_GLES2_Renderer *renderer)
 {
     if (!renderer)
         return;
@@ -76,6 +76,9 @@ void IJK_GLES2_Renderer_free(IJK_GLES2_Renderer *renderer)
 {
     if (!renderer)
         return;
+
+    if (renderer->func_destroy)
+        renderer->func_destroy(renderer);
 
 #if 0
     if (renderer->vertex_shader)    ALOGW("[GLES2] renderer: vertex_shader not deleted.\n");
@@ -155,25 +158,39 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create(SDL_VoutOverlay *overlay)
     IJK_GLES2_printString("Renderer", GL_RENDERER);
     IJK_GLES2_printString("Extensions", GL_EXTENSIONS);
 
+    IJK_GLES2_Renderer *renderer = NULL;
     switch (overlay->format) {
-        case SDL_FCC_YV12:      return IJK_GLES2_Renderer_create_yuv420p();
-        case SDL_FCC_I420:      return IJK_GLES2_Renderer_create_yuv420p();
-        case SDL_FCC_I444P10LE: return IJK_GLES2_Renderer_create_yuv444p10le();
-        default:                return NULL;
+        case SDL_FCC_RV16:      renderer = IJK_GLES2_Renderer_create_rgb565(); break;
+        case SDL_FCC_RV24:      renderer = IJK_GLES2_Renderer_create_rgb888(); break;
+        case SDL_FCC_RV32:      renderer = IJK_GLES2_Renderer_create_rgbx8888(); break;
+#ifdef __APPLE__
+        case SDL_FCC_NV12:      renderer = IJK_GLES2_Renderer_create_yuv420sp(); break;
+        case SDL_FCC__VTB:      renderer = IJK_GLES2_Renderer_create_yuv420sp_vtb(overlay); break;
+#endif
+        case SDL_FCC_YV12:      renderer = IJK_GLES2_Renderer_create_yuv420p(); break;
+        case SDL_FCC_I420:      renderer = IJK_GLES2_Renderer_create_yuv420p(); break;
+        case SDL_FCC_I444P10LE: renderer = IJK_GLES2_Renderer_create_yuv444p10le(); break;
+        default:
+            ALOGE("[GLES2] unknown format %4s(%d)", (char *)&overlay->format, overlay->format);
+            return NULL;
     }
+
+    renderer->format = overlay->format;
+    return renderer;
 }
 
 GLboolean IJK_GLES2_Renderer_isValid(IJK_GLES2_Renderer *renderer)
 {
-    return renderer && renderer->program;
+    return renderer && renderer->program ? GL_TRUE : GL_FALSE;
 }
 
-static const GLfloat g_vertices[] = {
-    -1.0f, -1.0f,
-     1.0f, -1.0f,
-    -1.0f,  1.0f,
-     1.0f,  1.0f
-};
+GLboolean IJK_GLES2_Renderer_isFormat(IJK_GLES2_Renderer *renderer, int format)
+{
+    if (!IJK_GLES2_Renderer_isValid(renderer))
+        return GL_FALSE;
+
+    return renderer->format == format ? GL_TRUE : GL_FALSE;
+}
 
 /*
  * Per-Context routine
@@ -185,6 +202,103 @@ GLboolean IJK_GLES2_Renderer_setupGLES()
     glCullFace(GL_BACK);                        IJK_GLES2_checkError_TRACE("glCullFace");
     glDisable(GL_DEPTH_TEST);
 
+    return GL_TRUE;
+}
+
+static void IJK_GLES2_Renderer_Vertices_reset(IJK_GLES2_Renderer *renderer)
+{
+    renderer->vertices[0] = -1.0f;
+    renderer->vertices[1] = -1.0f;
+    renderer->vertices[2] =  1.0f;
+    renderer->vertices[3] = -1.0f;
+    renderer->vertices[4] = -1.0f;
+    renderer->vertices[5] =  1.0f;
+    renderer->vertices[6] =  1.0f;
+    renderer->vertices[7] =  1.0f;
+}
+
+static void IJK_GLES2_Renderer_Vertices_apply(IJK_GLES2_Renderer *renderer)
+{
+    switch (renderer->gravity) {
+        case IJK_GLES2_GRAVITY_RESIZE_ASPECT:
+            break;
+        case IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL:
+            break;
+        case IJK_GLES2_GRAVITY_RESIZE:
+            IJK_GLES2_Renderer_Vertices_reset(renderer);
+            return;
+        default:
+            ALOGE("[GLES2] unknown gravity %d\n", renderer->gravity);
+            IJK_GLES2_Renderer_Vertices_reset(renderer);
+            return;
+    }
+
+    if (renderer->layer_width <= 0 ||
+        renderer->layer_height <= 0 ||
+        renderer->frame_width <= 0 ||
+        renderer->frame_height <= 0)
+    {
+        ALOGE("[GLES2] invalid width/height for gravity aspect\n");
+        IJK_GLES2_Renderer_Vertices_reset(renderer);
+        return;
+    }
+
+    float width     = renderer->frame_width;
+    float height    = renderer->frame_height;
+    const float dW  = (float)renderer->layer_width	/ width;
+    const float dH  = (float)renderer->layer_height / height;
+    float dd        = 1.0f;
+    float nW        = 1.0f;
+    float nH        = 1.0f;
+
+    if (renderer->frame_sar_num > 0 && renderer->frame_sar_den > 0) {
+        width = width * renderer->frame_sar_num / renderer->frame_sar_den;
+    }
+
+    switch (renderer->gravity) {
+        case IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL:  dd = FFMAX(dW, dH); break;
+        case IJK_GLES2_GRAVITY_RESIZE_ASPECT:       dd = FFMIN(dW, dH); break;
+    }
+
+    nW = (width  * dd / (float)renderer->layer_width);
+    nH = (height * dd / (float)renderer->layer_height);
+
+    renderer->vertices[0] = - nW;
+    renderer->vertices[1] = - nH;
+    renderer->vertices[2] =   nW;
+    renderer->vertices[3] = - nH;
+    renderer->vertices[4] = - nW;
+    renderer->vertices[5] =   nH;
+    renderer->vertices[6] =   nW;
+    renderer->vertices[7] =   nH;
+}
+
+static void IJK_GLES2_Renderer_Vertices_reloadVertex(IJK_GLES2_Renderer *renderer)
+{
+    glVertexAttribPointer(renderer->av4_position, 2, GL_FLOAT, GL_FALSE, 0, renderer->vertices);    IJK_GLES2_checkError_TRACE("glVertexAttribPointer(av2_texcoord)");
+    glEnableVertexAttribArray(renderer->av4_position);                                      IJK_GLES2_checkError_TRACE("glEnableVertexAttribArray(av2_texcoord)");
+}
+
+#define IJK_GLES2_GRAVITY_MIN                   (0)
+#define IJK_GLES2_GRAVITY_RESIZE                (0) // Stretch to fill layer bounds.
+#define IJK_GLES2_GRAVITY_RESIZE_ASPECT         (1) // Preserve aspect ratio; fit within layer bounds.
+#define IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL    (2) // Preserve aspect ratio; fill layer bounds.
+#define IJK_GLES2_GRAVITY_MAX                   (2)
+
+GLboolean IJK_GLES2_Renderer_setGravity(IJK_GLES2_Renderer *renderer, int gravity, GLsizei layer_width, GLsizei layer_height)
+{
+    if (renderer->gravity != gravity && gravity >= IJK_GLES2_GRAVITY_MIN && gravity <= IJK_GLES2_GRAVITY_MAX)
+        renderer->vertices_changed = 1;
+    else if (renderer->layer_width != layer_width)
+        renderer->vertices_changed = 1;
+    else if (renderer->layer_height != layer_height)
+        renderer->vertices_changed = 1;
+    else
+        return GL_TRUE;
+
+    renderer->gravity      = gravity;
+    renderer->layer_width  = layer_width;
+    renderer->layer_height = layer_height;
     return GL_TRUE;
 }
 
@@ -238,36 +352,8 @@ GLboolean IJK_GLES2_Renderer_use(IJK_GLES2_Renderer *renderer)
     IJK_GLES2_Renderer_TexCoords_reset(renderer);
     IJK_GLES2_Renderer_TexCoords_reloadVertex(renderer);
 
-    glVertexAttribPointer(renderer->av4_position, 2, GL_FLOAT, GL_FALSE, 0, g_vertices);    IJK_GLES2_checkError_TRACE("glVertexAttribPointer(av2_texcoord)");
-    glEnableVertexAttribArray(renderer->av4_position);                                      IJK_GLES2_checkError_TRACE("glEnableVertexAttribArray(av2_texcoord)");
-
-    return GL_TRUE;
-}
-
-static GLboolean IJK_GLES2_Renderer_prepareForOverlay(IJK_GLES2_Renderer *renderer, SDL_VoutOverlay *overlay)
-{
-    assert(renderer);
-    assert(overlay);
-    assert(renderer->func_getBufferWidth);
-
-    GLsizei buffer_width  = renderer->func_getBufferWidth(renderer, overlay);
-    GLsizei visible_width = overlay->w;
-    if (buffer_width > 0 &&
-        buffer_width > visible_width &&
-        buffer_width != renderer->buffer_width &&
-        visible_width != renderer->visible_width) {
-        renderer->buffer_width  = buffer_width;
-        renderer->visible_width = visible_width;
-
-        GLsizei padding_pixels     = buffer_width - visible_width;
-        GLfloat padding_normalized = ((GLfloat)padding_pixels) / buffer_width;
-            ALOGI("[yuv420p] padding changed: %d - %d = %d (%f)\n",
-                buffer_width, visible_width,
-                padding_pixels, padding_normalized);
-        IJK_GLES2_Renderer_TexCoords_reset(renderer);
-        IJK_GLES2_Renderer_TexCoords_cropRight(renderer, padding_normalized);
-        IJK_GLES2_Renderer_TexCoords_reloadVertex(renderer);
-    }
+    IJK_GLES2_Renderer_Vertices_reset(renderer);
+    IJK_GLES2_Renderer_Vertices_reloadVertex(renderer);
 
     return GL_TRUE;
 }
@@ -277,15 +363,54 @@ static GLboolean IJK_GLES2_Renderer_prepareForOverlay(IJK_GLES2_Renderer *render
  */
 GLboolean IJK_GLES2_Renderer_renderOverlay(IJK_GLES2_Renderer *renderer, SDL_VoutOverlay *overlay)
 {
-    if (!renderer || !overlay || !renderer->func_uploadTexture)
+    if (!renderer || !renderer->func_uploadTexture)
         return GL_FALSE;
 
     glClear(GL_COLOR_BUFFER_BIT);               IJK_GLES2_checkError_TRACE("glClear");
 
-    IJK_GLES2_Renderer_prepareForOverlay(renderer, overlay);
+    if (overlay) {
+        GLsizei visible_width  = overlay->w;
+        GLsizei visible_height = overlay->h;
+        if (renderer->frame_width   != visible_width    ||
+            renderer->frame_height  != visible_height   ||
+            renderer->frame_sar_num != overlay->sar_num ||
+            renderer->frame_sar_den != overlay->sar_den) {
 
-    if (!renderer->func_uploadTexture(renderer, overlay))
-        return GL_FALSE;
+            renderer->frame_width   = visible_width;
+            renderer->frame_height  = visible_height;
+            renderer->frame_sar_num = overlay->sar_num;
+            renderer->frame_sar_den = overlay->sar_den;
+            renderer->vertices_changed = 1;
+        }
+
+        if (renderer->vertices_changed) {
+            renderer->vertices_changed = 0;
+
+            IJK_GLES2_Renderer_Vertices_apply(renderer);
+            IJK_GLES2_Renderer_Vertices_reloadVertex(renderer);
+        }
+
+        GLsizei buffer_width   = renderer->func_getBufferWidth(renderer, overlay);
+        if (buffer_width > 0 &&
+            buffer_width > visible_width &&
+            buffer_width != renderer->buffer_width &&
+            visible_width != renderer->visible_width) {
+            renderer->buffer_width  = buffer_width;
+            renderer->visible_width = visible_width;
+
+            GLsizei padding_pixels     = buffer_width - visible_width;
+            GLfloat padding_normalized = ((GLfloat)padding_pixels) / buffer_width;
+            ALOGI("[yuv420p] padding changed: %d - %d = %d (%f)\n",
+                  buffer_width, visible_width,
+                  padding_pixels, padding_normalized);
+            IJK_GLES2_Renderer_TexCoords_reset(renderer);
+            IJK_GLES2_Renderer_TexCoords_cropRight(renderer, padding_normalized);
+            IJK_GLES2_Renderer_TexCoords_reloadVertex(renderer);
+        }
+        
+        if (!renderer->func_uploadTexture(renderer, overlay))
+            return GL_FALSE;
+    }
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);      IJK_GLES2_checkError_TRACE("glDrawArrays");
 

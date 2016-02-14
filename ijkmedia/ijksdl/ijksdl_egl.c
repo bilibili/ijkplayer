@@ -18,15 +18,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#ifndef __APPLE__
+
 #include "ijksdl_egl.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#include <EGL/eglplatform.h>
 #include "ijksdl/ijksdl_gles2.h"
 #include "ijksdl/ijksdl_log.h"
 #include "ijksdl/ijksdl_vout.h"
@@ -274,8 +271,16 @@ static EGLBoolean IJK_EGL_prepareRenderer(IJK_EGL* egl, SDL_VoutOverlay *overlay
 
     IJK_EGL_Opaque *opaque = egl->opaque;
 
-    // FIXME: check render against overlay
-    if (!IJK_GLES2_Renderer_isValid(opaque->renderer)) {
+    if (!IJK_GLES2_Renderer_isFormat(opaque->renderer, overlay->format)) {
+
+    }
+
+    if (!IJK_GLES2_Renderer_isValid(opaque->renderer) ||
+        !IJK_GLES2_Renderer_isFormat(opaque->renderer, overlay->format)) {
+
+        IJK_GLES2_Renderer_reset(opaque->renderer);
+        IJK_GLES2_Renderer_freeP(&opaque->renderer);
+
         opaque->renderer = IJK_GLES2_Renderer_create(overlay);
         if (!opaque->renderer) {
             ALOGE("[EGL] Could not create render.");
@@ -383,3 +388,5 @@ IJK_EGL *IJK_EGL_create()
 
     return egl;
 }
+
+#endif

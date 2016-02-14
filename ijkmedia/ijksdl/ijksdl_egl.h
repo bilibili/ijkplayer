@@ -21,9 +21,14 @@
 #ifndef IJKSDL__IJKSDL_EGL_H
 #define IJKSDL__IJKSDL_EGL_H
 
+#ifdef __APPLE__
+#include "ijksdl/ios/EGL/egl.h"
+#include "ijksdl/ios/EGL/eglplatform.h"
+#else
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <EGL/eglplatform.h>
+#endif
 #include "ijksdl_class.h"
 
 typedef struct SDL_VoutOverlay SDL_VoutOverlay;

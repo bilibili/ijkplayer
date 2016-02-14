@@ -48,13 +48,15 @@
     <string-array name="pref_entries_pixel_format">
         <item>Auto Select</item>
         <item>RGB 565</item>
-        <item>RGB 888X</item>
+        <item>RGB 888</item>
+        <item>RGBX 8888</item>
         <item>YV12</item>
         <item>OpenGL ES2</item>
     </string-array>
     <string-array name="pref_entry_values_pixel_format">
         <item></item>
         <item>fcc-rv16</item>
+        <item>fcc-rv24</item>
         <item>fcc-rv32</item>
         <item>fcc-yv12</item>
         <item>fcc-_es2</item>
@@ -62,7 +64,8 @@
     <string-array name="pref_entry_summaries_pixel_format">
         <item>Auto Select</item>
         <item>RGB 565</item>
-        <item>RGB 888X</item>
+        <item>RGB 888</item>
+        <item>RGBX 8888</item>
         <item>YV12</item>
         <item>OpenGL ES2</item>
     </string-array>

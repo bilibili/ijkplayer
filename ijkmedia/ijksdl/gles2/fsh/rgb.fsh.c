@@ -1,7 +1,5 @@
 /*
- * IJKSDLGLRenderNV12.h
- *
- * Copyright (c) 2014 Zhou Quan <zhouqicy@gmail.com>
+ * copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -20,11 +18,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <CoreVideo/CoreVideo.h>
-#import "IJKSDLGLRender.h"
+#include "ijksdl/gles2/internal.h"
 
-@interface IJKSDLGLRenderNV12 : NSObject<IJKSDLGLRender>
+static const char g_shader[] = IJK_GLES_STRING(
+    precision highp float;
+    varying   highp vec2 vv2_Texcoord;
+    uniform   lowp  sampler2D us2_SamplerX;
 
--(id)initWithTextureCache:(CVOpenGLESTextureCacheRef) textureCache;
+    void main()
+    {
+        gl_FragColor = vec4(texture2D(us2_SamplerX, vv2_Texcoord).rgb, 1);
+    }
+);
 
-@end
+const char *IJK_GLES2_getFragmentShader_rgb()
+{
+    return g_shader;
+}
