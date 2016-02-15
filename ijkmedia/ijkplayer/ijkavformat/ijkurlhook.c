@@ -293,24 +293,20 @@ static int ijkhttphook_read(URLContext *h, unsigned char *buf, int size)
 {
     Context *c = h->priv_data;
     int ret = 0;
-    int read_ret = AVERROR(EIO);
 
     c->inject_data.retry_counter = 0;
 
-    read_ret = ijkurlhook_read(h, buf, size);
-    while (read_ret < 0 && !h->is_streamed && c->logical_pos < c->logical_size) {
-        c->io_error = read_ret;
-        switch (read_ret) {
+    ret = ijkurlhook_read(h, buf, size);
+    while (ret < 0 && !h->is_streamed && c->logical_pos < c->logical_size) {
+        switch (ret) {
             case AVERROR_EXIT:
                 goto fail;
         }
 
         c->inject_data.retry_counter++;
         ret = ijkurlhook_call_inject(h);
-        if (ret) {
-            read_ret = AVERROR_EXIT;
+        if (ret)
             goto fail;
-        }
 
         if (!c->inject_data.is_handled)
             goto fail;
@@ -318,14 +314,17 @@ static int ijkhttphook_read(URLContext *h, unsigned char *buf, int size)
         av_log(h, AV_LOG_INFO, "%s: will reconnect(%d) at %"PRId64"\n", __func__, c->inject_data.retry_counter, c->logical_pos);
         ret = ijkhttphook_reconnect_at(h, c->logical_pos);
         av_log(h, AV_LOG_INFO, "%s: did reconnect(%d) at %"PRId64": %d\n", __func__, c->inject_data.retry_counter, c->logical_pos, ret);
-        if (ret)
+        if (ret < 0)
             continue;
 
-        read_ret = ijkurlhook_read(h, buf, size);
+        ret = ijkurlhook_read(h, buf, size);
     }
 
 fail:
-    return read_ret;
+    if (ret <= 0) {
+        c->io_error = ret;
+    }
+    return ret;
 }
 
 static int64_t ijkhttphook_reseek_at(URLContext *h, int64_t pos, int whence, int force_reconnect)
