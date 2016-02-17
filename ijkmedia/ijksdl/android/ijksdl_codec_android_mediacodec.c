@@ -23,15 +23,21 @@
 
 #include "ijksdl_codec_android_mediacodec.h"
 #include <assert.h>
+#include "ijksdl/ijksdl_log.h"
+#include "ijksdl_codec_android_mediacodec_internal.h"
 
-static int g_amediacodec_object_serial;
+static volatile int g_amediacodec_object_serial;
 
-// TODO: thread-safe
+typedef struct SDL_AMediaCodec_Common
+{
+    SDL_AMediaCodec_FakeFifo fake_fifo;
+} SDL_AMediaCodec_Common;
+
 int SDL_AMediaCodec_create_object_serial()
 {
-    int object_serial = ++g_amediacodec_object_serial;
+    int object_serial = __sync_add_and_fetch(&g_amediacodec_object_serial, 1);
     if (object_serial == 0)
-        object_serial = SDL_AMediaCodec_create_object_serial();
+        object_serial = __sync_add_and_fetch(&g_amediacodec_object_serial, 1);
     return object_serial;
 }
 
@@ -86,7 +92,8 @@ sdl_amedia_status_t SDL_AMediaCodec_configure_surface(
 void SDL_AMediaCodec_increaseReference(SDL_AMediaCodec *acodec)
 {
     assert(acodec);
-    __sync_fetch_and_add(&acodec->ref_count, 1);
+    int ref_count = __sync_add_and_fetch(&acodec->ref_count, 1);
+    ALOGD("%s(): ref=%d\n", __func__, ref_count);
 }
 
 void SDL_AMediaCodec_decreaseReference(SDL_AMediaCodec *acodec)
@@ -95,8 +102,8 @@ void SDL_AMediaCodec_decreaseReference(SDL_AMediaCodec *acodec)
         return;
 
     int ref_count = __sync_sub_and_fetch(&acodec->ref_count, 1);
+    ALOGD("%s(): ref=%d\n", __func__, ref_count);
     if (ref_count == 0) {
-        AMCTRACE("%s(): ref=0\n", __func__);
         if (SDL_AMediaCodec_isStarted(acodec)) {
             SDL_AMediaCodec_stop(acodec);
         }
@@ -137,25 +144,21 @@ sdl_amedia_status_t SDL_AMediaCodec_stop(SDL_AMediaCodec* acodec)
 {
     assert(acodec->func_stop);
     acodec->is_started = false;
+    SDL_AMediaCodec_FakeFifo_abort(&acodec->common->fake_fifo);
     return acodec->func_stop(acodec);
 }
 
 sdl_amedia_status_t SDL_AMediaCodec_flush(SDL_AMediaCodec* acodec)
 {
     assert(acodec->func_flush);
+    SDL_AMediaCodec_FakeFifo_flush(&acodec->common->fake_fifo);
     return acodec->func_flush(acodec);
 }
 
-uint8_t* SDL_AMediaCodec_getInputBuffer(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size)
+ssize_t SDL_AMediaCodec_writeInputData(SDL_AMediaCodec* acodec, size_t idx, const uint8_t *data, size_t size)
 {
-    assert(acodec->func_getInputBuffer);
-    return acodec->func_getInputBuffer(acodec, idx, out_size);
-}
-
-uint8_t* SDL_AMediaCodec_getOutputBuffer(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size)
-{
-    assert(acodec->func_getOutputBuffer);
-    return acodec->func_getOutputBuffer(acodec, idx, out_size);
+    assert(acodec->func_writeInputData);
+    return acodec->func_writeInputData(acodec, idx, data, size);
 }
 
 ssize_t SDL_AMediaCodec_dequeueInputBuffer(SDL_AMediaCodec* acodec, int64_t timeoutUs)
@@ -167,6 +170,10 @@ ssize_t SDL_AMediaCodec_dequeueInputBuffer(SDL_AMediaCodec* acodec, int64_t time
 sdl_amedia_status_t SDL_AMediaCodec_queueInputBuffer(SDL_AMediaCodec* acodec, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags)
 {
     assert(acodec->func_queueInputBuffer);
+    if (flags & AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME) {
+        return SDL_AMediaCodec_FakeFifo_queue(&acodec->common->fake_fifo, idx, offset, size, time, flags);
+    }
+
     return acodec->func_queueInputBuffer(acodec, idx, offset, size, time, flags);
 }
 
@@ -206,4 +213,81 @@ bool SDL_AMediaCodec_isSameSerial(SDL_AMediaCodec* acodec, int acodec_serial)
     if (acodec == NULL)
         return false;
     return acodec->object_serial == acodec_serial;
+}
+
+SDL_AMediaCodec *SDL_AMediaCodec_CreateInternal(size_t opaque_size)
+{
+    SDL_AMediaCodec *acodec = (SDL_AMediaCodec*) mallocz(sizeof(SDL_AMediaCodec));
+    if (!acodec)
+        return NULL;
+
+    acodec->mutex = SDL_CreateMutex();
+    if (acodec->mutex == NULL)
+        goto fail;
+
+    acodec->opaque = mallocz(opaque_size);
+    if (!acodec->opaque)
+        goto fail;
+
+    acodec->common = mallocz(sizeof(SDL_AMediaCodec_Common));
+    if (!acodec->common)
+        goto fail;
+
+    SDL_AMediaCodec_FakeFifo_init(&acodec->common->fake_fifo);
+
+    return acodec;
+fail:
+    SDL_AMediaCodec_FreeInternal(acodec);
+    return NULL;
+}
+
+void SDL_AMediaCodec_FreeInternal(SDL_AMediaCodec *acodec)
+{
+    if (!acodec)
+        return;
+
+    if (acodec->common) {
+        SDL_AMediaCodec_FakeFifo_destroy(&acodec->common->fake_fifo);
+        free(acodec->common);
+    }
+
+    free(acodec->opaque);
+
+    if (acodec->mutex)
+        SDL_DestroyMutexP(&acodec->mutex);
+
+    memset(acodec, 0, sizeof(SDL_AMediaCodec));
+    free(acodec);
+}
+
+void SDL_AMediaCodecFake_abort(SDL_AMediaCodec* acodec)
+{
+    SDL_AMediaCodec_FakeFifo_abort(&acodec->common->fake_fifo);
+}
+
+void SDL_AMediaCodecFake_flushFakeFrames(SDL_AMediaCodec* acodec)
+{
+    SDL_AMediaCodec_FakeFifo_flush(&acodec->common->fake_fifo);
+}
+
+sdl_amedia_status_t SDL_AMediaCodecFake_queueFakeFrame(SDL_AMediaCodec* acodec, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags)
+{
+    return SDL_AMediaCodec_FakeFifo_queue(&acodec->common->fake_fifo, idx, offset, size, time, flags);
+}
+
+ssize_t SDL_AMediaCodecFake_dequeueOutputBuffer(SDL_AMediaCodec* acodec, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs)
+{    
+    if (SDL_AMediaCodec_FakeFifo_size(&acodec->common->fake_fifo) > 0) {
+        ssize_t ret = SDL_AMediaCodec_FakeFifo_dequeue(&acodec->common->fake_fifo, info, 0);
+        if (ret >= 0)
+            return ret;
+    }
+
+    assert(acodec->func_dequeueOutputBuffer);
+    return acodec->func_dequeueOutputBuffer(acodec, info, timeoutUs);
+}
+
+ssize_t SDL_AMediaCodecFake_dequeueFakeFrameOnly(SDL_AMediaCodec* acodec, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs)
+{
+    return SDL_AMediaCodec_FakeFifo_dequeue(&acodec->common->fake_fifo, info, 0);
 }

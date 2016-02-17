@@ -26,41 +26,35 @@
 
 #include "ijksdl_codec_android_mediacodec.h"
 
-inline static SDL_AMediaCodec *SDL_AMediaCodec_CreateInternal(size_t opaque_size)
-{
-    SDL_AMediaCodec *acodec = (SDL_AMediaCodec*) mallocz(sizeof(SDL_AMediaCodec));
-    if (!acodec)
-        return NULL;
+SDL_AMediaCodec *SDL_AMediaCodec_CreateInternal(size_t opaque_size);
+void             SDL_AMediaCodec_FreeInternal(SDL_AMediaCodec *acodec);
 
-    acodec->opaque = mallocz(opaque_size);
-    if (!acodec->opaque) {
-        free(acodec);
-        return NULL;
-    }
+#define FAKE_BUFFER_QUEUE_SIZE 5
 
-    acodec->mutex = SDL_CreateMutex();
-    if (acodec->mutex == NULL) {
-        free(acodec->opaque);
-        free(acodec);
-        return NULL;
-    }
+typedef struct SDL_AMediaCodec_FakeFrame {
+    size_t index;
+    SDL_AMediaCodecBufferInfo info;
+} SDL_AMediaCodec_FakeFrame;
 
-    return acodec;
-}
+typedef struct SDL_AMediaCodec_FakeFifo {
+    SDL_AMediaCodec_FakeFrame fakes[FAKE_BUFFER_QUEUE_SIZE];
+    int begin;
+    int end;
+    int size;
+    int should_abort;
 
-inline static void SDL_AMediaCodec_FreeInternal(SDL_AMediaCodec *acodec)
-{
-    if (!acodec)
-        return;
+    SDL_mutex *mutex;
+    SDL_cond  *wakeup_enqueue_cond;
+    SDL_cond  *wakeup_dequeue_cond;
+} SDL_AMediaCodec_FakeFifo;
 
-    if (acodec->mutex) {
-        SDL_DestroyMutexP(&acodec->mutex);
-    }
-
-    free(acodec->opaque);
-    memset(acodec, 0, sizeof(SDL_AMediaCodec));
-    free(acodec);
-}
+sdl_amedia_status_t SDL_AMediaCodec_FakeFifo_init(SDL_AMediaCodec_FakeFifo *fifo);
+void                SDL_AMediaCodec_FakeFifo_abort(SDL_AMediaCodec_FakeFifo *fifo);
+void                SDL_AMediaCodec_FakeFifo_destroy(SDL_AMediaCodec_FakeFifo *fifo);
+sdl_amedia_status_t SDL_AMediaCodec_FakeFifo_queue(SDL_AMediaCodec_FakeFifo *fifo, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags);
+ssize_t             SDL_AMediaCodec_FakeFifo_dequeue(SDL_AMediaCodec_FakeFifo *fifo, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs);
+void                SDL_AMediaCodec_FakeFifo_flush(SDL_AMediaCodec_FakeFifo *fifo);
+int                 SDL_AMediaCodec_FakeFifo_size(SDL_AMediaCodec_FakeFifo *fifo);
 
 #endif
 

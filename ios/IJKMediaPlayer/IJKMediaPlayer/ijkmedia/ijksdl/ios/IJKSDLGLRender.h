@@ -35,3 +35,17 @@
 - (void) render: (SDL_VoutOverlay *) overlay;
 - (BOOL) prepareDisplay;
 @end
+
+// BT.709, which is the standard for HDTV.
+static const GLfloat kColorConversion709[] = {
+    1.164,  1.164,  1.164,
+    0.0,   -0.213,  2.112,
+    1.793, -0.533,  0.0,
+};
+
+// BT.601, which is the standard for SDTV.
+static const GLfloat kColorConversion601[] = {
+    1.164,  1.164, 1.164,
+    0.0,   -0.392, 2.017,
+    1.596, -0.813,   0.0,
+};

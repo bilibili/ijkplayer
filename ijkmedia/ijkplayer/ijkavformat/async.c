@@ -34,15 +34,17 @@
 #include "libavutil/log.h"
 #include "libavutil/opt.h"
 #include "libavutil/thread.h"
+#include "libavutil/time.h"
 #include "url.h"
 #include <stdint.h>
+
+#include "ijkplayer/ijkavutil/opt.h"
+#include "ijkavformat.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#define BUFFER_CAPACITY         (4 * 1024 * 1024)
-#define READ_BACK_CAPACITY      (4 * 1024 * 1024)
 #define SHORT_SEEK_THRESHOLD    (256 * 1024)
 
 typedef struct RingBuffer
@@ -78,16 +80,21 @@ typedef struct Context {
 
     int             abort_request;
     AVIOInterruptCB interrupt_callback;
+
+    /* options */
+    int64_t         opaque;
+    int64_t         forwards_capacity;
+    int64_t         backwards_capacity;
 } Context;
 
-static int ring_init(RingBuffer *ring, unsigned int capacity, int read_back_capacity)
+static int ring_init(RingBuffer *ring, int64_t capacity, int64_t read_back_capacity)
 {
     memset(ring, 0, sizeof(RingBuffer));
-    ring->fifo = av_fifo_alloc(capacity + read_back_capacity);
+    ring->fifo = av_fifo_alloc((unsigned int)(capacity + read_back_capacity));
     if (!ring->fifo)
         return AVERROR(ENOMEM);
 
-    ring->read_back_capacity = read_back_capacity;
+    ring->read_back_capacity = (int)read_back_capacity;
     return 0;
 }
 
@@ -173,6 +180,41 @@ static int wrapped_url_read(void *src, void *dst, int size)
     return ret;
 }
 
+static void call_inject_statistic(URLContext *h)
+{
+    Context *c = h->priv_data;
+    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+    void *opaque = (void *) (intptr_t) c->opaque;
+
+    if (opaque && inject_callback) {
+        IJKAVInject_AsyncStatistic stat;
+        stat.size = sizeof(stat);
+        stat.buf_forwards  = ring_size(&c->ring);
+        stat.buf_backwards = ring_size_of_read_back(&c->ring);
+        stat.buf_capacity  = c->forwards_capacity + c->backwards_capacity;
+
+        inject_callback(opaque, IJKAVINJECT_ASYNC_STATISTIC, &stat, sizeof(stat));
+    }
+}
+
+static void call_inject_async_fill_speed(URLContext *h, int is_full_speed, int64_t bytes, int64_t elapsed_micro)
+{
+    Context *c = h->priv_data;
+    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+    void *opaque = (void *) (intptr_t) c->opaque;
+    int64_t elapsed_milli = elapsed_micro / 1000;
+
+    if (opaque && inject_callback && bytes > 0 && elapsed_milli > 0) {
+        IJKAVInject_AsyncReadSpeed stat;
+        stat.size = sizeof(stat);
+        stat.is_full_speed = is_full_speed;
+        stat.io_bytes      = bytes;
+        stat.elapsed_milli = elapsed_milli;
+
+        inject_callback(opaque, IJKAVINJECT_ASYNC_READ_SPEED, &stat, sizeof(stat));
+    }
+}
+
 static void *async_buffer_task(void *arg)
 {
     URLContext   *h    = arg;
@@ -180,6 +222,9 @@ static void *async_buffer_task(void *arg)
     RingBuffer   *ring = &c->ring;
     int           ret  = 0;
     int64_t       seek_ret;
+    int           is_full_speed = 1;
+    int64_t       count_bytes = 0;
+    int64_t       count_start_time_micro = av_gettime_relative();
 
     while (1) {
         int fifo_space, to_copy;
@@ -211,6 +256,8 @@ static void *async_buffer_task(void *arg)
 
             pthread_cond_signal(&c->cond_wakeup_main);
             pthread_mutex_unlock(&c->mutex);
+
+            is_full_speed = 0;
             continue;
         }
 
@@ -219,12 +266,23 @@ static void *async_buffer_task(void *arg)
             pthread_cond_signal(&c->cond_wakeup_main);
             pthread_cond_wait(&c->cond_wakeup_background, &c->mutex);
             pthread_mutex_unlock(&c->mutex);
+            is_full_speed = 0;
             continue;
         }
         pthread_mutex_unlock(&c->mutex);
 
         to_copy = FFMIN(4096, fifo_space);
         ret = ring_generic_write(ring, (void *)h, to_copy, (void *)wrapped_url_read);
+        if (ret > 0) {
+            count_bytes += ret;
+            if (count_bytes > FFMIN((1 * 1024 * 1024), c->forwards_capacity)) {
+                int64_t now = av_gettime_relative();
+                call_inject_async_fill_speed(h, is_full_speed, count_bytes, now - count_start_time_micro);
+                is_full_speed = 1;
+                count_bytes = 0;
+                count_start_time_micro = now;
+            }
+        }
 
         pthread_mutex_lock(&c->mutex);
         if (ret <= 0) {
@@ -235,6 +293,8 @@ static void *async_buffer_task(void *arg)
 
         pthread_cond_signal(&c->cond_wakeup_main);
         pthread_mutex_unlock(&c->mutex);
+
+        call_inject_statistic(h);
     }
 
     return NULL;
@@ -248,9 +308,12 @@ static int async_open(URLContext *h, const char *arg, int flags, AVDictionary **
 
     av_strstart(arg, "async:", &arg);
 
-    ret = ring_init(&c->ring, BUFFER_CAPACITY, READ_BACK_CAPACITY);
+    ret = ring_init(&c->ring, c->forwards_capacity, c->backwards_capacity);
     if (ret < 0)
         goto fifo_fail;
+
+    if (c->opaque)
+        av_dict_set_int(options, "ijkinject-opaque", c->opaque, 0);
 
     /* wrap interrupt callback */
     c->interrupt_callback = h->interrupt_callback;
@@ -370,6 +433,7 @@ static int async_read_internal(URLContext *h, void *dest, int size, int read_com
     pthread_cond_signal(&c->cond_wakeup_background);
     pthread_mutex_unlock(&c->mutex);
 
+    call_inject_statistic(h);
     return ret;
 }
 
@@ -425,6 +489,7 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
         } else {
             // fast seek backwards
             ring_drain(ring, pos_delta);
+            call_inject_statistic(h);
             c->logical_pos = new_logical_pos;
         }
 
@@ -462,6 +527,7 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
 
     pthread_mutex_unlock(&c->mutex);
 
+    call_inject_statistic(h);
     return ret;
 }
 
@@ -469,6 +535,12 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
 #define D AV_OPT_FLAG_DECODING_PARAM
 
 static const AVOption options[] = {
+    { "ijkinject-opaque",           "private data of user, passed with custom callback",
+        OFFSET(opaque),             IJKAV_OPTION_INT64(0, INT64_MIN, INT64_MAX) },
+    { "async-forwards-capacity",    "max bytes that may be read forward in background",
+        OFFSET(forwards_capacity),  IJKAV_OPTION_INT64(128 * 1024, 128 * 1024, 128 * 1024 * 1024) },
+    { "async-backwards-capacity",   "max bytes that may be seek backward without seeking in inner protocol",
+        OFFSET(backwards_capacity), IJKAV_OPTION_INT64(128 * 1024, 128 * 1024, 128 * 1024 * 1024) },
     {NULL},
 };
 

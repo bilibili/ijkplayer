@@ -28,27 +28,32 @@
 static NSString *const g_yuvFragmentShaderString = IJK_SHADER_STRING
 (
     varying highp vec2 v_texcoord;
-    uniform sampler2D s_texture_y;
-    uniform sampler2D s_texture_u;
-    uniform sampler2D s_texture_v;
+    precision mediump float;
+    uniform sampler2D SamplerY;
+    uniform sampler2D SamplerU;
+    uniform sampler2D SamplerV;
+    uniform mat3 colorConversionMatrix;
 
     void main()
     {
-        highp float y = texture2D(s_texture_y, v_texcoord).r;
-        highp float u = texture2D(s_texture_u, v_texcoord).r - 0.5;
-        highp float v = texture2D(s_texture_v, v_texcoord).r - 0.5;
+        mediump vec3 yuv;
+        lowp vec3 rgb;
 
-        highp float r = y +               1.40200 * v;
-        highp float g = y - 0.34414 * u - 0.71414 * v;
-        highp float b = y + 1.77200 * u;
-
-        gl_FragColor = vec4(r,g,b,1.0);
+        // Subtract constants to map the video range start at 0
+        yuv.x = (texture2D(SamplerY, v_texcoord).r - (16.0/255.0));
+        yuv.y = (texture2D(SamplerU, v_texcoord).r - 0.5);
+        yuv.z = (texture2D(SamplerV, v_texcoord).r - 0.5);
+        rgb = colorConversionMatrix * yuv;
+        gl_FragColor = vec4(rgb,1);
     }
 );
 
 @implementation IJKSDLGLRenderI420 {
+    GLint _uniform[1];
     GLint _uniformSamplers[3];
     GLuint _textures[3];
+
+    const GLfloat *_preferredConversion;
 }
 
 - (BOOL) isValid
@@ -63,9 +68,10 @@ static NSString *const g_yuvFragmentShaderString = IJK_SHADER_STRING
 
 - (void) resolveUniforms: (GLuint) program
 {
-    _uniformSamplers[0] = glGetUniformLocation(program, "s_texture_y");
-    _uniformSamplers[1] = glGetUniformLocation(program, "s_texture_u");
-    _uniformSamplers[2] = glGetUniformLocation(program, "s_texture_v");
+    _uniformSamplers[0] = glGetUniformLocation(program, "SamplerY");
+    _uniformSamplers[1] = glGetUniformLocation(program, "SamplerU");
+    _uniformSamplers[2] = glGetUniformLocation(program, "SamplerV");
+    _uniform[0] = glGetUniformLocation(program, "colorConversionMatrix");
 }
 
 - (void) render: (SDL_VoutOverlay *) overlay
@@ -84,6 +90,8 @@ static NSString *const g_yuvFragmentShaderString = IJK_SHADER_STRING
 
     if (0 == _textures[0])
         glGenTextures(3, _textures);
+
+    _preferredConversion = kColorConversion709;
 
     const UInt8 *pixels[3] = { overlay->pixels[0], overlay->pixels[1], overlay->pixels[2] };
     const NSUInteger widths[3]  = { overlay->pitches[0], overlay->pitches[1], overlay->pitches[2] };
@@ -121,6 +129,7 @@ static NSString *const g_yuvFragmentShaderString = IJK_SHADER_STRING
         glUniform1i(_uniformSamplers[i], i);
     }
 
+    glUniformMatrix3fv(_uniform[0], 1, GL_FALSE, _preferredConversion);
     return YES;
 }
 

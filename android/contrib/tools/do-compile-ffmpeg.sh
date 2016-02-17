@@ -85,7 +85,9 @@ FF_CFG_FLAGS=
 FF_EXTRA_CFLAGS=
 FF_EXTRA_LDFLAGS=
 FF_DEP_LIBS=
-FF_ASM_OBJ_DIR=
+
+FF_MODULE_DIRS="compat libavcodec libavfilter libavformat libavutil libswresample libswscale"
+FF_ASSEMBLER_SUB_DIRS=
 
 #--------------------
 echo ""
@@ -124,7 +126,7 @@ if [ "$FF_ARCH" = "armv7a" ]; then
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS -march=armv7-a -mcpu=cortex-a8 -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb"
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS -Wl,--fix-cortex-a8"
 
-    FF_ASM_OBJ_DIR="libavcodec/arm/*.o libavutil/arm/*.o libswresample/arm/*.o"
+    FF_ASSEMBLER_SUB_DIRS="arm"
 
 elif [ "$FF_ARCH" = "armv5" ]; then
     FF_BUILD_NAME=ffmpeg-armv5
@@ -139,7 +141,7 @@ elif [ "$FF_ARCH" = "armv5" ]; then
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS -march=armv5te -mtune=arm9tdmi -msoft-float"
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
 
-    FF_ASM_OBJ_DIR="libavcodec/arm/*.o libavutil/arm/*.o libswresample/arm/*.o"
+    FF_ASSEMBLER_SUB_DIRS="arm"
 
 elif [ "$FF_ARCH" = "x86" ]; then
     FF_BUILD_NAME=ffmpeg-x86
@@ -154,7 +156,24 @@ elif [ "$FF_ARCH" = "x86" ]; then
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS -march=atom -msse3 -ffast-math -mfpmath=sse"
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
 
-    FF_ASM_OBJ_DIR="libavcodec/x86/*.o libavfilter/x86/*.o libavutil/x86/*.o libswresample/x86/*.o libswscale/x86/*.o"
+    FF_ASSEMBLER_SUB_DIRS="x86"
+
+elif [ "$FF_ARCH" = "x86_64" ]; then
+    FF_ANDROID_PLATFORM=android-21
+
+    FF_BUILD_NAME=ffmpeg-x86_64
+    FF_BUILD_NAME_OPENSSL=openssl-x86_64
+    FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
+
+    FF_CROSS_PREFIX=x86_64-linux-android
+    FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_64_VER}
+
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --arch=x86_64 --enable-yasm"
+
+    FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS"
+    FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
+
+    FF_ASSEMBLER_SUB_DIRS="x86"
 
 elif [ "$FF_ARCH" = "arm64" ]; then
     FF_ANDROID_PLATFORM=android-21
@@ -171,7 +190,7 @@ elif [ "$FF_ARCH" = "arm64" ]; then
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS"
     FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
 
-    FF_ASM_OBJ_DIR="libavcodec/aarch64/*.o libavutil/aarch64/*.o libswresample/aarch64/*.o libavcodec/neon/*.o"
+    FF_ASSEMBLER_SUB_DIRS="aarch64 neon"
 
 else
     echo "unknown architecture $FF_ARCH";
@@ -200,7 +219,7 @@ FF_MAKEFLAGS=
 if which nproc >/dev/null
 then
     FF_MAKEFLAGS=-j`nproc`
-elif [ "$UNAMES" = "Darwin" ] && which sysctl >/dev/null
+elif [ "$UNAME_S" = "Darwin" ] && which sysctl >/dev/null
 then
     FF_MAKEFLAGS=-j`sysctl -n machdep.cpu.thread_count`
 fi
@@ -308,16 +327,31 @@ echo "--------------------"
 echo "[*] link ffmpeg"
 echo "--------------------"
 echo $FF_EXTRA_LDFLAGS
+
+FF_C_OBJ_FILES=
+FF_ASM_OBJ_FILES=
+for MODULE_DIR in $FF_MODULE_DIRS
+do
+    C_OBJ_FILES="$MODULE_DIR/*.o"
+    if ls $C_OBJ_FILES 1> /dev/null 2>&1; then
+        echo "link $MODULE_DIR/*.o"
+        FF_C_OBJ_FILES="$FF_C_OBJ_FILES $C_OBJ_FILES"
+    fi
+
+    for ASM_SUB_DIR in $FF_ASSEMBLER_SUB_DIRS
+    do
+        ASM_OBJ_FILES="$MODULE_DIR/$ASM_SUB_DIR/*.o"
+        if ls $ASM_OBJ_FILES 1> /dev/null 2>&1; then
+            echo "link $MODULE_DIR/$ASM_SUB_DIR/*.o"
+            FF_ASM_OBJ_FILES="$FF_ASM_OBJ_FILES $ASM_OBJ_FILES"
+        fi
+    done
+done
+
 $CC -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack $FF_EXTRA_LDFLAGS \
     -Wl,-soname,libijkffmpeg.so \
-    compat/*.o \
-    libavcodec/*.o \
-    libavfilter/*.o \
-    libavformat/*.o \
-    libavutil/*.o \
-    libswresample/*.o \
-    libswscale/*.o \
-    $FF_ASM_OBJ_DIR \
+    $FF_C_OBJ_FILES \
+    $FF_ASM_OBJ_FILES \
     $FF_DEP_LIBS \
     -o $FF_PREFIX/libijkffmpeg.so
 

@@ -45,4 +45,6 @@
 // #define FFP_SHOW_AMC_DROPS
 // #define FFP_AMC_DISABLE_OUTPUT
 
+// #define FFP_AVFILTER_PLAYBACK_RATE
+
 #endif

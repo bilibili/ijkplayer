@@ -105,7 +105,7 @@ inline static bool check_object(SDL_VoutOverlay* object, const char *func_name)
 
 static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
 {
-    assert(frame->format == SDL_FCC__AMC);
+    assert(frame->format == IJK_AV_PIX_FMT__ANDROID_MEDIACODEC);
 
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
 
@@ -133,10 +133,10 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
     return 0;
 }
 
-SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout)
+SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, SDL_Vout *vout)
 {
-    SDLTRACE("SDL_VoutAMediaCodec_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, vout=%p)\n",
-        width, height, (const char*) &format, format, vout);
+    SDLTRACE("SDL_VoutAMediaCodec_CreateOverlay(w=%d, h=%d, fmt=_AMC vout=%p)\n",
+        width, height, vout);
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
     if (!overlay) {
         ALOGE("overlay allocation failed");
@@ -150,7 +150,7 @@ SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, Uint32
     opaque->buffer_proxy  = NULL;
 
     overlay->opaque_class = &g_vout_overlay_amediacodec_class;
-    overlay->format       = format;
+    overlay->format       = SDL_FCC__AMC;
     overlay->pitches      = opaque->pitches;
     overlay->pixels       = opaque->pixels;
     overlay->w            = width;
@@ -163,12 +163,8 @@ SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, Uint32
     overlay->unref        = overlay_unref;
     overlay->func_fill_frame = func_fill_frame;
 
-    switch (format) {
-    case SDL_FCC__AMC: {
-        break;
-    }
-    default:
-        ALOGE("SDL_VoutAMediaCodec_CreateOverlay(...): unknown format %.4s(0x%x)\n", (char*)&format, format);
+    if (!opaque->mutex) {
+        ALOGE("SDL_CreateMutex failed");
         goto fail;
     }
 

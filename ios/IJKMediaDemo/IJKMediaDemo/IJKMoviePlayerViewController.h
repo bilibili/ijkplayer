@@ -18,7 +18,7 @@
 #import <IJKMediaFramework/IJKMediaFramework.h>
 @class IJKMediaControl;
 
-@interface IJKVideoViewController : UIViewController <IJKMediaUrlOpenDelegate>
+@interface IJKVideoViewController : UIViewController
 
 @property(atomic,strong) NSURL *url;
 @property(atomic, retain) id<IJKMediaPlayback> player;
@@ -29,7 +29,7 @@
 
 - (IBAction)onClickMediaControl:(id)sender;
 - (IBAction)onClickOverlay:(id)sender;
-- (IBAction)onClickBack:(id)sender;
+- (IBAction)onClickDone:(id)sender;
 - (IBAction)onClickPlay:(id)sender;
 - (IBAction)onClickPause:(id)sender;
 

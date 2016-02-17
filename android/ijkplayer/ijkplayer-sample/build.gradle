@@ -49,9 +49,11 @@ dependencies {
     all64Compile project(':ijkplayer-armv7a')
     all64Compile project(':ijkplayer-arm64')
     all64Compile project(':ijkplayer-x86')
+    all64Compile project(':ijkplayer-x86_64')
 
     // armv5Compile project(':player-armv5')
     // armv7aCompile project(':player-armv7a')
     // arm64Compile project(':player-arm64')
     // x86Compile project(':player-x86')
+    // x86_64Compile project(':player-x86_64')
 }

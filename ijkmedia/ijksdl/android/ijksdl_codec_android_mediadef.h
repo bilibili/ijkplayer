@@ -52,6 +52,7 @@ typedef enum sdl_amedia_status_t {
 #define SDL_AMIME_VIDEO_VP9         "video/x-vnd.on2.vp9"   //- VP9 video (i.e. video in .webm)
 #define SDL_AMIME_VIDEO_AVC         "video/avc"             //- H.264/AVC video
 #define SDL_AMIME_VIDEO_HEVC        "video/hevc"            //- H.265/HEVC video
+#define SDL_AMIME_VIDEO_MPEG2VIDEO  "video/mpeg2"           //- MPEG2 video
 #define SDL_AMIME_VIDEO_MPEG4       "video/mp4v-es"         //- MPEG4 video
 #define SDL_AMIME_VIDEO_H264        "video/3gpp"            //- H.263 video
 #define SDL_AMIME_AUDIO_AMR_NB      "audio/3gpp"            //- AMR narrowband audio
@@ -129,6 +130,9 @@ enum {
     AMEDIACODEC__BUFFER_FLAG_KEY_FRAME       = 0x01,
     AMEDIACODEC__BUFFER_FLAG_CODEC_CONFIG    = 0x02,
     AMEDIACODEC__BUFFER_FLAG_END_OF_STREAM   = 0x04,
+
+    // extended
+    AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME      = 0x1000,
 };
 
 enum {

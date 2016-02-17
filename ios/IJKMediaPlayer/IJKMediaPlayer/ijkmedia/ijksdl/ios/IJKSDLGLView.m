@@ -28,9 +28,10 @@
 #import "IJKSDLGLRenderI420.h"
 #import "IJKSDLGLRenderRV24.h"
 #import "IJKSDLGLRenderNV12.h"
+#import "IJKSDLGLRenderI444P10LE.h"
 #include "ijksdl/ijksdl_timer.h"
 #include "ijksdl/ios/ijksdl_ios.h"
-
+#import "IJKSDLHudViewController.h"
 
 static NSString *const g_vertexShaderString = IJK_SHADER_STRING
 (
@@ -175,6 +176,7 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
 
     BOOL            _didSetContentMode;
     BOOL            _didRelayoutSubViews;
+    BOOL            _didVerticesChanged;
     BOOL            _didPaddingChanged;
 
     int             _tryLockErrorCount;
@@ -182,8 +184,9 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     BOOL            _didStopGL;
     NSMutableArray *_registeredNotifications;
 
-    BOOL                _useRenderQueue;
     dispatch_queue_t    _renderQueue;
+
+    IJKSDLHudViewController *_hudViewController;
 }
 
 enum {
@@ -198,7 +201,7 @@ static int g_ijk_gles_queue_spec_key;
 	return [CAEAGLLayer class];
 }
 
-- (id) initWithFrame:(CGRect)frame useRenderQueue:(BOOL)useRenderQueue;
+- (id) initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
@@ -208,23 +211,23 @@ static int g_ijk_gles_queue_spec_key;
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
 
-        self->_useRenderQueue = useRenderQueue;
-        if (useRenderQueue) {
-            dispatch_queue_attr_t attr = NULL;
-            if (isIOS8OrLater()) {
-                attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL,
-                                                               QOS_CLASS_USER_INTERACTIVE,
-                                                               DISPATCH_QUEUE_PRIORITY_HIGH);
-            }
-            _renderQueue = dispatch_queue_create("ijk-gles", attr);
-            dispatch_queue_set_specific(_renderQueue,
-                                        &g_ijk_gles_queue_spec_key,
-                                        &g_ijk_gles_queue_spec_key,
-                                        NULL);
+        dispatch_queue_attr_t attr = NULL;
+        if (isIOS8OrLater()) {
+            attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL,
+                                                           QOS_CLASS_USER_INTERACTIVE,
+                                                           DISPATCH_QUEUE_PRIORITY_HIGH);
         }
+        _renderQueue = dispatch_queue_create("ijk-gles", attr);
+        dispatch_queue_set_specific(_renderQueue,
+                                    &g_ijk_gles_queue_spec_key,
+                                    &g_ijk_gles_queue_spec_key,
+                                    NULL);
 
         _didSetupGL = NO;
         [self setupGLOnce];
+
+        _hudViewController = [[IJKSDLHudViewController alloc] init];
+        [self addSubview:_hudViewController.tableView];
     }
 
     return self;
@@ -411,15 +414,36 @@ static int g_ijk_gles_queue_spec_key;
 
 - (void)layoutSubviews
 {
+    [super layoutSubviews];
+
+    CGRect selfFrame = self.frame;
+    CGRect newFrame  = selfFrame;
+
+    newFrame.size.width   = selfFrame.size.width * 1 / 3;
+    newFrame.origin.x     = selfFrame.size.width * 2 / 3;
+
+    newFrame.size.height  = selfFrame.size.height * 6 / 8;
+    newFrame.origin.y    += selfFrame.size.height * 1 / 8;
+
+    _hudViewController.tableView.frame = newFrame;
+
     _didRelayoutSubViews = YES;
 }
 
 - (void)layoutOnDisplayThread
 {
+    int backingWidth  = 0;
+    int backingHeight = 0;
     glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
     [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
-	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
+	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
+
+    if (_backingWidth != backingWidth || _backingHeight != backingHeight) {
+        _backingWidth  = backingWidth;
+        _backingHeight = backingHeight;
+        _didVerticesChanged = YES;
+    }
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -430,17 +454,13 @@ static int g_ijk_gles_queue_spec_key;
 
         NSLog(@"OK setup GL framebuffer %d:%d", _backingWidth, _backingHeight);
     }
-
-    [self updateVertices];
-    // FIXME: trigger a redisplay on display thread
-    // [self display: nil];
 }
 
 - (void)setContentMode:(UIViewContentMode)contentMode
 {
-    _didSetContentMode = YES;
     [super setContentMode:contentMode];
-    if (self->_useRenderQueue && self->_renderQueue) {
+    _didSetContentMode = YES;
+    if (self->_renderQueue) {
         dispatch_async(self->_renderQueue, ^(){
             [self display:nil];
         });
@@ -471,6 +491,11 @@ static int g_ijk_gles_queue_spec_key;
             _renderer = [[IJKSDLGLRenderRV24 alloc] init];
             _bytesPerPixel = 3;
             NSLog(@"OK use RV24 GL renderer");
+        } else if (overlay->format == SDL_FCC_I444P10LE) {
+            _frameChroma = overlay->format;
+            _renderer = [[IJKSDLGLRenderI444P10LE alloc] init];
+            _bytesPerPixel = 2;
+            NSLog(@"OK use I444 GL renderer");
         }
 
         if (![self loadShaders]) {
@@ -478,15 +503,26 @@ static int g_ijk_gles_queue_spec_key;
         }
     }
 
-    if (overlay && (_frameWidth  != overlay->w ||
-                    _frameHeight != overlay->h ||
-                    _frameSarNum != overlay->sar_num ||
-                    _frameSarDen != overlay->sar_den)) {
-        _frameWidth  = overlay->w;
-        _frameHeight = overlay->h;
-        _frameSarNum = overlay->sar_num;
-        _frameSarDen = overlay->sar_den;
-        [self updateVertices];
+    if (overlay) {
+        if (_frameWidth  != overlay->w ||
+            _frameHeight != overlay->h ||
+            _frameSarNum != overlay->sar_num ||
+            _frameSarDen != overlay->sar_den) {
+            _frameWidth  = overlay->w;
+            _frameHeight = overlay->h;
+            _frameSarNum = overlay->sar_num;
+            _frameSarDen = overlay->sar_den;
+            _didVerticesChanged = YES;
+        }
+
+        if (!overlay->is_private && overlay->pitches && _frameWidth > 0) {
+            int frameBufferWidth   = overlay->pitches[0] / _bytesPerPixel;
+            int rightPaddingPixels = frameBufferWidth - _frameWidth;
+            if (rightPaddingPixels != _rightPaddingPixels) {
+                _rightPaddingPixels = rightPaddingPixels;
+                _rightPadding       = ((GLfloat)_rightPaddingPixels) / frameBufferWidth;
+            }
+        }
     }
 
     return YES;
@@ -592,7 +628,7 @@ exit:
 
 - (void)display: (SDL_VoutOverlay *) overlay
 {
-    if (self->_useRenderQueue && !dispatch_get_specific(&g_ijk_gles_queue_spec_key)) {
+    if (!dispatch_get_specific(&g_ijk_gles_queue_spec_key)) {
         dispatch_sync(self->_renderQueue, ^() {
             [self display:overlay];
         });
@@ -641,19 +677,14 @@ exit:
         return;
     }
 
-    if (overlay && !overlay->is_private && overlay->pitches[0] / _bytesPerPixel > _frameWidth) {
-        _rightPaddingPixels = overlay->pitches[0] / _bytesPerPixel - _frameWidth;
-        _didPaddingChanged = YES;
-    }
-
     if (_didRelayoutSubViews) {
-        [self layoutOnDisplayThread];
         _didRelayoutSubViews = NO;
+        [self layoutOnDisplayThread];
     }
 
-    if (_didSetContentMode || _didPaddingChanged) {
+    if (_didSetContentMode || _didVerticesChanged) {
         _didSetContentMode = NO;
-        _didPaddingChanged = NO;
+        _didVerticesChanged = NO;
         [self updateVertices];
     }
 
@@ -664,17 +695,10 @@ exit:
 	glUseProgram(_program);
 
     if (overlay) {
-        _frameWidth  = overlay->w;
-        _frameHeight = overlay->h;
-        _frameSarNum = overlay->sar_num;
-        _frameSarDen = overlay->sar_den;
         [_renderer render:overlay];
     }
 
     if ([_renderer prepareDisplay]) {
-        if (_frameWidth > 0)
-            _rightPadding = ((GLfloat)_rightPaddingPixels) / _frameWidth;
-
         _texCoords[0] = 0.0f;
         _texCoords[1] = 1.0f;
         _texCoords[2] = 1.0f - _rightPadding;
@@ -928,6 +952,28 @@ exit:
     CGImageRelease(iref);
 
     return image;
+}
+
+#pragma mark IJKFFHudController
+- (void)setHudValue:(NSString *)value forKey:(NSString *)key
+{
+    if ([[NSThread currentThread] isMainThread]) {
+        [_hudViewController setHudValue:value forKey:key];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self setHudValue:value forKey:key];
+        });
+    }
+}
+
+- (void)setShouldShowHudView:(BOOL)shouldShowHudView
+{
+    _hudViewController.tableView.hidden = !shouldShowHudView;
+}
+
+- (BOOL)shouldShowHudView
+{
+    return !_hudViewController.tableView.hidden;
 }
 
 @end

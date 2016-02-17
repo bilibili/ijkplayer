@@ -300,6 +300,13 @@ public class IjkExoMediaPlayer extends AbstractMediaPlayer {
         return Util.getUserAgent(mAppContext, "IjkExoMediaPlayer");
     }
 
+    public int getBufferedPercentage() {
+        if (mInternalPlayer == null)
+            return 0;
+
+        return mInternalPlayer.getBufferedPercentage();
+    }
+
     private class DemoPlayerListener implements DemoPlayer.Listener {
         private boolean mIsPrepareing = false;
         private boolean mDidPrepare = false;

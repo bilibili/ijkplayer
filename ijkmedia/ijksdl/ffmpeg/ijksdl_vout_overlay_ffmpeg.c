@@ -182,6 +182,16 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
                 dst_format = AV_PIX_FMT_YUV420P;
             }
             break;
+        case SDL_FCC_I444P10LE:
+            if (frame->format == AV_PIX_FMT_YUV444P10LE) {
+                // ALOGE("direct draw frame");
+                use_linked_frame = 1;
+                dst_format = frame->format;
+            } else {
+                // ALOGE("copy draw frame");
+                dst_format = AV_PIX_FMT_YUV444P10LE;
+            }
+            break;
         case SDL_FCC_RV32:
             dst_format = AV_PIX_FMT_0BGR32;
             break;
@@ -271,10 +281,32 @@ static SDL_Class g_vout_overlay_ffmpeg_class = {
 };
 
 #ifndef __clang_analyzer__
-SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *display)
+SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, int frame_format, SDL_Vout *display)
 {
+    Uint32 overlay_format = display->overlay_format;
+    switch (overlay_format) {
+        case SDL_FCC__GLES2: {
+            switch (frame_format) {
+                case AV_PIX_FMT_YUV444P10LE:
+                    overlay_format = SDL_FCC_I444P10LE;
+                    break;
+                case AV_PIX_FMT_YUV420P:
+                case AV_PIX_FMT_YUVJ420P:
+                default:
+#if defined(__ANDROID__)
+                    overlay_format = SDL_FCC_YV12;
+#else
+                    overlay_format = SDL_FCC_I420;
+#endif
+                    break;
+            }
+            break;
+        }
+    }
+
     SDLTRACE("SDL_VoutFFmpeg_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, dp=%p)\n",
-        width, height, (const char*) &format, format, display);
+        width, height, (const char*) &overlay_format, overlay_format, display);
+
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
     if (!overlay) {
         ALOGE("overlay allocation failed");
@@ -286,7 +318,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     opaque->sws_flags     = SWS_BILINEAR;
 
     overlay->opaque_class = &g_vout_overlay_ffmpeg_class;
-    overlay->format       = format;
+    overlay->format       = overlay_format;
     overlay->pitches      = opaque->pitches;
     overlay->pixels       = opaque->pixels;
     overlay->w            = width;
@@ -299,10 +331,27 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     enum AVPixelFormat ff_format = AV_PIX_FMT_NONE;
     int buf_width = width;
     int buf_height = height;
-    switch (format) {
+    switch (overlay_format) {
     case SDL_FCC_I420:
     case SDL_FCC_YV12: {
         ff_format = AV_PIX_FMT_YUV420P;
+        // FIXME: need runtime config
+#if defined(__ANDROID__)
+        // 16 bytes align pitch for arm-neon image-convert
+        buf_width = IJKALIGN(width, 16); // 1 bytes per pixel for Y-plane
+#elif defined(__APPLE__)
+        // 2^n align for width
+        buf_width = width;
+        if (width > 0)
+            buf_width = 1 << (sizeof(int) * 8 - __builtin_clz(width));
+#else
+        buf_width = IJKALIGN(width, 16); // unknown platform
+#endif
+        opaque->planes = 3;
+        break;
+    }
+    case SDL_FCC_I444P10LE: {
+        ff_format = AV_PIX_FMT_YUV444P10LE;
         // FIXME: need runtime config
 #if defined(__ANDROID__)
         // 16 bytes align pitch for arm-neon image-convert
@@ -344,7 +393,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         break;
     }
     default:
-        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...): unknown format %.4s(0x%x)\n", (char*)&format, format);
+        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...): unknown format %.4s(0x%x)\n", (char*)&overlay_format, overlay_format);
         goto fail;
     }
 

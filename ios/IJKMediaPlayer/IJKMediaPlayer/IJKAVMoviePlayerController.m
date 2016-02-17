@@ -122,7 +122,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     IJKKVOController *_playerItemKVO;
     
     id _timeObserver;
-    
+    dispatch_once_t _readyToPlayToken;
     // while AVPlayer is prerolling, it could resume itself.
     // foring start could
     BOOL _isPrerolling;
@@ -232,7 +232,6 @@ static IJKAVMoviePlayerController* instance;
 - (void)setScreenOn: (BOOL)on
 {
     [IJKMediaModule sharedModule].mediaModuleIdleTimerDisabled = on;
-    // [UIApplication sharedApplication].idleTimerDisabled = on;
 }
 
 - (void)dealloc
@@ -274,6 +273,7 @@ static IJKAVMoviePlayerController* instance;
 - (void)stop
 {
     [_player pause];
+    [self setScreenOn:NO];
     _isCompleted = YES;
 }
 
@@ -644,7 +644,8 @@ static IJKAVMoviePlayerController* instance;
     dispatch_async(dispatch_get_main_queue(), ^{
         [self didPlaybackStateChange];
         [self didLoadStateChange];
-        
+        [self setScreenOn:NO];
+ 
         if (blockError == nil) {
             blockError = [[NSError alloc] init];
         }
@@ -685,7 +686,8 @@ static IJKAVMoviePlayerController* instance;
     dispatch_async(dispatch_get_main_queue(), ^{
         [self didPlaybackStateChange];
         [self didLoadStateChange];
-        
+        [self setScreenOn:NO];
+ 
         [[NSNotificationCenter defaultCenter]
          postNotificationName:IJKMPMoviePlayerPlaybackDidFinishNotification
          object:self
@@ -724,22 +726,24 @@ static IJKAVMoviePlayerController* instance;
                 /* Once the AVPlayerItem becomes ready to play, i.e.
                  [playerItem status] == AVPlayerItemStatusReadyToPlay,
                  its duration can be fetched from the item. */
-                [_avView setPlayer:_player];
-                
-                self.isPreparedToPlay = YES;
-                AVPlayerItem *playerItem = (AVPlayerItem *)object;
-                NSTimeInterval duration = CMTimeGetSeconds(playerItem.duration);
-                if (duration <= 0)
-                    self.duration = 0.0f;
-                else
-                    self.duration = duration;
-                
-                [[NSNotificationCenter defaultCenter]
-                 postNotificationName:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification
-                 object:self];
-
-                if (_shouldAutoplay)
-                    [_player play];
+                dispatch_once(&_readyToPlayToken, ^{
+                    [_avView setPlayer:_player];
+                    
+                    self.isPreparedToPlay = YES;
+                    AVPlayerItem *playerItem = (AVPlayerItem *)object;
+                    NSTimeInterval duration = CMTimeGetSeconds(playerItem.duration);
+                    if (duration <= 0)
+                        self.duration = 0.0f;
+                    else
+                        self.duration = duration;
+                    
+                    [[NSNotificationCenter defaultCenter]
+                     postNotificationName:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification
+                     object:self];
+                    
+                    if (_shouldAutoplay && (!_pauseInBackground || [UIApplication sharedApplication].applicationState == UIApplicationStateActive))
+                        [_player play];
+                });
             }
                 break;
                 

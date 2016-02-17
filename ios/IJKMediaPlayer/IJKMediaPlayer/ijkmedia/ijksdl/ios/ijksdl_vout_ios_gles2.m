@@ -37,15 +37,13 @@ struct SDL_Vout_Opaque {
     IJKSDLGLView *gl_view;
 };
 
-static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, Uint32 format, SDL_Vout *vout)
+static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, int frame_format, SDL_Vout *vout)
 {
-    if (format == SDL_FCC__VTB)
-    {
-        return SDL_VoutVideoToolBox_CreateOverlay(width, height, format, vout);
-    }
-    else
-    {
-        return SDL_VoutFFmpeg_CreateOverlay(width, height, format, vout);
+    switch (frame_format) {
+        case IJK_AV_PIX_FMT__VIDEO_TOOLBOX:
+            return SDL_VoutVideoToolBox_CreateOverlay(width, height, vout);
+        default:
+            return SDL_VoutFFmpeg_CreateOverlay(width, height, frame_format, vout);
     }
 }
 

@@ -85,6 +85,7 @@ static const AVOption ffp_context_options[] = {
     { "overlay-format",                 "fourcc of overlay format",
         OPTION_OFFSET(overlay_format),  OPTION_INT(SDL_FCC_RV32, INT_MIN, INT_MAX),
         .unit = "overlay-format" },
+    { "fcc-_es2",                       "", 0, OPTION_CONST(SDL_FCC__GLES2), .unit = "overlay-format" },
     { "fcc-i420",                       "", 0, OPTION_CONST(SDL_FCC_I420), .unit = "overlay-format" },
     { "fcc-yv12",                       "", 0, OPTION_CONST(SDL_FCC_YV12), .unit = "overlay-format" },
     { "fcc-rv16",                       "", 0, OPTION_CONST(SDL_FCC_RV16), .unit = "overlay-format" },
@@ -100,7 +101,24 @@ static const AVOption ffp_context_options[] = {
                                                        VIDEO_PICTURE_QUEUE_SIZE_MAX) },
 
     { "max-buffer-size",                    "max buffer size should be pre-read",
-        OPTION_OFFSET(max_buffer_size),     OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
+        OPTION_OFFSET(dcc.max_buffer_size), OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
+    { "min-frames",                         "minimal frames to stop pre-reading",
+        OPTION_OFFSET(dcc.min_frames),      OPTION_INT(DEFAULT_MIN_FRAMES, MIN_MIN_FRAMES, MAX_MIN_FRAMES) },
+    { "first-high-water-mark-ms",           "first chance to wakeup read_thread",
+        OPTION_OFFSET(dcc.first_high_water_mark_in_ms),
+        OPTION_INT(DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_LAST_HIGH_WATER_MARK_IN_MS) },
+    { "next-high-water-mark-ms",            "second chance to wakeup read_thread",
+        OPTION_OFFSET(dcc.next_high_water_mark_in_ms),
+        OPTION_INT(DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_LAST_HIGH_WATER_MARK_IN_MS) },
+    { "last-high-water-mark-ms",            "last chance to wakeup read_thread",
+        OPTION_OFFSET(dcc.last_high_water_mark_in_ms),
+        OPTION_INT(DEFAULT_LAST_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_LAST_HIGH_WATER_MARK_IN_MS) },
 
     { "packet-buffering",                   "pause output until enough packets have been read after stalling",
         OPTION_OFFSET(packet_buffering),    OPTION_INT(1, 0, 1) },
@@ -108,10 +126,11 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(sync_av_start),       OPTION_INT(1, 0, 1) },
     { "iformat",                            "force format",
         OPTION_OFFSET(iformat_name),        OPTION_STR(NULL) },
-    { "min-frames",                         "minimal frames to stop pre-reading",
-        OPTION_OFFSET(min_frames),          OPTION_INT(DEFAULT_MIN_FRAMES, MIN_MIN_FRAMES, MAX_MIN_FRAMES) },
+    { "no-time-adjust",                     "return player's real time from the media stream instead of the adjusted time",
+        OPTION_OFFSET(no_time_adjust),      OPTION_INT(0, 0, 1) },
 
-    // iOS only options
+
+        // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
         OPTION_OFFSET(videotoolbox),        OPTION_INT(0, 0, 1) },
     { "videotoolbox-max-frame-width",       "VideoToolbox: max width of output frame",
@@ -132,7 +151,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(mediacodec_avc),          OPTION_INT(0, 0, 1) },
     { "mediacodec-hevc",                        "MediaCodec: enable HEVC",
         OPTION_OFFSET(mediacodec_hevc),         OPTION_INT(0, 0, 1) },
-
+    { "mediacodec-mpeg2",                       "MediaCodec: enable MPEG2VIDEO",
+        OPTION_OFFSET(mediacodec_mpeg2),        OPTION_INT(0, 0, 1) },
     { "opensles",                           "OpenSL ES: enable",
         OPTION_OFFSET(opensles),            OPTION_INT(0, 0, 1) },
     

@@ -14,8 +14,10 @@
     <string name="toggle_render">Render</string>
     <string name="toggle_ratio">Scale</string>
     <string name="show_info">Info</string>
-    <string name="fps_output">fps (output)</string>
-    <string name="fps_decode">fps (decode)</string>
+    <string name="vdec">vdec</string>
+    <string name="fps">fps</string>
+    <string name="v_cache">v-cache</string>
+    <string name="a_cache">a-cache</string>
 
     <string name="media_information">Media Information</string>
     <string name="mi_player">Player</string>
@@ -26,6 +28,7 @@
     <string name="mi_length">Length</string>
     <string name="mi_stream_fmt1">Stream #%d</string>
     <string name="mi_type">Type</string>
+    <string name="mi_language">Language</string>
     <string name="mi_codec">Codec</string>
     <string name="mi_frame_rate">Frame rate</string>
     <string name="mi_bit_rate">Bit rate</string>

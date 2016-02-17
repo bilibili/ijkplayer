@@ -70,9 +70,9 @@
  * NEXT:  buffering for the second time after START
  * MAX:   ...
  */
-#define DEFAULT_START_HIGH_WATER_MARK_IN_MS     (100)
+#define DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS     (100)
 #define DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS      (1 * 1000)
-#define DEFAULT_MAX_HIGH_WATER_MARK_IN_MS       (5 * 1000)
+#define DEFAULT_LAST_HIGH_WATER_MARK_IN_MS      (5 * 1000)
 
 #define BUFFERING_CHECK_PER_BYTES               (512)
 #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
@@ -84,7 +84,7 @@
 #define DEFAULT_MIN_FRAMES  50000
 #define MIN_MIN_FRAMES      5
 #define MAX_MIN_FRAMES      50000
-#define MIN_FRAMES (ffp->min_frames)
+#define MIN_FRAMES (ffp->dcc.min_frames)
 #define EXTERNAL_CLOCK_MIN_FRAMES 2
 #define EXTERNAL_CLOCK_MAX_FRAMES 10
 
@@ -292,7 +292,6 @@ typedef struct VideoState {
     int audio_diff_avg_count;
     AVStream *audio_st;
     PacketQueue audioq;
-    int64_t audioq_duration;
     int audio_hw_buf_size;
     uint8_t silence_buf[SDL_AUDIO_MIN_BUFFER_SIZE];
     uint8_t *audio_buf;
@@ -339,7 +338,6 @@ typedef struct VideoState {
     int video_stream;
     AVStream *video_st;
     PacketQueue videoq;
-    int64_t videoq_duration;
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
 #if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;
@@ -444,6 +442,50 @@ static SDL_Surface *screen;
  * end at line 330 in ffplay.c
  * near packet_queue_put
  ****************************************************************************/
+typedef struct FFTrackCacheStatistic
+{
+    int64_t duration;
+    int64_t bytes;
+    int64_t packets;
+} FFTrackCacheStatistic;
+
+typedef struct FFStatistic
+{
+    int64_t vdec_type;
+
+    float vfps;
+    float vdps;
+    float avdelay;
+    float avdiff;
+    int   bit_rate;
+
+    FFTrackCacheStatistic video_cache;
+    FFTrackCacheStatistic audio_cache;
+} FFStatistic;
+
+typedef struct FFDemuxCacheControl
+{
+    int min_frames;
+    int max_buffer_size;
+    int high_water_mark_in_bytes;
+
+    int first_high_water_mark_in_ms;
+    int next_high_water_mark_in_ms;
+    int last_high_water_mark_in_ms;
+    int current_high_water_mark_in_ms;
+} FFDemuxCacheControl;
+
+inline static void ffp_reset_demux_cache_control(FFDemuxCacheControl *dcc)
+{
+    dcc->min_frames                = DEFAULT_MIN_FRAMES;
+    dcc->max_buffer_size           = MAX_QUEUE_SIZE;
+    dcc->high_water_mark_in_bytes  = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
+
+    dcc->first_high_water_mark_in_ms    = DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS;
+    dcc->next_high_water_mark_in_ms     = DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS;
+    dcc->last_high_water_mark_in_ms     = DEFAULT_LAST_HIGH_WATER_MARK_IN_MS;
+    dcc->current_high_water_mark_in_ms  = DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS;
+}
 
 /* ffplayer */
 struct IjkMediaMeta;
@@ -553,15 +595,6 @@ typedef struct FFPlayer {
 
     MessageQueue msg_queue;
 
-    int min_frames;
-    int max_buffer_size;
-    int high_water_mark_in_bytes;
-
-    int start_high_water_mark_in_ms;
-    int next_high_water_mark_in_ms;
-    int max_high_water_mark_in_ms;
-    int current_high_water_mark_in_ms;
-
     int64_t playable_duration_ms;
 
     int packet_buffering;
@@ -576,19 +609,19 @@ typedef struct FFPlayer {
     int mediacodec_all_videos;
     int mediacodec_avc;
     int mediacodec_hevc;
+    int mediacodec_mpeg2;
     int mediacodec_auto_rotate;
 
     int opensles;
 
     char *iformat_name;
 
+    int no_time_adjust;
+
     struct IjkMediaMeta *meta;
 
     SDL_SpeedSampler vfps_sampler;
     SDL_SpeedSampler vdps_sampler;
-
-    float vfps;
-    float vdps;
 
     /* filters */
     SDL_mutex  *vf_mutex;
@@ -596,6 +629,10 @@ typedef struct FFPlayer {
     int         vf_changed;
     int         af_changed;
     float       pf_playback_rate;
+    int         pf_playback_rate_changed;
+
+    FFStatistic         stat;
+    FFDemuxCacheControl dcc;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
@@ -670,15 +707,6 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->first_video_frame_rendered = 0;
     ffp->sync_av_start          = 1;
 
-    ffp->min_frames                     = DEFAULT_MIN_FRAMES;
-    ffp->max_buffer_size                = MAX_QUEUE_SIZE;
-    ffp->high_water_mark_in_bytes       = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
-
-    ffp->start_high_water_mark_in_ms    = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
-    ffp->next_high_water_mark_in_ms     = DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS;
-    ffp->max_high_water_mark_in_ms      = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS;
-    ffp->current_high_water_mark_in_ms  = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
-
     ffp->playable_duration_ms           = 0;
 
     ffp->packet_buffering               = 1;
@@ -693,26 +721,30 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->mediacodec_all_videos          = 0; // option
     ffp->mediacodec_avc                 = 0; // option
     ffp->mediacodec_hevc                = 0; // option
+    ffp->mediacodec_mpeg2               = 0; // option
     ffp->mediacodec_auto_rotate         = 0; // option
 
     ffp->opensles                       = 0; // option
 
     ffp->iformat_name                   = NULL; // option
 
+    ffp->no_time_adjust                 = 0; // option
+
     ijkmeta_reset(ffp->meta);
 
     SDL_SpeedSamplerReset(&ffp->vfps_sampler);
     SDL_SpeedSamplerReset(&ffp->vdps_sampler);
 
-    ffp->vfps                           = 0.0f;
-    ffp->vdps                           = 0.0f;
-
     /* filters */
     ffp->vf_changed                     = 0;
     ffp->af_changed                     = 0;
     ffp->pf_playback_rate               = 1.0f;
+    ffp->pf_playback_rate_changed       = 0;
 
     msg_queue_flush(&ffp->msg_queue);
+
+    memset(&ffp->stat, 0, sizeof(ffp->stat));
+    ffp_reset_demux_cache_control(&ffp->dcc);
 }
 
 inline static void ffp_notify_msg1(FFPlayer *ffp, int what) {

@@ -43,6 +43,7 @@ typedef struct SDL_AMediaCodecBufferInfo {
 typedef struct SDL_AMediaFormat             SDL_AMediaFormat;
 typedef struct SDL_AMediaCrypto             SDL_AMediaCrypto;
 
+typedef struct SDL_AMediaCodec_Common       SDL_AMediaCodec_Common;
 typedef struct SDL_AMediaCodec_Opaque       SDL_AMediaCodec_Opaque;
 typedef struct SDL_AMediaCodec              SDL_AMediaCodec;
 typedef struct SDL_AMediaCodec
@@ -51,6 +52,7 @@ typedef struct SDL_AMediaCodec
     volatile int  ref_count;
 
     SDL_Class              *opaque_class;
+    SDL_AMediaCodec_Common *common;
     SDL_AMediaCodec_Opaque *opaque;
     bool                    is_configured;
     bool                    is_started;
@@ -76,8 +78,7 @@ typedef struct SDL_AMediaCodec
     sdl_amedia_status_t     (*func_stop)(SDL_AMediaCodec* acodec);
     sdl_amedia_status_t     (*func_flush)(SDL_AMediaCodec* acodec);
 
-    uint8_t*                (*func_getInputBuffer)(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size);
-    uint8_t*                (*func_getOutputBuffer)(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size);
+    ssize_t                 (*func_writeInputData)(SDL_AMediaCodec* acodec, size_t idx, const uint8_t *data, size_t size);
 
     ssize_t                 (*func_dequeueInputBuffer)(SDL_AMediaCodec* acodec, int64_t timeoutUs);
     sdl_amedia_status_t     (*func_queueInputBuffer)(SDL_AMediaCodec* acodec, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags);
@@ -88,17 +89,6 @@ typedef struct SDL_AMediaCodec
 
     bool                    (*func_isInputBuffersValid)(SDL_AMediaCodec* acodec);
 } SDL_AMediaCodec;
-
-struct SDL_CodecAndroid_BufferInfo {
-    int32_t offset;
-    int32_t size;
-    int64_t presentationTimeUs;
-    uint32_t flags;
-} SDL_CodecAndroid_BufferInfo;
-
-// use SDL_AMediaCodec_decreaseReference instead
-// sdl_amedia_status_t     SDL_AMediaCodec_delete(SDL_AMediaCodec* acodec);
-// sdl_amedia_status_t     SDL_AMediaCodec_deleteP(SDL_AMediaCodec** acodec);
 
 int                     SDL_AMediaCodec_create_object_serial();
 
@@ -128,8 +118,7 @@ sdl_amedia_status_t     SDL_AMediaCodec_start(SDL_AMediaCodec* acodec);
 sdl_amedia_status_t     SDL_AMediaCodec_stop(SDL_AMediaCodec* acodec);
 sdl_amedia_status_t     SDL_AMediaCodec_flush(SDL_AMediaCodec* acodec);
 
-uint8_t*                SDL_AMediaCodec_getInputBuffer(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size);
-// uint8_t*                SDL_AMediaCodec_getOutputBuffer(SDL_AMediaCodec* acodec, size_t idx, size_t *out_size);
+ssize_t                 SDL_AMediaCodec_writeInputData(SDL_AMediaCodec* acodec, size_t idx, const uint8_t *data, size_t size);
 
 ssize_t                 SDL_AMediaCodec_dequeueInputBuffer(SDL_AMediaCodec* acodec, int64_t timeoutUs);
 sdl_amedia_status_t     SDL_AMediaCodec_queueInputBuffer(SDL_AMediaCodec* acodec, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags);
@@ -142,5 +131,12 @@ bool                    SDL_AMediaCodec_isInputBuffersValid(SDL_AMediaCodec* aco
 
 int                     SDL_AMediaCodec_getSerial(SDL_AMediaCodec* acodec);
 bool                    SDL_AMediaCodec_isSameSerial(SDL_AMediaCodec* acodec, int acodec_serial);
+
+// extended
+void                    SDL_AMediaCodecFake_abort(SDL_AMediaCodec* acodec);
+void                    SDL_AMediaCodecFake_flushFakeFrames(SDL_AMediaCodec* acodec);
+sdl_amedia_status_t     SDL_AMediaCodecFake_queueFakeFrame(SDL_AMediaCodec* acodec, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags);
+ssize_t                 SDL_AMediaCodecFake_dequeueOutputBuffer(SDL_AMediaCodec* acodec, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs);
+ssize_t                 SDL_AMediaCodecFake_dequeueFakeFrameOnly(SDL_AMediaCodec* acodec, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs);
 
 #endif

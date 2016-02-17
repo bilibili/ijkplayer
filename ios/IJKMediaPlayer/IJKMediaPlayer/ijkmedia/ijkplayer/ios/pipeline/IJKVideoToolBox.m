@@ -252,7 +252,7 @@ void QueuePicture(VideoToolBoxContext* ctx) {
         double duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0);
         double pts = (picture.pts == AV_NOPTS_VALUE) ? NAN : picture.pts * av_q2d(tb);
 
-        picture.format = SDL_FCC__VTB;
+        picture.format = IJK_AV_PIX_FMT__VIDEO_TOOLBOX;
         picture.sample_aspect_ratio.num = 1;
         picture.sample_aspect_ratio.den = 1;
 
@@ -327,7 +327,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             goto failed;
         }
 
-        ffp->vdps = SDL_SpeedSamplerAdd(&ctx->sampler, FFP_SHOW_VDPS_VIDEOTOOLBOX, "vdps[VideoToolbox]");
+        ffp->stat.vdps = SDL_SpeedSamplerAdd(&ctx->sampler, FFP_SHOW_VDPS_VIDEOTOOLBOX, "vdps[VideoToolbox]");
 #ifdef FFP_VTB_DISABLE_OUTPUT
         goto failed;
 #endif
@@ -832,7 +832,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
     context_vtb->idr_based_identified = true;
     context_vtb->ffp = ffp;
-
+#if 0
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:
             if ([IJKDeviceModel currentModel].rank >= kIJKDeviceRank_AppleA7Class) {
@@ -848,7 +848,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
         case FF_PROFILE_H264_CAVLC_444:
             goto failed;
     }
-
+#endif
     if (width < 0 || height < 0) {
         goto failed;
     }

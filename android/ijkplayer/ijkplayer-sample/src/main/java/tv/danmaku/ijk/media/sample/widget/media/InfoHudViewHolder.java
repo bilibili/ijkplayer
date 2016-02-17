@@ -21,9 +21,6 @@ public class InfoHudViewHolder {
 
     public InfoHudViewHolder(Context context, TableLayout tableLayout) {
         mTableLayoutBinder = new TableLayoutBinder(context, tableLayout);
-
-        appendRow(R.string.fps_decode);
-        appendRow(R.string.fps_output);
     }
 
     private void appendSection(int nameId) {
@@ -54,6 +51,24 @@ public class InfoHudViewHolder {
         }
     }
 
+    private static String formatedDurationMilli(long duration) {
+        if (duration >=  1000) {
+            return String.format(Locale.US, "%.2f sec", ((float)duration) / 1000);
+        } else {
+            return String.format(Locale.US, "%d msec", duration);
+        }
+    }
+
+    private static String formatedSize(long bytes) {
+        if (bytes >= 100 * 1000) {
+            return String.format(Locale.US, "%.2f MB", ((float)bytes) / 1000 / 1000);
+        } else if (bytes >= 100) {
+            return String.format(Locale.US, "%.1f KB", ((float)bytes) / 1000);
+        } else {
+            return String.format(Locale.US, "%d B", bytes);
+        }
+    }
+
     private static final int MSG_UPDATE_HUD = 1;
     private Handler mHandler = new Handler() {
         @Override
@@ -75,10 +90,30 @@ public class InfoHudViewHolder {
                     if (mp == null)
                         break;
 
+                    int vdec = mp.getVideoDecoder();
+                    switch (vdec) {
+                        case IjkMediaPlayer.FFP_PROPV_DECODER_AVCODEC:
+                            setRowValue(R.string.vdec, "avcodec");
+                            break;
+                        case IjkMediaPlayer.FFP_PROPV_DECODER_MEDIACODEC:
+                            setRowValue(R.string.vdec, "MediaCodec");
+                            break;
+                        default:
+                            setRowValue(R.string.vdec, "");
+                            break;
+                    }
+
                     float fpsOutput = mp.getVideoOutputFramesPerSecond();
                     float fpsDecode = mp.getVideoDecodeFramesPerSecond();
-                    setRowValue(R.string.fps_decode, String.format(Locale.US, "%.2f", fpsDecode));
-                    setRowValue(R.string.fps_output, String.format(Locale.US, "%.2f", fpsOutput));
+                    setRowValue(R.string.fps, String.format(Locale.US, "%.2f / %.2f", fpsDecode, fpsOutput));
+
+                    long videoCachedDuration = mp.getVideoCachedDuration();
+                    long audioCachedDuration = mp.getAudioCachedDuration();
+                    long videoCachedBytes    = mp.getVideoCachedBytes();
+                    long audioCachedBytes    = mp.getAudioCachedBytes();
+
+                    setRowValue(R.string.v_cache, String.format(Locale.US, "%s, %s", formatedDurationMilli(videoCachedDuration), formatedSize(videoCachedBytes)));
+                    setRowValue(R.string.a_cache, String.format(Locale.US, "%s, %s", formatedDurationMilli(audioCachedDuration), formatedSize(audioCachedBytes)));
 
                     mHandler.removeMessages(MSG_UPDATE_HUD);
                     mHandler.sendEmptyMessageDelayed(MSG_UPDATE_HUD, 500);
