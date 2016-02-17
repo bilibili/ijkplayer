@@ -81,6 +81,14 @@ static GLvoid yuv420sp_vtb_clean_textures(IJK_GLES2_Renderer *renderer)
         CVOpenGLESTextureCacheFlush(opaque->cv_texture_cache, 0);
 }
 
+static GLsizei yuv420sp_vtb_getBufferWidth(IJK_GLES2_Renderer *renderer, SDL_VoutOverlay *overlay)
+{
+    if (!overlay)
+        return 0;
+
+    return overlay->pitches[0] / 1;
+}
+
 static GLboolean yuv420sp_vtb_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_VoutOverlay *overlay)
 {
     if (!renderer || !renderer->opaque || !overlay)
@@ -223,9 +231,10 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_yuv420sp_vtb(SDL_VoutOverlay *over
 
     renderer->um3_color_conversion = glGetUniformLocation(renderer->program, "um3_ColorConversion"); IJK_GLES2_checkError_TRACE("glGetUniformLocation(um3_ColorConversionMatrix)");
 
-    renderer->func_use           = yuv420sp_vtb_use;
-    renderer->func_uploadTexture = yuv420sp_vtb_uploadTexture;
-    renderer->func_destroy       = yuv420sp_vtb_destroy;
+    renderer->func_use            = yuv420sp_vtb_use;
+    renderer->func_getBufferWidth = yuv420sp_vtb_getBufferWidth;
+    renderer->func_uploadTexture  = yuv420sp_vtb_uploadTexture;
+    renderer->func_destroy        = yuv420sp_vtb_destroy;
 
     renderer->opaque = calloc(1, sizeof(IJK_GLES2_Renderer_Opaque));
     if (!renderer->opaque)
