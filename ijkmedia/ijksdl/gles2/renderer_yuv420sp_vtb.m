@@ -132,7 +132,13 @@ static GLboolean yuv420sp_vtb_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_Vo
             glUniformMatrix3fv(renderer->um3_color_conversion, 1, GL_FALSE, IJK_GLES2_getColorMatrix_bt709());
         }
 
-        opaque->color_attachments = color_attachments;
+        if (opaque->color_attachments != nil) {
+            CFRelease(opaque->color_attachments);
+            opaque->color_attachments = nil;
+        }
+        if (color_attachments != nil) {
+            opaque->color_attachments = CFRetain(color_attachments);
+        }
     }
 
     yuv420sp_vtb_clean_textures(renderer);
@@ -199,6 +205,11 @@ static GLvoid yuv420sp_vtb_destroy(IJK_GLES2_Renderer *renderer)
         CFRelease(opaque->cv_texture_cache);
         opaque->cv_texture_cache = nil;
     }
+
+    if (opaque->color_attachments != nil) {
+        CFRelease(opaque->color_attachments);
+        opaque->color_attachments = nil;
+    }
 }
 
 IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_yuv420sp_vtb(SDL_VoutOverlay *overlay)
@@ -246,7 +257,7 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_yuv420sp_vtb(SDL_VoutOverlay *over
         goto fail;
     }
 
-    renderer->opaque->color_attachments = kCVImageBufferYCbCrMatrix_ITU_R_709_2;
+    renderer->opaque->color_attachments = CFRetain(kCVImageBufferYCbCrMatrix_ITU_R_709_2);
     
     return renderer;
 fail:
