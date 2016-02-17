@@ -38,18 +38,7 @@ static GLboolean yuv420sp_vtb_use(IJK_GLES2_Renderer *renderer)
 
     glUseProgram(renderer->program);            IJK_GLES2_checkError_TRACE("glUseProgram");
 
-    if (0 == renderer->plane_textures[0])
-        glGenTextures(2, renderer->plane_textures);
-
     for (int i = 0; i < 2; ++i) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, renderer->plane_textures[i]);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
         glUniform1i(renderer->us2_sampler[i], i);
     }
 
@@ -60,7 +49,7 @@ static GLboolean yuv420sp_vtb_use(IJK_GLES2_Renderer *renderer)
 
 static GLvoid yuv420sp_vtb_clean_textures(IJK_GLES2_Renderer *renderer)
 {
-    if (renderer || !renderer->opaque)
+    if (!renderer || !renderer->opaque)
         return;
 
     IJK_GLES2_Renderer_Opaque *opaque = renderer->opaque;
@@ -70,10 +59,6 @@ static GLvoid yuv420sp_vtb_clean_textures(IJK_GLES2_Renderer *renderer)
             CFRelease(opaque->cv_texture[i]);
             opaque->cv_texture[i] = nil;
         }
-    }
-    if (opaque->cv_texture_cache) {
-        CFRelease(&opaque->cv_texture_cache);
-        opaque->cv_texture_cache = nil;
     }
 
     // Periodic texture cache flush every frame
@@ -142,8 +127,6 @@ static GLboolean yuv420sp_vtb_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_Vo
     }
 
     yuv420sp_vtb_clean_textures(renderer);
-    if (renderer->plane_textures[0])
-        glDeleteTextures(2, renderer->plane_textures);
 
     GLsizei frame_width  = (GLsizei)CVPixelBufferGetWidth(pixel_buffer);
     GLsizei frame_height = (GLsizei)CVPixelBufferGetHeight(pixel_buffer);
@@ -161,8 +144,7 @@ static GLboolean yuv420sp_vtb_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_Vo
                                                  GL_UNSIGNED_BYTE,
                                                  0,
                                                  &opaque->cv_texture[0]);
-    renderer->plane_textures[0] = CVOpenGLESTextureGetName(opaque->cv_texture[0]);
-    glBindTexture(CVOpenGLESTextureGetTarget(opaque->cv_texture[0]), renderer->plane_textures[0]);
+    glBindTexture(CVOpenGLESTextureGetTarget(opaque->cv_texture[0]), CVOpenGLESTextureGetName(opaque->cv_texture[0]));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -182,8 +164,7 @@ static GLboolean yuv420sp_vtb_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_Vo
                                                  GL_UNSIGNED_BYTE,
                                                  1,
                                                  &opaque->cv_texture[1]);
-    renderer->plane_textures[1] = CVOpenGLESTextureGetName(opaque->cv_texture[1]);
-    glBindTexture(CVOpenGLESTextureGetTarget(opaque->cv_texture[1]), renderer->plane_textures[1]);
+    glBindTexture(CVOpenGLESTextureGetTarget(opaque->cv_texture[1]), CVOpenGLESTextureGetName(opaque->cv_texture[1]));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
