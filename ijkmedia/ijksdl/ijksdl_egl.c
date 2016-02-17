@@ -271,10 +271,6 @@ static EGLBoolean IJK_EGL_prepareRenderer(IJK_EGL* egl, SDL_VoutOverlay *overlay
 
     IJK_EGL_Opaque *opaque = egl->opaque;
 
-    if (!IJK_GLES2_Renderer_isFormat(opaque->renderer, overlay->format)) {
-
-    }
-
     if (!IJK_GLES2_Renderer_isValid(opaque->renderer) ||
         !IJK_GLES2_Renderer_isFormat(opaque->renderer, overlay->format)) {
 
