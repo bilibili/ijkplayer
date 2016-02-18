@@ -322,7 +322,11 @@
 - (void)displayInternal: (SDL_VoutOverlay *) overlay
 {
     if (![self setupRenderer:overlay]) {
-        NSLog(@"IJKSDLGLView: setupDisplay failed\n");
+        if (!overlay && !_renderer) {
+            NSLog(@"IJKSDLGLView: setupDisplay not ready\n");
+        } else {
+            NSLog(@"IJKSDLGLView: setupDisplay failed\n");
+        }
         return;
     }
 
