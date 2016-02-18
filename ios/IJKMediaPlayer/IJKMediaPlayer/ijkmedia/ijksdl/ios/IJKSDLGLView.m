@@ -47,7 +47,7 @@
     IJK_GLES2_Renderer *_renderer;
     int                 _rendererGravity;
 
-    BOOL            _needResize;
+    BOOL            _isRenderBufferInvalidated;
 
     int             _tryLockErrorCount;
     BOOL            _didSetupGL;
@@ -218,6 +218,7 @@
 - (void)setScaleFactor:(CGFloat)scaleFactor
 {
     _scaleFactor = scaleFactor;
+    [self invalidateRenderBuffer];
 }
 
 - (void)layoutSubviews
@@ -234,7 +235,7 @@
     newFrame.origin.y    += selfFrame.size.height * 1 / 8;
 
     _hudViewController.tableView.frame = newFrame;
-    [self invalidateSize];
+    [self invalidateRenderBuffer];
 }
 
 - (void)setContentMode:(UIViewContentMode)contentMode
@@ -255,7 +256,7 @@
             _rendererGravity = IJK_GLES2_GRAVITY_RESIZE_ASPECT;
             break;
     }
-    [self invalidateSize];
+    [self invalidateRenderBuffer];
 }
 
 - (BOOL)setupRenderer: (SDL_VoutOverlay *) overlay
@@ -275,23 +276,30 @@
 
         if (!IJK_GLES2_Renderer_use(_renderer))
             return NO;
+
+        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
     }
 
     return YES;
 }
 
-- (void)invalidateSize
+- (void)invalidateRenderBuffer
 {
-    _needResize = YES;
+    NSLog(@"invalidateRenderBuffer\n");
+    [self lockGLActive];
+
+    _isRenderBufferInvalidated = YES;
 
     if ([[NSThread currentThread] isMainThread]) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-            if (_needResize)
+            if (_isRenderBufferInvalidated)
                 [self display:nil];
         });
     } else {
         [self display:nil];
     }
+
+    [self unlockGLActive];
 }
 
 - (void)display: (SDL_VoutOverlay *) overlay
@@ -330,15 +338,18 @@
         return;
     }
 
-    _needResize = NO;
-
     [[self eaglLayer] setContentsScale:_scaleFactor];
 
-    glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-//    [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
-    IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
+    if (_isRenderBufferInvalidated) {
+        NSLog(@"IJKSDLGLView: renderbufferStorage fromDrawable\n");
+        _isRenderBufferInvalidated = NO;
+
+        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+        [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
+        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
+        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
+        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
     glViewport(0, 0, _backingWidth, _backingHeight);
