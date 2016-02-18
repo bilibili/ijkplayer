@@ -36,8 +36,13 @@ typedef struct SDL_VoutOverlay SDL_VoutOverlay;
  * Common
  */
 
-#define IJK_GLES2_checkError_TRACE(op) IJK_GLES2_checkError(op)
+#ifdef DEBUG
+#define IJK_GLES2_checkError_TRACE(op)
+#define IJK_GLES2_checkError_DEBUG(op)
+#else
+#define IJK_GLES2_checkError_TRACE(op) IJK_GLES2_checkError(op) 
 #define IJK_GLES2_checkError_DEBUG(op) IJK_GLES2_checkError(op)
+#endif
 
 void IJK_GLES2_printString(const char *name, GLenum s);
 void IJK_GLES2_checkError(const char *op);
