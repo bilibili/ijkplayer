@@ -72,23 +72,23 @@ static void vout_free_l(SDL_Vout *vout)
     SDL_Vout_FreeInternal(vout);
 }
 
-static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
+static int vout_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
     IJKSDLGLView *gl_view = opaque->gl_view;
 
     if (!gl_view) {
-        ALOGE("voud_display_overlay_l: NULL gl_view\n");
+        ALOGE("vout_display_overlay_l: NULL gl_view\n");
         return -1;
     }
 
     if (!overlay) {
-        ALOGE("voud_display_overlay_l: NULL overlay\n");
+        ALOGE("vout_display_overlay_l: NULL overlay\n");
         return -1;
     }
 
     if (overlay->w <= 0 || overlay->h <= 0) {
-        ALOGE("voud_display_overlay_l: invalid overlay dimensions(%d, %d)\n", overlay->w, overlay->h);
+        ALOGE("vout_display_overlay_l: invalid overlay dimensions(%d, %d)\n", overlay->w, overlay->h);
         return -1;
     }
 
@@ -96,11 +96,11 @@ static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     return 0;
 }
 
-static int voud_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
+static int vout_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     @autoreleasepool {
         SDL_LockMutex(vout->mutex);
-        int retval = voud_display_overlay_l(vout, overlay);
+        int retval = vout_display_overlay_l(vout, overlay);
         SDL_UnlockMutex(vout->mutex);
         return retval;
     }
@@ -116,7 +116,7 @@ SDL_Vout *SDL_VoutIos_CreateForGLES2()
     opaque->gl_view = nil;
     vout->create_overlay = vout_create_overlay;
     vout->free_l = vout_free_l;
-    vout->display_overlay = voud_display_overlay;
+    vout->display_overlay = vout_display_overlay;
 
     return vout;
 }
