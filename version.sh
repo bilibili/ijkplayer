@@ -2,8 +2,8 @@
 
 set -e
 
-VERSION_CODE=405000
-VERSION_NAME=0.4.5
+VERSION_CODE=405001
+VERSION_NAME=0.4.5.1
 
 echo_usage() {
     echo ""
