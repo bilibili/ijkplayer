@@ -39,6 +39,10 @@ NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification = @"IJKMPMoviePlaye
 NSString *const IJKMPMoviePlayerFirstVideoFrameRenderedNotification = @"IJKMPMoviePlayerFirstVideoFrameRenderedNotification";
 NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification = @"IJKMPMoviePlayerFirstAudioFrameRenderedNotification";
 
+NSString *const IJKMPMoviePlayerDidSeekCompleteNotification = @"IJKMPMoviePlayerDidSeekCompleteNotification";
+NSString *const IJKMPMoviePlayerDidSeekCompleteTargetKey = @"IJKMPMoviePlayerDidSeekCompleteTargetKey";
+NSString *const IJKMPMoviePlayerDidSeekCompleteErrorKey = @"IJKMPMoviePlayerDidSeekCompleteErrorKey";
+
 @implementation IJKMediaUrlOpenData {
     NSString *_url;
     BOOL _handled;
@@ -46,14 +50,14 @@ NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification = @"IJKMPMov
 }
 
 - (id)initWithUrl:(NSString *)url
-         openType:(IJKMediaUrlOpenType)openType
+            event:(IJKMediaEvent)event
      segmentIndex:(int)segmentIndex
      retryCounter:(int)retryCounter
 {
     self = [super init];
     if (self) {
         self->_url          = url;
-        self->_openType     = openType;
+        self->_event        = event;
         self->_segmentIndex = segmentIndex;
         self->_retryCounter = retryCounter;
 

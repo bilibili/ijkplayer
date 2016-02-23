@@ -33,4 +33,12 @@
     return range.location != NSNotFound;
 }
 
++ (NSString *) ijk_stringBeEmptyIfNil:(NSString *)src
+{
+    if (src == nil)
+        return @"";
+
+    return src;
+}
+
 @end

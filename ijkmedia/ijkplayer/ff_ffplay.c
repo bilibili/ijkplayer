@@ -2664,7 +2664,6 @@ static int read_thread(void *arg)
             if (ret < 0) {
                 av_log(NULL, AV_LOG_ERROR,
                        "%s: error while seeking\n", is->ic->filename);
-                ffp_notify_msg1(ffp, FFP_MSG_SEEK_COMPLETE);
             } else {
                 if (is->audio_stream >= 0) {
                     packet_queue_flush(&is->audioq);
@@ -2709,7 +2708,7 @@ static int read_thread(void *arg)
             if (is->pause_req)
                 step_to_next_frame_l(ffp);
             SDL_UnlockMutex(ffp->is->play_mutex);
-            ffp_notify_msg1(ffp, FFP_MSG_SEEK_COMPLETE);
+            ffp_notify_msg3(ffp, FFP_MSG_SEEK_COMPLETE, (int)fftime_to_milliseconds(seek_target), ret);
             ffp_toggle_buffering(ffp, 1);
         }
         if (is->queue_attachments_req) {
@@ -3275,6 +3274,83 @@ static AVDictionary **ffp_get_opt_dict(FFPlayer *ffp, int opt_category)
             av_log(ffp, AV_LOG_ERROR, "unknown option category %d\n", opt_category);
             return NULL;
     }
+}
+
+static void app_func_did_tcp_connect_ip_port(AVApplicationContext *h, int error, int family, const char *ip, int port)
+{
+    IJKAVInject_IpAddress inject_data = {0};
+    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+
+    if (!h || !h->opaque || !inject_callback || !ip)
+        return;
+
+    FFPlayer *ffp = (FFPlayer *)h->opaque;
+    if (!ffp->inject_opaque)
+        return;
+
+    inject_data.error  = error;
+    inject_data.family = family;
+    av_strlcpy(inject_data.ip, ip, sizeof(inject_data.ip));
+    inject_data.port   = port;
+
+    inject_callback(ffp->inject_opaque, IJKAVINJECT_DID_TCP_CONNECT, &inject_data, sizeof(inject_data));
+}
+
+static void app_func_on_http_event(AVApplicationContext *h, AVAppHttpEvent *event)
+{
+    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+
+    if (!h || !h->opaque || !inject_callback || !event)
+        return;
+
+    FFPlayer *ffp = (FFPlayer *)h->opaque;
+    if (!ffp->inject_opaque)
+        return;
+
+    int message = -1;
+    switch (event->event_type) {
+        case AVAPP_EVENT_WILL_HTTP_OPEN: message = IJKAVINJECT_WILL_HTTP_OPEN; break;
+        case AVAPP_EVENT_DID_HTTP_OPEN:  message = IJKAVINJECT_DID_HTTP_OPEN;  break;
+        case AVAPP_EVENT_WILL_HTTP_SEEK: message = IJKAVINJECT_WILL_HTTP_SEEK; break;
+        case AVAPP_EVENT_DID_HTTP_SEEK:  message = IJKAVINJECT_DID_HTTP_SEEK;  break;
+        default:
+            return;
+    }
+    inject_callback(ffp->inject_opaque, message, event, sizeof(AVAppHttpEvent));
+}
+
+static void app_func_on_io_traffic(AVApplicationContext *h, AVAppIOTraffic *event)
+{
+    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+
+    if (!h || !h->opaque || !inject_callback || !event)
+        return;
+
+    FFPlayer *ffp = (FFPlayer *)h->opaque;
+    if (!ffp->inject_opaque)
+        return;
+
+    if (event->bytes > 0)
+        SDL_SpeedSampler2Add(&ffp->stat.tcp_read_sampler, event->bytes);
+
+    inject_callback(ffp->inject_opaque, IJKAVINJECT_ON_IO_TRAFFIC, event, sizeof(AVAppIOTraffic));
+}
+
+void ffp_set_inject_opaque(FFPlayer *ffp, void *opaque)
+{
+    if (!ffp)
+        return;
+
+    ffp->inject_opaque = opaque;
+
+    ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkinject-opaque", (int64_t)(intptr_t)opaque);
+    av_application_closep(&ffp->app_ctx);
+    av_application_open(&ffp->app_ctx, ffp);
+    ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkapplication", (int64_t)(intptr_t)ffp->app_ctx);
+
+    ffp->app_ctx->func_did_tcp_connect_ip_port = app_func_did_tcp_connect_ip_port;
+    ffp->app_ctx->func_on_http_event           = app_func_on_http_event;
+    ffp->app_ctx->func_on_io_traffic           = app_func_on_io_traffic;
 }
 
 void ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const char *value)
@@ -4020,6 +4096,8 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             return ffp->stat.audio_cache.packets;
         case FFP_PROP_INT64_BIT_RATE:
             return ffp ? ffp->stat.bit_rate : default_value;
+        case FFP_PROP_INT64_TCP_SPEED:
+            return ffp ? SDL_SpeedSampler2GetSpeed(&ffp->stat.tcp_read_sampler) : default_value;
         default:
             return default_value;
     }
