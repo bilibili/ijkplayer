@@ -24,6 +24,8 @@ IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 set -e
 TOOLS=tools
 
+git --version
+
 echo "== pull ffmpeg base =="
 sh $TOOLS/pull-repo-base.sh $IJK_FFMPEG_UPSTREAM $IJK_FFMPEG_LOCAL_REPO
 
