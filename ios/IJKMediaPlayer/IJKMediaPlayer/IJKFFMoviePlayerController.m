@@ -27,6 +27,7 @@
 #import "IJKMediaPlayback.h"
 #import "IJKMediaModule.h"
 #import "IJKAudioKit.h"
+#import "IJKNotificationManager.h"
 #import "NSString+IJKMedia.h"
 
 #include "string.h"
@@ -62,8 +63,8 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff2.8--ijk0.4.4.1--dev0.3.3--r
     BOOL _pauseInBackground;
     BOOL _isVideoToolboxOpen;
     BOOL _playingBeforeInterruption;
-    
-    NSMutableArray *_registeredNotifications;
+
+    IJKNotificationManager *_notificationManager;
 
     IJKAVInject_AsyncStatistic _asyncStat;
     IJKAVInject_AsyncReadSpeed _asyncReadSpeedStartup;
@@ -224,7 +225,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         _keepScreenOnWhilePlaying = YES;
         [self setScreenOn:YES];
 
-        _registeredNotifications = [[NSMutableArray alloc] init];
+        _notificationManager = [[IJKNotificationManager alloc] init];
         [self registerApplicationObservers];
     }
     return self;
@@ -1296,50 +1297,40 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
 
 - (void)registerApplicationObservers
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(audioSessionInterrupt:)
-                                                 name:AVAudioSessionInterruptionNotification
-                                               object:nil];
-    [_registeredNotifications addObject:AVAudioSessionInterruptionNotification];
+    [_notificationManager addObserver:self
+                             selector:@selector(audioSessionInterrupt:)
+                                 name:AVAudioSessionInterruptionNotification
+                               object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationWillEnterForeground)
-                                                 name:UIApplicationWillEnterForegroundNotification
-                                               object:nil];
-    [_registeredNotifications addObject:UIApplicationWillEnterForegroundNotification];
+    [_notificationManager addObserver:self
+                             selector:@selector(applicationWillEnterForeground)
+                                 name:UIApplicationWillEnterForegroundNotification
+                               object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationDidBecomeActive)
-                                                 name:UIApplicationDidBecomeActiveNotification
-                                               object:nil];
-    [_registeredNotifications addObject:UIApplicationDidBecomeActiveNotification];
+    [_notificationManager addObserver:self
+                             selector:@selector(applicationDidBecomeActive)
+                                 name:UIApplicationDidBecomeActiveNotification
+                               object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationWillResignActive)
-                                                 name:UIApplicationWillResignActiveNotification
-                                               object:nil];
-    [_registeredNotifications addObject:UIApplicationWillResignActiveNotification];
+    [_notificationManager addObserver:self
+                             selector:@selector(applicationWillResignActive)
+                                 name:UIApplicationWillResignActiveNotification
+                               object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationDidEnterBackground)
-                                                 name:UIApplicationDidEnterBackgroundNotification
-                                               object:nil];
-    [_registeredNotifications addObject:UIApplicationDidEnterBackgroundNotification];
+    [_notificationManager addObserver:self
+                             selector:@selector(applicationDidEnterBackground)
+                                 name:UIApplicationDidEnterBackgroundNotification
+                               object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationWillTerminate)
-                                                 name:UIApplicationWillTerminateNotification
-                                               object:nil];
-    [_registeredNotifications addObject:UIApplicationWillTerminateNotification];
+    [_notificationManager addObserver:self
+                             selector:@selector(applicationWillTerminate)
+                                 name:UIApplicationWillTerminateNotification
+                               object:nil];
 }
 
 - (void)unregisterApplicationObservers
 {
-    for (NSString *name in _registeredNotifications) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                        name:name
-                                                      object:nil];
-    }
+    [_notificationManager removeAllObservers:self];
 }
 
 - (void)audioSessionInterrupt:(NSNotification *)notification
