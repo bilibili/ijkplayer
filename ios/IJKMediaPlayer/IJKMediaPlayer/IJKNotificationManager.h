@@ -1,7 +1,7 @@
 /*
- * IJKMediaModule.h
+ * IJKNotificationManager.h
  *
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -22,11 +22,15 @@
 
 #import <Foundation/Foundation.h>
 
-@interface IJKMediaModule : NSObject
+@interface IJKNotificationManager : NSObject
 
-+ (IJKMediaModule *)sharedModule;
+- (nullable instancetype)init;
 
-@property(atomic, getter=isAppIdleTimerDisabled)            BOOL appIdleTimerDisabled;
-@property(atomic, getter=isMediaModuleIdleTimerDisabled)    BOOL mediaModuleIdleTimerDisabled;
+- (void)addObserver:(nonnull id)observer
+           selector:(nonnull SEL)aSelector
+               name:(nullable NSString *)aName
+             object:(nullable id)anObject;
+
+- (void)removeAllObservers:(nonnull id)observer;
 
 @end

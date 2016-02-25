@@ -1,7 +1,7 @@
 /*
- * IJKMediaModule.h
+ * NSString+IJKMedia.m
  *
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -20,13 +20,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <Foundation/Foundation.h>
+#import "NSString+IJKMedia.h"
 
-@interface IJKMediaModule : NSObject
+@implementation NSString (IJKMedia)
 
-+ (IJKMediaModule *)sharedModule;
+- (BOOL) ijk_isIpv4
+{
+    NSString *regexp =
+    @"^(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])$";
 
-@property(atomic, getter=isAppIdleTimerDisabled)            BOOL appIdleTimerDisabled;
-@property(atomic, getter=isMediaModuleIdleTimerDisabled)    BOOL mediaModuleIdleTimerDisabled;
+    NSRange range = [self rangeOfString:regexp options:NSRegularExpressionSearch];
+    return range.location != NSNotFound;
+}
 
 @end
