@@ -277,7 +277,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 {
     @autoreleasepool {
         VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
-        if (!ctx) {
+        if (!ctx || (status != noErr)) {
             return;
         }
 
