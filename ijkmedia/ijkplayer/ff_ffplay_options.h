@@ -30,7 +30,12 @@
     .min = min__, \
     .max = max__, \
     .flags = AV_OPT_FLAG_DECODING_PARAM
-
+#define OPTION_INT64(default__, min__, max__) \
+    .type = AV_OPT_TYPE_INT64, \
+    { .i64 = default__ }, \
+    .min = min__, \
+    .max = max__, \
+    .flags = AV_OPT_FLAG_DECODING_PARAM
 #define OPTION_CONST(default__) \
     .type = AV_OPT_TYPE_CONST, \
     { .i64 = default__ }, \
@@ -66,6 +71,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(infinite_buffer), OPTION_INT(0, 0, 1) },
     { "framedrop",                      "drop frames when cpu is too slow",
         OPTION_OFFSET(framedrop),       OPTION_INT(0, -1, 120) },
+    { "seek-at-start",                  "set offset of player should be seeked",
+        OPTION_OFFSET(seek_at_start),       OPTION_INT64(0, 0, INT_MAX) },
     // FFP_MERGE: window_title
 #if CONFIG_AVFILTER
     { "af",                             "audio filters",

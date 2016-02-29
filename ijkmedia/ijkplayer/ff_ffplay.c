@@ -2625,6 +2625,10 @@ static int read_thread(void *arg)
         ffp_notify_msg1(ffp, FFP_REQ_START);
         ffp->auto_resume = 0;
     }
+    /* offset should be seeked*/
+    if (ffp->seek_at_start > 0) {
+        ffp_seek_to_l(ffp, ffp->seek_at_start);
+    }
 
     for (;;) {
         if (is->abort_request)
