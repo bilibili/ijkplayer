@@ -260,6 +260,7 @@ inline static void msg_queue_remove(MessageQueue *q, int what)
                 msg->next = q->recycle_msg;
                 q->recycle_msg = msg;
 #endif
+                q->nb_messages--;
             } else {
                 last_msg = msg;
                 p_msg = &msg->next;
