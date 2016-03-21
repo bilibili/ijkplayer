@@ -197,6 +197,15 @@ else
     exit 1
 fi
 
+if [ ! -d $FF_SOURCE ]; then
+    echo ""
+    echo "!! ERROR"
+    echo "!! Can not find FFmpeg directory for $FF_BUILD_NAME"
+    echo "!! Run 'sh init-android.sh' first"
+    echo ""
+    exit 1
+fi
+
 FF_TOOLCHAIN_PATH=$FF_BUILD_ROOT/build/$FF_BUILD_NAME/toolchain
 FF_MAKE_TOOLCHAIN_FLAGS="$FF_MAKE_TOOLCHAIN_FLAGS --install-dir=$FF_TOOLCHAIN_PATH"
 

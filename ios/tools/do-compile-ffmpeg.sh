@@ -202,6 +202,16 @@ fi
 echo "\n--------------------"
 echo "[*] configure"
 echo "----------------------"
+
+if [ ! -d $FF_BUILD_SOURCE ]; then
+    echo ""
+    echo "!! ERROR"
+    echo "!! Can not find FFmpeg directory for $FF_BUILD_NAME"
+    echo "!! Run 'sh init-ios.sh' first"
+    echo ""
+    exit 1
+fi
+
 # xcode configuration
 export DEBUG_INFORMATION_FORMAT=dwarf-with-dsym
 
