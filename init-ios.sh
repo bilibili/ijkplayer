@@ -38,8 +38,6 @@ fi
 set -e
 TOOLS=tools
 
-git --version
-
 FF_ALL_ARCHS_IOS6_SDK="armv7 armv7s i386"
 FF_ALL_ARCHS_IOS7_SDK="armv7 armv7s arm64 i386 x86_64"
 FF_ALL_ARCHS_IOS8_SDK="armv7 arm64 i386 x86_64"
@@ -51,6 +49,7 @@ function echo_ffmpeg_version() {
 }
 
 function pull_common() {
+    git --version
     echo "== pull gas-preprocessor base =="
     sh $TOOLS/pull-repo-base.sh $IJK_GASP_UPSTREAM extra/gas-preprocessor
 
