@@ -33,13 +33,13 @@ dependencies {
 
 ### My Build Environment
 - Common
- - Mac OS X 10.10.5
+ - Mac OS X 10.11.3
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
- - Android Studio 1.4
+ - Android Studio 1.5.1
  - Gradle 2.6
 - iOS
- - Xcode 7.0 (7A220)
+ - Xcode 7.2 (7C68)
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
  - brew install git
@@ -55,7 +55,7 @@ dependencies {
  - platform: API 9~23
  - cpu: ARMv7a, ARM64v8a, x86 (ARMv5 is not tested on real devices)
  - api: [MediaPlayer-like](android/ijkplayer/ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IMediaPlayer.java)
- - video-output: NativeWindow
+ - video-output: NativeWindow, OpenGL ES 2.0
  - audio-output: OpenSL ES, AudioTrack
  - hw-decoder: MediaCodec (API 16+, Android 4.1+)
  - alternative-backend: android.media.MediaPlayer, ExoPlayer
@@ -63,7 +63,7 @@ dependencies {
  - platform: iOS 6.0~8.4.x
  - cpu: armv7, arm64, i386, x86_64, (armv7s is obselete)
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
- - video-output: OpenGL ES 2.0 (I420/YV12/NV12 shaders)
+ - video-output: OpenGL ES 2.0
  - audio-output: AudioQueue, AudioUnit
  - hw-decoder: VideoToolbox (iOS 8+)
  - alternative-backend: AVFoundation.Framework.AVPlayer, MediaPlayer.Framework.MPMoviePlayerControlelr (obselete since iOS 8) 
