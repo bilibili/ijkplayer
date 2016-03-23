@@ -436,7 +436,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     [self stopHudTimer];
     [self unregisterApplicationObservers];
     [self setScreenOn:NO];
-
+    [[IJKAudioKit sharedInstance] removeAudioSession];
     [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
 }
 

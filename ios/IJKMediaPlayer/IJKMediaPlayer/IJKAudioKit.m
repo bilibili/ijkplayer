@@ -64,6 +64,11 @@
     return ;
 }
 
+- (void)removeAudioSession {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAudioSessionInterruptionNotification object:[AVAudioSession sharedInstance]];
+    [self setActive:NO];
+}
+
 - (BOOL)setActive:(BOOL)active
 {
     if (active != NO) {

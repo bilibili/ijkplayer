@@ -98,6 +98,7 @@
 
 - (void)shutdown
 {
+    [[IJKAudioKit sharedInstance] removeAudioSession];
     // do nothing
 }
 
