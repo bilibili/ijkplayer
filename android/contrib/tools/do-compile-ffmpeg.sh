@@ -25,19 +25,6 @@ echo "[*] check env $1"
 echo "===================="
 set -e
 
-UNAME_S=$(uname -s)
-UNAME_SM=$(uname -sm)
-echo "build on $UNAME_SM"
-
-echo "ANDROID_SDK=$ANDROID_SDK"
-echo "ANDROID_NDK=$ANDROID_NDK"
-
-if [ -z "$ANDROID_NDK" -o -z "$ANDROID_SDK" ]; then
-    echo "You must define ANDROID_NDK, ANDROID_SDK before starting."
-    echo "They must point to your NDK and SDK directories."
-    echo ""
-    exit 1
-fi
 
 #--------------------
 # common defines
@@ -48,25 +35,6 @@ if [ -z "$FF_ARCH" ]; then
     exit 1
 fi
 
-# try to detect NDK version
-FF_NDK_REL=$(grep -o '^r[0-9]*.*' $ANDROID_NDK/RELEASE.TXT 2>/dev/null|cut -b2-)
-case "$FF_NDK_REL" in
-    9*|10*)
-        # we don't use 4.4.3 because it doesn't handle threads correctly.
-        if test -d ${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.8
-        # if gcc 4.8 is present, it's there for all the archs (x86, mips, arm)
-        then
-            echo "NDKr$FF_NDK_REL detected"
-        else
-            echo "You need the NDKr9 or later"
-            exit 1
-        fi
-    ;;
-    *)
-        echo "You need the NDKr9 or later"
-        exit 1
-    ;;
-esac
 
 FF_BUILD_ROOT=`pwd`
 FF_ANDROID_PLATFORM=android-9
@@ -89,26 +57,16 @@ FF_DEP_LIBS=
 FF_MODULE_DIRS="compat libavcodec libavfilter libavformat libavutil libswresample libswscale"
 FF_ASSEMBLER_SUB_DIRS=
 
+
 #--------------------
 echo ""
 echo "--------------------"
 echo "[*] make NDK standalone toolchain"
 echo "--------------------"
-FF_MAKE_TOOLCHAIN_FLAGS=
-case "$UNAME_S" in
-    Darwin)
-        FF_MAKE_TOOLCHAIN_FLAGS="$FF_MAKE_TOOLCHAIN_FLAGS --system=darwin-x86_64"
-    ;;
-    CYGWIN_NT-*)
-        FF_MAKE_TOOLCHAIN_FLAGS="$FF_MAKE_TOOLCHAIN_FLAGS --system=windows-x86_64"
+. ./tools/do-detect-env.sh
+FF_MAKE_TOOLCHAIN_FLAGS=$IJK_MAKE_TOOLCHAIN_FLAGS
+FF_MAKE_FLAGS=$IJK_MAKE_FLAG
 
-        FF_WIN_TEMP="$(cygpath -am /tmp)"
-        export TEMPDIR=$FF_WIN_TEMP/
-
-        echo "Cygwin temp prefix=$FF_WIN_TEMP/"
-        #FF_CFG_FLAGS="$FF_CFG_FLAGS --tempprefix=$FF_WIN_TEMP/"
-    ;;
-esac
 
 #----- armv7a begin -----
 if [ "$FF_ARCH" = "armv7a" ]; then
@@ -221,17 +179,10 @@ case "$UNAME_S" in
     ;;
 esac
 
+
 mkdir -p $FF_PREFIX
 mkdir -p $FF_SYSROOT
 
-FF_MAKEFLAGS=
-if which nproc >/dev/null
-then
-    FF_MAKEFLAGS=-j`nproc`
-elif [ "$UNAME_S" = "Darwin" ] && which sysctl >/dev/null
-then
-    FF_MAKEFLAGS=-j`sysctl -n machdep.cpu.thread_count`
-fi
 
 FF_TOOLCHAIN_TOUCH="$FF_TOOLCHAIN_PATH/touch"
 if [ ! -f "$FF_TOOLCHAIN_TOUCH" ]; then
@@ -278,6 +229,7 @@ export COMMON_FF_CFG_FLAGS=
 #--------------------
 # with openssl
 if [ -f "${FF_DEP_OPENSSL_LIB}/libssl.a" ]; then
+    echo "OpenSSL detected"
 # FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-nonfree"
     FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-openssl"
 
@@ -325,7 +277,7 @@ echo "--------------------"
 echo "[*] compile ffmpeg"
 echo "--------------------"
 cp config.* $FF_PREFIX
-make $FF_MAKEFLAGS
+make $FF_MAKE_FLAGS
 make install
 mkdir -p $FF_PREFIX/include/libffmpeg
 cp -f config.h $FF_PREFIX/include/libffmpeg/config.h
