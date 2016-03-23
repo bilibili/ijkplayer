@@ -36,7 +36,6 @@ fi
 
 FF_BUILD_ROOT=`pwd`
 FF_ANDROID_PLATFORM=android-9
-FF_GCC_VER=4.8
 
 
 FF_BUILD_NAME=
@@ -58,7 +57,9 @@ echo "[*] make NDK standalone toolchain"
 echo "--------------------"
 . ./tools/do-detect-env.sh
 FF_MAKE_TOOLCHAIN_FLAGS=$IJK_MAKE_TOOLCHAIN_FLAGS
-
+FF_MAKE_FLAGS=$IJK_MAKE_FLAG
+FF_GCC_VER=$IJK_GCC_VER
+FF_GCC_64_VER=$IJK_GCC_64_VER
 
 
 #----- armv7a begin -----
@@ -88,6 +89,28 @@ elif [ "$FF_ARCH" = "x86" ]; then
 	FF_TOOLCHAIN_NAME=x86-${FF_GCC_VER}
 
     FF_PLATFORM_CFG_FLAGS="android-x86"
+
+elif [ "$FF_ARCH" = "x86_64" ]; then
+    FF_ANDROID_PLATFORM=android-21
+
+    FF_BUILD_NAME=openssl-x86_64
+    FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
+
+    FF_CROSS_PREFIX=x86_64-linux-android
+    FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_64_VER}
+
+    FF_PLATFORM_CFG_FLAGS="linux-x86_64"
+
+elif [ "$FF_ARCH" = "arm64" ]; then
+    FF_ANDROID_PLATFORM=android-21
+
+    FF_BUILD_NAME=openssl-arm64
+    FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
+
+    FF_CROSS_PREFIX=aarch64-linux-android
+    FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_64_VER}
+
+    FF_PLATFORM_CFG_FLAGS="linux-aarch64"
 
 else
     echo "unknown architecture $FF_ARCH";
@@ -165,7 +188,7 @@ echo "[*] compile openssl"
 echo "--------------------"
 make depend
 make $FF_MAKE_FLAGS
-make install
+make install_sw
 
 #--------------------
 echo ""
