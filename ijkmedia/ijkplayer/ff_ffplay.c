@@ -1257,7 +1257,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
 #ifdef FFP_MERGE
 #if CONFIG_AVFILTER
         // FIXME use direct rendering
-        av_picture_copy(&pict, (AVPicture *)src_frame,
+        av_image_copy(data, linesize, (const uint8_t **)src_frame->data, src_frame->linesize,
                         src_frame->format, vp->width, vp->height);
 #else
         // sws_getCachedContext(...);
