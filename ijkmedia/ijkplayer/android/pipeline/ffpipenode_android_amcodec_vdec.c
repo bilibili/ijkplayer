@@ -1,9 +1,6 @@
 //TODO:
-// presentation times
 // end of stream behaviour
-// pause
 // trick modes
-// are write_av_packet failures expected/normal?
 // pid selection?
 
 
@@ -97,7 +94,8 @@ typedef struct IJKAM_Pipenode_Opaque {
     codec_para_t        vcodec;
     int                 check_first_pts;
 
-    int64_t             pts_delta;
+    int                 paused;
+
     int64_t             decode_dts;
     int64_t             decode_pts;
 
@@ -232,7 +230,7 @@ int sysfs_getint(const char * path, int* val)
   return ret;
 }
 
-static void am_packet_init(am_packet_t *pkt)
+static void am_packet_init(am_packet_t *pkt, codec_para_t *codec)
 {
     memset(&pkt->avpkt, 0, sizeof(AVPacket));
     pkt->avpts      = 0;
@@ -246,7 +244,7 @@ static void am_packet_init(am_packet_t *pkt)
     pkt->data_size  = 0;
     pkt->buf_size   = 0;
     pkt->hdr        = NULL;
-    //pkt->codec      = NULL;
+    pkt->codec      = codec;
 }
 
 void am_packet_release(am_packet_t *pkt)
@@ -526,7 +524,8 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_amcodec(FFPlayer *f
     //opaque->weak_vout   = vout;
 
     opaque->check_first_pts = 0;
-    opaque->pts_delta = 0;
+
+    opaque->paused = false;
 
     AVCodecContext * avctx = opaque->decoder->avctx;
 
@@ -605,9 +604,47 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_amcodec(FFPlayer *f
     opaque->decode_dts = 0;
     opaque->decode_pts = 0;
 
-    am_packet_init(&opaque->am_pkt);
+    am_packet_init(&opaque->am_pkt, vcodec);
 
-    opaque->am_pkt.codec = vcodec;
+
+
+    // avc1 is the codec tag when h264 is embedded in an mp4 and needs the stupid
+    // nal_size and extradata stuff processed.
+    if(avctx->codec_tag == CODEC_TAG_AVC1 || avctx->codec_tag == CODEC_TAG_avc1 ||
+       avctx->codec_tag == CODEC_TAG_hvc1 || avctx->codec_tag == CODEC_TAG_hev1) {
+
+        ALOGD("stream is avc1/hvc1, fixing sps/pps. extrasize:%d", avctx->extradata_size);
+
+        size_t   sps_pps_size   = 0;
+        size_t   convert_size   = avctx->extradata_size + 200;
+        uint8_t *convert_buffer = (uint8_t *)calloc(1, convert_size);
+        if (!convert_buffer) {
+            ALOGE("%s:sps_pps_buffer: alloc failed\n", __func__);
+            return NULL;
+        }
+
+        if(avctx->codec_tag == CODEC_TAG_AVC1 || avctx->codec_tag == CODEC_TAG_avc1) {
+            if (0 != convert_sps_pps(avctx->extradata, avctx->extradata_size,
+                                     convert_buffer, convert_size,
+                                     &sps_pps_size, &opaque->nal_size)) {
+                ALOGE("%s:convert_sps_pps: failed\n", __func__);
+                return NULL;
+            }
+        } else {
+            if (0 != convert_hevc_nal_units(avctx->extradata, avctx->extradata_size,
+                                     convert_buffer, convert_size,
+                                     &sps_pps_size, &opaque->nal_size)) {
+                ALOGE("%s:convert_hevc_nal_units: failed\n", __func__);
+                return NULL;
+            }
+        }
+        free(opaque->extradata);
+        opaque->extrasize = sps_pps_size;
+        opaque->extradata = convert_buffer;
+    }
+
+
+
     ret = pre_header_feeding(opaque, &opaque->am_pkt);
 
     // disable tsync, we are playing video disconnected from audio
@@ -722,9 +759,6 @@ static double get_master_clock(VideoState *is)
     return val;
 }
 
-static int64_t first_pts = 0;
-static int64_t cur_pts = 0;
-
 static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_count)
 {
     IJKAM_Pipenode_Opaque *opaque   = node->opaque;
@@ -744,6 +778,27 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
         goto fail;
     }
 
+#if 1
+    if (is->paused) {
+        if(!opaque->paused) {
+            Log(LOGDEBUG, "Pausing!");
+            am_codec_pause(&opaque->vcodec);
+            am_codec_set_cntl_mode(&opaque->vcodec, TRICKMODE_NONE);
+            opaque->paused = true;
+        }
+
+        usleep(1000000 / 30);   // Hmmm, is there a condwait for resuming?
+        return 0;
+    } else {
+        if(opaque->paused) {
+            Log(LOGDEBUG, "Resuming!");
+            am_codec_resume(&opaque->vcodec);
+            am_codec_set_cntl_mode(&opaque->vcodec, TRICKMODE_NONE);
+            opaque->paused = false;
+        }
+    }
+#endif
+
     if (!d->packet_pending || d->queue->serial != d->pkt_serial) {
         H264ConvertState convert_state = {0, 0};
         AVPacket pkt;
@@ -755,6 +810,20 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
                 goto fail;
             }
             if (ffp_is_flush_packet(&pkt)) {
+                Log(LOGDEBUG, "flush packet");
+
+                am_codec_reset(&opaque->vcodec);
+
+                ret = am_codec_resume(&opaque->vcodec);
+                ret = am_codec_set_cntl_mode(&opaque->vcodec, TRICKMODE_NONE);
+
+                am_packet_release(&opaque->am_pkt);
+                am_packet_init(&opaque->am_pkt, &opaque->vcodec);
+                ret = pre_header_feeding(opaque, &opaque->am_pkt);
+
+                opaque->decode_dts = 0;
+                opaque->decode_pts = 0;
+
                 // request flush before lock, or never get mutex
                 d->finished = 0;
                 d->next_pts = d->start_pts;
@@ -793,21 +862,16 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
             opaque->decode_dts = dts;
             opaque->decode_pts = pts;
 
-            Log(LOGDEBUG, "dts:%llu pts:%llu\n", dts, pts);
+            //Log(LOGDEBUG, "dts:%llu pts:%llu\n", dts, pts);
 
             if (!is->viddec.first_frame_decoded) {
                 ALOGD("Video: first frame decoded\n");
                 is->viddec.first_frame_decoded_time = SDL_GetTickHR();
                 is->viddec.first_frame_decoded = 1;
 
-        double time = av_gettime_relative() / 1000000.0;
-        set_clock_at(&is->vidclk, pts / 90000.0, d->pkt_serial, time);
-
-
-                first_pts = pts;
-                cur_pts = pts;
+                double time = av_gettime_relative() / 1000000.0;
+                set_clock_at(&is->vidclk, pts / 90000.0, d->pkt_serial, time);
             }
-
 
             //if((pts - last_pts) > 300
 
@@ -824,7 +888,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
             am_pkt->isvalid    = 1;
             am_pkt->avduration = 0;
             am_pkt->avdts      = dts;
-            am_pkt->avpts      = pts + opaque->pts_delta;
+            am_pkt->avpts      = pts;
 
             // some formats need header/data tweaks.
             // the actual write occurs once in write_av_packet
@@ -896,9 +960,9 @@ static int func_run_sync(IJKFF_Pipenode *node)
         ret = am_codec_get_vbuf_state(&opaque->vcodec, &vbuf);
 
 
-        if(dequeue_count == 0) {
+        if(dequeue_count == 0 || is->paused) {
             usleep(1000000/100);
-            Log(LOGDEBUG, "no dequeue");
+            //Log(LOGDEBUG, "no dequeue");
             continue;
         }
 
@@ -956,8 +1020,8 @@ static int func_run_sync(IJKFF_Pipenode *node)
 
         }
 
-        Log(LOGDEBUG, "pts_video:%lld pts_audio:%lld pts_pcrscr:%lld this_delta:%lld cur_delta:%lld offset:%lld last_pts:%lld slept:%d sync_master:%d",
-            pts_video, pts_audio, pts_pcrscr, delta, opaque->pts_delta, offset, last_pts, slept, get_master_sync_type(is));
+        //Log(LOGDEBUG, "pts_video:%lld pts_audio:%lld pts_pcrscr:%lld delta:%lld offset:%lld last_pts:%lld slept:%d sync_master:%d",
+        //    pts_video, pts_audio, pts_pcrscr, delta, offset, last_pts, slept, get_master_sync_type(is));
     }
 
 fail:
@@ -1395,42 +1459,6 @@ static int pre_header_feeding(am_private_t *para, am_packet_t *pkt)
         }
 
         if (VFORMAT_H264 == para->video_format || VFORMAT_H264_4K2K == para->video_format) {
-            AVCodecContext * avctx = para->decoder->avctx;
-
-            // avc1 is the codec tag when h264 is embedded in an mp4 and needs the stupid
-            // nal_size and extradata stuff processed.
-            if(avctx->codec_tag == CODEC_TAG_AVC1 || avctx->codec_tag == CODEC_TAG_avc1 ||
-               avctx->codec_tag == CODEC_TAG_hvc1 || avctx->codec_tag == CODEC_TAG_hev1) {
-                size_t   sps_pps_size   = 0;
-                size_t   convert_size   = avctx->extradata_size + 20;
-                uint8_t *convert_buffer = (uint8_t *)calloc(1, convert_size);
-                if (!convert_buffer) {
-                    ALOGE("%s:sps_pps_buffer: alloc failed\n", __func__);
-                    return PLAYER_NOMEM;
-                }
-
-                if(avctx->codec_tag == CODEC_TAG_AVC1 || avctx->codec_tag == CODEC_TAG_avc1) {
-                    if (0 != convert_sps_pps(avctx->extradata, avctx->extradata_size,
-                                             convert_buffer, convert_size,
-                                             &sps_pps_size, &para->nal_size)) {
-                        ALOGE("%s:convert_sps_pps: failed\n", __func__);
-                        return PLAYER_NOMEM;
-                    }
-                } else {
-                    if (0 != convert_hevc_nal_units(avctx->extradata, avctx->extradata_size,
-                                             convert_buffer, convert_size,
-                                             &sps_pps_size, &para->nal_size)) {
-                        ALOGE("%s:convert_hevc_nal_units: failed\n", __func__);
-                        return PLAYER_NOMEM;
-                    }
-                }
-                free(para->extradata);
-                para->extrasize = sps_pps_size;
-                para->extradata = convert_buffer;
-                free(convert_buffer);
-            }
-
-
             ret = h264_write_header(para, pkt);
             if (ret != PLAYER_SUCCESS) {
                 return ret;
