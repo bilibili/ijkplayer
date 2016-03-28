@@ -213,6 +213,11 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 setRenderView(renderView);
                 break;
             }
+            case RENDER_AML_VIEW: {
+                AMLRenderView renderView = new AMLRenderView(getContext());
+                setRenderView(renderView);
+                break;
+            }
             default:
                 Log.e(TAG, String.format(Locale.getDefault(), "invalid render %d\n", render));
                 break;
@@ -879,6 +884,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     public static final int RENDER_NONE = 0;
     public static final int RENDER_SURFACE_VIEW = 1;
     public static final int RENDER_TEXTURE_VIEW = 2;
+    public static final int RENDER_AML_VIEW = 3;
 
     private List<Integer> mAllRenders = new ArrayList<Integer>();
     private int mCurrentRenderIndex = 0;
@@ -893,6 +899,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mAllRenders.add(RENDER_TEXTURE_VIEW);
         if (mSettings.getEnableNoView())
             mAllRenders.add(RENDER_NONE);
+        if (mSettings.getEnableAMLView())
+            mAllRenders.add(RENDER_AML_VIEW);
 
         if (mAllRenders.isEmpty())
             mAllRenders.add(RENDER_SURFACE_VIEW);

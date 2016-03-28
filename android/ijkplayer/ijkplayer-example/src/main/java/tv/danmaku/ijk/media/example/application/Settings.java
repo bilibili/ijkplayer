@@ -91,6 +91,11 @@ public class Settings {
         return mSharedPreferences.getBoolean(key, false);
     }
 
+    public boolean getEnableAMLView() {
+        String key = mAppContext.getString(R.string.pref_key_enable_aml_view);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
     public String getLastDirectory() {
         String key = mAppContext.getString(R.string.pref_key_last_directory);
         return mSharedPreferences.getString(key, "/");

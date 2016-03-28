@@ -84,6 +84,10 @@
     <string name="pref_title_enable_no_view">Enable NoView</string>
     <string name="pref_summary_enable_no_view"></string>
 
+    <string name="pref_key_enable_aml_view">pref.enable_aml_view</string>
+    <string name="pref_title_enable_aml_view">Enable AML View</string>
+    <string name="pref_summary_enable_aml_view"></string>
+
     <string name="pref_key_enable_surface_view">pref.enable_surface_view</string>
     <string name="pref_title_enable_surface_view">Enable SurfaceView</string>
     <string name="pref_summary_enable_surface_view"></string>
