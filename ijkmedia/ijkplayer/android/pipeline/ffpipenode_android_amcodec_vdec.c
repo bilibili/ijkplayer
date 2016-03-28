@@ -1,6 +1,5 @@
 //TODO:
-// end of stream behaviour
-// trick modes
+// trick modes?
 // pid selection?
 
 
@@ -912,10 +911,15 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
                 assert(loop < 100);
             }
 
-            d->packet_pending = 0;
-
-            d->pkt_temp.dts =
+            d->pkt_temp.dts = AV_NOPTS_VALUE;
             d->pkt_temp.pts = AV_NOPTS_VALUE;
+        }
+
+        d->packet_pending = 0;
+
+        if (!d->pkt_temp.data) {
+            Log(LOGDEBUG, "finished");
+            d->finished = d->pkt_serial;
         }
     }
 
