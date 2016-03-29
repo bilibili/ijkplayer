@@ -1,6 +1,7 @@
 tag next
 --------------------------------
 - ffmpeg: upgrade to n3.0
+- android: support NDKr11
 
 tag k0.4.5
 --------------------------------
