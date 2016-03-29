@@ -101,6 +101,8 @@ static int ijkurlhook_reconnect(URLContext *h, AVDictionary *extra)
 
     assert(c->inner_options);
     av_dict_copy(&inner_options, c->inner_options, 0);
+    av_dict_set(&inner_options, "protocol-whitelist", h->protocol_whitelist, 0);
+
     if (extra)
         av_dict_copy(&inner_options, extra, 0);
 

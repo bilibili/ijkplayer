@@ -91,6 +91,7 @@ static int ijksegment_open(URLContext *h, const char *arg, int flags, AVDictiona
 
     av_dict_set_int(options, "ijkinject-opaque",        c->opaque, 0);
     av_dict_set_int(options, "ijkinject-segment-index", c->segment_index, 0);
+    av_dict_set(options, "protocol-whitelist", h->protocol_whitelist, 0);
 
     ret = ffurl_open(&c->inner, inject_data.url, flags, &h->interrupt_callback, options);
     if (ret)

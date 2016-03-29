@@ -42,6 +42,7 @@ static int ijklongurl_open(URLContext *h, const char *arg, int flags, AVDictiona
 
     if (!c->url || !*c->url)
         return AVERROR_EXTERNAL;
+    av_dict_set(options, "protocol-whitelist", h->protocol_whitelist, 0);
 
     return ffurl_open(&c->inner, c->url, flags, &h->interrupt_callback, options);
 }
