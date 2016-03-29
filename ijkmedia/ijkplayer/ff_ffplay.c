@@ -339,7 +339,7 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
         }
 
         if (*finished == *serial) {
-            av_free_packet(pkt);
+            av_packet_unref(pkt);
             continue;
         }
         else
