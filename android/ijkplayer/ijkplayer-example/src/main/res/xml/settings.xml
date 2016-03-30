@@ -20,6 +20,12 @@
     <PreferenceCategory android:title="@string/pref_title_ijkplayer_video">
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="@string/pref_key_using_amlogic"
+            android:persistent="true"
+            android:summary="@string/pref_summary_using_amlogic"
+            android:title="@string/pref_title_using_amlogic" />
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="@string/pref_key_using_media_codec"
             android:persistent="true"
             android:summary="@string/pref_summary_using_media_codec"

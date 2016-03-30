@@ -1,3 +1,5 @@
+// TODO: fail quickly if amlogic is not present.
+
 #include "ffpipenode_android_mediacodec_vdec.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_vout_android_nativewindow.h"
@@ -157,28 +159,44 @@ static int func_run_sync(IJKFF_Pipenode *node);
 static int pre_header_feeding(am_private_t *para, am_packet_t *pkt);
 static int set_header_info(am_private_t *para);
 static int write_av_packet(am_private_t *para, am_packet_t *pkt);
+static void syncToMaster();
+
+static int amlogic_not_present = 0;
+
+static void * find_symbol(const char * sym)
+{
+  void * addr = dlsym(RTLD_DEFAULT, sym);
+  if(!addr)
+    amlogic_not_present = 1;
+  return addr;
+}
 
 
 static void loadLibrary()
 {
     // We use Java to call System.loadLibrary as dlopen is weird on Android.
-    //void * lib = dlopen("libamplayer.so", RTLD_NOW);
+    void * lib = dlopen("libamplayer.so", RTLD_NOW);
+    if(!lib) {
+      ALOGD("amplayer library did not load.");
+      amlogic_not_present = 1;
+      return;
+    }
 
-    am_codec_init = dlsym(RTLD_DEFAULT, "codec_init");
-    am_codec_close = dlsym(RTLD_DEFAULT, "codec_close");
-    am_codec_reset = dlsym(RTLD_DEFAULT, "codec_reset");
-    am_codec_pause = dlsym(RTLD_DEFAULT, "codec_pause");
-    am_codec_resume = dlsym(RTLD_DEFAULT, "codec_resume");
-    am_codec_write = dlsym(RTLD_DEFAULT, "codec_write");
-    am_codec_checkin_pts = dlsym(RTLD_DEFAULT, "codec_checkin_pts");
-    am_codec_get_vbuf_state = dlsym(RTLD_DEFAULT, "codec_get_vbuf_state");
-    am_codec_get_vdec_state = dlsym(RTLD_DEFAULT, "codec_get_vdec_state");
-    am_codec_init_cntl = dlsym(RTLD_DEFAULT, "codec_init_cntl");
-    am_codec_poll_cntl = dlsym(RTLD_DEFAULT, "codec_poll_cntl");
-    am_codec_set_cntl_mode = dlsym(RTLD_DEFAULT, "codec_set_cntl_mode");
-    am_codec_set_cntl_avthresh = dlsym(RTLD_DEFAULT, "codec_set_cntl_avthresh");
-    am_codec_set_cntl_syncthresh = dlsym(RTLD_DEFAULT, "codec_set_cntl_syncthresh");
-    am_codec_get_vpts = dlsym(RTLD_DEFAULT, "codec_get_vpts");
+    am_codec_init                = find_symbol("codec_init");
+    am_codec_close               = find_symbol("codec_close");
+    am_codec_reset               = find_symbol("codec_reset");
+    am_codec_pause               = find_symbol("codec_pause");
+    am_codec_resume              = find_symbol("codec_resume");
+    am_codec_write               = find_symbol("codec_write");
+    am_codec_checkin_pts         = find_symbol("codec_checkin_pts");
+    am_codec_get_vbuf_state      = find_symbol("codec_get_vbuf_state");
+    am_codec_get_vdec_state      = find_symbol("codec_get_vdec_state");
+    am_codec_init_cntl           = find_symbol("codec_init_cntl");
+    am_codec_poll_cntl           = find_symbol("codec_poll_cntl");
+    am_codec_set_cntl_mode       = find_symbol("codec_set_cntl_mode");
+    am_codec_set_cntl_avthresh   = find_symbol("codec_set_cntl_avthresh");
+    am_codec_set_cntl_syncthresh = find_symbol("codec_set_cntl_syncthresh");
+    am_codec_get_vpts            = find_symbol("codec_get_vpts");
 }
 
 static void am_packet_init(am_packet_t *pkt, codec_para_t *codec)
@@ -535,6 +553,13 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_amcodec(FFPlayer *f
     if (!ffp || !ffp->is)
         return NULL;
 
+    ALOGI("amcodec initializing.");
+
+    loadLibrary();
+
+    if(amlogic_not_present)
+        return NULL;
+
     IJKFF_Pipenode *node = ffpipenode_alloc(sizeof(IJKAM_Pipenode_Opaque));
     if (!node)
         return node;
@@ -556,10 +581,6 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_amcodec(FFPlayer *f
     opaque->paused = false;
 
     AVCodecContext * avctx = opaque->decoder->avctx;
-
-    ALOGI("amcodec initializing.");
-
-    loadLibrary();
 
     opaque->stream_type = AM_STREAM_ES;
 
@@ -679,6 +700,8 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_amcodec(FFPlayer *f
     sysfs_setint("/sys/class/tsync/enable", 0);
     sysfs_setint("/sys/class/video/screen_mode", 1);
     sysfs_setint("/sys/class/video/disable_video", 0);
+
+    ffp->stat.vdec_type = FFP_PROPV_DECODER_AMLOGIC;
 
     return node;
 }
@@ -942,11 +965,18 @@ static int func_run_sync(IJKFF_Pipenode *node)
     }
 
     while (!q->abort_request) {
+        //
+        // Send a packet (an access unit) to the decoder
+        //
         ret = feed_input_buffer(env, node, &dequeue_count);
         if (ret != 0) {
             goto fail;
         }
 
+        //
+        // If we couldn't read a packet, it's probably because we're paused or at
+        // the end of the stream, so sleep for a bit and resume.
+        //
         if(dequeue_count == 0 || is->paused) {
             usleep(1000000/100);
             //ALOGD("no dequeue");
@@ -954,68 +984,78 @@ static int func_run_sync(IJKFF_Pipenode *node)
         }
 
         //
-        // We have our amlogic video running. It presents frames (that we can't access) according
-        // to pts values. It uses its own clock, pcrscr, that we can read and modify.
+        // Synchronize the video to the master clock
         //
-        // ijkplayer is then presenting audio according to its own audio clock, which has some pts
-        // time associated with that too.
-        //
-        // is->audclk gives the audio pts at the last packet played (or as close as possible).
-        //
-        // We adjust pcrscr so that it matches audclk, but we don't want to do that instantaneously
-        // every frame because then the video jitters.
-        //
-        //
-
-        int64_t pts_video = get_pts_video();
-
-        int64_t last_pts = opaque->decode_dts;
-
-        // prevent decoder/demux from getting too far ahead of video
-        int slept = 0;
-        while(last_pts > 0 && ((last_pts - pts_video) > 90000*2)) {
-            usleep(1000000/100);
-            slept += 1;
-            if(slept >= 100) {
-                ALOGD("slept:%d pts_video:%lld decode_dts:%lld", slept, pts_video, last_pts);
-                slept = 0;
-                break;
-            }
-            pts_video = get_pts_video();
-        }
-
-        int64_t pts_audio = is->audclk.pts * 90000.0;
-        pts_audio &= 0x7fffffff;
-
-        // since audclk.pts was recorded time has advanced so take that into account.
-        int64_t offset = av_gettime_relative() - ffp->audio_callback_time;
-        offset = offset * 9/100;    // convert 1000KHz counter to 90KHz
-        pts_audio += offset;
-
-        pts_audio -= 10000;    // Magic!
-
-        int64_t pts_pcrscr = get_pts_pcrscr();  // think this the master clock time for amcodec output
-
-
-        int64_t delta = pts_audio - pts_pcrscr;
-
-        // modify pcrscr so that the frame presentation times are adjusted 'instantly'
-        if(is->audclk.serial == d->pkt_serial) {
-            if(abs(delta) > 5000) {
-                set_pts_pcrscr(pts_pcrscr + delta);
-            }
-
-        }
-
-        //ALOGD("pts_video:%lld pts_audio:%lld pts_pcrscr:%lld delta:%lld offset:%lld last_pts:%lld slept:%d sync_master:%d",
-        //    pts_video, pts_audio, pts_pcrscr, delta, offset, last_pts, slept, get_master_sync_type(is));
+        syncToMaster(opaque);
     }
-
 fail:
     return -1;
 }
 
+static void syncToMaster(IJKAM_Pipenode_Opaque *opaque)
+{
+    FFPlayer     *ffp = opaque->ffp;
+    VideoState   *is  = ffp->is;
+    Decoder      *d   = &is->viddec;
 
+    //
+    //
+    // We have our amlogic video running. It presents frames (that we can't access) according
+    // to pts values. It uses its own clock, pcrscr, that we can read and modify.
+    //
+    // ijkplayer is then presenting audio according to its own audio clock, which has some pts
+    // time associated with that too.
+    //
+    // is->audclk gives the audio pts at the last packet played (or as close as possible).
+    //
+    // We adjust pcrscr so that it matches audclk, but we don't want to do that instantaneously
+    // every frame because then the video jitters.
+    //
+    //
+
+    int64_t pts_video = get_pts_video();
+
+    int64_t last_pts = opaque->decode_dts;
+
+    // prevent decoder/demux from getting too far ahead of video
+    int slept = 0;
+    while(last_pts > 0 && ((last_pts - pts_video) > 90000*2)) {
+        usleep(1000000/100);
+        slept += 1;
+        if(slept >= 100) {
+            ALOGD("slept:%d pts_video:%lld decode_dts:%lld", slept, pts_video, last_pts);
+            slept = 0;
+            break;
+        }
+        pts_video = get_pts_video();
+    }
+
+    int64_t pts_audio = is->audclk.pts * 90000.0;
+    pts_audio &= 0x7fffffff;
+
+    // since audclk.pts was recorded time has advanced so take that into account.
+    int64_t offset = av_gettime_relative() - ffp->audio_callback_time;
+    offset = offset * 9/100;    // convert 1000KHz counter to 90KHz
+    pts_audio += offset;
+
+    pts_audio -= 10000;    // Magic!
+
+    int64_t pts_pcrscr = get_pts_pcrscr();  // think this the master clock time for amcodec output
+
+
+    int64_t delta = pts_audio - pts_pcrscr;
+
+    // modify pcrscr so that the frame presentation times are adjusted 'instantly'
+    if(is->audclk.serial == d->pkt_serial) {
+        if(abs(delta) > 5000) {
+            set_pts_pcrscr(pts_pcrscr + delta);
+        }
+
+    }
+
+    //ALOGD("pts_video:%lld pts_audio:%lld pts_pcrscr:%lld delta:%lld offset:%lld last_pts:%lld slept:%d sync_master:%d",
+    //    pts_video, pts_audio, pts_pcrscr, delta, offset, last_pts, slept, get_master_sync_type(is));
+}
 static int write_header(am_private_t *para, am_packet_t *pkt)
 {
     int write_bytes = 0, len = 0;

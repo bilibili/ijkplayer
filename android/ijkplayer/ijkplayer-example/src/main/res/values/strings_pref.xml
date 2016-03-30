@@ -35,6 +35,10 @@
     <!-- -->
     <string name="pref_title_ijkplayer_video">Video: ijkplayer</string>
 
+    <string name="pref_key_using_amlogic">pref.using_amlogic</string>
+    <string name="pref_title_using_amlogic">Using Amlogic Video</string>
+    <string name="pref_summary_using_amlogic"></string>
+
     <string name="pref_key_using_media_codec">pref.using_media_codec</string>
     <string name="pref_title_using_media_codec">Using MediaCodec</string>
     <string name="pref_summary_using_media_codec"></string>
