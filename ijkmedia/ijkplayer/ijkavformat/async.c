@@ -317,8 +317,6 @@ static int async_open(URLContext *h, const char *arg, int flags, AVDictionary **
 
     /* wrap interrupt callback */
     c->interrupt_callback = h->interrupt_callback;
-    av_dict_set(options, "protocol-whitelist", h->protocol_whitelist, 0);
-
     ret = ffurl_open(&c->inner, arg, flags, &interrupt_callback, options);
     if (ret != 0) {
         av_log(h, AV_LOG_ERROR, "ffurl_open failed : %s, %s\n", av_err2str(ret), arg);

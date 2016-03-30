@@ -131,8 +131,6 @@ static int open_inner(AVFormatContext *avf)
         av_dict_copy(&tmp_opts, c->open_opts, 0);
 
     new_avf->interrupt_callback = avf->interrupt_callback;
-    av_dict_set(&tmp_opts, "protocol-whitelist", avf->protocol_whitelist, 0);
-
     ret = avformat_open_input(&new_avf, c->inject_data.url, NULL, &tmp_opts);
     if (ret < 0)
         goto fail;
