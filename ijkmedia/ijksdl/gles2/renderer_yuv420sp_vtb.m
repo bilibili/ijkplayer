@@ -176,7 +176,7 @@ static GLboolean yuv420sp_vtb_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_Vo
 
 static GLvoid yuv420sp_vtb_destroy(IJK_GLES2_Renderer *renderer)
 {
-    if (renderer || !renderer->opaque)
+    if (!renderer || !renderer->opaque)
         return;
 
     yuv420sp_vtb_clean_textures(renderer);
@@ -191,6 +191,8 @@ static GLvoid yuv420sp_vtb_destroy(IJK_GLES2_Renderer *renderer)
         CFRelease(opaque->color_attachments);
         opaque->color_attachments = nil;
     }
+    free(renderer->opaque);
+    renderer->opaque = nil;
 }
 
 IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_yuv420sp_vtb(SDL_VoutOverlay *overlay)
