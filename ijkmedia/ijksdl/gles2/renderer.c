@@ -68,6 +68,9 @@ void IJK_GLES2_Renderer_reset(IJK_GLES2_Renderer *renderer)
             glDeleteTextures(1, &renderer->plane_textures[i]);
         }
     }
+    
+    if (renderer->func_destroy)
+        renderer->func_destroy(renderer);
 
     memset(renderer, 0, sizeof(IJK_GLES2_Renderer));
 }
