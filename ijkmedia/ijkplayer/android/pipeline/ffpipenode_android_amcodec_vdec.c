@@ -1,4 +1,24 @@
-// TODO: fail quickly if amlogic is not present.
+/*
+ * ffpipenode_android_amcodec_vdec.c
+ *
+ * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
+ *
+ * This file is part of ijkPlayer.
+ *
+ * ijkPlayer is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * ijkPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with ijkPlayer; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include "ffpipenode_android_mediacodec_vdec.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
@@ -160,6 +180,7 @@ static int pre_header_feeding(am_private_t *para, am_packet_t *pkt);
 static int set_header_info(am_private_t *para);
 static int write_av_packet(am_private_t *para, am_packet_t *pkt);
 static void syncToMaster();
+static void reset(IJKAM_Pipenode_Opaque *opaque );
 
 static int amlogic_not_present = 0;
 
@@ -747,8 +768,8 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
     }
 #endif
 
+    // pull in a new packet if nothing pending
     if (!d->packet_pending || d->queue->serial != d->pkt_serial) {
-        H264ConvertState convert_state = {0, 0};
         AVPacket pkt;
         do {
             if (d->queue->nb_packets == 0)
@@ -760,17 +781,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
             if (ffp_is_flush_packet(&pkt)) {
                 ALOGD("amcodec flush packet");
 
-                am_codec_reset(&opaque->vcodec);
-
-                ret = am_codec_resume(&opaque->vcodec);
-                ret = am_codec_set_cntl_mode(&opaque->vcodec, TRICKMODE_NONE);
-
-                am_packet_release(&opaque->am_pkt);
-                am_packet_init(&opaque->am_pkt, &opaque->vcodec);
-                ret = pre_header_feeding(opaque, &opaque->am_pkt);
-
-                opaque->decode_dts = 0;
-                opaque->decode_pts = 0;
+                reset(opaque);
 
                 // request flush before lock, or never get mutex
                 d->finished = 0;
@@ -784,84 +795,122 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
 
         if (d->pkt_temp.data) {
             *enqueue_count += 1;
+            H264ConvertState convert_state = {0, 0};
 
             if (opaque->nal_size > 0 && (avctx->codec_id == AV_CODEC_ID_H264 || avctx->codec_id == AV_CODEC_ID_HEVC)) {
                 convert_h264_to_annexb(d->pkt_temp.data, d->pkt_temp.size, opaque->nal_size, &convert_state);
             }
-
-            // amlogic uses an int inside the kernel and we need to copy that.
-            // TODO: just masking out the lower 31 bits is not a solution
-            int64_t dts = d->pkt_temp.dts & 0x7fffffff;
-            int64_t pts = d->pkt_temp.pts & 0x7fffffff;
-
-            if (dts != AV_NOPTS_VALUE)
-                dts = av_rescale_q(dts, is->video_st->time_base, AM_TIME_BASE_Q);
-
-            if (pts != AV_NOPTS_VALUE)
-                pts = av_rescale_q(pts, is->video_st->time_base, AM_TIME_BASE_Q);
-
-            if(dts > pts)
-                dts = pts;
-
-            if(dts <= opaque->decode_dts)
-                dts = opaque->decode_dts + 1;
-
-            opaque->decode_dts = dts;
-            opaque->decode_pts = pts;
-
-            //ALOGD("dts:%llu pts:%llu\n", dts, pts);
-
-            if (!is->viddec.first_frame_decoded) {
-                ALOGD("Video: first frame decoded\n");
-                is->viddec.first_frame_decoded_time = SDL_GetTickHR();
-                is->viddec.first_frame_decoded = 1;
-
-                double time = av_gettime_relative() / 1000000.0;
-                set_clock_at(&is->vidclk, pts / 90000.0, d->pkt_serial, time);
-            }
-
-            //if((pts - last_pts) > 300
-
-            //if(pts_jump) {
-            //    if (pts != AV_NOPTS_VALUE) {
-            //        double time = av_gettime_relative() / 1000000.0;
-            //        set_clock_at(&is->vidclk, pts / 90000.0, d->pkt_serial, time);
-            //    }
-            //}
-
-            am_pkt->data       = d->pkt_temp.data;
-            am_pkt->data_size  = d->pkt_temp.size;
-            am_pkt->newflag    = 1;
-            am_pkt->isvalid    = 1;
-            am_pkt->avduration = 0;
-            am_pkt->avdts      = dts;
-            am_pkt->avpts      = pts;
-
-            // some formats need header/data tweaks.
-            // the actual write occurs once in write_av_packet
-            // and is controlled by am_pkt.newflag.
-            set_header_info(opaque);
-
-            // loop until we write all into codec, am_pkt.isvalid
-            // will get set to zero once everything is consumed.
-            // PLAYER_SUCCESS means all is ok, not all bytes were written.
-            int loop = 0;
-            while (opaque->am_pkt.isvalid && loop < 100) {
-                // abort on any errors.
-                if (write_av_packet(opaque, &opaque->am_pkt) != PLAYER_SUCCESS)
-                    break;
-
-                if (opaque->am_pkt.isvalid) {
-                    ALOGD("write_av_packet looping");
-                    loop++;
-                }
-
-                assert(loop < 100);
-            }
-
-            d->pkt_temp.dts = AV_NOPTS_VALUE;
-            d->pkt_temp.pts = AV_NOPTS_VALUE;
         }
+    }
+
+    if (d->pkt_temp.data) {
+        *enqueue_count += 1;
+
+        // amlogic uses an int inside the kernel and we need to copy that.
+        // TODO: just masking out the lower 31 bits is not a solution
+        int64_t dts = d->pkt_temp.dts & 0x7fffffff;
+        int64_t pts = d->pkt_temp.pts & 0x7fffffff;
+
+        if (dts != AV_NOPTS_VALUE)
+            dts = av_rescale_q(dts, is->video_st->time_base, AM_TIME_BASE_Q);
+
+        if (pts != AV_NOPTS_VALUE)
+            pts = av_rescale_q(pts, is->video_st->time_base, AM_TIME_BASE_Q);
+
+        if(dts > pts)
+            dts = pts;
+
+        if(dts <= opaque->decode_dts)
+            dts = opaque->decode_dts + 1;
+
+
+        // on a discontinuity we need to wait for all frames to popout of the decoder.
+        bool discontinuity_dts = opaque->decode_dts != 0 && abs(opaque->decode_dts - dts) > AM_TIME_BASE;
+        bool discontinuity_pts = opaque->decode_pts != 0 && abs(opaque->decode_pts - pts) > AM_TIME_BASE;
+        if(discontinuity_dts) {
+          int64_t pts_pcrscr = get_pts_pcrscr();
+
+          ALOGD("clock dts discontinuity: ptsscr:%lld decode_dts:%lld", pts_pcrscr, opaque->decode_dts);
+
+          // wait for pts_scr to hit the last decode_dts
+          if(pts_pcrscr < opaque->decode_dts)
+            return 0;
+
+          reset(opaque);
+        } else if(discontinuity_pts) {
+          int64_t pts_pcrscr = get_pts_pcrscr();
+
+          // wait for pts_scr to hit the last decode_pts
+          while(pts_pcrscr < opaque->decode_pts) {
+            ALOGD("clock pts discontinuity: ptsscr:%lld decode_pts:%lld", pts_pcrscr, opaque->decode_pts);
+
+            pts_pcrscr = get_pts_pcrscr();
+          }
+
+          reset(opaque);
+        }
+
+
+        opaque->decode_dts = dts;
+        opaque->decode_pts = pts;
+
+        ALOGD("queued dts:%llu pts:%llu\n", dts, pts);
+
+        if (!is->viddec.first_frame_decoded) {
+            ALOGD("Video: first frame decoded\n");
+            is->viddec.first_frame_decoded_time = SDL_GetTickHR();
+            is->viddec.first_frame_decoded = 1;
+
+            double time = av_gettime_relative() / 1000000.0;
+            set_clock_at(&is->vidclk, pts / 90000.0, d->pkt_serial, time);
+        }
+
+        //if((pts - last_pts) > 300
+
+        //if(pts_jump) {
+        //    if (pts != AV_NOPTS_VALUE) {
+        //        double time = av_gettime_relative() / 1000000.0;
+        //        set_clock_at(&is->vidclk, pts / 90000.0, d->pkt_serial, time);
+        //    }
+        //}
+
+        am_pkt->data       = d->pkt_temp.data;
+        am_pkt->data_size  = d->pkt_temp.size;
+        am_pkt->newflag    = 1;
+        am_pkt->isvalid    = 1;
+        am_pkt->avduration = 0;
+        am_pkt->avdts      = dts;
+        am_pkt->avpts      = pts;
+
+        // some formats need header/data tweaks.
+        // the actual write occurs once in write_av_packet
+        // and is controlled by am_pkt.newflag.
+        set_header_info(opaque);
+
+        // loop until we write all into codec, am_pkt.isvalid
+        // will get set to zero once everything is consumed.
+        // PLAYER_SUCCESS means all is ok, not all bytes were written.
+        int loop = 0;
+        while (opaque->am_pkt.isvalid && loop < 100) {
+            // abort on any errors.
+            if (write_av_packet(opaque, &opaque->am_pkt) != PLAYER_SUCCESS)
+                break;
+
+            if (opaque->am_pkt.isvalid) {
+                ALOGD("write_av_packet looping");
+                loop++;
+            }
+
+            assert(loop < 100);
+        }
+
+        if(loop == 100) {
+          ALOGD("amcodec stuck, reset!");
+          reset(opaque);
+        }
+
+        d->pkt_temp.dts = AV_NOPTS_VALUE;
+        d->pkt_temp.pts = AV_NOPTS_VALUE;
 
         d->packet_pending = 0;
 
@@ -873,6 +922,24 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
 
 fail:
     return ret;
+}
+
+static void reset(IJKAM_Pipenode_Opaque *opaque ) {
+    int ret;
+
+    ALOGD("amcodec reset!");
+
+    am_codec_reset(&opaque->vcodec);
+
+    ret = am_codec_resume(&opaque->vcodec);
+    ret = am_codec_set_cntl_mode(&opaque->vcodec, TRICKMODE_NONE);
+
+    am_packet_release(&opaque->am_pkt);
+    am_packet_init(&opaque->am_pkt, &opaque->vcodec);
+    ret = pre_header_feeding(opaque, &opaque->am_pkt);
+
+    opaque->decode_dts = 0;
+    opaque->decode_pts = 0;
 }
 
 static void func_destroy(IJKFF_Pipenode *node)
@@ -1013,9 +1080,9 @@ static void syncToMaster(IJKAM_Pipenode_Opaque *opaque)
     //
     //
 
-    int64_t pts_video = get_pts_video();
+    int64_t pts_video = get_pts_video();    // pts of frame that was last displayed...?
 
-    int64_t last_pts = opaque->decode_dts;
+    int64_t last_pts = opaque->decode_pts;
 
     // prevent decoder/demux from getting too far ahead of video
     int slept = 0;
@@ -1049,13 +1116,16 @@ static void syncToMaster(IJKAM_Pipenode_Opaque *opaque)
     if(is->audclk.serial == d->pkt_serial) {
         if(abs(delta) > 5000) {
             set_pts_pcrscr(pts_pcrscr + delta);
+            ALOGD("set pcr %lld!", pts_pcrscr + delta);
         }
 
     }
 
-    //ALOGD("pts_video:%lld pts_audio:%lld pts_pcrscr:%lld delta:%lld offset:%lld last_pts:%lld slept:%d sync_master:%d",
-    //    pts_video, pts_audio, pts_pcrscr, delta, offset, last_pts, slept, get_master_sync_type(is));
+    ALOGD("pts_video:%lld pts_audio:%lld pts_pcrscr:%lld delta:%lld offset:%lld last_pts:%lld slept:%d sync_master:%d",
+        pts_video, pts_audio, pts_pcrscr, delta, offset, last_pts, slept, get_master_sync_type(is));
 }
+
+
 static int write_header(am_private_t *para, am_packet_t *pkt)
 {
     int write_bytes = 0, len = 0;
