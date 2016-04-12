@@ -142,6 +142,7 @@ typedef struct IJKAM_Pipenode_Opaque {
 
     int64_t             decode_dts;
     int64_t             decode_pts;
+    int                 do_discontinuity_check;
 
     unsigned int        nal_size;
 
@@ -180,7 +181,7 @@ static int pre_header_feeding(am_private_t *para, am_packet_t *pkt);
 static int set_header_info(am_private_t *para);
 static int write_av_packet(am_private_t *para, am_packet_t *pkt);
 static void syncToMaster();
-static void reset(IJKAM_Pipenode_Opaque *opaque );
+static int reset(IJKAM_Pipenode_Opaque *opaque );
 
 static int amlogic_not_present = 0;
 
@@ -823,31 +824,41 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
         if(dts <= opaque->decode_dts)
             dts = opaque->decode_dts + 1;
 
+        if (pts == 0)
+          pts = dts;
 
-        // on a discontinuity we need to wait for all frames to popout of the decoder.
-        bool discontinuity_dts = opaque->decode_dts != 0 && abs(opaque->decode_dts - dts) > AM_TIME_BASE;
-        bool discontinuity_pts = opaque->decode_pts != 0 && abs(opaque->decode_pts - pts) > AM_TIME_BASE;
-        if(discontinuity_dts) {
-          int64_t pts_pcrscr = get_pts_pcrscr();
+        if (opaque->do_discontinuity_check) {
 
-          ALOGD("clock dts discontinuity: ptsscr:%lld decode_dts:%lld", pts_pcrscr, opaque->decode_dts);
+          // on a discontinuity we need to wait for all frames to popout of the decoder.
+          bool discontinuity_dts = opaque->decode_dts != 0 && abs(opaque->decode_dts - dts) > AM_TIME_BASE;
+          bool discontinuity_pts = opaque->decode_pts != 0 && abs(opaque->decode_pts - pts) > AM_TIME_BASE;
+          if(discontinuity_dts) {
+            int64_t pts_pcrscr = get_pts_pcrscr();
 
-          // wait for pts_scr to hit the last decode_dts
-          if(pts_pcrscr < opaque->decode_dts)
-            return 0;
+            // wait for pts_scr to hit the last decode_dts
+            while(pts_pcrscr < opaque->decode_dts) {
+              ALOGD("clock dts discontinuity: ptsscr:%lld decode_dts:%lld", pts_pcrscr, opaque->decode_dts);
 
-          reset(opaque);
-        } else if(discontinuity_pts) {
-          int64_t pts_pcrscr = get_pts_pcrscr();
+              usleep(1000000/30);
 
-          // wait for pts_scr to hit the last decode_pts
-          while(pts_pcrscr < opaque->decode_pts) {
-            ALOGD("clock pts discontinuity: ptsscr:%lld decode_pts:%lld", pts_pcrscr, opaque->decode_pts);
+              pts_pcrscr = get_pts_pcrscr();
+            }
 
-            pts_pcrscr = get_pts_pcrscr();
+            reset(opaque);
+          } else if(discontinuity_pts) {
+            int64_t pts_pcrscr = get_pts_pcrscr();
+
+            // wait for pts_scr to hit the last decode_pts
+            while(pts_pcrscr < opaque->decode_pts) {
+              ALOGD("clock pts discontinuity: ptsscr:%lld decode_pts:%lld", pts_pcrscr, opaque->decode_pts);
+
+              usleep(1000000/30);
+
+              pts_pcrscr = get_pts_pcrscr();
+            }
+
+            reset(opaque);
           }
-
-          reset(opaque);
         }
 
 
@@ -924,22 +935,32 @@ fail:
     return ret;
 }
 
-static void reset(IJKAM_Pipenode_Opaque *opaque ) {
-    int ret;
+static int reset(IJKAM_Pipenode_Opaque *opaque ) {
 
     ALOGD("amcodec reset!");
 
     am_codec_reset(&opaque->vcodec);
 
-    ret = am_codec_resume(&opaque->vcodec);
-    ret = am_codec_set_cntl_mode(&opaque->vcodec, TRICKMODE_NONE);
+    int ret1 = am_codec_resume(&opaque->vcodec);
+    int ret2 = am_codec_set_cntl_mode(&opaque->vcodec, TRICKMODE_NONE);
 
     am_packet_release(&opaque->am_pkt);
     am_packet_init(&opaque->am_pkt, &opaque->vcodec);
-    ret = pre_header_feeding(opaque, &opaque->am_pkt);
+    int ret3 = pre_header_feeding(opaque, &opaque->am_pkt);
 
     opaque->decode_dts = 0;
     opaque->decode_pts = 0;
+    opaque->do_discontinuity_check = 0;
+
+    // return the first error.
+    if(ret1 < 0)
+      return ret1;
+    if(ret2 < 0)
+      return ret2;
+    if(ret3 < 0)
+      return ret3;
+
+    return 0;
 }
 
 static void func_destroy(IJKFF_Pipenode *node)
@@ -1119,6 +1140,7 @@ static void syncToMaster(IJKAM_Pipenode_Opaque *opaque)
             ALOGD("set pcr %lld!", pts_pcrscr + delta);
         }
 
+        opaque->do_discontinuity_check = 1;
     }
 
     ALOGD("pts_video:%lld pts_audio:%lld pts_pcrscr:%lld delta:%lld offset:%lld last_pts:%lld slept:%d sync_master:%d",
