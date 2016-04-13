@@ -22,7 +22,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile 'com.google.android.exoplayer:exoplayer:r1.5.2'
+    compile 'com.google.android.exoplayer:exoplayer:r1.5.7'
 
     compile project(':ijkplayer-java')
     // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.5.0'
