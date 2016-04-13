@@ -23,6 +23,7 @@ dependencies {
     compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.5.0'
     compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.5.0'
     compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.5.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.5.0'
 
     # ExoPlayer as IMediaPlayer: optional, experimental
     compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.5.0'
