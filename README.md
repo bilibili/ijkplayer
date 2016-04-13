@@ -16,16 +16,17 @@ allprojects {
 
 dependencies {
     # required, enough for most devices.
-    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.4.5.1'
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.4.5.1'
+    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.5.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.5.0'
 
     # Other ABIs: optional
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.4.5.1'
-    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.4.5.1'
-    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.4.5.1'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.5.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.5.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.5.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.5.0'
 
     # ExoPlayer as IMediaPlayer: optional, experimental
-    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.4.5.1'
+    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.5.0'
 }
 ```
 - iOS
@@ -36,8 +37,8 @@ dependencies {
  - Mac OS X 10.11.3
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
- - Android Studio 1.5.1
- - Gradle 2.6
+ - Android Studio 2.0
+ - Gradle 2.10
 - iOS
  - Xcode 7.2 (7C68)
 - [HomeBrew](http://brew.sh)
@@ -135,7 +136,7 @@ sudo dpkg-reconfigure dash
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest k0.4.5.1
+git checkout -B latest k0.5.0
 
 ./init-android.sh
 
@@ -175,7 +176,7 @@ cd ..
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
-git checkout -B latest k0.4.5.1
+git checkout -B latest k0.5.0
 
 ./init-ios.sh
 
@@ -189,8 +190,6 @@ cd ios
 
 
 ### Support (支持) ###
-- Although not all issues can be well resolved by me in time, but they are welcome, and could be resolved by other developers.
-- 能力所限，我个人无法及时有效解决所有问题，不过仍然欢迎[提交问题](https://github.com/bilibili/ijkplayer/issues)。考虑到某些问题有可能被老外大牛看到并解决，建议尽量用英文提问，以获得更多支持。
 - Please do not send e-mail to me. Public technical discussion on github is preferred.
 - 请尽量在 github 上公开讨论[技术问题](https://github.com/bilibili/ijkplayer/issues)，不要以邮件方式私下询问，恕不一一回复。
 
@@ -198,7 +197,7 @@ cd ios
 ### License
 
 ```
-Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com> 
+Copyright (C) 2013-2016 Zhang Rui <bbcallen@gmail.com> 
 Licensed under LGPLv2.1 or later
 ```
 

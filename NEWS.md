@@ -1,6 +1,11 @@
 tag next
 --------------------------------
 
+tag k0.5.0
+--------------------------------
+- ffmpeg: upgrade to n3.0
+- android: support NDKr11
+
 tag k0.4.5
 --------------------------------
 - ios: support playbackRate change. (iOS 7.0 or later)

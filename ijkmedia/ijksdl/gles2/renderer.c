@@ -63,13 +63,16 @@ void IJK_GLES2_Renderer_reset(IJK_GLES2_Renderer *renderer)
     if (renderer->program)
         glDeleteProgram(renderer->program);
 
+    renderer->vertex_shader   = 0;
+    renderer->fragment_shader = 0;
+    renderer->program         = 0;
+
     for (int i = 0; i < IJK_GLES2_MAX_PLANE; ++i) {
         if (renderer->plane_textures[i]) {
             glDeleteTextures(1, &renderer->plane_textures[i]);
+            renderer->plane_textures[i] = 0;
         }
     }
-
-    memset(renderer, 0, sizeof(IJK_GLES2_Renderer));
 }
 
 void IJK_GLES2_Renderer_free(IJK_GLES2_Renderer *renderer)

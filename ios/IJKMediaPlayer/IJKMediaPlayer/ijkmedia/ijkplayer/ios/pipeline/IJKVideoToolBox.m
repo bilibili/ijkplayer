@@ -652,7 +652,7 @@ failed:
 
 static inline void ResetPktBuffer(VideoToolBoxContext* context) {
     for (int i = 0 ; i < context->m_buffer_deep; i++) {
-        av_free_packet(&context->m_buffer_packet[i]);
+        av_packet_unref(&context->m_buffer_packet[i]);
     }
     context->m_buffer_deep = 0;
     memset(context->m_buffer_packet, 0, sizeof(context->m_buffer_packet));
