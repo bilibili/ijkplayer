@@ -189,8 +189,6 @@ cd ios
 
 
 ### Support (支持) ###
-- Although not all issues can be well resolved by me in time, but they are welcome, and could be resolved by other developers.
-- 能力所限，我个人无法及时有效解决所有问题，不过仍然欢迎[提交问题](https://github.com/bilibili/ijkplayer/issues)。考虑到某些问题有可能被老外大牛看到并解决，建议尽量用英文提问，以获得更多支持。
 - Please do not send e-mail to me. Public technical discussion on github is preferred.
 - 请尽量在 github 上公开讨论[技术问题](https://github.com/bilibili/ijkplayer/issues)，不要以邮件方式私下询问，恕不一一回复。
 
@@ -198,7 +196,7 @@ cd ios
 ### License
 
 ```
-Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com> 
+Copyright (C) 2013-2016 Zhang Rui <bbcallen@gmail.com> 
 Licensed under LGPLv2.1 or later
 ```
 
