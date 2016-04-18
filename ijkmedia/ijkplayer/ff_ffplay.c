@@ -1911,7 +1911,7 @@ static int audio_decode_frame(FFPlayer *ffp)
     }
 
     do {
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(__APPLE__)
         while (frame_queue_nb_remaining(&is->sampq) == 0) {
             if ((av_gettime_relative() - audio_callback_time) > 1000000LL * is->audio_hw_buf_size / is->audio_tgt.bytes_per_sec / 2)
                 return -1;
