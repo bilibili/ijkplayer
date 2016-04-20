@@ -307,7 +307,6 @@ public class TextureRenderView extends TextureView implements IRenderView {
         public void releaseSurfaceTexture(SurfaceTexture surfaceTexture) {
             if (surfaceTexture == null) {
                 Log.d(TAG, "releaseSurfaceTexture: null");
-                return;
             } else if (mDidDetachFromWindow) {
                 if (surfaceTexture != mSurfaceTexture) {
                     Log.d(TAG, "releaseSurfaceTexture: didDetachFromWindow(): release different SurfaceTexture");

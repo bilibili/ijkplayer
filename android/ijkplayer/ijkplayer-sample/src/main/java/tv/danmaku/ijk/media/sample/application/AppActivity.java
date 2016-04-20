@@ -67,7 +67,6 @@ public class AppActivity extends AppCompatActivity {
                 } else {
                     // permission denied, boo! Disable the functionality that depends on this permission.
                 }
-                return;
             }
         }
     }
