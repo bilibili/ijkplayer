@@ -17,6 +17,7 @@
 package tv.danmaku.ijk.media.sample.application;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -31,6 +32,7 @@ import tv.danmaku.ijk.media.sample.activities.RecentMediaActivity;
 import tv.danmaku.ijk.media.sample.activities.SampleMediaActivity;
 import tv.danmaku.ijk.media.sample.activities.SettingsActivity;
 
+@SuppressLint("Registered")
 public class AppActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
 
