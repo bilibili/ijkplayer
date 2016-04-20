@@ -26,12 +26,12 @@ import android.view.View;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 
 public interface IRenderView {
-    static final int AR_ASPECT_FIT_PARENT = 0; // without clip
-    static final int AR_ASPECT_FILL_PARENT = 1; // may clip
-    static final int AR_ASPECT_WRAP_CONTENT = 2;
-    static final int AR_MATCH_PARENT = 3;
-    static final int AR_16_9_FIT_PARENT = 4;
-    static final int AR_4_3_FIT_PARENT = 5;
+    int AR_ASPECT_FIT_PARENT = 0; // without clip
+    int AR_ASPECT_FILL_PARENT = 1; // may clip
+    int AR_ASPECT_WRAP_CONTENT = 2;
+    int AR_MATCH_PARENT = 3;
+    int AR_16_9_FIT_PARENT = 4;
+    int AR_4_3_FIT_PARENT = 5;
 
     View getView();
 
@@ -65,7 +65,7 @@ public interface IRenderView {
         SurfaceTexture getSurfaceTexture();
     }
 
-    public interface IRenderCallback {
+    interface IRenderCallback {
         /**
          * @param holder
          * @param width  could be 0
