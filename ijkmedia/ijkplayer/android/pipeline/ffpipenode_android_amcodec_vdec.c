@@ -38,9 +38,16 @@
 #include <fcntl.h>
 #include <string.h>
 
+// Emit extremely verbose timing debug logs.
+#define TIMING_DEBUG              0
+
 // 90kHz is an amlogic magic value, all timings are specified in a 90KHz clock.
 #define AM_TIME_BASE              90000
 #define AM_TIME_BASE_Q            (AVRational){1, AM_TIME_BASE}
+
+// amcodec only tracks time using a 32 bit mask
+#define AM_TIME_BITS              (32ULL)
+#define AM_TIME_MASK              (0xffffffffULL)
 
 // Framerate specified in a 96KHz clock
 #define FPS_FREQ                  96000
@@ -306,6 +313,12 @@ static int64_t get_pts_video() {
 
     ALOGE("get_pts_video: open /tsync/event error");
     return -1;
+}
+
+static int64_t am_time_sub(int64_t a, int64_t b)
+{
+    int64_t shift = 64 - AM_TIME_BITS;
+    return ((a - b) << shift) >> shift;
 }
 
 static int64_t get_pts_pcrscr() {
@@ -808,9 +821,12 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
         *enqueue_count += 1;
 
         // amlogic uses an int inside the kernel and we need to copy that.
-        // TODO: just masking out the lower 31 bits is not a solution
-        int64_t dts = d->pkt_temp.dts & 0x7fffffff;
-        int64_t pts = d->pkt_temp.pts & 0x7fffffff;
+        int64_t dts = d->pkt_temp.dts;
+        int64_t pts = d->pkt_temp.pts;
+
+        // we need to force pts to be in the same 'phase' as dts
+        //if(pts != AV_NOPTS_VALUE)
+        //  pts = (((int)pts-(int)dts)&0x7fffffff) + dts;
 
         if (dts != AV_NOPTS_VALUE)
             dts = av_rescale_q(dts, is->video_st->time_base, AM_TIME_BASE_Q);
@@ -836,8 +852,8 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
             int64_t pts_pcrscr = get_pts_pcrscr();
 
             // wait for pts_scr to hit the last decode_dts
-            while(pts_pcrscr < opaque->decode_dts) {
-              ALOGD("clock dts discontinuity: ptsscr:%lld decode_dts:%lld", pts_pcrscr, opaque->decode_dts);
+            while(am_time_sub(pts_pcrscr, opaque->decode_dts) < 0) {
+              ALOGD("clock dts discontinuity: ptsscr:%lld decode_dts:%lld dts:%lld", pts_pcrscr, opaque->decode_dts, dts);
 
               usleep(1000000/30);
 
@@ -849,8 +865,8 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
             int64_t pts_pcrscr = get_pts_pcrscr();
 
             // wait for pts_scr to hit the last decode_pts
-            while(pts_pcrscr < opaque->decode_pts) {
-              ALOGD("clock pts discontinuity: ptsscr:%lld decode_pts:%lld", pts_pcrscr, opaque->decode_pts);
+            while(am_time_sub(pts_pcrscr, opaque->decode_pts) < 0) {
+              ALOGD("clock pts discontinuity: ptsscr:%lld decode_pts:%lld next_pts:%lld", pts_pcrscr, opaque->decode_pts, pts);
 
               usleep(1000000/30);
 
@@ -865,7 +881,9 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
         opaque->decode_dts = dts;
         opaque->decode_pts = pts;
 
+#if TIMING_DEBUG
         ALOGD("queued dts:%llu pts:%llu\n", dts, pts);
+#endif
 
         if (!is->viddec.first_frame_decoded) {
             ALOGD("Video: first frame decoded\n");
@@ -1119,7 +1137,6 @@ static void syncToMaster(IJKAM_Pipenode_Opaque *opaque)
     }
 
     int64_t pts_audio = is->audclk.pts * 90000.0;
-    pts_audio &= 0x7fffffff;
 
     // since audclk.pts was recorded time has advanced so take that into account.
     int64_t offset = av_gettime_relative() - ffp->audio_callback_time;
@@ -1130,8 +1147,7 @@ static void syncToMaster(IJKAM_Pipenode_Opaque *opaque)
 
     int64_t pts_pcrscr = get_pts_pcrscr();  // think this the master clock time for amcodec output
 
-
-    int64_t delta = pts_audio - pts_pcrscr;
+    int64_t delta = am_time_sub(pts_audio, pts_pcrscr);
 
     // modify pcrscr so that the frame presentation times are adjusted 'instantly'
     if(is->audclk.serial == d->pkt_serial) {
@@ -1143,8 +1159,10 @@ static void syncToMaster(IJKAM_Pipenode_Opaque *opaque)
         opaque->do_discontinuity_check = 1;
     }
 
+#if TIMING_DEBUG
     ALOGD("pts_video:%lld pts_audio:%lld pts_pcrscr:%lld delta:%lld offset:%lld last_pts:%lld slept:%d sync_master:%d",
         pts_video, pts_audio, pts_pcrscr, delta, offset, last_pts, slept, get_master_sync_type(is));
+#endif
 }
 
 
