@@ -3,10 +3,10 @@ package tv.danmaku.ijk.media.sample.widget.media;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.TableLayout;
 
-import java.util.HashMap;
 import java.util.Locale;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
@@ -16,7 +16,7 @@ import tv.danmaku.ijk.media.sample.R;
 
 public class InfoHudViewHolder {
     private TableLayoutBinder mTableLayoutBinder;
-    private HashMap<Integer, View> mRowMap = new HashMap<Integer, View>();
+    private SparseArray<View> mRowMap = new SparseArray<View>();
     private IMediaPlayer mMediaPlayer;
 
     public InfoHudViewHolder(Context context, TableLayout tableLayout) {
