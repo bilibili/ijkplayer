@@ -130,7 +130,7 @@ public class PathCursor extends AbstractCursor {
 
     private static Set<String> sMediaExtSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 
-    {
+    static {
         sMediaExtSet.add("flv");
         sMediaExtSet.add("mp4");
     }
