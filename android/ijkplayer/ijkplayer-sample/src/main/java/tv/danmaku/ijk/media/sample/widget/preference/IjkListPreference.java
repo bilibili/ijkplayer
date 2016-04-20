@@ -47,7 +47,7 @@ public class IjkListPreference extends ListPreference {
         initPreference(context, attrs);
     }
 
-    private final void initPreference(Context context, AttributeSet attrs) {
+    private void initPreference(Context context, AttributeSet attrs) {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.IjkListPreference, 0, 0);
         if (a == null)

@@ -70,7 +70,7 @@ public class AndroidMediaController extends MediaController implements IMediaCon
             mActionBar.hide();
         for (View view : mShowOnceArray)
             view.setVisibility(View.GONE);
-        mShowOnceArray.clear();;
+        mShowOnceArray.clear();
     }
 
     //----------

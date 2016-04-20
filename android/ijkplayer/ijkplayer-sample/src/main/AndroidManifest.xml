@@ -52,7 +52,7 @@
             android:screenOrientation="user"
             android:theme="@style/AppTheme" />
         <activity
-            android:name="tv.danmaku.ijk.media.sample.activities.VideoActivity"
+            android:name=".activities.VideoActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="user"
@@ -73,6 +73,14 @@
                 <data android:mimeType="video/*" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".services.MediaPlayerService"
+            android:enabled="false"
+            android:exported="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name" >
+        </service>
     </application>
 
 </manifest>

@@ -98,6 +98,6 @@ public class Settings {
 
     public void setLastDirectory(String path) {
         String key = mAppContext.getString(R.string.pref_key_last_directory);
-        mSharedPreferences.edit().putString(key, path).commit();
+        mSharedPreferences.edit().putString(key, path).apply();
     }
 }

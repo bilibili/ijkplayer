@@ -8,7 +8,8 @@
         android:id="@+id/icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentLeft="true"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/name"

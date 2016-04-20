@@ -72,7 +72,7 @@ public class PathCursor extends AbstractCursor {
     public String getString(int column) {
         switch (column) {
             case CI_FILE_NAME:
-                return mFileList.get(getPosition()).file.getName().toString();
+                return mFileList.get(getPosition()).file.getName();
             case CI_FILE_PATH:
                 return mFileList.get(getPosition()).file.toString();
         }
@@ -130,7 +130,7 @@ public class PathCursor extends AbstractCursor {
 
     private static Set<String> sMediaExtSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 
-    {
+    static {
         sMediaExtSet.add("flv");
         sMediaExtSet.add("mp4");
     }
