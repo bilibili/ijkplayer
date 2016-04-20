@@ -840,7 +840,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
         if(dts <= opaque->decode_dts)
             dts = opaque->decode_dts + 1;
 
-        if (pts == 0)
+        if (pts == AV_NOPTS_VALUE)
           pts = dts;
 
         if (opaque->do_discontinuity_check) {
