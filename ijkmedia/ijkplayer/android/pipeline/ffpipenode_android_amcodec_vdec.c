@@ -1125,7 +1125,7 @@ static void syncToMaster(IJKAM_Pipenode_Opaque *opaque)
 
     // prevent decoder/demux from getting too far ahead of video
     int slept = 0;
-    while(last_pts > 0 && ((last_pts - pts_video) > 90000*2)) {
+    while(last_pts > 0 && (am_time_sub(last_pts, pts_video) > 90000*2)) {
         usleep(1000000/100);
         slept += 1;
         if(slept >= 100) {
