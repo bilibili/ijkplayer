@@ -12,7 +12,7 @@
         android:id="@+id/path_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:editable="false"
+        android:inputType="none"
         android:visibility="gone"
         android:lines="1" />
 
