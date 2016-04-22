@@ -217,7 +217,7 @@ android/ijkplayer-exo is based on or derives from projects below:
 - Apache License 2.0
   - [ExoPlayer](https://github.com/google/ExoPlayer)
 
-android/sample is based on or derives from projects below:
+android/example is based on or derives from projects below:
 - GPL
   - [android-ndk-profiler](https://github.com/richq/android-ndk-profiler) (not included by default)
 
