@@ -25,7 +25,7 @@ dependencies {
     compile 'com.google.android.exoplayer:exoplayer:r1.5.7'
 
     compile project(':ijkplayer-java')
-    // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.5.0'
+    // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.5.1'
 }
 
 ext {
