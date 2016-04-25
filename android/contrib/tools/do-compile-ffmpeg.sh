@@ -29,6 +29,9 @@ set -e
 #--------------------
 # common defines
 FF_ARCH=$1
+FF_BUILD_OPT=$2
+echo "FF_ARCH=$FF_ARCH"
+echo "FF_BUILD_OPT=$FF_BUILD_OPT"
 if [ -z "$FF_ARCH" ]; then
     echo "You must specific an architecture 'arm, armv7a, x86, ...'."
     echo ""
@@ -254,6 +257,19 @@ FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-pic"
 # Optimization options (experts only):
 FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-asm"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-inline-asm"
+
+case "$FF_BUILD_OPT" in
+    debug)
+        FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-optimizations"
+        FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-debug"
+        FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-small"
+    ;;
+    *)
+        FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-optimizations"
+        FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-debug"
+        FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-small"
+    ;;
+esac
 
 #--------------------
 echo ""
