@@ -25,7 +25,7 @@ fi
 # > README.md.new
 
 cat README.md \
-| sed "s/\(compile \'tv.danmaku.ijk.media:ijkplayer-[[:alnum:]]*:\)[[:digit:].]*[[:digit:]]/\1$VERSION_NAME/g" \
+| sed "s/\(compile \'tv.danmaku.ijk.media:ijkplayer-[[:alnum:]_]*:\)[[:digit:].]*[[:digit:]]/\1$VERSION_NAME/g" \
 | sed "s/\(git checkout -B latest k\)[[:digit:]][[:digit:].]*/\1$VERSION_NAME/g" \
 > README.md.new
 
