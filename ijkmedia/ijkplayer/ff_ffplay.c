@@ -3335,5 +3335,13 @@ int ffp_set_muted(FFPlayer *ffp,int mute)
     VideoState *is = ffp->is;
     if (is)
         is->muted = mute;
+    
+    SDL_AoutPauseAudio(ffp->aout, mute);
+#if defined(__ANDROID__)
+    if(mute) {
+        SDL_AoutFlushAudio(ffp->aout);
+    }
+#endif
+    
     return 0;
 }
