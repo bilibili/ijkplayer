@@ -3327,3 +3327,13 @@ static int ffp_format_control_message(struct AVFormatContext *s, int type,
 
     return ffp->format_control_message(ffp->format_control_opaque, type, data, data_size);
 }
+            
+int ffp_set_muted(FFPlayer *ffp,int mute)
+{
+    assert(ffp);
+    
+    VideoState *is = ffp->is;
+    if (is)
+        is->muted = mute;
+    return 0;
+}

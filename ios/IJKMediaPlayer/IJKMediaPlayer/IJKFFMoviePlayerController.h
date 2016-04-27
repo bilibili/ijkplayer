@@ -46,6 +46,8 @@
 
 + (void)setLogReport:(BOOL)preferLogReport;
 
+- (void)setMuted:(BOOL)mute;
+
 @end
 
 #define IJK_FF_IO_TYPE_READ (1)
