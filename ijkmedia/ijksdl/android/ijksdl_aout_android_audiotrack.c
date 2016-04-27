@@ -90,7 +90,7 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
         if (!opaque->abort_request && opaque->pause_on) {
             SDL_Android_AudioTrack_pause(env, atrack);
             while (!opaque->abort_request && opaque->pause_on) {
-                audio_cblk(userdata, buffer, copy_size);
+                audio_cblk(userdata, buffer, 0);
                 SDL_CondWaitTimeout(opaque->wakeup_cond, opaque->wakeup_mutex, 50);
             }
             if (!opaque->abort_request && !opaque->pause_on)
