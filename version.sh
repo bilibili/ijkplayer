@@ -2,8 +2,8 @@
 
 set -e
 
-VERSION_CODE=405001
-VERSION_NAME=0.4.5.1
+VERSION_CODE=501000
+VERSION_NAME=0.5.1
 
 echo_usage() {
     echo ""
@@ -25,7 +25,7 @@ fi
 # > README.md.new
 
 cat README.md \
-| sed "s/\(compile \'tv.danmaku.ijk.media:ijkplayer-[[:alnum:]]*:\)[[:digit:].]*[[:digit:]]/\1$VERSION_NAME/g" \
+| sed "s/\(compile \'tv.danmaku.ijk.media:ijkplayer-[[:alnum:]_]*:\)[[:digit:].]*[[:digit:]]/\1$VERSION_NAME/g" \
 | sed "s/\(git checkout -B latest k\)[[:digit:]][[:digit:].]*/\1$VERSION_NAME/g" \
 > README.md.new
 

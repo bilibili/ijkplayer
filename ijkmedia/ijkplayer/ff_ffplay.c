@@ -178,16 +178,12 @@ static int packet_queue_put(PacketQueue *q, AVPacket *pkt)
 {
     int ret;
 
-    /* duplicate the packet */
-    if (pkt != &flush_pkt && av_dup_packet(pkt) < 0)
-        return -1;
-
     SDL_LockMutex(q->mutex);
     ret = packet_queue_put_private(q, pkt);
     SDL_UnlockMutex(q->mutex);
 
     if (pkt != &flush_pkt && ret < 0)
-        av_free_packet(pkt);
+        av_packet_unref(pkt);
 
     return ret;
 }
@@ -227,7 +223,7 @@ static void packet_queue_flush(PacketQueue *q)
     SDL_LockMutex(q->mutex);
     for (pkt = q->first_pkt; pkt; pkt = pkt1) {
         pkt1 = pkt->next;
-        av_free_packet(&pkt->pkt);
+        av_packet_unref(&pkt->pkt);
 #ifdef FFP_MERGE
         av_freep(&pkt);
 #else
@@ -343,7 +339,7 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
         }
 
         if (*finished == *serial) {
-            av_free_packet(pkt);
+            av_packet_unref(pkt);
             continue;
         }
         else
@@ -389,7 +385,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                     d->next_pts_tb = d->start_pts_tb;
                 }
             } while (pkt.data == flush_pkt.data || d->queue->serial != d->pkt_serial);
-            av_free_packet(&d->pkt);
+            av_packet_unref(&d->pkt);
             d->pkt_temp = d->pkt = pkt;
             d->packet_pending = 1;
         }
@@ -455,7 +451,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
 }
 
 static void decoder_destroy(Decoder *d) {
-    av_free_packet(&d->pkt);
+    av_packet_unref(&d->pkt);
 }
 
 static void frame_queue_unref_item(Frame *vp)
@@ -1261,7 +1257,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
 #ifdef FFP_MERGE
 #if CONFIG_AVFILTER
         // FIXME use direct rendering
-        av_picture_copy(&pict, (AVPicture *)src_frame,
+        av_image_copy(data, linesize, (const uint8_t **)src_frame->data, src_frame->linesize,
                         src_frame->format, vp->width, vp->height);
 #else
         // sws_getCachedContext(...);
@@ -1915,9 +1911,9 @@ static int audio_decode_frame(FFPlayer *ffp)
     }
 
     do {
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(__APPLE__)
         while (frame_queue_nb_remaining(&is->sampq) == 0) {
-            if ((av_gettime_relative() - audio_callback_time) > 1000000LL * is->audio_hw_buf_size / is->audio_tgt.bytes_per_sec / 2)
+            if ((av_gettime_relative() - ffp->audio_callback_time) > 1000000LL * is->audio_hw_buf_size / is->audio_tgt.bytes_per_sec / 2)
                 return -1;
             av_usleep (1000);
         }
@@ -2625,6 +2621,10 @@ static int read_thread(void *arg)
         ffp_notify_msg1(ffp, FFP_REQ_START);
         ffp->auto_resume = 0;
     }
+    /* offset should be seeked*/
+    if (ffp->seek_at_start > 0) {
+        ffp_seek_to_l(ffp, ffp->seek_at_start);
+    }
 
     for (;;) {
         if (is->abort_request)
@@ -2660,7 +2660,6 @@ static int read_thread(void *arg)
             if (ret < 0) {
                 av_log(NULL, AV_LOG_ERROR,
                        "%s: error while seeking\n", is->ic->filename);
-                ffp_notify_msg1(ffp, FFP_MSG_SEEK_COMPLETE);
             } else {
                 if (is->audio_stream >= 0) {
                     packet_queue_flush(&is->audioq);
@@ -2705,7 +2704,7 @@ static int read_thread(void *arg)
             if (is->pause_req)
                 step_to_next_frame_l(ffp);
             SDL_UnlockMutex(ffp->is->play_mutex);
-            ffp_notify_msg1(ffp, FFP_MSG_SEEK_COMPLETE);
+            ffp_notify_msg3(ffp, FFP_MSG_SEEK_COMPLETE, (int)fftime_to_milliseconds(seek_target), ret);
             ffp_toggle_buffering(ffp, 1);
         }
         if (is->queue_attachments_req) {
@@ -2877,7 +2876,7 @@ static int read_thread(void *arg)
             packet_queue_put(&is->subtitleq, pkt);
 #endif
         } else {
-            av_free_packet(pkt);
+            av_packet_unref(pkt);
         }
 
         ffp_statistic_l(ffp);
@@ -3271,6 +3270,83 @@ static AVDictionary **ffp_get_opt_dict(FFPlayer *ffp, int opt_category)
             av_log(ffp, AV_LOG_ERROR, "unknown option category %d\n", opt_category);
             return NULL;
     }
+}
+
+static void app_func_did_tcp_connect_ip_port(AVApplicationContext *h, int error, int family, const char *ip, int port)
+{
+    IJKAVInject_IpAddress inject_data = {0};
+    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+
+    if (!h || !h->opaque || !inject_callback || !ip)
+        return;
+
+    FFPlayer *ffp = (FFPlayer *)h->opaque;
+    if (!ffp->inject_opaque)
+        return;
+
+    inject_data.error  = error;
+    inject_data.family = family;
+    av_strlcpy(inject_data.ip, ip, sizeof(inject_data.ip));
+    inject_data.port   = port;
+
+    inject_callback(ffp->inject_opaque, IJKAVINJECT_DID_TCP_CONNECT, &inject_data, sizeof(inject_data));
+}
+
+static void app_func_on_http_event(AVApplicationContext *h, AVAppHttpEvent *event)
+{
+    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+
+    if (!h || !h->opaque || !inject_callback || !event)
+        return;
+
+    FFPlayer *ffp = (FFPlayer *)h->opaque;
+    if (!ffp->inject_opaque)
+        return;
+
+    int message = -1;
+    switch (event->event_type) {
+        case AVAPP_EVENT_WILL_HTTP_OPEN: message = IJKAVINJECT_WILL_HTTP_OPEN; break;
+        case AVAPP_EVENT_DID_HTTP_OPEN:  message = IJKAVINJECT_DID_HTTP_OPEN;  break;
+        case AVAPP_EVENT_WILL_HTTP_SEEK: message = IJKAVINJECT_WILL_HTTP_SEEK; break;
+        case AVAPP_EVENT_DID_HTTP_SEEK:  message = IJKAVINJECT_DID_HTTP_SEEK;  break;
+        default:
+            return;
+    }
+    inject_callback(ffp->inject_opaque, message, event, sizeof(AVAppHttpEvent));
+}
+
+static void app_func_on_io_traffic(AVApplicationContext *h, AVAppIOTraffic *event)
+{
+    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+
+    if (!h || !h->opaque || !inject_callback || !event)
+        return;
+
+    FFPlayer *ffp = (FFPlayer *)h->opaque;
+    if (!ffp->inject_opaque)
+        return;
+
+    if (event->bytes > 0)
+        SDL_SpeedSampler2Add(&ffp->stat.tcp_read_sampler, event->bytes);
+
+    inject_callback(ffp->inject_opaque, IJKAVINJECT_ON_IO_TRAFFIC, event, sizeof(AVAppIOTraffic));
+}
+
+void ffp_set_inject_opaque(FFPlayer *ffp, void *opaque)
+{
+    if (!ffp)
+        return;
+
+    ffp->inject_opaque = opaque;
+
+    ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkinject-opaque", (int64_t)(intptr_t)opaque);
+    av_application_closep(&ffp->app_ctx);
+    av_application_open(&ffp->app_ctx, ffp);
+    ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkapplication", (int64_t)(intptr_t)ffp->app_ctx);
+
+    ffp->app_ctx->func_did_tcp_connect_ip_port = app_func_did_tcp_connect_ip_port;
+    ffp->app_ctx->func_on_http_event           = app_func_on_http_event;
+    ffp->app_ctx->func_on_io_traffic           = app_func_on_io_traffic;
 }
 
 void ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const char *value)
@@ -4016,6 +4092,8 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             return ffp->stat.audio_cache.packets;
         case FFP_PROP_INT64_BIT_RATE:
             return ffp ? ffp->stat.bit_rate : default_value;
+        case FFP_PROP_INT64_TCP_SPEED:
+            return ffp ? SDL_SpeedSampler2GetSpeed(&ffp->stat.tcp_read_sampler) : default_value;
         default:
             return default_value;
     }

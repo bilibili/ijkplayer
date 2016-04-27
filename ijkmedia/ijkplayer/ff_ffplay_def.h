@@ -457,11 +457,20 @@ typedef struct FFStatistic
     float vdps;
     float avdelay;
     float avdiff;
-    int   bit_rate;
+    int64_t bit_rate;
 
     FFTrackCacheStatistic video_cache;
     FFTrackCacheStatistic audio_cache;
+
+    SDL_SpeedSampler2 tcp_read_sampler;
 } FFStatistic;
+
+#define FFP_TCP_READ_SAMPLE_RANGE 2000
+inline static void ffp_reset_statistic(FFStatistic *dcc)
+{
+    memset(dcc, 0, sizeof(FFStatistic));
+    SDL_SpeedSampler2Reset(&dcc->tcp_read_sampler, FFP_TCP_READ_SAMPLE_RANGE);
+}
 
 typedef struct FFDemuxCacheControl
 {
@@ -540,6 +549,7 @@ typedef struct FFPlayer {
 #endif
     int loop;
     int framedrop;
+    int64_t seek_at_start;
     int infinite_buffer;
     enum ShowMode show_mode;
     char *audio_codec_name;
@@ -631,12 +641,15 @@ typedef struct FFPlayer {
     float       pf_playback_rate;
     int         pf_playback_rate_changed;
 
+    void               *inject_opaque;
     FFStatistic         stat;
     FFDemuxCacheControl dcc;
+
+    AVApplicationContext *app_ctx;
 } FFPlayer;
 
-#define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE));
-#define milliseconds_to_fftime(ms) (av_rescale(ms, AV_TIME_BASE, 1000));
+#define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
+#define milliseconds_to_fftime(ms) (av_rescale(ms, AV_TIME_BASE, 1000))
 
 inline static void ffp_reset_internal(FFPlayer *ffp)
 {
@@ -668,6 +681,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->autoexit               = 0;
     ffp->loop                   = 1;
     ffp->framedrop              = 0; // option
+    ffp->seek_at_start          = 0;
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
     av_freep(&ffp->audio_codec_name);
@@ -741,9 +755,12 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->pf_playback_rate               = 1.0f;
     ffp->pf_playback_rate_changed       = 0;
 
+    av_application_closep(&ffp->app_ctx);
+
     msg_queue_flush(&ffp->msg_queue);
 
-    memset(&ffp->stat, 0, sizeof(ffp->stat));
+    ffp->inject_opaque = NULL;
+    ffp_reset_statistic(&ffp->stat);
     ffp_reset_demux_cache_control(&ffp->dcc);
 }
 

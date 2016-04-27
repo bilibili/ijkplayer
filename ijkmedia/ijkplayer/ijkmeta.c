@@ -150,9 +150,9 @@ void ijkmeta_set_string_l(IjkMediaMeta *meta, const char *name, const char *valu
     av_dict_set(&meta->dict, name, value, 0);
 }
 
-static int get_bit_rate(AVCodecContext *ctx)
+static int64_t get_bit_rate(AVCodecContext *ctx)
 {
-    int bit_rate;
+    int64_t bit_rate;
     int bits_per_sample;
 
     switch (ctx->codec_type) {

@@ -317,9 +317,9 @@ static int async_open(URLContext *h, const char *arg, int flags, AVDictionary **
 
     /* wrap interrupt callback */
     c->interrupt_callback = h->interrupt_callback;
-    ret = ffurl_open(&c->inner, arg, flags, &interrupt_callback, options);
+    ret = ffurl_open_whitelist(&c->inner, arg, flags, &interrupt_callback, options, h->protocol_whitelist);
     if (ret != 0) {
-        av_log(h, AV_LOG_ERROR, "ffurl_open failed : %s, %s\n", av_err2str(ret), arg);
+        av_log(h, AV_LOG_ERROR, "ffurl_open_whitelist failed : %s, %s\n", av_err2str(ret), arg);
         goto url_fail;
     }
 
@@ -683,7 +683,7 @@ int main(void)
     /*
      * test normal read
      */
-    ret = ffurl_open(&h, "async:async-test:", AVIO_FLAG_READ, NULL, NULL);
+    ret = ffurl_open_whitelist(&h, "async:async-test:", AVIO_FLAG_READ, NULL, NULL, NULL);
     printf("open: %d\n", ret);
 
     size = ffurl_size(h);
@@ -759,7 +759,7 @@ int main(void)
      */
     ffurl_close(h);
     av_dict_set_int(&opts, "async-test-read-error", -10000, 0);
-    ret = ffurl_open(&h, "async:async-test:", AVIO_FLAG_READ, NULL, &opts);
+    ret = ffurl_open_whitelist(&h, "async:async-test:", AVIO_FLAG_READ, NULL, &opts, NULL);
     printf("open: %d\n", ret);
 
     ret = ffurl_read(h, buf, 1);

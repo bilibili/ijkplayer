@@ -104,7 +104,7 @@ static int ijkurlhook_reconnect(URLContext *h, AVDictionary *extra)
     if (extra)
         av_dict_copy(&inner_options, extra, 0);
 
-    ret = ffurl_open(&new_url, c->inject_data.url, c->inner_flags, &h->interrupt_callback, &inner_options);
+    ret = ffurl_open_whitelist(&new_url, c->inject_data.url, c->inner_flags, &h->interrupt_callback, &inner_options, h->protocol_whitelist);
     if (ret)
         goto fail;
 

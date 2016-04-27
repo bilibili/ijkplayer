@@ -188,11 +188,11 @@
 
     _didStopGL = YES;
 
-    IJK_GLES2_Renderer_reset(_renderer);
-    IJK_GLES2_Renderer_freeP(&_renderer);
-
     EAGLContext *prevContext = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:_context];
+    
+    IJK_GLES2_Renderer_reset(_renderer);
+    IJK_GLES2_Renderer_freeP(&_renderer);
 
     if (_framebuffer) {
         glDeleteFramebuffers(1, &_framebuffer);
