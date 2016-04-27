@@ -266,6 +266,13 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     ijkmp_global_set_log_report(preferLogReport ? 1 : 0);
 }
 
+- (void)setMuted:(BOOL)mute{
+    if (_mediaPlayer){
+        int value = mute ? 1 : 0;
+        ijkmp_set_muted(_mediaPlayer,value);
+    }
+}
+
 - (void)shutdown
 {
     if (!_mediaPlayer)

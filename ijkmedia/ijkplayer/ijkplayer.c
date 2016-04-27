@@ -569,6 +569,12 @@ void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
     return prev_weak_thiz;
 }
 
+int ijkmp_set_muted(IjkMediaPlayer *mp, int mute){
+    assert(mp);
+    ffp_set_muted(mp->ffplayer, mute);
+    return 0;
+}
+
 int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 {
     assert(mp);
