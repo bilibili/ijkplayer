@@ -7,6 +7,9 @@ android {
     //noinspection GroovyAssignabilityCheck
     buildToolsVersion rootProject.ext.buildToolsVersion
 
+    lintOptions {
+        abortOnError false
+    }
     defaultConfig {
         applicationId "tv.danmaku.ijk.media.example"
         minSdkVersion 9
