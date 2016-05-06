@@ -37,6 +37,18 @@
 (((const uint8_t*)(x))[2] <<  8) |        \
 ((const uint8_t*)(x))[3])
 
+char *
+AV_Encode32(char *output, char *outend, int nVal)
+{
+    if (output+4 > outend)
+        return NULL;
+    
+    output[3] = nVal & 0xff;
+    output[2] = nVal >> 8;
+    output[1] = nVal >> 16;
+    output[0] = nVal >> 24;
+    return output+4;
+}
 
 /* NAL unit types */
 enum {

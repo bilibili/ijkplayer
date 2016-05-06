@@ -210,8 +210,10 @@ static void annexB_to_AVC(uint8_t *in_buff, size_t in_size, uint8_t **out_buff, 
         /* no start code, AVC */
         *out_buff = in_buff;
         *out_size = in_size;
+        return;
     }
     
+    char nalu_size[4];
     while (p_start_code != NULL) {
         size_t remain_size = in_size - (p_start_code - in_buff) - kStartCodeSize;
         uint8_t *p_next_code = search_start_code(p_start_code + kStartCodeSize, remain_size);
@@ -220,9 +222,12 @@ static void annexB_to_AVC(uint8_t *in_buff, size_t in_size, uint8_t **out_buff, 
         if (p_next_code != NULL) {
             move_size = p_next_code - p_start_code - kStartCodeSize;
         }
-        memmove(in_buff + size, p_start_code + kStartCodeSize, move_size);
         
-        size += move_size;
+        AV_Encode32(nalu_size, nalu_size + 4, move_size);
+        memcpy(in_buff + size, nalu_size, 4);
+        memmove(in_buff + size + 4, p_start_code + kStartCodeSize, move_size);
+        
+        size += move_size + 4;
         p_start_code = p_next_code;
     }
     
@@ -820,7 +825,7 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
     size_t sps_size = AV_RB16(p);
     const uint8_t *sps = p + 2;
     
-    p += sps_size + 2;
+    p += sps_size + 3;
     size_t pps_size = AV_RB16(p);
     const uint8_t *pps = p + 2;
     
