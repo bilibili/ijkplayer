@@ -39,6 +39,12 @@
 #define IJK_VTB_FCC_ESD    SDL_FOURCC('s', 'd', 's', 'e')
 #define IJK_VTB_FCC_AVC1   SDL_FOURCC('1', 'c', 'v', 'a')
 
+static const uint8_t kStartCode1[3] = {0, 0, 1};
+static const size_t kStartCodeSize1 = 3;
+
+static const uint8_t kStartCode2[4] = {0, 0, 0, 1};
+static const size_t kStartCodeSize2 = 4;
+
 
 static const char *vtb_get_error_string(OSStatus status) {
     switch (status) {
@@ -182,6 +188,25 @@ inline static void sample_info_recycle(VideoToolBoxContext* context, sample_info
 
     SDL_CondSignal(context->sample_info_cond);
     SDL_UnlockMutex(context->sample_info_mutex);
+}
+
+static uint8_t *search_start_code(uint8_t *data, size_t size)
+{
+    if (size < kStartCodeSize1) {
+        return NULL;
+    }
+    
+    for (int i = 0; i < size - kStartCodeSize1; i++) {
+        if (memcmp(data + i, kStartCode1, kStartCodeSize1) == 0) {
+            return data + i;
+        } else if (i < size - kStartCodeSize2) {
+            if (memcmp(data + i, kStartCode2, kStartCodeSize2) == 0) {
+                return data + i;
+            }
+        }
+    }
+    
+    return NULL;
 }
 
 static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc, void *demux_buff, size_t demux_size)
@@ -543,6 +568,12 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
     if (pts == AV_NOPTS_VALUE) {
         pts = dts;
+    }
+    
+    if (search_start_code(pData, iSize) != NULL) {
+        context->m_convert_bytestream = true;
+    } else {
+        context->m_convert_bytestream = false;
     }
 
     if (context->m_convert_bytestream) {
