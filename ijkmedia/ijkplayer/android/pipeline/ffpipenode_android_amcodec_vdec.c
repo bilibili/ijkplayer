@@ -151,7 +151,7 @@ typedef struct IJKAM_Pipenode_Opaque {
     int64_t             decode_pts;
     int                 do_discontinuity_check;
 
-    unsigned int        nal_size;
+    size_t              nal_size;
 
     am_packet_t         am_pkt;
 
@@ -362,6 +362,7 @@ static void set_clock_at(Clock *c, double pts, int serial, double time)
     c->serial = serial;
 }
 
+#if 0
 static double get_clock(Clock *c)
 {
     if (*c->queue_serial != c->serial)
@@ -408,7 +409,7 @@ static double get_master_clock(VideoState *is)
     }
     return val;
 }
-
+#endif
 
 static vformat_t codecid_to_vformat(enum AVCodecID id)
 {
@@ -803,7 +804,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
                 d->next_pts_tb = d->start_pts_tb;
             }
         } while (ffp_is_flush_packet(&pkt) || d->queue->serial != d->pkt_serial);
-        av_free_packet(&d->pkt);
+        av_packet_unref(&d->pkt);
         d->pkt_temp = d->pkt = pkt;
         d->packet_pending = 1;
 
@@ -853,7 +854,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
 
             // wait for pts_scr to hit the last decode_dts
             while(am_time_sub(pts_pcrscr, opaque->decode_dts) < 0) {
-              ALOGD("clock dts discontinuity: ptsscr:%lld decode_dts:%lld dts:%lld", pts_pcrscr, opaque->decode_dts, dts);
+              ALOGD("clock dts discontinuity: ptsscr:%jd decode_dts:%jd dts:%jd", pts_pcrscr, opaque->decode_dts, dts);
 
               usleep(1000000/30);
 
@@ -866,7 +867,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
 
             // wait for pts_scr to hit the last decode_pts
             while(am_time_sub(pts_pcrscr, opaque->decode_pts) < 0) {
-              ALOGD("clock pts discontinuity: ptsscr:%lld decode_pts:%lld next_pts:%lld", pts_pcrscr, opaque->decode_pts, pts);
+              ALOGD("clock pts discontinuity: ptsscr:%jd decode_pts:%jd next_pts:%jd", pts_pcrscr, opaque->decode_pts, pts);
 
               usleep(1000000/30);
 
@@ -1129,7 +1130,7 @@ static void syncToMaster(IJKAM_Pipenode_Opaque *opaque)
         usleep(1000000/100);
         slept += 1;
         if(slept >= 100) {
-            ALOGD("slept:%d pts_video:%lld decode_dts:%lld", slept, pts_video, last_pts);
+            ALOGD("slept:%d pts_video:%jd decode_dts:%jd", slept, pts_video, last_pts);
             slept = 0;
             break;
         }
@@ -1153,7 +1154,7 @@ static void syncToMaster(IJKAM_Pipenode_Opaque *opaque)
     if(is->audclk.serial == d->pkt_serial) {
         if(abs(delta) > 5000) {
             set_pts_pcrscr(pts_pcrscr + delta);
-            ALOGD("set pcr %lld!", pts_pcrscr + delta);
+            ALOGD("set pcr %jd!", pts_pcrscr + delta);
         }
 
         opaque->do_discontinuity_check = 1;

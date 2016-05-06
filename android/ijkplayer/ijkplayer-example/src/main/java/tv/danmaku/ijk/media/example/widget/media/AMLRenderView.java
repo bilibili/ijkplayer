@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.sample.widget.media;
+package tv.danmaku.ijk.media.example.widget.media;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -57,7 +57,7 @@ import tv.danmaku.ijk.media.player.ISurfaceTextureHolder;
 //
 // AMLRenderView with special handling for AMLOGIC aspect ratio.
 //
-// It would be nice to just dervice from SurfaceRenderView but the measurement helper
+// It would be nice to just derice from SurfaceRenderView but the measurement helper
 // is private and we need access to it.
 //
 public class AMLRenderView extends SurfaceView implements IRenderView {

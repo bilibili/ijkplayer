@@ -70,8 +70,6 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
     IJKFF_Pipenode        *node = NULL;
 
-    ALOGD("use_amlogic:%d\n", ffp->use_amlogic);
-
     if(!node && (ffp->use_amlogic))
         node = ffpipenode_create_video_decoder_from_android_amcodec(ffp);
 
