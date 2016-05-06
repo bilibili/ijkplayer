@@ -39,8 +39,11 @@
 #define IJK_VTB_FCC_ESD    SDL_FOURCC('s', 'd', 's', 'e')
 #define IJK_VTB_FCC_AVC1   SDL_FOURCC('1', 'c', 'v', 'a')
 
-static const uint8_t kStartCode[4] = {0, 0, 0, 1};
-static const size_t kStartCodeSize = 4;
+static const uint8_t kStartCode1[3] = {0, 0, 1};
+static const size_t kStartCodeSize1 = 3;
+
+static const uint8_t kStartCode2[4] = {0, 0, 0, 1};
+static const size_t kStartCodeSize2 = 4;
 
 
 static const char *vtb_get_error_string(OSStatus status) {
@@ -189,50 +192,21 @@ inline static void sample_info_recycle(VideoToolBoxContext* context, sample_info
 
 static uint8_t *search_start_code(uint8_t *data, size_t size)
 {
-    if (size < kStartCodeSize) {
+    if (size < kStartCodeSize1) {
         return NULL;
     }
     
-    for (int i = 0; i < size - kStartCodeSize; i++) {
-        if (memcmp(data + i, kStartCode, kStartCodeSize) == 0) {
+    for (int i = 0; i < size - kStartCodeSize1; i++) {
+        if (memcmp(data + i, kStartCode1, kStartCodeSize1) == 0) {
             return data + i;
+        } else if (i < size - kStartCodeSize2) {
+            if (memcmp(data + i, kStartCode2, kStartCodeSize2) == 0) {
+                return data + i;
+            }
         }
     }
     
     return NULL;
-}
-
-static void annexB_to_AVC(uint8_t *in_buff, size_t in_size, uint8_t **out_buff, size_t *out_size)
-{
-    size_t size = 0;
-    uint8_t *p_start_code = search_start_code(in_buff, in_size);
-    if (p_start_code == NULL) {
-        /* no start code, AVC */
-        *out_buff = in_buff;
-        *out_size = in_size;
-        return;
-    }
-    
-    char nalu_size[4];
-    while (p_start_code != NULL) {
-        size_t remain_size = in_size - (p_start_code - in_buff) - kStartCodeSize;
-        uint8_t *p_next_code = search_start_code(p_start_code + kStartCodeSize, remain_size);
-        
-        size_t move_size = remain_size;
-        if (p_next_code != NULL) {
-            move_size = p_next_code - p_start_code - kStartCodeSize;
-        }
-        
-        AV_Encode32(nalu_size, nalu_size + 4, move_size);
-        memcpy(in_buff + size, nalu_size, 4);
-        memmove(in_buff + size + 4, p_start_code + kStartCodeSize, move_size);
-        
-        size += move_size + 4;
-        p_start_code = p_next_code;
-    }
-    
-    *out_buff = in_buff;
-    *out_size = size;
 }
 
 static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc, void *demux_buff, size_t demux_size)
@@ -240,9 +214,6 @@ static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc,
     OSStatus status;
     CMBlockBufferRef newBBufOut = NULL;
     CMSampleBufferRef sBufOut = NULL;
-    
-    /* VideoToolbox only support avcC */
-    annexB_to_AVC((uint8_t *)demux_buff, demux_size, (uint8_t **)&demux_buff, &demux_size);
 
     status = CMBlockBufferCreateWithMemoryBlock(
                                                 NULL,
@@ -278,6 +249,9 @@ static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc,
         return NULL;
     }
 }
+
+
+
 
 static bool GetVTBPicture(VideoToolBoxContext* context, AVFrame* pVTBPicture)
 {
@@ -595,6 +569,12 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     if (pts == AV_NOPTS_VALUE) {
         pts = dts;
     }
+    
+    if (search_start_code(pData, iSize) != NULL) {
+        context->m_convert_bytestream = true;
+    } else {
+        context->m_convert_bytestream = false;
+    }
 
     if (context->m_convert_bytestream) {
         // ALOGI("the buffer should m_convert_byte\n");
@@ -807,38 +787,29 @@ static void dict_set_i32(CFMutableDictionaryRef dict, CFStringRef key,
 static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format_id, int width, int height, const uint8_t *extradata, int extradata_size, uint32_t atom)
 {
     CMFormatDescriptionRef fmt_desc = NULL;
-    
-    const uint8_t *p = extradata + 4;  /* skip 4 bytes */
-    
-    /* retrieve length coded size */
-    size_t length_size = (*p++ & 0x3) + 1;
-    if (length_size == 3)
-        return NULL;
-    
-    
-    /* retrieve sps and pps unit(s) */
-    size_t unit_nb = *p++ & 0x1f; /* number of sps unit(s) */
-    if (!unit_nb) {
-        return NULL;
-    }
-    
-    size_t sps_size = AV_RB16(p);
-    const uint8_t *sps = p + 2;
-    
-    p += sps_size + 3;
-    size_t pps_size = AV_RB16(p);
-    const uint8_t *pps = p + 2;
-    
-    
-    const uint8_t* const parameterSetPointers[2] = { sps, pps };
-    const size_t parameterSetSizes[2] = { sps_size, pps_size };
-    OSStatus status = CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
-                                                                          2, //param count
-                                                                          parameterSetPointers,
-                                                                          parameterSetSizes,
-                                                                          4, //nal start code size
-                                                                          &fmt_desc);
-    
+    OSStatus status;
+
+    CFMutableDictionaryRef par = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,&kCFTypeDictionaryValueCallBacks);
+    CFMutableDictionaryRef atoms = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,&kCFTypeDictionaryValueCallBacks);
+    CFMutableDictionaryRef extensions = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+
+    /* CVPixelAspectRatio dict */
+    dict_set_i32(par, CFSTR ("HorizontalSpacing"), 0);
+    dict_set_i32(par, CFSTR ("VerticalSpacing"), 0);
+    /* SampleDescriptionExtensionAtoms dict */
+    dict_set_data(atoms, CFSTR ("avcC"), (uint8_t *)extradata, extradata_size);
+
+      /* Extensions dict */
+    dict_set_string(extensions, CFSTR ("CVImageBufferChromaLocationBottomField"), "left");
+    dict_set_string(extensions, CFSTR ("CVImageBufferChromaLocationTopField"), "left");
+    dict_set_boolean(extensions, CFSTR("FullRangeVideo"), FALSE);
+    dict_set_object(extensions, CFSTR ("CVPixelAspectRatio"), (CFTypeRef *) par);
+    dict_set_object(extensions, CFSTR ("SampleDescriptionExtensionAtoms"), (CFTypeRef *) atoms);
+    status = CMVideoFormatDescriptionCreate(NULL, format_id, width, height, extensions, &fmt_desc);
+
+    CFRelease(extensions);
+    CFRelease(atoms);
+    CFRelease(par);
 
     if (status == 0)
         return fmt_desc;
