@@ -52,5 +52,5 @@ install_java player/ExtractorRendererBuilder.java
 install_java player/HlsRendererBuilder.java
 install_java player/SmoothStreamingRendererBuilder.java
 install_java EventLogger.java
-# install_java SmoothStreamingTestMediaDrmCallback.java
+install_java SmoothStreamingTestMediaDrmCallback.java
 # install_java WidevineTestMediaDrmCallback.java
