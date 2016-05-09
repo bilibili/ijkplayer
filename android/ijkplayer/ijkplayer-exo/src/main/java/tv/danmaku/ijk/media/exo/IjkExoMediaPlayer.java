@@ -33,7 +33,7 @@ import tv.danmaku.ijk.media.exo.demo.player.DemoPlayer.RendererBuilder;
 import tv.danmaku.ijk.media.exo.demo.player.ExtractorRendererBuilder;
 import tv.danmaku.ijk.media.exo.demo.player.HlsRendererBuilder;
 import tv.danmaku.ijk.media.exo.demo.player.SmoothStreamingRendererBuilder;
-import tv.danmaku.ijk.media.exo.demo.player.SmoothStreamingTestMediaDrmCallback;
+import tv.danmaku.ijk.media.exo.demo.SmoothStreamingTestMediaDrmCallback;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.MediaInfo;
