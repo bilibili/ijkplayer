@@ -430,7 +430,7 @@ static int aout_open_audio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_Aud
     return opaque->buffer_capacity;
 fail:
     aout_close_audio(aout);
-    return 0;
+    return -1;
 }
 
 static void aout_pause_audio(SDL_Aout *aout, int pause_on)
