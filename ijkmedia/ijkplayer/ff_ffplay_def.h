@@ -87,6 +87,7 @@
 #define MIN_FRAMES (ffp->dcc.min_frames)
 #define EXTERNAL_CLOCK_MIN_FRAMES 2
 #define EXTERNAL_CLOCK_MAX_FRAMES 10
+#define SEEK_CACHE_MIN_FRAMES      50
 
 /* Minimum SDL audio buffer size, in samples. */
 #define SDL_AUDIO_MIN_BUFFER_SIZE 512
@@ -149,6 +150,7 @@ typedef struct PacketQueue {
     int alloc_count;
 
     int is_buffer_indicator;
+    int64_t max_pts;
 } PacketQueue;
 
 // #define VIDEO_PICTURE_QUEUE_SIZE 3
@@ -376,6 +378,9 @@ typedef struct VideoState {
     int dropping_frame;
     int is_video_high_fps; // above 30fps
     int is_video_high_res; // above 1080p
+
+    //设置flag,用于跳出最大缓冲模式
+    int seek_cache;
 
     PacketQueue *buffer_indicator_queue;
 } VideoState;
