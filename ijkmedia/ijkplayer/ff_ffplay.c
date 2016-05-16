@@ -421,7 +421,7 @@ static int ff_seek(FFPlayer *ffp) {
                                           is->ic->streams[is->video_stream]->time_base);
     int64_t seek_min = is->seek_rel > 0 ? seek_target - is->seek_rel + 2 : INT64_MIN;
     int64_t seek_max = is->seek_rel < 0 ? seek_target - is->seek_rel - 2 : INT64_MAX;
-    int64_t current_pos = ffp_get_current_position_ext(ffp) * 1000;
+    int64_t current_pos = ffp_get_current_position_l(ffp) * 1000;
     ALOGW("ff_seek seek current pos:%llu, seek pos pts:%llu, timestamp:%llu, "
                   "video cached max pts:%llu\n",
           current_pos, seek_target, seek_timestamp, is->videoq.max_pts);
