@@ -94,7 +94,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                     String scheme = mVideoUri.getScheme();
                     if (TextUtils.isEmpty(scheme)) {
-                        Log.e(TAG, "Null unknown ccheme\n");
+                        Log.e(TAG, "Null unknown scheme\n");
                         finish();
                         return;
                     }
