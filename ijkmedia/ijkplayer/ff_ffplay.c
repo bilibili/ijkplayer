@@ -360,25 +360,30 @@ static int packet_queue_delete_elements_until_by_pts(PacketQueue *q, int64_t pts
     return delete_count;
 }
 
-
-/* return 0 if aborted return seek pos last key frame pts*/
-static int64_t packet_video_queue_seek(PacketQueue *q, int64_t seek_pos) {
+/* return 0 if seek type == 1 return seek pos last key frame pts else return > seek_pos pts*/
+static int64_t packet_queue_seek(PacketQueue *q, int64_t seek_pos, int stream_type) {
     MyAVPacketList *pkt = NULL;
-    int64_t key_frame_pts = 0;
+    int64_t key_frame_pts = 0, current_pts = 0;
 
     if (q->nb_packets == 0)
         return key_frame_pts;
 
     pkt = q->first_pkt;
     while (pkt->next) {
-        if (pkt->pkt.flags & AV_PKT_FLAG_KEY)
-            key_frame_pts = pkt->pkt.pts;
-        if (pkt->pkt.pts >= seek_pos)
+        if (seek_type) {
+            if (pkt->pkt.flags & AV_PKT_FLAG_KEY)
+                key_frame_pts = pkt->pkt.pts;
+        }
+        if (pkt->pkt.pts >= seek_pos) {
+            current_pts = pkt->pkt.pts;
             break;
+        }
         pkt = pkt->next;
     }
-
-    return key_frame_pts;
+    if (seek_type)
+        return key_frame_pts;
+    else
+        return current_pts;
 }
 
 static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket *pkt, int *serial, int *finished)
@@ -420,45 +425,76 @@ static int ff_seek(FFPlayer *ffp) {
     int64_t seek_target = is->seek_pos;
     int64_t seek_min = is->seek_rel > 0 ? seek_target - is->seek_rel + 2 : INT64_MIN;
     int64_t seek_max = is->seek_rel < 0 ? seek_target - is->seek_rel - 2 : INT64_MAX;
-    if (is->video_stream >= 0)
+    int64_t current_pos = ffp_get_current_position_l(ffp) * 1000;
+    if (is->video_stream >= 0) {
         seek_timestamp = av_rescale_q(seek_target, AV_TIME_BASE_Q,
-                                          is->ic->streams[is->video_stream]->time_base);
-    else
+                                      is->ic->streams[is->video_stream]->time_base);
+        ALOGW("ff_seek seek current pos:%llu, seek pos pts:%llu, timestamp:%llu, "
+                      "video cached max pts:%llu\n",
+              current_pos, seek_target, seek_timestamp, is->videoq.max_pts);
+    } else if (is->audio_stream >= 0) {
+        seek_timestamp = av_rescale_q(seek_target, AV_TIME_BASE_Q,
+                                      is->ic->streams[is->audio_stream]->time_base);
+        ALOGW("ff_seek seek current pos:%llu, seek pos pts:%llu, timestamp:%llu, "
+                      "audio cached max pts:%llu\n",
+              current_pos, seek_target, seek_timestamp, is->audioq.max_pts);
+    } else
         goto file_seek;
 
-    int64_t current_pos = ffp_get_current_position_l(ffp) * 1000;
-    ALOGW("ff_seek seek current pos:%llu, seek pos pts:%llu, timestamp:%llu, "
-                  "video cached max pts:%llu\n",
-          current_pos, seek_target, seek_timestamp, is->videoq.max_pts);
-    if ((ffp->packet_buffering) && (seek_target > current_pos) && (is->videoq.max_pts > seek_timestamp)) {
-        int64_t video_key_frame_pts = 0;
-        //计算视频cache中小余seek pos最大的一个关键帧的pts
-        video_key_frame_pts = packet_video_queue_seek(&is->videoq, seek_timestamp);
-        ALOGW("ff_seek found last match video key frame pts:%llu\n", video_key_frame_pts);
+    if (ffp->packet_buffering && seek_target > current_pos) {
+        if (is->video_stream >= 0 && is->videoq.max_pts > seek_timestamp) {
+            int64_t video_key_frame_pts = 0;
+            //计算视频cache中小余seek pos最大的一个关键帧的pts
+            video_key_frame_pts = packet_queue_seek(&is->videoq, seek_timestamp, 1);
+            ALOGW("ff_seek found last match video key frame pts:%llu\n", video_key_frame_pts);
 
-        if (video_key_frame_pts == 0) {
-            ALOGW("ff_seek can not found last match video key frame go to file seek\n");
-            goto file_seek;
-        }
+            if (video_key_frame_pts == 0) {
+                ALOGW("ff_seek can not found last match video key frame go to file seek\n");
+                goto file_seek;
+            }
 
-        //删除视频cache中关键帧pts之前的数据包
-        if ((ret = packet_queue_delete_elements_until_by_pts(&is->videoq, video_key_frame_pts)) <= 0) {
-            ALOGE("ff_seek error seek video cache queue ret:%d, go to file seek\n", ret);
+            //删除视频cache中关键帧pts之前的数据包
+            if ((ret = packet_queue_delete_elements_until_by_pts(&is->videoq, video_key_frame_pts)) <= 0) {
+                ALOGE("ff_seek error seek video cache queue ret:%d, go to file seek\n", ret);
+                goto file_seek;
+            }
+            ALOGW("ff_seek packet_queue_delete_elements delete video element num:%d\n", ret);
+            //删除音频cache关键帧pts之前的数据包
+            if ((ret = packet_queue_delete_elements_until_by_pts(&is->audioq, video_key_frame_pts)) <= 0) {
+                ALOGE("ff_seek error delete audio cache queue ret:%d, go to file seek\n", ret);
+                goto file_seek;
+            }
+            ALOGW("ff_seek packet_queue_delete_elements delete audio element num:%d\n", ret);
+            if (is->videoq.nb_packets > SEEK_CACHE_MIN_FRAMES)
+                is->seek_cache = 1;
+            return ret;
+        } else if (is->audio_stream >= 0 && is->audioq.max_pts > seek_timestamp) {
+            int64_t audio_frame_pts = 0;
+            //计算视频cache中小余seek pos最大的一个关键帧的pts
+            audio_frame_pts = packet_queue_seek(&is->audioq, seek_timestamp, 0);
+            ALOGW("ff_seek found last match audio pts:%llu\n", audio_frame_pts);
+
+            if (audio_frame_pts == 0) {
+                ALOGW("ff_seek can not found last match audio frame go to file seek\n");
+                goto file_seek;
+            }
+
+            //删除音频cache关键帧pts之前的数据包
+            if ((ret = packet_queue_delete_elements_until_by_pts(&is->audioq, audio_frame_pts)) <= 0) {
+                ALOGE("ff_seek error delete audio cache queue ret:%d, go to file seek\n", ret);
+                goto file_seek;
+            }
+            ALOGW("ff_seek packet_queue_delete_elements delete audio element num:%d\n", ret);
+            if (is->audioq.nb_packets > SEEK_CACHE_MIN_FRAMES)
+                is->seek_cache = 1;
+            return ret;
+        } else {
+            ALOGW("ff_seek seek not match condition((is->video_stream >= 0 && is->videoq.max_pts > seek_timestamp)"
+                          "or(is->audio_stream >= 0 && is->audioq.max_pts > seek_timestamp)\n");
             goto file_seek;
         }
-        ALOGW("ff_seek packet_queue_delete_elements delete video element num:%d\n", ret);
-        //删除音频cache关键帧pts之前的数据包
-        if ((ret = packet_queue_delete_elements_until_by_pts(&is->audioq, video_key_frame_pts)) <= 0) {
-            ALOGE("ff_seek error delete audio cache queue ret:%d, go to file seek\n", ret);
-            goto file_seek;
-        }
-        ALOGW("ff_seek packet_queue_delete_elements delete audio element num:%d\n", ret);
-        if (is->videoq.nb_packets > SEEK_CACHE_MIN_FRAMES)
-            is->seek_cache = 1;
-        return ret;
     } else {
-        ALOGW("ff_seek seek not match condition(enable buffering or seek_pos < current_pos or "
-                      "seek_pos > videoq->max_pts)\n");
+        ALOGW("ff_seek seek not match condition(enable buffering or seek_pos < current_pos)\n");
         goto file_seek;
     }
 
