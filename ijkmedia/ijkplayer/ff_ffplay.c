@@ -370,7 +370,7 @@ static int64_t packet_queue_seek(PacketQueue *q, int64_t seek_pos, int stream_ty
 
     pkt = q->first_pkt;
     while (pkt->next) {
-        if (seek_type) {
+        if (stream_type) {
             if (pkt->pkt.flags & AV_PKT_FLAG_KEY)
                 key_frame_pts = pkt->pkt.pts;
         }
