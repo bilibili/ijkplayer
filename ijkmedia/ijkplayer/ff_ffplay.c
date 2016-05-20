@@ -380,7 +380,7 @@ static int64_t packet_queue_seek(PacketQueue *q, int64_t seek_pos, int stream_ty
         }
         pkt = pkt->next;
     }
-    if (seek_type)
+    if (stream_type)
         return key_frame_pts;
     else
         return current_pts;
