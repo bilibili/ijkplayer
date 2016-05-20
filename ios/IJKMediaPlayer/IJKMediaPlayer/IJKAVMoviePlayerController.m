@@ -250,6 +250,9 @@ static IJKAVMoviePlayerController* instance;
                          completionHandler:^{
                              dispatch_async( dispatch_get_main_queue(), ^{
                                  [self didPrepareToPlayAsset:asset withKeys:requestedKeys];
+                                 [[NSNotificationCenter defaultCenter]
+                                  postNotificationName:IJKMPMovieNaturalSizeAvailableNotification
+                                  object:self];
                              });
                          }];
 }

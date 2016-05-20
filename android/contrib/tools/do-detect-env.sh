@@ -26,12 +26,11 @@ UNAME_S=$(uname -s)
 UNAME_SM=$(uname -sm)
 echo "build on $UNAME_SM"
 
-echo "ANDROID_SDK=$ANDROID_SDK"
 echo "ANDROID_NDK=$ANDROID_NDK"
 
-if [ -z "$ANDROID_NDK" -o -z "$ANDROID_SDK" ]; then
-    echo "You must define ANDROID_NDK, ANDROID_SDK before starting."
-    echo "They must point to your NDK and SDK directories."
+if [ -z "$ANDROID_NDK" ]; then
+    echo "You must define ANDROID_NDK before starting."
+    echo "They must point to your NDK directories."
     echo ""
     exit 1
 fi
@@ -43,7 +42,7 @@ export IJK_GCC_VER=4.9
 export IJK_GCC_64_VER=4.9
 export IJK_MAKE_TOOLCHAIN_FLAGS=
 export IJK_MAKE_FLAG=
-export IJK_NDK_REL=$(grep -o '^r[0-9]*.*' $ANDROID_NDK/RELEASE.TXT 2>/dev/null|cut -b2-)
+export IJK_NDK_REL=$(grep -o '^r[0-9]*.*' $ANDROID_NDK/RELEASE.TXT 2>/dev/null | sed 's/[[:space:]]*//g' | cut -b2-)
 case "$IJK_NDK_REL" in
     10e*)
         # we don't use 4.4.3 because it doesn't handle threads correctly.
