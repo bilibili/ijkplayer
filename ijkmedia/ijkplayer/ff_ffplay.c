@@ -417,10 +417,14 @@ static int ff_seek(FFPlayer *ffp) {
     VideoState *is = ffp->is;
     //计算seek的位置
     int64_t seek_target = is->seek_pos;
-    int64_t seek_timestamp = av_rescale_q(seek_target, AV_TIME_BASE_Q,
-                                          is->ic->streams[is->video_stream]->time_base);
     int64_t seek_min = is->seek_rel > 0 ? seek_target - is->seek_rel + 2 : INT64_MIN;
     int64_t seek_max = is->seek_rel < 0 ? seek_target - is->seek_rel - 2 : INT64_MAX;
+    if (is->video_stream >= 0)
+        int64_t seek_timestamp = av_rescale_q(seek_target, AV_TIME_BASE_Q,
+                                          is->ic->streams[is->video_stream]->time_base);
+    else
+        goto file_seek;
+
     int64_t current_pos = ffp_get_current_position_l(ffp) * 1000;
     ALOGW("ff_seek seek current pos:%llu, seek pos pts:%llu, timestamp:%llu, "
                   "video cached max pts:%llu\n",
@@ -3975,19 +3979,12 @@ void ffp_check_buffering_l(FFPlayer *ffp)
 #endif
         }
 
-//        if (video_cached_duration > 0 && audio_cached_duration > 0) {
-//            cached_duration_in_ms = (int)IJKMIN(video_cached_duration, audio_cached_duration);
-//        } else if (video_cached_duration > 0) {
-//            cached_duration_in_ms = (int)video_cached_duration;
-//        } else if (audio_cached_duration > 0) {
-//            cached_duration_in_ms = (int)audio_cached_duration;
-//        }
-        if (audio_cached_duration > 0) {
-            cached_duration_in_ms = (int) audio_cached_duration;
-//        } else if (video_cached_duration > 0 && audio_cached_duration > 0) {
-//            cached_duration_in_ms = (int) IJKMIN(video_cached_duration, audio_cached_duration);
+        if (video_cached_duration > 0 && audio_cached_duration > 0) {
+            cached_duration_in_ms = (int)IJKMIN(video_cached_duration, audio_cached_duration);
         } else if (video_cached_duration > 0) {
-            cached_duration_in_ms = (int) video_cached_duration;
+            cached_duration_in_ms = (int)video_cached_duration;
+        } else if (audio_cached_duration > 0) {
+            cached_duration_in_ms = (int)audio_cached_duration;
         }
 
         if (cached_duration_in_ms >= 0) {
@@ -4057,6 +4054,8 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         }
     }
 }
+
+
 
 int ffp_video_thread(FFPlayer *ffp)
 {
