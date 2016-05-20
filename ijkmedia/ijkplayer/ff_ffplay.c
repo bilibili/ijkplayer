@@ -416,11 +416,12 @@ static int ff_seek(FFPlayer *ffp) {
     int ret = 0;
     VideoState *is = ffp->is;
     //计算seek的位置
+    int64_t seek_timestamp = 0;
     int64_t seek_target = is->seek_pos;
     int64_t seek_min = is->seek_rel > 0 ? seek_target - is->seek_rel + 2 : INT64_MIN;
     int64_t seek_max = is->seek_rel < 0 ? seek_target - is->seek_rel - 2 : INT64_MAX;
     if (is->video_stream >= 0)
-        int64_t seek_timestamp = av_rescale_q(seek_target, AV_TIME_BASE_Q,
+        seek_timestamp = av_rescale_q(seek_target, AV_TIME_BASE_Q,
                                           is->ic->streams[is->video_stream]->time_base);
     else
         goto file_seek;
