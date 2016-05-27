@@ -519,6 +519,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
      postNotificationName:IJKMPMoviePlayerPlaybackStateDidChangeNotification
      object:self];
 
+    _bufferingPosition = 0;
     ijkmp_seek_to(_mediaPlayer, aCurrentPlaybackTime * 1000);
 }
 
