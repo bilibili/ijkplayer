@@ -91,7 +91,6 @@ public class HlsRendererBuilder implements RendererBuilder {
 
     private final Context context;
     private final String userAgent;
-    private final String url;
     private final DemoPlayer player;
     private final ManifestFetcher<HlsPlaylist> playlistFetcher;
 
@@ -100,11 +99,10 @@ public class HlsRendererBuilder implements RendererBuilder {
     public AsyncRendererBuilder(Context context, String userAgent, String url, DemoPlayer player) {
       this.context = context;
       this.userAgent = userAgent;
-      this.url = url;
       this.player = player;
       HlsPlaylistParser parser = new HlsPlaylistParser();
       playlistFetcher = new ManifestFetcher<>(url, new DefaultUriDataSource(context, userAgent),
-          parser);
+              parser);
     }
 
     public void init() {
@@ -145,35 +143,35 @@ public class HlsRendererBuilder implements RendererBuilder {
 
       // Build the video/id3 renderers.
       DataSource dataSource = new DefaultUriDataSource(context, bandwidthMeter, userAgent);
-      HlsChunkSource chunkSource = new HlsChunkSource(true /* isMaster */, dataSource, url,
-          manifest, DefaultHlsTrackSelector.newDefaultInstance(context), bandwidthMeter,
-          timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
+      HlsChunkSource chunkSource = new HlsChunkSource(true /* isMaster */, dataSource, manifest,
+              DefaultHlsTrackSelector.newDefaultInstance(context), bandwidthMeter,
+              timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
       HlsSampleSource sampleSource = new HlsSampleSource(chunkSource, loadControl,
-          MAIN_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_VIDEO);
+              MAIN_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_VIDEO);
       MediaCodecVideoTrackRenderer videoRenderer = new MediaCodecVideoTrackRenderer(context,
-          sampleSource, MediaCodecSelector.DEFAULT, MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT,
-          5000, mainHandler, player, 50);
+              sampleSource, MediaCodecSelector.DEFAULT, MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT,
+              5000, mainHandler, player, 50);
       MetadataTrackRenderer<List<Id3Frame>> id3Renderer = new MetadataTrackRenderer<>(
-          sampleSource, new Id3Parser(), player, mainHandler.getLooper());
+              sampleSource, new Id3Parser(), player, mainHandler.getLooper());
 
       // Build the audio renderer.
       MediaCodecAudioTrackRenderer audioRenderer;
       if (haveAudios) {
         DataSource audioDataSource = new DefaultUriDataSource(context, bandwidthMeter, userAgent);
         HlsChunkSource audioChunkSource = new HlsChunkSource(false /* isMaster */, audioDataSource,
-            url, manifest, DefaultHlsTrackSelector.newAudioInstance(), bandwidthMeter,
-            timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
+                manifest, DefaultHlsTrackSelector.newAudioInstance(), bandwidthMeter,
+                timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
         HlsSampleSource audioSampleSource = new HlsSampleSource(audioChunkSource, loadControl,
-            AUDIO_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player,
-            DemoPlayer.TYPE_AUDIO);
+                AUDIO_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player,
+                DemoPlayer.TYPE_AUDIO);
         audioRenderer = new MediaCodecAudioTrackRenderer(
-            new SampleSource[] {sampleSource, audioSampleSource}, MediaCodecSelector.DEFAULT, null,
-            true, player.getMainHandler(), player, AudioCapabilities.getCapabilities(context),
-            AudioManager.STREAM_MUSIC);
+                new SampleSource[] {sampleSource, audioSampleSource}, MediaCodecSelector.DEFAULT, null,
+                true, player.getMainHandler(), player, AudioCapabilities.getCapabilities(context),
+                AudioManager.STREAM_MUSIC);
       } else {
         audioRenderer = new MediaCodecAudioTrackRenderer(sampleSource,
-            MediaCodecSelector.DEFAULT, null, true, player.getMainHandler(), player,
-            AudioCapabilities.getCapabilities(context), AudioManager.STREAM_MUSIC);
+                MediaCodecSelector.DEFAULT, null, true, player.getMainHandler(), player,
+                AudioCapabilities.getCapabilities(context), AudioManager.STREAM_MUSIC);
       }
 
       // Build the text renderer.
@@ -181,10 +179,10 @@ public class HlsRendererBuilder implements RendererBuilder {
       if (haveSubtitles) {
         DataSource textDataSource = new DefaultUriDataSource(context, bandwidthMeter, userAgent);
         HlsChunkSource textChunkSource = new HlsChunkSource(false /* isMaster */, textDataSource,
-            url, manifest, DefaultHlsTrackSelector.newSubtitleInstance(), bandwidthMeter,
-            timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
+                manifest, DefaultHlsTrackSelector.newSubtitleInstance(), bandwidthMeter,
+                timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
         HlsSampleSource textSampleSource = new HlsSampleSource(textChunkSource, loadControl,
-            TEXT_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_TEXT);
+                TEXT_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_TEXT);
         textRenderer = new TextTrackRenderer(textSampleSource, player, mainHandler.getLooper());
       } else {
         textRenderer = new Eia608TrackRenderer(sampleSource, player, mainHandler.getLooper());
