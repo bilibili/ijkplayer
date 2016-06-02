@@ -200,6 +200,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         [_glView setHudValue:nil forKey:@"ip"];
         [_glView setHudValue:nil forKey:@"http"];
         [_glView setHudValue:nil forKey:@"tcp-spd"];
+        [_glView setHudValue:nil forKey:@"t-prepared"];
+        [_glView setHudValue:nil forKey:@"t-render"];
+        [_glView setHudValue:nil forKey:@"t-preroll"];
+        [_glView setHudValue:nil forKey:@"t-http-open"];
+        [_glView setHudValue:nil forKey:@"t-http-seek"];
         
         self.shouldShowHudView = options.showHudView;
 
@@ -261,6 +266,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     ijkmp_set_data_source(_mediaPlayer, [_urlString UTF8String]);
     ijkmp_set_option(_mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "safe", "0"); // for concat demuxer
+
+    _monitor.prepareStartTick = (int64_t)SDL_GetTickHR();
     ijkmp_prepare_async(_mediaPlayer);
 }
 
@@ -737,6 +744,18 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     int64_t tcpSpeed = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_TCP_SPEED, 0);
     [_glView setHudValue:[NSString stringWithFormat:@"%@", formatedSpeed(tcpSpeed, 1000)]
                   forKey:@"tcp-spd"];
+
+    [_glView setHudValue:formatedDurationMilli(_monitor.prepareDuration) forKey:@"t-prepared"];
+    [_glView setHudValue:formatedDurationMilli(_monitor.firstVideoFrameLatency) forKey:@"t-render"];
+    [_glView setHudValue:formatedDurationMilli(_monitor.lastPrerollDuration) forKey:@"t-preroll"];
+    [_glView setHudValue:[NSString stringWithFormat:@"%@ / %d",
+                          formatedDurationMilli(_monitor.lastHttpOpenDuration),
+                          _monitor.httpOpenCount]
+                  forKey:@"t-http-open"];
+    [_glView setHudValue:[NSString stringWithFormat:@"%@ / %d",
+                          formatedDurationMilli(_monitor.lastHttpSeekDuration),
+                          _monitor.httpSeekCount]
+                  forKey:@"t-http-seek"];
 }
 
 - (void)startHudTimer
@@ -854,6 +873,8 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         }
         case FFP_MSG_PREPARED: {
             NSLog(@"FFP_MSG_PREPARED:\n");
+
+            _monitor.prepareDuration = (int64_t)SDL_GetTickHR() - _monitor.prepareStartTick;
 
             IjkMediaMeta *rawMeta = ijkmp_get_meta_l(_mediaPlayer);
             if (rawMeta) {
@@ -975,6 +996,8 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         case FFP_MSG_BUFFERING_START: {
             NSLog(@"FFP_MSG_BUFFERING_START:\n");
 
+            _monitor.lastPrerollStartTick = (int64_t)SDL_GetTickHR();
+
             _loadState = IJKMPMovieLoadStateStalled;
 
             [[NSNotificationCenter defaultCenter]
@@ -984,6 +1007,8 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         }
         case FFP_MSG_BUFFERING_END: {
             NSLog(@"FFP_MSG_BUFFERING_END:\n");
+
+            _monitor.lastPrerollDuration = (int64_t)SDL_GetTickHR() - _monitor.lastPrerollStartTick;
 
             _loadState = IJKMPMovieLoadStatePlayable | IJKMPMovieLoadStatePlaythroughOK;
 
@@ -1032,6 +1057,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         }
         case FFP_MSG_VIDEO_RENDERING_START: {
             NSLog(@"FFP_MSG_VIDEO_RENDERING_START:\n");
+            _monitor.firstVideoFrameLatency = (int64_t)SDL_GetTickHR() - _monitor.prepareStartTick;
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMPMoviePlayerFirstVideoFrameRenderedNotification
              object:self];
@@ -1194,11 +1220,13 @@ static int onInjectOnHttpEvent(IJKFFMoviePlayerController *mpc, int type, void *
         case IJKAVINJECT_DID_HTTP_OPEN:
             monitor.httpError = realData->error;
             monitor.httpCode  = realData->http_code;
+            monitor.httpOpenCount++;
             [mpc->_glView setHudValue:@(realData->http_code).stringValue forKey:@"http"];
 
             if (delegate != nil) {
                 int64_t elapsed = calculateElapsed(monitor.httpOpenTick, SDL_GetTickHR());
                 monitor.httpOpenTick = 0;
+                monitor.lastHttpOpenDuration = elapsed;
 
                 dict[IJKMediaEventAttrKey_time_of_event]    = @(elapsed).stringValue;
                 dict[IJKMediaEventAttrKey_url]              = [NSString ijk_stringBeEmptyIfNil:monitor.httpUrl];
@@ -1220,11 +1248,13 @@ static int onInjectOnHttpEvent(IJKFFMoviePlayerController *mpc, int type, void *
         case IJKAVINJECT_DID_HTTP_SEEK:
             monitor.httpError = realData->error;
             monitor.httpCode  = realData->http_code;
+            monitor.httpSeekCount++;
             [mpc->_glView setHudValue:@(realData->http_code).stringValue forKey:@"http"];
 
             if (delegate != nil) {
                 int64_t elapsed = calculateElapsed(monitor.httpSeekTick, SDL_GetTickHR());
                 monitor.httpSeekTick = 0;
+                monitor.lastHttpSeekDuration = elapsed;
 
                 dict[IJKMediaEventAttrKey_time_of_event]    = @(elapsed).stringValue;
                 dict[IJKMediaEventAttrKey_url]              = [NSString ijk_stringBeEmptyIfNil:monitor.httpUrl];
