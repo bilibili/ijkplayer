@@ -2656,6 +2656,7 @@ static int read_thread(void *arg)
 //      of the seek_pos/seek_rel variables
 
             ffp_toggle_buffering(ffp, 1);
+            ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_UPDATE, 0, 0);
             ret = avformat_seek_file(is->ic, -1, seek_min, seek_target, seek_max, is->seek_flags);
             if (ret < 0) {
                 av_log(NULL, AV_LOG_ERROR,

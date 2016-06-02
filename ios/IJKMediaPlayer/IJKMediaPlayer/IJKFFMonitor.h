@@ -45,5 +45,15 @@
 @property(nonatomic) int       httpCode;
 @property(nonatomic) int64_t   httpOpenTick;
 @property(nonatomic) int64_t   httpSeekTick;
+@property(nonatomic) int       httpOpenCount;
+@property(nonatomic) int       httpSeekCount;
+@property(nonatomic) int64_t   lastHttpOpenDuration;
+@property(nonatomic) int64_t   lastHttpSeekDuration;
+
+@property(nonatomic) int64_t   prepareStartTick;
+@property(nonatomic) int64_t   prepareDuration;
+@property(nonatomic) int64_t   firstVideoFrameLatency;
+@property(nonatomic) int64_t   lastPrerollStartTick;
+@property(nonatomic) int64_t   lastPrerollDuration;
 
 @end

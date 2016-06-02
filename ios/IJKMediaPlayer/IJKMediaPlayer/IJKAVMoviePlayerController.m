@@ -337,6 +337,7 @@ static IJKAVMoviePlayerController* instance;
 
     _seekingTime = aCurrentPlaybackTime;
     _isSeeking = YES;
+    _bufferingProgress = 0;
     [self didPlaybackStateChange];
     [self didLoadStateChange];
     if (_isPrerolling) {

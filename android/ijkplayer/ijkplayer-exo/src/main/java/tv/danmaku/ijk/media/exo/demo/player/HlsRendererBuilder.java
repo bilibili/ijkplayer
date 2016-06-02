@@ -91,7 +91,6 @@ public class HlsRendererBuilder implements RendererBuilder {
 
     private final Context context;
     private final String userAgent;
-    private final String url;
     private final DemoPlayer player;
     private final ManifestFetcher<HlsPlaylist> playlistFetcher;
 
@@ -100,7 +99,6 @@ public class HlsRendererBuilder implements RendererBuilder {
     public AsyncRendererBuilder(Context context, String userAgent, String url, DemoPlayer player) {
       this.context = context;
       this.userAgent = userAgent;
-      this.url = url;
       this.player = player;
       HlsPlaylistParser parser = new HlsPlaylistParser();
       playlistFetcher = new ManifestFetcher<>(url, new DefaultUriDataSource(context, userAgent),
@@ -145,8 +143,8 @@ public class HlsRendererBuilder implements RendererBuilder {
 
       // Build the video/id3 renderers.
       DataSource dataSource = new DefaultUriDataSource(context, bandwidthMeter, userAgent);
-      HlsChunkSource chunkSource = new HlsChunkSource(true /* isMaster */, dataSource, url,
-          manifest, DefaultHlsTrackSelector.newDefaultInstance(context), bandwidthMeter,
+      HlsChunkSource chunkSource = new HlsChunkSource(true /* isMaster */, dataSource, manifest,
+          DefaultHlsTrackSelector.newDefaultInstance(context), bandwidthMeter,
           timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
       HlsSampleSource sampleSource = new HlsSampleSource(chunkSource, loadControl,
           MAIN_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_VIDEO);
@@ -161,7 +159,7 @@ public class HlsRendererBuilder implements RendererBuilder {
       if (haveAudios) {
         DataSource audioDataSource = new DefaultUriDataSource(context, bandwidthMeter, userAgent);
         HlsChunkSource audioChunkSource = new HlsChunkSource(false /* isMaster */, audioDataSource,
-            url, manifest, DefaultHlsTrackSelector.newAudioInstance(), bandwidthMeter,
+            manifest, DefaultHlsTrackSelector.newAudioInstance(), bandwidthMeter,
             timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
         HlsSampleSource audioSampleSource = new HlsSampleSource(audioChunkSource, loadControl,
             AUDIO_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player,
@@ -181,7 +179,7 @@ public class HlsRendererBuilder implements RendererBuilder {
       if (haveSubtitles) {
         DataSource textDataSource = new DefaultUriDataSource(context, bandwidthMeter, userAgent);
         HlsChunkSource textChunkSource = new HlsChunkSource(false /* isMaster */, textDataSource,
-            url, manifest, DefaultHlsTrackSelector.newSubtitleInstance(), bandwidthMeter,
+            manifest, DefaultHlsTrackSelector.newSubtitleInstance(), bandwidthMeter,
             timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
         HlsSampleSource textSampleSource = new HlsSampleSource(textChunkSource, loadControl,
             TEXT_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_TEXT);
