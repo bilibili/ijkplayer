@@ -331,7 +331,7 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
         if (new_packet < 0)
             return -1;
         else if (new_packet == 0) {
-            if (q->is_buffer_indicator && !*finished)
+            if (/*q->is_buffer_indicator &&*/ !*finished)
                 ffp_toggle_buffering(ffp, 1);
             new_packet = packet_queue_get(q, pkt, 1, serial);
             if (new_packet < 0)
