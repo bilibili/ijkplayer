@@ -1198,6 +1198,7 @@ static int onInjectOnHttpEvent(IJKFFMoviePlayerController *mpc, int type, void *
     IJKFFMonitor *monitor = mpc->_monitor;
     NSString     *url  = monitor.httpUrl;
     NSString     *host = monitor.httpHost;
+    int64_t       elapsed = 0;
 
     id<IJKMediaNativeInvokeDelegate> delegate = mpc.nativeInvokeDelegate;
 
@@ -1218,16 +1219,15 @@ static int onInjectOnHttpEvent(IJKFFMoviePlayerController *mpc, int type, void *
             }
             break;
         case IJKAVINJECT_DID_HTTP_OPEN:
+            elapsed = calculateElapsed(monitor.httpOpenTick, SDL_GetTickHR());
             monitor.httpError = realData->error;
             monitor.httpCode  = realData->http_code;
             monitor.httpOpenCount++;
+            monitor.httpOpenTick = 0;
+            monitor.lastHttpOpenDuration = elapsed;
             [mpc->_glView setHudValue:@(realData->http_code).stringValue forKey:@"http"];
 
             if (delegate != nil) {
-                int64_t elapsed = calculateElapsed(monitor.httpOpenTick, SDL_GetTickHR());
-                monitor.httpOpenTick = 0;
-                monitor.lastHttpOpenDuration = elapsed;
-
                 dict[IJKMediaEventAttrKey_time_of_event]    = @(elapsed).stringValue;
                 dict[IJKMediaEventAttrKey_url]              = [NSString ijk_stringBeEmptyIfNil:monitor.httpUrl];
                 dict[IJKMediaEventAttrKey_host]             = [NSString ijk_stringBeEmptyIfNil:host];
@@ -1246,16 +1246,15 @@ static int onInjectOnHttpEvent(IJKFFMoviePlayerController *mpc, int type, void *
             }
             break;
         case IJKAVINJECT_DID_HTTP_SEEK:
+            elapsed = calculateElapsed(monitor.httpSeekTick, SDL_GetTickHR());
             monitor.httpError = realData->error;
             monitor.httpCode  = realData->http_code;
             monitor.httpSeekCount++;
+            monitor.httpSeekTick = 0;
+            monitor.lastHttpSeekDuration = elapsed;
             [mpc->_glView setHudValue:@(realData->http_code).stringValue forKey:@"http"];
 
             if (delegate != nil) {
-                int64_t elapsed = calculateElapsed(monitor.httpSeekTick, SDL_GetTickHR());
-                monitor.httpSeekTick = 0;
-                monitor.lastHttpSeekDuration = elapsed;
-
                 dict[IJKMediaEventAttrKey_time_of_event]    = @(elapsed).stringValue;
                 dict[IJKMediaEventAttrKey_url]              = [NSString ijk_stringBeEmptyIfNil:monitor.httpUrl];
                 dict[IJKMediaEventAttrKey_host]             = [NSString ijk_stringBeEmptyIfNil:host];
