@@ -54,7 +54,7 @@
             return nil;
         }
 
-        if (aSpec->channels > 6) {
+        if (aSpec->channels > 2) {
             NSLog(@"aout_open_audio: unsupported channels %d\n", (int)aSpec->channels);
             return nil;
         }
