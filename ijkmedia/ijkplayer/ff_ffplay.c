@@ -1936,6 +1936,7 @@ static int audio_decode_frame(FFPlayer *ffp)
         dec_channel_layout       != is->audio_src.channel_layout ||
         af->frame->sample_rate   != is->audio_src.freq           ||
         (wanted_nb_samples       != af->frame->nb_samples && !is->swr_ctx)) {
+        AVDictionary *swr_opts = NULL;
         swr_free(&is->swr_ctx);
         is->swr_ctx = swr_alloc_set_opts(NULL,
                                          is->audio_tgt.channel_layout, is->audio_tgt.fmt, is->audio_tgt.freq,
@@ -1949,6 +1950,9 @@ static int audio_decode_frame(FFPlayer *ffp)
             swr_free(&is->swr_ctx);
             return -1;
         }
+        av_dict_copy(&swr_opts, ffp->swr_opts, 0);
+        av_opt_set_dict(is->swr_ctx, &swr_opts);
+        av_dict_free(&swr_opts);
         is->audio_src.channel_layout = dec_channel_layout;
         is->audio_src.channels       = av_frame_get_channels(af->frame);
         is->audio_src.freq = af->frame->sample_rate;
