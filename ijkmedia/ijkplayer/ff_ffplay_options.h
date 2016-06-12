@@ -36,6 +36,12 @@
     .min = min__, \
     .max = max__, \
     .flags = AV_OPT_FLAG_DECODING_PARAM
+#define OPTION_DOUBLE(default__, min__, max__) \
+    .type = AV_OPT_TYPE_DOUBLE, \
+    { .dbl = default__ }, \
+    .min = min__, \
+    .max = max__, \
+    .flags = AV_OPT_FLAG_DECODING_PARAM
 #define OPTION_CONST(default__) \
     .type = AV_OPT_TYPE_CONST, \
     { .i64 = default__ }, \
@@ -135,7 +141,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(iformat_name),        OPTION_STR(NULL) },
     { "no-time-adjust",                     "return player's real time from the media stream instead of the adjusted time",
         OPTION_OFFSET(no_time_adjust),      OPTION_INT(0, 0, 1) },
-
+    { "preset-5-1-center-mix-level",        "preset center-mix-level for 5.1 channel",
+        OPTION_OFFSET(preset_5_1_center_mix_level), OPTION_DOUBLE(M_SQRT1_2, -32, 32) },
 
         // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
