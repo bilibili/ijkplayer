@@ -2313,23 +2313,25 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
             goto fail;
         is->queue_attachments_req = 1;
 
-        if(is->video_st->avg_frame_rate.den && is->video_st->avg_frame_rate.num) {
-            double fps = av_q2d(is->video_st->avg_frame_rate);
-            SDL_ProfilerReset(&is->viddec.decode_profiler, fps + 0.5);
-            if (fps > ffp->max_fps && fps < 130.0) {
-                is->is_video_high_fps = 1;
-                av_log(ffp, AV_LOG_WARNING, "fps: %lf (too high)\n", fps);
-            } else {
-                av_log(ffp, AV_LOG_WARNING, "fps: %lf (normal)\n", fps);
+        if (ffp->max_fps >= 0) {
+            if(is->video_st->avg_frame_rate.den && is->video_st->avg_frame_rate.num) {
+                double fps = av_q2d(is->video_st->avg_frame_rate);
+                SDL_ProfilerReset(&is->viddec.decode_profiler, fps + 0.5);
+                if (fps > ffp->max_fps && fps < 130.0) {
+                    is->is_video_high_fps = 1;
+                    av_log(ffp, AV_LOG_WARNING, "fps: %lf (too high)\n", fps);
+                } else {
+                    av_log(ffp, AV_LOG_WARNING, "fps: %lf (normal)\n", fps);
+                }
             }
-        }
-        if(is->video_st->r_frame_rate.den && is->video_st->r_frame_rate.num) {
-            double tbr = av_q2d(is->video_st->r_frame_rate);
-            if (tbr > ffp->max_fps && tbr < 130.0) {
-                is->is_video_high_fps = 1;
-                av_log(ffp, AV_LOG_WARNING, "fps: %lf (too high)\n", tbr);
-            } else {
-                av_log(ffp, AV_LOG_WARNING, "fps: %lf (normal)\n", tbr);
+            if(is->video_st->r_frame_rate.den && is->video_st->r_frame_rate.num) {
+                double tbr = av_q2d(is->video_st->r_frame_rate);
+                if (tbr > ffp->max_fps && tbr < 130.0) {
+                    is->is_video_high_fps = 1;
+                    av_log(ffp, AV_LOG_WARNING, "fps: %lf (too high)\n", tbr);
+                } else {
+                    av_log(ffp, AV_LOG_WARNING, "fps: %lf (normal)\n", tbr);
+                }
             }
         }
 
