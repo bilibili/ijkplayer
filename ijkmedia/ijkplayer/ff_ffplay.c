@@ -1951,7 +1951,7 @@ static int audio_decode_frame(FFPlayer *ffp)
             return -1;
         }
         av_dict_copy(&swr_opts, ffp->swr_opts, 0);
-        if (is->audio_src.channel_layout == AV_CH_LAYOUT_5POINT1)
+        if (af->frame->channel_layout == AV_CH_LAYOUT_5POINT1_BACK)
             av_opt_set_double(is->swr_ctx, "center_mix_level", ffp->preset_5_1_center_mix_level, 0);
         av_opt_set_dict(is->swr_ctx, &swr_opts);
         av_dict_free(&swr_opts);
