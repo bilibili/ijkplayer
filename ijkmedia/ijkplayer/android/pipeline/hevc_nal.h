@@ -25,9 +25,9 @@
 #include "ijksdl/ijksdl_log.h"
 
 /* Inspired by libavcodec/hevc.c */
-int convert_hevc_nal_units(const uint8_t *p_buf,uint32_t i_buf_size,
-                           uint8_t *p_out_buf,uint32_t i_out_buf_size,
-                           uint32_t *p_sps_pps_size,uint32_t *p_nal_size)
+int convert_hevc_nal_units(const uint8_t *p_buf,size_t i_buf_size,
+                           uint8_t *p_out_buf,size_t i_out_buf_size,
+                           size_t *p_sps_pps_size,size_t *p_nal_size)
 {
     int i, num_arrays;
     const uint8_t *p_end = p_buf + i_buf_size;

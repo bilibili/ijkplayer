@@ -191,6 +191,10 @@
                              selector:@selector(IJK_dispatchMoviePlayerIsAirPlayVideoActiveDidChangeNotification:)
                                  name:MPMoviePlayerIsAirPlayVideoActiveDidChangeNotification
                                object:self];
+    [_notificationManager addObserver:self
+                             selector:@selector(IJK_dispatchMoviePlayerNaturalSizeAvailableNotification:)
+                                 name:MPMovieNaturalSizeAvailableNotification
+                               object:self];
 }
 
 - (void)IJK_removeMovieNotificationObservers
@@ -221,6 +225,11 @@
 - (void)IJK_dispatchMoviePlayerIsAirPlayVideoActiveDidChangeNotification:(NSNotification*)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:notification.object userInfo:notification.userInfo];
+}
+
+- (void)IJK_dispatchMoviePlayerNaturalSizeAvailableNotification:(NSNotification*)notification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMovieNaturalSizeAvailableNotification object:notification.object userInfo:notification.userInfo];
 }
 
 - (void)setPauseInBackground:(BOOL)pause

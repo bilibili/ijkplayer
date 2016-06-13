@@ -49,7 +49,7 @@ static int ijkinject_open(URLContext *h, const char *arg, int flags, AVDictionar
 
     av_dict_set_int(options, "ijkinject-opaque",        c->opaque, 0);
     av_dict_set_int(options, "ijkinject-segment-index", c->segment_index, 0);
-    ret = ffurl_open(&c->inner, arg, flags, &h->interrupt_callback, options);
+    ret = ffurl_open_whitelist(&c->inner, arg, flags, &h->interrupt_callback, options, h->protocol_whitelist);
     if (ret)
         goto fail;
 

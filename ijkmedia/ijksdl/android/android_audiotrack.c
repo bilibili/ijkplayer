@@ -230,8 +230,8 @@ SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_spec(JNIEnv *env, SDL_An
     atrack->spec.buffer_size_in_bytes = min_buffer_size;
     // atrack->max_volume = J4AC_AudioTrack__getMaxVolume__catchAll(env);
     // atrack->min_volume = J4AC_AudioTrack__getMinVolume__catchAll(env);
-    atrack->max_volume = 0.0f;
-    atrack->min_volume = 1.0f;
+    atrack->max_volume = 1.0f;
+    atrack->min_volume = 0.0f;
 
     // extra init
     float init_volume = 1.0f;

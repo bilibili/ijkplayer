@@ -7,6 +7,9 @@ android {
     //noinspection GroovyAssignabilityCheck
     buildToolsVersion rootProject.ext.buildToolsVersion
 
+    lintOptions {
+        abortOnError false
+    }
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion rootProject.ext.targetSdkVersion
@@ -22,20 +25,16 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile 'com.google.android.exoplayer:exoplayer:r1.5.2'
+    compile 'com.google.android.exoplayer:exoplayer:r1.5.8'
 
     compile project(':ijkplayer-java')
-    // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.4.5.1'
+    // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.5.1'
 }
 
-ext {
-    optionalPlugins = null;
-    // optionalPlugins = ['tools/gradle-mvn-push.gradle', 'tools/gradle-bintray-upload.gradle'];
-}
-
-ext.optionalPlugins.each{ value ->
-    def plugin_file = new File(rootProject.projectDir, value);
-    if (plugin_file.exists()) {
-        apply from: plugin_file
-    }
+gradle.startParameter.taskNames.each { task ->
+    def subProjectName = task;
+    if (task.startsWith(':'))
+        subProjectName = task.split(":")[1]
+    if (subProjectName.equals(project.name))
+        apply from: new File(rootProject.projectDir, "tools/gradle-on-demand.gradle");
 }

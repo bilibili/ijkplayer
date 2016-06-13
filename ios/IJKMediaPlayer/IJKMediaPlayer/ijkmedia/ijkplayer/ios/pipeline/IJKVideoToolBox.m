@@ -245,7 +245,7 @@ static bool GetVTBPicture(VideoToolBoxContext* context, AVFrame* pVTBPicture)
 }
 
 void QueuePicture(VideoToolBoxContext* ctx) {
-    AVFrame picture;
+    AVFrame picture = {0};
     if (true == GetVTBPicture(ctx, &picture)) {
         AVRational tb = ctx->ffp->is->video_st->time_base;
         AVRational frame_rate = av_guess_frame_rate(ctx->ffp->is->ic, ctx->ffp->is->video_st, NULL);
@@ -253,8 +253,6 @@ void QueuePicture(VideoToolBoxContext* ctx) {
         double pts = (picture.pts == AV_NOPTS_VALUE) ? NAN : picture.pts * av_q2d(tb);
 
         picture.format = IJK_AV_PIX_FMT__VIDEO_TOOLBOX;
-        picture.sample_aspect_ratio.num = 1;
-        picture.sample_aspect_ratio.den = 1;
 
         ffp_queue_picture(ctx->ffp, &picture, pts, duration, 0, ctx->ffp->is->viddec.pkt_serial);
 
@@ -277,7 +275,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 {
     @autoreleasepool {
         VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
-        if (!ctx) {
+        if (!ctx || (status != noErr)) {
             return;
         }
 
@@ -652,7 +650,7 @@ failed:
 
 static inline void ResetPktBuffer(VideoToolBoxContext* context) {
     for (int i = 0 ; i < context->m_buffer_deep; i++) {
-        av_free_packet(&context->m_buffer_packet[i]);
+        av_packet_unref(&context->m_buffer_packet[i]);
     }
     context->m_buffer_deep = 0;
     memset(context->m_buffer_packet, 0, sizeof(context->m_buffer_packet));

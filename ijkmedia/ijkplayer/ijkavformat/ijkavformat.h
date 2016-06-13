@@ -64,6 +64,7 @@ typedef struct IJKAVInject_OnUrlOpenData {
 #define IJKAVINJECT_ON_LIVE_RETRY       0x10004
 
 
+
 /**
  * Statistic
  */
@@ -84,6 +85,23 @@ typedef struct IJKAVInject_AsyncReadSpeed {
 } IJKAVInject_AsyncReadSpeed;
 
 #define IJKAVINJECT_ASYNC_READ_SPEED    0x11001
+
+typedef struct IJKAVInject_IpAddress {
+    int  error;
+    int  family;
+    char ip[96];
+    int  port;
+} IJKAVInject_IpAddress;
+#define IJKAVINJECT_DID_TCP_CONNECT     0x12002
+
+// AVAppHttpEvent
+#define IJKAVINJECT_WILL_HTTP_OPEN      0x12100
+#define IJKAVINJECT_DID_HTTP_OPEN       0x12101
+#define IJKAVINJECT_WILL_HTTP_SEEK      0x12102
+#define IJKAVINJECT_DID_HTTP_SEEK       0x12103
+
+// AVAppIOTraffic
+#define IJKAVINJECT_ON_IO_TRAFFIC       0x12204
 
 typedef int (*IjkAVInjectCallback)(void *opaque, int message, void *data, size_t data_size);
 

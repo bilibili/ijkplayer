@@ -78,11 +78,11 @@ static AVFrame *opaque_setup_frame(SDL_VoutOverlay_Opaque* opaque, enum AVPixelF
     opaque->frame_buffer  = frame_buffer_ref;
      */
 
-    AVPicture *pic = (AVPicture *) managed_frame;
     managed_frame->format = format;
     managed_frame->width  = width;
     managed_frame->height = height;
-    avpicture_fill(pic, NULL, format, width, height);
+    av_image_fill_arrays(managed_frame->data, managed_frame->linesize ,NULL,
+                         format, width, height, 1);
     opaque->managed_frame = managed_frame;
     opaque->linked_frame  = linked_frame;
     return managed_frame;
@@ -94,13 +94,13 @@ static AVFrame *opaque_obtain_managed_frame_buffer(SDL_VoutOverlay_Opaque* opaqu
         return opaque->managed_frame;
 
     AVFrame *managed_frame = opaque->managed_frame;
-    int frame_bytes = avpicture_get_size(managed_frame->format, managed_frame->width, managed_frame->height);
+    int frame_bytes = av_image_get_buffer_size(managed_frame->format, managed_frame->width, managed_frame->height, 1);
     AVBufferRef *frame_buffer_ref = av_buffer_alloc(frame_bytes);
     if (!frame_buffer_ref)
         return NULL;
 
-    AVPicture *pic = (AVPicture *) managed_frame;
-    avpicture_fill(pic, frame_buffer_ref->data, managed_frame->format, managed_frame->width, managed_frame->height);
+    av_image_fill_arrays(managed_frame->data, managed_frame->linesize,
+                         frame_buffer_ref->data, managed_frame->format, managed_frame->width, managed_frame->height, 1);
     opaque->frame_buffer  = frame_buffer_ref;
     return opaque->managed_frame;
 }
@@ -136,12 +136,11 @@ static void func_free_l(SDL_VoutOverlay *overlay)
 
 static void overlay_fill(SDL_VoutOverlay *overlay, AVFrame *frame, int planes)
 {
-    AVPicture *pic = (AVPicture *) frame;
     overlay->planes = planes;
 
     for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i) {
-        overlay->pixels[i] = pic->data[i];
-        overlay->pitches[i] = pic->linesize[i];
+        overlay->pixels[i] = frame->data[i];
+        overlay->pitches[i] = frame->linesize[i];
     }
 }
 
@@ -161,7 +160,7 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
 {
     assert(overlay);
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
-    AVPicture swscale_dst_pic = { { 0 } };
+    AVFrame swscale_dst_pic = { { 0 } };
 
     av_frame_unref(opaque->linked_frame);
 

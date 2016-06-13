@@ -145,14 +145,7 @@ void ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque)
     assert(mp);
 
     MPTRACE("%s(%p)\n", __func__, opaque);
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
-#endif
-    ijkmp_set_option_int(mp, IJKMP_OPT_CATEGORY_FORMAT, "ijkinject-opaque", (int64_t)opaque);
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
+    ffp_set_inject_opaque(mp->ffplayer, opaque);
     MPTRACE("%s()=void\n", __func__);
 }
 

@@ -49,9 +49,17 @@
         }
         _spec = *aSpec;
 
+        if (aSpec->format != AUDIO_S16SYS) {
+            NSLog(@"aout_open_audio: unsupported format %d\n", (int)aSpec->format);
+            return nil;
+        }
+
+        if (aSpec->channels > 2) {
+            NSLog(@"aout_open_audio: unsupported channels %d\n", (int)aSpec->channels);
+            return nil;
+        }
+
         /* Get the current format */
-        _spec.format = AUDIO_S16SYS;
-        _spec.channels = 2;
         AudioStreamBasicDescription streamDescription;
         IJKSDLGetAudioStreamBasicDescriptionFromSpec(&_spec, &streamDescription);
 

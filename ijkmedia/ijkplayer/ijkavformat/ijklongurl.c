@@ -43,7 +43,7 @@ static int ijklongurl_open(URLContext *h, const char *arg, int flags, AVDictiona
     if (!c->url || !*c->url)
         return AVERROR_EXTERNAL;
 
-    return ffurl_open(&c->inner, c->url, flags, &h->interrupt_callback, options);
+    return ffurl_open_whitelist(&c->inner, c->url, flags, &h->interrupt_callback, options, h->protocol_whitelist);
 }
 
 static int ijklongurl_close(URLContext *h)

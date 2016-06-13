@@ -618,7 +618,7 @@ IjkMediaPlayer_getMediaMeta(JNIEnv *env, jobject thiz)
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_FORMAT, NULL );
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_DURATION_US, NULL );
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_START_US, NULL );
-    fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_START_US, NULL );
+    fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_BITRATE, NULL );
 
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_VIDEO_STREAM, "-1");
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_AUDIO_STREAM, "-1");

@@ -250,6 +250,9 @@ static IJKAVMoviePlayerController* instance;
                          completionHandler:^{
                              dispatch_async( dispatch_get_main_queue(), ^{
                                  [self didPrepareToPlayAsset:asset withKeys:requestedKeys];
+                                 [[NSNotificationCenter defaultCenter]
+                                  postNotificationName:IJKMPMovieNaturalSizeAvailableNotification
+                                  object:self];
                              });
                          }];
 }
@@ -334,6 +337,7 @@ static IJKAVMoviePlayerController* instance;
 
     _seekingTime = aCurrentPlaybackTime;
     _isSeeking = YES;
+    _bufferingProgress = 0;
     [self didPlaybackStateChange];
     [self didLoadStateChange];
     if (_isPrerolling) {
