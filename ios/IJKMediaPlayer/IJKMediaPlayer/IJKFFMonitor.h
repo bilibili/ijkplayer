@@ -35,6 +35,8 @@
 @property(nonatomic, readonly) int       height;     // height
 @property(nonatomic, readonly) NSString *vcodec;     // video codec
 @property(nonatomic, readonly) NSString *acodec;     // audio codec
+@property(nonatomic, readonly) int       sampleRate;
+@property(nonatomic, readonly) int64_t   channelLayout;
 
 @property(nonatomic) int       tcpError;
 @property(nonatomic) NSString *remoteIp;
