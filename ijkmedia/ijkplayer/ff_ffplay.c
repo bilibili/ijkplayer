@@ -2572,7 +2572,7 @@ static int read_thread(void *arg)
 #ifdef FFP_MERGE // bbc: dunno if we need this
     if (st_index[AVMEDIA_TYPE_VIDEO] >= 0) {
         AVStream *st = ic->streams[st_index[AVMEDIA_TYPE_VIDEO]];
-        AVCodecParameters *codecpar = st->codec;
+        AVCodecParameters *codecpar = st->codecpar;
         AVRational sar = av_guess_sample_aspect_ratio(ic, st, NULL);
         if (codecpar->width)
             set_default_window_size(codecpar->width, codecpar->height, sar);
@@ -2624,10 +2624,10 @@ static int read_thread(void *arg)
 
     if (!ffp->start_on_prepared)
         toggle_pause(ffp, 1);
-    if (is->video_st && is->video_st->codec) {
-        AVCodecContext *avctx = is->video_st->codec;
-        ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, avctx->width, avctx->height);
-        ffp_notify_msg3(ffp, FFP_MSG_SAR_CHANGED, avctx->sample_aspect_ratio.num, avctx->sample_aspect_ratio.den);
+    if (is->video_st && is->video_st->codecpar) {
+        AVCodecParameters *codecpar = is->video_st->codecpar;
+        ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, codecpar->width, codecpar->height);
+        ffp_notify_msg3(ffp, FFP_MSG_SAR_CHANGED, codecpar->sample_aspect_ratio.num, codecpar->sample_aspect_ratio.den);
     }
     ffp->prepared = true;
     ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
@@ -3987,9 +3987,9 @@ int ffp_get_video_rotate_degrees(FFPlayer *ffp)
 
 int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
 {
-    VideoState      *is = ffp->is;
-    AVFormatContext *ic = NULL;
-    AVCodecContext  *avctx = NULL;
+    VideoState        *is = ffp->is;
+    AVFormatContext   *ic = NULL;
+    AVCodecParameters *codecpar = NULL;
     if (!is)
         return -1;
     ic = is->ic;
@@ -4001,10 +4001,10 @@ int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
         return -1;
     }
 
-    avctx = ic->streams[stream]->codec;
+    codecpar = ic->streams[stream]->codecpar;
 
     if (selected) {
-        switch (avctx->codec_type) {
+        switch (codecpar->codec_type) {
             case AVMEDIA_TYPE_VIDEO:
                 if (stream != is->video_stream && is->video_stream >= 0)
                     stream_component_close(ffp, is->video_stream);
@@ -4014,12 +4014,12 @@ int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
                     stream_component_close(ffp, is->audio_stream);
                 break;
             default:
-                av_log(ffp, AV_LOG_ERROR, "select invalid stream %d of video type %d\n", stream, avctx->codec_type);
+                av_log(ffp, AV_LOG_ERROR, "select invalid stream %d of video type %d\n", stream, codecpar->codec_type);
                 return -1;
         }
         return stream_component_open(ffp, stream);
     } else {
-        switch (avctx->codec_type) {
+        switch (codecpar->codec_type) {
             case AVMEDIA_TYPE_VIDEO:
                 if (stream == is->video_stream)
                     stream_component_close(ffp, is->video_stream);
@@ -4029,7 +4029,7 @@ int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
                     stream_component_close(ffp, is->audio_stream);
                 break;
             default:
-                av_log(ffp, AV_LOG_ERROR, "select invalid stream %d of audio type %d\n", stream, avctx->codec_type);
+                av_log(ffp, AV_LOG_ERROR, "select invalid stream %d of audio type %d\n", stream, codecpar->codec_type);
                 return -1;
         }
         return 0;
