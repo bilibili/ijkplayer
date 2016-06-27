@@ -32,7 +32,7 @@
 
 #include "string.h"
 #include "ijkplayer/version.h"
-#include "ijkplayer/ijkavformat/ijkavformat.h"
+#include "libavformat/ijkavformat.h"
 
 static const char *kIJKFFRequiredFFmpegVersion = "ff3.0--ijk0.5.0--dev0.4.5--rc11";
 

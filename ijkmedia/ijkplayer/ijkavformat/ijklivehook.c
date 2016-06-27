@@ -24,7 +24,8 @@
 #include "libavutil/opt.h"
 
 #include "ijkplayer/ijkavutil/opt.h"
-#include "ijkavformat.h"
+
+#include "libavformat/ijkavformat.h"
 
 typedef struct {
     AVClass         *class;

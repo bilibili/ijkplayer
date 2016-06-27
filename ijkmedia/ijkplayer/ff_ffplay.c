@@ -60,7 +60,7 @@
 #endif
 
 #include "ijksdl/ijksdl_log.h"
-#include "ijkavformat/ijkavformat.h"
+#include "libavformat/ijkavformat.h"
 #include "ff_cmdutils.h"
 #include "ff_fferror.h"
 #include "ff_ffpipeline.h"
