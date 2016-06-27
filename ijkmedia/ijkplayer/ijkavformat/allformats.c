@@ -67,7 +67,7 @@ void ijkav_register_all(void)
     /* protocols */
     av_log(NULL, AV_LOG_INFO, "===== custom modules begin =====\n");
 #ifdef __ANDROID__
-    IJK_REGISTER_PROTOCOL(ijkmediadatasource);
+    // IJK_REGISTER_PROTOCOL(ijkmediadatasource);
 #endif
 
     /* demuxers */

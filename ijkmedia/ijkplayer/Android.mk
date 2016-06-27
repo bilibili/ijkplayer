@@ -51,14 +51,8 @@ LOCAL_SRC_FILES += android/pipeline/ffpipeline_android.c
 LOCAL_SRC_FILES += android/pipeline/ffpipenode_android_mediacodec_vdec.c
 
 LOCAL_SRC_FILES += ijkavformat/allformats.c
-LOCAL_SRC_FILES += ijkavformat/async.c
-LOCAL_SRC_FILES += ijkavformat/ijkinject.c
 LOCAL_SRC_FILES += ijkavformat/ijklivehook.c
-LOCAL_SRC_FILES += ijkavformat/ijklongurl.c
-LOCAL_SRC_FILES += ijkavformat/ijkmediadatasource.c
-LOCAL_SRC_FILES += ijkavformat/ijksegment.c
-LOCAL_SRC_FILES += ijkavformat/ijkurlhook.c
-LOCAL_SRC_FILES += ijkavformat/utils.c
+# LOCAL_SRC_FILES += ijkavformat/ijkmediadatasource.c
 
 LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl
 LOCAL_STATIC_LIBRARIES := android-ndk-profiler
