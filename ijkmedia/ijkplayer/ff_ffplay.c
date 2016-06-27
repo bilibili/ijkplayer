@@ -2366,6 +2366,13 @@ static int decode_interrupt_cb(void *ctx)
     return is->abort_request;
 }
 
+static int stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue *queue, int min_frames) {
+    return stream_id < 0 ||
+           queue->abort_request ||
+           (st->disposition & AV_DISPOSITION_ATTACHED_PIC) ||
+           queue->nb_packets > min_frames;
+}
+
 static int is_realtime(AVFormatContext *s)
 {
     if(   !strcmp(s->iformat->name, "rtp")
@@ -2735,16 +2742,12 @@ static int read_thread(void *arg)
 #ifdef FFP_MERGE
               (is->audioq.size + is->videoq.size + is->subtitleq.size > MAX_QUEUE_SIZE
 #else
-              (((is->audioq.size + is->videoq.size > ffp->dcc.max_buffer_size)
-                 && (is->audioq.nb_packets > MIN_MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
-                 && (is->videoq.nb_packets > MIN_MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)
-                )
+              (is->audioq.size + is->videoq.size > ffp->dcc.max_buffer_size
 #endif
-            || (   (is->audioq   .nb_packets > MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
-                && (is->videoq   .nb_packets > MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request
-                    || (is->video_st->disposition & AV_DISPOSITION_ATTACHED_PIC))
+            || (   stream_has_enough_packets(is->audio_st, is->audio_stream, &is->audioq, MIN_FRAMES)
+                && stream_has_enough_packets(is->video_st, is->video_stream, &is->videoq, MIN_FRAMES)
 #ifdef FFP_MERGE
-                && (is->subtitleq.nb_packets > MIN_FRAMES || is->subtitle_stream < 0 || is->subtitleq.abort_request)))) {
+                && stream_has_enough_packets(is->subtitle_st, is->subtitle_stream, &is->subtitleq, MIN_FRAMES)))) {
 #else
                 ))) {
 #endif
