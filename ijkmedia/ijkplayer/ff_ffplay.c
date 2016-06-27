@@ -452,6 +452,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
 
 static void decoder_destroy(Decoder *d) {
     av_packet_unref(&d->pkt);
+    avcodec_free_context(&d->avctx);
 }
 
 static void frame_queue_unref_item(Frame *vp)
@@ -662,13 +663,13 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
 {
     VideoState *is = ffp->is;
     AVFormatContext *ic = is->ic;
-    AVCodecContext *avctx;
+    AVCodecParameters *codecpar;
 
     if (stream_index < 0 || stream_index >= ic->nb_streams)
         return;
-    avctx = ic->streams[stream_index]->codec;
+    codecpar = ic->streams[stream_index]->codecpar;
 
-    switch (avctx->codec_type) {
+    switch (codecpar->codec_type) {
     case AVMEDIA_TYPE_AUDIO:
         decoder_abort(&is->auddec, &is->sampq);
         SDL_AoutCloseAudio(ffp->aout);
@@ -698,8 +699,7 @@ static void stream_component_close(FFPlayer *ffp, int stream_index)
     }
 
     ic->streams[stream_index]->discard = AVDISCARD_ALL;
-    avcodec_close(avctx);
-    switch (avctx->codec_type) {
+    switch (codecpar->codec_type) {
     case AVMEDIA_TYPE_AUDIO:
         is->audio_st = NULL;
         is->audio_stream = -1;
@@ -1143,8 +1143,8 @@ display:
                    aqsize / 1024,
                    vqsize / 1024,
                    sqsize,
-                   is->video_st ? is->video_st->codec->pts_correction_num_faulty_dts : 0,
-                   is->video_st ? is->video_st->codec->pts_correction_num_faulty_pts : 0);
+                   is->video_st ? is->viddec.avctx->pts_correction_num_faulty_dts : 0,
+                   is->video_st ? is->viddec.avctx->pts_correction_num_faulty_pts : 0);
             fflush(stdout);
             last_time = cur_time;
         }
@@ -1387,7 +1387,7 @@ static int configure_video_filters(FFPlayer *ffp, AVFilterGraph *graph, VideoSta
     char buffersrc_args[256];
     int ret;
     AVFilterContext *filt_src = NULL, *filt_out = NULL, *last_filter = NULL;
-    AVCodecContext *codec = is->video_st->codec;
+    AVCodecParameters *codecpar = is->video_st->codecpar;
     AVRational fr = av_guess_frame_rate(is->ic, is->video_st, NULL);
     AVDictionaryEntry *e = NULL;
 
@@ -1406,7 +1406,7 @@ static int configure_video_filters(FFPlayer *ffp, AVFilterGraph *graph, VideoSta
              "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
              frame->width, frame->height, frame->format,
              is->video_st->time_base.num, is->video_st->time_base.den,
-             codec->sample_aspect_ratio.num, FFMAX(codec->sample_aspect_ratio.den, 1));
+             codecpar->sample_aspect_ratio.num, FFMAX(codecpar->sample_aspect_ratio.den, 1));
     if (fr.num && fr.den)
         av_strlcatf(buffersrc_args, sizeof(buffersrc_args), ":frame_rate=%d/%d", fr.num, fr.den);
 
@@ -2185,7 +2185,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     VideoState *is = ffp->is;
     AVFormatContext *ic = is->ic;
     AVCodecContext *avctx;
-    AVCodec *codec;
+    AVCodec *codec = NULL;
     const char *forced_codec_name = NULL;
     AVDictionary *opts;
     AVDictionaryEntry *t = NULL;
@@ -2196,7 +2196,14 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
     if (stream_index < 0 || stream_index >= ic->nb_streams)
         return -1;
-    avctx = ic->streams[stream_index]->codec;
+    avctx = avcodec_alloc_context3(NULL);
+    if (!avctx)
+        return AVERROR(ENOMEM);
+
+    ret = avcodec_parameters_to_context(avctx, ic->streams[stream_index]->codecpar);
+    if (ret < 0)
+        goto fail;
+    av_codec_set_pkt_timebase(avctx, ic->streams[stream_index]->time_base);
 
     codec = avcodec_find_decoder(avctx->codec_id);
 
@@ -2213,7 +2220,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
                                       "No codec could be found with name '%s'\n", forced_codec_name);
         else                   av_log(NULL, AV_LOG_WARNING,
                                       "No codec could be found with id %d\n", avctx->codec_id);
-        return -1;
+        ret = AVERROR(EINVAL);
+        goto fail;
     }
 
     avctx->codec_id = codec->id;
@@ -2307,7 +2315,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
             is->auddec.start_pts_tb = is->audio_st->time_base;
         }
         if ((ret = decoder_start(&is->auddec, audio_thread, ffp, "ff_audio_dec")) < 0)
-            goto fail;
+            goto out;
         SDL_AoutPauseAudio(ffp->aout, 0);
         break;
     case AVMEDIA_TYPE_VIDEO:
@@ -2324,7 +2332,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         if (!ffp->node_vdec)
             goto fail;
         if ((ret = decoder_start(&is->viddec, video_thread, ffp, "ff_video_dec")) < 0)
-            goto fail;
+            goto out;
         is->queue_attachments_req = 1;
 
         if (ffp->max_fps >= 0) {
@@ -2360,7 +2368,11 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     default:
         break;
     }
+    goto out;
+
 fail:
+    avcodec_free_context(&avctx);
+out:
     av_dict_free(&opts);
 
     return ret;
@@ -2523,17 +2535,18 @@ static int read_thread(void *arg)
     int first_h264_stream = -1;
     for (i = 0; i < ic->nb_streams; i++) {
         AVStream *st = ic->streams[i];
-        enum AVMediaType type = st->codec->codec_type;
+        enum AVMediaType type = st->codecpar->codec_type;
         st->discard = AVDISCARD_ALL;
         if (ffp->wanted_stream_spec[type] && st_index[type] == -1)
             if (avformat_match_stream_specifier(ic, st, ffp->wanted_stream_spec[type]) > 0)
                 st_index[type] = i;
 
         // choose first h264
-        AVCodecContext *codec = ic->streams[i]->codec;
-        if (codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+
+        if (type == AVMEDIA_TYPE_VIDEO) {
+            enum AVCodecID codec_id = st->codecpar->codec_id;
             video_stream_count++;
-            if (codec->codec_id == AV_CODEC_ID_H264) {
+            if (codec_id == AV_CODEC_ID_H264) {
                 h264_stream_count++;
                 if (first_h264_stream < 0)
                     first_h264_stream = i;
@@ -2569,10 +2582,10 @@ static int read_thread(void *arg)
 #ifdef FFP_MERGE // bbc: dunno if we need this
     if (st_index[AVMEDIA_TYPE_VIDEO] >= 0) {
         AVStream *st = ic->streams[st_index[AVMEDIA_TYPE_VIDEO]];
-        AVCodecContext *avctx = st->codec;
+        AVCodecParameters *codecpar = st->codec;
         AVRational sar = av_guess_sample_aspect_ratio(ic, st, NULL);
-        if (avctx->width)
-            set_default_window_size(avctx->width, avctx->height, sar);
+        if (codecpar->width)
+            set_default_window_size(codecpar->width, codecpar->height, sar);
     }
 #endif
 
