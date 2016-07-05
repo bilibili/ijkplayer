@@ -24,6 +24,7 @@
 
 #import "IJKSDLAudioQueueController.h"
 #import "IJKSDLAudioKit.h"
+#import "ijksdl_log.h"
 
 #import <AVFoundation/AVFoundation.h>
 
@@ -207,6 +208,11 @@
         AudioQueueSetProperty(_audioQueueRef, kAudioQueueProperty_TimePitchBypass, &propValue, sizeof(propValue));
         AudioQueueSetParameter(_audioQueueRef, kAudioQueueParam_PlayRate, playbackRate);
     }
+}
+
+- (double)get_latency_seconds
+{
+    return ((double)(kIJKAudioQueueNumberBuffers)) * _spec.samples / _spec.freq;
 }
 
 static void IJKSDLAudioQueueOuptutCallback(void * inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer) {
