@@ -2129,7 +2129,7 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
         next_sample_rate_idx--;
     wanted_spec.format = AUDIO_S16SYS;
     wanted_spec.silence = 0;
-    wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AUDIO_MAX_CALLBACKS_PER_SEC));
+    wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AoutGetAudioPerSecondCallBacks(ffp->aout)));
     wanted_spec.callback = sdl_audio_callback;
     wanted_spec.userdata = opaque;
     while (SDL_AoutOpenAudio(ffp->aout, &wanted_spec, &spec) < 0) {
