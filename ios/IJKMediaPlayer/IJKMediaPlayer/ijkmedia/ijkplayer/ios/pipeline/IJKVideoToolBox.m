@@ -275,16 +275,20 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 {
     @autoreleasepool {
         VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
-        if (!ctx || (status != noErr)) {
+        if (!ctx)
             return;
-        }
 
-        FFPlayer   *ffp = ctx->ffp;
-        VideoState *is  = ffp->is;
-
-        sort_queue *newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
+        FFPlayer   *ffp         = ctx->ffp;
+        VideoState *is          = ffp->is;
+        sort_queue *newFrame    = NULL;
 
         sample_info *sample_info = sourceFrameRefCon;
+        if (!sample_info->is_decoding) {
+            ALOGD("VTB: frame out of date: id=%d\n", sample_info->sample_id);
+            goto failed;
+        }
+
+        newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
         newFrame->pic.pkt_pts    = sample_info->pts;
         newFrame->pic.pkt_dts    = sample_info->dts;
         newFrame->pic.sample_aspect_ratio.num = sample_info->sar_num;
@@ -299,10 +303,6 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             newFrame->sort    = newFrame->pic.pkt_dts;
             newFrame->pic.pts = newFrame->pic.pkt_dts;
         }
-
-#ifdef FFP_SHOW_VTB_IN_DECODING
-        ALOGD("VTB: indecoding: %d\n", ctx->sample_infos_in_decoding);
-#endif
 
         if (ctx->dealloced || is->abort_request || is->viddec.queue->abort_request)
             goto failed;
@@ -530,6 +530,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
 
         if(context->m_vt_session) {
             VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+            sample_info_flush(context, 1000);
             VTDecompressionSessionInvalidate(context->m_vt_session);
             CFRelease(context->m_vt_session);
             context->m_vt_session = NULL;
@@ -622,6 +623,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         }
         if (status == kVTVideoDecoderMalfunctionErr) {
             context->recovery_drop_packet = true;
+            context->refresh_session = true;
         }
         goto failed;
     }
@@ -691,6 +693,7 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         int ret = 0;
         if (context->m_vt_session) {
             VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+            sample_info_flush(context, 1000);
             VTDecompressionSessionInvalidate(context->m_vt_session);
             CFRelease(context->m_vt_session);
         }
