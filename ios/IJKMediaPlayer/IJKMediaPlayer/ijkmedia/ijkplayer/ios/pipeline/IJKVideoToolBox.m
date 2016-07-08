@@ -94,6 +94,9 @@ struct VideoToolBoxContext {
     SDL_SpeedSampler            sampler;
 };
 
+static void vtbformat_destroy(VTBFormatDesc *fmt_desc);
+static int  vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecContext *avctx);
+
 static const char *vtb_get_error_string(OSStatus status) {
     switch (status) {
         case kVTInvalidSessionErr:                      return "kVTInvalidSessionErr";
@@ -857,13 +860,11 @@ void videotoolbox_free(VideoToolBoxContext* context)
     }
     if (context) {
         ResetPktBuffer(context);
-        if (context->fmt_desc.fmt_desc) {
-            CFRelease(context->fmt_desc.fmt_desc);
-            context->fmt_desc.fmt_desc = NULL;
-        }
         SDL_DestroyCondP(&context->sample_info_cond);
         SDL_DestroyMutexP(&context->sample_info_mutex);
     }
+
+    vtbformat_destroy(&context->fmt_desc);
 }
 
 int videotoolbox_decode_frame(VideoToolBoxContext* context)
@@ -928,7 +929,7 @@ int videotoolbox_decode_frame(VideoToolBoxContext* context)
     return got_frame;
 }
 
-void vtbformat_destroy(VTBFormatDesc *fmt_desc)
+static void vtbformat_destroy(VTBFormatDesc *fmt_desc)
 {
     if (!fmt_desc || !fmt_desc->fmt_desc)
         return;
@@ -937,7 +938,7 @@ void vtbformat_destroy(VTBFormatDesc *fmt_desc)
     fmt_desc->fmt_desc = NULL;
 }
 
-int vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecContext *avctx)
+static int vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecContext *avctx)
 {
     int width           = avctx->width;
     int height          = avctx->height;
