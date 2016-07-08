@@ -75,7 +75,7 @@ struct VideoToolBoxContext {
     volatile bool               recovery_drop_packet;
 
     VTBFormatDesc               fmt_desc;
-    VTDecompressionSessionRef   m_vt_session;
+    VTDecompressionSessionRef   vt_session;
     pthread_mutex_t             m_queue_mutex;
     volatile sort_queue        *m_sort_queue;
     volatile int32_t            m_queue_depth;
@@ -493,8 +493,20 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 }
 
 
+void vtbsession_destroy_p(VTDecompressionSessionRef *vt_session_ptr)
+{
+    if (!vt_session_ptr || !*vt_session_ptr)
+        return;
 
-void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
+    VTDecompressionSessionRef vt_session = *vt_session_ptr;
+    VTDecompressionSessionWaitForAsynchronousFrames(vt_session);
+    VTDecompressionSessionInvalidate(vt_session);
+    CFRelease(vt_session);
+
+    *vt_session_ptr = NULL;
+}
+
+VTDecompressionSessionRef vtbsession_create(VideoToolBoxContext* context, int width, int height)
 {
     FFPlayer *ffp = context->ffp;
 
@@ -536,17 +548,15 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
                                           &vt_session);
 
     if (status != noErr) {
-        context->m_vt_session = NULL;
         NSError* error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
         NSLog(@"Error %@", [error description]);
         ALOGI("%s - failed with status = (%d)", __FUNCTION__, (int)status);
-    } else {
-        context->m_vt_session =(void*) vt_session;
     }
     CFRelease(destinationPixelBufferAttributes);
 
     memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
     context->sample_infos_in_decoding = 0;
+    return vt_session;
 }
 
 
@@ -580,20 +590,18 @@ static int decode_video_internal(VideoToolBoxContext* context, AVCodecContext *a
     }
 
     if (context->refresh_request) {
-
         while (context->m_queue_depth > 0) {
             SortQueuePop(context);
         }
 
-        if(context->m_vt_session) {
-            VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-            sample_info_flush(context, 1000);
-            VTDecompressionSessionInvalidate(context->m_vt_session);
-            CFRelease(context->m_vt_session);
-            context->m_vt_session = NULL;
-        }
+        sample_info_flush(context, 1000);
+        vtbsession_destroy_p(&context->vt_session);
+        memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
+        context->sample_infos_in_decoding = 0;
 
-        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
+        context->vt_session = vtbsession_create(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
+        if (!context->vt_session)
+            goto failed;
         context->refresh_request = false;
     }
 
@@ -659,14 +667,14 @@ static int decode_video_internal(VideoToolBoxContext* context, AVCodecContext *a
     sample_info->sar_den = avctx->sample_aspect_ratio.den;
     sample_info_push(context);
 
-    status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)sample_info, 0);
+    status = VTDecompressionSessionDecodeFrame(context->vt_session, sample_buff, decoder_flags, (void*)sample_info, 0);
     if (status == noErr) {
         if (context->ffp->is->videoq.abort_request)
             goto failed;
 
         // Wait for delayed frames even if kVTDecodeInfo_Asynchronous is not set.
         if (ffp->vtb_wait_async) {
-            status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+            status = VTDecompressionSessionWaitForAsynchronousFrames(context->vt_session);
         }
     }
 
@@ -748,14 +756,15 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, con
 
     if (context->refresh_session) {
         int ret = 0;
-        if (context->m_vt_session) {
-            VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-            sample_info_flush(context, 1000);
-            VTDecompressionSessionInvalidate(context->m_vt_session);
-            CFRelease(context->m_vt_session);
-        }
 
-        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
+        sample_info_flush(context, 1000);
+        vtbsession_destroy_p(&context->vt_session);
+        memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
+        context->sample_infos_in_decoding = 0;
+
+        context->vt_session = vtbsession_create(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
+        if (!context->vt_session)
+            return -1;
 
         if ((context->m_buffer_deep > 0) &&
             ff_avpacket_i_or_idr(&context->m_buffer_packet[0], context->idr_based_identified) == true ) {
@@ -851,13 +860,10 @@ void videotoolbox_free(VideoToolBoxContext* context)
     while (context && context->m_queue_depth > 0) {
         SortQueuePop(context);
     }
-    if (context && context->m_vt_session) {
-        VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-        sample_info_flush(context, 3000);
-        VTDecompressionSessionInvalidate(context->m_vt_session);
-        CFRelease(context->m_vt_session);
-        context->m_vt_session = NULL;
-    }
+
+    sample_info_flush(context, 3000);
+    vtbsession_destroy_p(&context->vt_session);
+
     if (context) {
         ResetPktBuffer(context);
         SDL_DestroyCondP(&context->sample_info_cond);
@@ -1068,8 +1074,8 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
         goto fail;
     assert(context_vtb->fmt_desc.fmt_desc);
 
-    CreateVTBSession(context_vtb, width, height);
-    if (context_vtb->m_vt_session == NULL)
+    context_vtb->vt_session = vtbsession_create(context_vtb, width, height);
+    if (context_vtb->vt_session == NULL)
         goto fail;
 
     context_vtb->m_sort_queue = 0;
