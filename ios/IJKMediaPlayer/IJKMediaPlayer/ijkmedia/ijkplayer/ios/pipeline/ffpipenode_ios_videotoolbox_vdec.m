@@ -112,7 +112,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ios_videotoolbox(FFPlayer *
     opaque->avctx = opaque->decoder->avctx;
     switch (opaque->avctx->codec_id) {
     case AV_CODEC_ID_H264:
-        opaque->context = init_videotoolbox(ffp, opaque->avctx);
+        opaque->context = videotoolbox_create(ffp, opaque->avctx);
         break;
     default:
         ALOGI("Videotoolbox-pipeline:open_video_decoder: not H264\n");

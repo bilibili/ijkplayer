@@ -38,7 +38,7 @@
 
 typedef struct VideoToolBoxContext VideoToolBoxContext;
 
-VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic);
+VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* ic);
 
 int videotoolbox_decode_frame(VideoToolBoxContext* context);
 

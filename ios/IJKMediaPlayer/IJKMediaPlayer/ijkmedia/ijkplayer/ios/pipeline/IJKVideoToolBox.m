@@ -922,7 +922,7 @@ int videotoolbox_decode_frame(VideoToolBoxContext* context)
     return got_frame;
 }
 
-VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* avctx)
+VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
 {
     int width           = avctx->width;
     int height          = avctx->height;
