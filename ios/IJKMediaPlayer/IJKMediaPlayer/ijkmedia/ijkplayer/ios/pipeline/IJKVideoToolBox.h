@@ -36,62 +36,11 @@
 #define MAX_PKT_QUEUE_DEEP   350
 #define VTB_MAX_DECODING_SAMPLES 3
 
-
-typedef struct sample_info {
-    int     sample_id;
-
-    double  sort;
-    double  dts;
-    double  pts;
-    int     serial;
-
-    int     sar_num;
-    int     sar_den;
-
-    volatile int is_decoding;
-} sample_info;
-
-typedef struct sort_queue {
-    AVFrame pic;
-    int serial;
-    int64_t sort;
-    volatile struct sort_queue *nextframe;
-} sort_queue;
-
-typedef struct VideoToolBoxContext {
-    FFPlayer                   *ffp;
-    volatile bool               refresh_request;
-    volatile bool               new_seg_flag;
-    volatile bool               idr_based_identified;
-    volatile bool               refresh_session;
-    volatile bool               recovery_drop_packet;
-    VTDecompressionSessionRef   m_vt_session;
-    CMFormatDescriptionRef      m_fmt_desc;
-    pthread_mutex_t             m_queue_mutex;
-    volatile sort_queue        *m_sort_queue;
-    volatile int32_t            m_queue_depth;
-    int32_t                     m_max_ref_frames;
-    bool                        m_convert_bytestream;
-    bool                        m_convert_3byteTo4byteNALSize;
-    int                         serial;
-    bool                        dealloced;
-    int                         m_buffer_deep;
-    AVPacket                    m_buffer_packet[MAX_PKT_QUEUE_DEEP];
-
-    SDL_mutex                  *sample_info_mutex;
-    SDL_cond                   *sample_info_cond;
-    sample_info                 sample_info_array[VTB_MAX_DECODING_SAMPLES];
-    volatile int                sample_info_index;
-    volatile int                sample_info_id_generator;
-    volatile int                sample_infos_in_decoding;
-
-    SDL_SpeedSampler            sampler;
-} VideoToolBoxContext ;
-
+typedef struct VideoToolBoxContext VideoToolBoxContext;
 
 VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic);
 
-int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt,int* got_picture_ptr);
+int videotoolbox_decode_frame(VideoToolBoxContext* context);
 
 void dealloc_videotoolbox(VideoToolBoxContext* context);
 
