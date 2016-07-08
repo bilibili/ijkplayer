@@ -812,17 +812,17 @@ void dealloc_videotoolbox(VideoToolBoxContext* context)
 
 
 
-VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
+VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* avctx)
 {
-    int width           = ic->width;
-    int height          = ic->height;
-    int level           = ic->level;
-    int profile         = ic->profile;
+    int width           = avctx->width;
+    int height          = avctx->height;
+    int level           = avctx->level;
+    int profile         = avctx->profile;
     int sps_level       = 0;
     int sps_profile     = 0;
-    int extrasize       = ic->extradata_size;
-    int codec           = ic->codec_id;
-    uint8_t* extradata  = ic->extradata;
+    int extrasize       = avctx->extradata_size;
+    int codec           = avctx->codec_id;
+    uint8_t* extradata  = avctx->extradata;
 
     VideoToolBoxContext *context_vtb = (VideoToolBoxContext *)mallocz(sizeof(VideoToolBoxContext));
     if (!context_vtb) {
