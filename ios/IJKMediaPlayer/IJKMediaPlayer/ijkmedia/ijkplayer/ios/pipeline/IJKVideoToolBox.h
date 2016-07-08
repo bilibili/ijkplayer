@@ -42,6 +42,6 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* ic);
 
 int videotoolbox_decode_frame(VideoToolBoxContext* context);
 
-void dealloc_videotoolbox(VideoToolBoxContext* context);
+void videotoolbox_free(VideoToolBoxContext* context);
 
 #endif

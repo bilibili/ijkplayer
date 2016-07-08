@@ -81,7 +81,7 @@ static int func_run_sync(IJKFF_Pipenode *node)
     int ret = videotoolbox_video_thread(opaque);
 
     if (opaque->context) {
-        dealloc_videotoolbox(opaque->context);
+        videotoolbox_free(opaque->context);
         free(opaque->context);
         opaque->context = NULL;
     }

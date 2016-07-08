@@ -835,7 +835,7 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
         return NULL;
 }
 
-void dealloc_videotoolbox(VideoToolBoxContext* context)
+void videotoolbox_free(VideoToolBoxContext* context)
 {
     context->dealloced = true;
 
