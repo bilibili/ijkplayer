@@ -35,9 +35,7 @@
 #import <Foundation/Foundation.h>
 #import "IJKDeviceModel.h"
 
-#define IJK_VTB_FCC_AVC    SDL_FOURCC('C', 'c', 'v', 'a')
-#define IJK_VTB_FCC_ESD    SDL_FOURCC('s', 'd', 's', 'e')
-#define IJK_VTB_FCC_AVC1   SDL_FOURCC('1', 'c', 'v', 'a')
+#define IJK_VTB_FCC_AVCC   SDL_FOURCC('C', 'c', 'v', 'a')
 
 
 static const char *vtb_get_error_string(OSStatus status) {
@@ -880,7 +878,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
                     context_vtb->m_convert_3byteTo4byteNALSize = true;
                 }
 
-                context_vtb->m_fmt_desc = CreateFormatDescriptionFromCodecData(IJK_VTB_FCC_AVC1, width, height, extradata, extrasize,  IJK_VTB_FCC_AVC);
+                context_vtb->m_fmt_desc = CreateFormatDescriptionFromCodecData(kCMVideoCodecType_H264, width, height, extradata, extrasize,  IJK_VTB_FCC_AVCC);
 
                 ALOGI("%s - using avcC atom of size(%d), ref_frames(%d)", __FUNCTION__, extrasize, context_vtb->m_max_ref_frames);
             } else {
@@ -902,7 +900,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
                             goto failed;
                         }
 
-                        context_vtb->m_fmt_desc = CreateFormatDescriptionFromCodecData(IJK_VTB_FCC_AVC1, width, height, extradata, extrasize, IJK_VTB_FCC_AVC);
+                        context_vtb->m_fmt_desc = CreateFormatDescriptionFromCodecData(kCMVideoCodecType_H264, width, height, extradata, extrasize, IJK_VTB_FCC_AVCC);
 
                         av_free(extradata);
                     } else {
