@@ -73,6 +73,8 @@ int decoder_decode_frame_videotoolbox(VideoToolBoxContext* context) {
                 }
             } while (ffp_is_flush_packet(&pkt) || d->queue->serial != d->pkt_serial);
 
+            av_packet_split_side_data(&pkt);
+
             av_packet_unref(&d->pkt);
             d->pkt_temp = d->pkt = pkt;
             d->packet_pending = 1;
