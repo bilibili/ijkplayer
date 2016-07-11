@@ -174,7 +174,7 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create(SDL_VoutOverlay *overlay)
         case SDL_FCC_I420:      renderer = IJK_GLES2_Renderer_create_yuv420p(); break;
         case SDL_FCC_I444P10LE: renderer = IJK_GLES2_Renderer_create_yuv444p10le(); break;
         default:
-            ALOGE("[GLES2] unknown format %4s(%d)", (char *)&overlay->format, overlay->format);
+            ALOGE("[GLES2] unknown format %4s(%d)\n", (char *)&overlay->format, overlay->format);
             return NULL;
     }
 
@@ -320,7 +320,7 @@ static void IJK_GLES2_Renderer_TexCoords_reset(IJK_GLES2_Renderer *renderer)
 
 static void IJK_GLES2_Renderer_TexCoords_cropRight(IJK_GLES2_Renderer *renderer, GLfloat cropRight)
 {
-    ALOGE("IJK_GLES2_Renderer_TexCoords_cropRight");
+    ALOGE("IJK_GLES2_Renderer_TexCoords_cropRight\n");
     renderer->texcoords[0] = 0.0f;
     renderer->texcoords[1] = 1.0f;
     renderer->texcoords[2] = 1.0f - cropRight;
