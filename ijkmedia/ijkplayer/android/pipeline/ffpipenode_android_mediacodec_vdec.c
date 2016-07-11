@@ -1042,8 +1042,8 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     ALOGI("AMediaFormat: %s, %dx%d\n", opaque->mcc.mime_type, opaque->avctx->width, opaque->avctx->height);
     opaque->input_aformat = SDL_AMediaFormatJava_createVideoFormat(env, opaque->mcc.mime_type, opaque->avctx->width, opaque->avctx->height);
     if (opaque->avctx->extradata && opaque->avctx->extradata_size > 0) {
-        if ((opaque->avctx->codec_id == AV_CODEC_ID_H264 || opaque->avctx->codec_id == AV_CODEC_ID_HEVC)
-            && opaque->avctx->extradata[0] == 1) {
+        if ((opaque->avctx->codec_id == AV_CODEC_ID_H264  && opaque->avctx->extradata[0] == 1)
+            || (opaque->avctx->codec_id == AV_CODEC_ID_HEVC && opaque->avctx->extradata[1] == 1)) {
 #if AMC_USE_AVBITSTREAM_FILTER
             if (opaque->avctx->codec_id == AV_CODEC_ID_H264) {
                 opaque->bsfc = av_bitstream_filter_init("h264_mp4toannexb");
