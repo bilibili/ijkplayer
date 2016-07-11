@@ -509,10 +509,12 @@ void vtbsession_destroy(VideoToolBoxContext *context)
     }
 }
 
-VTDecompressionSessionRef vtbsession_create(VideoToolBoxContext* context, int width, int height)
+VTDecompressionSessionRef vtbsession_create(VideoToolBoxContext* context)
 {
     FFPlayer *ffp = context->ffp;
     int       ret = 0;
+    int       width  = context->codecpar->width;
+    int       height = context->codecpar->height;
 
     VTDecompressionSessionRef vt_session = NULL;
     CFMutableDictionaryRef destinationPixelBufferAttributes;
@@ -604,7 +606,7 @@ static int decode_video_internal(VideoToolBoxContext* context, AVCodecContext *a
         memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
         context->sample_infos_in_decoding = 0;
 
-        context->vt_session = vtbsession_create(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
+        context->vt_session = vtbsession_create(context);
         if (!context->vt_session)
             goto failed;
         context->refresh_request = false;
@@ -740,34 +742,83 @@ static inline void DuplicatePkt(VideoToolBoxContext* context, const AVPacket* pk
 
 
 
-static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
+static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVPacket *avpkt, int* got_picture_ptr)
 {
+    int      ret            = 0;
+    uint8_t *size_data      = NULL;
+    int      size_data_size = 0;
+
     if (!avpkt || !avpkt->data) {
         return 0;
     }
 
-    if (ff_avpacket_is_idr(avpkt) == true) {
-        context->idr_based_identified = true;
-    }
-    if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
-        ResetPktBuffer(context);
-        context->recovery_drop_packet = false;
-    }
-    if (context->recovery_drop_packet == true) {
-        return -1;
+    if (context->codecpar->codec_id == AV_CODEC_ID_H264) {
+        size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
+        if (size_data && size_data_size > AV_INPUT_BUFFER_PADDING_SIZE) {
+            int             got_picture = 0;
+            AVFrame        *frame      = av_frame_alloc();
+            AVDictionary   *codec_opts = NULL;
+            AVCodecContext *new_avctx  = avcodec_alloc_context3(avctx->codec);
+            if (!new_avctx)
+                return AVERROR(ENOMEM);
+
+            avcodec_parameters_to_context(new_avctx, context->codecpar);
+            av_freep(&new_avctx->extradata);
+            new_avctx->extradata = av_mallocz(size_data_size);
+            if (!new_avctx->extradata)
+                return AVERROR(ENOMEM);
+            memcpy(new_avctx->extradata, size_data, size_data_size);
+            new_avctx->extradata_size = size_data_size;
+
+            av_dict_set(&codec_opts, "threads", "1", 0);
+            ret = avcodec_open2(new_avctx, avctx->codec, &codec_opts);
+            av_dict_free(&codec_opts);
+            if (ret < 0) {
+                avcodec_free_context(&new_avctx);
+                return ret;
+            }
+
+            ret = avcodec_decode_video2(new_avctx, frame, &got_picture, avpkt);
+            if (ret < 0) {
+                avcodec_free_context(&new_avctx);
+                return ret;
+            }
+
+            if (got_picture) {
+                if (context->codecpar->width  != new_avctx->width &&
+                    context->codecpar->height != new_avctx->height) {
+                    avcodec_parameters_from_context(context->codecpar, new_avctx);
+                    context->refresh_request = true;
+                }
+            }
+
+            av_frame_unref(frame);
+            avcodec_free_context(&new_avctx);
+        }
+    } else {
+        if (ff_avpacket_is_idr(avpkt) == true) {
+            context->idr_based_identified = true;
+        }
+        if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
+            ResetPktBuffer(context);
+            context->recovery_drop_packet = false;
+        }
+        if (context->recovery_drop_packet == true) {
+            return -1;
+        }
     }
 
     DuplicatePkt(context, avpkt);
 
     if (context->refresh_session) {
-        int ret = 0;
+        ret = 0;
 
         sample_info_flush(context, 1000);
         vtbsession_destroy(context);
         memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
         context->sample_infos_in_decoding = 0;
 
-        context->vt_session = vtbsession_create(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
+        context->vt_session = vtbsession_create(context);
         if (!context->vt_session)
             return -1;
 
@@ -1064,9 +1115,7 @@ fail:
 
 VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
 {
-    int ret    = 0;
-    int width  = avctx->width;
-    int height = avctx->height;
+    int ret = 0;
 
     VideoToolBoxContext *context_vtb = (VideoToolBoxContext *)mallocz(sizeof(VideoToolBoxContext));
     if (!context_vtb) {
@@ -1089,7 +1138,7 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
         goto fail;
     assert(context_vtb->fmt_desc.fmt_desc);
 
-    context_vtb->vt_session = vtbsession_create(context_vtb, width, height);
+    context_vtb->vt_session = vtbsession_create(context_vtb);
     if (context_vtb->vt_session == NULL)
         goto fail;
 
