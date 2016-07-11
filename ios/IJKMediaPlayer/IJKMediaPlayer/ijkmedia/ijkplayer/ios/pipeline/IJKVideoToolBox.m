@@ -74,6 +74,7 @@ struct VideoToolBoxContext {
     volatile bool               refresh_session;
     volatile bool               recovery_drop_packet;
 
+    AVCodecParameters          *codecpar;
     VTBFormatDesc               fmt_desc;
     VTDecompressionSessionRef   vt_session;
     pthread_mutex_t             m_queue_mutex;
@@ -95,7 +96,7 @@ struct VideoToolBoxContext {
 };
 
 static void vtbformat_destroy(VTBFormatDesc *fmt_desc);
-static int  vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecContext *avctx);
+static int  vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecParameters *codecpar);
 
 static const char *vtb_get_error_string(OSStatus status) {
     switch (status) {
@@ -493,32 +494,36 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 }
 
 
-void vtbsession_destroy_p(VTDecompressionSessionRef *vt_session_ptr)
+void vtbsession_destroy(VideoToolBoxContext *context)
 {
-    if (!vt_session_ptr || !*vt_session_ptr)
+    if (!context)
         return;
 
-    VTDecompressionSessionRef vt_session = *vt_session_ptr;
-    VTDecompressionSessionWaitForAsynchronousFrames(vt_session);
-    VTDecompressionSessionInvalidate(vt_session);
-    CFRelease(vt_session);
+    vtbformat_destroy(&context->fmt_desc);
 
-    *vt_session_ptr = NULL;
+    if (context->vt_session) {
+        VTDecompressionSessionWaitForAsynchronousFrames(context->vt_session);
+        VTDecompressionSessionInvalidate(context->vt_session);
+        CFRelease(context->vt_session);
+        context->vt_session = NULL;
+    }
 }
 
 VTDecompressionSessionRef vtbsession_create(VideoToolBoxContext* context, int width, int height)
 {
     FFPlayer *ffp = context->ffp;
+    int       ret = 0;
 
     VTDecompressionSessionRef vt_session = NULL;
     CFMutableDictionaryRef destinationPixelBufferAttributes;
     VTDecompressionOutputCallbackRecord outputCallback;
     OSStatus status;
-    int width_frame_max = ffp->vtb_max_frame_width;
 
-    if (width_frame_max > 0 && width > width_frame_max) {
-        double w_scaler = (float)width_frame_max / width;
-        width = width_frame_max;
+    ret = vtbformat_init(&context->fmt_desc, context->codecpar);
+
+    if (ffp->vtb_max_frame_width > 0 && width > ffp->vtb_max_frame_width) {
+        double w_scaler = (float)ffp->vtb_max_frame_width / width;
+        width = ffp->vtb_max_frame_width;
         height = height * w_scaler;
     }
 
@@ -595,7 +600,7 @@ static int decode_video_internal(VideoToolBoxContext* context, AVCodecContext *a
         }
 
         sample_info_flush(context, 1000);
-        vtbsession_destroy_p(&context->vt_session);
+        vtbsession_destroy(context);
         memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
         context->sample_infos_in_decoding = 0;
 
@@ -758,7 +763,7 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, con
         int ret = 0;
 
         sample_info_flush(context, 1000);
-        vtbsession_destroy_p(&context->vt_session);
+        vtbsession_destroy(context);
         memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
         context->sample_infos_in_decoding = 0;
 
@@ -862,7 +867,7 @@ void videotoolbox_free(VideoToolBoxContext* context)
     }
 
     sample_info_flush(context, 3000);
-    vtbsession_destroy_p(&context->vt_session);
+    vtbsession_destroy(context);
 
     if (context) {
         ResetPktBuffer(context);
@@ -871,6 +876,8 @@ void videotoolbox_free(VideoToolBoxContext* context)
     }
 
     vtbformat_destroy(&context->fmt_desc);
+
+    avcodec_parameters_free(&context->codecpar);
 }
 
 int videotoolbox_decode_frame(VideoToolBoxContext* context)
@@ -944,17 +951,17 @@ static void vtbformat_destroy(VTBFormatDesc *fmt_desc)
     fmt_desc->fmt_desc = NULL;
 }
 
-static int vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecContext *avctx)
+static int vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecParameters *codecpar)
 {
-    int width           = avctx->width;
-    int height          = avctx->height;
-    int level           = avctx->level;
-    int profile         = avctx->profile;
+    int width           = codecpar->width;
+    int height          = codecpar->height;
+    int level           = codecpar->level;
+    int profile         = codecpar->profile;
     int sps_level       = 0;
     int sps_profile     = 0;
-    int extrasize       = avctx->extradata_size;
-    int codec           = avctx->codec_id;
-    uint8_t* extradata  = avctx->extradata;
+    int extrasize       = codecpar->extradata_size;
+    int codec           = codecpar->codec_id;
+    uint8_t* extradata  = codecpar->extradata;
 
 #if 0
     switch (profile) {
@@ -1066,10 +1073,18 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
         goto fail;
     }
 
+    context_vtb->codecpar = avcodec_parameters_alloc();
+    if (!context_vtb->codecpar)
+        goto fail;
+
+    ret = avcodec_parameters_from_context(context_vtb->codecpar, avctx);
+    if (ret)
+        goto fail;
+
     context_vtb->ffp = ffp;
     context_vtb->idr_based_identified = true;
 
-    ret = vtbformat_init(&context_vtb->fmt_desc, avctx);
+    ret = vtbformat_init(&context_vtb->fmt_desc, context_vtb->codecpar);
     if (ret)
         goto fail;
     assert(context_vtb->fmt_desc.fmt_desc);
