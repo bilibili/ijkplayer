@@ -752,7 +752,8 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
         return 0;
     }
 
-    if (context->codecpar->codec_id == AV_CODEC_ID_H264) {
+    if (context->ffp->vtb_handle_resolution_change &&
+        context->codecpar->codec_id == AV_CODEC_ID_H264) {
         size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
         if (size_data && size_data_size > AV_INPUT_BUFFER_PADDING_SIZE) {
             int             got_picture = 0;

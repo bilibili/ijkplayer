@@ -615,6 +615,7 @@ typedef struct FFPlayer {
     int vtb_max_frame_width;
     int vtb_async;
     int vtb_wait_async;
+    int vtb_handle_resolution_change;
 
     int mediacodec_all_videos;
     int mediacodec_avc;

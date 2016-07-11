@@ -153,6 +153,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(vtb_async),           OPTION_INT(0, 0, 1) },
     { "videotoolbox-wait-async",            "VideoToolbox: call VTDecompressionSessionWaitForAsynchronousFrames()",
         OPTION_OFFSET(vtb_wait_async),      OPTION_INT(1, 0, 1) },
+    { "videotoolbox-handle-resolution-change",          "VideoToolbox: handle resolution change automatically",
+        OPTION_OFFSET(vtb_handle_resolution_change),    OPTION_INT(0, 0, 1) },
 
     // Android only options
     { "mediacodec",                             "MediaCodec: enable H264 (deprecated by 'mediacodec-avc')",
