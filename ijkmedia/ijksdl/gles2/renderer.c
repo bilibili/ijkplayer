@@ -386,6 +386,8 @@ GLboolean IJK_GLES2_Renderer_renderOverlay(IJK_GLES2_Renderer *renderer, SDL_Vou
             renderer->frame_height  = visible_height;
             renderer->frame_sar_num = overlay->sar_num;
             renderer->frame_sar_den = overlay->sar_den;
+
+            renderer->vertices_changed = 1;
         }
 
         renderer->last_buffer_width = renderer->func_getBufferWidth(renderer, overlay);
