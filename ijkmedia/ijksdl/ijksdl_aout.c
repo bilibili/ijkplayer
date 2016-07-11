@@ -23,7 +23,7 @@
 
 #include "ijksdl_aout.h"
 #include <stdlib.h>
-#include "ff_ffplay_def.h"
+#include "ijkplayer/ff_ffplay_def.h"
 
 int SDL_AoutOpenAudio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
