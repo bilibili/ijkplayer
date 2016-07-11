@@ -27,6 +27,7 @@ typedef enum IJKFFOptionCategory {
     kIJKFFOptionCategoryCodec  = 2,
     kIJKFFOptionCategorySws    = 3,
     kIJKFFOptionCategoryPlayer = 4,
+    kIJKFFOptionCategorySwr    = 5,
 } IJKFFOptionCategory;
 
 // for codec option 'skip_loop_filter' and 'skip_frame'

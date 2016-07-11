@@ -248,15 +248,16 @@ static void IJK_GLES2_Renderer_Vertices_apply(IJK_GLES2_Renderer *renderer)
 
     float width     = renderer->frame_width;
     float height    = renderer->frame_height;
+
+    if (renderer->frame_sar_num > 0 && renderer->frame_sar_den > 0) {
+        width = width * renderer->frame_sar_num / renderer->frame_sar_den;
+    }
+
     const float dW  = (float)renderer->layer_width	/ width;
     const float dH  = (float)renderer->layer_height / height;
     float dd        = 1.0f;
     float nW        = 1.0f;
     float nH        = 1.0f;
-
-    if (renderer->frame_sar_num > 0 && renderer->frame_sar_den > 0) {
-        width = width * renderer->frame_sar_num / renderer->frame_sar_den;
-    }
 
     switch (renderer->gravity) {
         case IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL:  dd = FFMAX(dW, dH); break;

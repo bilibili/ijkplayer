@@ -511,6 +511,7 @@ typedef struct FFPlayer {
     AVDictionary *sws_dict;
     AVDictionary *player_opts;
     AVDictionary *swr_opts;
+    AVDictionary *swr_preset_opts;
 
     /* ffplay options specified by the user */
 #ifdef FFP_MERGE
@@ -627,6 +628,7 @@ typedef struct FFPlayer {
     char *iformat_name;
 
     int no_time_adjust;
+    double preset_5_1_center_mix_level;
 
     struct IjkMediaMeta *meta;
 
@@ -662,6 +664,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     av_dict_free(&ffp->sws_dict);
     av_dict_free(&ffp->player_opts);
     av_dict_free(&ffp->swr_opts);
+    av_dict_free(&ffp->swr_preset_opts);
 
     /* ffplay options specified by the user */
     av_freep(&ffp->input_filename);

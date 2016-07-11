@@ -23,6 +23,7 @@
 
 #include "ijksdl_aout.h"
 #include <stdlib.h>
+#include "ijkplayer/ff_ffplay_def.h"
 
 int SDL_AoutOpenAudio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
@@ -114,3 +115,12 @@ int SDL_AoutGetAudioSessionId(SDL_Aout *aout)
     return 0;
 }
 
+int SDL_AoutGetAudioPerSecondCallBacks(SDL_Aout *aout)
+{
+    if (aout) {
+        if (aout->func_get_audio_persecond_callbacks) {
+            return aout->func_get_audio_persecond_callbacks(aout);
+        }
+    }
+    return SDL_AUDIO_MAX_CALLBACKS_PER_SEC;
+}

@@ -24,6 +24,7 @@
 
 #import "IJKSDLAudioQueueController.h"
 #import "IJKSDLAudioKit.h"
+#import "ijksdl_log.h"
 
 #import <AVFoundation/AVFoundation.h>
 
@@ -54,7 +55,7 @@
             return nil;
         }
 
-        if (aSpec->channels > 6) {
+        if (aSpec->channels > 2) {
             NSLog(@"aout_open_audio: unsupported channels %d\n", (int)aSpec->channels);
             return nil;
         }
@@ -207,6 +208,11 @@
         AudioQueueSetProperty(_audioQueueRef, kAudioQueueProperty_TimePitchBypass, &propValue, sizeof(propValue));
         AudioQueueSetParameter(_audioQueueRef, kAudioQueueParam_PlayRate, playbackRate);
     }
+}
+
+- (double)get_latency_seconds
+{
+    return ((double)(kIJKAudioQueueNumberBuffers)) * _spec.samples / _spec.freq;
 }
 
 static void IJKSDLAudioQueueOuptutCallback(void * inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer) {

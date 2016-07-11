@@ -1936,12 +1936,26 @@ static int audio_decode_frame(FFPlayer *ffp)
         dec_channel_layout       != is->audio_src.channel_layout ||
         af->frame->sample_rate   != is->audio_src.freq           ||
         (wanted_nb_samples       != af->frame->nb_samples && !is->swr_ctx)) {
+        AVDictionary *swr_opts = NULL;
         swr_free(&is->swr_ctx);
         is->swr_ctx = swr_alloc_set_opts(NULL,
                                          is->audio_tgt.channel_layout, is->audio_tgt.fmt, is->audio_tgt.freq,
                                          dec_channel_layout,           af->frame->format, af->frame->sample_rate,
                                          0, NULL);
-        if (!is->swr_ctx || swr_init(is->swr_ctx) < 0) {
+        if (!is->swr_ctx) {
+            av_log(NULL, AV_LOG_ERROR,
+                   "Cannot create sample rate converter for conversion of %d Hz %s %d channels to %d Hz %s %d channels!\n",
+                    af->frame->sample_rate, av_get_sample_fmt_name(af->frame->format), av_frame_get_channels(af->frame),
+                    is->audio_tgt.freq, av_get_sample_fmt_name(is->audio_tgt.fmt), is->audio_tgt.channels);
+            return -1;
+        }
+        av_dict_copy(&swr_opts, ffp->swr_opts, 0);
+        if (af->frame->channel_layout == AV_CH_LAYOUT_5POINT1_BACK)
+            av_opt_set_double(is->swr_ctx, "center_mix_level", ffp->preset_5_1_center_mix_level, 0);
+        av_opt_set_dict(is->swr_ctx, &swr_opts);
+        av_dict_free(&swr_opts);
+
+        if (swr_init(is->swr_ctx) < 0) {
             av_log(NULL, AV_LOG_ERROR,
                    "Cannot create sample rate converter for conversion of %d Hz %s %d channels to %d Hz %s %d channels!\n",
                     af->frame->sample_rate, av_get_sample_fmt_name(af->frame->format), av_frame_get_channels(af->frame),
@@ -2115,7 +2129,7 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
         next_sample_rate_idx--;
     wanted_spec.format = AUDIO_S16SYS;
     wanted_spec.silence = 0;
-    wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AUDIO_MAX_CALLBACKS_PER_SEC));
+    wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AoutGetAudioPerSecondCallBacks(ffp->aout)));
     wanted_spec.callback = sdl_audio_callback;
     wanted_spec.userdata = opaque;
     while (SDL_AoutOpenAudio(ffp->aout, &wanted_spec, &spec) < 0) {
@@ -2313,23 +2327,25 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
             goto fail;
         is->queue_attachments_req = 1;
 
-        if(is->video_st->avg_frame_rate.den && is->video_st->avg_frame_rate.num) {
-            double fps = av_q2d(is->video_st->avg_frame_rate);
-            SDL_ProfilerReset(&is->viddec.decode_profiler, fps + 0.5);
-            if (fps > ffp->max_fps && fps < 130.0) {
-                is->is_video_high_fps = 1;
-                av_log(ffp, AV_LOG_WARNING, "fps: %lf (too high)\n", fps);
-            } else {
-                av_log(ffp, AV_LOG_WARNING, "fps: %lf (normal)\n", fps);
+        if (ffp->max_fps >= 0) {
+            if(is->video_st->avg_frame_rate.den && is->video_st->avg_frame_rate.num) {
+                double fps = av_q2d(is->video_st->avg_frame_rate);
+                SDL_ProfilerReset(&is->viddec.decode_profiler, fps + 0.5);
+                if (fps > ffp->max_fps && fps < 130.0) {
+                    is->is_video_high_fps = 1;
+                    av_log(ffp, AV_LOG_WARNING, "fps: %lf (too high)\n", fps);
+                } else {
+                    av_log(ffp, AV_LOG_WARNING, "fps: %lf (normal)\n", fps);
+                }
             }
-        }
-        if(is->video_st->r_frame_rate.den && is->video_st->r_frame_rate.num) {
-            double tbr = av_q2d(is->video_st->r_frame_rate);
-            if (tbr > ffp->max_fps && tbr < 130.0) {
-                is->is_video_high_fps = 1;
-                av_log(ffp, AV_LOG_WARNING, "tbr: %lf (too high)\n", tbr);
-            } else {
-                av_log(ffp, AV_LOG_WARNING, "tbr: %lf (normal)\n", tbr);
+            if(is->video_st->r_frame_rate.den && is->video_st->r_frame_rate.num) {
+                double tbr = av_q2d(is->video_st->r_frame_rate);
+                if (tbr > ffp->max_fps && tbr < 130.0) {
+                    is->is_video_high_fps = 1;
+                    av_log(ffp, AV_LOG_WARNING, "tbr: %lf (too high)\n", tbr);
+                } else {
+                    av_log(ffp, AV_LOG_WARNING, "tbr: %lf (normal)\n", tbr);
+                }
             }
         }
 
@@ -3837,7 +3853,7 @@ void ffp_check_buffering_l(FFPlayer *ffp)
             av_log(ffp, AV_LOG_DEBUG, "video cache=%%%d milli:(%d/%d) bytes:(%d/%d) packet:(%d/%d)\n", video_cached_percent,
                   (int)video_cached_duration, hwm_in_ms,
                   is->videoq.size, hwm_in_bytes,
-                  is->audioq.nb_packets, MIN_FRAMES);
+                  is->videoq.nb_packets, MIN_FRAMES);
 #endif
         }
 

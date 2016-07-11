@@ -112,8 +112,8 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
     // overlay->pixels[1]  = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 1);
     overlay->pixels[0]  = NULL;
     overlay->pixels[1]  = NULL;
-    overlay->pitches[0] = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 0);
-    overlay->pitches[1] = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 1);
+    overlay->pitches[0] = CVPixelBufferGetWidthOfPlane(pixel_buffer, 0);
+    overlay->pitches[1] = CVPixelBufferGetWidthOfPlane(pixel_buffer, 1);
     CVPixelBufferUnlockBaseAddress(pixel_buffer, 0);
 #else
     overlay->pixels[0]  = NULL;
