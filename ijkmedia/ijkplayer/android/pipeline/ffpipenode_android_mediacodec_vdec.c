@@ -70,6 +70,7 @@ typedef struct IJKFF_Pipenode_Opaque {
     int                       frame_rotate_degrees;
 
     AVCodecContext           *avctx; // not own
+    AVCodecParameters        *codecpar;
     AVBitStreamFilterContext *bsfc;  // own
 
 #if AMC_USE_AVBITSTREAM_FILTER
@@ -250,7 +251,7 @@ static int amc_fill_frame(
     frame->width  = opaque->frame_width;
     frame->height = opaque->frame_height;
     frame->format = IJK_AV_PIX_FMT__ANDROID_MEDIACODEC;
-    frame->sample_aspect_ratio = opaque->avctx->sample_aspect_ratio;
+    frame->sample_aspect_ratio = opaque->codecpar->sample_aspect_ratio;
     frame->pts    = av_rescale_q(buffer_info->presentationTimeUs, AV_TIME_BASE_Q, is->video_st->time_base);
     if (frame->pts < 0)
         frame->pts = AV_NOPTS_VALUE;
@@ -285,8 +286,6 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
         ret = 0;
         goto fail;
     }
-
-    opaque->avctx = opaque->decoder->avctx;
 
     if (!d->packet_pending || d->queue->serial != d->pkt_serial) {
 #if AMC_USE_AVBITSTREAM_FILTER
@@ -364,7 +363,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             d->pkt_temp.data[6],
             d->pkt_temp.data[7]);
 #endif
-        if (opaque->avctx->codec_id == AV_CODEC_ID_H264 || opaque->avctx->codec_id == AV_CODEC_ID_HEVC) {
+        if (opaque->codecpar->codec_id == AV_CODEC_ID_H264 || opaque->codecpar->codec_id == AV_CODEC_ID_HEVC) {
             convert_h264_to_annexb(d->pkt_temp.data, d->pkt_temp.size, opaque->nal_size, &convert_state);
             int64_t time_stamp = d->pkt_temp.pts;
             if (!time_stamp && d->pkt_temp.dts)
@@ -789,12 +788,14 @@ static void func_destroy(IJKFF_Pipenode *node)
 
 #if AMC_USE_AVBITSTREAM_FILTER
     av_freep(&opaque->orig_extradata);
-#endif
 
     if (opaque->bsfc) {
         av_bitstream_filter_close(opaque->bsfc);
         opaque->bsfc = NULL;
     }
+#endif
+
+    avcodec_parameters_free(&opaque->codecpar);
 
     JNIEnv *env = NULL;
     if (JNI_OK == SDL_JNI_SetupThreadEnv(&env)) {
@@ -835,11 +836,11 @@ static int func_run_sync(IJKFF_Pipenode *node)
         goto fail;
 
     if (opaque->frame_rotate_degrees == 90 || opaque->frame_rotate_degrees == 270) {
-        opaque->frame_width  = opaque->avctx->height;
-        opaque->frame_height = opaque->avctx->width;
+        opaque->frame_width  = opaque->codecpar->height;
+        opaque->frame_height = opaque->codecpar->width;
     } else {
-        opaque->frame_width  = opaque->avctx->width;
-        opaque->frame_height = opaque->avctx->height;
+        opaque->frame_width  = opaque->codecpar->width;
+        opaque->frame_height = opaque->codecpar->height;
     }
 
     opaque->enqueue_thread = SDL_CreateThreadEx(&opaque->_enqueue_thread, enqueue_thread_func, node, "amediacodec_input_thread");
@@ -944,14 +945,21 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     opaque->decoder     = &is->viddec;
     opaque->weak_vout   = vout;
 
-    opaque->avctx = opaque->decoder->avctx;
-    switch (opaque->avctx->codec_id) {
+    opaque->codecpar = avcodec_parameters_alloc();
+    if (!opaque->codecpar)
+        goto fail;
+
+    ret = avcodec_parameters_from_context(opaque->codecpar, opaque->decoder->avctx);
+    if (ret)
+        goto fail;
+
+    switch (opaque->codecpar->codec_id) {
     case AV_CODEC_ID_H264:
         if (!ffp->mediacodec_avc && !ffp->mediacodec_all_videos) {
-            ALOGE("%s: MediaCodec: AVC/H264 is disabled. codec_id:%d \n", __func__, opaque->avctx->codec_id);
+            ALOGE("%s: MediaCodec: AVC/H264 is disabled. codec_id:%d \n", __func__, opaque->codecpar->codec_id);
             goto fail;
         }
-        switch (opaque->avctx->profile) {
+        switch (opaque->codecpar->profile) {
             case FF_PROFILE_H264_BASELINE:
                 ALOGI("%s: MediaCodec: H264_BASELINE: enabled\n", __func__);
                 break;
@@ -992,34 +1000,34 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
                 ALOGW("%s: MediaCodec: H264_CAVLC_444: disabled\n", __func__);
                 goto fail;
             default:
-                ALOGW("%s: MediaCodec: (%d) unknown profile: disabled\n", __func__, opaque->avctx->profile);
+                ALOGW("%s: MediaCodec: (%d) unknown profile: disabled\n", __func__, opaque->codecpar->profile);
                 goto fail;
         }
         strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_AVC);
-        opaque->mcc.profile = opaque->avctx->profile;
-        opaque->mcc.level   = opaque->avctx->level;
+        opaque->mcc.profile = opaque->codecpar->profile;
+        opaque->mcc.level   = opaque->codecpar->level;
         break;
     case AV_CODEC_ID_HEVC:
         if (!ffp->mediacodec_hevc && !ffp->mediacodec_all_videos) {
-            ALOGE("%s: MediaCodec/HEVC is disabled. codec_id:%d \n", __func__, opaque->avctx->codec_id);
+            ALOGE("%s: MediaCodec/HEVC is disabled. codec_id:%d \n", __func__, opaque->codecpar->codec_id);
             goto fail;
         }
         strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_HEVC);
-        opaque->mcc.profile = opaque->avctx->profile;
-        opaque->mcc.level   = opaque->avctx->level;
+        opaque->mcc.profile = opaque->codecpar->profile;
+        opaque->mcc.level   = opaque->codecpar->level;
         break;
     case AV_CODEC_ID_MPEG2VIDEO:
         if (!ffp->mediacodec_mpeg2 && !ffp->mediacodec_all_videos) {
-            ALOGE("%s: MediaCodec/MPEG2VIDEO is disabled. codec_id:%d \n", __func__, opaque->avctx->codec_id);
+            ALOGE("%s: MediaCodec/MPEG2VIDEO is disabled. codec_id:%d \n", __func__, opaque->codecpar->codec_id);
             goto fail;
         }
         strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_MPEG2VIDEO);
-        opaque->mcc.profile = opaque->avctx->profile;
-        opaque->mcc.level   = opaque->avctx->level;
+        opaque->mcc.profile = opaque->codecpar->profile;
+        opaque->mcc.level   = opaque->codecpar->level;
         break;
 
     default:
-        ALOGE("%s:create: not H264 or H265/HEVC, codec_id:%d \n", __func__, opaque->avctx->codec_id);
+        ALOGE("%s:create: not H264 or H265/HEVC, codec_id:%d \n", __func__, opaque->codecpar->codec_id);
         goto fail;
     }
 
@@ -1040,11 +1048,11 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         goto fail;
     }
 
-    ALOGI("AMediaFormat: %s, %dx%d\n", opaque->mcc.mime_type, opaque->avctx->width, opaque->avctx->height);
-    opaque->input_aformat = SDL_AMediaFormatJava_createVideoFormat(env, opaque->mcc.mime_type, opaque->avctx->width, opaque->avctx->height);
-    if (opaque->avctx->extradata && opaque->avctx->extradata_size > 0) {
-        if ((opaque->avctx->codec_id == AV_CODEC_ID_H264 || opaque->avctx->codec_id == AV_CODEC_ID_HEVC)
-            && opaque->avctx->extradata[0] == 1) {
+    ALOGI("AMediaFormat: %s, %dx%d\n", opaque->mcc.mime_type, opaque->codecpar->width, opaque->codecpar->height);
+    opaque->input_aformat = SDL_AMediaFormatJava_createVideoFormat(env, opaque->mcc.mime_type, opaque->codecpar->width, opaque->codecpar->height);
+    if (opaque->codecpar->extradata && opaque->codecpar->extradata_size > 0) {
+        if ((opaque->codecpar->codec_id == AV_CODEC_ID_H264 || opaque->codecpar->codec_id == AV_CODEC_ID_HEVC)
+            && opaque->codecpar->extradata[0] == 1) {
 #if AMC_USE_AVBITSTREAM_FILTER
             if (opaque->avctx->codec_id == AV_CODEC_ID_H264) {
                 opaque->bsfc = av_bitstream_filter_init("h264_mp4toannexb");
@@ -1073,23 +1081,23 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
             SDL_AMediaFormat_setBuffer(opaque->input_aformat, "csd-0", opaque->avctx->extradata, opaque->avctx->extradata_size);
 #else
             size_t   sps_pps_size   = 0;
-            size_t   convert_size   = opaque->avctx->extradata_size + 20;
+            size_t   convert_size   = opaque->codecpar->extradata_size + 20;
             uint8_t *convert_buffer = (uint8_t *)calloc(1, convert_size);
             if (!convert_buffer) {
                 ALOGE("%s:sps_pps_buffer: alloc failed\n", __func__);
                 goto fail;
             }
-            if (opaque->avctx->codec_id == AV_CODEC_ID_H264) {
-                if (0 != convert_sps_pps(opaque->avctx->extradata, opaque->avctx->extradata_size,
+            if (opaque->codecpar->codec_id == AV_CODEC_ID_H264) {
+                if (0 != convert_sps_pps(opaque->codecpar->extradata, opaque->codecpar->extradata_size,
                                          convert_buffer, convert_size,
                                          &sps_pps_size, &opaque->nal_size)) {
                     ALOGE("%s:convert_sps_pps: failed\n", __func__);
                     goto fail;
                 }
             } else {
-                if (0 != convert_hevc_nal_units(opaque->avctx->extradata, opaque->avctx->extradata_size,
-                                         convert_buffer, convert_size,
-                                         &sps_pps_size, &opaque->nal_size)) {
+                if (0 != convert_hevc_nal_units(opaque->codecpar->extradata, opaque->codecpar->extradata_size,
+                                                convert_buffer, convert_size,
+                                                &sps_pps_size, &opaque->nal_size)) {
                     ALOGE("%s:convert_hevc_nal_units: failed\n", __func__);
                     goto fail;
                 }
@@ -1102,11 +1110,11 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
 #endif
         } else {
             // Codec specific data
-            // SDL_AMediaFormat_setBuffer(opaque->aformat, "csd-0", opaque->avctx->extradata, opaque->avctx->extradata_size);
+            // SDL_AMediaFormat_setBuffer(opaque->aformat, "csd-0", opaque->codecpar->extradata, opaque->codecpar->extradata_size);
             ALOGE("csd-0: naked\n");
         }
     } else {
-        ALOGE("no buffer(%d)\n", opaque->avctx->extradata_size);
+        ALOGE("no buffer(%d)\n", opaque->codecpar->extradata_size);
     }
 
     rotate_degrees = ffp_get_video_rotate_degrees(ffp);
