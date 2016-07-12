@@ -363,17 +363,17 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             d->pkt_temp.data[6],
             d->pkt_temp.data[7]);
 #endif
-    if (opaque->avctx->codec_id == AV_CODEC_ID_H264 || opaque->avctx->codec_id == AV_CODEC_ID_HEVC) {
-        convert_h264_to_annexb(d->pkt_temp.data, d->pkt_temp.size, opaque->nal_size, &convert_state);
-        int64_t time_stamp = d->pkt_temp.pts;
-        if (!time_stamp && d->pkt_temp.dts)
-            time_stamp = d->pkt_temp.dts;
-        if (time_stamp > 0) {
-            time_stamp = av_rescale_q(time_stamp, is->video_st->time_base, AV_TIME_BASE_Q);
-        } else {
-            time_stamp = 0;
+        if (opaque->avctx->codec_id == AV_CODEC_ID_H264 || opaque->avctx->codec_id == AV_CODEC_ID_HEVC) {
+            convert_h264_to_annexb(d->pkt_temp.data, d->pkt_temp.size, opaque->nal_size, &convert_state);
+            int64_t time_stamp = d->pkt_temp.pts;
+            if (!time_stamp && d->pkt_temp.dts)
+                time_stamp = d->pkt_temp.dts;
+            if (time_stamp > 0) {
+                time_stamp = av_rescale_q(time_stamp, is->video_st->time_base, AV_TIME_BASE_Q);
+            } else {
+                time_stamp = 0;
+            }
         }
-    }
 #if 0
         AMCTRACE("input[%d][%d][%lld,%lld (%d, %d) -> %lld] %02x%02x%02x%02x%02x%02x%02x%02x", (int)d->pkt_temp.size,
             (int)opaque->nal_size,
