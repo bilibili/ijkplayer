@@ -51,6 +51,7 @@ typedef struct SDL_AMediaCodec_FakeFifo {
 sdl_amedia_status_t SDL_AMediaCodec_FakeFifo_init(SDL_AMediaCodec_FakeFifo *fifo);
 void                SDL_AMediaCodec_FakeFifo_abort(SDL_AMediaCodec_FakeFifo *fifo);
 void                SDL_AMediaCodec_FakeFifo_destroy(SDL_AMediaCodec_FakeFifo *fifo);
+ssize_t             SDL_AMediaCodec_FakeFifo_dequeueInputBuffer(SDL_AMediaCodec_FakeFifo* fifo, int64_t timeoutUs);
 sdl_amedia_status_t SDL_AMediaCodec_FakeFifo_queueInputBuffer(SDL_AMediaCodec_FakeFifo *fifo, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags);
 ssize_t             SDL_AMediaCodec_FakeFifo_dequeueOutputBuffer(SDL_AMediaCodec_FakeFifo *fifo, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs);
 void                SDL_AMediaCodec_FakeFifo_flush(SDL_AMediaCodec_FakeFifo *fifo);

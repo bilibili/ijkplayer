@@ -88,7 +88,7 @@ static ssize_t SDL_AMediaCodecDummy_writeInputData(SDL_AMediaCodec* acodec, size
 static ssize_t SDL_AMediaCodecDummy_dequeueInputBuffer(SDL_AMediaCodec* acodec, int64_t timeoutUs)
 {
     DMY_TRACE("%s", __func__);
-    return 0;
+    return SDL_AMediaCodec_FakeFifo_dequeueInputBuffer(&acodec->opaque->dummy_fifo, timeoutUs);
 }
 
 static sdl_amedia_status_t SDL_AMediaCodecDummy_queueInputBuffer(SDL_AMediaCodec* acodec, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags)
