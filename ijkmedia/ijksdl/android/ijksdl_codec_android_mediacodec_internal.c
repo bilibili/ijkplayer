@@ -62,7 +62,7 @@ void SDL_AMediaCodec_FakeFifo_destroy(SDL_AMediaCodec_FakeFifo *fifo)
     memset(fifo, 0, sizeof(SDL_AMediaCodec_FakeFifo));
 }
 
-sdl_amedia_status_t SDL_AMediaCodec_FakeFifo_queue(SDL_AMediaCodec_FakeFifo *fifo, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags)
+sdl_amedia_status_t SDL_AMediaCodec_FakeFifo_queueInputBuffer(SDL_AMediaCodec_FakeFifo *fifo, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags)
 {
     if (fifo->should_abort)
         return SDL_AMEDIA_ERROR_UNKNOWN;
@@ -95,7 +95,7 @@ sdl_amedia_status_t SDL_AMediaCodec_FakeFifo_queue(SDL_AMediaCodec_FakeFifo *fif
     return SDL_AMEDIA_OK;
 }
 
-ssize_t SDL_AMediaCodec_FakeFifo_dequeue(SDL_AMediaCodec_FakeFifo *fifo, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs)
+ssize_t SDL_AMediaCodec_FakeFifo_dequeueOutputBuffer(SDL_AMediaCodec_FakeFifo *fifo, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs)
 {
     if (fifo->should_abort)
         return -1;
