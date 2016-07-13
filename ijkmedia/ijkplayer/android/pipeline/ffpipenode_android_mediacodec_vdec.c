@@ -149,6 +149,14 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
         }
     }
 
+    if (opaque->frame_rotate_degrees == 90 || opaque->frame_rotate_degrees == 270) {
+        opaque->frame_width  = opaque->codecpar->height;
+        opaque->frame_height = opaque->codecpar->width;
+    } else {
+        opaque->frame_width  = opaque->codecpar->width;
+        opaque->frame_height = opaque->codecpar->height;
+    }
+
     return acodec;
 }
 
@@ -311,6 +319,8 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node, jobject new_su
     opaque->acodec_first_dequeue_output_request = true;
     ALOGI("%s:new acodec: %p\n", __func__, opaque->acodec);
     SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, opaque->acodec);
+
+    ret = 0;
 fail:
     return ret;
 }
@@ -991,14 +1001,6 @@ static int func_run_sync(IJKFF_Pipenode *node)
     frame = av_frame_alloc();
     if (!frame)
         goto fail;
-
-    if (opaque->frame_rotate_degrees == 90 || opaque->frame_rotate_degrees == 270) {
-        opaque->frame_width  = opaque->codecpar->height;
-        opaque->frame_height = opaque->codecpar->width;
-    } else {
-        opaque->frame_width  = opaque->codecpar->width;
-        opaque->frame_height = opaque->codecpar->height;
-    }
 
     opaque->enqueue_thread = SDL_CreateThreadEx(&opaque->_enqueue_thread, enqueue_thread_func, node, "amediacodec_input_thread");
     if (!opaque->enqueue_thread) {
