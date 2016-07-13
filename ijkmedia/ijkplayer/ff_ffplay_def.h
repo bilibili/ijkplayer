@@ -621,6 +621,7 @@ typedef struct FFPlayer {
     int mediacodec_avc;
     int mediacodec_hevc;
     int mediacodec_mpeg2;
+    int mediacodec_handle_resolution_change;
     int mediacodec_auto_rotate;
 
     int opensles;
@@ -733,12 +734,14 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->videotoolbox                   = 0; // option
     ffp->vtb_max_frame_width            = 0; // option
     ffp->vtb_async                      = 0; // option
+    ffp->vtb_handle_resolution_change   = 0; // option
     ffp->vtb_wait_async                 = 0; // option
 
     ffp->mediacodec_all_videos          = 0; // option
     ffp->mediacodec_avc                 = 0; // option
     ffp->mediacodec_hevc                = 0; // option
     ffp->mediacodec_mpeg2               = 0; // option
+    ffp->mediacodec_handle_resolution_change = 0; // option
     ffp->mediacodec_auto_rotate         = 0; // option
 
     ffp->opensles                       = 0; // option

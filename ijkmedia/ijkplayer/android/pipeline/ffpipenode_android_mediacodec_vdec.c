@@ -431,7 +431,8 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
         d->pkt_temp = d->pkt = pkt;
         d->packet_pending = 1;
 
-        if (opaque->codecpar->codec_id == AV_CODEC_ID_H264) {
+        if (opaque->ffp->mediacodec_handle_resolution_change &&
+            opaque->codecpar->codec_id == AV_CODEC_ID_H264) {
             uint8_t  *size_data      = NULL;
             int       size_data_size = 0;
             AVPacket *avpkt          = &d->pkt_temp;
