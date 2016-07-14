@@ -98,6 +98,9 @@ public class InfoHudViewHolder {
                         case IjkMediaPlayer.FFP_PROPV_DECODER_MEDIACODEC:
                             setRowValue(R.string.vdec, "MediaCodec");
                             break;
+                        case IjkMediaPlayer.FFP_PROPV_DECODER_AMLOGIC:
+                            setRowValue(R.string.vdec, "amlogic");
+                            break;
                         default:
                             setRowValue(R.string.vdec, "");
                             break;

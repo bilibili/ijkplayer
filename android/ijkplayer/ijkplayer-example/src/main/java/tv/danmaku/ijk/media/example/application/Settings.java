@@ -51,6 +51,11 @@ public class Settings {
         }
     }
 
+    public boolean getUsingAmlogic() {
+        String key = mAppContext.getString(R.string.pref_key_using_amlogic);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
     public boolean getUsingMediaCodec() {
         String key = mAppContext.getString(R.string.pref_key_using_media_codec);
         return mSharedPreferences.getBoolean(key, false);
@@ -88,6 +93,11 @@ public class Settings {
 
     public boolean getEnableDetachedSurfaceTextureView() {
         String key = mAppContext.getString(R.string.pref_key_enable_detached_surface_texture);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
+    public boolean getEnableAMLView() {
+        String key = mAppContext.getString(R.string.pref_key_enable_aml_view);
         return mSharedPreferences.getBoolean(key, false);
     }
 

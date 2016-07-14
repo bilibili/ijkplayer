@@ -617,6 +617,8 @@ typedef struct FFPlayer {
     int vtb_async;
     int vtb_wait_async;
 
+    int use_amlogic;
+
     int mediacodec_all_videos;
     int mediacodec_avc;
     int mediacodec_hevc;
@@ -734,6 +736,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->vtb_max_frame_width            = 0; // option
     ffp->vtb_async                      = 0; // option
     ffp->vtb_wait_async                 = 0; // option
+
+    ffp->use_amlogic                    = 0; // option
 
     ffp->mediacodec_all_videos          = 0; // option
     ffp->mediacodec_avc                 = 0; // option

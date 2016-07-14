@@ -155,6 +155,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(vtb_wait_async),      OPTION_INT(1, 0, 1) },
 
     // Android only options
+    { "amlogic",                                "Enable Amlogic video codecs",
+        OPTION_OFFSET(use_amlogic),             OPTION_INT(0, 0, 1) },
     { "mediacodec",                             "MediaCodec: enable H264 (deprecated by 'mediacodec-avc')",
         OPTION_OFFSET(mediacodec_avc),          OPTION_INT(0, 0, 1) },
     { "mediacodec-auto-rotate",                 "MediaCodec: auto rotate frame depending on meta",

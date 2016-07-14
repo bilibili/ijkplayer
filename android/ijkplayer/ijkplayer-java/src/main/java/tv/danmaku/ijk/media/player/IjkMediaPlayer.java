@@ -115,6 +115,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int     FFP_PROPV_DECODER_AVCODEC             = 1;
     public static final int     FFP_PROPV_DECODER_MEDIACODEC          = 2;
     public static final int     FFP_PROPV_DECODER_VIDEOTOOLBOX        = 3;
+    public static final int     FFP_PROPV_DECODER_AMLOGIC             = 4;
     public static final int FFP_PROP_INT64_VIDEO_CACHED_DURATION      = 20005;
     public static final int FFP_PROP_INT64_AUDIO_CACHED_DURATION      = 20006;
     public static final int FFP_PROP_INT64_VIDEO_CACHED_BYTES         = 20007;
