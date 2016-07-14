@@ -449,8 +449,10 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 avcodec_parameters_to_context(new_avctx, opaque->codecpar);
                 av_freep(&new_avctx->extradata);
                 new_avctx->extradata = av_mallocz(size_data_size);
-                if (!new_avctx->extradata)
+                if (!new_avctx->extradata) {
+                    avcodec_free_context(&new_avctx);
                     return AVERROR(ENOMEM);
+                }
                 memcpy(new_avctx->extradata, size_data, size_data_size);
                 new_avctx->extradata_size = size_data_size;
 
