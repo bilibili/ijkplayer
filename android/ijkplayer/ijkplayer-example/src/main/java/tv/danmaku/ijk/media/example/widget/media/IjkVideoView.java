@@ -990,6 +990,11 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                         } else {
                             ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 0);
                         }
+                        if (mSettings.getMediaCodecHandleResolutionChange()) {
+                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 1);
+                        } else {
+                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 0);
+                        }
                     } else {
                         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
                     }
