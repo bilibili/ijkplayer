@@ -185,8 +185,33 @@ cd ios
 ./compile-ffmpeg.sh clean
 ./compile-ffmpeg.sh all
 
-# import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
-# open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
+# Demo
+#     open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
+# 
+# Import into Your own Application
+#     Select your project in Xcode.
+#     File -> Add Files to ... -> Select ios/IJKMediaPlayer/IJKMediaPlayer.xcodeproj
+#     Select your Application's target.
+#     Build Phases -> Target Dependencies -> Select IJKMediaFramework
+#     Build Phases -> Link Binary with Libraries -> Add:
+#         IJKMediaFramework.framework
+#
+#         AudioToolbox.framework
+#         AVFoundation.framework
+#         CoreGraphics.framework
+#         CoreMedia.framework
+#         CoreVideo.framework
+#         libbz2.dylib
+#         libz.dylib
+#         MediaPlayer.framework
+#         MobileCoreServices.framework
+#         OpenGLES.framework
+#         QuartzCore.framework
+#         UIKit.framework
+#         VideoToolbox.framework
+#
+#         ... (Maybe something else, if you get any link error)
+# 
 ```
 
 
