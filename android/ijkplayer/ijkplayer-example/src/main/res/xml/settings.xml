@@ -79,4 +79,12 @@
             android:summary="@string/pref_summary_enable_detached_surface_texture"
             android:title="@string/pref_title_enable_detached_surface_texture" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_title_misc">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_using_mediadatasource"
+            android:persistent="true"
+            android:summary="@string/pref_summary_using_mediadatasource"
+            android:title="@string/pref_title_using_mediadatasource" />
+    </PreferenceCategory>
 </PreferenceScreen>

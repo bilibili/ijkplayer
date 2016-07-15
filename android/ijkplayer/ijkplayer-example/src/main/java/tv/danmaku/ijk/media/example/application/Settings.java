@@ -96,6 +96,11 @@ public class Settings {
         return mSharedPreferences.getBoolean(key, false);
     }
 
+    public boolean getUsingMediaDataSource() {
+        String key = mAppContext.getString(R.string.pref_key_using_mediadatasource);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
     public String getLastDirectory() {
         String key = mAppContext.getString(R.string.pref_key_last_directory);
         return mSharedPreferences.getString(key, "/");
