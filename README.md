@@ -201,8 +201,8 @@ cd ios
 #         CoreGraphics.framework
 #         CoreMedia.framework
 #         CoreVideo.framework
-#         libbz2.dylib
-#         libz.dylib
+#         libbz2.tbd
+#         libz.tbd
 #         MediaPlayer.framework
 #         MobileCoreServices.framework
 #         OpenGLES.framework
