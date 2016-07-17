@@ -38,7 +38,7 @@ sdl_amedia_status_t SDL_AMediaFormat_deleteP(SDL_AMediaFormat** aformat)
     if (!aformat)
         return SDL_AMEDIA_OK;
     sdl_amedia_status_t amc_ret = SDL_AMediaFormat_delete(*aformat);
-    aformat = NULL;
+    *aformat = NULL;
     return amc_ret;
 }
 

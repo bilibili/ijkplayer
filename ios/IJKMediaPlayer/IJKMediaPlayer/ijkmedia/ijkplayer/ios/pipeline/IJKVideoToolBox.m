@@ -35,10 +35,68 @@
 #import <Foundation/Foundation.h>
 #import "IJKDeviceModel.h"
 
-#define IJK_VTB_FCC_AVC    SDL_FOURCC('C', 'c', 'v', 'a')
-#define IJK_VTB_FCC_ESD    SDL_FOURCC('s', 'd', 's', 'e')
-#define IJK_VTB_FCC_AVC1   SDL_FOURCC('1', 'c', 'v', 'a')
+#define IJK_VTB_FCC_AVCC   SDL_FOURCC('C', 'c', 'v', 'a')
 
+typedef struct sample_info {
+    int     sample_id;
+
+    double  sort;
+    double  dts;
+    double  pts;
+    int     serial;
+
+    int     sar_num;
+    int     sar_den;
+
+    volatile int is_decoding;
+} sample_info;
+
+typedef struct sort_queue {
+    AVFrame pic;
+    int serial;
+    int64_t sort;
+    volatile struct sort_queue *nextframe;
+} sort_queue;
+
+typedef struct VTBFormatDesc
+{
+    CMFormatDescriptionRef      fmt_desc;
+    int32_t                     max_ref_frames;
+    bool                        convert_bytestream;
+    bool                        convert_3byteTo4byteNALSize;
+} VTBFormatDesc;
+
+struct VideoToolBoxContext {
+    FFPlayer                   *ffp;
+    volatile bool               refresh_request;
+    volatile bool               new_seg_flag;
+    volatile bool               idr_based_identified;
+    volatile bool               refresh_session;
+    volatile bool               recovery_drop_packet;
+
+    AVCodecParameters          *codecpar;
+    VTBFormatDesc               fmt_desc;
+    VTDecompressionSessionRef   vt_session;
+    pthread_mutex_t             m_queue_mutex;
+    volatile sort_queue        *m_sort_queue;
+    volatile int32_t            m_queue_depth;
+    int                         serial;
+    bool                        dealloced;
+    int                         m_buffer_deep;
+    AVPacket                    m_buffer_packet[MAX_PKT_QUEUE_DEEP];
+
+    SDL_mutex                  *sample_info_mutex;
+    SDL_cond                   *sample_info_cond;
+    sample_info                 sample_info_array[VTB_MAX_DECODING_SAMPLES];
+    volatile int                sample_info_index;
+    volatile int                sample_info_id_generator;
+    volatile int                sample_infos_in_decoding;
+
+    SDL_SpeedSampler            sampler;
+};
+
+static void vtbformat_destroy(VTBFormatDesc *fmt_desc);
+static int  vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecParameters *codecpar);
 
 static const char *vtb_get_error_string(OSStatus status) {
     switch (status) {
@@ -275,16 +333,20 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 {
     @autoreleasepool {
         VideoToolBoxContext *ctx = (VideoToolBoxContext*)decompressionOutputRefCon;
-        if (!ctx || (status != noErr)) {
+        if (!ctx)
             return;
-        }
 
-        FFPlayer   *ffp = ctx->ffp;
-        VideoState *is  = ffp->is;
-
-        sort_queue *newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
+        FFPlayer   *ffp         = ctx->ffp;
+        VideoState *is          = ffp->is;
+        sort_queue *newFrame    = NULL;
 
         sample_info *sample_info = sourceFrameRefCon;
+        if (!sample_info->is_decoding) {
+            ALOGD("VTB: frame out of date: id=%d\n", sample_info->sample_id);
+            goto failed;
+        }
+
+        newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
         newFrame->pic.pkt_pts    = sample_info->pts;
         newFrame->pic.pkt_dts    = sample_info->dts;
         newFrame->pic.sample_aspect_ratio.num = sample_info->sar_num;
@@ -299,10 +361,6 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             newFrame->sort    = newFrame->pic.pkt_dts;
             newFrame->pic.pts = newFrame->pic.pkt_dts;
         }
-
-#ifdef FFP_SHOW_VTB_IN_DECODING
-        ALOGD("VTB: indecoding: %d\n", ctx->sample_infos_in_decoding);
-#endif
 
         if (ctx->dealloced || is->abort_request || is->viddec.queue->abort_request)
             goto failed;
@@ -420,7 +478,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             goto successed;
         }
         //ALOGI("depth %d  %d\n", ctx->m_queue_depth, ctx->m_max_ref_frames);
-        if ((ctx->m_queue_depth > ctx->m_max_ref_frames)) {
+        if ((ctx->m_queue_depth > ctx->fmt_desc.max_ref_frames)) {
             QueuePicture(ctx);
         }
     successed:
@@ -436,20 +494,38 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 }
 
 
+void vtbsession_destroy(VideoToolBoxContext *context)
+{
+    if (!context)
+        return;
 
-void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
+    vtbformat_destroy(&context->fmt_desc);
+
+    if (context->vt_session) {
+        VTDecompressionSessionWaitForAsynchronousFrames(context->vt_session);
+        VTDecompressionSessionInvalidate(context->vt_session);
+        CFRelease(context->vt_session);
+        context->vt_session = NULL;
+    }
+}
+
+VTDecompressionSessionRef vtbsession_create(VideoToolBoxContext* context)
 {
     FFPlayer *ffp = context->ffp;
+    int       ret = 0;
+    int       width  = context->codecpar->width;
+    int       height = context->codecpar->height;
 
     VTDecompressionSessionRef vt_session = NULL;
     CFMutableDictionaryRef destinationPixelBufferAttributes;
     VTDecompressionOutputCallbackRecord outputCallback;
     OSStatus status;
-    int width_frame_max = ffp->vtb_max_frame_width;
 
-    if (width_frame_max > 0 && width > width_frame_max) {
-        double w_scaler = (float)width_frame_max / width;
-        width = width_frame_max;
+    ret = vtbformat_init(&context->fmt_desc, context->codecpar);
+
+    if (ffp->vtb_max_frame_width > 0 && width > ffp->vtb_max_frame_width) {
+        double w_scaler = (float)ffp->vtb_max_frame_width / width;
+        width = ffp->vtb_max_frame_width;
         height = height * w_scaler;
     }
 
@@ -472,29 +548,27 @@ void CreateVTBSession(VideoToolBoxContext* context, int width, int height)
     outputCallback.decompressionOutputRefCon = context  ;
     status = VTDecompressionSessionCreate(
                                           kCFAllocatorDefault,
-                                          context->m_fmt_desc,
+                                          context->fmt_desc.fmt_desc,
                                           NULL,
                                           destinationPixelBufferAttributes,
                                           &outputCallback,
                                           &vt_session);
 
     if (status != noErr) {
-        context->m_vt_session = NULL;
         NSError* error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
         NSLog(@"Error %@", [error description]);
         ALOGI("%s - failed with status = (%d)", __FUNCTION__, (int)status);
-    } else {
-        context->m_vt_session =(void*) vt_session;
     }
     CFRelease(destinationPixelBufferAttributes);
 
     memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
     context->sample_infos_in_decoding = 0;
+    return vt_session;
 }
 
 
 
-int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
+static int decode_video_internal(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
 {
     FFPlayer *ffp                   = context->ffp;
     OSStatus status                 = 0;
@@ -523,19 +597,18 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     }
 
     if (context->refresh_request) {
-
         while (context->m_queue_depth > 0) {
             SortQueuePop(context);
         }
 
-        if(context->m_vt_session) {
-            VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-            VTDecompressionSessionInvalidate(context->m_vt_session);
-            CFRelease(context->m_vt_session);
-            context->m_vt_session = NULL;
-        }
+        sample_info_flush(context, 1000);
+        vtbsession_destroy(context);
+        memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
+        context->sample_infos_in_decoding = 0;
 
-        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
+        context->vt_session = vtbsession_create(context);
+        if (!context->vt_session)
+            goto failed;
         context->refresh_request = false;
     }
 
@@ -543,7 +616,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         pts = dts;
     }
 
-    if (context->m_convert_bytestream) {
+    if (context->fmt_desc.convert_bytestream) {
         // ALOGI("the buffer should m_convert_byte\n");
         if(avio_open_dyn_buf(&pb) < 0) {
             goto failed;
@@ -554,8 +627,8 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         if (demux_size == 0) {
             goto failed;
         }
-        sample_buff = CreateSampleBufferFrom(context->m_fmt_desc, demux_buff, demux_size);
-    } else if (context->m_convert_3byteTo4byteNALSize) {
+        sample_buff = CreateSampleBufferFrom(context->fmt_desc.fmt_desc, demux_buff, demux_size);
+    } else if (context->fmt_desc.convert_3byteTo4byteNALSize) {
         // ALOGI("3byteto4byte\n");
         if (avio_open_dyn_buf(&pb) < 0) {
             goto failed;
@@ -572,9 +645,9 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
             nal_start += nal_size;
         }
         demux_size = avio_close_dyn_buf(pb, &demux_buff);
-        sample_buff = CreateSampleBufferFrom(context->m_fmt_desc, demux_buff, demux_size);
+        sample_buff = CreateSampleBufferFrom(context->fmt_desc.fmt_desc, demux_buff, demux_size);
     } else {
-        sample_buff = CreateSampleBufferFrom(context->m_fmt_desc, pData, iSize);
+        sample_buff = CreateSampleBufferFrom(context->fmt_desc.fmt_desc, pData, iSize);
     }
     if (!sample_buff) {
         if (demux_size) {
@@ -601,14 +674,14 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
     sample_info->sar_den = avctx->sample_aspect_ratio.den;
     sample_info_push(context);
 
-    status = VTDecompressionSessionDecodeFrame(context->m_vt_session, sample_buff, decoder_flags, (void*)sample_info, 0);
+    status = VTDecompressionSessionDecodeFrame(context->vt_session, sample_buff, decoder_flags, (void*)sample_info, 0);
     if (status == noErr) {
         if (context->ffp->is->videoq.abort_request)
             goto failed;
 
         // Wait for delayed frames even if kVTDecodeInfo_Asynchronous is not set.
         if (ffp->vtb_wait_async) {
-            status = VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
+            status = VTDecompressionSessionWaitForAsynchronousFrames(context->vt_session);
         }
     }
 
@@ -622,6 +695,7 @@ int videotoolbox_decode_video_internal(VideoToolBoxContext* context, AVCodecCont
         }
         if (status == kVTVideoDecoderMalfunctionErr) {
             context->recovery_drop_packet = true;
+            context->refresh_session = true;
         }
         goto failed;
     }
@@ -668,40 +742,92 @@ static inline void DuplicatePkt(VideoToolBoxContext* context, const AVPacket* pk
 
 
 
-int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
+static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVPacket *avpkt, int* got_picture_ptr)
 {
+    int      ret            = 0;
+    uint8_t *size_data      = NULL;
+    int      size_data_size = 0;
+
     if (!avpkt || !avpkt->data) {
         return 0;
     }
 
-    if (ff_avpacket_is_idr(avpkt) == true) {
-        context->idr_based_identified = true;
-    }
-    if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
-        ResetPktBuffer(context);
-        context->recovery_drop_packet = false;
-    }
-    if (context->recovery_drop_packet == true) {
-        return -1;
+    if (context->ffp->vtb_handle_resolution_change &&
+        context->codecpar->codec_id == AV_CODEC_ID_H264) {
+        size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
+        if (size_data && size_data_size > AV_INPUT_BUFFER_PADDING_SIZE) {
+            int             got_picture = 0;
+            AVFrame        *frame      = av_frame_alloc();
+            AVDictionary   *codec_opts = NULL;
+            AVCodecContext *new_avctx  = avcodec_alloc_context3(avctx->codec);
+            if (!new_avctx)
+                return AVERROR(ENOMEM);
+
+            avcodec_parameters_to_context(new_avctx, context->codecpar);
+            av_freep(&new_avctx->extradata);
+            new_avctx->extradata = av_mallocz(size_data_size);
+            if (!new_avctx->extradata)
+                return AVERROR(ENOMEM);
+            memcpy(new_avctx->extradata, size_data, size_data_size);
+            new_avctx->extradata_size = size_data_size;
+
+            av_dict_set(&codec_opts, "threads", "1", 0);
+            ret = avcodec_open2(new_avctx, avctx->codec, &codec_opts);
+            av_dict_free(&codec_opts);
+            if (ret < 0) {
+                avcodec_free_context(&new_avctx);
+                return ret;
+            }
+
+            ret = avcodec_decode_video2(new_avctx, frame, &got_picture, avpkt);
+            if (ret < 0) {
+                avcodec_free_context(&new_avctx);
+                return ret;
+            }
+
+            if (got_picture) {
+                if (context->codecpar->width  != new_avctx->width &&
+                    context->codecpar->height != new_avctx->height) {
+                    avcodec_parameters_from_context(context->codecpar, new_avctx);
+                    context->refresh_request = true;
+                }
+            }
+
+            av_frame_unref(frame);
+            avcodec_free_context(&new_avctx);
+        }
+    } else {
+        if (ff_avpacket_is_idr(avpkt) == true) {
+            context->idr_based_identified = true;
+        }
+        if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
+            ResetPktBuffer(context);
+            context->recovery_drop_packet = false;
+        }
+        if (context->recovery_drop_packet == true) {
+            return -1;
+        }
     }
 
     DuplicatePkt(context, avpkt);
 
     if (context->refresh_session) {
-        int ret = 0;
-        if (context->m_vt_session) {
-            VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-            VTDecompressionSessionInvalidate(context->m_vt_session);
-            CFRelease(context->m_vt_session);
-        }
+        ret = 0;
 
-        CreateVTBSession(context, context->ffp->is->viddec.avctx->width, context->ffp->is->viddec.avctx->height);
+        sample_info_flush(context, 1000);
+        vtbsession_destroy(context);
+        memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
+        context->sample_infos_in_decoding = 0;
+
+        context->vt_session = vtbsession_create(context);
+        if (!context->vt_session)
+            return -1;
 
         if ((context->m_buffer_deep > 0) &&
             ff_avpacket_i_or_idr(&context->m_buffer_packet[0], context->idr_based_identified) == true ) {
             for (int i = 0; i < context->m_buffer_deep; i++) {
                 AVPacket* pkt = &context->m_buffer_packet[i];
-                ret = videotoolbox_decode_video_internal(context, avctx, pkt, got_picture_ptr);
+                ret = decode_video_internal(context, avctx, pkt, got_picture_ptr);
             }
         } else {
             context->recovery_drop_packet = true;
@@ -711,7 +837,7 @@ int videotoolbox_decode_video(VideoToolBoxContext* context, AVCodecContext *avct
         context->refresh_session = false;
         return ret;
     }
-    return videotoolbox_decode_video_internal(context, avctx, avpkt, got_picture_ptr);
+    return decode_video_internal(context, avctx, avpkt, got_picture_ptr);
 }
 
 
@@ -784,52 +910,111 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
         return NULL;
 }
 
-void dealloc_videotoolbox(VideoToolBoxContext* context)
+void videotoolbox_free(VideoToolBoxContext* context)
 {
     context->dealloced = true;
 
     while (context && context->m_queue_depth > 0) {
         SortQueuePop(context);
     }
-    if (context && context->m_vt_session) {
-        VTDecompressionSessionWaitForAsynchronousFrames(context->m_vt_session);
-        sample_info_flush(context, 3000);
-        VTDecompressionSessionInvalidate(context->m_vt_session);
-        CFRelease(context->m_vt_session);
-        context->m_vt_session = NULL;
-    }
+
+    sample_info_flush(context, 3000);
+    vtbsession_destroy(context);
+
     if (context) {
         ResetPktBuffer(context);
-        if (context->m_fmt_desc) {
-            CFRelease(context->m_fmt_desc);
-            context->m_fmt_desc = NULL;
-        }
         SDL_DestroyCondP(&context->sample_info_cond);
         SDL_DestroyMutexP(&context->sample_info_mutex);
     }
+
+    vtbformat_destroy(&context->fmt_desc);
+
+    avcodec_parameters_free(&context->codecpar);
 }
 
-
-
-VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
+int videotoolbox_decode_frame(VideoToolBoxContext* context)
 {
-    int width           = ic->width;
-    int height          = ic->height;
-    int level           = ic->level;
-    int profile         = ic->profile;
+    FFPlayer *ffp = context->ffp;
+    VideoState *is = ffp->is;
+    Decoder *d = &is->viddec;
+    int got_frame = 0;
+    do {
+        int ret = -1;
+        if (is->abort_request || d->queue->abort_request) {
+            return -1;
+        }
+
+        if (!d->packet_pending || d->queue->serial != d->pkt_serial) {
+            AVPacket pkt;
+            do {
+                if (d->queue->nb_packets == 0)
+                    SDL_CondSignal(d->empty_queue_cond);
+                ffp_video_statistic_l(ffp);
+                if (ffp_packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0)
+                    return -1;
+                if (ffp_is_flush_packet(&pkt)) {
+                    avcodec_flush_buffers(d->avctx);
+                    context->refresh_request = true;
+                    context->serial += 1;
+                    d->finished = 0;
+                    ALOGI("flushed last keyframe pts %lld \n",d->pkt.pts);
+                    d->next_pts = d->start_pts;
+                    d->next_pts_tb = d->start_pts_tb;
+                }
+            } while (ffp_is_flush_packet(&pkt) || d->queue->serial != d->pkt_serial);
+
+            av_packet_split_side_data(&pkt);
+
+            av_packet_unref(&d->pkt);
+            d->pkt_temp = d->pkt = pkt;
+            d->packet_pending = 1;
+        }
+
+        ret = decode_video(context, d->avctx, &d->pkt_temp, &got_frame);
+        if (ret < 0) {
+            d->packet_pending = 0;
+        } else {
+            d->pkt_temp.dts =
+            d->pkt_temp.pts = AV_NOPTS_VALUE;
+            if (d->pkt_temp.data) {
+                if (d->avctx->codec_type != AVMEDIA_TYPE_AUDIO)
+                    ret = d->pkt_temp.size;
+                d->pkt_temp.data += ret;
+                d->pkt_temp.size -= ret;
+                if (d->pkt_temp.size <= 0)
+                    d->packet_pending = 0;
+            } else {
+                if (!got_frame) {
+                    d->packet_pending = 0;
+                    d->finished = d->pkt_serial;
+                }
+            }
+        }
+    } while (!got_frame && !d->finished);
+    return got_frame;
+}
+
+static void vtbformat_destroy(VTBFormatDesc *fmt_desc)
+{
+    if (!fmt_desc || !fmt_desc->fmt_desc)
+        return;
+
+    CFRelease(fmt_desc->fmt_desc);
+    fmt_desc->fmt_desc = NULL;
+}
+
+static int vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecParameters *codecpar)
+{
+    int width           = codecpar->width;
+    int height          = codecpar->height;
+    int level           = codecpar->level;
+    int profile         = codecpar->profile;
     int sps_level       = 0;
     int sps_profile     = 0;
-    int extrasize       = ic->extradata_size;
-    int codec           = ic->codec_id;
-    uint8_t* extradata  = ic->extradata;
+    int extrasize       = codecpar->extradata_size;
+    int codec           = codecpar->codec_id;
+    uint8_t* extradata  = codecpar->extradata;
 
-    VideoToolBoxContext *context_vtb = (VideoToolBoxContext *)mallocz(sizeof(VideoToolBoxContext));
-    if (!context_vtb) {
-        goto failed;
-    }
-
-    context_vtb->idr_based_identified = true;
-    context_vtb->ffp = ffp;
 #if 0
     switch (profile) {
         case FF_PROFILE_H264_HIGH_10:
@@ -848,18 +1033,18 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     }
 #endif
     if (width < 0 || height < 0) {
-        goto failed;
+        goto fail;
     }
 
     switch (codec) {
         case AV_CODEC_ID_H264:
             if (extrasize < 7 || extradata == NULL) {
                 ALOGI("%s - avcC atom too data small or missing", __FUNCTION__);
-                goto failed;
+                goto fail;
             }
 
             if (extradata[0] == 1) {
-                if (!validate_avcC_spc(extradata, extrasize, &context_vtb->m_max_ref_frames, &sps_level, &sps_profile)) {
+                if (!validate_avcC_spc(extradata, extrasize, &fmt_desc->max_ref_frames, &sps_level, &sps_profile)) {
                     //goto failed;
                 }
                 if (level == 0 && sps_level > 0)
@@ -867,73 +1052,99 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
 
                 if (profile == 0 && sps_profile > 0)
                     profile = sps_profile;
-                if (profile == FF_PROFILE_H264_MAIN && level == 32 && context_vtb->m_max_ref_frames > 4) {
-                    ALOGE("%s - Main@L3.2 detected, VTB cannot decode with %d ref frames", __FUNCTION__, context_vtb->m_max_ref_frames);
-                    goto failed;
+                if (profile == FF_PROFILE_H264_MAIN && level == 32 && fmt_desc->max_ref_frames > 4) {
+                    ALOGE("%s - Main@L3.2 detected, VTB cannot decode with %d ref frames", __FUNCTION__, fmt_desc->max_ref_frames);
+                    goto fail;
                 }
 
                 if (extradata[4] == 0xFE) {
                     extradata[4] = 0xFF;
-                    context_vtb->m_convert_3byteTo4byteNALSize = true;
+                    fmt_desc->convert_3byteTo4byteNALSize = true;
                 }
 
-                context_vtb->m_fmt_desc = CreateFormatDescriptionFromCodecData(IJK_VTB_FCC_AVC1, width, height, extradata, extrasize,  IJK_VTB_FCC_AVC);
+                fmt_desc->fmt_desc = CreateFormatDescriptionFromCodecData(kCMVideoCodecType_H264, width, height, extradata, extrasize,  IJK_VTB_FCC_AVCC);
+                if (fmt_desc->fmt_desc == NULL) {
+                    goto fail;
+                }
 
-                ALOGI("%s - using avcC atom of size(%d), ref_frames(%d)", __FUNCTION__, extrasize, context_vtb->m_max_ref_frames);
+                ALOGI("%s - using avcC atom of size(%d), ref_frames(%d)", __FUNCTION__, extrasize, fmt_desc->max_ref_frames);
             } else {
-                    if ((extradata[0] == 0 && extradata[1] == 0 && extradata[2] == 0 && extradata[3] == 1) ||
+                if ((extradata[0] == 0 && extradata[1] == 0 && extradata[2] == 0 && extradata[3] == 1) ||
                     (extradata[0] == 0 && extradata[1] == 0 && extradata[2] == 1)) {
-                        AVIOContext *pb;
-                        if (avio_open_dyn_buf(&pb) < 0) {
-                            goto failed;
-                        }
-
-                        context_vtb->m_convert_bytestream = true;
-                        ff_isom_write_avcc(pb, extradata, extrasize);
-                        extradata = NULL;
-
-                        extrasize = avio_close_dyn_buf(pb, &extradata);
-
-                        if (!validate_avcC_spc(extradata, extrasize, &context_vtb->m_max_ref_frames, &sps_level, &sps_profile)) {
-                            av_free(extradata);
-                            goto failed;
-                        }
-
-                        context_vtb->m_fmt_desc = CreateFormatDescriptionFromCodecData(IJK_VTB_FCC_AVC1, width, height, extradata, extrasize, IJK_VTB_FCC_AVC);
-
-                        av_free(extradata);
-                    } else {
-                        ALOGI("%s - invalid avcC atom data", __FUNCTION__);
-                        goto failed;
+                    AVIOContext *pb;
+                    if (avio_open_dyn_buf(&pb) < 0) {
+                        goto fail;
                     }
+
+                    fmt_desc->convert_bytestream = true;
+                    ff_isom_write_avcc(pb, extradata, extrasize);
+                    extradata = NULL;
+
+                    extrasize = avio_close_dyn_buf(pb, &extradata);
+
+                    if (!validate_avcC_spc(extradata, extrasize, &fmt_desc->max_ref_frames, &sps_level, &sps_profile)) {
+                        av_free(extradata);
+                        goto fail;
+                    }
+
+                    fmt_desc->fmt_desc = CreateFormatDescriptionFromCodecData(kCMVideoCodecType_H264, width, height, extradata, extrasize, IJK_VTB_FCC_AVCC);
+                    if (fmt_desc->fmt_desc == NULL) {
+                        goto fail;
+                    }
+
+                    av_free(extradata);
+                } else {
+                    ALOGI("%s - invalid avcC atom data", __FUNCTION__);
+                    goto fail;
                 }
+            }
             break;
         default:
-            goto failed;
-    }
-    if (context_vtb->m_fmt_desc == NULL) {
-        goto failed;
+            goto fail;
     }
 
+    fmt_desc->max_ref_frames = FFMAX(fmt_desc->max_ref_frames, 2);
+    fmt_desc->max_ref_frames = FFMIN(fmt_desc->max_ref_frames, 5);
 
-    CreateVTBSession(context_vtb, width, height);
+    ALOGI("m_max_ref_frames %d \n", fmt_desc->max_ref_frames);
+
+    return 0;
+fail:
+    vtbformat_destroy(fmt_desc);
+    return -1;
+}
+
+VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
+{
+    int ret = 0;
+
+    VideoToolBoxContext *context_vtb = (VideoToolBoxContext *)mallocz(sizeof(VideoToolBoxContext));
+    if (!context_vtb) {
+        goto fail;
+    }
+
+    context_vtb->codecpar = avcodec_parameters_alloc();
+    if (!context_vtb->codecpar)
+        goto fail;
+
+    ret = avcodec_parameters_from_context(context_vtb->codecpar, avctx);
+    if (ret)
+        goto fail;
+
+    context_vtb->ffp = ffp;
+    context_vtb->idr_based_identified = true;
+
+    ret = vtbformat_init(&context_vtb->fmt_desc, context_vtb->codecpar);
+    if (ret)
+        goto fail;
+    assert(context_vtb->fmt_desc.fmt_desc);
+
+    context_vtb->vt_session = vtbsession_create(context_vtb);
+    if (context_vtb->vt_session == NULL)
+        goto fail;
+
     context_vtb->m_sort_queue = 0;
-    if (context_vtb->m_vt_session == NULL) {
-        if (context_vtb->m_fmt_desc) {
-            CFRelease(context_vtb->m_fmt_desc);
-            context_vtb->m_fmt_desc = NULL;
-        }
-        goto failed;
-    }
     context_vtb->m_queue_depth = 0;
-    if (context_vtb->m_max_ref_frames <= 0) {
-        context_vtb->m_max_ref_frames = 2;
-    }
-    if (context_vtb->m_max_ref_frames > 5) {
-        context_vtb->m_max_ref_frames = 5;
-    }
-
-    ALOGI("m_max_ref_frames %d \n", context_vtb->m_max_ref_frames);
 
     context_vtb->sample_info_mutex = SDL_CreateMutex();
     context_vtb->sample_info_cond  = SDL_CreateCond();
@@ -941,9 +1152,7 @@ VideoToolBoxContext* init_videotoolbox(FFPlayer* ffp, AVCodecContext* ic)
     SDL_SpeedSamplerReset(&context_vtb->sampler);
     return context_vtb;
 
-failed:
-    if (context_vtb) {
-        free(context_vtb);
-    }
+fail:
+    videotoolbox_free(context_vtb);
     return NULL;
 }
