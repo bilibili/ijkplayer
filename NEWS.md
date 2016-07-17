@@ -1,6 +1,12 @@
 tag next
 --------------------------------
+
+tag k0.6.0
+--------------------------------
 - openssl: upgrade to 1.0.2h
+- ffmpeg: upgrade to n3.1
+- MediaCodec: add options to enable resolution change.
+- VideoToolbox: add options to enable resolution change.
 
 tag k0.5.1
 --------------------------------

@@ -1,4 +1,9 @@
-# ijkplayer [![Build Status](https://travis-ci.org/Bilibili/ijkplayer.svg?branch=master)](https://travis-ci.org/Bilibili/ijkplayer)
+# ijkplayer
+
+ Platform | Build Status
+ -------- | ------------
+ Android | [![Build Status](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-android.svg?branch=master)](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-android)
+ iOS | [![Build Status](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-ios.svg?branch=master)](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-ios)
 
 Video player based on [ffplay](http://ffmpeg.org)
 
@@ -16,17 +21,17 @@ allprojects {
 
 dependencies {
     # required, enough for most devices.
-    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.5.1'
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.5.1'
+    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.6.0'
 
     # Other ABIs: optional
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.5.1'
-    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.5.1'
-    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.5.1'
-    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.5.1'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.0'
 
     # ExoPlayer as IMediaPlayer: optional, experimental
-    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.5.1'
+    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.6.0'
 }
 ```
 - iOS
@@ -34,13 +39,13 @@ dependencies {
 
 ### My Build Environment
 - Common
- - Mac OS X 10.11.3
+ - Mac OS X 10.11.5
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
- - Android Studio 2.0
+ - Android Studio 2.1.2
  - Gradle 2.10
 - iOS
- - Xcode 7.2 (7C68)
+ - Xcode 7.3 (7D175)
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
  - brew install git
@@ -57,7 +62,7 @@ dependencies {
  - cpu: ARMv7a, ARM64v8a, x86 (ARMv5 is not tested on real devices)
  - api: [MediaPlayer-like](android/ijkplayer/ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IMediaPlayer.java)
  - video-output: NativeWindow, OpenGL ES 2.0
- - audio-output: OpenSL ES, AudioTrack
+ - audio-output: AudioTrack, OpenSL ES
  - hw-decoder: MediaCodec (API 16+, Android 4.1+)
  - alternative-backend: android.media.MediaPlayer, ExoPlayer
 - iOS
@@ -67,11 +72,7 @@ dependencies {
  - video-output: OpenGL ES 2.0
  - audio-output: AudioQueue, AudioUnit
  - hw-decoder: VideoToolbox (iOS 8+)
- - alternative-backend: AVFoundation.Framework.AVPlayer, MediaPlayer.Framework.MPMoviePlayerControlelr (obselete since iOS 8) 
-
-### TODO
-- iOS
- - api: AVPlayer-like
+ - alternative-backend: AVFoundation.Framework.AVPlayer, MediaPlayer.Framework.MPMoviePlayerControlelr (obselete since iOS 8)
 
 ### NOT-ON-PLAN
 - obsolete platforms (Android: API-8 and below; iOS: pre-6.0)
@@ -136,7 +137,7 @@ sudo dpkg-reconfigure dash
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest k0.5.1
+git checkout -B latest k0.6.0
 
 ./init-android.sh
 
@@ -176,7 +177,7 @@ cd ..
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
-git checkout -B latest k0.5.1
+git checkout -B latest k0.6.0
 
 ./init-ios.sh
 
@@ -184,8 +185,33 @@ cd ios
 ./compile-ffmpeg.sh clean
 ./compile-ffmpeg.sh all
 
-# import ios/IJKMediaPlayer for MediaPlayer.framework-like interface (recommended)
-# open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
+# Demo
+#     open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
+# 
+# Import into Your own Application
+#     Select your project in Xcode.
+#     File -> Add Files to ... -> Select ios/IJKMediaPlayer/IJKMediaPlayer.xcodeproj
+#     Select your Application's target.
+#     Build Phases -> Target Dependencies -> Select IJKMediaFramework
+#     Build Phases -> Link Binary with Libraries -> Add:
+#         IJKMediaFramework.framework
+#
+#         AudioToolbox.framework
+#         AVFoundation.framework
+#         CoreGraphics.framework
+#         CoreMedia.framework
+#         CoreVideo.framework
+#         libbz2.tbd
+#         libz.tbd
+#         MediaPlayer.framework
+#         MobileCoreServices.framework
+#         OpenGLES.framework
+#         QuartzCore.framework
+#         UIKit.framework
+#         VideoToolbox.framework
+#
+#         ... (Maybe something else, if you get any link error)
+# 
 ```
 
 

@@ -43,6 +43,10 @@
     <string name="pref_title_using_media_codec_auto_rotate">Using MediaCodec auto rotate</string>
     <string name="pref_summary_using_media_codec_auto_rotate"></string>
 
+    <string name="pref_key_media_codec_handle_resolution_change">pref.media_codec_handle_resolution_change</string>
+    <string name="pref_title_media_codec_handle_resolution_change">MediaCodec handle resolution change</string>
+    <string name="pref_summary_media_codec_handle_resolution_change"></string>
+
     <string name="pref_key_pixel_format">pref.pixel_format</string>
     <string name="pref_title_pixel_format">Pixel Format</string>
     <string-array name="pref_entries_pixel_format">
@@ -95,6 +99,12 @@
     <string name="pref_key_enable_detached_surface_texture">pref.enable_detached_surface_texture</string>
     <string name="pref_title_enable_detached_surface_texture">Enable detached SurfaceTexture</string>
     <string name="pref_summary_enable_detached_surface_texture"></string>
+
+    <!-- -->
+    <string name="pref_title_misc">Misc</string>
+    <string name="pref_key_using_mediadatasource">pref.using_mediadatasource</string>
+    <string name="pref_title_using_mediadatasource">Using MediaDataSource</string>
+    <string name="pref_summary_using_mediadatasource"></string>
 
     <!-- -->
     <string name="pref_key_last_directory"></string>
