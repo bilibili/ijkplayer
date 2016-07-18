@@ -1210,93 +1210,10 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         goto fail;
     }
 
-<<<<<<< HEAD
-    ALOGI("AMediaFormat: %s, %dx%d\n", opaque->mcc.mime_type, opaque->avctx->width, opaque->avctx->height);
-    opaque->input_aformat = SDL_AMediaFormatJava_createVideoFormat(env, opaque->mcc.mime_type, opaque->avctx->width, opaque->avctx->height);
-    if (opaque->avctx->extradata && opaque->avctx->extradata_size > 0) {
-        if ((opaque->avctx->codec_id == AV_CODEC_ID_H264  && opaque->avctx->extradata[0] == 1)
-            || (opaque->avctx->codec_id == AV_CODEC_ID_HEVC && opaque->avctx->extradata[1] == 1)) {
-#if AMC_USE_AVBITSTREAM_FILTER
-            if (opaque->avctx->codec_id == AV_CODEC_ID_H264) {
-                opaque->bsfc = av_bitstream_filter_init("h264_mp4toannexb");
-                if (!opaque->bsfc) {
-                    ALOGE("Cannot open the h264_mp4toannexb BSF!\n");
-                    goto fail;
-                }
-            } else {
-                opaque->bsfc = av_bitstream_filter_init("hevc_mp4toannexb");
-                if (!opaque->bsfc) {
-                    ALOGE("Cannot open the hevc_mp4toannexb BSF!\n");
-                    goto fail;
-                }
-            }
-
-            opaque->orig_extradata_size = opaque->avctx->extradata_size;
-            opaque->orig_extradata = (uint8_t*) av_mallocz(opaque->avctx->extradata_size +
-                                                      FF_INPUT_BUFFER_PADDING_SIZE);
-            if (!opaque->orig_extradata) {
-                goto fail;
-            }
-            memcpy(opaque->orig_extradata, opaque->avctx->extradata, opaque->avctx->extradata_size);
-            for(int i = 0; i < opaque->avctx->extradata_size; i+=4) {
-                ALOGE("csd-0[%d]: %02x%02x%02x%02x\n", opaque->avctx->extradata_size, (int)opaque->avctx->extradata[i+0], (int)opaque->avctx->extradata[i+1], (int)opaque->avctx->extradata[i+2], (int)opaque->avctx->extradata[i+3]);
-            }
-            SDL_AMediaFormat_setBuffer(opaque->input_aformat, "csd-0", opaque->avctx->extradata, opaque->avctx->extradata_size);
-#else
-            size_t   sps_pps_size   = 0;
-            size_t   convert_size   = opaque->avctx->extradata_size + 20;
-            uint8_t *convert_buffer = (uint8_t *)calloc(1, convert_size);
-            if (!convert_buffer) {
-                ALOGE("%s:sps_pps_buffer: alloc failed\n", __func__);
-                goto fail;
-            }
-            if (opaque->avctx->codec_id == AV_CODEC_ID_H264) {
-                if (0 != convert_sps_pps(opaque->avctx->extradata, opaque->avctx->extradata_size,
-                                         convert_buffer, convert_size,
-                                         &sps_pps_size, &opaque->nal_size)) {
-                    ALOGE("%s:convert_sps_pps: failed\n", __func__);
-                    goto fail;
-                }
-            } else {
-                if (0 != convert_hevc_nal_units(opaque->avctx->extradata, opaque->avctx->extradata_size,
-                                         convert_buffer, convert_size,
-                                         &sps_pps_size, &opaque->nal_size)) {
-                    ALOGE("%s:convert_hevc_nal_units: failed\n", __func__);
-                    goto fail;
-                }
-            }
-            SDL_AMediaFormat_setBuffer(opaque->input_aformat, "csd-0", convert_buffer, sps_pps_size);
-            for(int i = 0; i < sps_pps_size; i+=4) {
-                ALOGE("csd-0[%d]: %02x%02x%02x%02x\n", (int)sps_pps_size, (int)convert_buffer[i+0], (int)convert_buffer[i+1], (int)convert_buffer[i+2], (int)convert_buffer[i+3]);
-            }
-            free(convert_buffer);
-#endif
-        } else {
-            // Codec specific data
-            // SDL_AMediaFormat_setBuffer(opaque->aformat, "csd-0", opaque->avctx->extradata, opaque->avctx->extradata_size);
-            ALOGE("csd-0: naked\n");
-        }
-    } else {
-        ALOGE("no buffer(%d)\n", opaque->avctx->extradata_size);
-    }
-
-    rotate_degrees = ffp_get_video_rotate_degrees(ffp);
-    if (ffp->mediacodec_auto_rotate &&
-        rotate_degrees != 0 &&
-        SDL_Android_GetApiLevel() >= IJK_API_21_LOLLIPOP) {
-        ALOGI("amc: rotate in decoder: %d\n", rotate_degrees);
-        opaque->frame_rotate_degrees = rotate_degrees;
-        SDL_AMediaFormat_setInt32(opaque->input_aformat, "rotation-degrees", rotate_degrees);
-        ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, 0);
-    } else {
-        ALOGI("amc: rotate notify: %d\n", rotate_degrees);
-        ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, rotate_degrees);
-=======
     ret = recreate_format_l(env, node);
     if (ret) {
         ALOGE("amc: recreate_format_l failed\n");
         goto fail;
->>>>>>> 1bcfb62c6dda47df3d1bf90b94729eb80060e497
     }
 
     if (!ffpipeline_select_mediacodec_l(pipeline, &opaque->mcc) || !opaque->mcc.codec_name[0]) {
