@@ -170,8 +170,9 @@ static int recreate_format_l(JNIEnv *env, IJKFF_Pipenode *node)
     SDL_AMediaFormat_deleteP(&opaque->output_aformat);
     opaque->input_aformat = SDL_AMediaFormatJava_createVideoFormat(env, opaque->mcc.mime_type, opaque->codecpar->width, opaque->codecpar->height);
     if (opaque->codecpar->extradata && opaque->codecpar->extradata_size > 0) {
-        if ((opaque->codecpar->codec_id == AV_CODEC_ID_H264 || opaque->codecpar->codec_id == AV_CODEC_ID_HEVC)
-            && opaque->codecpar->extradata[0] == 1) {
+        if ((opaque->avctx->codec_id == AV_CODEC_ID_H264  && opaque->avctx->extradata[0] == 1)
+            || (opaque->avctx->codec_id == AV_CODEC_ID_HEVC && opaque->avctx->extradata_size > 3
+                && (opaque->avctx->extradata[0] == 1 || opaque->avctx->extradata[1] == 1)) {
 #if AMC_USE_AVBITSTREAM_FILTER
             if (opaque->avctx->codec_id == AV_CODEC_ID_H264) {
                 opaque->bsfc = av_bitstream_filter_init("h264_mp4toannexb");
