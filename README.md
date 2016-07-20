@@ -102,7 +102,7 @@ rm module.sh
 ln -s module-default.sh module.sh
 cd android/contrib
 # cd ios
-sh compile-ffmpeg clean
+sh compile-ffmpeg.sh clean
 ```
 
 - If you prefer less codec/format for smaller binary size (include hevc function)
@@ -112,7 +112,7 @@ rm module.sh
 ln -s module-lite-hevc.sh module.sh
 cd android/contrib
 # cd ios
-sh compile-ffmpeg clean
+sh compile-ffmpeg.sh clean
 ```
 
 - If you prefer less codec/format for smaller binary size (by default)
@@ -122,7 +122,7 @@ rm module.sh
 ln -s module-lite.sh module.sh
 cd android/contrib
 # cd ios
-sh compile-ffmpeg clean
+sh compile-ffmpeg.sh clean
 ```
 
 - For Ubuntu/Debian users.
