@@ -30,6 +30,7 @@
     NSMutableDictionary *_formatOptions;
     NSMutableDictionary *_codecOptions;
     NSMutableDictionary *_swsOptions;
+    NSMutableDictionary *_swrOptions;
 }
 
 + (IJKFFOptions *)optionsByDefault
@@ -60,12 +61,14 @@
         _formatOptions      = [[NSMutableDictionary alloc] init];
         _codecOptions       = [[NSMutableDictionary alloc] init];
         _swsOptions         = [[NSMutableDictionary alloc] init];
+        _swrOptions         = [[NSMutableDictionary alloc] init];
 
         _optionCategories   = [[NSMutableDictionary alloc] init];
         _optionCategories[@(IJKMP_OPT_CATEGORY_PLAYER)] = _playerOptions;
         _optionCategories[@(IJKMP_OPT_CATEGORY_FORMAT)] = _formatOptions;
         _optionCategories[@(IJKMP_OPT_CATEGORY_CODEC)]  = _codecOptions;
         _optionCategories[@(IJKMP_OPT_CATEGORY_SWS)]    = _swsOptions;
+        _optionCategories[@(IJKMP_OPT_CATEGORY_SWR)]    = _swrOptions;
     }
     return self;
 }

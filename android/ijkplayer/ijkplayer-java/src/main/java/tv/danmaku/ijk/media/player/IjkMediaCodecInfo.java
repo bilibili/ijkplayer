@@ -15,7 +15,7 @@ import java.util.TreeMap;
 public class IjkMediaCodecInfo {
     private final static String TAG = "IjkMediaCodecInfo";
 
-    public static int RANK_MAX = 1000;
+    public static final int RANK_MAX = 1000;
     public static final int RANK_TESTED = 800;
     public static final int RANK_ACCEPTABLE = 700;
     public static final int RANK_LAST_CHANCE = 600;

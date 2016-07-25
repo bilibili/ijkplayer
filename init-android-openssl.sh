@@ -18,7 +18,7 @@
 #IJK_OPENSSL_UPSTREAM=https://github.com/openssl/openssl
 IJK_OPENSSL_UPSTREAM=https://github.com/Bilibili/openssl.git
 IJK_OPENSSL_FORK=https://github.com/Bilibili/openssl.git
-IJK_OPENSSL_COMMIT=OpenSSL_1_0_2d
+IJK_OPENSSL_COMMIT=OpenSSL_1_0_2h
 IJK_OPENSSL_LOCAL_REPO=extra/openssl
 
 set -e
@@ -32,10 +32,12 @@ function pull_fork()
     echo "== pull openssl fork $1 =="
     sh $TOOLS/pull-repo-ref.sh $IJK_OPENSSL_FORK android/contrib/openssl-$1 ${IJK_OPENSSL_LOCAL_REPO}
     cd android/contrib/openssl-$1
-    git checkout ${IJK_OPENSSL_COMMIT}
+    git checkout ${IJK_OPENSSL_COMMIT} -B ijkplayer
     cd -
 }
 
-pull_fork "armv7a"
 pull_fork "armv5"
+pull_fork "armv7a"
+pull_fork "arm64"
 pull_fork "x86"
+pull_fork "x86_64"

@@ -19,7 +19,7 @@
 APP_OPTIM := release
 APP_PLATFORM := android-9
 APP_ABI := armeabi
-NDK_TOOLCHAIN_VERSION=4.8
+NDK_TOOLCHAIN_VERSION=4.9
 APP_PIE := false
 
 APP_CFLAGS := -O3 -Wall -pipe \

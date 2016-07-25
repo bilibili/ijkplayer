@@ -171,7 +171,7 @@ sdl_amedia_status_t SDL_AMediaCodec_queueInputBuffer(SDL_AMediaCodec* acodec, si
 {
     assert(acodec->func_queueInputBuffer);
     if (flags & AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME) {
-        return SDL_AMediaCodec_FakeFifo_queue(&acodec->common->fake_fifo, idx, offset, size, time, flags);
+        return SDL_AMediaCodec_FakeFifo_queueInputBuffer(&acodec->common->fake_fifo, idx, offset, size, time, flags);
     }
 
     return acodec->func_queueInputBuffer(acodec, idx, offset, size, time, flags);
@@ -272,13 +272,13 @@ void SDL_AMediaCodecFake_flushFakeFrames(SDL_AMediaCodec* acodec)
 
 sdl_amedia_status_t SDL_AMediaCodecFake_queueFakeFrame(SDL_AMediaCodec* acodec, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags)
 {
-    return SDL_AMediaCodec_FakeFifo_queue(&acodec->common->fake_fifo, idx, offset, size, time, flags);
+    return SDL_AMediaCodec_FakeFifo_queueInputBuffer(&acodec->common->fake_fifo, idx, offset, size, time, flags);
 }
 
 ssize_t SDL_AMediaCodecFake_dequeueOutputBuffer(SDL_AMediaCodec* acodec, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs)
 {    
     if (SDL_AMediaCodec_FakeFifo_size(&acodec->common->fake_fifo) > 0) {
-        ssize_t ret = SDL_AMediaCodec_FakeFifo_dequeue(&acodec->common->fake_fifo, info, 0);
+        ssize_t ret = SDL_AMediaCodec_FakeFifo_dequeueOutputBuffer(&acodec->common->fake_fifo, info, 0);
         if (ret >= 0)
             return ret;
     }
@@ -289,5 +289,5 @@ ssize_t SDL_AMediaCodecFake_dequeueOutputBuffer(SDL_AMediaCodec* acodec, SDL_AMe
 
 ssize_t SDL_AMediaCodecFake_dequeueFakeFrameOnly(SDL_AMediaCodec* acodec, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs)
 {
-    return SDL_AMediaCodec_FakeFifo_dequeue(&acodec->common->fake_fifo, info, 0);
+    return SDL_AMediaCodec_FakeFifo_dequeueOutputBuffer(&acodec->common->fake_fifo, info, 0);
 }

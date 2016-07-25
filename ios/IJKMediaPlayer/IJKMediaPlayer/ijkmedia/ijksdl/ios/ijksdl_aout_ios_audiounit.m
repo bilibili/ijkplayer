@@ -30,6 +30,8 @@
 #import "IJKSDLAudioUnitController.h"
 #import "IJKSDLAudioQueueController.h"
 
+#define SDL_IOS_AUDIO_MAX_CALLBACKS_PER_SEC 15
+
 struct SDL_Aout_Opaque {
     IJKSDLAudioQueueController *aoutController;
 };
@@ -88,6 +90,17 @@ static void aout_set_playback_rate(SDL_Aout *aout, float playbackRate)
     [opaque->aoutController setPlaybackRate:playbackRate];
 }
 
+static double auout_get_latency_seconds(SDL_Aout *aout)
+{
+    SDL_Aout_Opaque *opaque = aout->opaque;
+    return [opaque->aoutController get_latency_seconds];
+}
+
+static int aout_get_persecond_callbacks(SDL_Aout *aout)
+{
+    return SDL_IOS_AUDIO_MAX_CALLBACKS_PER_SEC;
+}
+
 static void aout_free_l(SDL_Aout *aout)
 {
     if (!aout)
@@ -119,6 +132,7 @@ SDL_Aout *SDL_AoutIos_CreateForAudioUnit()
     aout->close_audio = aout_close_audio;
 
     aout->func_set_playback_rate = aout_set_playback_rate;
-
+    aout->func_get_latency_seconds = auout_get_latency_seconds;
+    aout->func_get_audio_persecond_callbacks = aout_get_persecond_callbacks;
     return aout;
 }

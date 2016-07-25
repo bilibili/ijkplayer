@@ -36,7 +36,7 @@
 #include "ijkplayer_android.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_codec_android_mediadef.h"
-#include "ijkplayer/ijkavformat/ijkavformat.h"
+#include "libavformat/ijkavformat.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
@@ -618,7 +618,7 @@ IjkMediaPlayer_getMediaMeta(JNIEnv *env, jobject thiz)
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_FORMAT, NULL );
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_DURATION_US, NULL );
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_START_US, NULL );
-    fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_START_US, NULL );
+    fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_BITRATE, NULL );
 
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_VIDEO_STREAM, "-1");
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_AUDIO_STREAM, "-1");
@@ -702,7 +702,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
     jni_set_media_player(env, thiz, mp);
     ijkmp_set_weak_thiz(mp, (*env)->NewGlobalRef(env, weak_this));
     ijkmp_set_inject_opaque(mp, ijkmp_get_weak_thiz(mp));
-    ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, (*env)->NewGlobalRef(env, weak_this));
+    ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, ijkmp_get_weak_thiz(mp));
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);

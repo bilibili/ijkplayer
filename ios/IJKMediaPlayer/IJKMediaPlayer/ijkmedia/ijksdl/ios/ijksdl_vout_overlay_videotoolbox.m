@@ -96,7 +96,7 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
     overlay->format = SDL_FCC__VTB;
     overlay->planes = 2;
 
-#if 0
+#if 1
     if (CVPixelBufferLockBaseAddress(pixel_buffer, 0) != kCVReturnSuccess) {
         overlay->pixels[0]  = NULL;
         overlay->pixels[1]  = NULL;
@@ -108,18 +108,20 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
         opaque->pixel_buffer = NULL;
         return -1;
     }
-    overlay->pixels[0]  = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 0);
-    overlay->pixels[1]  = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 1);
-    overlay->pitches[0] = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 0);
-    overlay->pitches[1] = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 1);
+    // overlay->pixels[0]  = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 0);
+    // overlay->pixels[1]  = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 1);
+    overlay->pixels[0]  = NULL;
+    overlay->pixels[1]  = NULL;
+    overlay->pitches[0] = CVPixelBufferGetWidthOfPlane(pixel_buffer, 0);
+    overlay->pitches[1] = CVPixelBufferGetWidthOfPlane(pixel_buffer, 1);
     CVPixelBufferUnlockBaseAddress(pixel_buffer, 0);
 #else
     overlay->pixels[0]  = NULL;
     overlay->pixels[1]  = NULL;
     overlay->pitches[0] = 0;
     overlay->pitches[1] = 0;
-    overlay->is_private = 1;
 #endif
+    overlay->is_private = 1;
 
     overlay->w = (int)frame->width;
     overlay->h = (int)frame->height;

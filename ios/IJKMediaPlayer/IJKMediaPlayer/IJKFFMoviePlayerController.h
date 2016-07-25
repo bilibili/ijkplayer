@@ -21,6 +21,7 @@
  */
 
 #import "IJKMediaPlayback.h"
+#import "IJKFFMonitor.h"
 #import "IJKFFOptions.h"
 
 // media meta
@@ -120,6 +121,13 @@ typedef enum IJKLogLevel {
 @property (nonatomic, retain) id<IJKMediaUrlOpenDelegate> tcpOpenDelegate;
 @property (nonatomic, retain) id<IJKMediaUrlOpenDelegate> httpOpenDelegate;
 @property (nonatomic, retain) id<IJKMediaUrlOpenDelegate> liveOpenDelegate;
+
+@property (nonatomic, retain) id<IJKMediaNativeInvokeDelegate> nativeInvokeDelegate;
+
+- (void)didShutdown;
+
+#pragma mark KVO properties
+@property (nonatomic, readonly) IJKFFMonitor *monitor;
 
 @end
 

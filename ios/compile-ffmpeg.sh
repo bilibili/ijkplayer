@@ -29,6 +29,7 @@ UNI_BUILD_ROOT=`pwd`
 UNI_TMP="$UNI_BUILD_ROOT/tmp"
 UNI_TMP_LLVM_VER_FILE="$UNI_TMP/llvm.ver.txt"
 FF_TARGET=$1
+FF_TARGET_EXTRA=$2
 set -e
 
 #----------
@@ -117,11 +118,11 @@ do_lipo_all () {
 #----------
 if [ "$FF_TARGET" = "armv7" -o "$FF_TARGET" = "armv7s" -o "$FF_TARGET" = "arm64" ]; then
     echo_archs
-    sh tools/do-compile-ffmpeg.sh $FF_TARGET
+    sh tools/do-compile-ffmpeg.sh $FF_TARGET $FF_TARGET_EXTRA
     do_lipo_all
 elif [ "$FF_TARGET" = "i386" -o "$FF_TARGET" = "x86_64" ]; then
     echo_archs
-    sh tools/do-compile-ffmpeg.sh $FF_TARGET
+    sh tools/do-compile-ffmpeg.sh $FF_TARGET $FF_TARGET_EXTRA
     do_lipo_all
 elif [ "$FF_TARGET" = "lipo" ]; then
     echo_archs
@@ -130,7 +131,7 @@ elif [ "$FF_TARGET" = "all" ]; then
     echo_archs
     for ARCH in $FF_ALL_ARCHS
     do
-        sh tools/do-compile-ffmpeg.sh $ARCH
+        sh tools/do-compile-ffmpeg.sh $ARCH $FF_TARGET_EXTRA
     done
 
     do_lipo_all

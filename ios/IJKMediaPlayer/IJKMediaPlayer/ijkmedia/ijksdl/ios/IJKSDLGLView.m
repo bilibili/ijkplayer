@@ -188,11 +188,11 @@
 
     _didStopGL = YES;
 
-    IJK_GLES2_Renderer_reset(_renderer);
-    IJK_GLES2_Renderer_freeP(&_renderer);
-
     EAGLContext *prevContext = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:_context];
+    
+    IJK_GLES2_Renderer_reset(_renderer);
+    IJK_GLES2_Renderer_freeP(&_renderer);
 
     if (_framebuffer) {
         glDeleteFramebuffers(1, &_framebuffer);
@@ -231,8 +231,8 @@
     newFrame.size.width   = selfFrame.size.width * 1 / 3;
     newFrame.origin.x     = selfFrame.size.width * 2 / 3;
 
-    newFrame.size.height  = selfFrame.size.height * 6 / 8;
-    newFrame.origin.y    += selfFrame.size.height * 1 / 8;
+    newFrame.size.height  = selfFrame.size.height * 8 / 8;
+    newFrame.origin.y    += selfFrame.size.height * 0 / 8;
 
     _hudViewController.tableView.frame = newFrame;
     [self invalidateRenderBuffer];

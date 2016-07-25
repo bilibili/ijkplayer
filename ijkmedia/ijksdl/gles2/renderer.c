@@ -63,13 +63,16 @@ void IJK_GLES2_Renderer_reset(IJK_GLES2_Renderer *renderer)
     if (renderer->program)
         glDeleteProgram(renderer->program);
 
+    renderer->vertex_shader   = 0;
+    renderer->fragment_shader = 0;
+    renderer->program         = 0;
+
     for (int i = 0; i < IJK_GLES2_MAX_PLANE; ++i) {
         if (renderer->plane_textures[i]) {
             glDeleteTextures(1, &renderer->plane_textures[i]);
+            renderer->plane_textures[i] = 0;
         }
     }
-
-    memset(renderer, 0, sizeof(IJK_GLES2_Renderer));
 }
 
 void IJK_GLES2_Renderer_free(IJK_GLES2_Renderer *renderer)
@@ -171,7 +174,7 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create(SDL_VoutOverlay *overlay)
         case SDL_FCC_I420:      renderer = IJK_GLES2_Renderer_create_yuv420p(); break;
         case SDL_FCC_I444P10LE: renderer = IJK_GLES2_Renderer_create_yuv444p10le(); break;
         default:
-            ALOGE("[GLES2] unknown format %4s(%d)", (char *)&overlay->format, overlay->format);
+            ALOGE("[GLES2] unknown format %4s(%d)\n", (char *)&overlay->format, overlay->format);
             return NULL;
     }
 
@@ -245,15 +248,16 @@ static void IJK_GLES2_Renderer_Vertices_apply(IJK_GLES2_Renderer *renderer)
 
     float width     = renderer->frame_width;
     float height    = renderer->frame_height;
+
+    if (renderer->frame_sar_num > 0 && renderer->frame_sar_den > 0) {
+        width = width * renderer->frame_sar_num / renderer->frame_sar_den;
+    }
+
     const float dW  = (float)renderer->layer_width	/ width;
     const float dH  = (float)renderer->layer_height / height;
     float dd        = 1.0f;
     float nW        = 1.0f;
     float nH        = 1.0f;
-
-    if (renderer->frame_sar_num > 0 && renderer->frame_sar_den > 0) {
-        width = width * renderer->frame_sar_num / renderer->frame_sar_den;
-    }
 
     switch (renderer->gravity) {
         case IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL:  dd = FFMAX(dW, dH); break;
@@ -316,7 +320,7 @@ static void IJK_GLES2_Renderer_TexCoords_reset(IJK_GLES2_Renderer *renderer)
 
 static void IJK_GLES2_Renderer_TexCoords_cropRight(IJK_GLES2_Renderer *renderer, GLfloat cropRight)
 {
-    ALOGE("IJK_GLES2_Renderer_TexCoords_cropRight");
+    ALOGE("IJK_GLES2_Renderer_TexCoords_cropRight\n");
     renderer->texcoords[0] = 0.0f;
     renderer->texcoords[1] = 1.0f;
     renderer->texcoords[2] = 1.0f - cropRight;
@@ -368,9 +372,11 @@ GLboolean IJK_GLES2_Renderer_renderOverlay(IJK_GLES2_Renderer *renderer, SDL_Vou
 
     glClear(GL_COLOR_BUFFER_BIT);               IJK_GLES2_checkError_TRACE("glClear");
 
+    GLsizei visible_width  = renderer->frame_width;
+    GLsizei visible_height = renderer->frame_height;
     if (overlay) {
-        GLsizei visible_width  = overlay->w;
-        GLsizei visible_height = overlay->h;
+        visible_width  = overlay->w;
+        visible_height = overlay->h;
         if (renderer->frame_width   != visible_width    ||
             renderer->frame_height  != visible_height   ||
             renderer->frame_sar_num != overlay->sar_num ||
@@ -380,36 +386,40 @@ GLboolean IJK_GLES2_Renderer_renderOverlay(IJK_GLES2_Renderer *renderer, SDL_Vou
             renderer->frame_height  = visible_height;
             renderer->frame_sar_num = overlay->sar_num;
             renderer->frame_sar_den = overlay->sar_den;
+
             renderer->vertices_changed = 1;
         }
 
-        if (renderer->vertices_changed) {
-            renderer->vertices_changed = 0;
+        renderer->last_buffer_width = renderer->func_getBufferWidth(renderer, overlay);
 
-            IJK_GLES2_Renderer_Vertices_apply(renderer);
-            IJK_GLES2_Renderer_Vertices_reloadVertex(renderer);
-        }
-
-        GLsizei buffer_width   = renderer->func_getBufferWidth(renderer, overlay);
-        if (buffer_width > 0 &&
-            buffer_width > visible_width &&
-            buffer_width != renderer->buffer_width &&
-            visible_width != renderer->visible_width) {
-            renderer->buffer_width  = buffer_width;
-            renderer->visible_width = visible_width;
-
-            GLsizei padding_pixels     = buffer_width - visible_width;
-            GLfloat padding_normalized = ((GLfloat)padding_pixels) / buffer_width;
-            ALOGI("[yuv420p] padding changed: %d - %d = %d (%f)\n",
-                  buffer_width, visible_width,
-                  padding_pixels, padding_normalized);
-            IJK_GLES2_Renderer_TexCoords_reset(renderer);
-            IJK_GLES2_Renderer_TexCoords_cropRight(renderer, padding_normalized);
-            IJK_GLES2_Renderer_TexCoords_reloadVertex(renderer);
-        }
-        
         if (!renderer->func_uploadTexture(renderer, overlay))
             return GL_FALSE;
+    } else {
+        // NULL overlay means force reload vertice
+        renderer->vertices_changed = 1;
+    }
+
+    GLsizei buffer_width = renderer->last_buffer_width;
+    if (renderer->vertices_changed ||
+        (buffer_width > 0 &&
+         buffer_width > visible_width &&
+         buffer_width != renderer->buffer_width &&
+         visible_width != renderer->visible_width)){
+
+        renderer->vertices_changed = 0;
+
+        IJK_GLES2_Renderer_Vertices_apply(renderer);
+        IJK_GLES2_Renderer_Vertices_reloadVertex(renderer);
+
+        renderer->buffer_width  = buffer_width;
+        renderer->visible_width = visible_width;
+
+        GLsizei padding_pixels     = buffer_width - visible_width;
+        GLfloat padding_normalized = ((GLfloat)padding_pixels) / buffer_width;
+
+        IJK_GLES2_Renderer_TexCoords_reset(renderer);
+        IJK_GLES2_Renderer_TexCoords_cropRight(renderer, padding_normalized);
+        IJK_GLES2_Renderer_TexCoords_reloadVertex(renderer);
     }
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);      IJK_GLES2_checkError_TRACE("glDrawArrays");

@@ -262,7 +262,7 @@ static void SDL_VoutAndroid_SetNativeWindow_l(SDL_Vout *vout, ANativeWindow *nat
             SDL_VoutAndroid_invalidateAllBuffers_l(vout);
         }
         return;
-    } else
+    }
 
     IJK_EGL_terminate(opaque->egl);
     SDL_VoutAndroid_invalidateAllBuffers_l(vout);

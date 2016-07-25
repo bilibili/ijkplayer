@@ -48,6 +48,7 @@ struct SDL_Aout {
 
     // optional
     void   (*func_set_playback_rate)(SDL_Aout *aout, float playbackRate);
+    int    (*func_get_audio_persecond_callbacks)(SDL_Aout *aout);
 
     // Android only
     int    (*func_get_audio_session_id)(SDL_Aout *aout);
@@ -63,6 +64,7 @@ void SDL_AoutFreeP(SDL_Aout **paout);
 
 double SDL_AoutGetLatencySeconds(SDL_Aout *aout);
 void   SDL_AoutSetDefaultLatencySeconds(SDL_Aout *aout, double latency);
+int    SDL_AoutGetAudioPerSecondCallBacks(SDL_Aout *aout);
 
 // optional
 void   SDL_AoutSetPlaybackRate(SDL_Aout *aout, float playbackRate);

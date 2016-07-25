@@ -1,6 +1,22 @@
 tag next
 --------------------------------
 
+tag k0.6.0
+--------------------------------
+- openssl: upgrade to 1.0.2h
+- ffmpeg: upgrade to n3.1
+- MediaCodec: add options to enable resolution change.
+- VideoToolbox: add options to enable resolution change.
+
+tag k0.5.1
+--------------------------------
+- ffmpeg: fix crash introduced in k0.5.0
+
+tag k0.5.0
+--------------------------------
+- ffmpeg: upgrade to n3.0
+- android: support NDKr11
+
 tag k0.4.5
 --------------------------------
 - ios: support playbackRate change. (iOS 7.0 or later)
