@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 
-IJK_LIBSOXR_UPSTREAM=https://github.com/yuazhen/soxr.git
-IJK_LIBSOXR_FORK=https://github.com/yuazhen/soxr.git
+IJK_LIBSOXR_UPSTREAM=http://git.code.sf.net/p/soxr/code
+IJK_LIBSOXR_FORK=http://git.code.sf.net/p/soxr/code
 IJK_LIBSOXR_COMMIT=0.1.2
 IJK_LIBSOXR_LOCAL_REPO=extra/soxr
 
