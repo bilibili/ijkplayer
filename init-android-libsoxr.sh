@@ -18,6 +18,7 @@
 IJK_LIBSOXR_UPSTREAM=http://git.code.sf.net/p/soxr/code
 IJK_LIBSOXR_FORK=http://git.code.sf.net/p/soxr/code
 IJK_LIBSOXR_COMMIT=0.1.2
+IJK_LIBSOXR_COMMIT_64=master
 IJK_LIBSOXR_LOCAL_REPO=extra/soxr
 
 set -e
@@ -32,7 +33,14 @@ function pull_fork()
     sh $TOOLS/pull-repo-ref.sh $IJK_LIBSOXR_FORK android/contrib/libsoxr-$1 ${IJK_LIBSOXR_LOCAL_REPO}
     cp extra/android-cmake/android.toolchain.cmake android/contrib/libsoxr-$1
     cd android/contrib/libsoxr-$1
-    git checkout ${IJK_LIBSOXR_COMMIT} -B ijkplayer
+    case "$1" in
+        arm64|x86_64)
+            git checkout ${IJK_LIBSOXR_COMMIT_64} -B ijkplayer
+            ;;
+        *)
+            git checkout ${IJK_LIBSOXR_COMMIT} -B ijkplayer
+            ;;
+    esac
     cd -
 }
 
