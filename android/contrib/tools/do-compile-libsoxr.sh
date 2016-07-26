@@ -60,14 +60,14 @@ if [ "$FF_ARCH" = "armv7a" ]; then
 elif [ "$FF_ARCH" = "armv5" ]; then
     FF_BUILD_NAME=libsoxr-armv5
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
-	
+
     FF_CMAKE_ABI="armeabi"
     FF_CMAKE_EXTRA_FLAGS="-DHAVE_WORDS_BIGENDIAN_EXITCODE=1 -DWITH_SIMD=0"
 
 elif [ "$FF_ARCH" = "x86" ]; then
     FF_BUILD_NAME=libsoxr-x86
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
-	
+
     FF_CMAKE_ABI="x86"
     FF_CMAKE_EXTRA_FLAGS="-DHAVE_WORDS_BIGENDIAN_EXITCODE=1"
 
