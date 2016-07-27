@@ -170,11 +170,11 @@ static int recreate_format_l(JNIEnv *env, IJKFF_Pipenode *node)
     SDL_AMediaFormat_deleteP(&opaque->output_aformat);
     opaque->input_aformat = SDL_AMediaFormatJava_createVideoFormat(env, opaque->mcc.mime_type, opaque->codecpar->width, opaque->codecpar->height);
     if (opaque->codecpar->extradata && opaque->codecpar->extradata_size > 0) {
-        if ((opaque->avctx->codec_id == AV_CODEC_ID_H264  && opaque->avctx->extradata[0] == 1)
-            || (opaque->avctx->codec_id == AV_CODEC_ID_HEVC && opaque->avctx->extradata_size > 3
-                && (opaque->avctx->extradata[0] == 1 || opaque->avctx->extradata[1] == 1))) {
+        if ((opaque->codecpar->codec_id == AV_CODEC_ID_H264 && opaque->codecpar->extradata[0] == 1)
+            || (opaque->codecpar->codec_id == AV_CODEC_ID_HEVC && opaque->codecpar->extradata_size > 3
+                && (opaque->codecpar->extradata[0] == 1 || opaque->codecpar->extradata[1] == 1))) {
 #if AMC_USE_AVBITSTREAM_FILTER
-            if (opaque->avctx->codec_id == AV_CODEC_ID_H264) {
+            if (opaque->codecpar->codec_id == AV_CODEC_ID_H264) {
                 opaque->bsfc = av_bitstream_filter_init("h264_mp4toannexb");
                 if (!opaque->bsfc) {
                     ALOGE("Cannot open the h264_mp4toannexb BSF!\n");
@@ -188,16 +188,16 @@ static int recreate_format_l(JNIEnv *env, IJKFF_Pipenode *node)
                 }
             }
 
-            opaque->orig_extradata_size = opaque->avctx->extradata_size;
-            opaque->orig_extradata = (uint8_t*) av_mallocz(opaque->avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+            opaque->orig_extradata_size = opaque->codecpar->extradata_size;
+            opaque->orig_extradata = (uint8_t*) av_mallocz(opaque->codecpar->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
             if (!opaque->orig_extradata) {
                 goto fail;
             }
-            memcpy(opaque->orig_extradata, opaque->avctx->extradata, opaque->avctx->extradata_size);
-            for(int i = 0; i < opaque->avctx->extradata_size; i+=4) {
-                ALOGE("csd-0[%d]: %02x%02x%02x%02x\n", opaque->avctx->extradata_size, (int)opaque->avctx->extradata[i+0], (int)opaque->avctx->extradata[i+1], (int)opaque->avctx->extradata[i+2], (int)opaque->avctx->extradata[i+3]);
+            memcpy(opaque->orig_extradata, opaque->codecpar->extradata, opaque->codecpar->extradata_size);
+            for(int i = 0; i < opaque->codecpar->extradata_size; i+=4) {
+                ALOGE("csd-0[%d]: %02x%02x%02x%02x\n", opaque->codecpar->extradata_size, (int)opaque->codecpar->extradata[i+0], (int)opaque->codecpar->extradata[i+1], (int)opaque->codecpar->extradata[i+2], (int)opaque->codecpar->extradata[i+3]);
             }
-            SDL_AMediaFormat_setBuffer(opaque->input_aformat, "csd-0", opaque->avctx->extradata, opaque->avctx->extradata_size);
+            SDL_AMediaFormat_setBuffer(opaque->input_aformat, "csd-0", opaque->codecpar->extradata, opaque->codecpar->extradata_size);
 #else
             size_t   sps_pps_size   = 0;
             size_t   convert_size   = opaque->codecpar->extradata_size + 20;
