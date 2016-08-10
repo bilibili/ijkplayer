@@ -27,7 +27,7 @@
 #include "libavutil/log.h"
 #include "libavutil/opt.h"
 
-#include "libavformat/ijkavformat.h"
+#include "ijkavformat/ijkavformat.h"
 #include "ijkplayer/ijkavutil/opt.h"
 
 #include "j4a/class/tv/danmaku/ijk/media/player/misc/IMediaDataSource.h"
