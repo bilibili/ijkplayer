@@ -13,4 +13,6 @@ public class Bundle {
     public void   putString(String key, String value);
 
     public void putParcelableArrayList(String key, ArrayList value);
+    public long getLong(String key);
+    public void putLong(String key, long value);
 }
