@@ -219,7 +219,7 @@ static const AVClass ijkmediadatasource_context_class = {
     .version    = LIBAVUTIL_VERSION_INT,
 };
 
-URLProtocol ijkff_ijkmediadatasource_protocol = {
+URLProtocol ijkimp_ff_ijkmediadatasource_protocol = {
     .name                = "ijkmediadatasource",
     .url_open2           = ijkmds_open,
     .url_read            = ijkmds_read,
