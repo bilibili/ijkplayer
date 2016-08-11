@@ -33,7 +33,7 @@
 #include "string.h"
 #include "ijkplayer/version.h"
 
-static const char *kIJKFFRequiredFFmpegVersion = "ff3.1--ijk0.6.0--20160718--001";
+static const char *kIJKFFRequiredFFmpegVersion = "ff3.1--ijk0.6.1--20160824--001";
 
 @interface IJKFFMoviePlayerController()
 
