@@ -60,7 +60,7 @@
 #endif
 
 #include "ijksdl/ijksdl_log.h"
-#include "libavformat/ijkavformat.h"
+#include "ijkavformat/ijkavformat.h"
 #include "ff_cmdutils.h"
 #include "ff_fferror.h"
 #include "ff_ffpipeline.h"
@@ -3174,9 +3174,17 @@ void ffp_global_set_log_level(int log_level)
     av_log_set_level(av_level);
 }
 
+static ijk_inject_callback s_inject_callback;
+int inject_callback(void *opaque, int type, void *data, size_t data_size)
+{
+    if (s_inject_callback)
+        return s_inject_callback(opaque, type, data, data_size);
+    return 0;
+}
+
 void ffp_global_set_inject_callback(ijk_inject_callback cb)
 {
-    ijkav_register_inject_callback(cb);
+    s_inject_callback = cb;
 }
 
 void ffp_io_stat_register(void (*cb)(const char *url, int type, int bytes))
@@ -3289,64 +3297,20 @@ static AVDictionary **ffp_get_opt_dict(FFPlayer *ffp, int opt_category)
     }
 }
 
-static void app_func_did_tcp_connect_ip_port(AVApplicationContext *h, int error, int family, const char *ip, int port)
+static int app_func_event(AVApplicationContext *h, int message ,void *data, size_t size)
 {
-    IJKAVInject_IpAddress inject_data = {0};
-    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
-
-    if (!h || !h->opaque || !inject_callback || !ip)
-        return;
+    if (!h || !h->opaque || !data)
+        return 0;
 
     FFPlayer *ffp = (FFPlayer *)h->opaque;
     if (!ffp->inject_opaque)
-        return;
-
-    inject_data.error  = error;
-    inject_data.family = family;
-    av_strlcpy(inject_data.ip, ip, sizeof(inject_data.ip));
-    inject_data.port   = port;
-
-    inject_callback(ffp->inject_opaque, IJKAVINJECT_DID_TCP_CONNECT, &inject_data, sizeof(inject_data));
-}
-
-static void app_func_on_http_event(AVApplicationContext *h, AVAppHttpEvent *event)
-{
-    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
-
-    if (!h || !h->opaque || !inject_callback || !event)
-        return;
-
-    FFPlayer *ffp = (FFPlayer *)h->opaque;
-    if (!ffp->inject_opaque)
-        return;
-
-    int message = -1;
-    switch (event->event_type) {
-        case AVAPP_EVENT_WILL_HTTP_OPEN: message = IJKAVINJECT_WILL_HTTP_OPEN; break;
-        case AVAPP_EVENT_DID_HTTP_OPEN:  message = IJKAVINJECT_DID_HTTP_OPEN;  break;
-        case AVAPP_EVENT_WILL_HTTP_SEEK: message = IJKAVINJECT_WILL_HTTP_SEEK; break;
-        case AVAPP_EVENT_DID_HTTP_SEEK:  message = IJKAVINJECT_DID_HTTP_SEEK;  break;
-        default:
-            return;
+        return 0;
+    if (message == AVAPP_EVENT_IO_TRAFFIC && sizeof(AVAppIOTraffic) == size) {
+        AVAppIOTraffic *event = (AVAppIOTraffic *)(intptr_t)data;
+        if (event->bytes > 0)
+            SDL_SpeedSampler2Add(&ffp->stat.tcp_read_sampler, event->bytes);
     }
-    inject_callback(ffp->inject_opaque, message, event, sizeof(AVAppHttpEvent));
-}
-
-static void app_func_on_io_traffic(AVApplicationContext *h, AVAppIOTraffic *event)
-{
-    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
-
-    if (!h || !h->opaque || !inject_callback || !event)
-        return;
-
-    FFPlayer *ffp = (FFPlayer *)h->opaque;
-    if (!ffp->inject_opaque)
-        return;
-
-    if (event->bytes > 0)
-        SDL_SpeedSampler2Add(&ffp->stat.tcp_read_sampler, event->bytes);
-
-    inject_callback(ffp->inject_opaque, IJKAVINJECT_ON_IO_TRAFFIC, event, sizeof(AVAppIOTraffic));
+    return inject_callback(ffp->inject_opaque, message , data, size);
 }
 
 void ffp_set_inject_opaque(FFPlayer *ffp, void *opaque)
@@ -3356,14 +3320,11 @@ void ffp_set_inject_opaque(FFPlayer *ffp, void *opaque)
 
     ffp->inject_opaque = opaque;
 
-    ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkinject-opaque", (int64_t)(intptr_t)opaque);
     av_application_closep(&ffp->app_ctx);
     av_application_open(&ffp->app_ctx, ffp);
     ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkapplication", (int64_t)(intptr_t)ffp->app_ctx);
 
-    ffp->app_ctx->func_did_tcp_connect_ip_port = app_func_did_tcp_connect_ip_port;
-    ffp->app_ctx->func_on_http_event           = app_func_on_http_event;
-    ffp->app_ctx->func_on_io_traffic           = app_func_on_io_traffic;
+    ffp->app_ctx->func_on_app_event = app_func_event;
 }
 
 void ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const char *value)
