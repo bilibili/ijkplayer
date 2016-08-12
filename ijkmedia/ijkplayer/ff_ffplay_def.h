@@ -461,6 +461,9 @@ typedef struct FFStatistic
     FFTrackCacheStatistic video_cache;
     FFTrackCacheStatistic audio_cache;
 
+    int64_t buf_backwards;
+    int64_t buf_forwards;
+    int64_t buf_capacity;
     SDL_SpeedSampler2 tcp_read_sampler;
 } FFStatistic;
 
