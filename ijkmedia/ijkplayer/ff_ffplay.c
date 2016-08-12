@@ -3297,6 +3297,7 @@ static AVDictionary **ffp_get_opt_dict(FFPlayer *ffp, int opt_category)
     }
 }
 
+static void ffp_set_playback__async_statistic(FFPlayer *ffp, int64_t buf_backwards, int64_t buf_forwards, int64_t buf_capacity);
 static int app_func_event(AVApplicationContext *h, int message ,void *data, size_t size)
 {
     if (!h || !h->opaque || !data)
@@ -3309,6 +3310,9 @@ static int app_func_event(AVApplicationContext *h, int message ,void *data, size
         AVAppIOTraffic *event = (AVAppIOTraffic *)(intptr_t)data;
         if (event->bytes > 0)
             SDL_SpeedSampler2Add(&ffp->stat.tcp_read_sampler, event->bytes);
+    } else if (message == AVAPP_EVENT_ASYNC_STATISTIC && sizeof(AVAppAsyncStatistic) == size) {
+        AVAppAsyncStatistic *statistic =  (AVAppAsyncStatistic *) (intptr_t)data;
+        ffp_set_playback__async_statistic(ffp, statistic->buf_backwards, statistic->buf_forwards, statistic->buf_capacity);
     }
     return inject_callback(ffp->inject_opaque, message , data, size);
 }
@@ -3922,6 +3926,15 @@ void ffp_set_playback_rate(FFPlayer *ffp, float rate)
     ffp->pf_playback_rate_changed = 1;
 }
 
+static void ffp_set_playback__async_statistic(FFPlayer *ffp, int64_t buf_backwards, int64_t buf_forwards, int64_t buf_capacity)
+{
+     if (!ffp)
+        return;
+     ffp->stat.buf_backwards = buf_backwards;
+     ffp->stat.buf_forwards = buf_forwards;
+     ffp->stat.buf_capacity = buf_capacity;
+}
+
 int ffp_get_video_rotate_degrees(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
@@ -4072,6 +4085,18 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             return ffp ? ffp->stat.bit_rate : default_value;
         case FFP_PROP_INT64_TCP_SPEED:
             return ffp ? SDL_SpeedSampler2GetSpeed(&ffp->stat.tcp_read_sampler) : default_value;
+        case FFP_PROP_INT64_AVAPP_ASYNC_STATISTIC_BUF_BACKWARDS:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.buf_backwards;
+        case FFP_PROP_INT64_AVAPP_ASYNC_STATISTIC_BUF_FORWARDS:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.buf_forwards;
+        case FFP_PROP_INT64_AVAPP_ASYNC_STATISTIC_BUF_CAPACITY:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.buf_capacity;
         default:
             return default_value;
     }
