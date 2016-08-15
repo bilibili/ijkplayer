@@ -2904,6 +2904,13 @@ static int read_thread(void *arg)
                 ffp_check_buffering_l(ffp);
             }
         }
+
+#pragma mark - E7
+        if (ffp->buf_hook) {
+            int64_t start_time, duration;
+            ffp->buf_hook->cb(start_time, duration, ffp->buf_hook->userData);
+        }
+#pragma mark -
     }
 
     ret = 0;
@@ -4133,3 +4140,21 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 
     return ffp->meta;
 }
+            
+#pragma mark - E7
+        
+void ffp_buf_update_register(FFPlayer *ffp, void *userData, void (*cb)(int64_t start_time, int64_t duration, void *userData))
+{
+    if (ffp->buf_hook) {
+        free(ffp->buf_hook);
+        ffp->buf_hook = NULL;
+    }
+    if (cb) {
+        ffp->buf_hook = (FFBufHook *)calloc(1, sizeof(FFBufHook));
+        ffp->buf_hook->ffp = ffp;
+        ffp->buf_hook->userData = userData;
+        ffp->buf_hook->cb = cb;
+    }
+}
+            
+#pragma mark -

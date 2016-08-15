@@ -113,4 +113,8 @@ void      ffp_set_property_int64(FFPlayer *ffp, int id, int64_t value);
 // must be freed with free();
 struct IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp);
 
+#pragma mark - E7
+void      ffp_buf_update_register(FFPlayer *ffp, void *userData, void (*cb)(int64_t start_time, int64_t duration, void *userData));
+#pragma mark -
+
 #endif

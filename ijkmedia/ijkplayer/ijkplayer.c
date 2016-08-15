@@ -766,3 +766,13 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 
     return -1;
 }
+
+
+#pragma mark - E7
+
+void ijkmp_buf_update_register(IjkMediaPlayer *mp, void *userData, void (*cb)(int64_t start_time, int64_t duration, void *userData))
+{
+    ffp_buf_update_register(mp->ffplayer, userData, cb);
+}
+
+#pragma mark -

@@ -224,6 +224,10 @@ if [ ! -d $FF_BUILD_SOURCE ]; then
     exit 1
 fi
 
+OPENH264=`pwd`/"libs/openh264"
+FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I$OPENH264/include"
+FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS -L$OPENH264/lib"
+
 # xcode configuration
 export DEBUG_INFORMATION_FORMAT=dwarf-with-dsym
 

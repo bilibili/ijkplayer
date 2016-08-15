@@ -732,6 +732,7 @@
 				E654EA861B6B27E600B0F2D0 /* Frameworks */,
 				E654EA871B6B27E600B0F2D0 /* Headers */,
 				E654EA881B6B27E600B0F2D0 /* Resources */,
+				BE2E45DF1D62008C00A563E0 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -811,6 +812,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		BE2E45DF1D62008C00A563E0 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "rm -rf \"${BUILT_PRODUCTS_DIR}/IJKMediaFramework.framework/include\"\ncp -r \"../build/universal/include\" \"${BUILT_PRODUCTS_DIR}/IJKMediaFramework.framework/\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E654EA851B6B27E600B0F2D0 /* Sources */ = {

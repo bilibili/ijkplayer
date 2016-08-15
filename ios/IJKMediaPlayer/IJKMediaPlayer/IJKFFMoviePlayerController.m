@@ -38,6 +38,8 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff3.1--ijk0.6.0--20160715--001
 
 @interface IJKFFMoviePlayerController()
 
+@property (copy, nonatomic) void (^BufUpdateCallback)(int64_t start_time, int64_t duration);
+
 @end
 
 @implementation IJKFFMoviePlayerController {
@@ -1514,6 +1516,26 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
         }
     });
 }
+
+
+#pragma mark - E7
+
+void e7_buf_update(int64_t start_time, int64_t duration, void *userData)
+{
+    IJKFFMoviePlayerController *player = (__bridge IJKFFMoviePlayerController*)userData;
+    if (player.BufUpdateCallback) {
+        player.BufUpdateCallback(start_time, duration);
+    }
+}
+
+- (void)setBufferUpdateCallback:(void (^)(int64_t start_time, int64_t duration))callback
+{
+    __weak typeof(self) _self = self;
+    _BufUpdateCallback = callback;
+    ijkmp_buf_update_register(_mediaPlayer, (__bridge void *)(_self), e7_buf_update);
+}
+
+#pragma mark -
 
 @end
 

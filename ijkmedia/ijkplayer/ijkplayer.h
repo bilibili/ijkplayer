@@ -213,4 +213,8 @@ void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 /* return < 0 if aborted, 0 if no packet and > 0 if packet.  */
 int             ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block);
 
+#pragma mark - E7
+void            ijkmp_buf_update_register(IjkMediaPlayer *mp, void *userData, void (*cb)(int64_t start_time, int64_t duration, void *userData));
+#pragma mark -
+
 #endif

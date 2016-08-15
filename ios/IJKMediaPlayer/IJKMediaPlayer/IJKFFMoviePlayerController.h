@@ -129,6 +129,10 @@ typedef enum IJKLogLevel {
 #pragma mark KVO properties
 @property (nonatomic, readonly) IJKFFMonitor *monitor;
 
+#pragma mark - E7
+- (void)setBufferUpdateCallback:(void(^)(int64_t start_time, int64_t duration))callback;
+#pragma mark -
+
 @end
 
 #define IJK_FF_IO_TYPE_READ (1)
@@ -141,3 +145,4 @@ void IJKFFIOStatCompleteDebugCallback(const char *url,
 void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
                                             int64_t read_bytes, int64_t total_size,
                                             int64_t elpased_time, int64_t total_duration));
+

@@ -495,6 +495,16 @@ inline static void ffp_reset_demux_cache_control(FFDemuxCacheControl *dcc)
     dcc->current_high_water_mark_in_ms  = DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS;
 }
 
+#pragma mark - E7
+struct FFPlayer;
+typedef struct FFBufHook {
+    struct FFPlayer *ffp;
+    void *userData;
+    void (*cb)(int64_t start_time, int64_t duration, void *userData);
+} FFBufHook;
+
+#pragma mark -
+
 /* ffplayer */
 struct IjkMediaMeta;
 struct IJKFF_Pipeline;
@@ -649,6 +659,10 @@ typedef struct FFPlayer {
     FFDemuxCacheControl dcc;
 
     AVApplicationContext *app_ctx;
+    
+#pragma mark - E7
+    struct FFBufHook *buf_hook;
+#pragma mark -
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
