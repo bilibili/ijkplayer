@@ -289,6 +289,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 {
     if (!_mediaPlayer)
         return;
+    
+    [_glView monitorDisplay:nil];
 
     [self setScreenOn:_keepScreenOnWhilePlaying];
 
@@ -314,6 +316,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     [self stopHudTimer];
     ijkmp_stop(_mediaPlayer);
+    
+    [_glView monitorDisplay:nil];
 }
 
 - (BOOL)isPlaying
@@ -1061,6 +1065,11 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMPMoviePlayerFirstVideoFrameRenderedNotification
              object:self];
+#pragma mark - E7
+            [_glView monitorDisplay:^(BOOL displaying) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:displaying ? IJKMPMoviePlayerVideoFrameRenderResumedNotification : IJKMPMoviePlayerVideoFrameRenderStoppedNotification object:self];
+            }];
+#pragma mark -
             break;
         }
         case FFP_MSG_AUDIO_RENDERING_START: {

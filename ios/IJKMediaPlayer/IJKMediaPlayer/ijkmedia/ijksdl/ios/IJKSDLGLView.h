@@ -39,4 +39,11 @@
 @property(nonatomic)        CGFloat  scaleFactor;
 @property(nonatomic)        BOOL     shouldShowHudView;
 
+#pragma mark - E7
+/**
+ * Start monitoring after first frame displayed.
+ */
+- (void)monitorDisplay:(void(^)(BOOL displaying))monitorCallback;
+#pragma mark -
+
 @end

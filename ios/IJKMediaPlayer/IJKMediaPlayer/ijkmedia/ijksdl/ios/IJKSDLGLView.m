@@ -31,6 +31,14 @@
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
 @property(atomic) BOOL glActivePaused;
+
+#pragma mark - E7
+@property (strong, nonatomic) NSTimer *monitorTimer;
+@property (nonatomic) int monitorCheck;
+@property (nonatomic) BOOL displayPauesed;
+@property (copy, nonatomic) void (^monitorCallback)(BOOL displaying);
+#pragma mark -
+
 @end
 
 @implementation IJKSDLGLView {
@@ -371,6 +379,17 @@
     } else {
         _frameCount++;
     }
+    
+#pragma mark - E7
+    _monitorCheck = _frameCount;
+    if (_monitorCallback && !_monitorTimer) {
+        if (_displayPauesed) {
+            _displayPauesed = NO;
+            _monitorCallback(YES);
+        }
+        _monitorTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(checkDisplay) userInfo:nil repeats:YES];
+    }
+#pragma mark -
 }
 
 #pragma mark AppDelegate
@@ -610,5 +629,35 @@
 {
     return !_hudViewController.tableView.hidden;
 }
+
+#pragma mark - E7
+
+- (void)monitorDisplay:(void(^)(BOOL displaying))monitorCallback
+{
+    if (monitorCallback) {
+        _monitorCallback = monitorCallback;
+        if (_monitorTimer) {
+            [_monitorTimer invalidate];
+            _monitorTimer = nil;
+        }
+    } else {
+        [_monitorTimer invalidate];
+        _monitorTimer = nil;
+    }
+}
+
+- (void)checkDisplay
+{
+    if (_monitorCheck == _frameCount) {
+        [_monitorTimer invalidate];
+        _monitorTimer = nil;
+        _displayPauesed = YES;
+        if (_monitorCallback) {
+            _monitorCallback(NO);
+        }
+    }
+}
+
+#pragma mark -
 
 @end
