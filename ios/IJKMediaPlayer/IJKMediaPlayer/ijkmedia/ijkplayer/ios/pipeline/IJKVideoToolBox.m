@@ -1119,6 +1119,10 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
     int ret = 0;
 
     VideoToolBoxContext *context_vtb = (VideoToolBoxContext *)mallocz(sizeof(VideoToolBoxContext));
+
+    context_vtb->sample_info_mutex = SDL_CreateMutex();
+    context_vtb->sample_info_cond  = SDL_CreateCond();
+
     if (!context_vtb) {
         goto fail;
     }
@@ -1145,9 +1149,6 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
 
     context_vtb->m_sort_queue = 0;
     context_vtb->m_queue_depth = 0;
-
-    context_vtb->sample_info_mutex = SDL_CreateMutex();
-    context_vtb->sample_info_cond  = SDL_CreateCond();
 
     SDL_SpeedSamplerReset(&context_vtb->sampler);
     return context_vtb;
