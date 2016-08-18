@@ -347,6 +347,11 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         }
 
         newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
+        if (!newFrame) {
+            ALOGE("VTB: create new frame fail: out of memory\n");
+            goto failed;
+        }
+
         newFrame->pic.pkt_pts    = sample_info->pts;
         newFrame->pic.pkt_dts    = sample_info->dts;
         newFrame->pic.sample_aspect_ratio.num = sample_info->sar_num;
