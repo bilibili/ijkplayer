@@ -377,6 +377,9 @@ typedef struct VideoState {
     int is_video_high_res; // above 1080p
 
     PacketQueue *buffer_indicator_queue;
+
+    volatile int latest_seek_load_serial;
+    volatile int64_t latest_seek_load_start_at;
 } VideoState;
 
 /* options specified by the user */
@@ -465,6 +468,7 @@ typedef struct FFStatistic
     int64_t buf_forwards;
     int64_t buf_capacity;
     SDL_SpeedSampler2 tcp_read_sampler;
+    int64_t latest_seek_load_duration;
 } FFStatistic;
 
 #define FFP_TCP_READ_SAMPLE_RANGE 2000

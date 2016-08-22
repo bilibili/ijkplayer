@@ -636,6 +636,10 @@ static void video_image_display2(FFPlayer *ffp)
     Frame *vp;
 
     vp = frame_queue_peek_last(&is->pictq);
+
+    if (is->latest_seek_load_serial == vp->serial)
+        ffp->stat.latest_seek_load_duration = (av_gettime() - is->latest_seek_load_start_at) / 1000;
+
     if (vp->bmp) {
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
         ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
@@ -2703,6 +2707,9 @@ static int read_thread(void *arg)
                 } else {
                    set_clock(&is->extclk, seek_target / (double)AV_TIME_BASE, 0);
                 }
+
+                is->latest_seek_load_serial = is->videoq.serial;
+                is->latest_seek_load_start_at = av_gettime();
             }
             ffp->dcc.current_high_water_mark_in_ms = ffp->dcc.first_high_water_mark_in_ms;
             is->seek_req = 0;
@@ -4097,6 +4104,8 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             if (!ffp)
                 return default_value;
             return ffp->stat.buf_capacity;
+        case FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION:
+            return ffp ? ffp->stat.latest_seek_load_duration : default_value;
         default:
             return default_value;
     }
