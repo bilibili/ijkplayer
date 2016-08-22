@@ -116,6 +116,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
     private InfoHudViewHolder mHudViewHolder;
 
+    private long mPrepareStartTime = 0;
+    private long mPrepareEndTime = 0;
+
+    private long mSeekStartTime = 0;
+    private long mSeekEndTime = 0;
+
     public IjkVideoView(Context context) {
         super(context);
         initVideoView(context);
@@ -307,6 +313,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mMediaPlayer.setOnErrorListener(mErrorListener);
             mMediaPlayer.setOnInfoListener(mInfoListener);
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
+            mMediaPlayer.setOnSeekCompleteListener(mSeekCompleteListener);
             mCurrentBufferPercentage = 0;
             String scheme = mUri.getScheme();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
@@ -322,6 +329,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             bindSurfaceHolder(mMediaPlayer, mSurfaceHolder);
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.setScreenOnWhilePlaying(true);
+            mPrepareStartTime = System.currentTimeMillis();
             mMediaPlayer.prepareAsync();
             if (mHudViewHolder != null)
                 mHudViewHolder.setMediaPlayer(mMediaPlayer);
@@ -385,6 +393,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
     IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
         public void onPrepared(IMediaPlayer mp) {
+            mPrepareEndTime = System.currentTimeMillis();
+            mHudViewHolder.updateLoadCost(mPrepareEndTime - mPrepareStartTime);
             mCurrentState = STATE_PREPARED;
 
             // Get the capabilities of the player for this stream
@@ -560,6 +570,15 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     mCurrentBufferPercentage = percent;
                 }
             };
+
+    private IMediaPlayer.OnSeekCompleteListener mSeekCompleteListener = new IMediaPlayer.OnSeekCompleteListener() {
+
+        @Override
+        public void onSeekComplete(IMediaPlayer mp) {
+            mSeekEndTime = System.currentTimeMillis();
+            mHudViewHolder.updateSeekCost(mSeekEndTime - mSeekStartTime);
+        }
+    };
 
     /**
      * Register a callback to be invoked when the media file
@@ -801,6 +820,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     @Override
     public void seekTo(int msec) {
         if (isInPlaybackState()) {
+            mSeekStartTime = System.currentTimeMillis();
             mMediaPlayer.seekTo(msec);
             mSeekWhenPrepared = 0;
         } else {
