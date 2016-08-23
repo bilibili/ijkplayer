@@ -566,7 +566,21 @@ VTDecompressionSessionRef vtbsession_create(VideoToolBoxContext* context)
     return vt_session;
 }
 
-
+void
+print_bytes(void   *start,
+            size_t  length)
+{
+    uint8_t *base = NULL;
+    size_t   idx = 0;
+    
+    if (!start || length <= 0)
+        return;
+    
+    base = (uint8_t *)(start);
+    for (idx = 0; idx < length; idx++)
+        printf("%02X%s", base[idx] & 0xFF, (idx + 1) % 16 == 0 ? "\n" : " ");
+    printf("\n");
+}
 
 static int decode_video_internal(VideoToolBoxContext* context, AVCodecContext *avctx, const AVPacket *avpkt, int* got_picture_ptr)
 {
@@ -586,6 +600,10 @@ static int decode_video_internal(VideoToolBoxContext* context, AVCodecContext *a
     if (!context) {
         goto failed;
     }
+    
+//    if (avpkt->flags & AV_PKT_FLAG_KEY) {
+//        print_bytes(pData, 64);
+//    }
 
     if (ffp->vtb_async) {
         decoder_flags |= kVTDecodeFrame_EnableAsynchronousDecompression;
@@ -740,61 +758,200 @@ static inline void DuplicatePkt(VideoToolBoxContext* context, const AVPacket* pk
     context->m_buffer_deep++;
 }
 
+typedef struct h264_sps_t
+{
+    uint8_t nalu_header;
+    uint8_t profile_idc;
+    uint8_t profile_compatibility; /* constraint set 0~3 + reserved 4 bits */
+    uint8_t level_idc;
+    uint8_t remaining[];
+    
+} __attribute__ ((__packed__)) h264_sps_t;
 
+typedef struct flv_config_tag_t
+{
+    uint8_t version;
+    uint8_t profile_idc;
+    uint8_t profile_compatibility;
+    uint8_t level_idc;
+    uint8_t nal_header_size;
+    uint8_t blocks[];
+    
+} __attribute__ ((__packed__)) flv_config_tag_t;
+
+static int parse_h264_extradata(AVPacket *avpkt, uint8_t **extradata, int *extradata_size, uint64_t *frame_timestamp)
+{
+    uint8_t *data = avpkt->data;
+    
+    const uint8_t *sps       = NULL;
+    const uint8_t *pps       = NULL;
+    const uint8_t *sei       = NULL;
+    const uint8_t *sei_type  = NULL;
+    const uint8_t *uuid      = NULL;
+    const uint8_t *ts        = NULL;
+    uint16_t       sps_len   = 0;
+    uint16_t       pps_len   = 0;
+    uint16_t       sei_len   = 0;
+    uint8_t       *position  = NULL;
+    uint64_t       timestamp = 0;
+    flv_config_tag_t *config   = NULL;
+    h264_sps_t       *sps_info = NULL;
+    
+    /* parse sps and pps length and locations */
+    sps_len = (uint16_t)(ntohl(*(uint32_t *)(data)));
+    sps = data + sizeof(uint32_t);
+    pps_len = (uint16_t)(ntohl(*(uint32_t *)(sps + sps_len)));
+    pps = sps + sps_len + sizeof(uint32_t);
+    sps_info = (h264_sps_t *)(sps);
+    
+    // sei
+    /**
+     * 17.Media System Time Synchronization UUID
+     * 7627DFE0-4924-4084-B98D-F2C9444B8E98
+     */
+    static const uint8_t time_sync_uuid[] =
+    {0x76, 0x27, 0xDF, 0xE0,
+     0x49, 0x24, 0x40, 0x84,
+     0xB9, 0x8D, 0xF2, 0xC9,
+     0x44, 0x4B, 0x8E, 0x98};
+    
+    sei = pps + pps_len + sizeof(uint32_t);
+    sei_type = sei + 1;
+    uuid = sei_type + 1 + 1;
+    
+    if ((sei[0] & 0x1F) == 0x06 && sei_type[0] == 0x05 && memcmp(time_sync_uuid, uuid, 16) == 0)
+    {
+        sei_len = (uint16_t)(ntohl(*(uint32_t *)(pps + pps_len)));
+        ts = uuid + 16;
+        
+        ALOGE("SEI length = %d\n", sei_len);
+        print_bytes(sei, sei_len);
+        ALOGE("UUID:\n");
+        print_bytes(uuid, 16);
+        ALOGE("Timestamp:\n");
+        print_bytes(ts, 8);
+        timestamp = *(uint64_t *)(ts);
+        timestamp = CFSwapInt64BigToHost(timestamp);
+        ALOGE("Timestamp value: %"PRIu64"\n", timestamp);
+        
+        *frame_timestamp = timestamp;
+    }
+    
+    *extradata_size = sizeof(flv_config_tag_t) + (1 + 2 + sps_len + 1 + 2 + pps_len);
+    *extradata = av_mallocz(*extradata_size);
+    
+    if (!*extradata) {
+        return AVERROR(ENOMEM);
+    }
+    
+    /* compose AVCVIDEOPACKET tag */
+    config = (flv_config_tag_t *)(*extradata);
+    config->version = 0x01;
+    config->profile_idc = sps_info->profile_idc;
+    config->profile_compatibility = sps_info->profile_compatibility;
+    config->level_idc = sps_info->level_idc;
+    config->nal_header_size = 0xFF; /* always 4 bytes to match databroker eOptH264NALLen */
+    
+    /* prepare sps and pps blocks */
+    position = config->blocks;
+    *position = 0xE1; /* number of sps blocks, 3 reserved bits, 5 for count */
+    position += 1;
+    *(uint16_t *)(position) = htons(sps_len);
+    position += 2;
+    memcpy(position, sps, sps_len);
+    position += sps_len;
+    *position = 0x01; /* number of pps blocks, full octet */
+    position += 1;
+    *(uint16_t *)(position) = htons(pps_len);
+    position += 2;
+    memcpy(position, pps, pps_len);
+    position += pps_len;
+    
+    return 0;
+}
+
+static inline void forward_av_queue_to_sync(FFPlayer *ffp, uint64_t current_timestamp_mills)
+{
+    FFVideoSync *sync = ffp->video_sync;
+    if (sync->sync_baseline == 0)
+        return;
+    
+    ALOGE("sync to baseline %llu , current time = %llu\n", sync->sync_baseline, current_timestamp_mills);
+    
+    if (current_timestamp_mills < sync->sync_baseline - sync->low_water_mark) {
+        VideoState *is = ffp->is;
+        Decoder *d = &is->viddec;
+        
+        AVPacket pkt;
+        do {
+            if (ffp_packet_queue_get(d->queue, &pkt, 0, &d->pkt_serial) <= 0)
+                break;
+            if (pkt.flags & AV_PKT_FLAG_KEY) {
+                // sync audio
+                Decoder *ad = &is->auddec;
+                AVPacket a_pkt;
+                do {
+                    if (ffp_packet_queue_get(ad->queue, &a_pkt, 0, &ad->pkt_serial) <= 0)
+                        break;
+                    if (a_pkt.dts >= pkt.dts)
+                        break;
+                    if (llabs(a_pkt.dts - pkt.dts) <= 100 * 1000)
+                        break;
+                } while (ad->queue->nb_packets > 0);
+                break;
+            }
+        } while (d->queue->nb_packets > 0);
+    }
+}
 
 static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVPacket *avpkt, int* got_picture_ptr)
 {
-    int      ret            = 0;
-    uint8_t *size_data      = NULL;
-    int      size_data_size = 0;
-
     if (!avpkt || !avpkt->data) {
         return 0;
     }
-
-    if (context->ffp->vtb_handle_resolution_change &&
-        context->codecpar->codec_id == AV_CODEC_ID_H264) {
-        size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
-        if (size_data && size_data_size > AV_INPUT_BUFFER_PADDING_SIZE) {
-            int             got_picture = 0;
-            AVFrame        *frame      = av_frame_alloc();
-            AVDictionary   *codec_opts = NULL;
-            AVCodecContext *new_avctx  = avcodec_alloc_context3(avctx->codec);
-            if (!new_avctx)
-                return AVERROR(ENOMEM);
-
-            avcodec_parameters_to_context(new_avctx, context->codecpar);
-            av_freep(&new_avctx->extradata);
-            new_avctx->extradata = av_mallocz(size_data_size);
-            if (!new_avctx->extradata)
-                return AVERROR(ENOMEM);
-            memcpy(new_avctx->extradata, size_data, size_data_size);
-            new_avctx->extradata_size = size_data_size;
-
-            av_dict_set(&codec_opts, "threads", "1", 0);
-            ret = avcodec_open2(new_avctx, avctx->codec, &codec_opts);
-            av_dict_free(&codec_opts);
-            if (ret < 0) {
-                avcodec_free_context(&new_avctx);
-                return ret;
+    
+    int ret = 0;
+    
+    if (context->codecpar->codec_id == AV_CODEC_ID_H264 && (avpkt->flags & AV_PKT_FLAG_KEY)) {
+        uint8_t *extradata;
+        int extradata_size;
+        uint64_t timestamp;
+        BOOL free_extradata = YES;
+        
+        // parse extra data
+        ret = parse_h264_extradata(avpkt, &extradata, &extradata_size, &timestamp);
+        if (ret != 0) {
+            return ret;
+        }
+        // sync
+        if (timestamp > 0) {
+            FFVideoSync *sync = context->ffp->video_sync;
+            if (sync) {
+                sync->sync_baseline = sync->sync_baseline_cb(timestamp, sync->userData);
+                forward_av_queue_to_sync(context->ffp, timestamp / 1000.0);
+                sync->sync_finish_cb(sync->userData);
             }
-
-            ret = avcodec_decode_video2(new_avctx, frame, &got_picture, avpkt);
-            if (ret < 0) {
-                avcodec_free_context(&new_avctx);
-                return ret;
-            }
-
-            if (got_picture) {
-                if (context->codecpar->width  != new_avctx->width &&
-                    context->codecpar->height != new_avctx->height) {
-                    avcodec_parameters_from_context(context->codecpar, new_avctx);
-                    context->refresh_request = true;
+        }
+        // handle resolution change
+        if (context->ffp->vtb_handle_resolution_change && extradata_size > 0) {
+            // compare extra data
+            if (avctx->extradata_size != extradata_size ||
+                memcmp(extradata, avctx->extradata, extradata_size) != 0) {
+                if (context->codecpar->extradata) {
+                    av_free(context->codecpar->extradata);
+                    context->codecpar->extradata = av_malloc(extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
+                    memset(context->codecpar->extradata, 0, extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
+                    memcpy(context->codecpar->extradata, extradata, extradata_size);
                 }
+                av_free(avctx->extradata);
+                avctx->extradata = extradata;
+                avctx->extradata_size = extradata_size;
+                context->refresh_request = true;
+                free_extradata = NO;
             }
-
-            av_frame_unref(frame);
-            avcodec_free_context(&new_avctx);
+        }
+        if (free_extradata) {
+            av_free(extradata);
         }
     } else {
         if (ff_avpacket_is_idr(avpkt) == true) {
@@ -808,7 +965,7 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
             return -1;
         }
     }
-
+    
     DuplicatePkt(context, avpkt);
 
     if (context->refresh_session) {
@@ -840,6 +997,103 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
     return decode_video_internal(context, avctx, avpkt, got_picture_ptr);
 }
 
+static int _decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVPacket *avpkt, int* got_picture_ptr)
+{
+    int      ret            = 0;
+    uint8_t *size_data      = NULL;
+    int      size_data_size = 0;
+    
+    if (!avpkt || !avpkt->data) {
+        return 0;
+    }
+    
+    if (context->ffp->vtb_handle_resolution_change &&
+        context->codecpar->codec_id == AV_CODEC_ID_H264) {
+        size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
+        if (size_data && size_data_size > AV_INPUT_BUFFER_PADDING_SIZE) {
+            int             got_picture = 0;
+            AVFrame        *frame      = av_frame_alloc();
+            AVDictionary   *codec_opts = NULL;
+            AVCodecContext *new_avctx  = avcodec_alloc_context3(avctx->codec);
+            if (!new_avctx)
+                return AVERROR(ENOMEM);
+            
+            avcodec_parameters_to_context(new_avctx, context->codecpar);
+            av_freep(&new_avctx->extradata);
+            new_avctx->extradata = av_mallocz(size_data_size);
+            if (!new_avctx->extradata)
+                return AVERROR(ENOMEM);
+            memcpy(new_avctx->extradata, size_data, size_data_size);
+            new_avctx->extradata_size = size_data_size;
+            
+            av_dict_set(&codec_opts, "threads", "1", 0);
+            ret = avcodec_open2(new_avctx, avctx->codec, &codec_opts);
+            av_dict_free(&codec_opts);
+            if (ret < 0) {
+                avcodec_free_context(&new_avctx);
+                return ret;
+            }
+            
+            ret = avcodec_decode_video2(new_avctx, frame, &got_picture, avpkt);
+            if (ret < 0) {
+                avcodec_free_context(&new_avctx);
+                return ret;
+            }
+            
+            if (got_picture) {
+                if (context->codecpar->width  != new_avctx->width &&
+                    context->codecpar->height != new_avctx->height) {
+                    avcodec_parameters_from_context(context->codecpar, new_avctx);
+                    context->refresh_request = true;
+                }
+            }
+            
+            av_frame_unref(frame);
+            avcodec_free_context(&new_avctx);
+        }
+    } else {
+        if (ff_avpacket_is_idr(avpkt) == true) {
+            context->idr_based_identified = true;
+        }
+        if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
+            ResetPktBuffer(context);
+            context->recovery_drop_packet = false;
+        }
+        if (context->recovery_drop_packet == true) {
+            return -1;
+        }
+    }
+    
+    DuplicatePkt(context, avpkt);
+    
+    if (context->refresh_session) {
+        ret = 0;
+        
+        sample_info_flush(context, 1000);
+        vtbsession_destroy(context);
+        memset(context->sample_info_array, 0, sizeof(context->sample_info_array));
+        context->sample_infos_in_decoding = 0;
+        
+        context->vt_session = vtbsession_create(context);
+        if (!context->vt_session)
+            return -1;
+        
+        if ((context->m_buffer_deep > 0) &&
+            ff_avpacket_i_or_idr(&context->m_buffer_packet[0], context->idr_based_identified) == true ) {
+            for (int i = 0; i < context->m_buffer_deep; i++) {
+                AVPacket* pkt = &context->m_buffer_packet[i];
+                ret = decode_video_internal(context, avctx, pkt, got_picture_ptr);
+            }
+        } else {
+            context->recovery_drop_packet = true;
+            ret = -1;
+            ALOGE("recovery error!!!!\n");
+        }
+        context->refresh_session = false;
+        return ret;
+    }
+    return decode_video_internal(context, avctx, avpkt, got_picture_ptr);
+}
 
 static void dict_set_string(CFMutableDictionaryRef dict, CFStringRef key, const char * value)
 {
@@ -1119,9 +1373,12 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
     int ret = 0;
 
     VideoToolBoxContext *context_vtb = (VideoToolBoxContext *)mallocz(sizeof(VideoToolBoxContext));
-    if (!context_vtb) {
+    
+    context_vtb->sample_info_mutex = SDL_CreateMutex();
+    context_vtb->sample_info_cond  = SDL_CreateCond();
+    
+    if (!context_vtb)
         goto fail;
-    }
 
     context_vtb->codecpar = avcodec_parameters_alloc();
     if (!context_vtb->codecpar)
@@ -1145,9 +1402,6 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
 
     context_vtb->m_sort_queue = 0;
     context_vtb->m_queue_depth = 0;
-
-    context_vtb->sample_info_mutex = SDL_CreateMutex();
-    context_vtb->sample_info_cond  = SDL_CreateCond();
 
     SDL_SpeedSamplerReset(&context_vtb->sampler);
     return context_vtb;

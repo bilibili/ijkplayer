@@ -497,11 +497,15 @@ inline static void ffp_reset_demux_cache_control(FFDemuxCacheControl *dcc)
 
 #pragma mark - E7
 struct FFPlayer;
-typedef struct FFBufHook {
+typedef struct FFVideoSync {
     struct FFPlayer *ffp;
+    uint64_t high_water_mark;
+    uint64_t low_water_mark;
+    uint64_t sync_baseline; // milliseconds
     void *userData;
-    void (*cb)(int64_t start_time, int64_t duration, void *userData);
-} FFBufHook;
+    uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData);
+    void (*sync_finish_cb)(void *userData);
+} FFVideoSync;
 
 #pragma mark -
 
@@ -661,7 +665,7 @@ typedef struct FFPlayer {
     AVApplicationContext *app_ctx;
     
 #pragma mark - E7
-    struct FFBufHook *buf_hook;
+    struct FFVideoSync *video_sync;
 #pragma mark -
 } FFPlayer;
 

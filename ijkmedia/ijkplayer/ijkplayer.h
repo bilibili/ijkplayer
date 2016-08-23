@@ -214,7 +214,8 @@ void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 int             ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block);
 
 #pragma mark - E7
-void            ijkmp_buf_update_register(IjkMediaPlayer *mp, void *userData, void (*cb)(int64_t start_time, int64_t duration, void *userData));
+void            ijkmp_sync_baseline_register(IjkMediaPlayer *mp, void *userData, uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData));
+void            ijkmp_sync_finish_register(IjkMediaPlayer *mp, void *userData, void (*sync_finish_cb)(void *userData));
 #pragma mark -
 
 #endif

@@ -2389,7 +2389,7 @@ static int is_realtime(AVFormatContext *s)
         return 1;
     return 0;
 }
-
+    
 /* this thread gets the stream from the disk or the network */
 static int read_thread(void *arg)
 {
@@ -2859,7 +2859,6 @@ static int read_thread(void *arg)
         } else {
             is->eof = 0;
         }
-
         if (pkt->flags & AV_PKT_FLAG_DISCONTINUITY) {
             if (is->audio_stream >= 0) {
                 packet_queue_put(&is->audioq, &flush_pkt);
@@ -2896,7 +2895,7 @@ static int read_thread(void *arg)
         }
 
         ffp_statistic_l(ffp);
-
+                
         if (ffp->packet_buffering) {
             io_tick_counter = SDL_GetTickHR();
             if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
@@ -2904,13 +2903,6 @@ static int read_thread(void *arg)
                 ffp_check_buffering_l(ffp);
             }
         }
-
-#pragma mark - E7
-        if (ffp->buf_hook) {
-            int64_t start_time, duration;
-            ffp->buf_hook->cb(start_time, duration, ffp->buf_hook->userData);
-        }
-#pragma mark -
     }
 
     ret = 0;
@@ -4143,17 +4135,24 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
             
 #pragma mark - E7
         
-void ffp_buf_update_register(FFPlayer *ffp, void *userData, void (*cb)(int64_t start_time, int64_t duration, void *userData))
+void ffp_sync_baseline_register(FFPlayer *ffp, void *userData, uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData))
 {
-    if (ffp->buf_hook) {
-        free(ffp->buf_hook);
-        ffp->buf_hook = NULL;
+    if (ffp->video_sync) {
+        free(ffp->video_sync);
+        ffp->video_sync = NULL;
     }
-    if (cb) {
-        ffp->buf_hook = (FFBufHook *)calloc(1, sizeof(FFBufHook));
-        ffp->buf_hook->ffp = ffp;
-        ffp->buf_hook->userData = userData;
-        ffp->buf_hook->cb = cb;
+    if (sync_baseline_cb) {
+        ffp->video_sync = (FFVideoSync *)calloc(1, sizeof(FFVideoSync));
+        ffp->video_sync->ffp = ffp;
+        ffp->video_sync->userData = userData;
+        ffp->video_sync->sync_baseline_cb = sync_baseline_cb;
+    }
+}
+            
+void ffp_sync_finish_register(FFPlayer *ffp, void *userData, void (*sync_finish_cb)(void *userData))
+{
+    if (ffp->video_sync && sync_finish_cb) {
+        ffp->video_sync->sync_finish_cb = sync_finish_cb;
     }
 }
             

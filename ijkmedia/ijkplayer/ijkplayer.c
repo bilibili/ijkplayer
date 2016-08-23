@@ -770,9 +770,14 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 
 #pragma mark - E7
 
-void ijkmp_buf_update_register(IjkMediaPlayer *mp, void *userData, void (*cb)(int64_t start_time, int64_t duration, void *userData))
+void ijkmp_sync_baseline_register(IjkMediaPlayer *mp, void *userData, uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData))
 {
-    ffp_buf_update_register(mp->ffplayer, userData, cb);
+    ffp_sync_baseline_register(mp->ffplayer, userData, sync_baseline_cb);
+}
+
+void ijkmp_sync_finish_register(IjkMediaPlayer *mp, void *userData, void (*sync_finish_cb)(void *userData))
+{
+    ffp_sync_finish_register(mp->ffplayer, userData, sync_finish_cb);
 }
 
 #pragma mark -
