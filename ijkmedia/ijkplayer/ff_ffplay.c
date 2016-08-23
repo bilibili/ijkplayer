@@ -2856,7 +2856,7 @@ static int read_thread(void *arg)
             }
             if (is->eof) {
                 ffp_toggle_buffering(ffp, 0);
-                SDL_Delay(1000);
+                SDL_Delay(100);
             }
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
