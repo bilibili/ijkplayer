@@ -32,6 +32,7 @@
 #include "ijkplayer/ff_ffplay_debug.h"
 #include "h264_nal.h"
 #include "hevc_nal.h"
+#include "mpeg4_esds.h"
 #include "ffpipeline_android.h"
 
 #define AMC_USE_AVBITSTREAM_FILTER 0
@@ -227,6 +228,14 @@ static int recreate_format_l(JNIEnv *env, IJKFF_Pipenode *node)
             }
             free(convert_buffer);
 #endif
+        } else if (opaque->codecpar->codec_id == AV_CODEC_ID_MPEG4) {
+            size_t esds_dec_dscr_type_length = opaque->codecpar->extradata_size + 0x18;
+            size_t esds_es_dscr_type_length = esds_dec_dscr_type_length + 0x08;
+            size_t esds_size = esds_es_dscr_type_length + 0x05;
+            uint8_t *convert_buffer = (uint8_t *)calloc(1, esds_size);
+            restore_mpeg4_esds(opaque->codecpar, opaque->codecpar->extradata, opaque->codecpar->extradata_size, esds_es_dscr_type_length, esds_dec_dscr_type_length, convert_buffer);
+            SDL_AMediaFormat_setBuffer(opaque->input_aformat, "csd-0", convert_buffer, esds_size);
+            free(convert_buffer);
         } else {
             // Codec specific data
             // SDL_AMediaFormat_setBuffer(opaque->aformat, "csd-0", opaque->codecpar->extradata, opaque->codecpar->extradata_size);
@@ -1186,6 +1195,19 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_MPEG2VIDEO);
         opaque->mcc.profile = opaque->codecpar->profile;
         opaque->mcc.level   = opaque->codecpar->level;
+        break;
+    case AV_CODEC_ID_MPEG4:
+        if (!ffp->mediacodec_mpeg4 && !ffp->mediacodec_all_videos) {
+            ALOGE("%s: MediaCodec/MPEG4 is disabled. codec_id:%d \n", __func__, opaque->codecpar->codec_id);
+            goto fail;
+        }
+        if ((opaque->codecpar->codec_tag & 0x0000FFFF) == 0x00005844) {
+            ALOGE("%s: divx is not supported \n", __func__);
+            goto fail;
+        }
+        strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_MPEG4);
+        opaque->mcc.profile = opaque->codecpar->profile >= 0 ? opaque->codecpar->profile : 0;
+        opaque->mcc.level   = opaque->codecpar->level >= 0 ? opaque->codecpar->level : 1;
         break;
 
     default:
