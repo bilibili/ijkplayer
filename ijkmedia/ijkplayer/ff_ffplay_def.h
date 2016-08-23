@@ -621,6 +621,7 @@ typedef struct FFPlayer {
     int mediacodec_avc;
     int mediacodec_hevc;
     int mediacodec_mpeg2;
+    int mediacodec_mpeg4;
     int mediacodec_handle_resolution_change;
     int mediacodec_auto_rotate;
 
