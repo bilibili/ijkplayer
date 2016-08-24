@@ -117,9 +117,51 @@ public class IjkMediaFormat implements IMediaFormat {
         sFormatterMap.put(KEY_IJK_CODEC_PROFILE_LEVEL_UI, new Formatter() {
             @Override
             protected String doFormat(IjkMediaFormat mediaFormat) {
-                String profile = mediaFormat.getString(IjkMediaMeta.IJKM_KEY_CODEC_PROFILE);
-                if (TextUtils.isEmpty(profile))
-                    return null;
+                int profileIndex = mediaFormat.getInteger(IjkMediaMeta.IJKM_KEY_CODEC_PROFILE_ID);
+                String profile;
+                switch (profileIndex) {
+                    case IjkMediaMeta.FF_PROFILE_H264_BASELINE:
+                        profile = "Baseline";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_CONSTRAINED_BASELINE:
+                        profile = "Constrained Baseline";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_MAIN:
+                        profile = "Main";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_EXTENDED:
+                        profile = "Extended";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH:
+                        profile = "High";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_10:
+                        profile = "High 10";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_10_INTRA:
+                        profile = "High 10 Intra";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_422:
+                        profile = "High 4:2:2";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_422_INTRA:
+                        profile = "High 4:2:2 Intra";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_444:
+                        profile = "High 4:4:4";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_444_PREDICTIVE:
+                        profile = "High 4:4:4 Predictive";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_444_INTRA:
+                        profile = "High 4:4:4 Intra";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_CAVLC_444:
+                        profile = "CAVLC 4:4:4";
+                        break;
+                    default:
+                        return null;
+                }
 
                 StringBuilder sb = new StringBuilder();
                 sb.append(profile);
