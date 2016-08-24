@@ -4085,15 +4085,15 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             return ffp ? ffp->stat.bit_rate : default_value;
         case FFP_PROP_INT64_TCP_SPEED:
             return ffp ? SDL_SpeedSampler2GetSpeed(&ffp->stat.tcp_read_sampler) : default_value;
-        case FFP_PROP_INT64_AVAPP_ASYNC_STATISTIC_BUF_BACKWARDS:
+        case FFP_PROP_INT64_ASYNC_STATISTIC_BUF_BACKWARDS:
             if (!ffp)
                 return default_value;
             return ffp->stat.buf_backwards;
-        case FFP_PROP_INT64_AVAPP_ASYNC_STATISTIC_BUF_FORWARDS:
+        case FFP_PROP_INT64_ASYNC_STATISTIC_BUF_FORWARDS:
             if (!ffp)
                 return default_value;
             return ffp->stat.buf_forwards;
-        case FFP_PROP_INT64_AVAPP_ASYNC_STATISTIC_BUF_CAPACITY:
+        case FFP_PROP_INT64_ASYNC_STATISTIC_BUF_CAPACITY:
             if (!ffp)
                 return default_value;
             return ffp->stat.buf_capacity;
