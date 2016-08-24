@@ -210,6 +210,7 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
         if (codecpar->profile != FF_PROFILE_UNKNOWN) {
             const AVCodec *codec = avcodec_find_decoder(codecpar->codec_id);
             if (codec) {
+                ijkmeta_set_int64_l(stream_meta, IJKM_KEY_CODEC_PROFILE_ID, codecpar->profile);
                 const char *profile = av_get_profile_name(codec, codecpar->profile);
                 if (profile)
                     ijkmeta_set_string_l(stream_meta, IJKM_KEY_CODEC_PROFILE, profile);
