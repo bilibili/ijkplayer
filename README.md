@@ -42,8 +42,8 @@ dependencies {
  - Mac OS X 10.11.5
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
- - Android Studio 2.1.2
- - Gradle 2.10
+ - Android Studio 2.1.3
+ - Gradle 2.14.1
 - iOS
  - Xcode 7.3 (7D175)
 - [HomeBrew](http://brew.sh)
