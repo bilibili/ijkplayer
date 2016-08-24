@@ -3304,7 +3304,7 @@ static AVDictionary **ffp_get_opt_dict(FFPlayer *ffp, int opt_category)
     }
 }
 
-static void ffp_set_playback__async_statistic(FFPlayer *ffp, int64_t buf_backwards, int64_t buf_forwards, int64_t buf_capacity);
+static void ffp_set_playback_async_statistic(FFPlayer *ffp, int64_t buf_backwards, int64_t buf_forwards, int64_t buf_capacity);
 static int app_func_event(AVApplicationContext *h, int message ,void *data, size_t size)
 {
     if (!h || !h->opaque || !data)
@@ -3319,7 +3319,9 @@ static int app_func_event(AVApplicationContext *h, int message ,void *data, size
             SDL_SpeedSampler2Add(&ffp->stat.tcp_read_sampler, event->bytes);
     } else if (message == AVAPP_EVENT_ASYNC_STATISTIC && sizeof(AVAppAsyncStatistic) == size) {
         AVAppAsyncStatistic *statistic =  (AVAppAsyncStatistic *) (intptr_t)data;
-        ffp_set_playback__async_statistic(ffp, statistic->buf_backwards, statistic->buf_forwards, statistic->buf_capacity);
+        ffp->stat.buf_backwards = statistic->buf_backwards;
+        ffp->stat.buf_forwards = statistic->buf_forwards;
+        ffp->stat.buf_capacity = statistic->buf_capacity;
     }
     return inject_callback(ffp->inject_opaque, message , data, size);
 }
@@ -3931,15 +3933,6 @@ void ffp_set_playback_rate(FFPlayer *ffp, float rate)
 
     ffp->pf_playback_rate = rate;
     ffp->pf_playback_rate_changed = 1;
-}
-
-static void ffp_set_playback__async_statistic(FFPlayer *ffp, int64_t buf_backwards, int64_t buf_forwards, int64_t buf_capacity)
-{
-     if (!ffp)
-        return;
-     ffp->stat.buf_backwards = buf_backwards;
-     ffp->stat.buf_forwards = buf_forwards;
-     ffp->stat.buf_capacity = buf_capacity;
 }
 
 int ffp_get_video_rotate_degrees(FFPlayer *ffp)
