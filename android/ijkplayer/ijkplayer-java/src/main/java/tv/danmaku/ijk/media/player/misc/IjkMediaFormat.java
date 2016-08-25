@@ -29,6 +29,7 @@ import tv.danmaku.ijk.media.player.IjkMediaMeta;
 public class IjkMediaFormat implements IMediaFormat {
     // Common
     public static final String KEY_IJK_CODEC_LONG_NAME_UI = "ijk-codec-long-name-ui";
+    public static final String KEY_IJK_CODEC_NAME_UI = "ijk-codec-name-ui";
     public static final String KEY_IJK_BIT_RATE_UI = "ijk-bit-rate-ui";
 
     // Video
@@ -99,6 +100,12 @@ public class IjkMediaFormat implements IMediaFormat {
             @Override
             public String doFormat(IjkMediaFormat mediaFormat) {
                 return mMediaFormat.getString(IjkMediaMeta.IJKM_KEY_CODEC_LONG_NAME);
+            }
+        });
+        sFormatterMap.put(KEY_IJK_CODEC_NAME_UI, new Formatter() {
+            @Override
+            public String doFormat(IjkMediaFormat mediaFormat) {
+                return mMediaFormat.getString(IjkMediaMeta.IJKM_KEY_CODEC_NAME);
             }
         });
         sFormatterMap.put(KEY_IJK_BIT_RATE_UI, new Formatter() {
