@@ -37,7 +37,7 @@
 static const char *kIJKFFRequiredFFmpegVersion = "ff3.1--ijk0.6.0--20160715--001";
 
 typedef uint64_t (^VideoSyncTimestampCallback)(uint64_t timestamp);
-typedef void(^VideoSyncFinishCallback)();
+typedef void(^VideoSyncFinishCallback)(uint64_t timestamp);
 
 @interface IJKFFMoviePlayerController ()
 
@@ -1530,21 +1530,29 @@ uint64_t e7_player_sync_timestamp(uint64_t timestamp, void *userData)
     return player.vSyncTsCallback ? player.vSyncTsCallback(timestamp) : 0;
 }
 
-void e7_player_sync_finish(void *userData)
+void e7_player_sync_finish(uint64_t timestamp, void *userData)
 {
     IJKFFMoviePlayerController *player = (__bridge IJKFFMoviePlayerController*)userData;
     if (player.vSyncFinishCallback)
-        player.vSyncFinishCallback();
+        player.vSyncFinishCallback(timestamp);
 }
 
-- (void)setVideoSyncTimestampCallback:(uint64_t (^)(uint64_t timestamp))callback
-                       finishCallback:(void(^)())finishCallback
-{
+- (void)syncWithHighWaterMark:(uint16_t)highWaterMark
+                 lowWaterMark:(uint16_t)lowWaterMark
+            timestampCallback:(uint64_t (^)(uint64_t timestamp))tsCallback
+               syncedCallback:(void(^)(uint64_t timestamp))syncedCallback {
+    _vSyncTsCallback = tsCallback;
+    _vSyncFinishCallback = syncedCallback;
     __weak typeof(self) _self = self;
-    _vSyncTsCallback = callback;
-    ijkmp_sync_baseline_register(_mediaPlayer, (__bridge void *)_self, e7_player_sync_timestamp);
-    _vSyncFinishCallback = finishCallback;
+    ijkmp_sync_baseline_register(_mediaPlayer, (__bridge void *)_self, highWaterMark, lowWaterMark, e7_player_sync_timestamp);
     ijkmp_sync_finish_register(_mediaPlayer, (__bridge void *)_self, e7_player_sync_finish);
+}
+
+- (void)stopSync {
+    _vSyncTsCallback = nil;
+    _vSyncFinishCallback = nil;
+    ijkmp_sync_baseline_register(_mediaPlayer, NULL, 0, 0, NULL);
+    ijkmp_sync_finish_register(_mediaPlayer, NULL, NULL);
 }
 
 #pragma mark -

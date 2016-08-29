@@ -114,8 +114,13 @@ void      ffp_set_property_int64(FFPlayer *ffp, int id, int64_t value);
 struct IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp);
 
 #pragma mark - E7
-void      ffp_sync_baseline_register(FFPlayer *ffp, void *userData, uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData));
-void      ffp_sync_finish_register(FFPlayer *ffp, void *userData, void (*sync_finish_cb)(void *userData));
+void      ffp_sync_baseline_register(FFPlayer *ffp,
+                                     void *userData,
+                                     uint16_t high_water_mark,
+                                     uint16_t low_water_mark,
+                                     uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData));
+void      ffp_sync_configure(uint16_t high_water_mark, uint16_t low_water_mark);
+void      ffp_sync_finish_register(FFPlayer *ffp, void *userData, void (*sync_finish_cb)(uint64_t timestamp, void *userData));
 #pragma mark -
 
 #endif

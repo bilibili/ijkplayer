@@ -499,12 +499,14 @@ inline static void ffp_reset_demux_cache_control(FFDemuxCacheControl *dcc)
 struct FFPlayer;
 typedef struct FFVideoSync {
     struct FFPlayer *ffp;
-    uint64_t high_water_mark;
-    uint64_t low_water_mark;
-    uint64_t sync_baseline; // milliseconds
+    uint16_t high_water_mark;   // milliseconds
+    uint16_t low_water_mark;    // milliseconds
+    uint64_t sync_baseline;     // milliseconds
+    uint64_t local_timestamp;   // milliseconds
+    uint64_t last_sync_dts;
     void *userData;
     uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData);
-    void (*sync_finish_cb)(void *userData);
+    void (*sync_finish_cb)(uint64_t timestamp, void *userData);
 } FFVideoSync;
 
 #pragma mark -

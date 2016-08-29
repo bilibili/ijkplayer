@@ -770,12 +770,21 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 
 #pragma mark - E7
 
-void ijkmp_sync_baseline_register(IjkMediaPlayer *mp, void *userData, uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData))
+void ijkmp_sync_baseline_register(IjkMediaPlayer *mp,
+                                  void *userData,
+                                  uint16_t high_water_mark,
+                                  uint16_t low_water_mark,
+                                  uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData))
 {
-    ffp_sync_baseline_register(mp->ffplayer, userData, sync_baseline_cb);
+    ffp_sync_baseline_register(mp->ffplayer, userData, high_water_mark, low_water_mark, sync_baseline_cb);
 }
 
-void ijkmp_sync_finish_register(IjkMediaPlayer *mp, void *userData, void (*sync_finish_cb)(void *userData))
+void ijkmp_sync_configure(uint16_t high_water_mark, uint16_t low_water_mark)
+{
+    ffp_sync_configure(high_water_mark, low_water_mark);
+}
+
+void ijkmp_sync_finish_register(IjkMediaPlayer *mp, void *userData, void (*sync_finish_cb)(uint64_t timestamp, void *userData))
 {
     ffp_sync_finish_register(mp->ffplayer, userData, sync_finish_cb);
 }

@@ -781,6 +781,8 @@ typedef struct flv_config_tag_t
 
 static int parse_h264_extradata(AVPacket *avpkt, uint8_t **extradata, int *extradata_size, uint64_t *frame_timestamp)
 {
+    ALOGE("parse_h264_extradata \n");
+    
     uint8_t *data = avpkt->data;
     
     const uint8_t *sps       = NULL;
@@ -824,15 +826,15 @@ static int parse_h264_extradata(AVPacket *avpkt, uint8_t **extradata, int *extra
         sei_len = (uint16_t)(ntohl(*(uint32_t *)(pps + pps_len)));
         ts = uuid + 16;
         
-        ALOGE("SEI length = %d\n", sei_len);
-        print_bytes(sei, sei_len);
-        ALOGE("UUID:\n");
-        print_bytes(uuid, 16);
-        ALOGE("Timestamp:\n");
-        print_bytes(ts, 8);
+//        ALOGE("SEI length = %d\n", sei_len);
+//        print_bytes(sei, sei_len);
+//        ALOGE("UUID:\n");
+//        print_bytes(uuid, 16);
+//        ALOGE("Timestamp:\n");
+//        print_bytes(ts, 8);
         timestamp = *(uint64_t *)(ts);
         timestamp = CFSwapInt64BigToHost(timestamp);
-        ALOGE("Timestamp value: %"PRIu64"\n", timestamp);
+//        ALOGE("Timestamp value: %"PRIu64"\n", timestamp);
         
         *frame_timestamp = timestamp;
     }
@@ -870,15 +872,29 @@ static int parse_h264_extradata(AVPacket *avpkt, uint8_t **extradata, int *extra
     return 0;
 }
 
-static inline void forward_av_queue_to_sync(FFPlayer *ffp, uint64_t current_timestamp_mills)
+static inline uint64_t forward_av_queue_to_sync(FFPlayer *ffp, uint64_t current_timestamp_mills, int64_t dts)
 {
     FFVideoSync *sync = ffp->video_sync;
+    sync->last_sync_dts = dts;
     if (sync->sync_baseline == 0)
-        return;
+        return current_timestamp_mills;
     
-    ALOGE("sync to baseline %llu , current time = %llu\n", sync->sync_baseline, current_timestamp_mills);
+    if (current_timestamp_mills >= sync->sync_baseline) {
+        ALOGE("sync to baseline %llu , current time = %llu , diff = %llu\n", sync->sync_baseline, current_timestamp_mills, current_timestamp_mills - sync->sync_baseline);
+    } else {
+        ALOGE("sync to baseline %llu , current time = %llu , diff = -%llu\n", sync->sync_baseline, current_timestamp_mills, sync->sync_baseline - current_timestamp_mills);
+    }
+    ALOGE("high_water_mark = %hu, low_water_mark = %hu\n", sync->high_water_mark, sync->low_water_mark);
     
-    if (current_timestamp_mills < sync->sync_baseline - sync->low_water_mark) {
+    uint64_t timestamp = current_timestamp_mills;
+    
+    // ahead too much
+    if (current_timestamp_mills > sync->sync_baseline + sync->high_water_mark) {
+        ALOGE("ahead = %llu ms, high_water_mark is %hu, do sync \n", current_timestamp_mills - sync->sync_baseline, sync->high_water_mark);
+    }
+    // behind too much
+    else if (current_timestamp_mills < sync->sync_baseline - sync->low_water_mark) {
+        ALOGE("behind = %llu ms, low_water_mark is %hu, do sync \n", sync->sync_baseline - current_timestamp_mills, sync->low_water_mark);
         VideoState *is = ffp->is;
         Decoder *d = &is->viddec;
         
@@ -886,22 +902,30 @@ static inline void forward_av_queue_to_sync(FFPlayer *ffp, uint64_t current_time
         do {
             if (ffp_packet_queue_get(d->queue, &pkt, 0, &d->pkt_serial) <= 0)
                 break;
+            ALOGE("video pkt.dts = %llu\n", pkt.dts);
             if (pkt.flags & AV_PKT_FLAG_KEY) {
-                // sync audio
-                Decoder *ad = &is->auddec;
-                AVPacket a_pkt;
-                do {
-                    if (ffp_packet_queue_get(ad->queue, &a_pkt, 0, &ad->pkt_serial) <= 0)
-                        break;
-                    if (a_pkt.dts >= pkt.dts)
-                        break;
-                    if (llabs(a_pkt.dts - pkt.dts) <= 100 * 1000)
-                        break;
-                } while (ad->queue->nb_packets > 0);
+                ALOGE("video key frame found !!\n");
                 break;
             }
         } while (d->queue->nb_packets > 0);
+        if (pkt.dts > 0) {
+            sync->last_sync_dts = pkt.dts;
+            timestamp = current_timestamp_mills + (pkt.dts - dts);
+            // sync audio
+            Decoder *ad = &is->auddec;
+            AVPacket a_pkt;
+            do {
+                if (ffp_packet_queue_get(ad->queue, &a_pkt, 0, &ad->pkt_serial) <= 0)
+                    break;
+                ALOGE("Audio pkt.dts = %llu\n", a_pkt.dts);
+                if (a_pkt.dts >= pkt.dts)
+                    break;
+                if (llabs(a_pkt.dts - pkt.dts) <= 30)  // 30 ms, a aac packet with 48000 sample rate presents 21.3333... ms
+                    break;
+            } while (ad->queue->nb_packets > 0);
+        }
     }
+    return timestamp;
 }
 
 static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVPacket *avpkt, int* got_picture_ptr)
@@ -927,9 +951,10 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
         if (timestamp > 0) {
             FFVideoSync *sync = context->ffp->video_sync;
             if (sync) {
+                timestamp /= 1000.0;    // we use milliseconds
                 sync->sync_baseline = sync->sync_baseline_cb(timestamp, sync->userData);
-                forward_av_queue_to_sync(context->ffp, timestamp / 1000.0);
-                sync->sync_finish_cb(sync->userData);
+                sync->local_timestamp = forward_av_queue_to_sync(context->ffp, timestamp, avpkt->dts);
+                sync->sync_finish_cb(sync->local_timestamp, sync->userData);
             }
         }
         // handle resolution change
@@ -954,6 +979,15 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
             av_free(extradata);
         }
     } else {
+        if (context->codecpar->codec_id == AV_CODEC_ID_H264) {
+            FFVideoSync *sync = context->ffp->video_sync;
+            if (sync && sync->local_timestamp > 0) {
+                uint64_t timestamp = sync->local_timestamp + (avpkt->dts - sync->last_sync_dts);
+                sync->sync_baseline = sync->sync_baseline_cb(timestamp, sync->userData);
+                sync->local_timestamp = forward_av_queue_to_sync(context->ffp, timestamp, avpkt->dts);
+                sync->sync_finish_cb(sync->local_timestamp, sync->userData);
+            }
+        }
         if (ff_avpacket_is_idr(avpkt) == true) {
             context->idr_based_identified = true;
         }

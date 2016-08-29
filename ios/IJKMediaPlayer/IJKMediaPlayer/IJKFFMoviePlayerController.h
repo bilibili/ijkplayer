@@ -130,8 +130,13 @@ typedef enum IJKLogLevel {
 @property (nonatomic, readonly) IJKFFMonitor *monitor;
 
 #pragma mark - E7
-- (void)setVideoSyncTimestampCallback:(uint64_t (^)(uint64_t timestamp))callback
-                       finishCallback:(void(^)())finishCallback;
+- (void)syncWithHighWaterMark:(uint16_t)highWaterMark
+                 lowWaterMark:(uint16_t)lowWaterMark
+            timestampCallback:(uint64_t (^)(uint64_t timestamp))tsCallback
+               syncedCallback:(void(^)(uint64_t timestamp))syncedCallback;
+
+- (void)stopSync;
+
 #pragma mark -
 
 @end

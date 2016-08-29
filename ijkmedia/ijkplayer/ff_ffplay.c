@@ -4135,7 +4135,11 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
             
 #pragma mark - E7
         
-void ffp_sync_baseline_register(FFPlayer *ffp, void *userData, uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData))
+void ffp_sync_baseline_register(FFPlayer *ffp,
+                                void *userData,
+                                uint16_t high_water_mark,
+                                uint16_t low_water_mark,
+                                uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData))
 {
     if (ffp->video_sync) {
         free(ffp->video_sync);
@@ -4145,11 +4149,13 @@ void ffp_sync_baseline_register(FFPlayer *ffp, void *userData, uint64_t (*sync_b
         ffp->video_sync = (FFVideoSync *)calloc(1, sizeof(FFVideoSync));
         ffp->video_sync->ffp = ffp;
         ffp->video_sync->userData = userData;
+        ffp->video_sync->high_water_mark = high_water_mark;
+        ffp->video_sync->low_water_mark = low_water_mark;
         ffp->video_sync->sync_baseline_cb = sync_baseline_cb;
     }
 }
             
-void ffp_sync_finish_register(FFPlayer *ffp, void *userData, void (*sync_finish_cb)(void *userData))
+void ffp_sync_finish_register(FFPlayer *ffp, void *userData, void (*sync_finish_cb)(uint64_t timestamp, void *userData))
 {
     if (ffp->video_sync && sync_finish_cb) {
         ffp->video_sync->sync_finish_cb = sync_finish_cb;
