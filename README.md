@@ -160,6 +160,21 @@ cd ..
 #       targetSdkVersion = 23        // depending on your sdk version
 #     }
 #
+# If you want to enable debugging ijkplayer(native modules) on Android Studio 2.2+: (experimental)
+#     cd android
+#     sh patch-debugging-with-lldb.sh armv7a
+#     Install Android Studio 2.2(+)
+#     Preference -> Android SDK -> SDK Tools
+#     Select (LLDB, NDK, Android SDK Build-tools,Cmake) and install
+#     Open an existing Android Studio project
+#     Select android/ijkplayer
+#     Sync Project with Gradle Files
+#     Run -> Edit Configurations -> Debugger -> Symbol Directories
+#     Add "ijkplayer-armv7a/.externalNativeBuild/ndkBuild/release/obj/local/armeabi-v7a" to Symbol Directories
+#     Run -> Debug 'ijkplayer-example'
+#     if you want to reverse patches:
+#     sh patch-debugging-with-lldb.sh reverse armv7a
+#
 # Eclipse: (obselete)
 #     File -> New -> Project -> Android Project from Existing Code
 #     Select android/ and import all project

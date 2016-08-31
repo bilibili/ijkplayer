@@ -1,0 +1,138 @@
+From e7a63003b2f3d15f795128b95085da57dd838945 Mon Sep 17 00:00:00 2001
+From: ctiao <calmer91@gmail.com>
+Date: Mon, 29 Aug 2016 16:23:52 +0800
+Subject: [PATCH] armv5: enable debugging with LLDB
+
+---
+ android/ijkplayer/ijkplayer-armv5/build.gradle     | 20 ++++++++++++---
+ .../ijkplayer-armv5/src/main/jni/Android.mk        | 29 +++++++++++++++++++++-
+ android/ijkplayer/ijkplayer-example/build.gradle   | 14 +++++------
+ android/ijkplayer/settings.gradle                  |  8 +++---
+ 4 files changed, 56 insertions(+), 15 deletions(-)
+ mode change 120000 => 100644 android/ijkplayer/ijkplayer-armv5/src/main/jni/Android.mk
+
+diff --git a/android/ijkplayer/ijkplayer-armv5/build.gradle b/android/ijkplayer/ijkplayer-armv5/build.gradle
+index b3b7b3a..d05f33e 100644
+--- a/android/ijkplayer/ijkplayer-armv5/build.gradle
++++ b/android/ijkplayer/ijkplayer-armv5/build.gradle
+@@ -10,16 +10,30 @@ android {
+     defaultConfig {
+         minSdkVersion 9
+         targetSdkVersion rootProject.ext.targetSdkVersion
++        externalNativeBuild {
++            ndkBuild {
++                arguments "NDK_APPLICATION_MK:=src/main/jni/Application.mk"
++                abiFilters "armeabi"
++            }
++        }
+     }
+     buildTypes {
+         release {
+             minifyEnabled false
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+         }
++        debug {
++            debuggable true
++            jniDebuggable true
++            ndk {
++                debuggable true
++            }
++        }
+     }
+-    sourceSets.main {
+-        jniLibs.srcDirs 'src/main/libs'
+-        jni.srcDirs = [] // This prevents the auto generation of Android.mk
++    externalNativeBuild {
++        ndkBuild {
++            path 'src/main/jni/Android.mk'
++        }
+     }
+ }
+ 
+diff --git a/android/ijkplayer/ijkplayer-armv5/src/main/jni/Android.mk b/android/ijkplayer/ijkplayer-armv5/src/main/jni/Android.mk
+deleted file mode 120000
+index fb30867..0000000
+--- a/android/ijkplayer/ijkplayer-armv5/src/main/jni/Android.mk
++++ /dev/null
+@@ -1 +0,0 @@
+-../../../../ijkplayer-armv7a/src/main/jni/Android.mk
+\ No newline at end of file
+diff --git a/android/ijkplayer/ijkplayer-armv5/src/main/jni/Android.mk b/android/ijkplayer/ijkplayer-armv5/src/main/jni/Android.mk
+new file mode 100644
+index 0000000..47d400e
+--- /dev/null
++++ b/android/ijkplayer/ijkplayer-armv5/src/main/jni/Android.mk
+@@ -0,0 +1,28 @@
++# copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
++#
++# This file is part of ijkPlayer.
++#
++# ijkPlayer is free software; you can redistribute it and/or
++# modify it under the terms of the GNU Lesser General Public
++# License as published by the Free Software Foundation; either
++# version 2.1 of the License, or (at your option) any later version.
++#
++# ijkPlayer is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++# Lesser General Public License for more details.
++#
++# You should have received a copy of the GNU Lesser General Public
++# License along with ijkPlayer; if not, write to the Free Software
++# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++
++LOCAL_PATH := $(call my-dir)
++
++MY_APP_JNI_ROOT := $(realpath $(LOCAL_PATH))
++MY_APP_PRJ_ROOT := $(realpath $(MY_APP_JNI_ROOT)/..)
++MY_APP_ANDROID_ROOT := $(realpath $(MY_APP_PRJ_ROOT)/../../../..)
++
++MY_APP_FFMPEG_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/ffmpeg-armv5/output)
++MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_FFMPEG_OUTPUT_PATH)/include)
++
++include $(call all-subdir-makefiles)
+diff --git a/android/ijkplayer/ijkplayer-example/build.gradle b/android/ijkplayer/ijkplayer-example/build.gradle
+index 9afe650..3c5c819 100644
+--- a/android/ijkplayer/ijkplayer-example/build.gradle
++++ b/android/ijkplayer/ijkplayer-example/build.gradle
+@@ -45,14 +45,14 @@ dependencies {
+     compile project(':ijkplayer-exo')
+ 
+     all32Compile project(':ijkplayer-armv5')
+-    all32Compile project(':ijkplayer-armv7a')
+-    all32Compile project(':ijkplayer-x86')
+-
++//    all32Compile project(':ijkplayer-armv7a')
++//    all32Compile project(':ijkplayer-x86')
++//
+     all64Compile project(':ijkplayer-armv5')
+-    all64Compile project(':ijkplayer-armv7a')
+-    all64Compile project(':ijkplayer-arm64')
+-    all64Compile project(':ijkplayer-x86')
+-    all64Compile project(':ijkplayer-x86_64')
++//    all64Compile project(':ijkplayer-armv7a')
++//    all64Compile project(':ijkplayer-arm64')
++//    all64Compile project(':ijkplayer-x86')
++//    all64Compile project(':ijkplayer-x86_64')
+ 
+     // armv5Compile project(':player-armv5')
+     // armv7aCompile project(':player-armv7a')
+diff --git a/android/ijkplayer/settings.gradle b/android/ijkplayer/settings.gradle
+index 758234a..b0873e0 100644
+--- a/android/ijkplayer/settings.gradle
++++ b/android/ijkplayer/settings.gradle
+@@ -1,7 +1,7 @@
+-include ':ijkplayer-armv5', ':ijkplayer-x86_64'
+-include ':ijkplayer-armv7a'
+-include ':ijkplayer-arm64'
+-include ':ijkplayer-x86'
++include ':ijkplayer-armv5'//, ':ijkplayer-x86_64'
++//include ':ijkplayer-armv7a'
++//include ':ijkplayer-arm64'
++//include ':ijkplayer-x86'
+ 
+ include ':ijkplayer-java'
+ include ':ijkplayer-exo'
+-- 
+2.7.4 (Apple Git-66)
+
