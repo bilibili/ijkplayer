@@ -2167,7 +2167,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     AVCodecContext *avctx;
     AVCodec *codec = NULL;
     const char *forced_codec_name = NULL;
-    AVDictionary *opts;
+    AVDictionary *opts = NULL;
     AVDictionaryEntry *t = NULL;
     int sample_rate, nb_channels;
     int64_t channel_layout;
