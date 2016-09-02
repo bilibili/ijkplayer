@@ -161,8 +161,7 @@ cd ..
 #     }
 #
 # If you want to enable debugging ijkplayer(native modules) on Android Studio 2.2+: (experimental)
-#     cd android
-#     sh patch-debugging-with-lldb.sh armv7a
+#     sh android/patch-debugging-with-lldb.sh armv7a
 #     Install Android Studio 2.2(+)
 #     Preference -> Android SDK -> SDK Tools
 #     Select (LLDB, NDK, Android SDK Build-tools,Cmake) and install

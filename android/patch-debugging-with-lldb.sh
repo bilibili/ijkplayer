@@ -19,12 +19,14 @@ patch_enable () {
     PARAM_TARGET=$1
     case "$PARAM_TARGET" in
         armv5|armv7a|arm64|x86|x86_64)
-            git apply -- patches/0001-gitignore-ignore-.externalNativeBuild.patch
+            git apply -- android/patches/0001-gitignore-ignore-.externalNativeBuild.patch
             echo "git apply ==> patches/0001-gitignore-ignore-.externalNativeBuild.patch"
-            git apply -- patches/0002-gradle-upgrade-build-tool-to-2.2.0-beta2.patch
+            git apply -- android/patches/0002-gradle-upgrade-build-tool-to-2.2.0-beta2.patch
             echo "git apply ==> patches/0002-gradle-upgrade-build-tool-to-2.2.0-beta2.patch"
-            git apply -- patches/0003-$PARAM_TARGET-enable-debugging-with-LLDB.patch
+            git apply -- android/patches/0003-$PARAM_TARGET-enable-debugging-with-LLDB.patch
             echo "git apply ==> patches/0003-$PARAM_TARGET-enable-debugging-with-LLDB.patch"
+            git apply -- android/patches/0004-$PARAM_TARGET-link-prebuilt-staic-libraries-of-ffmepg.patch
+            echo "git apply ==> patches/0004-$PARAM_TARGET-link-prebuilt-staic-libraries-of-ffmepg.patch"
         ;;
     esac
 }
@@ -33,11 +35,18 @@ patch_disable () {
     PARAM_TARGET=$1
     case "$PARAM_TARGET" in
         armv5|armv7a|arm64|x86|x86_64)
-            git apply -R patches/0003-$PARAM_TARGET-enable-debugging-with-LLDB.patch
+            git apply -R android/patches/0004-$PARAM_TARGET-link-prebuilt-staic-libraries-of-ffmepg.patch
+            echo "git apply reverse ==> patches/0004-$PARAM_TARGET-link-prebuilt-staic-libraries-of-ffmepg.patch"
+
+            git checkout android/ijkplayer/ijkplayer-$PARAM_TARGET/src/main/jni/Android.mk
+            git checkout android/ijkplayer/ijkplayer-example/build.gradle
+            git checkout android/ijkplayer/ijkplayer-$PARAM_TARGET/build.gradle
+            git checkout android/ijkplayer/settings.gradle
+#            git apply -R android/patches/0003-$PARAM_TARGET-enable-debugging-with-LLDB.patch
             echo "git apply reverse ==> patches/0003-$PARAM_TARGET-enable-debugging-with-LLDB.patch"
-            git apply -R patches/0002-gradle-upgrade-build-tool-to-2.2.0-beta2.patch
+            git apply -R android/patches/0002-gradle-upgrade-build-tool-to-2.2.0-beta2.patch
             echo "git apply reverse ==> patches/0002-gradle-upgrade-build-tool-to-2.2.0-beta2.patch"
-            git apply -R patches/0001-gitignore-ignore-.externalNativeBuild.patch
+            git apply -R android/patches/0001-gitignore-ignore-.externalNativeBuild.patch
             echo "git apply reverse ==> patches/0001-gitignore-ignore-.externalNativeBuild.patch"
         ;;
     esac
