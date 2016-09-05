@@ -760,7 +760,7 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
     if (context->ffp->vtb_handle_resolution_change &&
         context->codecpar->codec_id == AV_CODEC_ID_H264) {
         size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
-        // avcC(sps,pps) of size, minimum is 7
+        // minimum avcC(sps,pps) = 7
         if (size_data && size_data_size > 7) {
             int             got_picture = 0;
             AVFrame        *frame      = av_frame_alloc();
