@@ -447,7 +447,8 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
             int       size_data_size = 0;
             AVPacket *avpkt          = &d->pkt_temp;
             size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
-            if (size_data && size_data_size > AV_INPUT_BUFFER_PADDING_SIZE) {
+            // minimum avcC(sps,pps) = 7
+            if (size_data && size_data_size >= 7) {
                 int             got_picture = 0;
                 AVFrame        *frame      = av_frame_alloc();
                 AVDictionary   *codec_opts = NULL;
