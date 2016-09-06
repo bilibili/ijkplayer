@@ -936,7 +936,8 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
     
     int ret = 0;
     
-    if (context->codecpar->codec_id == AV_CODEC_ID_H264 && (avpkt->flags & AV_PKT_FLAG_KEY)) {
+    if (context->codecpar->codec_id == AV_CODEC_ID_H264 && (avpkt->flags & AV_PKT_FLAG_KEY) &&
+        (context->ffp->vtb_handle_resolution_change || context->ffp->video_sync)) {
         uint8_t *extradata;
         int extradata_size;
         uint64_t timestamp;
