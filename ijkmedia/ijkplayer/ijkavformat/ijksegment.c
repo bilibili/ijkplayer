@@ -32,7 +32,6 @@ typedef struct Context {
     URLContext     *inner;
 
     /* options */
-    int             segment_index;
     char           *http_hook;
     int64_t         app_ctx_intptr;
 } Context;
@@ -43,13 +42,16 @@ static int ijksegment_open(URLContext *h, const char *arg, int flags, AVDictiona
     AVAppIOControl io_control = {0};
     AVApplicationContext *app_ctx = (AVApplicationContext *)(intptr_t)c->app_ctx_intptr;
     int ret = -1;
+    int segment_index = -1;
 
     av_strstart(arg, "ijksegment:", &arg);
+
     if (!arg || !*arg)
         return AVERROR_EXTERNAL;
 
+    segment_index = (int)strtol(arg, NULL, 0);
     io_control.size = sizeof(io_control);
-    io_control.segment_index = (int)strtol(arg, NULL, 0);
+    io_control.segment_index = segment_index;
     strlcpy(io_control.url,    arg,    sizeof(io_control.url));
 
     if (app_ctx && io_control.segment_index < 0) {
@@ -63,7 +65,7 @@ static int ijksegment_open(URLContext *h, const char *arg, int flags, AVDictiona
     }
 
     av_dict_set_int(options, "ijkapplication", c->app_ctx_intptr, 0);
-    av_dict_set_int(options, "ijkinject-segment-index", io_control.segment_index, 0);
+    av_dict_set_int(options, "ijkinject-segment-index", segment_index, 0);
 
     ret = ffurl_open_whitelist(&c->inner,
                                io_control.url,
@@ -106,8 +108,6 @@ static int64_t ijksegment_seek(URLContext *h, int64_t pos, int whence)
 #define D AV_OPT_FLAG_DECODING_PARAM
 
 static const AVOption options[] = {
-    { "ijkinject-segment-index",    "segment index of current url",
-        OFFSET(segment_index),      AV_OPT_TYPE_INT,   {.i64 = 0}, 0,         INT_MAX,   D },
     { "ijkapplication", "AVApplicationContext", OFFSET(app_ctx_intptr), AV_OPT_TYPE_INT64, { .i64 = 0 }, INT64_MIN, INT64_MAX, .flags = D },
     { NULL }
 };
