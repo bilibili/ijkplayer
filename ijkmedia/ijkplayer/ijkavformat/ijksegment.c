@@ -63,7 +63,7 @@ static int ijksegment_open(URLContext *h, const char *arg, int flags, AVDictiona
     }
 
     av_dict_set_int(options, "ijkapplication", c->app_ctx_intptr, 0);
-    av_dict_set_int(options, "ijkinject-segment-index", c->segment_index, 0);
+    av_dict_set_int(options, "ijkinject-segment-index", io_control.segment_index, 0);
 
     ret = ffurl_open_whitelist(&c->inner,
                                io_control.url,
