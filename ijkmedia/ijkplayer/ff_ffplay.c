@@ -417,6 +417,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                         d->next_pts = frame->pts + frame->nb_samples;
                         d->next_pts_tb = tb;
                     }
+                    //ALOGI("[AUDIO][DECODE] %llu\n", frame->pts);
                 }
                 break;
             // FFP_MERGE: case AVMEDIA_TYPE_SUBTITLE:
@@ -2876,6 +2877,13 @@ static int read_thread(void *arg)
         /* check if packet is in play range specified by user, then queue, otherwise discard */
         stream_start_time = ic->streams[pkt->stream_index]->start_time;
         pkt_ts = pkt->pts == AV_NOPTS_VALUE ? pkt->dts : pkt->pts;
+                
+                if (pkt->stream_index == is->audio_stream) {
+                    ALOGE("[AUDIO][IN] %llu\n", pkt_ts);
+                } else if (pkt->stream_index == is->video_stream) {
+                    ALOGE("[VIDEO][IN] ------------- %llu\n", pkt_ts);
+                }
+                
         pkt_in_play_range = ffp->duration == AV_NOPTS_VALUE ||
                 (pkt_ts - (stream_start_time != AV_NOPTS_VALUE ? stream_start_time : 0)) *
                 av_q2d(ic->streams[pkt->stream_index]->time_base) -

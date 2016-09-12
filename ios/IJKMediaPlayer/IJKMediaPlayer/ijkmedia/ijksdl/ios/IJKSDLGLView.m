@@ -28,13 +28,20 @@
 #include "ijksdl/ijksdl_gles2.h"
 #import "IJKSDLHudViewController.h"
 
+#include "ijksdl_vout_overlay_videotoolbox.h"
+
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
 @property(atomic) BOOL glActivePaused;
 
 #pragma mark - E7
-@property (strong, nonatomic) NSTimer *monitorTimer;
-@property (nonatomic) int monitorCheck;
+
+@property (strong, nonatomic) CADisplayLink *displayTimer;
+@property (nonatomic) SDL_VoutOverlay *overlay;
+@property (nonatomic) uint64_t renderIndex, lastIndex;
+@property (strong, nonatomic) NSObject *indexFence;
+
+@property (nonatomic) int monitorTick;
 @property (nonatomic) BOOL displayPauesed;
 @property (copy, nonatomic) void (^monitorCallback)(BOOL displaying);
 #pragma mark -
@@ -85,6 +92,12 @@
 
         _hudViewController = [[IJKSDLHudViewController alloc] init];
         [self addSubview:_hudViewController.tableView];
+        
+        _displayTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(renderDisplay)];
+        _displayTimer.frameInterval = 2;
+        [_displayTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+        [_displayTimer setPaused:YES];
+        _indexFence = [NSObject new];
     }
 
     return self;
@@ -221,6 +234,9 @@
     [self unregisterApplicationObservers];
 
     [self unlockGLActive];
+    
+    [_displayTimer invalidate];
+    _displayTimer = nil;
 }
 
 - (void)setScaleFactor:(CGFloat)scaleFactor
@@ -315,23 +331,70 @@
     if (![self setupGLOnce])
         return;
 
+#pragma mark - E7
+    if (_overlay) {
+        return;
+    }
+    @synchronized (_indexFence) {
+        _renderIndex++;
+        if (_renderIndex > 10000)
+            _renderIndex = 0;
+        if (overlay) {
+            _overlay = SDL_VoutVideoToolBox_DuplicateOverlay(overlay);
+        }
+    }
+    if (_displayTimer.isPaused) {
+        [_displayTimer setPaused:NO];
+    }
+    
+//    _overlay = overlay;
+//    [self renderDisplay];
+    
+#pragma mark -
+}
+
+- (void)renderDisplay
+{
+    @synchronized (_indexFence) {
+        if (_renderIndex == _lastIndex) {
+            [self renderNoNewFrame];
+            if (_overlay) {
+                SDL_VoutVideoToolBox_UnrefOverlay(_overlay);
+                _overlay = nil;
+            }
+            return;
+        }
+        _lastIndex = _renderIndex;
+    }
+    
     if (![self tryLockGLActive]) {
         if (0 == (_tryLockErrorCount % 100)) {
             NSLog(@"IJKSDLGLView:display: unable to tryLock GL active: %d\n", _tryLockErrorCount);
         }
         _tryLockErrorCount++;
+        if (_overlay) {
+            SDL_VoutVideoToolBox_UnrefOverlay(_overlay);
+            _overlay = nil;
+        }
         return;
     }
-
+    
     _tryLockErrorCount = 0;
     if (_context && !_didStopGL) {
         EAGLContext *prevContext = [EAGLContext currentContext];
         [EAGLContext setCurrentContext:_context];
-        [self displayInternal:overlay];
+        [self displayInternal:_overlay];
         [EAGLContext setCurrentContext:prevContext];
     }
-
+    
     [self unlockGLActive];
+    
+    if (_overlay) {
+        SDL_VoutVideoToolBox_UnrefOverlay(_overlay);
+        _overlay = nil;
+    }
+    
+    [self renderHasNewFrame];
 }
 
 // NOTE: overlay could be NULl
@@ -379,17 +442,6 @@
     } else {
         _frameCount++;
     }
-    
-#pragma mark - E7
-    _monitorCheck = _frameCount;
-    if (_monitorCallback && !_monitorTimer) {
-        if (_displayPauesed) {
-            _displayPauesed = NO;
-            _monitorCallback(YES);
-        }
-        _monitorTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(checkDisplay) userInfo:nil repeats:YES];
-    }
-#pragma mark -
 }
 
 #pragma mark AppDelegate
@@ -634,27 +686,43 @@
 
 - (void)monitorDisplay:(void(^)(BOOL displaying))monitorCallback
 {
-    if (monitorCallback) {
-        _monitorCallback = monitorCallback;
-        if (_monitorTimer) {
-            [_monitorTimer invalidate];
-            _monitorTimer = nil;
+    _monitorCallback = monitorCallback;
+}
+
+- (void)renderNoNewFrame
+{
+    if (!_displayPauesed) {
+        _monitorTick++;
+        if (_monitorTick >= 30) {
+            _displayPauesed = YES;
+            if (_monitorCallback) {
+                __weak typeof(self) _self = self;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    _self.monitorCallback(NO);
+                });
+            }
         }
-    } else {
-        [_monitorTimer invalidate];
-        _monitorTimer = nil;
     }
 }
 
-- (void)checkDisplay
+- (void)renderHasNewFrame
 {
-    if (_monitorCheck == _frameCount) {
-        [_monitorTimer invalidate];
-        _monitorTimer = nil;
-        _displayPauesed = YES;
+    if (_displayPauesed) {
+        _displayPauesed = NO;
         if (_monitorCallback) {
-            _monitorCallback(NO);
+            __weak typeof(self) _self = self;
+//            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(15 / 30.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//                if (!_self.displayPauesed) {
+//                    _self.monitorCallback(YES);
+//                }
+//            });
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _self.monitorCallback(YES);
+            });
         }
+    }
+    if (_monitorTick != 0) {
+        _monitorTick = 0;
     }
 }
 

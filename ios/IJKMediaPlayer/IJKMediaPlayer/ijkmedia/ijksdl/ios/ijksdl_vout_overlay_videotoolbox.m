@@ -183,3 +183,41 @@ SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, SDL_V
     opaque->mutex = SDL_CreateMutex();
     return overlay;
 }
+
+SDL_VoutOverlay *SDL_VoutVideoToolBox_DuplicateOverlay(SDL_VoutOverlay *display)
+{
+    SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
+    if (!overlay) {
+        ALOGE("overlay allocation failed");
+        return NULL;
+    }
+    SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
+    overlay->opaque_class = display->opaque_class;
+    overlay->format     = SDL_FCC__VTB;
+    overlay->w          = display->w;
+    overlay->h          = display->h;
+    overlay->pitches    = display->pitches;
+    overlay->pixels     = display->pixels;
+    overlay->is_private = display->is_private;
+    
+    overlay->free_l             = func_free_l;
+    overlay->lock               = func_lock;
+    overlay->unlock             = func_unlock;
+    overlay->unref              = func_unref;
+    overlay->func_fill_frame    = func_fill_frame;
+    
+    opaque->mutex = SDL_CreateMutex();
+    opaque->pixel_buffer = CVPixelBufferRetain(display->opaque->pixel_buffer);
+    *(opaque->pitches) = *(display->opaque->pitches);
+    *(opaque->pixels) = *(display->pixels);
+    
+    return overlay;
+}
+
+void SDL_VoutVideoToolBox_UnrefOverlay(SDL_VoutOverlay *display)
+{
+    SDL_DestroyMutex(display->opaque->mutex);
+    CVPixelBufferRelease(display->opaque->pixel_buffer);
+    free(display);
+}
+

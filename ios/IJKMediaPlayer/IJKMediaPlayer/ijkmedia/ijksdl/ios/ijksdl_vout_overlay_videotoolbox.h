@@ -5,7 +5,10 @@
  * copyright (c) 2014 ZhouQuan <zhouqicy@gmail.com>
  *
  * This file is part of ijkPlayer.
- *
+ *if (!overlay) {
+ ALOGE("overlay allocation failed");
+ return NULL;
+ }
  * ijkPlayer is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,5 +34,8 @@
 
 SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, SDL_Vout *vout);
 CVPixelBufferRef SDL_VoutOverlayVideoToolBox_GetCVPixelBufferRef(SDL_VoutOverlay *overlay);
+
+SDL_VoutOverlay *SDL_VoutVideoToolBox_DuplicateOverlay(SDL_VoutOverlay *display);
+void SDL_VoutVideoToolBox_UnrefOverlay(SDL_VoutOverlay *display);
 
 #endif
