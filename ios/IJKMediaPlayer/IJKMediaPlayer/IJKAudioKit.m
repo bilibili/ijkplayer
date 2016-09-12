@@ -23,6 +23,7 @@
  */
 
 #import "IJKAudioKit.h"
+#import "IJKLog.h"
 
 @implementation IJKAudioKit {
     BOOL _audioSessionInitialized;
@@ -51,13 +52,13 @@
     /* Set audio session to mediaplayback */
     NSError *error = nil;
     if (NO == [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error]) {
-        NSLog(@"IJKAudioKit: AVAudioSession.setCategory() failed: %@\n", error ? [error localizedDescription] : @"nil");
+        IJKLog(@"IJKAudioKit: AVAudioSession.setCategory() failed: %@\n", error ? [error localizedDescription] : @"nil");
         return;
     }
 
     error = nil;
     if (NO == [[AVAudioSession sharedInstance] setActive:YES error:&error]) {
-        NSLog(@"IJKAudioKit: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
+        IJKLog(@"IJKAudioKit: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
         return;
     }
 
@@ -72,7 +73,7 @@
         @try {
             [[AVAudioSession sharedInstance] setActive:NO error:nil];
         } @catch (NSException *exception) {
-            NSLog(@"failed to inactive AVAudioSession\n");
+            IJKLog(@"failed to inactive AVAudioSession\n");
         }
     }
 }
@@ -82,12 +83,12 @@
     int reason = [[[notification userInfo] valueForKey:AVAudioSessionInterruptionTypeKey] intValue];
     switch (reason) {
         case AVAudioSessionInterruptionTypeBegan: {
-            NSLog(@"AVAudioSessionInterruptionTypeBegan\n");
+            IJKLog(@"AVAudioSessionInterruptionTypeBegan\n");
             [self setActive:NO];
             break;
         }
         case AVAudioSessionInterruptionTypeEnded: {
-            NSLog(@"AVAudioSessionInterruptionTypeEnded\n");
+            IJKLog(@"AVAudioSessionInterruptionTypeEnded\n");
             [self setActive:YES];
             break;
         }

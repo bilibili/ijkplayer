@@ -23,6 +23,7 @@
 #import "IJKMPMoviePlayerController.h"
 #import "IJKAudioKit.h"
 #import "IJKNotificationManager.h"
+#import "IJKLog.h"
 
 @implementation IJKMPMoviePlayerController
 {
@@ -154,7 +155,7 @@
 
 -(void)setPlaybackRate:(float)playbackRate
 {
-    NSLog(@"[MPMoviePlayerController setPlaybackRate] is not supported\n");
+    IJKLog(@"[MPMoviePlayerController setPlaybackRate] is not supported\n");
 }
 
 -(float)playbackRate

@@ -34,6 +34,7 @@
 #import <CoreVideo/CVHostTime.h>
 #import <Foundation/Foundation.h>
 #import "IJKDeviceModel.h"
+#import "IJKLog.h"
 
 #define IJK_VTB_FCC_AVCC   SDL_FOURCC('C', 'c', 'v', 'a')
 
@@ -556,7 +557,7 @@ VTDecompressionSessionRef vtbsession_create(VideoToolBoxContext* context)
 
     if (status != noErr) {
         NSError* error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
-        NSLog(@"Error %@", [error description]);
+        IJKLog(@"Error %@", [error description]);
         ALOGI("%s - failed with status = (%d)", __FUNCTION__, (int)status);
     }
     CFRelease(destinationPixelBufferAttributes);

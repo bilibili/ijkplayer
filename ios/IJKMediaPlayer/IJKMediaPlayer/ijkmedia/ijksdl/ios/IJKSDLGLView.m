@@ -27,6 +27,7 @@
 #include "ijksdl/ios/ijksdl_ios.h"
 #include "ijksdl/ijksdl_gles2.h"
 #import "IJKSDLHudViewController.h"
+#import "IJKLog.h"
 
 #include "ijksdl_vout_overlay_videotoolbox.h"
 
@@ -116,13 +117,13 @@
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
-        NSLog(@"failed to make complete framebuffer object %x\n", status);
+        IJKLog(@"failed to make complete framebuffer object %x\n", status);
         return NO;
     }
 
     GLenum glError = glGetError();
     if (GL_NO_ERROR != glError) {
-        NSLog(@"failed to setup GL %x\n", glError);
+        IJKLog(@"failed to setup GL %x\n", glError);
         return NO;
     }
 
@@ -157,7 +158,7 @@
 
     _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     if (_context == nil) {
-        NSLog(@"failed to setup EAGLContext\n");
+        IJKLog(@"failed to setup EAGLContext\n");
         return NO;
     }
 
@@ -166,7 +167,7 @@
 
     _didSetupGL = NO;
     if ([self setupEAGLContext:_context]) {
-        NSLog(@"OK setup GL\n");
+        IJKLog(@"OK setup GL\n");
         _didSetupGL = YES;
     }
 
@@ -309,7 +310,7 @@
 
 - (void)invalidateRenderBuffer
 {
-    NSLog(@"invalidateRenderBuffer\n");
+    IJKLog(@"invalidateRenderBuffer\n");
     [self lockGLActive];
 
     _isRenderBufferInvalidated = YES;
@@ -369,7 +370,7 @@
     
     if (![self tryLockGLActive]) {
         if (0 == (_tryLockErrorCount % 100)) {
-            NSLog(@"IJKSDLGLView:display: unable to tryLock GL active: %d\n", _tryLockErrorCount);
+            IJKLog(@"IJKSDLGLView:display: unable to tryLock GL active: %d\n", _tryLockErrorCount);
         }
         _tryLockErrorCount++;
         if (_overlay) {
@@ -402,9 +403,9 @@
 {
     if (![self setupRenderer:overlay]) {
         if (!overlay && !_renderer) {
-            NSLog(@"IJKSDLGLView: setupDisplay not ready\n");
+            IJKLog(@"IJKSDLGLView: setupDisplay not ready\n");
         } else {
-            NSLog(@"IJKSDLGLView: setupDisplay failed\n");
+            IJKLog(@"IJKSDLGLView: setupDisplay failed\n");
         }
         return;
     }
@@ -412,7 +413,7 @@
     [[self eaglLayer] setContentsScale:_scaleFactor];
 
     if (_isRenderBufferInvalidated) {
-        NSLog(@"IJKSDLGLView: renderbufferStorage fromDrawable\n");
+        IJKLog(@"IJKSDLGLView: renderbufferStorage fromDrawable\n");
         _isRenderBufferInvalidated = NO;
 
         glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
@@ -537,31 +538,31 @@
 
 - (void)applicationWillEnterForeground
 {
-    NSLog(@"IJKSDLGLView:applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
+    IJKLog(@"IJKSDLGLView:applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
     [self toggleGLPaused:NO];
 }
 
 - (void)applicationDidBecomeActive
 {
-    NSLog(@"IJKSDLGLView:applicationDidBecomeActive: %d", (int)[UIApplication sharedApplication].applicationState);
+    IJKLog(@"IJKSDLGLView:applicationDidBecomeActive: %d", (int)[UIApplication sharedApplication].applicationState);
     [self toggleGLPaused:NO];
 }
 
 - (void)applicationWillResignActive
 {
-    NSLog(@"IJKSDLGLView:applicationWillResignActive: %d", (int)[UIApplication sharedApplication].applicationState);
+    IJKLog(@"IJKSDLGLView:applicationWillResignActive: %d", (int)[UIApplication sharedApplication].applicationState);
     [self toggleGLPaused:YES];
 }
 
 - (void)applicationDidEnterBackground
 {
-    NSLog(@"IJKSDLGLView:applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
+    IJKLog(@"IJKSDLGLView:applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
     [self toggleGLPaused:YES];
 }
 
 - (void)applicationWillTerminate
 {
-    NSLog(@"IJKSDLGLView:applicationWillTerminate: %d", (int)[UIApplication sharedApplication].applicationState);
+    IJKLog(@"IJKSDLGLView:applicationWillTerminate: %d", (int)[UIApplication sharedApplication].applicationState);
     [self toggleGLPaused:YES];
 }
 

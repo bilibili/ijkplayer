@@ -25,6 +25,7 @@
 #import "IJKSDLAudioQueueController.h"
 #import "IJKSDLAudioKit.h"
 #import "ijksdl_log.h"
+#import "IJKLog.h"
 
 #import <AVFoundation/AVFoundation.h>
 
@@ -51,12 +52,12 @@
         _spec = *aSpec;
 
         if (aSpec->format != AUDIO_S16SYS) {
-            NSLog(@"aout_open_audio: unsupported format %d\n", (int)aSpec->format);
+            IJKLog(@"aout_open_audio: unsupported format %d\n", (int)aSpec->format);
             return nil;
         }
 
         if (aSpec->channels > 2) {
-            NSLog(@"aout_open_audio: unsupported channels %d\n", (int)aSpec->channels);
+            IJKLog(@"aout_open_audio: unsupported channels %d\n", (int)aSpec->channels);
             return nil;
         }
 
@@ -74,7 +75,7 @@
                                               0,
                                               &audioQueueRef);
         if (status != noErr) {
-            NSLog(@"AudioQueue: AudioQueueNewOutput failed (%d)\n", (int)status);
+            IJKLog(@"AudioQueue: AudioQueueNewOutput failed (%d)\n", (int)status);
             self = nil;
             return nil;
         }
@@ -89,7 +90,7 @@
 
         status = AudioQueueStart(audioQueueRef, NULL);
         if (status != noErr) {
-            NSLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
+            IJKLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
             self = nil;
             return nil;
         }
@@ -109,7 +110,7 @@
         /*-
         status = AudioQueueStart(audioQueueRef, NULL);
         if (status != noErr) {
-            NSLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
+            IJKLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
             self = nil;
             return nil;
         }
@@ -136,12 +137,12 @@
         _isPaused = NO;
         NSError *error = nil;
         if (NO == [[AVAudioSession sharedInstance] setActive:YES error:&error]) {
-            NSLog(@"AudioQueue: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
+            IJKLog(@"AudioQueue: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
         }
 
         OSStatus status = AudioQueueStart(_audioQueueRef, NULL);
         if (status != noErr)
-            NSLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
+            IJKLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
     }
 }
 
@@ -157,7 +158,7 @@
         _isPaused = YES;
         OSStatus status = AudioQueuePause(_audioQueueRef);
         if (status != noErr)
-            NSLog(@"AudioQueue: AudioQueuePause failed (%d)\n", (int)status);
+            IJKLog(@"AudioQueue: AudioQueuePause failed (%d)\n", (int)status);
     }
 }
 

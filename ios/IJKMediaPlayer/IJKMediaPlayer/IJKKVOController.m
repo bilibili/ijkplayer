@@ -21,6 +21,7 @@
  */
 
 #import "IJKKVOController.h"
+#import "IJKLog.h"
 
 @interface IJKKVOEntry : NSObject
 @property(nonatomic, weak)   NSObject *observer;
@@ -59,7 +60,7 @@
     BOOL removed = [self removeEntryOfObserver:observer forKeyPath:keyPath];
     if (removed) {
         // duplicated register
-        NSLog(@"duplicated observer");
+        IJKLog(@"duplicated observer");
     }
 
     @try {
@@ -73,7 +74,7 @@
         entry.keyPath  = keyPath;
         [_observerArray addObject:entry];
     } @catch (NSException *e) {
-        NSLog(@"IJKKVO: failed to add observer for %@\n", keyPath);
+        IJKLog(@"IJKKVO: failed to add observer for %@\n", keyPath);
     }
 }
 
@@ -87,7 +88,7 @@
     BOOL removed = [self removeEntryOfObserver:observer forKeyPath:keyPath];
     if (removed) {
         // duplicated register
-        NSLog(@"duplicated observer");
+        IJKLog(@"duplicated observer");
     }
 
     @try {
@@ -96,7 +97,7 @@
                         forKeyPath:keyPath];
         }
     } @catch (NSException *e) {
-        NSLog(@"IJKKVO: failed to remove observer for %@\n", keyPath);
+        IJKLog(@"IJKKVO: failed to remove observer for %@\n", keyPath);
     }
 }
 
@@ -119,7 +120,7 @@
             [target removeObserver:observer
                         forKeyPath:entry.keyPath];
         } @catch (NSException *e) {
-            NSLog(@"IJKKVO: failed to remove observer for %@\n", entry.keyPath);
+            IJKLog(@"IJKKVO: failed to remove observer for %@\n", entry.keyPath);
         }
     }];
 
