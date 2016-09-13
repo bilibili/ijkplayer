@@ -36,7 +36,7 @@
 #include "ijkplayer_android.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include "ijksdl/android/ijksdl_codec_android_mediadef.h"
-#include "libavformat/ijkavformat.h"
+#include "ijkavformat/ijkavformat.h"
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
@@ -647,6 +647,7 @@ IjkMediaPlayer_getMediaMeta(JNIEnv *env, jobject thiz)
                 fillMetaInternal(env, jstream_bundle, streamRawMeta, IJKM_KEY_CODEC_LONG_NAME, NULL );
                 fillMetaInternal(env, jstream_bundle, streamRawMeta, IJKM_KEY_CODEC_PIXEL_FORMAT, NULL );
                 fillMetaInternal(env, jstream_bundle, streamRawMeta, IJKM_KEY_BITRATE, NULL );
+                fillMetaInternal(env, jstream_bundle, streamRawMeta, IJKM_KEY_CODEC_PROFILE_ID, NULL );
 
                 if (0 == strcmp(type, IJKM_VAL_TYPE__VIDEO)) {
                     fillMetaInternal(env, jstream_bundle, streamRawMeta, IJKM_KEY_WIDTH, NULL );
@@ -722,49 +723,81 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
     JNIEnv     *env     = NULL;
     jobject     jbundle = NULL;
     int         ret     = -1;
-    int         is_handled = 0;
     SDL_JNI_SetupThreadEnv(&env);
 
     jobject weak_thiz = (jobject) opaque;
     if (weak_thiz == NULL )
         goto fail;
-
     switch (what) {
-    case IJKAVINJECT_CONCAT_RESOLVE_SEGMENT:
-    case IJKAVINJECT_ON_TCP_OPEN:
-    case IJKAVINJECT_ON_HTTP_OPEN:
-    case IJKAVINJECT_ON_HTTP_RETRY:
-    case IJKAVINJECT_ON_LIVE_RETRY: {
-        IJKAVInject_OnUrlOpenData *real_data = (IJKAVInject_OnUrlOpenData *) data;
-        real_data->is_handled = 0;
+        case AVAPP_CTRL_WILL_HTTP_OPEN:
+        case AVAPP_CTRL_WILL_LIVE_OPEN:
+        case AVAPP_CTRL_WILL_CONCAT_SEGMENT_OPEN: {
+            AVAppIOControl *real_data = (AVAppIOControl *)data;
+            real_data->is_handled = 0;
 
-        jbundle = J4AC_Bundle__Bundle__catchAll(env);
-        if (!jbundle) {
-            ALOGE("%s: ASDK_Bundle__init failed\n", __func__);
-            goto fail;
+            jbundle = J4AC_Bundle__Bundle__catchAll(env);
+            if (!jbundle) {
+                ALOGE("%s: J4AC_Bundle__Bundle__catchAll failed for case %d\n", __func__, what);
+                goto fail;
+            }
+            J4AC_Bundle__putString__withCString__catchAll(env, jbundle, "url", real_data->url);
+            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "segment_index", real_data->segment_index);
+            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "retry_counter", real_data->retry_counter);
+            real_data->is_handled = J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
+            if (J4A_ExceptionCheck__catchAll(env)) {
+                goto fail;
+            }
+
+            J4AC_Bundle__getString__withCString__asCBuffer(env, jbundle, "url", real_data->url, sizeof(real_data->url));
+            if (J4A_ExceptionCheck__catchAll(env)) {
+                goto fail;
+            }
+            ret = 0;
+            break;
         }
-
-        J4AC_Bundle__putString__withCString__catchAll(env, jbundle,  "url",           real_data->url);
-        J4AC_Bundle__putInt__withCString__catchAll(env, jbundle,     "segment_index", real_data->segment_index);
-        J4AC_Bundle__putInt__withCString__catchAll(env, jbundle,     "retry_counter", real_data->retry_counter);
-
-        is_handled = J4AC_IjkMediaPlayer__onNativeInvoke__catchAll(env, weak_thiz, what, jbundle);
-        if (J4A_ExceptionCheck__catchAll(env))
-            goto fail;
-
-        J4AC_Bundle__getString__withCString__asCBuffer(env, jbundle, "url", real_data->url, sizeof(real_data->url));
-        if (J4A_ExceptionCheck__catchAll(env))
-            goto fail;
-
-        real_data->is_handled = is_handled;
-        ret = 0;
-        break;
+        case AVAPP_EVENT_WILL_HTTP_OPEN:
+        case AVAPP_EVENT_DID_HTTP_OPEN:
+        case AVAPP_EVENT_WILL_HTTP_SEEK:
+        case AVAPP_EVENT_DID_HTTP_SEEK: {
+            AVAppHttpEvent *real_data = (AVAppHttpEvent *) data;
+            jbundle = J4AC_Bundle__Bundle__catchAll(env);
+            if (!jbundle) {
+                ALOGE("%s: J4AC_Bundle__Bundle__catchAll failed for case %d\n", __func__, what);
+                goto fail;
+            }
+            J4AC_Bundle__putString__withCString__catchAll(env, jbundle, "url", real_data->url);
+            J4AC_Bundle__putLong__withCString__catchAll(env, jbundle, "offset", real_data->offset);
+            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "error", real_data->error);
+            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "http_code", real_data->http_code);
+            J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
+            if (J4A_ExceptionCheck__catchAll(env))
+                goto fail;
+            ret = 0;
+            break;
+        }
+        case AVAPP_CTRL_DID_TCP_OPEN:
+        case AVAPP_CTRL_WILL_TCP_OPEN: {
+            AVAppTcpIOControl *real_data = (AVAppTcpIOControl *)data;
+            jbundle = J4AC_Bundle__Bundle__catchAll(env);
+            if (!jbundle) {
+                ALOGE("%s: J4AC_Bundle__Bundle__catchAll failed for case %d\n", __func__, what);
+                goto fail;
+            }
+            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "error", real_data->error);
+            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "family", real_data->family);
+            J4AC_Bundle__putString__withCString__catchAll(env, jbundle, "ip", real_data->ip);
+            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "port", real_data->port);
+            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "fd", real_data->fd);
+            J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
+            if (J4A_ExceptionCheck__catchAll(env))
+                goto fail;
+            ret = 0;
+            break;
+        }
+        default: {
+            ret = 0;
+        }
     }
-    default: {
-        goto fail;
-    }
-    }
-
 fail:
     SDL_JNI_DeleteLocalRefP(env, &jbundle);
     return ret;

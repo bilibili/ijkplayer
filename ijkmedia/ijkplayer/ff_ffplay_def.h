@@ -101,7 +101,7 @@
 /* AV sync correction is done if above the maximum AV sync threshold */
 #define AV_SYNC_THRESHOLD_MAX 0.1
 /* If a frame duration is longer than this, it will not be duplicated to compensate AV sync */
-#define AV_SYNC_FRAMEDUP_THRESHOLD 0.1
+#define AV_SYNC_FRAMEDUP_THRESHOLD 0.15
 /* no AV correction is done if too big error */
 #define AV_NOSYNC_THRESHOLD 100.0
 
@@ -377,6 +377,9 @@ typedef struct VideoState {
     int is_video_high_res; // above 1080p
 
     PacketQueue *buffer_indicator_queue;
+
+    volatile int latest_seek_load_serial;
+    volatile int64_t latest_seek_load_start_at;
 } VideoState;
 
 /* options specified by the user */
@@ -461,7 +464,11 @@ typedef struct FFStatistic
     FFTrackCacheStatistic video_cache;
     FFTrackCacheStatistic audio_cache;
 
+    int64_t buf_backwards;
+    int64_t buf_forwards;
+    int64_t buf_capacity;
     SDL_SpeedSampler2 tcp_read_sampler;
+    int64_t latest_seek_load_duration;
 } FFStatistic;
 
 #define FFP_TCP_READ_SAMPLE_RANGE 2000
@@ -621,6 +628,7 @@ typedef struct FFPlayer {
     int mediacodec_avc;
     int mediacodec_hevc;
     int mediacodec_mpeg2;
+    int mediacodec_mpeg4;
     int mediacodec_handle_resolution_change;
     int mediacodec_auto_rotate;
 

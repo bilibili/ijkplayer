@@ -157,17 +157,18 @@ IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteErrorKey;
 
 // Must equal to the defination in ijkavformat/ijkavformat.h
 typedef NS_ENUM(NSInteger, IJKMediaEvent) {
-    // Control Messages
-    IJKMediaUrlOpenEvent_ConcatResolveSegment = 0x10000,
-    IJKMediaUrlOpenEvent_TcpOpen = 0x10001,
-    IJKMediaUrlOpenEvent_HttpOpen = 0x10002,
-    IJKMediaUrlOpenEvent_LiveOpen = 0x10004,
 
     // Notify Events
-    IJKMediaEvent_WillHttpOpen = 0x12100, // attr: url
-    IJKMediaEvent_DidHttpOpen = 0x12101,  // attr: url, error, http_code
-    IJKMediaEvent_WillHttpSeek = 0x12102, // attr: url, offset
-    IJKMediaEvent_DidHttpSeek = 0x12103,  // attr: url, offset, error, http_code
+    IJKMediaEvent_WillHttpOpen         = 1,       // attr: url
+    IJKMediaEvent_DidHttpOpen          = 2,       // attr: url, error, http_code
+    IJKMediaEvent_WillHttpSeek         = 3,       // attr: url, offset
+    IJKMediaEvent_DidHttpSeek          = 4,       // attr: url, offset, error, http_code
+    // Control Message
+    IJKMediaCtrl_WillTcpOpen           = 0x20001, // IJKMediaUrlOpenData: no args
+    IJKMediaCtrl_DidTcpOpen            = 0x20002, // IJKMediaUrlOpenData: error, family, ip, port, fd
+    IJKMediaCtrl_WillHttpOpen          = 0x20003, // IJKMediaUrlOpenData: url, segmentIndex, retryCounter
+    IJKMediaCtrl_WillLiveOpen          = 0x20005, // IJKMediaUrlOpenData: url, retryCounter
+    IJKMediaCtrl_WillConcatSegmentOpen = 0x20007, // IJKMediaUrlOpenData: url, segmentIndex, retryCounter
 };
 
 #define IJKMediaEventAttrKey_url            @"url"
@@ -190,6 +191,8 @@ typedef NS_ENUM(NSInteger, IJKMediaEvent) {
 @property(nonatomic, readonly) int retryCounter;
 
 @property(nonatomic, retain) NSString *url;
+@property(nonatomic, assign) int fd;
+@property(nonatomic, strong) NSString *msg;
 @property(nonatomic) int error; // set a negative value to indicate an error has occured.
 @property(nonatomic, getter=isHandled)    BOOL handled;     // auto set to YES if url changed
 @property(nonatomic, getter=isUrlChanged) BOOL urlChanged;  // auto set to YES by url changed

@@ -347,6 +347,11 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         }
 
         newFrame = (sort_queue *)mallocz(sizeof(sort_queue));
+        if (!newFrame) {
+            ALOGE("VTB: create new frame fail: out of memory\n");
+            goto failed;
+        }
+
         newFrame->pic.pkt_pts    = sample_info->pts;
         newFrame->pic.pkt_dts    = sample_info->dts;
         newFrame->pic.sample_aspect_ratio.num = sample_info->sar_num;
@@ -755,7 +760,8 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
     if (context->ffp->vtb_handle_resolution_change &&
         context->codecpar->codec_id == AV_CODEC_ID_H264) {
         size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
-        if (size_data && size_data_size > AV_INPUT_BUFFER_PADDING_SIZE) {
+        // minimum avcC(sps,pps) = 7
+        if (size_data && size_data_size > 7) {
             int             got_picture = 0;
             AVFrame        *frame      = av_frame_alloc();
             AVDictionary   *codec_opts = NULL;
@@ -765,7 +771,7 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
 
             avcodec_parameters_to_context(new_avctx, context->codecpar);
             av_freep(&new_avctx->extradata);
-            new_avctx->extradata = av_mallocz(size_data_size);
+            new_avctx->extradata = av_mallocz(size_data_size + AV_INPUT_BUFFER_PADDING_SIZE);
             if (!new_avctx->extradata)
                 return AVERROR(ENOMEM);
             memcpy(new_avctx->extradata, size_data, size_data_size);
@@ -1119,6 +1125,10 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
     int ret = 0;
 
     VideoToolBoxContext *context_vtb = (VideoToolBoxContext *)mallocz(sizeof(VideoToolBoxContext));
+
+    context_vtb->sample_info_mutex = SDL_CreateMutex();
+    context_vtb->sample_info_cond  = SDL_CreateCond();
+
     if (!context_vtb) {
         goto fail;
     }
@@ -1145,9 +1155,6 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
 
     context_vtb->m_sort_queue = 0;
     context_vtb->m_queue_depth = 0;
-
-    context_vtb->sample_info_mutex = SDL_CreateMutex();
-    context_vtb->sample_info_cond  = SDL_CreateCond();
 
     SDL_SpeedSamplerReset(&context_vtb->sampler);
     return context_vtb;

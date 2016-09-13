@@ -52,6 +52,8 @@
     int             _tryLockErrorCount;
     BOOL            _didSetupGL;
     BOOL            _didStopGL;
+    BOOL            _didLockedDueToMovedToWindow;
+    BOOL            _shouldLockWhileBeingMovedToWindow;
     NSMutableArray *_registeredNotifications;
 
     IJKSDLHudViewController *_hudViewController;
@@ -67,7 +69,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         _tryLockErrorCount = 0;
-
+        _shouldLockWhileBeingMovedToWindow = YES;
         self.glActiveLock = [[NSRecursiveLock alloc] init];
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
@@ -80,6 +82,28 @@
     }
 
     return self;
+}
+
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+    if (!_shouldLockWhileBeingMovedToWindow) {
+        [super willMoveToWindow:newWindow];
+        return;
+    }
+    if (newWindow && !_didLockedDueToMovedToWindow) {
+        [self lockGLActive];
+        _didLockedDueToMovedToWindow = YES;
+    }
+    [super willMoveToWindow:newWindow];
+}
+
+- (void)didMoveToWindow
+{
+    [super didMoveToWindow];
+    if (self.window && _didLockedDueToMovedToWindow) {
+        [self unlockGLActive];
+        _didLockedDueToMovedToWindow = NO;
+    }
 }
 
 - (BOOL)setupEAGLContext:(EAGLContext *)context
@@ -599,6 +623,11 @@
             [self setHudValue:value forKey:key];
         });
     }
+}
+
+- (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhileBeingMovedToWindow
+{
+    _shouldLockWhileBeingMovedToWindow = shouldLockWhileBeingMovedToWindow;
 }
 
 - (void)setShouldShowHudView:(BOOL)shouldShowHudView
