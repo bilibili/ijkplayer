@@ -68,6 +68,7 @@
 #include "ff_ffplay_debug.h"
 #include "version.h"
 #include "ijkmeta.h"
+#include "ijkversion.h"
 
 #ifndef AV_CODEC_FLAG2_FAST
 #define AV_CODEC_FLAG2_FAST CODEC_FLAG2_FAST
@@ -3231,9 +3232,15 @@ const AVClass ffp_context_class = {
     .child_class_next = ffp_context_child_class_next,
 };
 
+const char *ijk_version_info()
+{
+    return IJKPLAYER_VERSION;
+}
+
 FFPlayer *ffp_create()
 {
     av_log(NULL, AV_LOG_INFO, "av_version_info: %s\n", av_version_info());
+    av_log(NULL, AV_LOG_INFO, "ijk_version_info: %s\n", ijk_version_info());
 
     FFPlayer* ffp = (FFPlayer*) av_mallocz(sizeof(FFPlayer));
     if (!ffp)
@@ -3455,6 +3462,7 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
     }
 
     av_log(NULL, AV_LOG_INFO, "===== versions =====\n");
+    ffp_show_version_str(ffp, "ijkplayer",      ijk_version_info());
     ffp_show_version_str(ffp, "FFmpeg",         av_version_info());
     ffp_show_version_int(ffp, "libavutil",      avutil_version());
     ffp_show_version_int(ffp, "libavcodec",     avcodec_version());
