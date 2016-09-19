@@ -1011,6 +1011,8 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
                 }
                 
                 if (got_picture) {
+                    ALOGI("old size = %d x %d\n", context->codecpar->width, context->codecpar->height);
+                    ALOGI("new size = %d x %d\n", new_avctx->width, new_avctx->height);
                     if (context->codecpar->width  != new_avctx->width &&
                         context->codecpar->height != new_avctx->height) {
                         avcodec_parameters_from_context(context->codecpar, new_avctx);

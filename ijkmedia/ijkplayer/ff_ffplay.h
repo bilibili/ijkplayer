@@ -119,7 +119,6 @@ void      ffp_sync_baseline_register(FFPlayer *ffp,
                                      uint16_t high_water_mark,
                                      uint16_t low_water_mark,
                                      uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData));
-void      ffp_sync_configure(uint16_t high_water_mark, uint16_t low_water_mark);
 void      ffp_sync_finish_register(FFPlayer *ffp, void *userData, void (*sync_finish_cb)(uint64_t timestamp, void *userData));
 #pragma mark -
 
