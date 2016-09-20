@@ -331,7 +331,7 @@
 {
     if (![self setupGLOnce])
         return;
-
+    
 #pragma mark - E7
     if (_overlay) {
         return;

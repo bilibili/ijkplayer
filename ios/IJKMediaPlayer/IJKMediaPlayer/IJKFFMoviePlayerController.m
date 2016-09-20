@@ -246,7 +246,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (void)dealloc
 {
+    IJKLog(@"%s", __FUNCTION__);
 //    [self unregisterApplicationObservers];
+    //ijkmp_global_set_inject_callback(NULL);
 }
 
 - (void)setShouldAutoplay:(BOOL)shouldAutoplay
@@ -454,6 +456,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     [self stopHudTimer];
     [self unregisterApplicationObservers];
     [self setScreenOn:NO];
+    [_glView monitorDisplay:nil];
 
     [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
 }

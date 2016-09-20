@@ -945,9 +945,8 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
     if (!avpkt || !avpkt->data) {
         return 0;
     }
-    
+
     int ret = 0;
-    
     if (context->codecpar->codec_id == AV_CODEC_ID_H264 && (avpkt->flags & AV_PKT_FLAG_KEY) &&
         (context->ffp->vtb_handle_resolution_change || context->ffp->video_sync)) {
         uint8_t *extradata = NULL;
@@ -1056,16 +1055,17 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
                 sync->sync_finish_cb(sync->local_timestamp, sync->userData);
             }
         }
-        if (ff_avpacket_is_idr(avpkt) == true) {
-            context->idr_based_identified = true;
-        }
-        if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
-            ResetPktBuffer(context);
-            context->recovery_drop_packet = false;
-        }
-        if (context->recovery_drop_packet == true) {
-            return -1;
-        }
+    }
+    
+    if (ff_avpacket_is_idr(avpkt) == true) {
+        context->idr_based_identified = true;
+    }
+    if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
+        ResetPktBuffer(context);
+        context->recovery_drop_packet = false;
+    }
+    if (context->recovery_drop_packet == true) {
+        return -1;
     }
     
     DuplicatePkt(context, avpkt);
