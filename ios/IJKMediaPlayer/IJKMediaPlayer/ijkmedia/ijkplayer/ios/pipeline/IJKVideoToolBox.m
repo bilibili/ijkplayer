@@ -342,6 +342,9 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         sort_queue *newFrame    = NULL;
 
         sample_info *sample_info = sourceFrameRefCon;
+        if (!sample_info)
+            return;
+        
         if (!sample_info->is_decoding) {
             ALOGD("VTB: frame out of date: id=%d\n", sample_info->sample_id);
             goto failed;
