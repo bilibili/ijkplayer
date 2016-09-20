@@ -2878,11 +2878,11 @@ static int read_thread(void *arg)
         stream_start_time = ic->streams[pkt->stream_index]->start_time;
         pkt_ts = pkt->pts == AV_NOPTS_VALUE ? pkt->dts : pkt->pts;
                 
-                if (pkt->stream_index == is->audio_stream) {
-                    ALOGE("[AUDIO][IN] %llu\n", pkt_ts);
-                } else if (pkt->stream_index == is->video_stream) {
-                    ALOGE("[VIDEO][IN] ------------- %llu\n", pkt_ts);
-                }
+//                if (pkt->stream_index == is->audio_stream) {
+//                    ALOGE("[AUDIO][IN] %llu\n", pkt_ts);
+//                } else if (pkt->stream_index == is->video_stream) {
+//                    ALOGE("[VIDEO][IN] ------------- %llu\n", pkt_ts);
+//                }
                 
         pkt_in_play_range = ffp->duration == AV_NOPTS_VALUE ||
                 (pkt_ts - (stream_start_time != AV_NOPTS_VALUE ? stream_start_time : 0)) *
