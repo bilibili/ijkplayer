@@ -45,6 +45,8 @@ typedef void(^VideoSyncFinishCallback)(uint64_t timestamp);
 @property (copy, nonatomic) VideoSyncTimestampCallback vSyncTsCallback;
 @property (copy, nonatomic) VideoSyncFinishCallback vSyncFinishCallback;
 
+@property (nonatomic) BOOL isShutdown;
+
 @end
 
 @implementation IJKFFMoviePlayerController {
@@ -452,6 +454,9 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 {
     if (!_mediaPlayer)
         return;
+    if (_isShutdown)
+        return;
+    _isShutdown = YES;
 
     [self stopHudTimer];
     [self unregisterApplicationObservers];
@@ -490,6 +495,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 
 - (void)didShutdown
 {
+    _mediaPlayer = nil;
 }
 
 - (IJKMPMoviePlaybackState)playbackState
