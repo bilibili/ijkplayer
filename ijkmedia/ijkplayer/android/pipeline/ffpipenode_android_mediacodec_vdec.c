@@ -655,9 +655,9 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
         }
 
         time_stamp = d->pkt_temp.pts;
-        if (!time_stamp && d->pkt_temp.dts)
+        if (time_stamp == AV_NOPTS_VALUE && d->pkt_temp.dts != AV_NOPTS_VALUE)
             time_stamp = d->pkt_temp.dts;
-        if (time_stamp > 0) {
+        if (time_stamp >= 0) {
             time_stamp = av_rescale_q(time_stamp, is->video_st->time_base, AV_TIME_BASE_Q);
         } else {
             time_stamp = 0;
