@@ -454,6 +454,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 AVDictionary   *codec_opts = NULL;
                 const AVCodec  *codec      = opaque->decoder->avctx->codec;
                 AVCodecContext *new_avctx  = avcodec_alloc_context3(codec);
+                int change_ret = 0;
                 if (!new_avctx)
                     return AVERROR(ENOMEM);
 
@@ -468,17 +469,17 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 new_avctx->extradata_size = size_data_size;
 
                 av_dict_set(&codec_opts, "threads", "1", 0);
-                ret = avcodec_open2(new_avctx, codec, &codec_opts);
+                change_ret = avcodec_open2(new_avctx, codec, &codec_opts);
                 av_dict_free(&codec_opts);
-                if (ret < 0) {
+                if (change_ret < 0) {
                     avcodec_free_context(&new_avctx);
-                    return ret;
+                    return change_ret;
                 }
 
-                ret = avcodec_decode_video2(new_avctx, frame, &got_picture, avpkt);
-                if (ret < 0) {
+                change_ret = avcodec_decode_video2(new_avctx, frame, &got_picture, avpkt);
+                if (change_ret < 0) {
                     avcodec_free_context(&new_avctx);
-                    return ret;
+                    return change_ret;
                 }
 
                 if (got_picture) {
