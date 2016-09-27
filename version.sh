@@ -53,6 +53,8 @@ if [ "$VERSION_TARGET" = "readme" ]; then
     do_version_readme
 elif [ "$VERSION_TARGET" = "gradle" ]; then
     do_version_gradle
+elif [ "$VERSION_TARGET" = "show" ]; then
+    echo $VERSION_NAME
 else
     do_version_readme
     do_version_gradle
