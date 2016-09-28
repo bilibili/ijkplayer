@@ -15,6 +15,11 @@
  */
 package tv.danmaku.ijk.media.exo.demo.player;
 
+import android.content.Context;
+import android.media.AudioManager;
+import android.media.MediaCodec;
+import android.os.Handler;
+import android.util.Log;
 import com.google.android.exoplayer.DefaultLoadControl;
 import com.google.android.exoplayer.LoadControl;
 import com.google.android.exoplayer.MediaCodecAudioTrackRenderer;
@@ -34,7 +39,7 @@ import com.google.android.exoplayer.dash.mpd.Period;
 import com.google.android.exoplayer.dash.mpd.UtcTimingElement;
 import com.google.android.exoplayer.dash.mpd.UtcTimingElementResolver;
 import com.google.android.exoplayer.dash.mpd.UtcTimingElementResolver.UtcTimingCallback;
-import tv.danmaku.ijk.media.exo.demo.player.DemoPlayer.RendererBuilder;
+import com.google.android.exoplayer.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer.drm.MediaDrmCallback;
 import com.google.android.exoplayer.drm.StreamingDrmSessionManager;
 import com.google.android.exoplayer.drm.UnsupportedDrmException;
@@ -46,19 +51,12 @@ import com.google.android.exoplayer.upstream.DefaultUriDataSource;
 import com.google.android.exoplayer.upstream.UriDataSource;
 import com.google.android.exoplayer.util.ManifestFetcher;
 import com.google.android.exoplayer.util.Util;
-
-import android.content.Context;
-import android.media.AudioManager;
-import android.media.MediaCodec;
-import android.os.Handler;
-import android.util.Log;
-
 import java.io.IOException;
 
 /**
  * A {link RendererBuilder} for DASH.
  */
-public class DashRendererBuilder implements RendererBuilder {
+public class DashRendererBuilder implements DemoPlayer.RendererBuilder {
 
   private static final String TAG = "DashRendererBuilder";
 
@@ -195,7 +193,7 @@ public class DashRendererBuilder implements RendererBuilder {
 
       // Check drm support if necessary.
       boolean filterHdContent = false;
-      StreamingDrmSessionManager drmSessionManager = null;
+      StreamingDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = null;
       if (hasContentProtection) {
         if (Util.SDK_INT < 18) {
           player.onRenderersError(
