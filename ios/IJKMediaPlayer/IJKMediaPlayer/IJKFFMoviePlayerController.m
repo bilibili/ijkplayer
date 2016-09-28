@@ -197,6 +197,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         [_glView setHudValue:nil forKey:@"host"];
         [_glView setHudValue:nil forKey:@"path"];
         [_glView setHudValue:nil forKey:@"ip"];
+        [_glView setHudValue:nil forKey:@"tcp-info"];
         [_glView setHudValue:nil forKey:@"http"];
         [_glView setHudValue:nil forKey:@"tcp-spd"];
         [_glView setHudValue:nil forKey:@"t-prepared"];
@@ -1186,7 +1187,7 @@ static int onInjectTcpIOControl(IJKFFMoviePlayerController *mpc, id<IJKMediaUrlO
     [delegate willOpenUrl:openData];
     if (openData.error < 0)
         return -1;
-
+    [mpc->_glView setHudValue: [NSString stringWithFormat:@"fd:%d %@", openData.fd, openData.msg?:@"unknown"] forKey:@"tcp-info"];
     return 0;
 }
 

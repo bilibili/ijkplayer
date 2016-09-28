@@ -68,6 +68,7 @@
 #include "ff_ffplay_debug.h"
 #include "version.h"
 #include "ijkmeta.h"
+#include "ijkversion.h"
 
 #ifndef AV_CODEC_FLAG2_FAST
 #define AV_CODEC_FLAG2_FAST CODEC_FLAG2_FAST
@@ -636,6 +637,10 @@ static void video_image_display2(FFPlayer *ffp)
     Frame *vp;
 
     vp = frame_queue_peek_last(&is->pictq);
+
+    if (is->latest_seek_load_serial == vp->serial)
+        ffp->stat.latest_seek_load_duration = (av_gettime() - is->latest_seek_load_start_at) / 1000;
+
     if (vp->bmp) {
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
         ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
@@ -2167,7 +2172,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
     AVCodecContext *avctx;
     AVCodec *codec = NULL;
     const char *forced_codec_name = NULL;
-    AVDictionary *opts;
+    AVDictionary *opts = NULL;
     AVDictionaryEntry *t = NULL;
     int sample_rate, nb_channels;
     int64_t channel_layout;
@@ -2703,6 +2708,9 @@ static int read_thread(void *arg)
                 } else {
                    set_clock(&is->extclk, seek_target / (double)AV_TIME_BASE, 0);
                 }
+
+                is->latest_seek_load_serial = is->videoq.serial;
+                is->latest_seek_load_start_at = av_gettime();
             }
             ffp->dcc.current_high_water_mark_in_ms = ffp->dcc.first_high_water_mark_in_ms;
             is->seek_req = 0;
@@ -2849,7 +2857,7 @@ static int read_thread(void *arg)
             }
             if (is->eof) {
                 ffp_toggle_buffering(ffp, 0);
-                SDL_Delay(1000);
+                SDL_Delay(100);
             }
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
@@ -3224,9 +3232,15 @@ const AVClass ffp_context_class = {
     .child_class_next = ffp_context_child_class_next,
 };
 
+const char *ijk_version_info()
+{
+    return IJKPLAYER_VERSION;
+}
+
 FFPlayer *ffp_create()
 {
     av_log(NULL, AV_LOG_INFO, "av_version_info: %s\n", av_version_info());
+    av_log(NULL, AV_LOG_INFO, "ijk_version_info: %s\n", ijk_version_info());
 
     FFPlayer* ffp = (FFPlayer*) av_mallocz(sizeof(FFPlayer));
     if (!ffp)
@@ -3297,7 +3311,7 @@ static AVDictionary **ffp_get_opt_dict(FFPlayer *ffp, int opt_category)
     }
 }
 
-static void ffp_set_playback__async_statistic(FFPlayer *ffp, int64_t buf_backwards, int64_t buf_forwards, int64_t buf_capacity);
+static void ffp_set_playback_async_statistic(FFPlayer *ffp, int64_t buf_backwards, int64_t buf_forwards, int64_t buf_capacity);
 static int app_func_event(AVApplicationContext *h, int message ,void *data, size_t size)
 {
     if (!h || !h->opaque || !data)
@@ -3312,7 +3326,9 @@ static int app_func_event(AVApplicationContext *h, int message ,void *data, size
             SDL_SpeedSampler2Add(&ffp->stat.tcp_read_sampler, event->bytes);
     } else if (message == AVAPP_EVENT_ASYNC_STATISTIC && sizeof(AVAppAsyncStatistic) == size) {
         AVAppAsyncStatistic *statistic =  (AVAppAsyncStatistic *) (intptr_t)data;
-        ffp_set_playback__async_statistic(ffp, statistic->buf_backwards, statistic->buf_forwards, statistic->buf_capacity);
+        ffp->stat.buf_backwards = statistic->buf_backwards;
+        ffp->stat.buf_forwards = statistic->buf_forwards;
+        ffp->stat.buf_capacity = statistic->buf_capacity;
     }
     return inject_callback(ffp->inject_opaque, message , data, size);
 }
@@ -3446,6 +3462,7 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
     }
 
     av_log(NULL, AV_LOG_INFO, "===== versions =====\n");
+    ffp_show_version_str(ffp, "ijkplayer",      ijk_version_info());
     ffp_show_version_str(ffp, "FFmpeg",         av_version_info());
     ffp_show_version_int(ffp, "libavutil",      avutil_version());
     ffp_show_version_int(ffp, "libavcodec",     avcodec_version());
@@ -3926,15 +3943,6 @@ void ffp_set_playback_rate(FFPlayer *ffp, float rate)
     ffp->pf_playback_rate_changed = 1;
 }
 
-static void ffp_set_playback__async_statistic(FFPlayer *ffp, int64_t buf_backwards, int64_t buf_forwards, int64_t buf_capacity)
-{
-     if (!ffp)
-        return;
-     ffp->stat.buf_backwards = buf_backwards;
-     ffp->stat.buf_forwards = buf_forwards;
-     ffp->stat.buf_capacity = buf_capacity;
-}
-
 int ffp_get_video_rotate_degrees(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
@@ -4085,18 +4093,20 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             return ffp ? ffp->stat.bit_rate : default_value;
         case FFP_PROP_INT64_TCP_SPEED:
             return ffp ? SDL_SpeedSampler2GetSpeed(&ffp->stat.tcp_read_sampler) : default_value;
-        case FFP_PROP_INT64_AVAPP_ASYNC_STATISTIC_BUF_BACKWARDS:
+        case FFP_PROP_INT64_ASYNC_STATISTIC_BUF_BACKWARDS:
             if (!ffp)
                 return default_value;
             return ffp->stat.buf_backwards;
-        case FFP_PROP_INT64_AVAPP_ASYNC_STATISTIC_BUF_FORWARDS:
+        case FFP_PROP_INT64_ASYNC_STATISTIC_BUF_FORWARDS:
             if (!ffp)
                 return default_value;
             return ffp->stat.buf_forwards;
-        case FFP_PROP_INT64_AVAPP_ASYNC_STATISTIC_BUF_CAPACITY:
+        case FFP_PROP_INT64_ASYNC_STATISTIC_BUF_CAPACITY:
             if (!ffp)
                 return default_value;
             return ffp->stat.buf_capacity;
+        case FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION:
+            return ffp ? ffp->stat.latest_seek_load_duration : default_value;
         default:
             return default_value;
     }

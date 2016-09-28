@@ -54,7 +54,7 @@ LOCAL_SRC_FILES += ijkavformat/allformats.c
 LOCAL_SRC_FILES += ijkavformat/ijklivehook.c
 LOCAL_SRC_FILES += ijkavformat/ijkmediadatasource.c
 
-LOCAL_SRC_FILES  += ijkavformat/async.c
+LOCAL_SRC_FILES  += ijkavformat/ijkasync.c
 LOCAL_SRC_FILES  += ijkavformat/ijkurlhook.c
 LOCAL_SRC_FILES  += ijkavformat/ijklongurl.c
 LOCAL_SRC_FILES  += ijkavformat/ijksegment.c
@@ -63,4 +63,8 @@ LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl
 LOCAL_STATIC_LIBRARIES := android-ndk-profiler
 
 LOCAL_MODULE := ijkplayer
+
+VERSION_SH  = $(LOCAL_PATH)/version.sh
+VERSION_H   = ijkversion.h
+$(info $(shell ($(VERSION_SH) $(LOCAL_PATH) $(VERSION_H))))
 include $(BUILD_SHARED_LIBRARY)

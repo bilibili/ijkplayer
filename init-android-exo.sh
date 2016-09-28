@@ -17,7 +17,7 @@
 
 IJK_EXO_UPSTREAM=https://github.com/google/ExoPlayer.git
 IJK_EXO_FORK=https://github.com/google/ExoPlayer.git
-IJK_EXO_COMMIT=r1.5.9
+IJK_EXO_COMMIT=r1.5.11
 IJK_EXO_LOCAL_REPO=extra/ExoPlayer
 
 set -e

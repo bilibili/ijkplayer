@@ -18,6 +18,8 @@ public class InfoHudViewHolder {
     private TableLayoutBinder mTableLayoutBinder;
     private SparseArray<View> mRowMap = new SparseArray<View>();
     private IMediaPlayer mMediaPlayer;
+    private long mLoadCost = 0;
+    private long mSeekCost = 0;
 
     public InfoHudViewHolder(Context context, TableLayout tableLayout) {
         mTableLayoutBinder = new TableLayoutBinder(context, tableLayout);
@@ -57,6 +59,33 @@ public class InfoHudViewHolder {
         } else {
             return String.format(Locale.US, "%d msec", duration);
         }
+    }
+
+    private static String formatedSpeed(long bytes,long elapsed_milli) {
+        if (elapsed_milli <= 0) {
+            return "0 B/s";
+        }
+
+        if (bytes <= 0) {
+            return "0 B/s";
+        }
+
+        float bytes_per_sec = ((float)bytes) * 1000.f /  elapsed_milli;
+        if (bytes_per_sec >= 1000 * 1000) {
+            return String.format(Locale.US, "%.2f MB/s", ((float)bytes_per_sec) / 1000 / 1000);
+        } else if (bytes_per_sec >= 1000) {
+            return String.format(Locale.US, "%.1f KB/s", ((float)bytes_per_sec) / 1000);
+        } else {
+            return String.format(Locale.US, "%d B/s", (long)bytes_per_sec);
+        }
+    }
+
+    public void updateLoadCost(long time)  {
+        mLoadCost = time;
+    }
+
+    public void updateSeekCost(long time)  {
+        mSeekCost = time;
     }
 
     private static String formatedSize(long bytes) {
@@ -111,9 +140,17 @@ public class InfoHudViewHolder {
                     long audioCachedDuration = mp.getAudioCachedDuration();
                     long videoCachedBytes    = mp.getVideoCachedBytes();
                     long audioCachedBytes    = mp.getAudioCachedBytes();
+                    long tcpSpeed            = mp.getTcpSpeed();
+                    long bitRate             = mp.getBitRate();
+                    long seekLoadDuration    = mp.getSeekLoadDuration();
 
                     setRowValue(R.string.v_cache, String.format(Locale.US, "%s, %s", formatedDurationMilli(videoCachedDuration), formatedSize(videoCachedBytes)));
                     setRowValue(R.string.a_cache, String.format(Locale.US, "%s, %s", formatedDurationMilli(audioCachedDuration), formatedSize(audioCachedBytes)));
+                    setRowValue(R.string.load_cost, String.format(Locale.US, "%d ms", mLoadCost));
+                    setRowValue(R.string.seek_cost, String.format(Locale.US, "%d ms", mSeekCost));
+                    setRowValue(R.string.seek_load_cost, String.format(Locale.US, "%d ms", seekLoadDuration));
+                    setRowValue(R.string.tcp_speed, String.format(Locale.US, "%s", formatedSpeed(tcpSpeed, 1000)));
+                    setRowValue(R.string.bit_rate, String.format(Locale.US, "%.2f kbs", bitRate/1000f));
 
                     mHandler.removeMessages(MSG_UPDATE_HUD);
                     mHandler.sendEmptyMessageDelayed(MSG_UPDATE_HUD, 500);
