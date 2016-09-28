@@ -43,10 +43,19 @@ do_version_gradle() {
 
     # android/ijkplayer/ijkplayer-exo/build.gradle
     cat android/ijkplayer/ijkplayer-exo/build.gradle \
-    | sed "s/\(compile \'tv.danmaku.ijk.media:ijkplayer-java:\)[[:digit:].]*[[:digit:]]/\1$VERSION_NAME/g" \
+    | sed "s/\(compile \'tv.danmaku.ijk.media:ijkplayer-[-_[:alpha:][:digit:]]*:\)[[:digit:].]*[[:digit:]]/\1$VERSION_NAME/g" \
     > android/ijkplayer/ijkplayer-exo/build.gradle.new
 
     mv -f android/ijkplayer/ijkplayer-exo/build.gradle.new android/ijkplayer/ijkplayer-exo/build.gradle
+
+
+
+    # android/ijkplayer/ijkplayer-example/build.gradle
+    cat android/ijkplayer/ijkplayer-example/build.gradle \
+    | sed "s/\(ompile \'tv.danmaku.ijk.media:ijkplayer-[-_[:alpha:][:digit:]]*:\)[[:digit:].]*[[:digit:]]/\1$VERSION_NAME/g" \
+    > android/ijkplayer/ijkplayer-example/build.gradle.new
+
+    mv -f android/ijkplayer/ijkplayer-example/build.gradle.new android/ijkplayer/ijkplayer-example/build.gradle
 }
 
 if [ "$VERSION_TARGET" = "readme" ]; then
