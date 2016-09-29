@@ -31,6 +31,8 @@
 
 #include "ijksdl_vout_overlay_videotoolbox.h"
 
+#include <time.h>
+
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
 @property(atomic) BOOL glActivePaused;
@@ -705,7 +707,8 @@
             if (_monitorCallback) {
                 __weak typeof(self) _self = self;
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    _self.monitorCallback(NO);
+                    if (_self.monitorCallback)
+                        _self.monitorCallback(NO);
                 });
             }
         }
@@ -724,7 +727,9 @@
 //                }
 //            });
             dispatch_async(dispatch_get_main_queue(), ^{
-                _self.monitorCallback(YES);
+                NSLog(@"%@", _self);
+                if (_self.monitorCallback)
+                    _self.monitorCallback(YES);
             });
         }
     }
