@@ -40,6 +40,9 @@
 @property(nonatomic)        BOOL     shouldShowHudView;
 
 #pragma mark - E7
+
+- (void)invalidate;
+
 /**
  * Start monitoring after first frame displayed.
  */
