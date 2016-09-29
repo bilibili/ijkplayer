@@ -685,6 +685,12 @@
 
 #pragma mark - E7
 
+- (void)invalidate
+{
+    [_displayTimer invalidate];
+    _displayTimer = nil;
+}
+
 - (void)monitorDisplay:(void(^)(BOOL displaying))monitorCallback
 {
     _monitorCallback = monitorCallback;

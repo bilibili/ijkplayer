@@ -251,6 +251,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     IJKLog(@"%s", __FUNCTION__);
 //    [self unregisterApplicationObservers];
     //ijkmp_global_set_inject_callback(NULL);
+    [_glView invalidate];
 }
 
 - (void)setShouldAutoplay:(BOOL)shouldAutoplay
@@ -1561,8 +1562,10 @@ void e7_player_sync_finish(uint64_t timestamp, void *userData)
 - (void)stopSync {
     _vSyncTsCallback = nil;
     _vSyncFinishCallback = nil;
-    ijkmp_sync_baseline_register(_mediaPlayer, NULL, 0, 0, NULL);
-    ijkmp_sync_finish_register(_mediaPlayer, NULL, NULL);
+    if (_mediaPlayer) {
+        ijkmp_sync_baseline_register(_mediaPlayer, NULL, 0, 0, NULL);
+        ijkmp_sync_finish_register(_mediaPlayer, NULL, NULL);
+    }
 }
 
 #pragma mark -
