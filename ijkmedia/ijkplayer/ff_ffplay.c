@@ -66,7 +66,6 @@
 #include "ff_ffpipeline.h"
 #include "ff_ffpipenode.h"
 #include "ff_ffplay_debug.h"
-#include "version.h"
 #include "ijkmeta.h"
 #include "ijkversion.h"
 #include <stdatomic.h>
@@ -104,6 +103,10 @@ static AVPacket flush_pkt;
 #if CONFIG_AVFILTER
 // FFP_MERGE: opt_add_vfilter
 #endif
+
+#define IJKVERSION_GET_MAJOR(x)     ((x >> 16) & 0xFF)
+#define IJKVERSION_GET_MINOR(x)     ((x >>  8) & 0xFF)
+#define IJKVERSION_GET_MICRO(x)     ((x      ) & 0xFF)
 
 #if CONFIG_AVFILTER
 static inline
@@ -3234,7 +3237,7 @@ const AVClass ffp_context_class = {
     .child_class_next = ffp_context_child_class_next,
 };
 
-const char *ijk_version_info()
+static const char *ijk_version_info()
 {
     return IJKPLAYER_VERSION;
 }
