@@ -69,6 +69,7 @@
 #include "version.h"
 #include "ijkmeta.h"
 #include "ijkversion.h"
+#include <stdatomic.h>
 
 #ifndef AV_CODEC_FLAG2_FAST
 #define AV_CODEC_FLAG2_FAST CODEC_FLAG2_FAST
@@ -638,7 +639,8 @@ static void video_image_display2(FFPlayer *ffp)
 
     vp = frame_queue_peek_last(&is->pictq);
 
-    if (is->latest_seek_load_serial == vp->serial)
+    int latest_seek_load_serial = __atomic_exchange_n(&(is->latest_seek_load_serial), -1, memory_order_seq_cst);
+    if (latest_seek_load_serial == vp->serial)
         ffp->stat.latest_seek_load_duration = (av_gettime() - is->latest_seek_load_start_at) / 1000;
 
     if (vp->bmp) {
