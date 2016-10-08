@@ -194,7 +194,7 @@ esac
 
 
 mkdir -p $FF_PREFIX
-mkdir -p $FF_SYSROOT
+# mkdir -p $FF_SYSROOT
 
 
 FF_TOOLCHAIN_TOUCH="$FF_TOOLCHAIN_PATH/touch"
