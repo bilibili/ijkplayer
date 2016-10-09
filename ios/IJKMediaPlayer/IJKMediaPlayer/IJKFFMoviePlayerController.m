@@ -31,7 +31,6 @@
 #import "NSString+IJKMedia.h"
 
 #include "string.h"
-#include "ijkplayer/version.h"
 
 static const char *kIJKFFRequiredFFmpegVersion = "ff3.1--ijk0.6.2--20160926--001";
 
@@ -413,17 +412,16 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 }
 
 + (BOOL)checkIfPlayerVersionMatch:(BOOL)showAlert
-                            major:(unsigned int)major
-                            minor:(unsigned int)minor
-                            micro:(unsigned int)micro
+                          version:(NSString *)version
 {
-    unsigned int actualVersion = ijkmp_version_int();
-    if (actualVersion == AV_VERSION_INT(major, minor, micro)) {
+    const char *actualVersion = ijkmp_version();
+    const char *expectVersion = version.UTF8String;
+    if (0 == strcmp(actualVersion, expectVersion)) {
         return YES;
     } else {
         if (showAlert) {
-            NSString *message = [NSString stringWithFormat:@"actual: %s\n expect: %d.%d.%d\n",
-                                 ijkmp_version_ident(), major, minor, micro];
+            NSString *message = [NSString stringWithFormat:@"actual: %s\n expect: %s\n",
+                                 actualVersion, expectVersion];
             UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Unexpected ijkplayer version"
                                                                 message:message
                                                                delegate:nil
