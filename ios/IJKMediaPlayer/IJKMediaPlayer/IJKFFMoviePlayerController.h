@@ -126,6 +126,14 @@ typedef enum IJKLogLevel {
 
 - (void)didShutdown;
 
+//==========================Modify==================================
+- (int64_t)getBitrate;
+- (NSString *)getTcpSpeedStr;
+- (int64_t)getTcpSpeed;
+- (NSTimeInterval)duration;
+//==================================================================
+
+
 #pragma mark KVO properties
 @property (nonatomic, readonly) IJKFFMonitor *monitor;
 
