@@ -480,9 +480,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 if (change_ret < 0) {
                     avcodec_free_context(&new_avctx);
                     return change_ret;
-                }
-
-                if (got_picture) {
+                } else {
                     if (opaque->codecpar->width  != new_avctx->width &&
                         opaque->codecpar->height != new_avctx->height) {
                         ALOGW("AV_PKT_DATA_NEW_EXTRADATA: %d x %d\n", new_avctx->width, new_avctx->height);
