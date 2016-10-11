@@ -3551,8 +3551,10 @@ int ffp_stop_l(FFPlayer *ffp)
 {
     assert(ffp);
     VideoState *is = ffp->is;
-    if (is)
+    if (is) {
         is->abort_request = 1;
+        toggle_pause(ffp, 1);
+    }
 
     msg_queue_abort(&ffp->msg_queue);
     return 0;
