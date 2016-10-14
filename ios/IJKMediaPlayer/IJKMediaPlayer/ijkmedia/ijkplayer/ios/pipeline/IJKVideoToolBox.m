@@ -789,9 +789,7 @@ static int decode_video(VideoToolBoxContext* context, AVCodecContext *avctx, AVP
             if (ret < 0) {
                 avcodec_free_context(&new_avctx);
                 return ret;
-            }
-
-            if (got_picture) {
+            } else {
                 if (context->codecpar->width  != new_avctx->width &&
                     context->codecpar->height != new_avctx->height) {
                     avcodec_parameters_from_context(context->codecpar, new_avctx);
