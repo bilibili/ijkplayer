@@ -1,6 +1,11 @@
 tag next
 --------------------------------
 
+tag k0.6.3
+--------------------------------
+- ffmpeg: fix crash happened in xcode8
+- player: rewrite ijkversion
+
 tag k0.6.2
 --------------------------------
 - ffmpeg: fix wild pointer when decoder was not found
