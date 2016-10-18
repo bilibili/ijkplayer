@@ -3,8 +3,8 @@ tag next
 
 tag k0.6.3
 --------------------------------
-- ffmpeg: fix crash happened in xcode8
-- player: rewrite ijkversion
+- ffmpeg: disable clock_gettime added in xcode8
+- android: make NDKr13 happy
 
 tag k0.6.2
 --------------------------------
