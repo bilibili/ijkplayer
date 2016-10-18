@@ -35,6 +35,8 @@ IJK_VERSION=`../version.sh show`
 
 
 wget_uploaded_version() {
+    PARAM_TARGET=$1
+
     VERSION_URL="https://jcenter.bintray.com/tv/danmaku/ijk/media/ijkplayer-$PARAM_TARGET/$IJK_VERSION"
     echo "VERSION_URL="$VERSION_URL
     wget $VERSION_URL -O /dev/null
@@ -81,20 +83,20 @@ case "$REQUEST_TARGET" in
         do_build_exo
     ;;
     all32)
+        do_build_java
         for ABI in $ACT_ABI_32
         do
             do_build_native "$ABI";
         done
-        do_build_java
-        # do_build_exo
+        do_build_exo
     ;;
     all|all64)
+        do_build_java
         for ABI in $ACT_ABI_64
         do
             do_build_native "$ABI";
         done
-        do_build_java
-        # do_build_exo
+        do_build_exo
     ;;
     *)
         echo "Usage:"
