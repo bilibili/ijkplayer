@@ -34,6 +34,14 @@
 
 static const char *kIJKFFRequiredFFmpegVersion = "ff3.1--ijk0.6.2--20160926--001";
 
+// It means you didn't call shutdown if you found this object leaked.
+@interface IJKWeakHolder : NSObject
+@property (nonatomic, weak) id object;
+@end
+
+@implementation IJKWeakHolder
+@end
+
 @interface IJKFFMoviePlayerController()
 
 @end
@@ -183,9 +191,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init player
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
         _msgPool = [[IJKFFMoviePlayerMessagePool alloc] init];
+        IJKWeakHolder *weakHolder = [IJKWeakHolder new];
+        weakHolder.object = self;
 
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
-        ijkmp_set_inject_opaque(_mediaPlayer, (__bridge void *) self);
+        ijkmp_set_inject_opaque(_mediaPlayer, (__bridge_retained void *) weakHolder);
         ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", _shouldAutoplay ? 1 : 0);
 
         // init video sink
@@ -467,6 +477,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     _liveOpenDelegate       = nil;
     _nativeInvokeDelegate   = nil;
 
+    __unused id weakHolder = (__bridge_transfer IJKWeakHolder*)ijkmp_set_inject_opaque(_mediaPlayer, NULL);
     ijkmp_dec_ref_p(&_mediaPlayer);
 
     [self didShutdown];
@@ -1089,7 +1100,6 @@ int media_player_msg_loop(void* arg)
     @autoreleasepool {
         IjkMediaPlayer *mp = (IjkMediaPlayer*)arg;
         __weak IJKFFMoviePlayerController *ffpController = ffplayerRetain(ijkmp_set_weak_thiz(mp, NULL));
-
         while (ffpController) {
             @autoreleasepool {
                 IJKFFMoviePlayerMessage *msg = [ffpController obtainMessage];
@@ -1295,7 +1305,10 @@ static int onInjectOnHttpEvent(IJKFFMoviePlayerController *mpc, int type, void *
 // NOTE: could be called from multiple thread
 static int ijkff_inject_callback(void *opaque, int message, void *data, size_t data_size)
 {
-    IJKFFMoviePlayerController *mpc = (__bridge IJKFFMoviePlayerController*)opaque;
+    IJKWeakHolder *weakHolder = (__bridge IJKWeakHolder*)opaque;
+    IJKFFMoviePlayerController *mpc = weakHolder.object;
+    if (!mpc)
+        return 0;
 
     switch (message) {
         case AVAPP_CTRL_WILL_CONCAT_SEGMENT_OPEN:

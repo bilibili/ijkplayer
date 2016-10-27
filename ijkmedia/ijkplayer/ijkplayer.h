@@ -163,7 +163,7 @@ void            ijkmp_io_stat_complete_register(void (*cb)(const char *url,
 
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*));
-void            ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque);
+void*            ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque);
 
 void            ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, const char *value);
 void            ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const char *name, int64_t value);

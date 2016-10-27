@@ -3337,11 +3337,11 @@ static int app_func_event(AVApplicationContext *h, int message ,void *data, size
     return inject_callback(ffp->inject_opaque, message , data, size);
 }
 
-void ffp_set_inject_opaque(FFPlayer *ffp, void *opaque)
+void *ffp_set_inject_opaque(FFPlayer *ffp, void *opaque)
 {
     if (!ffp)
-        return;
-
+        return NULL;
+    void *prev_weak_thiz = ffp->inject_opaque;
     ffp->inject_opaque = opaque;
 
     av_application_closep(&ffp->app_ctx);
@@ -3349,6 +3349,7 @@ void ffp_set_inject_opaque(FFPlayer *ffp, void *opaque)
     ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkapplication", (int64_t)(intptr_t)ffp->app_ctx);
 
     ffp->app_ctx->func_on_app_event = app_func_event;
+    return prev_weak_thiz;
 }
 
 void ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const char *value)
