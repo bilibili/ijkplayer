@@ -656,6 +656,8 @@ typedef struct FFPlayer {
     int         af_changed;
     float       pf_playback_rate;
     int         pf_playback_rate_changed;
+    float       pf_playback_volume;
+    int         pf_playback_volume_changed;
 
     void               *inject_opaque;
     FFStatistic         stat;
@@ -773,6 +775,8 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->af_changed                     = 0;
     ffp->pf_playback_rate               = 1.0f;
     ffp->pf_playback_rate_changed       = 0;
+    ffp->pf_playback_volume             = 1.0f;
+    ffp->pf_playback_volume_changed     = 0;
 
     av_application_closep(&ffp->app_ctx);
 

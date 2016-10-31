@@ -2013,6 +2013,10 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
         ffp->pf_playback_rate_changed = 0;
         SDL_AoutSetPlaybackRate(ffp->aout, ffp->pf_playback_rate);
     }
+    if (ffp->pf_playback_volume_changed) {
+        ffp->pf_playback_volume_changed = 0;
+        SDL_AoutSetPlaybackVolume(ffp->aout, ffp->pf_playback_volume);
+    }
 
     while (len > 0) {
         if (is->audio_buf_index >= is->audio_buf_size) {
@@ -3917,6 +3921,14 @@ void ffp_set_playback_rate(FFPlayer *ffp, float rate)
     ffp->pf_playback_rate_changed = 1;
 }
 
+void ffp_set_playback_volume(FFPlayer *ffp, float volume)
+{
+    if (!ffp)
+        return;
+    ffp->pf_playback_volume = volume;
+    ffp->pf_playback_volume_changed = 1;
+}
+
 int ffp_get_video_rotate_degrees(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
@@ -4006,6 +4018,8 @@ float ffp_get_property_float(FFPlayer *ffp, int id, float default_value)
             return ffp ? ffp->stat.avdelay : default_value;
         case FFP_PROP_FLOAT_AVDIFF:
             return ffp ? ffp->stat.avdiff : default_value;
+        case FFP_PROP_FLOAT_PLAYBACK_VOLUME:
+            return ffp ? ffp->pf_playback_volume : default_value;
         default:
             return default_value;
     }
@@ -4016,6 +4030,10 @@ void ffp_set_property_float(FFPlayer *ffp, int id, float value)
     switch (id) {
         case FFP_PROP_FLOAT_PLAYBACK_RATE:
             ffp_set_playback_rate(ffp, value);
+            break;
+        case FFP_PROP_FLOAT_PLAYBACK_VOLUME:
+            ffp_set_playback_volume(ffp, value);
+            break;
         default:
             return;
     }

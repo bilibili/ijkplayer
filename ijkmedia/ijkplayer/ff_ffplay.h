@@ -102,6 +102,7 @@ void      ffp_set_video_codec_info(FFPlayer *ffp, const char *module, const char
 void      ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *codec);
 
 void      ffp_set_playback_rate(FFPlayer *ffp, float rate);
+void      ffp_set_playback_volume(FFPlayer *ffp, float volume);
 int       ffp_get_video_rotate_degrees(FFPlayer *ffp);
 int       ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected);
 

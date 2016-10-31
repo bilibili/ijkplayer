@@ -105,6 +105,14 @@ void SDL_AoutSetPlaybackRate(SDL_Aout *aout, float playbackRate)
     }
 }
 
+void SDL_AoutSetPlaybackVolume(SDL_Aout *aout, float volume)
+{
+    if (aout) {
+        if (aout->func_set_playback_volume)
+            aout->func_set_playback_volume(aout, volume);
+    }
+}
+
 int SDL_AoutGetAudioSessionId(SDL_Aout *aout)
 {
     if (aout) {
