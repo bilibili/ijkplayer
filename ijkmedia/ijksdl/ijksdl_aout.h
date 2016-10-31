@@ -48,6 +48,7 @@ struct SDL_Aout {
 
     // optional
     void   (*func_set_playback_rate)(SDL_Aout *aout, float playbackRate);
+    void   (*func_set_playback_volume)(SDL_Aout *aout, float playbackVolume);
     int    (*func_get_audio_persecond_callbacks)(SDL_Aout *aout);
 
     // Android only
@@ -68,6 +69,7 @@ int    SDL_AoutGetAudioPerSecondCallBacks(SDL_Aout *aout);
 
 // optional
 void   SDL_AoutSetPlaybackRate(SDL_Aout *aout, float playbackRate);
+void   SDL_AoutSetPlaybackVolume(SDL_Aout *aout, float volume);
 
 // android only
 int    SDL_AoutGetAudioSessionId(SDL_Aout *aout);
