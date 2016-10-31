@@ -145,6 +145,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     IJKNotificationManager *_notificationManager;
 
     float _playbackRate;
+    float _playbackVolume;
 }
 
 @synthesize view                        = _view;
@@ -191,7 +192,7 @@ static IJKAVMoviePlayerController* instance;
         _playbackBufferFull     = NO;
 
         _playbackRate           = 1.0f;
-
+        _playbackVolume         = 1.0f;
         // init extra
         [self setScreenOn:YES];
 
@@ -448,6 +449,18 @@ static IJKAVMoviePlayerController* instance;
     return _playbackRate;
 }
 
+-(void)setPlaybackVolume:(float)playbackVolume
+{
+    _playbackVolume = playbackVolume;
+    if (_player != nil && _player.volume != playbackVolume) {
+        _player.volume = playbackVolume;
+    }
+}
+
+-(float)playbackVolume
+{
+    return _playbackVolume;
+}
 
 - (void)didPrepareToPlayAsset:(AVURLAsset *)asset withKeys:(NSArray *)requestedKeys
 {

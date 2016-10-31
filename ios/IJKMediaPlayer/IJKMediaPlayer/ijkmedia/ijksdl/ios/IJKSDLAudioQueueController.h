@@ -36,6 +36,7 @@
 - (void)stop;
 - (void)close;
 - (void)setPlaybackRate:(float)playbackRate;
+- (void)setPlaybackVolume:(float)playbackVolume;
 - (double)get_latency_seconds;
 
 @property (nonatomic, readonly) SDL_AudioSpec spec;
