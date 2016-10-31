@@ -95,6 +95,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property (nonatomic, readonly) BOOL airPlayMediaActive;
 
 @property (nonatomic) float playbackRate;
+@property (nonatomic) float playbackVolume;
 
 - (UIImage *)thumbnailImageAtCurrentTime;
 

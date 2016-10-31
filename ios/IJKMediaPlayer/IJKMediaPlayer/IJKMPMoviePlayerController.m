@@ -163,6 +163,16 @@
     return 1.0f;
 }
 
+-(void)setPlaybackVolume:(float)playbackVolume
+{
+    NSLog(@"[MPMoviePlayerController setPlaybackVolume] is not supported\n");
+}
+
+-(float)playbackVolume
+{
+    return 1.0f;
+}
+
 #pragma mark Movie Notification Handlers
 
 /* Register observers for the various movie object notifications. */

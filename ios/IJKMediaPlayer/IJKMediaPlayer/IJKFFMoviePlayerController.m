@@ -866,6 +866,20 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     return ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_PLAYBACK_RATE, 0.0f);
 }
 
+- (void)setPlaybackVolume:(float)volume
+{
+    if (!_mediaPlayer)
+        return;
+    return ijkmp_set_playback_volume(_mediaPlayer, volume);
+}
+
+- (float)playbackVolume
+{
+    if (!_mediaPlayer)
+        return 0.0f;
+    return ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_PLAYBACK_VOLUME, 1.0f);
+}
+
 inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *rawMeta, const char *name, NSString *defaultValue)
 {
     if (!meta || !rawMeta || !name)
@@ -986,12 +1000,13 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
                 ijkmeta_unlock(rawMeta);
                 _monitor.mediaMeta = newMediaMeta;
             }
+            ijkmp_set_playback_rate(_mediaPlayer, [self playbackRate]);
+            ijkmp_set_playback_volume(_mediaPlayer, [self playbackVolume]);
 
             [self startHudTimer];
             _isPreparedToPlay = YES;
 
             [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
-
             _loadState = IJKMPMovieLoadStatePlayable | IJKMPMovieLoadStatePlaythroughOK;
 
             [[NSNotificationCenter defaultCenter]
