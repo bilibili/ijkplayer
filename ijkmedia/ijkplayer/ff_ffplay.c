@@ -2271,7 +2271,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
             SDL_UnlockMutex(ffp->af_mutex);
             link = is->out_audio_filter->inputs[0];
             sample_rate    = link->sample_rate;
-            nb_channels    = link->channels;
+            nb_channels    = avfilter_link_get_channels(link);
             channel_layout = link->channel_layout;
         }
 #else
