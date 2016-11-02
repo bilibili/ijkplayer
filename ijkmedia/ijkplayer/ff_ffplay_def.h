@@ -283,9 +283,6 @@ typedef struct VideoState {
     Decoder viddec;
 #ifdef FFP_MERGE
     Decoder subdec;
-
-    int viddec_width;
-    int viddec_height;
 #endif
 
     int audio_stream;
