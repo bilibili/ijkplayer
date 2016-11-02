@@ -126,6 +126,8 @@
 #ifdef FFP_MERGE
 #define CURSOR_HIDE_DELAY 1000000
 
+#define USE_ONEPASS_SUBTITLE_RENDER 1
+
 static unsigned sws_flags = SWS_BICUBIC;
 #endif
 
@@ -185,18 +187,24 @@ typedef struct Frame {
     AVFrame *frame;
 #ifdef FFP_MERGE
     AVSubtitle sub;
-    AVSubtitleRect **subrects;  /* rescaled subtitle rectangles in yuva */
 #endif
     int serial;
     double pts;           /* presentation timestamp for the frame */
     double duration;      /* estimated duration of the frame */
     int64_t pos;          /* byte position of the frame in the input file */
+#ifdef FF_MERGE
+    SDL_Texture *bmp;
+#else
     SDL_VoutOverlay *bmp;
+#endif
     int allocated;
-    int reallocate;
     int width;
     int height;
+    int format;
     AVRational sar;
+#ifdef FF_MERGE
+    int uploaded;
+#endif
 } Frame;
 
 typedef struct FrameQueue {
@@ -324,6 +332,10 @@ typedef struct VideoState {
     int xpos;
 #endif
     double last_vis_time;
+#ifdef FFP_MERGE
+    SDL_Texture *vis_texture;
+    SDL_Texture *sub_texture;
+#endif
 
 #ifdef FFP_MERGE
     int subtitle_stream;
@@ -338,12 +350,9 @@ typedef struct VideoState {
     AVStream *video_st;
     PacketQueue videoq;
     double max_frame_duration;      // maximum duration of a frame - above this, we consider the jump a timestamp discontinuity
-#if !CONFIG_AVFILTER
     struct SwsContext *img_convert_ctx;
-#endif
 #ifdef FFP_SUB
     struct SwsContext *sub_convert_ctx;
-    SDL_Rect last_display_rect;
 #endif
     int eof;
 
@@ -387,8 +396,6 @@ typedef struct VideoState {
 static AVInputFormat *file_iformat;
 static const char *input_filename;
 static const char *window_title;
-static int fs_screen_width;
-static int fs_screen_height;
 static int default_width  = 640;
 static int default_height = 480;
 static int screen_width  = 0;
@@ -437,7 +444,8 @@ static AVPacket eof_pkt;
 #define FF_ALLOC_EVENT   (SDL_USEREVENT)
 #define FF_QUIT_EVENT    (SDL_USEREVENT + 2)
 
-static SDL_Surface *screen;
+static SDL_Window *window;
+static SDL_Renderer *renderer;
 #endif
 
 /*****************************************************************************

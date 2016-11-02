@@ -460,14 +460,6 @@ static void decoder_destroy(Decoder *d) {
 
 static void frame_queue_unref_item(Frame *vp)
 {
-#ifdef FFP_MERGE
-    int i;
-    for (i = 0; i < vp->sub.num_rects; i++) {
-        av_freep(&vp->subrects[i]->data[0]);
-        av_freep(&vp->subrects[i]);
-    }
-    av_freep(&vp->subrects);
-#endif
     av_frame_unref(vp->frame);
     SDL_VoutUnrefYUVOverlay(vp->bmp);
 #ifdef FFP_MERGE
@@ -632,7 +624,9 @@ static void free_picture(Frame *vp)
     }
 }
 
+// FFP_MERGE: realloc_texture
 // FFP_MERGE: calculate_display_rect
+// FFP_MERGE: upload_texture
 // FFP_MERGE: video_image_display
 
 static void video_image_display2(FFPlayer *ffp)
@@ -1148,7 +1142,7 @@ static void alloc_picture(FFPlayer *ffp, int frame_format)
     VideoState *is = ffp->is;
     Frame *vp;
 #ifdef FFP_MERGE
-    int64_t bufferdiff;
+    int sdl_format;
 #endif
 
     vp = &is->pictq.queue[is->pictq.windex];
@@ -1156,7 +1150,7 @@ static void alloc_picture(FFPlayer *ffp, int frame_format)
     free_picture(vp);
 
 #ifdef FFP_MERGE
-    video_open(ffp, 0, vp);
+    video_open(is, vp);
 #endif
 
     SDL_VoutSetOverlayFormat(ffp->vout, ffp->overlay_format);
@@ -1164,8 +1158,11 @@ static void alloc_picture(FFPlayer *ffp, int frame_format)
                                    frame_format,
                                    ffp->vout);
 #ifdef FFP_MERGE
-    bufferdiff = vp->bmp ? FFMAX(vp->bmp->pixels[0], vp->bmp->pixels[1]) - FFMIN(vp->bmp->pixels[0], vp->bmp->pixels[1]) : 0;
-    if (!vp->bmp || vp->bmp->pitches[0] < vp->width || bufferdiff < (int64_t)vp->height * vp->bmp->pitches[0]) {
+    if (vp->format == AV_PIX_FMT_YUV420P)
+        sdl_format = SDL_PIXELFORMAT_YV12;
+    else
+        sdl_format = SDL_PIXELFORMAT_ARGB8888;
+    if (realloc_texture(&vp->bmp, sdl_format, vp->width, vp->height, SDL_BLENDMODE_NONE, 0) < 0) {
 #else
     /* RV16, RV32 contains only one plane */
     if (!vp->bmp || (!vp->bmp->is_private && vp->bmp->pitches[0] < vp->width)) {
@@ -1185,26 +1182,6 @@ static void alloc_picture(FFPlayer *ffp, int frame_format)
     SDL_UnlockMutex(is->pictq.mutex);
 }
 
-#ifdef FFP_MERGE
-static void duplicate_right_border_pixels(SDL_Overlay *bmp) {
-    int i, width, height;
-    Uint8 *p, *maxp;
-    for (i = 0; i < 3; i++) {
-        width  = bmp->w;
-        height = bmp->h;
-        if (i > 0) {
-            width  >>= 1;
-            height >>= 1;
-        }
-        if (bmp->pitches[i] > width) {
-            maxp = bmp->pixels[i] + bmp->pitches[i] * height - 1;
-            for (p = bmp->pixels[i] + width - 1; p < maxp; p += bmp->pitches[i])
-                *(p+1) = *p;
-        }
-    }
-}
-#endif
-
 static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial)
 {
     VideoState *is = ffp->is;
@@ -1218,19 +1195,24 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
     if (!(vp = frame_queue_peek_writable(&is->pictq)))
         return -1;
 
+    vp->sar = src_frame->sample_aspect_ratio;
+#if FFP_MERGE
+    vp->uploaded = 0;
+#endif
     /* alloc or resize hardware picture buffer */
-    if (!vp->bmp || vp->reallocate || !vp->allocated ||
+    if (!vp->bmp || !vp->allocated ||
         vp->width  != src_frame->width ||
-        vp->height != src_frame->height) {
+        vp->height != src_frame->height ||
+        vp->format != src_frame->format) {
 
         if (vp->width != src_frame->width || vp->height != src_frame->height)
             ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, src_frame->width, src_frame->height);
 
-        vp->allocated  = 0;
-        vp->reallocate = 0;
+        vp->allocated = 0;
+
         vp->width = src_frame->width;
         vp->height = src_frame->height;
-
+        vp->format = src_frame->format;
         /* the allocation must be done in the main thread to avoid
            locking problems. */
         alloc_picture(ffp, src_frame->format);
@@ -1266,11 +1248,10 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         vp->pos = pos;
         vp->serial = serial;
         vp->sar = src_frame->sample_aspect_ratio;
-
         vp->bmp->sar_num = vp->sar.num;
         vp->bmp->sar_den = vp->sar.den;
 
-        /* now we can update the picture count */
+        av_frame_move_ref(vp->frame, src_frame);
         frame_queue_push(&is->pictq);
         if (!is->viddec.first_frame_decoded) {
             ALOGD("Video: first frame decoded\n");
@@ -1372,7 +1353,7 @@ fail:
 
 static int configure_video_filters(FFPlayer *ffp, AVFilterGraph *graph, VideoState *is, const char *vfilters, AVFrame *frame)
 {
-    static const enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_YUV420P, AV_PIX_FMT_NONE };
+    static const enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_YUV420P, AV_PIX_FMT_BGRA, AV_PIX_FMT_NONE };
     char sws_flags_str[512] = "";
     char buffersrc_args[256];
     int ret;
@@ -1434,10 +1415,6 @@ static int configure_video_filters(FFPlayer *ffp, AVFilterGraph *graph, VideoSta
                                                                              \
     last_filter = filt_ctx;                                                  \
 } while (0)
-
-    /* SDL YUV code is not handling odd width/height for some driver
-     * combinations, therefore we crop the picture to an even width/height. */
-    INSERT_FILT("crop", "floor(in_w/2)*2:floor(in_h/2)*2");
 
     if (ffp->autorotate) {
         double theta  = get_rotation(is->video_st);
