@@ -1158,6 +1158,7 @@ static void alloc_picture(FFPlayer *ffp, int frame_format)
         sdl_format = SDL_PIXELFORMAT_YV12;
     else
         sdl_format = SDL_PIXELFORMAT_ARGB8888;
+
     if (realloc_texture(&vp->bmp, sdl_format, vp->width, vp->height, SDL_BLENDMODE_NONE, 0) < 0) {
 #else
     /* RV16, RV32 contains only one plane */
@@ -1195,6 +1196,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
 #if FFP_MERGE
     vp->uploaded = 0;
 #endif
+
     /* alloc or resize hardware picture buffer */
     if (!vp->bmp || !vp->allocated ||
         vp->width  != src_frame->width ||
@@ -1205,10 +1207,10 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
             ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, src_frame->width, src_frame->height);
 
         vp->allocated = 0;
-
         vp->width = src_frame->width;
         vp->height = src_frame->height;
         vp->format = src_frame->format;
+
         /* the allocation must be done in the main thread to avoid
            locking problems. */
         alloc_picture(ffp, src_frame->format);
@@ -1554,9 +1556,8 @@ static int audio_thread(void *arg)
     AVRational tb;
     int ret = 0;
 
-    if (!frame) {
+    if (!frame)
         return AVERROR(ENOMEM);
-    }
 
     do {
         ffp_audio_statistic_l(ffp);
@@ -1669,6 +1670,7 @@ static int ffplay_video_thread(void *arg)
         av_frame_free(&frame);
         return AVERROR(ENOMEM);
     }
+
 #else
     ffp_notify_msg2(ffp, FFP_MSG_VIDEO_ROTATION_CHANGED, ffp_get_video_rotate_degrees(ffp));
 #endif
@@ -1692,8 +1694,8 @@ static int ffplay_video_thread(void *arg)
             || last_h != frame->height
             || last_format != frame->format
             || last_serial != is->viddec.pkt_serial
-            || last_vfilter_idx != is->vfilter_idx
-            || ffp->vf_changed) {
+            || ffp->vf_changed
+            || last_vfilter_idx != is->vfilter_idx) {
             SDL_LockMutex(ffp->vf_mutex);
             ffp->vf_changed = 0;
             av_log(NULL, AV_LOG_DEBUG,
