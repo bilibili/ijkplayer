@@ -72,6 +72,10 @@ function pull_fork_all() {
     done
 }
 
+function sync_ff_version() {
+    sed -i '' "s/static const char \*kIJKFFRequiredFFmpegVersion\ \=\ .*/static const char *kIJKFFRequiredFFmpegVersion = \"${IJK_FFMPEG_COMMIT}\";/g" ios/IJKMediaPlayer/IJKMediaPlayer/IJKFFMoviePlayerController.m
+}
+
 #----------
 case "$FF_TARGET" in
     ffmpeg-version)
@@ -86,3 +90,6 @@ case "$FF_TARGET" in
         pull_fork_all
     ;;
 esac
+
+sync_ff_version
+
