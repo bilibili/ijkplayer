@@ -1,6 +1,10 @@
 tag next
 --------------------------------
 
+tag k0.7.1
+-------------------------------
+- ffmpeg: upgrade to n3.2
+
 tag k0.6.3
 --------------------------------
 - ffmpeg: disable clock_gettime added in xcode8
