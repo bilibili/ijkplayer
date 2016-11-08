@@ -1,6 +1,12 @@
 tag next
 --------------------------------
+
+tag k0.7.3
+- ios: turn videotoolbox into singleton
+- ffmoeg: merge ipv6 issue in tcp.c
+
 tag k0.7.2
+-------------------------------
 - ios: fix a compile error
 
 tag k0.7.1
