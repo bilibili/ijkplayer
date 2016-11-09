@@ -1193,7 +1193,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         return -1;
 
     vp->sar = src_frame->sample_aspect_ratio;
-#if FFP_MERGE
+#ifdef FFP_MERGE
     vp->uploaded = 0;
 #endif
 
