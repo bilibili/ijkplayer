@@ -1,9 +1,13 @@
 tag next
 --------------------------------
 
+tag k0.7.4
+- ffplay: fix sample buffer leak introduced in k0.7.1
+- doc: add takeoff checklist
+
 tag k0.7.3
 - ios: turn videotoolbox into singleton
-- ffmoeg: merge ipv6 issue in tcp.c
+- ffmpeg: merge ipv6 issue in tcp.c
 
 tag k0.7.2
 -------------------------------
