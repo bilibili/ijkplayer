@@ -228,7 +228,7 @@ inline static void sample_info_drop_last_push(VideoToolBoxContext* context)
 inline static void sample_info_recycle(VideoToolBoxContext* context, sample_info *sample_info)
 {
     SDL_LockMutex(context->sample_info_mutex);
-
+    
     if (sample_info->is_decoding) {
         sample_info->is_decoding = 0;
         if (context->sample_infos_in_decoding > 0)
@@ -342,8 +342,15 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         sort_queue *newFrame    = NULL;
 
         sample_info *sample_info = sourceFrameRefCon;
-        if (!sample_info)
+        int i;
+        for (i = 0; i < VTB_MAX_DECODING_SAMPLES; i++) {
+            if (sample_info == &ctx->sample_info_array[i]) {
+                break;
+            }
+        }
+        if (i >= VTB_MAX_DECODING_SAMPLES) {
             return;
+        }
         
         if (!sample_info->is_decoding) {
             ALOGD("VTB: frame out of date: id=%d\n", sample_info->sample_id);
@@ -697,7 +704,7 @@ static int decode_video_internal(VideoToolBoxContext* context, AVCodecContext *a
     sample_info->sar_num = avctx->sample_aspect_ratio.num;
     sample_info->sar_den = avctx->sample_aspect_ratio.den;
     sample_info_push(context);
-
+    
     status = VTDecompressionSessionDecodeFrame(context->vt_session, sample_buff, decoder_flags, (void*)sample_info, 0);
     if (status == noErr) {
         if (context->ffp->is->videoq.abort_request)
