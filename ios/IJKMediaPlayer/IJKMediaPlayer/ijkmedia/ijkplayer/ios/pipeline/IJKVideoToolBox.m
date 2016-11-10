@@ -357,7 +357,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
             goto failed;
         }
 
-        newFrame->pic.pkt_pts    = sample_info->pts;
+        newFrame->pic.pts        = sample_info->pts;
         newFrame->pic.pkt_dts    = sample_info->dts;
         newFrame->pic.sample_aspect_ratio.num = sample_info->sar_num;
         newFrame->pic.sample_aspect_ratio.den = sample_info->sar_den;
@@ -365,8 +365,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
         newFrame->nextframe  = NULL;
 
         if (newFrame->pic.pts != AV_NOPTS_VALUE) {
-            newFrame->sort    = newFrame->pic.pkt_pts;
-            newFrame->pic.pts = newFrame->pic.pkt_pts;
+            newFrame->sort    = newFrame->pic.pts;
         } else {
             newFrame->sort    = newFrame->pic.pkt_dts;
             newFrame->pic.pts = newFrame->pic.pkt_dts;
