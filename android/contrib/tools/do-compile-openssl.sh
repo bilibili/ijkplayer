@@ -123,7 +123,7 @@ FF_SYSROOT=$FF_TOOLCHAIN_PATH/sysroot
 FF_PREFIX=$FF_BUILD_ROOT/build/$FF_BUILD_NAME/output
 
 mkdir -p $FF_PREFIX
-mkdir -p $FF_SYSROOT
+# mkdir -p $FF_SYSROOT
 
 
 #--------------------
