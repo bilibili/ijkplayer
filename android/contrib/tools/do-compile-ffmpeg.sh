@@ -271,9 +271,13 @@ FF_CFG_FLAGS="$FF_CFG_FLAGS --target-os=linux"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-pic"
 # FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-symver"
 
-# Optimization options (experts only):
-FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-asm"
-FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-inline-asm"
+if [ "$FF_ARCH" = "x86" ]; then
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-asm"
+else
+    # Optimization options (experts only):
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-asm"
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-inline-asm"
+fi
 
 case "$FF_BUILD_OPT" in
     debug)
