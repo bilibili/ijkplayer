@@ -396,7 +396,7 @@ SDL_AMediaCodec* SDL_AMediaCodecJava_createByCodecName(JNIEnv *env, const char *
 {
     SDLTRACE("%s", __func__);
 
-    jobject android_media_codec = J4AC_MediaCodec__createByCodecName__withCString(env, codec_name);
+    jobject android_media_codec = J4AC_MediaCodec__createByCodecName__withCString__catchAll(env, codec_name);
     if (J4A_ExceptionCheck__catchAll(env) || !android_media_codec) {
         return NULL;
     }
