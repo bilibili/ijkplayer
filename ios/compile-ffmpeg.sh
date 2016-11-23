@@ -142,7 +142,7 @@ elif [ "$FF_TARGET" = "clean" ]; then
     echo "=================="
     for ARCH in $FF_ALL_ARCHS
     do
-	echo "clean ffmpeg-$ARCH"
+        echo "clean ffmpeg-$ARCH"
         echo "=================="
         cd ffmpeg-$ARCH && git clean -xdf && cd -
     done
