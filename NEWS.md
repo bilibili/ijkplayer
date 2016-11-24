@@ -1,11 +1,19 @@
 tag next
 --------------------------------
 
+tag k0.7.5
+--------------------------------
+- ffmpeg: disable-asm on architecture x86
+- ffmpeg: revert some cutted demuxer and decoder
+- ios: add playback volume interface
+
 tag k0.7.4
+--------------------------------
 - ffplay: fix sample buffer leak introduced in k0.7.1
 - doc: add takeoff checklist
 
 tag k0.7.3
+--------------------------------
 - ios: turn videotoolbox into singleton
 - ffmpeg: merge ipv6 issue in tcp.c
 
