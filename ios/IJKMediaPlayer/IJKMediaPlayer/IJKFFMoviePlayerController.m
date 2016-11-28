@@ -898,6 +898,21 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             NSLog(@"FFP_MSG_PREPARED:\n");
 
             _monitor.prepareDuration = (int64_t)SDL_GetTickHR() - _monitor.prepareStartTick;
+            int64_t vdec = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_VIDEO_DECODER, FFP_PROPV_DECODER_UNKNOWN);
+            switch (vdec) {
+                case FFP_PROPV_DECODER_VIDEOTOOLBOX:
+                    _monitor.vdecoder = @"VideoToolbox";
+                    break;
+                case FFP_PROPV_DECODER_AVCODEC:
+                    _monitor.vdecoder = [NSString stringWithFormat:@"avcodec %d.%d.%d",
+                                         LIBAVCODEC_VERSION_MAJOR,
+                                         LIBAVCODEC_VERSION_MINOR,
+                                         LIBAVCODEC_VERSION_MICRO];
+                    break;
+                default:
+                    _monitor.vdecoder = @"Unknown";
+                    break;
+            }
 
             IjkMediaMeta *rawMeta = ijkmp_get_meta_l(_mediaPlayer);
             if (rawMeta) {
