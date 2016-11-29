@@ -220,6 +220,8 @@ void            ijkmp_sync_baseline_register(IjkMediaPlayer *mp,
                                              uint16_t low_water_mark,
                                              uint64_t (*sync_baseline_cb)(uint64_t timestamp, void *userData));
 void            ijkmp_sync_finish_register(IjkMediaPlayer *mp, void *userData, void (*sync_finish_cb)(uint64_t timestamp, void *userData));
+
+int64_t         ijkmp_read_total_bytes(IjkMediaPlayer *mp);
 #pragma mark -
 
 #endif

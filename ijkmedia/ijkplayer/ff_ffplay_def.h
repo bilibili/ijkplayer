@@ -668,6 +668,7 @@ typedef struct FFPlayer {
     
 #pragma mark - E7
     struct FFVideoSync *video_sync;
+    int64_t accumulated_bytes;
 #pragma mark -
 } FFPlayer;
 

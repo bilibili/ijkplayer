@@ -2883,7 +2883,8 @@ static int read_thread(void *arg)
 //                } else if (pkt->stream_index == is->video_stream) {
 //                    ALOGE("[VIDEO][IN] ------------- %llu\n", pkt_ts);
 //                }
-                
+        ffp->accumulated_bytes += pkt->size;
+        
         pkt_in_play_range = ffp->duration == AV_NOPTS_VALUE ||
                 (pkt_ts - (stream_start_time != AV_NOPTS_VALUE ? stream_start_time : 0)) *
                 av_q2d(ic->streams[pkt->stream_index]->time_base) -
@@ -4168,6 +4169,13 @@ void ffp_sync_finish_register(FFPlayer *ffp, void *userData, void (*sync_finish_
     if (ffp->video_sync && sync_finish_cb) {
         ffp->video_sync->sync_finish_cb = sync_finish_cb;
     }
+}
+            
+int64_t ffp_read_total_bytes(FFPlayer *ffp)
+{
+    int64_t total_bytes = ffp->accumulated_bytes;
+    ffp->accumulated_bytes = 0;
+    return total_bytes;
 }
             
 #pragma mark -

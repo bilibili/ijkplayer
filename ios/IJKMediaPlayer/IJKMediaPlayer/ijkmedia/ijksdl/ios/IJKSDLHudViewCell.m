@@ -31,6 +31,8 @@
             _column[i] = [[UILabel alloc] init];
             _column[i].textColor = [UIColor whiteColor];
             _column[i].font = [UIFont fontWithName:@"Menlo" size:9];
+            _column[i].numberOfLines = 0;
+            _column[i].minimumScaleFactor = 0.1;
 
             [self.contentView addSubview:_column[i]];
         }
@@ -53,12 +55,13 @@
     CGFloat nextX      = CELL_MARGIN;
 
     newFrame.origin.x   = nextX;
-    newFrame.size.width = parentFrame.size.width * 0.2;
+    newFrame.size.width = parentFrame.size.width * 0.3;
     _column[0].frame    = newFrame;
     nextX               = newFrame.origin.x + newFrame.size.width + CELL_MARGIN;
 
     newFrame.origin.x   = nextX;
     newFrame.size.width = parentFrame.size.width - nextX - CELL_MARGIN;
+    newFrame.size.height = parentFrame.size.height;
     _column[1].frame = newFrame;
 }
 

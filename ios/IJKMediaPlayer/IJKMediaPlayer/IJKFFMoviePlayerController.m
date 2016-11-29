@@ -74,6 +74,8 @@ typedef void(^VideoSyncFinishCallback)(uint64_t timestamp);
     IJKAVInject_AsyncStatistic _asyncStat;
     BOOL _shouldShowHudView;
     NSTimer *_hudTimer;
+    
+    NSURL *_streamURL;
 }
 
 @synthesize view = _view;
@@ -709,6 +711,17 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     if (_mediaPlayer == nil)
         return;
 
+    if (!_streamURL) {
+        _streamURL = [NSURL URLWithString:_urlString];
+        [_glView setHudValue:_serverProtocol forKey:@"server-protocol"];
+        [_glView setHudValue:_liveProtocol forKey:@"live-protocol"];
+        [_glView setHudValue:_liveId forKey:@"live-id"];
+        [_glView setHudValue:_provider forKey:@"provider"];
+        [_glView setHudValue:_streamURL.scheme forKey:@"scheme"];
+        [_glView setHudValue:_streamURL.host forKey:@"host"];
+        [_glView setHudValue:_urlString forKey:@"path"];
+    }
+    
     int64_t vdec = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_VIDEO_DECODER, FFP_PROPV_DECODER_UNKNOWN);
     float   vdps = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND, .0f);
     float   vfps = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND, .0f);
@@ -730,7 +743,11 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     }
 
     [_glView setHudValue:[NSString stringWithFormat:@"%.2f / %.2f", vdps, vfps] forKey:@"fps"];
+    [_glView setHudValue:[NSString stringWithFormat:@"%.2f", _glView.fps] forKey:@"display-fps"];
 
+    int64_t bps = ijkmp_read_total_bytes(_mediaPlayer) * 8;
+    [_glView setHudValue:[NSString stringWithFormat:@"%lld", bps] forKey:@"bitrate"];
+    
     int64_t vcacheb = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_VIDEO_CACHED_BYTES, 0);
     int64_t acacheb = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_AUDIO_CACHED_BYTES, 0);
     int64_t vcached = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_VIDEO_CACHED_DURATION, 0);
@@ -789,7 +806,7 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
 
     if ([[NSThread currentThread] isMainThread]) {
         _glView.shouldShowHudView = YES;
-        _hudTimer = [NSTimer scheduledTimerWithTimeInterval:.5f
+        _hudTimer = [NSTimer scheduledTimerWithTimeInterval:1.f//.5f
                                                      target:self
                                                    selector:@selector(refreshHudView)
                                                    userInfo:nil

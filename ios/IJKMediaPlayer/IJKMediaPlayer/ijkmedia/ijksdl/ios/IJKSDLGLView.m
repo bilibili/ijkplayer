@@ -255,8 +255,8 @@
     CGRect selfFrame = self.frame;
     CGRect newFrame  = selfFrame;
 
-    newFrame.size.width   = selfFrame.size.width * 1 / 3;
-    newFrame.origin.x     = selfFrame.size.width * 2 / 3;
+    newFrame.size.width   = selfFrame.size.width * 2 / 3;
+    newFrame.origin.x     = selfFrame.size.width * 1 / 3;
 
     newFrame.size.height  = selfFrame.size.height * 8 / 8;
     newFrame.origin.y    += selfFrame.size.height * 0 / 8;

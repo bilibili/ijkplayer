@@ -784,4 +784,9 @@ void ijkmp_sync_finish_register(IjkMediaPlayer *mp, void *userData, void (*sync_
     ffp_sync_finish_register(mp->ffplayer, userData, sync_finish_cb);
 }
 
+int64_t ijkmp_read_total_bytes(IjkMediaPlayer *mp)
+{
+    return ffp_read_total_bytes(mp->ffplayer);
+}
+
 #pragma mark -
