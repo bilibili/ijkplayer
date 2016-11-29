@@ -83,7 +83,8 @@ inline static bool isFloatZero(float value)
 }
 
 // resume play after stall
-static const float kMaxHighWaterMarkMilli   = 15 * 1000;
+//static const float kMaxHighWaterMarkMilli   = 15 * 1000;
+static const float kMaxHighWaterMarkMilli   = 0;
 
 static NSString *kErrorDomain = @"IJKAVMoviePlayer";
 static const NSInteger kEC_CurrentPlayerItemIsNil   = 5001;

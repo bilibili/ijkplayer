@@ -305,6 +305,11 @@
 				CLASSPREFIX = IJK;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = bilibili;
+				TargetAttributes = {
+					E6903EFB17EAF70200CFD954 = {
+						DevelopmentTeam = 6QCFTA7KPE;
+					};
+				};
 			};
 			buildConfigurationList = E6903EF717EAF70200CFD954 /* Build configuration list for PBXProject "IJKMediaDemo" */;
 			compatibilityVersion = "Xcode 3.2";
