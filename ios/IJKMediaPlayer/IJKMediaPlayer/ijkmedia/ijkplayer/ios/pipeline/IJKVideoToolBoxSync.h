@@ -21,23 +21,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKMediaPlayer_videotoolbox_h
-#define IJKMediaPlayer_videotoolbox_h
+#ifndef IJKMediaPlayer_videotoolbox_sync_h
+#define IJKMediaPlayer_videotoolbox_sync_h
 
 #include "ff_ffplay.h"
 
 typedef struct Ijk_VideoToolBox_Opaque Ijk_VideoToolBox_Opaque;
-typedef struct Ijk_VideoToolBox Ijk_VideoToolBox;
 
-struct Ijk_VideoToolBox {
+Ijk_VideoToolBox_Opaque* videotoolbox_sync_create(FFPlayer* ffp, AVCodecContext* ic);
 
-    Ijk_VideoToolBox_Opaque *opaque;
+int videotoolbox_sync_decode_frame(Ijk_VideoToolBox_Opaque* opaque);
 
-    int  (*decode_frame)(Ijk_VideoToolBox_Opaque *opaque);
-    void (*free)(Ijk_VideoToolBox_Opaque *opaque);
-};
-
-Ijk_VideoToolBox *Ijk_VideoToolbox_Async_Create(FFPlayer* ffp, AVCodecContext* ic);
-Ijk_VideoToolBox *Ijk_VideoToolbox_Sync_Create(FFPlayer* ffp, AVCodecContext* ic);
+void videotoolbox_sync_free(Ijk_VideoToolBox_Opaque* opaque);
 
 #endif
