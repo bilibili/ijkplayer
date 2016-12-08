@@ -315,7 +315,7 @@ static bool GetVTBPicture(Ijk_VideoToolBox_Opaque* context, AVFrame* pVTBPicture
     return true;
 }
 
-void QueuePicture(Ijk_VideoToolBox_Opaque* ctx) {
+static void QueuePicture(Ijk_VideoToolBox_Opaque* ctx) {
     AVFrame picture = {0};
     if (true == GetVTBPicture(ctx, &picture)) {
         AVRational tb = ctx->ffp->is->video_st->time_base;
@@ -336,7 +336,7 @@ void QueuePicture(Ijk_VideoToolBox_Opaque* ctx) {
 }
 
 
-void VTDecoderCallback(void *decompressionOutputRefCon,
+static void VTDecoderCallback(void *decompressionOutputRefCon,
                        void *sourceFrameRefCon,
                        OSStatus status,
                        VTDecodeInfoFlags infoFlags,
@@ -511,7 +511,7 @@ void VTDecoderCallback(void *decompressionOutputRefCon,
 }
 
 
-void vtbsession_destroy(Ijk_VideoToolBox_Opaque *context)
+static void vtbsession_destroy(Ijk_VideoToolBox_Opaque *context)
 {
     if (!context)
         return;
@@ -526,7 +526,7 @@ void vtbsession_destroy(Ijk_VideoToolBox_Opaque *context)
     }
 }
 
-VTDecompressionSessionRef vtbsession_create(Ijk_VideoToolBox_Opaque* context)
+static VTDecompressionSessionRef vtbsession_create(Ijk_VideoToolBox_Opaque* context)
 {
     FFPlayer *ffp = context->ffp;
     int       ret = 0;
@@ -1186,6 +1186,7 @@ Ijk_VideoToolBox_Opaque* videotoolbox_async_create(FFPlayer* ffp, AVCodecContext
     if (ret)
         goto fail;
     assert(context_vtb->fmt_desc.fmt_desc);
+    vtbformat_destroy(&context_vtb->fmt_desc);
 
     context_vtb->vt_session = vtbsession_create(context_vtb);
     if (context_vtb->vt_session == NULL)
