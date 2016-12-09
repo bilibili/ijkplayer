@@ -458,7 +458,7 @@ static IJKAVMoviePlayerController* instance;
         _player.volume = playbackVolume;
     }
     BOOL muted = fabs(playbackVolume) < 1e-6;
-    if(_player != nil && _player.muted != muted) {
+    if (_player != nil && _player.muted != muted) {
         _player.muted = muted;
     }
 }
