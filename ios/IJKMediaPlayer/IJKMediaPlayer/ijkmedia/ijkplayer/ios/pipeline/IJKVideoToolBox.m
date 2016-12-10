@@ -1178,6 +1178,7 @@ VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* avctx)
     if (ret)
         goto fail;
     assert(context_vtb->fmt_desc.fmt_desc);
+    vtbformat_destroy(&context_vtb->fmt_desc);
 
     context_vtb->vt_session = vtbsession_create(context_vtb);
     if (context_vtb->vt_session == NULL)
