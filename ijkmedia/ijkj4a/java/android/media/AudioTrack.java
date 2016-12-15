@@ -8,7 +8,7 @@ public class AudioTrack {
     public static int   getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat);
     public static float getMaxVolume();
     public static float getMinVolume();
-    public static int   getNativeOutputSampleRate (int streamType);
+    public static int   getNativeOutputSampleRate(int streamType);
 
     public void play();
     public void pause();
@@ -25,4 +25,10 @@ public class AudioTrack {
     public PlaybackParams getPlaybackParams();
     @MinApi(23)
     void setPlaybackParams(PlaybackParams params);
+
+
+    int getStreamType();
+    int getSampleRate();
+    int getPlaybackRate();
+    int setPlaybackRate(int sampleRateInHz);
 }
