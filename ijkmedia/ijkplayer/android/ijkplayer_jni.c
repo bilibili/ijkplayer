@@ -905,6 +905,12 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             break;
         case FFP_MSG_PLAYBACK_STATE_CHANGED:
             break;
+        case FFP_MSG_TIMED_TEXT:
+            {
+            jstring text = (*env)->NewStringUTF(env, (char *)msg.obj);
+            J4AC_IjkMediaPlayer__postEventFromNative(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, text);
+            }
+            break;
         default:
             ALOGE("unknown FFP_MSG_xxx(%d)\n", msg.what);
             break;

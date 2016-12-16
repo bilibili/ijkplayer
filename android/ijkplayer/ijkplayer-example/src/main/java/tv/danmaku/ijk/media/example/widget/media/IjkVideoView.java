@@ -36,6 +36,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.widget.TableLayout;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,11 +44,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import tv.danmaku.ijk.media.exo.IjkExoMediaPlayer;
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+import tv.danmaku.ijk.media.player.IjkTimedText;
 import tv.danmaku.ijk.media.player.TextureMediaPlayer;
 import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.IMediaFormat;
@@ -122,6 +126,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private long mSeekStartTime = 0;
     private long mSeekEndTime = 0;
 
+    private TextView subtitleDisplay;
+
     public IjkVideoView(Context context) {
         super(context);
         initVideoView(context);
@@ -165,6 +171,15 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         // REMOVED: mPendingSubtitleTracks = new Vector<Pair<InputStream, MediaFormat>>();
         mCurrentState = STATE_IDLE;
         mTargetState = STATE_IDLE;
+
+        subtitleDisplay = new TextView(context);
+        subtitleDisplay.setTextSize(24);
+        subtitleDisplay.setGravity(Gravity.CENTER);
+        FrameLayout.LayoutParams layoutParams_txt = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM);
+        addView(subtitleDisplay, layoutParams_txt);
     }
 
     public void setRenderView(IRenderView renderView) {
@@ -314,6 +329,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mMediaPlayer.setOnInfoListener(mInfoListener);
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
             mMediaPlayer.setOnSeekCompleteListener(mSeekCompleteListener);
+            mMediaPlayer.setOnTimedTextListener(mOnTimedTextListener);
             mCurrentBufferPercentage = 0;
             String scheme = mUri.getScheme();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
@@ -577,6 +593,15 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         public void onSeekComplete(IMediaPlayer mp) {
             mSeekEndTime = System.currentTimeMillis();
             mHudViewHolder.updateSeekCost(mSeekEndTime - mSeekStartTime);
+        }
+    };
+
+    private IMediaPlayer.OnTimedTextListener mOnTimedTextListener = new IMediaPlayer.OnTimedTextListener() {
+        @Override
+        public void onTimedText(IMediaPlayer mp, IjkTimedText text) {
+            if (text != null) {
+                subtitleDisplay.setText(text.getText());
+            }
         }
     };
 

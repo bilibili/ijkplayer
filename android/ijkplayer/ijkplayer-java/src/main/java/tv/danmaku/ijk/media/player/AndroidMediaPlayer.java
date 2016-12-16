@@ -22,6 +22,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaDataSource;
 import android.media.MediaPlayer;
+import android.media.TimedText;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
@@ -342,6 +343,7 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
                 .setOnVideoSizeChangedListener(mInternalListenerAdapter);
         mInternalMediaPlayer.setOnErrorListener(mInternalListenerAdapter);
         mInternalMediaPlayer.setOnInfoListener(mInternalListenerAdapter);
+        mInternalMediaPlayer.setOnTimedTextListener(mInternalListenerAdapter);
     }
 
     private class AndroidMediaPlayerListenerHolder implements
@@ -349,7 +351,8 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
             MediaPlayer.OnBufferingUpdateListener,
             MediaPlayer.OnSeekCompleteListener,
             MediaPlayer.OnVideoSizeChangedListener,
-            MediaPlayer.OnErrorListener, MediaPlayer.OnInfoListener {
+            MediaPlayer.OnErrorListener, MediaPlayer.OnInfoListener,
+            MediaPlayer.OnTimedTextListener {
         public final WeakReference<AndroidMediaPlayer> mWeakMediaPlayer;
 
         public AndroidMediaPlayerListenerHolder(AndroidMediaPlayer mp) {
@@ -413,6 +416,16 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
                 return;
 
             notifyOnPrepared();
+        }
+
+        @Override
+        public void onTimedText(MediaPlayer mp, TimedText text) {
+            AndroidMediaPlayer self = mWeakMediaPlayer.get();
+            if (self == null)
+                return;
+            
+            IjkTimedText ijkText = new IjkTimedText(text.getBounds(), text.getText());
+            notifyOnTimedText(ijkText);
         }
     }
 }
