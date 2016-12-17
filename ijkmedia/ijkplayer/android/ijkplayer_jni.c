@@ -622,6 +622,7 @@ IjkMediaPlayer_getMediaMeta(JNIEnv *env, jobject thiz)
 
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_VIDEO_STREAM, "-1");
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_AUDIO_STREAM, "-1");
+    fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_TIMEDTEXT_STREAM, "-1");
 
     jarray_list = J4AC_ArrayList__ArrayList(env);
     if (J4A_ExceptionCheck__throwAny(env)) {

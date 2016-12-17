@@ -204,6 +204,7 @@ public class IjkMediaMeta {
 
         int videoStreamIndex = meta.getInt(IJKM_KEY_VIDEO_STREAM, -1);
         int audioStreamIndex = meta.getInt(IJKM_KEY_AUDIO_STREAM, -1);
+        int subtitleStreamIndex = meta.getInt(IJKM_KEY_TIMEDTEXT_STREAM, -1);
 
         ArrayList<Bundle> streams = meta
                 .getParcelableArrayList(IJKM_KEY_STREAMS);

@@ -1120,6 +1120,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
         int selectedVideoTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_VIDEO);
         int selectedAudioTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
+        int selectedSubtitleTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
 
         TableLayoutBinder builder = new TableLayoutBinder(getContext());
         builder.appendSection(R.string.mi_player);
@@ -1139,6 +1140,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     builder.appendSection(getContext().getString(R.string.mi_stream_fmt1, index) + " " + getContext().getString(R.string.mi__selected_video_track));
                 } else if (index == selectedAudioTrack) {
                     builder.appendSection(getContext().getString(R.string.mi_stream_fmt1, index) + " " + getContext().getString(R.string.mi__selected_audio_track));
+                } else if (index == selectedSubtitleTrack) {
+                    builder.appendSection(getContext().getString(R.string.mi_stream_fmt1, index) + " " + getContext().getString(R.string.mi__selected_subtitle_track));
                 } else {
                     builder.appendSection(getContext().getString(R.string.mi_stream_fmt1, index));
                 }
