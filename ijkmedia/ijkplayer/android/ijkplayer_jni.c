@@ -832,6 +832,13 @@ inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1
     // MPTRACE("post_event()=void");
 }
 
+inline static void post_event2(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2, jobject obj)
+{
+    // MPTRACE("post_event2(%p, %p, %d, %d, %d, %p)", (void*)env, (void*) weak_this, what, arg1, arg2, (void*)obj);
+    J4AC_IjkMediaPlayer__postEventFromNative(env, weak_this, what, arg1, arg2, obj);
+    // MPTRACE("post_event2()=void");
+}
+
 static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
 {
     jobject weak_thiz = (jobject) ijkmp_get_weak_thiz(mp);
@@ -909,7 +916,7 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
         case FFP_MSG_TIMED_TEXT:
             {
             jstring text = (*env)->NewStringUTF(env, (char *)msg.obj);
-            J4AC_IjkMediaPlayer__postEventFromNative(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, text);
+            post_event2(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, text);
             }
             break;
         default:
