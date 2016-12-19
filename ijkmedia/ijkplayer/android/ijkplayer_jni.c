@@ -914,9 +914,14 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
         case FFP_MSG_PLAYBACK_STATE_CHANGED:
             break;
         case FFP_MSG_TIMED_TEXT:
-            {
-            jstring text = (*env)->NewStringUTF(env, (char *)msg.obj);
-            post_event2(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, text);
+            if (msg.obj) {
+                jstring text = (*env)->NewStringUTF(env, (char *)msg.obj);
+                post_event2(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, text);
+                J4A_DeleteLocalRef__p(env, &text);
+                free(msg.obj);
+            }
+            else {
+                post_event2(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, NULL);
             }
             break;
         default:

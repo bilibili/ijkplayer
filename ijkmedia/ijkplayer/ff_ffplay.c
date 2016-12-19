@@ -460,9 +460,7 @@ static void frame_queue_unref_item(Frame *vp)
 {
     av_frame_unref(vp->frame);
     SDL_VoutUnrefYUVOverlay(vp->bmp);
-#ifdef FFP_MERGE
     avsubtitle_free(&vp->sub);
-#endif
 }
 
 static int frame_queue_init(FrameQueue *f, PacketQueue *pktq, int max_size, int keep_last)
@@ -694,7 +692,7 @@ static void video_image_display2(FFPlayer *ffp)
                             else if (sp->sub.rects[0]->ass) {
                                 parse_ass_subtitle(sp->sub.rects[0]->ass, buffered_text);
                             }
-                            ffp_notify_msg4(ffp, FFP_MSG_TIMED_TEXT, 0, 0, buffered_text);
+                            ffp_notify_msg4(ffp, FFP_MSG_TIMED_TEXT, 0, 0, buffered_text, sizeof(buffered_text));
                         }
                         sp->uploaded = 1;
                     }
@@ -1143,7 +1141,7 @@ retry:
                             || (sp2 && is->vidclk.pts > (sp2->pts + ((float) sp2->sub.start_display_time / 1000))))
                     {
                         if (sp->uploaded) {
-                            ffp_notify_msg4(ffp, FFP_MSG_TIMED_TEXT, 0, 0, "");
+                            ffp_notify_msg4(ffp, FFP_MSG_TIMED_TEXT, 0, 0, "", 1);
                         }
                         frame_queue_next(&is->subpq);
                     } else {
