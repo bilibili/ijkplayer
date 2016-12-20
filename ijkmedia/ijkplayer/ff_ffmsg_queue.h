@@ -180,6 +180,7 @@ inline static void msg_queue_destroy(MessageQueue *q)
         AVMessage *msg = q->recycle_msg;
         if (msg)
             q->recycle_msg = msg->next;
+        msg_free_res(msg);
         av_freep(&msg);
     }
     SDL_UnlockMutex(q->mutex);
