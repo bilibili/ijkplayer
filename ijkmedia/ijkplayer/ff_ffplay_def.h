@@ -550,6 +550,7 @@ typedef struct FFPlayer {
     int loop;
     int framedrop;
     int64_t seek_at_start;
+    int subtitle;
     int infinite_buffer;
     enum ShowMode show_mode;
     char *audio_codec_name;

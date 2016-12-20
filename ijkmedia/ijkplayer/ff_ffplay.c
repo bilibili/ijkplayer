@@ -2445,6 +2445,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         break;
     case AVMEDIA_TYPE_SUBTITLE:
+        if (!ffp->subtitle) break;
+
         is->subtitle_stream = stream_index;
         is->subtitle_st = ic->streams[stream_index];
 
