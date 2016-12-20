@@ -259,6 +259,10 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
                     ijkmeta_set_int64_l(stream_meta, IJKM_KEY_CHANNEL_LAYOUT, codecpar->channel_layout);
                 break;
             }
+            case AVMEDIA_TYPE_SUBTITLE: {
+                ijkmeta_set_string_l(stream_meta, IJKM_KEY_TYPE, IJKM_VAL_TYPE__TIMEDTEXT);
+                break;
+            }
             default: {
                 ijkmeta_set_string_l(stream_meta, IJKM_KEY_TYPE, IJKM_VAL_TYPE__UNKNOWN);
                 break;

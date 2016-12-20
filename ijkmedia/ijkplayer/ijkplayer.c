@@ -764,9 +764,10 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             pthread_mutex_unlock(&mp->mutex);
             break;
         }
-        msg_free_res(msg);
-        if (continue_wait_next_msg)
+        if (continue_wait_next_msg) {
+            msg_free_res(msg);
             continue;
+        }
 
         return retval;
     }
