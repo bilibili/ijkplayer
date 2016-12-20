@@ -15,11 +15,13 @@ public class IjkMediaMeta {
     public static final String IJKM_KEY_BITRATE = "bitrate";
     public static final String IJKM_KEY_VIDEO_STREAM = "video";
     public static final String IJKM_KEY_AUDIO_STREAM = "audio";
+    public static final String IJKM_KEY_TIMEDTEXT_STREAM = "timedtext";
 
     // stream meta
     public static final String IJKM_KEY_TYPE = "type";
     public static final String IJKM_VAL_TYPE__VIDEO = "video";
     public static final String IJKM_VAL_TYPE__AUDIO = "audio";
+    public static final String IJKM_VAL_TYPE__TIMEDTEXT = "timedtext";
     public static final String IJKM_VAL_TYPE__UNKNOWN = "unknown";
     public static final String IJKM_KEY_LANGUAGE = "language";
 
@@ -202,6 +204,7 @@ public class IjkMediaMeta {
 
         int videoStreamIndex = meta.getInt(IJKM_KEY_VIDEO_STREAM, -1);
         int audioStreamIndex = meta.getInt(IJKM_KEY_AUDIO_STREAM, -1);
+        int subtitleStreamIndex = meta.getInt(IJKM_KEY_TIMEDTEXT_STREAM, -1);
 
         ArrayList<Bundle> streams = meta
                 .getParcelableArrayList(IJKM_KEY_STREAMS);

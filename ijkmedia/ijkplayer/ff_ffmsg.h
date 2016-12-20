@@ -40,6 +40,7 @@
 #define FFP_MSG_BUFFERING_TIME_UPDATE       504     /* arg1 = cached duration in milliseconds, arg2 = high water mark */
 #define FFP_MSG_SEEK_COMPLETE               600     /* arg1 = seek position,                   arg2 = error */
 #define FFP_MSG_PLAYBACK_STATE_CHANGED      700
+#define FFP_MSG_TIMED_TEXT                  800
 
 #define FFP_MSG_VIDEO_DECODER_OPEN          10001
 
@@ -56,6 +57,7 @@
 
 #define FFP_PROP_INT64_SELECTED_VIDEO_STREAM            20001
 #define FFP_PROP_INT64_SELECTED_AUDIO_STREAM            20002
+#define FFP_PROP_INT64_SELECTED_TIMEDTEXT_STREAM        20011
 #define FFP_PROP_INT64_VIDEO_DECODER                    20003
 #define FFP_PROP_INT64_AUDIO_DECODER                    20004
 #define     FFP_PROPV_DECODER_UNKNOWN                   0

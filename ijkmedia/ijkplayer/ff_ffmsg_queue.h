@@ -143,6 +143,24 @@ inline static void msg_queue_put_simple3(MessageQueue *q, int what, int arg1, in
     msg_queue_put(q, &msg);
 }
 
+inline static void msg_obj_free_l(void *obj)
+{
+    av_free(obj);
+}
+
+inline static void msg_queue_put_simple4(MessageQueue *q, int what, int arg1, int arg2, void *obj, int obj_len)
+{
+    AVMessage msg;
+    msg_init_msg(&msg);
+    msg.what = what;
+    msg.arg1 = arg1;
+    msg.arg2 = arg2;
+    msg.obj = av_malloc(obj_len);
+    memcpy(msg.obj, obj, obj_len);
+    msg.free_l = msg_obj_free_l;
+    msg_queue_put(q, &msg);
+}
+
 inline static void msg_queue_init(MessageQueue *q)
 {
     memset(q, 0, sizeof(MessageQueue));

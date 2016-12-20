@@ -185,9 +185,7 @@ typedef struct Clock {
 /* Common struct for handling all types of decoded data and allocated render buffers. */
 typedef struct Frame {
     AVFrame *frame;
-#ifdef FFP_MERGE
     AVSubtitle sub;
-#endif
     int serial;
     double pts;           /* presentation timestamp for the frame */
     double duration;      /* estimated duration of the frame */
@@ -202,9 +200,7 @@ typedef struct Frame {
     int height;
     int format;
     AVRational sar;
-#ifdef FFP_MERGE
     int uploaded;
-#endif
 } Frame;
 
 typedef struct FrameQueue {
@@ -274,16 +270,12 @@ typedef struct VideoState {
     Clock extclk;
 
     FrameQueue pictq;
-#ifdef FFP_MERGE
     FrameQueue subpq;
-#endif
     FrameQueue sampq;
 
     Decoder auddec;
     Decoder viddec;
-#ifdef FFP_MERGE
     Decoder subdec;
-#endif
 
     int audio_stream;
 
@@ -334,11 +326,9 @@ typedef struct VideoState {
     SDL_Texture *sub_texture;
 #endif
 
-#ifdef FFP_MERGE
     int subtitle_stream;
     AVStream *subtitle_st;
     PacketQueue subtitleq;
-#endif
 
     double frame_timer;
     double frame_last_returned_time;
@@ -540,9 +530,7 @@ typedef struct FFPlayer {
 #endif
     int audio_disable;
     int video_disable;
-#ifdef FFP_MERGE
     int subtitle_disable;
-#endif
     const char* wanted_stream_spec[AVMEDIA_TYPE_NB];
     int seek_by_bytes;
     int display_disable;
@@ -565,9 +553,7 @@ typedef struct FFPlayer {
     int infinite_buffer;
     enum ShowMode show_mode;
     char *audio_codec_name;
-#ifdef FFP_MERGE
     char *subtitle_codec_name;
-#endif
     char *video_codec_name;
     double rdftspeed;
 #ifdef FFP_MERGE
@@ -603,6 +589,7 @@ typedef struct FFPlayer {
 
     char *video_codec_info;
     char *audio_codec_info;
+    char *subtitle_codec_info;
     Uint32 overlay_format;
 
     int last_error;
@@ -729,6 +716,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     av_freep(&ffp->video_codec_info);
     av_freep(&ffp->audio_codec_info);
+    av_freep(&ffp->subtitle_codec_info);
     ffp->overlay_format         = SDL_FCC_RV32;
 
     ffp->last_error             = 0;
@@ -797,6 +785,10 @@ inline static void ffp_notify_msg2(FFPlayer *ffp, int what, int arg1) {
 
 inline static void ffp_notify_msg3(FFPlayer *ffp, int what, int arg1, int arg2) {
     msg_queue_put_simple3(&ffp->msg_queue, what, arg1, arg2);
+}
+
+inline static void ffp_notify_msg4(FFPlayer *ffp, int what, int arg1, int arg2, void *obj, int obj_len) {
+    msg_queue_put_simple4(&ffp->msg_queue, what, arg1, arg2, obj, obj_len);
 }
 
 inline static void ffp_remove_msg(FFPlayer *ffp, int what) {
