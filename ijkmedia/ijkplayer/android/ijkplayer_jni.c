@@ -918,7 +918,6 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
                 jstring text = (*env)->NewStringUTF(env, (char *)msg.obj);
                 post_event2(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, text);
                 J4A_DeleteLocalRef__p(env, &text);
-                free(msg.obj);
             }
             else {
                 post_event2(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, NULL);
@@ -928,6 +927,7 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             ALOGE("unknown FFP_MSG_xxx(%d)\n", msg.what);
             break;
         }
+        msg_free_res(&msg);
     }
 
 LABEL_RETURN:
