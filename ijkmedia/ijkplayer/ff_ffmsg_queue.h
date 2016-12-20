@@ -33,6 +33,8 @@ typedef struct AVMessage {
     int what;
     int arg1;
     int arg2;
+    void *obj;
+    void (*free_l)(void *obj);
     struct AVMessage *next;
 } AVMessage;
 
@@ -47,6 +49,15 @@ typedef struct MessageQueue {
     int recycle_count;
     int alloc_count;
 } MessageQueue;
+
+inline static void msg_free_res(AVMessage *msg)
+{
+    if (!msg || !msg->obj)
+        return;
+    assert(msg->free_l);
+    msg->free_l(msg->obj);
+    msg->obj = NULL;
+}
 
 inline static int msg_queue_put_private(MessageQueue *q, AVMessage *msg)
 {
@@ -221,6 +232,7 @@ inline static int msg_queue_get(MessageQueue *q, AVMessage *msg, int block)
                 q->last_msg = NULL;
             q->nb_messages--;
             *msg = *msg1;
+            msg1->obj = NULL;
 #ifdef FFP_MERGE
             av_free(msg1);
 #else
@@ -257,6 +269,7 @@ inline static void msg_queue_remove(MessageQueue *q, int what)
 #ifdef FFP_MERGE
                 av_free(msg);
 #else
+                msg_free_res(msg);
                 msg->next = q->recycle_msg;
                 q->recycle_msg = msg;
 #endif
