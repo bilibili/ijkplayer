@@ -28,6 +28,12 @@
 #include "ijksdl/ijksdl_gles2.h"
 #import "IJKSDLHudViewController.h"
 
+typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
+    IJKSDLGLViewApplicationUnknownState = 0,
+    IJKSDLGLViewApplicationForegroundState = 1,
+    IJKSDLGLViewApplicationBackgroundState = 2
+};
+
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
 @property(atomic) BOOL glActivePaused;
@@ -57,6 +63,7 @@
     NSMutableArray *_registeredNotifications;
 
     IJKSDLHudViewController *_hudViewController;
+    IJKSDLGLViewApplicationState _applicationState;
 }
 
 + (Class) layerClass
@@ -195,14 +202,22 @@
 
 - (BOOL)isApplicationActive
 {
-    UIApplicationState appState = [UIApplication sharedApplication].applicationState;
-    switch (appState) {
-        case UIApplicationStateActive:
+    switch (_applicationState) {
+        case IJKSDLGLViewApplicationForegroundState:
             return YES;
-        case UIApplicationStateInactive:
-        case UIApplicationStateBackground:
-        default:
+        case IJKSDLGLViewApplicationBackgroundState:
             return NO;
+        default: {
+            UIApplicationState appState = [UIApplication sharedApplication].applicationState;
+            switch (appState) {
+                case UIApplicationStateActive:
+                    return YES;
+                case UIApplicationStateInactive:
+                case UIApplicationStateBackground:
+                default:
+                    return NO;
+            }
+        }
     }
 }
 
@@ -491,6 +506,7 @@
 - (void)applicationWillEnterForeground
 {
     NSLog(@"IJKSDLGLView:applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
+    _applicationState = IJKSDLGLViewApplicationForegroundState;
     [self toggleGLPaused:NO];
 }
 
@@ -509,6 +525,7 @@
 - (void)applicationDidEnterBackground
 {
     NSLog(@"IJKSDLGLView:applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
+    _applicationState = IJKSDLGLViewApplicationBackgroundState;
     [self toggleGLPaused:YES];
 }
 
