@@ -57,6 +57,7 @@
     NSMutableArray *_registeredNotifications;
 
     IJKSDLHudViewController *_hudViewController;
+    UITextView *_subtitleView;
 }
 
 + (Class) layerClass
@@ -79,6 +80,11 @@
 
         _hudViewController = [[IJKSDLHudViewController alloc] init];
         [self addSubview:_hudViewController.tableView];
+        _subtitleView = [[UITextView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(frame) -40, CGRectGetWidth(frame), 40)];
+        [_subtitleView setBackgroundColor:[UIColor clearColor]];
+        [_subtitleView setTextColor:[UIColor whiteColor]];
+        [_subtitleView setTextAlignment:NSTextAlignmentCenter];
+        [self addSubview:_subtitleView];
     }
 
     return self;
@@ -639,5 +645,7 @@
 {
     return !_hudViewController.tableView.hidden;
 }
-
+- (void) setTimedText:(NSString *)text{
+    [_subtitleView setText:text];
+}
 @end
