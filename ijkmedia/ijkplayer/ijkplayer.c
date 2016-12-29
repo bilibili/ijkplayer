@@ -664,6 +664,7 @@ void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
     return prev_weak_thiz;
 }
 
+/* need to call msg_free_res for freeing the resouce obtained in msg */
 int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 {
     assert(mp);
@@ -764,9 +765,10 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             pthread_mutex_unlock(&mp->mutex);
             break;
         }
-        msg_free_res(msg);
-        if (continue_wait_next_msg)
+        if (continue_wait_next_msg) {
+            msg_free_res(msg);
             continue;
+        }
 
         return retval;
     }

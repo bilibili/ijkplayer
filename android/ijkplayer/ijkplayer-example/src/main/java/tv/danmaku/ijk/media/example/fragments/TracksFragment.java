@@ -67,10 +67,13 @@ public class TracksFragment extends Fragment {
 
             int selectedVideoTrack = trackHolder.getSelectedTrack(ITrackInfo.MEDIA_TRACK_TYPE_VIDEO);
             int selectedAudioTrack = trackHolder.getSelectedTrack(ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
+            int selectedSubtitleTrack = trackHolder.getSelectedTrack(ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
             if (selectedVideoTrack >= 0)
                 mTrackListView.setItemChecked(selectedVideoTrack, true);
             if (selectedAudioTrack >= 0)
                 mTrackListView.setItemChecked(selectedAudioTrack, true);
+            if (selectedSubtitleTrack >= 0)
+                mTrackListView.setItemChecked(selectedSubtitleTrack, true);
 
             mTrackListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override

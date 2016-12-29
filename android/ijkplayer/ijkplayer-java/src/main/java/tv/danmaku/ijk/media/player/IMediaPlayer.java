@@ -132,6 +132,8 @@ public interface IMediaPlayer {
 
     void setOnInfoListener(OnInfoListener listener);
 
+    void setOnTimedTextListener(OnTimedTextListener listener);
+
     /*--------------------
      * Listeners
      */
@@ -162,6 +164,10 @@ public interface IMediaPlayer {
 
     interface OnInfoListener {
         boolean onInfo(IMediaPlayer mp, int what, int extra);
+    }
+
+    interface OnTimedTextListener {
+        void onTimedText(IMediaPlayer mp, IjkTimedText text);
     }
 
     /*--------------------

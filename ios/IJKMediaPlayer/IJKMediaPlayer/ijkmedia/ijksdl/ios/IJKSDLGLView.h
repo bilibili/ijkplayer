@@ -40,4 +40,6 @@
 @property(nonatomic)        CGFloat  scaleFactor;
 @property(nonatomic)        BOOL     shouldShowHudView;
 
+- (void) setTimedText:(NSString *)text;
+
 @end

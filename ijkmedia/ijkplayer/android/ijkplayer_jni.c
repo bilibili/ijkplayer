@@ -622,6 +622,7 @@ IjkMediaPlayer_getMediaMeta(JNIEnv *env, jobject thiz)
 
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_VIDEO_STREAM, "-1");
     fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_AUDIO_STREAM, "-1");
+    fillMetaInternal(env, jlocal_bundle, meta, IJKM_KEY_TIMEDTEXT_STREAM, "-1");
 
     jarray_list = J4AC_ArrayList__ArrayList(env);
     if (J4A_ExceptionCheck__throwAny(env)) {
@@ -831,6 +832,13 @@ inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1
     // MPTRACE("post_event()=void");
 }
 
+inline static void post_event2(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2, jobject obj)
+{
+    // MPTRACE("post_event2(%p, %p, %d, %d, %d, %p)", (void*)env, (void*) weak_this, what, arg1, arg2, (void*)obj);
+    J4AC_IjkMediaPlayer__postEventFromNative(env, weak_this, what, arg1, arg2, obj);
+    // MPTRACE("post_event2()=void");
+}
+
 static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
 {
     jobject weak_thiz = (jobject) ijkmp_get_weak_thiz(mp);
@@ -905,10 +913,21 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             break;
         case FFP_MSG_PLAYBACK_STATE_CHANGED:
             break;
+        case FFP_MSG_TIMED_TEXT:
+            if (msg.obj) {
+                jstring text = (*env)->NewStringUTF(env, (char *)msg.obj);
+                post_event2(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, text);
+                J4A_DeleteLocalRef__p(env, &text);
+            }
+            else {
+                post_event2(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, NULL);
+            }
+            break;
         default:
             ALOGE("unknown FFP_MSG_xxx(%d)\n", msg.what);
             break;
         }
+        msg_free_res(&msg);
     }
 
 LABEL_RETURN:

@@ -41,6 +41,7 @@
     <string name="mi_channels">Channels</string>
     <string name="mi__selected_video_track">*</string>
     <string name="mi__selected_audio_track">*</string>
+    <string name="mi__selected_subtitle_track">*</string>
 
     <string name="TrackType_video">Video</string>
     <string name="TrackType_audio">Audio</string>
