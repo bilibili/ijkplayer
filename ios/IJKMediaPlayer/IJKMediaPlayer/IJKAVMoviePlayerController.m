@@ -783,16 +783,15 @@ static IJKAVMoviePlayerController* instance;
             NSArray *timeRangeArray = playerItem.loadedTimeRanges;
             CMTime currentTime = [_player currentTime];
             
-            __block BOOL foundRange = NO;
-            __block CMTimeRange aTimeRange;
+            BOOL foundRange = NO;
+            CMTimeRange aTimeRange;
             
-            [timeRangeArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            if (timeRangeArray.count) {
                 aTimeRange = [[timeRangeArray objectAtIndex:0] CMTimeRangeValue];
                 if(CMTimeRangeContainsTime(aTimeRange, currentTime)) {
-                    *stop = YES;
                     foundRange = YES;
                 }
-            }];
+            }
             
             if (foundRange) {
                 CMTime maxTime = CMTimeRangeGetEnd(aTimeRange);
