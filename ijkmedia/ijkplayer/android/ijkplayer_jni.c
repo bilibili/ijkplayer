@@ -29,6 +29,7 @@
 #include "j4a/class/android/os/Bundle.h"
 #include "j4a/class/tv/danmaku/ijk/media/player/IjkMediaPlayer.h"
 #include "j4a/class/tv/danmaku/ijk/media/player/misc/IMediaDataSource.h"
+#include "j4a/class/tv/danmaku/ijk/media/player/misc/IIjkIOHttp.h"
 #include "ijksdl/ijksdl_log.h"
 #include "../ff_ffplay.h"
 #include "ffmpeg_api_jni.h"
@@ -118,6 +119,32 @@ fail:
     return nativeMediaDataSource;
 }
 
+static int64_t jni_set_ijkio_http(JNIEnv* env, jobject thiz, jobject ijk_io)
+{
+    int64_t nativeIjkIOHttp = 0;
+
+    pthread_mutex_lock(&g_clazz.mutex);
+
+    jobject old = (jobject) (intptr_t) J4AC_IjkMediaPlayer__mNativeIjkIOHttp__get__catchAll(env, thiz);
+    if (old) {
+        J4AC_IIjkIOHttp__close__catchAll(env, old);
+        J4A_DeleteGlobalRef__p(env, &old);
+        J4AC_IjkMediaPlayer__mNativeIjkIOHttp__set__catchAll(env, thiz, 0);
+    }
+
+    if (ijk_io) {
+        jobject global_ijkio_http = (*env)->NewGlobalRef(env, ijk_io);
+        if (J4A_ExceptionCheck__catchAll(env) || !global_ijkio_http)
+            goto fail;
+        nativeIjkIOHttp = (int64_t) (intptr_t) global_ijkio_http;
+        J4AC_IjkMediaPlayer__mNativeIjkIOHttp__set__catchAll(env, thiz, (jlong) nativeIjkIOHttp);
+    }
+
+fail:
+    pthread_mutex_unlock(&g_clazz.mutex);
+    return nativeIjkIOHttp;
+}
+
 static int message_loop(void *arg);
 
 static void
@@ -184,6 +211,31 @@ IjkMediaPlayer_setDataSourceCallback(JNIEnv *env, jobject thiz, jobject callback
 
     ALOGV("setDataSourceCallback: %"PRId64"\n", nativeMediaDataSource);
     snprintf(uri, sizeof(uri), "ijkmediadatasource:%"PRId64, nativeMediaDataSource);
+
+    retval = ijkmp_set_data_source(mp, uri);
+
+    IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+}
+
+static void
+IjkMediaPlayer_setDataSourceIjkIOHttpCallback(JNIEnv *env, jobject thiz, jobject callback) {
+    MPTRACE("%s\n", __func__);
+    int retval = 0;
+    char uri[128];
+    int64_t nativeIjkIOHttp = 0;
+
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(callback, env, "java/lang/IllegalArgumentException", "mpjni: setDataSourceIjkIOCallback: null fd", LABEL_RETURN);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setDataSourceIjkIOCallback: null mp", LABEL_RETURN);
+
+    nativeIjkIOHttp = jni_set_ijkio_http(env, thiz, callback);
+    JNI_CHECK_GOTO(nativeIjkIOHttp, env, "java/lang/IllegalStateException", "mpjni: jni_set_ijkio_http: NewGlobalRef", LABEL_RETURN);
+
+    ALOGV("setDataSourceIjkIOHttpCallback: %"PRId64"\n", nativeIjkIOHttp);
+    snprintf(uri, sizeof(uri), "ijkio:http:%"PRId64, nativeIjkIOHttp);
 
     retval = ijkmp_set_data_source(mp, uri);
 
@@ -704,6 +756,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
     jni_set_media_player(env, thiz, mp);
     ijkmp_set_weak_thiz(mp, (*env)->NewGlobalRef(env, weak_this));
     ijkmp_set_inject_opaque(mp, ijkmp_get_weak_thiz(mp));
+    ijkmp_set_ijkio_inject_opaque(mp, ijkmp_get_weak_thiz(mp));
     ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, ijkmp_get_weak_thiz(mp));
 
 LABEL_RETURN:
@@ -1023,6 +1076,7 @@ static JNINativeMethod g_methods[] = {
     },
     { "_setDataSourceFd",       "(I)V",     (void *) IjkMediaPlayer_setDataSourceFd },
     { "_setDataSource",         "(Ltv/danmaku/ijk/media/player/misc/IMediaDataSource;)V", (void *)IjkMediaPlayer_setDataSourceCallback },
+    { "_setDataSourceIjkIOHttp",    "(Ltv/danmaku/ijk/media/player/misc/IIjkIOHttp;)V", (void *)IjkMediaPlayer_setDataSourceIjkIOHttpCallback },
 
     { "_setVideoSurface",       "(Landroid/view/Surface;)V", (void *) IjkMediaPlayer_setVideoSurface },
     { "_prepareAsync",          "()V",      (void *) IjkMediaPlayer_prepareAsync },

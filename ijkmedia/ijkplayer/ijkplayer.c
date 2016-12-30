@@ -145,6 +145,16 @@ void *ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque)
     return prev_weak_thiz;
 }
 
+void *ijkmp_set_ijkio_inject_opaque(IjkMediaPlayer *mp, void *opaque)
+{
+    assert(mp);
+
+    MPTRACE("%s(%p)\n", __func__, opaque);
+    void *prev_weak_thiz = ffp_set_ijkio_inject_opaque(mp->ffplayer, opaque);
+    MPTRACE("%s()=void\n", __func__);
+    return prev_weak_thiz;
+}
+
 void ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, const char *value)
 {
     assert(mp);

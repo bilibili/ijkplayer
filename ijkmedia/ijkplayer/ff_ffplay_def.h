@@ -58,6 +58,8 @@
 #endif
 
 #include <stdbool.h>
+#include "ijkavformat/ijkiomanager.h"
+#include "ijkavformat/ijkioapplication.h"
 #include "ff_ffinc.h"
 #include "ff_ffmsg_queue.h"
 #include "ff_ffpipenode.h"
@@ -467,6 +469,10 @@ typedef struct FFStatistic
     SDL_SpeedSampler2 tcp_read_sampler;
     int64_t latest_seek_load_duration;
     int64_t byte_count;
+    int64_t cache_physical_pos;
+    int64_t cache_buf_forwards;
+    int64_t cache_file_pos;
+    int64_t cache_count_bytes;
 } FFStatistic;
 
 #define FFP_TCP_READ_SAMPLE_RANGE 2000
@@ -651,10 +657,13 @@ typedef struct FFPlayer {
     int         pf_playback_volume_changed;
 
     void               *inject_opaque;
+    void               *ijkio_inject_opaque;
     FFStatistic         stat;
     FFDemuxCacheControl dcc;
 
     AVApplicationContext *app_ctx;
+    IjkIOManagerContext *ijkio_manager_ctx;
+
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
@@ -771,10 +780,12 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->pf_playback_volume_changed     = 0;
 
     av_application_closep(&ffp->app_ctx);
+    ijkio_manager_destroyp(&ffp->ijkio_manager_ctx);
 
     msg_queue_flush(&ffp->msg_queue);
 
     ffp->inject_opaque = NULL;
+    ffp->ijkio_inject_opaque = NULL;
     ffp_reset_statistic(&ffp->stat);
     ffp_reset_demux_cache_control(&ffp->dcc);
 }
