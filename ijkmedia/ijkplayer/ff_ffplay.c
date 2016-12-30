@@ -751,6 +751,7 @@ static void stream_close(FFPlayer *ffp)
 #endif
     av_free(is->filename);
     av_free(is);
+    ffp->is = NULL;
 }
 
 // FFP_MERGE: do_exit
