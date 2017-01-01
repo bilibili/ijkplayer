@@ -63,25 +63,25 @@
 #include "ff_ffpipenode.h"
 #include "ijkmeta.h"
 
-#define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
+//#define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
 
 /*
  * START: buffering after prepared/seeked
  * NEXT:  buffering for the second time after START
  * MAX:   ...
  */
-#define DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS     (100)
-#define DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS      (1 * 1000)
-#define DEFAULT_LAST_HIGH_WATER_MARK_IN_MS      (5 * 1000)
+//#define DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS     (100)
+//#define DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS      (1 * 1000)
+//#define DEFAULT_LAST_HIGH_WATER_MARK_IN_MS      (5 * 1000)
 
 #define BUFFERING_CHECK_PER_BYTES               (512)
-#define BUFFERING_CHECK_PER_MILLISECONDS        (500)
+#define BUFFERING_CHECK_PER_MILLISECONDS        (500) //500
 
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #ifdef FFP_MERGE
-#define MIN_FRAMES 25
+#define MIN_FRAMES 25 //25
 #endif
-#define DEFAULT_MIN_FRAMES  50000
+#define DEFAULT_MIN_FRAMES  50000 //50000
 #define MIN_MIN_FRAMES      5
 #define MAX_MIN_FRAMES      50000
 #define MIN_FRAMES (ffp->dcc.min_frames)
@@ -161,7 +161,7 @@ typedef struct PacketQueue {
 #define SAMPLE_QUEUE_SIZE 9
 #define FRAME_QUEUE_SIZE FFMAX(SAMPLE_QUEUE_SIZE, FFMAX(VIDEO_PICTURE_QUEUE_SIZE_MAX, SUBPICTURE_QUEUE_SIZE))
 
-#define VIDEO_MAX_FPS_DEFAULT 30
+#define VIDEO_MAX_FPS_DEFAULT 24 //30
 
 typedef struct AudioParams {
     int freq;
@@ -383,8 +383,8 @@ typedef struct VideoState {
 static AVInputFormat *file_iformat;
 static const char *input_filename;
 static const char *window_title;
-static int default_width  = 640;
-static int default_height = 480;
+static int default_width  = 320; //640
+static int default_height = 240; //480
 static int screen_width  = 0;
 static int screen_height = 0;
 static int audio_disable;
@@ -397,7 +397,7 @@ static int show_status = 1;
 static int av_sync_type = AV_SYNC_AUDIO_MASTER;
 static int64_t start_time = AV_NOPTS_VALUE;
 static int64_t duration = AV_NOPTS_VALUE;
-static int fast = 0;
+static int fast = 1; //0
 static int genpts = 0;
 static int lowres = 0;
 static int decoder_reorder_pts = -1;
@@ -489,12 +489,12 @@ inline static void ffp_reset_demux_cache_control(FFDemuxCacheControl *dcc)
 {
     dcc->min_frames                = DEFAULT_MIN_FRAMES;
     dcc->max_buffer_size           = MAX_QUEUE_SIZE;
-    dcc->high_water_mark_in_bytes  = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
+  //  dcc->high_water_mark_in_bytes  = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
 
-    dcc->first_high_water_mark_in_ms    = DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS;
-    dcc->next_high_water_mark_in_ms     = DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS;
-    dcc->last_high_water_mark_in_ms     = DEFAULT_LAST_HIGH_WATER_MARK_IN_MS;
-    dcc->current_high_water_mark_in_ms  = DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS;
+   // dcc->first_high_water_mark_in_ms    = DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS;
+   // dcc->next_high_water_mark_in_ms     = DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS;
+   // dcc->last_high_water_mark_in_ms     = DEFAULT_LAST_HIGH_WATER_MARK_IN_MS;
+   // dcc->current_high_water_mark_in_ms  = DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS;
 }
 
 /* ffplayer */
@@ -687,13 +687,13 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->decoder_reorder_pts    = -1;
     ffp->autoexit               = 0;
     ffp->loop                   = 1;
-    ffp->framedrop              = 0; // option
+    ffp->framedrop              = 1; //0 // option
     ffp->seek_at_start          = 0;
     ffp->infinite_buffer        = -1;
     ffp->show_mode              = SHOW_MODE_NONE;
     av_freep(&ffp->audio_codec_name);
     av_freep(&ffp->video_codec_name);
-    ffp->rdftspeed              = 0.02;
+    ffp->rdftspeed              = 0.02; //0.02
 #if CONFIG_AVFILTER
     av_freep(&ffp->vfilters_list);
     ffp->nb_vfilters            = 0;
@@ -733,7 +733,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->packet_buffering               = 1;
     ffp->pictq_size                     = VIDEO_PICTURE_QUEUE_SIZE_DEFAULT; // option
-    ffp->max_fps                        = 31; // option
+    ffp->max_fps                        = 24; // 31 option
 
     ffp->videotoolbox                   = 0; // option
     ffp->vtb_max_frame_width            = 0; // option

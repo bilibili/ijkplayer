@@ -963,7 +963,7 @@ int videotoolbox_decode_frame(VideoToolBoxContext* context)
                 if (d->queue->nb_packets == 0)
                     SDL_CondSignal(d->empty_queue_cond);
                 ffp_video_statistic_l(ffp);
-                if (ffp_packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0)
+                 if (ffp_packet_queue_get(d->queue, &pkt, 1,  &d->pkt_serial) < 0)
                     return -1;
                 if (ffp_is_flush_packet(&pkt)) {
                     avcodec_flush_buffers(d->avctx);

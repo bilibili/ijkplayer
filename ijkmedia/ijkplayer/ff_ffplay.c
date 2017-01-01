@@ -379,7 +379,7 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
             do {
                 if (d->queue->nb_packets == 0)
                     SDL_CondSignal(d->empty_queue_cond);
-                if (packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0)
+                if (packet_queue_get(d->queue, &pkt, 1, &d->pkt_serial) < 0)
                     return -1;
                 if (pkt.data == flush_pkt.data) {
                     avcodec_flush_buffers(d->avctx);
@@ -1032,8 +1032,19 @@ static double compute_target_delay(FFPlayer *ffp, double delay, VideoState *is)
     av_log(NULL, AV_LOG_TRACE, "video: delay=%0.3f A-V=%f\n",
             delay, -diff);
 #endif
+  
+   //return delay;
 
-    return delay;
+//  if (delay >= 0.05){
+//    return 0.05;
+//  }else {
+//    return 0.05;
+//  }
+  av_log(NULL, AV_LOG_DEBUG, "video: delay=%0.3f A-V=%f\n",
+         delay, -diff);
+  
+  return delay;
+
 }
 
 static double vp_duration(VideoState *is, Frame *vp, Frame *nextvp) {
@@ -2491,6 +2502,7 @@ static int is_realtime(AVFormatContext *s)
     if(   !strcmp(s->iformat->name, "rtp")
        || !strcmp(s->iformat->name, "rtsp")
        || !strcmp(s->iformat->name, "sdp")
+       || !strcmp(s->iformat->name, "rtmp")
     )
         return 1;
 
@@ -2553,6 +2565,7 @@ static int read_thread(void *arg)
         // There is total different meaning for 'timeout' option in rtmp
         av_log(ffp, AV_LOG_WARNING, "remove 'timeout' option for rtmp.\n");
         av_dict_set(&ffp->format_opts, "timeout", NULL, 0);
+        av_dict_set(&ffp->format_opts, "fflags", "nobuffer", 0);
     }
     if (ffp->iformat_name)
         is->iformat = av_find_input_format(ffp->iformat_name);
@@ -2886,9 +2899,11 @@ static int read_thread(void *arg)
                     SDL_UnlockMutex(wait_mutex);
                     if (!is->abort_request)
                         continue;
-                } else {
-                    completed = 1;
-                    ffp->auto_resume = 0;
+                }
+              
+                else {
+                    //completed = 1;
+                    ffp->auto_resume = 1;
 
                     // TODO: 0 it's a bit early to notify complete here
                     ffp_toggle_buffering(ffp, 0);
@@ -2995,13 +3010,13 @@ static int read_thread(void *arg)
 
         ffp_statistic_l(ffp);
 
-        if (ffp->packet_buffering) {
-            io_tick_counter = SDL_GetTickHR();
-            if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
-                prev_io_tick_counter = io_tick_counter;
-                ffp_check_buffering_l(ffp);
-            }
-        }
+//        if (ffp->packet_buffering) {
+//            io_tick_counter = SDL_GetTickHR();
+//            if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
+//                prev_io_tick_counter = io_tick_counter;
+//                ffp_check_buffering_l(ffp);
+//            }
+//        }
     }
 
     ret = 0;
