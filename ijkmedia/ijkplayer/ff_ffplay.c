@@ -625,7 +625,7 @@ static void free_picture(Frame *vp)
 // FFP_MERGE: upload_texture
 // FFP_MERGE: video_image_display
 
-static int parse_ass_subtitle(const char *ass, char *output)
+static size_t parse_ass_subtitle(const char *ass, char *output)
 {
     char *tok = NULL;
     tok = strchr(ass, ':'); if (tok) tok += 1; // skip event
@@ -640,18 +640,18 @@ static int parse_ass_subtitle(const char *ass, char *output)
     tok = strchr(tok, ','); if (tok) tok += 1; // skip effect
     if (tok) {
         char *text = tok;
-        int idx = 0;
+        size_t idx = 0;
         do {
             char *found = strstr(text, "\\N");
             if (found) {
-                int n = found - text;
+                size_t n = found - text;
                 memcpy(output+idx, text, n);
                 output[idx + n] = '\n';
                 idx = n + 1;
                 text = found + 2;
             }
             else {
-                int left_text_len = strlen(text);
+                size_t left_text_len = strlen(text);
                 memcpy(output+idx, text, left_text_len);
                 if (output[idx + left_text_len - 1] == '\n')
                     output[idx + left_text_len - 1] = '\0';
