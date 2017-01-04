@@ -784,7 +784,7 @@ static IJKAVMoviePlayerController* instance;
             CMTime currentTime = [_player currentTime];
             
             BOOL foundRange = NO;
-            CMTimeRange aTimeRange;
+            CMTimeRange aTimeRange = {0};
             
             if (timeRangeArray.count) {
                 aTimeRange = [[timeRangeArray objectAtIndex:0] CMTimeRangeValue];
