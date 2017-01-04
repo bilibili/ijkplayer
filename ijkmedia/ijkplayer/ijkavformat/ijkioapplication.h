@@ -26,8 +26,8 @@
 
 #include <stdint.h>
 
-#define CACHE_FILE_PATH_MAX_LEN  256
-#define IJKIOAPP_EVENT_CACHE_STATISTIC     0x1003  //IJKIOAppCacheStatistic
+#define CACHE_FILE_PATH_MAX_LEN        512
+#define IJKIOAPP_EVENT_CACHE_STATISTIC 0x1003  //IJKIOAppCacheStatistic
 
 typedef struct IjkIOAppCacheStatistic {
     int64_t cache_physical_pos;

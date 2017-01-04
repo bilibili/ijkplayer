@@ -96,7 +96,7 @@ typedef struct IjkIOCacheContext {
 typedef struct IjkCacheEntry {
     int64_t logical_pos;
     int64_t physical_pos;
-    int size;
+    int64_t size;
 } IjkCacheEntry;
 
 static int cmp(const void *key, const void *node)
@@ -188,12 +188,12 @@ static int ijkio_cache_file_error(IjkURLContext *h) {
     return 0;
 }
 
-static int ijkio_cache_file_overrang(IjkURLContext *h, int64_t *cur_pos, int size) {
+static int64_t ijkio_cache_file_overrang(IjkURLContext *h, int64_t *cur_pos, int size) {
     IjkIOCacheContext *c= h->priv_data;
     IjkCacheTreeInfo *tree_info = NULL;
-    int free_space   = 0;
-    int min_root_id  = 0;
-    int is_first_pos = 1;
+    int64_t free_space   = 0;
+    int min_root_id      = 0;
+    int is_first_pos     = 1;
 
     if (1 == ijk_map_size(c->cache_info_map)) {
         tree_info = ijk_map_index_get(c->cache_info_map, 0);
@@ -221,7 +221,7 @@ static int ijkio_cache_file_overrang(IjkURLContext *h, int64_t *cur_pos, int siz
 
         if (tree_info) {
             free_space += tree_info->physical_size;
-            int pos = lseek(c->fd, tree_info->physical_init_pos, SEEK_SET);
+            int64_t pos = lseek(c->fd, tree_info->physical_init_pos, SEEK_SET);
             if (pos < 0) {
                 return -1;
             }
@@ -254,15 +254,15 @@ static int ijkio_cache_file_overrang(IjkURLContext *h, int64_t *cur_pos, int siz
     return free_space;
 }
 
-static int add_entry(IjkURLContext *h, const unsigned char *buf, int size)
+static int64_t add_entry(IjkURLContext *h, const unsigned char *buf, int size)
 {
     IjkIOCacheContext *c= h->priv_data;
     int64_t pos = -1;
-    int ret;
+    int64_t ret;
     IjkCacheEntry *entry = NULL, *next[2] = {NULL, NULL};
     IjkCacheEntry *entry_ret;
     struct IjkAVTreeNode *node = NULL;
-    int free_space;
+    int64_t free_space;
 
     //FIXME avoid lseek
     pos = lseek(c->fd, *c->last_physical_pos, SEEK_SET);
@@ -351,7 +351,7 @@ static int wrapped_file_read(void *src, void *dst, int size)
     IjkIOCacheContext *c   = h->priv_data;
     int ret;
 
-    ret = read(c->fd, dst, size);
+    ret = (int)read(c->fd, dst, size);
     c->read_file_inner_error = ret < 0 ? ret : 0;
     return ret;
 }
@@ -372,7 +372,7 @@ static int wrapped_url_read(void *src, void *dst, int size)
     return ret;
 }
 
-static int ijkio_cache_fill_fifo(IjkURLContext *h) {
+static int64_t ijkio_cache_fill_fifo(IjkURLContext *h) {
     IjkIOCacheContext *c= h->priv_data;
     if (!c)
         return IJKAVERROR(ENOSYS);
@@ -447,7 +447,7 @@ static int ijkio_cache_fill_fifo(IjkURLContext *h) {
                 }
 
                 if (r >= 0) {
-                    to_copy = FFMIN(to_copy, entry->size - in_block_pos);
+                    to_copy = (int)FFMIN(to_copy, entry->size - in_block_pos);
                     r = ijk_av_fifo_generic_write(c->fifo, h, to_copy, wrapped_file_read);
                     if (r > 0) {
                         c->fifo_logical_pos       += r;
@@ -494,12 +494,12 @@ static int ijkio_cache_fill_fifo(IjkURLContext *h) {
     return r;
 }
 
-static int ijkio_cache_write_file(IjkURLContext *h) {
+static int64_t ijkio_cache_write_file(IjkURLContext *h) {
     IjkIOCacheContext *c= h->priv_data;
     int64_t r;
     unsigned char buf[4096] = {0};
     int to_read = 4096;
-    int to_copy = to_read;
+    int64_t to_copy = (int64_t)to_read;
 
     IjkCacheEntry *root = NULL ,*l_entry = NULL, *r_entry = NULL, *next[2] = {NULL, NULL};
 
@@ -557,19 +557,19 @@ static int ijkio_cache_write_file(IjkURLContext *h) {
         }
         c->file_inner_pos = r;
     }
-    r = c->inner->prot->url_read(c->inner, buf, to_copy);
+    r = c->inner->prot->url_read(c->inner, buf, (int)to_copy);
     if (r == 0 && to_copy > 0) {
         c->file_logical_end = c->file_logical_pos;
     }
     if (r <= 0) {
         c->io_eof_reached = 1;
-        c->io_error = r;
+        c->io_error = (int)r;
         return r;
     }
     *c->cache_count_bytes += r;
     c->file_inner_pos += r;
 
-    r = add_entry(h, buf, r);
+    r = add_entry(h, buf, (int)r);
 
     if (r > 0)
         c->file_logical_pos += r;
@@ -594,7 +594,7 @@ static int64_t ijkio_cache_ffurl_size(IjkURLContext *h) {
 }
 
 static void ijkio_cache_task(void *h, void *r) {
-    int ret;
+    int64_t ret;
     IjkIOCacheContext *c= ((IjkURLContext *)h)->priv_data;
     c->task_is_running = 1;
     while(1) {
@@ -657,13 +657,13 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
 
     t = ijk_av_dict_get(*options, "cache_file_close", NULL, IJK_AV_DICT_IGNORE_SUFFIX);
     if (t) {
-        c->cache_file_close = strtol(t->value, NULL, 10);
+        c->cache_file_close = (int)strtol(t->value, NULL, 10);
         c->cache_file_close = c->cache_file_close != 0 ? 1 : 0;
     }
 
     t = ijk_av_dict_get(*options, "cur_file_no", NULL, IJK_AV_DICT_IGNORE_SUFFIX);
     if (t) {
-        c->cur_file_no = strtol(t->value, NULL, 10);
+        c->cur_file_no = (int)strtol(t->value, NULL, 10);
     }
 
     c->cache_file_path = c->ijkio_app_ctx->cache_file_path;
@@ -689,8 +689,8 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
                 break;
             }
 
-            ret = lseek(c->fd, *c->last_physical_pos, SEEK_SET);
-            if (ret < 0) {
+            int64_t seek_ret = lseek(c->fd, *c->last_physical_pos, SEEK_SET);
+            if (seek_ret < 0) {
                 c->cache_file_close = 1;
                 close(c->fd);
                 break;
@@ -711,7 +711,7 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
         } while(0);
     }
 
-    c->fifo = ijk_av_fifo_alloc(c->cache_forwards_fifo_capacity);
+    c->fifo = ijk_av_fifo_alloc((unsigned int)c->cache_forwards_fifo_capacity);
 
     ret = ijkio_alloc_url(&(c->inner), url);
     if (c->inner && !ret) {
@@ -927,8 +927,8 @@ static int ijkio_cache_resume(IjkURLContext *h) {
             c->cache_file_close = 1;
         }
 
-       ret = lseek(c->fd, *c->last_physical_pos, SEEK_SET);
-        if (ret < 0) {
+        int64_t seek_ret = lseek(c->fd, *c->last_physical_pos, SEEK_SET);
+        if (seek_ret < 0) {
             c->cache_file_close = 1;
             close(c->fd);
         } else {
