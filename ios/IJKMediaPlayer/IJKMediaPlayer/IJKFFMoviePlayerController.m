@@ -196,6 +196,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
         ijkmp_set_inject_opaque(_mediaPlayer, (__bridge_retained void *) weakHolder);
+        ijkmp_set_ijkio_inject_opaque(_mediaPlayer, (__bridge_retained void *)weakHolder);
         ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", _shouldAutoplay ? 1 : 0);
 
         // init video sink
@@ -478,6 +479,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     _nativeInvokeDelegate   = nil;
 
     __unused id weakHolder = (__bridge_transfer IJKWeakHolder*)ijkmp_set_inject_opaque(_mediaPlayer, NULL);
+    __unused id weakijkHolder = (__bridge_transfer IJKWeakHolder*)ijkmp_set_ijkio_inject_opaque(_mediaPlayer, NULL);
     ijkmp_dec_ref_p(&_mediaPlayer);
 
     [self didShutdown];
