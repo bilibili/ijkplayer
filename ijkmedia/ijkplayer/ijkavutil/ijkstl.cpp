@@ -21,16 +21,16 @@
 
 using namespace std;
 
-typedef map<int, void *> IjkMap;
+typedef map<int64_t, void *> IjkMap;
 
 extern "C" void* ijk_map_create();
-extern "C" void ijk_map_put(void *data, int key, void *value);
-extern "C" void* ijk_map_get(void *data, int key);
-extern "C" int ijk_map_remove(void *data, int key);
+extern "C" void ijk_map_put(void *data, int64_t key, void *value);
+extern "C" void* ijk_map_get(void *data, int64_t key);
+extern "C" int ijk_map_remove(void *data, int64_t key);
 extern "C" int ijk_map_size(void *data);
 extern "C" int ijk_map_max_size(void *data);
 extern "C" void* ijk_map_index_get(void *data, int index);
-extern "C" int ijk_map_get_min_key(void *data);
+extern "C" int64_t ijk_map_get_min_key(void *data);
 extern "C" void ijk_map_clear(void *data);
 extern "C" void ijk_map_destroy(void *data);
 extern "C" void ijk_map_traversal_handle(void *data, int (*enu)(void *elem));
@@ -40,14 +40,14 @@ void* ijk_map_create() {
     return data;
 }
 
-void ijk_map_put(void *data, int key, void *value) {
+void ijk_map_put(void *data, int64_t key, void *value) {
     IjkMap *map_data = reinterpret_cast<IjkMap *>(data);
     if (!map_data)
         return;
     (*map_data)[key] = value;
 }
 
-void* ijk_map_get(void *data, int key) {
+void* ijk_map_get(void *data, int64_t key) {
     IjkMap *map_data = reinterpret_cast<IjkMap *>(data);
     if (!map_data)
         return NULL;
@@ -59,7 +59,7 @@ void* ijk_map_get(void *data, int key) {
     return NULL;
 }
 
-int ijk_map_remove(void *data, int key) {
+int ijk_map_remove(void *data, int64_t key) {
     IjkMap *map_data = reinterpret_cast<IjkMap *>(data);
     if (!map_data)
         return -1;
@@ -113,14 +113,14 @@ void ijk_map_traversal_handle(void *data, int (*enu)(void *elem)) {
     }
 }
 
-int ijk_map_get_min_key(void *data) {
+int64_t ijk_map_get_min_key(void *data) {
     IjkMap *map_data = reinterpret_cast<IjkMap *>(data);
     if (!map_data || map_data->empty())
         return -1;
 
     IjkMap::iterator it = map_data->begin();
 
-    int min_key = it->first;
+    int64_t min_key = it->first;
 
     for (; it != map_data->end(); it++) {
         min_key = min_key < it->first ? min_key : it->first;

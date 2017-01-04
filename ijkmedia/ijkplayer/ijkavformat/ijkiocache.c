@@ -192,7 +192,7 @@ static int64_t ijkio_cache_file_overrang(IjkURLContext *h, int64_t *cur_pos, int
     IjkIOCacheContext *c= h->priv_data;
     IjkCacheTreeInfo *tree_info = NULL;
     int64_t free_space   = 0;
-    int min_root_id      = 0;
+    int64_t min_root_id      = 0;
     int is_first_pos     = 1;
 
     if (1 == ijk_map_size(c->cache_info_map)) {
@@ -209,7 +209,7 @@ static int64_t ijkio_cache_file_overrang(IjkURLContext *h, int64_t *cur_pos, int
         c->cache_physical_pos = 0;
         return c->cache_max_capacity;
     } else {
-        ijk_map_remove(c->cache_info_map, c->cur_file_no);
+        ijk_map_remove(c->cache_info_map, (int64_t)c->cur_file_no);
     }
 
     while (1) {
@@ -249,7 +249,7 @@ static int64_t ijkio_cache_file_overrang(IjkURLContext *h, int64_t *cur_pos, int
         }
     }
 
-    ijk_map_put(c->cache_info_map, c->cur_file_no, c->tree_info);
+    ijk_map_put(c->cache_info_map, (int64_t)c->cur_file_no, c->tree_info);
 
     return free_space;
 }
@@ -698,13 +698,13 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
                 c->cache_physical_pos = *c->last_physical_pos;
             }
 
-            c->tree_info = ijk_map_get(c->cache_info_map, c->cur_file_no);
+            c->tree_info = ijk_map_get(c->cache_info_map, (int64_t)c->cur_file_no);
             if (c->tree_info == NULL) {
                 c->tree_info = calloc(1, sizeof(IjkCacheTreeInfo));
                 c->tree_info->physical_init_pos = *c->last_physical_pos;
             }
 
-            ijk_map_put(c->cache_info_map, c->cur_file_no, c->tree_info);
+            ijk_map_put(c->cache_info_map, (int64_t)c->cur_file_no, c->tree_info);
 
             if (*c->cache_limit_file_pos <= 0)
                 *c->cache_limit_file_pos = c->cache_max_capacity;
@@ -771,7 +771,7 @@ mutex_fail:
 url_fail:
     ijk_av_fifo_freep(&c->fifo);
     if (c->tree_info)
-        ijk_map_put(c->cache_info_map, c->cur_file_no, c->tree_info);
+        ijk_map_put(c->cache_info_map, (int64_t)c->cur_file_no, c->tree_info);
     return ret;
 }
 

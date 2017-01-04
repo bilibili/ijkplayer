@@ -148,7 +148,7 @@ int ijkio_manager_io_open(IjkIOManagerContext *h, const char *url, int flags, Ij
         if (h->ijk_ctx_map) {
             ijkio_manager_set_all_ctx_pause(h);
             inner->state = IJKURL_STARTED;
-            ijk_map_put(h->ijk_ctx_map, (int)(intptr_t)h->cur_ffmpeg_ctx, inner);
+            ijk_map_put(h->ijk_ctx_map, (int64_t)(intptr_t)h->cur_ffmpeg_ctx, inner);
         }
         ret = inner->prot->url_open2(inner, url, flags, options);
         if (ret < 0)
@@ -163,7 +163,7 @@ fail:
             ret = inner->prot->url_close(inner);
 
         if (h->ijk_ctx_map) {
-            ijk_map_remove(h->ijk_ctx_map, (int)(intptr_t)h->cur_ffmpeg_ctx);
+            ijk_map_remove(h->ijk_ctx_map, (int64_t)(intptr_t)h->cur_ffmpeg_ctx);
         }
         ijk_av_freep(&inner->priv_data);
         ijk_av_freep(&inner);
@@ -176,7 +176,7 @@ int ijkio_manager_io_read(IjkIOManagerContext *h, unsigned char *buf, int size) 
     if (!h)
         return ret;
 
-    IjkURLContext *inner = ijk_map_get(h->ijk_ctx_map, (int)(intptr_t)h->cur_ffmpeg_ctx);
+    IjkURLContext *inner = ijk_map_get(h->ijk_ctx_map, (int64_t)(intptr_t)h->cur_ffmpeg_ctx);
     if (inner && inner->prot && inner->prot->url_read) {
         if (inner->state == IJKURL_PAUSED) {
             if (inner->prot->url_resume) {
@@ -199,7 +199,7 @@ int64_t ijkio_manager_io_seek(IjkIOManagerContext *h, int64_t offset, int whence
     if (!h)
         return ret;
 
-    IjkURLContext *inner = ijk_map_get(h->ijk_ctx_map, (int)(intptr_t)h->cur_ffmpeg_ctx);
+    IjkURLContext *inner = ijk_map_get(h->ijk_ctx_map, (int64_t)(intptr_t)h->cur_ffmpeg_ctx);
     if (inner && inner->prot && inner->prot->url_seek) {
         if (inner->state == IJKURL_PAUSED) {
             if (inner->prot->url_resume) {
@@ -221,12 +221,12 @@ int ijkio_manager_io_close(IjkIOManagerContext *h) {
     if (!h)
         return ret;
 
-    IjkURLContext *inner = ijk_map_get(h->ijk_ctx_map, (int)(intptr_t)h->cur_ffmpeg_ctx);
+    IjkURLContext *inner = ijk_map_get(h->ijk_ctx_map, (int64_t)(intptr_t)h->cur_ffmpeg_ctx);
     if (inner) {
         if (inner->prot && inner->prot->url_close) {
             ret = inner->prot->url_close(inner);
         }
-        ijk_map_remove(h->ijk_ctx_map, (int)(intptr_t)h->cur_ffmpeg_ctx);
+        ijk_map_remove(h->ijk_ctx_map, (int64_t)(intptr_t)h->cur_ffmpeg_ctx);
         ijk_av_freep(&inner);
     }
 
