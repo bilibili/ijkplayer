@@ -412,10 +412,24 @@ static int64_t ijkio_cache_fill_fifo(IjkURLContext *h) {
     }
 
     fifo_space = ijk_av_fifo_space(c->fifo);
-    if (c->fifo_eof_reached || fifo_space <= 0) {
-        pthread_cond_signal(&c->cond_wakeup_main);
-        pthread_mutex_unlock(&c->mutex);
-        return 0;
+
+    if (c->cache_file_close) {
+        if (c->fifo_eof_reached || fifo_space <= 0) {
+            pthread_cond_signal(&c->cond_wakeup_main);
+            pthread_cond_wait(&c->cond_wakeup_background, &c->mutex);
+            pthread_mutex_unlock(&c->mutex);
+            return 0;
+        }
+    } else {
+        int64_t file_forwards_spece = c->file_logical_pos - c->fifo_logical_pos;
+        if (c->fifo_eof_reached || fifo_space <= 0) {
+            pthread_cond_signal(&c->cond_wakeup_main);
+            if ((file_forwards_spece >= c->cache_file_forwards_capacity) || c->io_eof_reached) {
+                pthread_cond_wait(&c->cond_wakeup_background, &c->mutex);
+            }
+            pthread_mutex_unlock(&c->mutex);
+            return 0;
+        }
     }
 
     pthread_mutex_unlock(&c->mutex);
@@ -598,13 +612,6 @@ static void ijkio_cache_task(void *h, void *r) {
     IjkIOCacheContext *c= ((IjkURLContext *)h)->priv_data;
     c->task_is_running = 1;
     while(1) {
-        if (c->fifo_eof_reached) {
-            pthread_mutex_lock(&c->mutex);
-            pthread_cond_signal(&c->cond_wakeup_main);
-            pthread_cond_wait(&c->cond_wakeup_background, &c->mutex);
-            pthread_mutex_unlock(&c->mutex);
-        }
-
         ret = ijkio_cache_fill_fifo(h);
         if (ret == IJKAVERROR_EXIT)
             break;
