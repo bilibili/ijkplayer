@@ -1,6 +1,14 @@
 tag next
 --------------------------------
 
+tag k0.7.6
+--------------------------------
+- ffmpeg: ass subtitle support
+- msg_queue: add resource for msg_queue
+- ios: separate vtb sync mode from mixed vtb
+- android: fix some thread competition
+- android: support setSpeed for pre-M(api<23) versions
+
 tag k0.7.5
 --------------------------------
 - ffmpeg: disable-asm on architecture x86
