@@ -627,6 +627,7 @@ static void free_picture(Frame *vp)
 
 static size_t parse_ass_subtitle(const char *ass, char *output)
 {
+    printf("%s\n", ass);
     char *tok = NULL;
     tok = strchr(ass, ':'); if (tok) tok += 1; // skip event
     tok = strchr(tok, ','); if (tok) tok += 1; // skip layer
@@ -660,6 +661,7 @@ static size_t parse_ass_subtitle(const char *ass, char *output)
                 break;
             }
         } while(1);
+        printf("%s\n", output);
         return strlen(output) + 1;
     }
     return 0;
@@ -2446,8 +2448,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         break;
     case AVMEDIA_TYPE_SUBTITLE:
-        if (!ffp->subtitle) break;
-
+//        if (!ffp->subtitle) break;
+        
         is->subtitle_stream = stream_index;
         is->subtitle_st = ic->streams[stream_index];
 
