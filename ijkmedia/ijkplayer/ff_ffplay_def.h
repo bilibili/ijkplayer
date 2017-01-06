@@ -123,6 +123,8 @@
 /* TODO: We assume that a decoded and resampled frame fits into this buffer */
 #define SAMPLE_ARRAY_SIZE (8 * 65536)
 
+#define MIN_PKT_DURATION 15
+
 #ifdef FFP_MERGE
 #define CURSOR_HIDE_DELAY 1000000
 

@@ -172,7 +172,9 @@ static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
     q->last_pkt = pkt1;
     q->nb_packets++;
     q->size += pkt1->pkt.size + sizeof(*pkt1);
-    q->duration += pkt1->pkt.duration;
+
+    q->duration += FFMAX(pkt1->pkt.duration, MIN_PKT_DURATION);
+
     /* XXX: should duplicate packet data in DV case */
     SDL_CondSignal(q->cond);
     return 0;
@@ -300,7 +302,7 @@ static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *seria
                 q->last_pkt = NULL;
             q->nb_packets--;
             q->size -= pkt1->pkt.size + sizeof(*pkt1);
-            q->duration -= pkt1->pkt.duration;
+            q->duration -= FFMAX(pkt1->pkt.duration, MIN_PKT_DURATION);
             *pkt = pkt1->pkt;
             if (serial)
                 *serial = pkt1->serial;
