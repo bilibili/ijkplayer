@@ -120,6 +120,7 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
         goto fail;
 
     mp->ffplayer = ffp_create();
+    mp->ffplayer->wanted_stream_spec[AVMEDIA_TYPE_SUBTITLE] = "s:1";
     if (!mp->ffplayer)
         goto fail;
 
