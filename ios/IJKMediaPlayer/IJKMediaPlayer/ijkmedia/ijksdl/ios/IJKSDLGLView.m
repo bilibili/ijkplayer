@@ -559,6 +559,9 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 
 - (UIImage*)snapshotInternalOnIOS7AndLater
 {
+    if (CGSizeEqualToSize(self.bounds.size, CGSizeZero)) {
+        return nil;
+    }
     UIGraphicsBeginImageContextWithOptions(self.bounds.size, NO, 0.0);
     // Render our snapshot into the image context
     [self drawViewHierarchyInRect:self.bounds afterScreenUpdates:NO];
