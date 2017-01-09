@@ -29,7 +29,7 @@
 #import "IJKAudioKit.h"
 #import "IJKNotificationManager.h"
 #import "NSString+IJKMedia.h"
-
+#import "ijkioapplication.h"
 #include "string.h"
 
 static const char *kIJKFFRequiredFFmpegVersion = "ff3.2--ijk0.7.5--20161205--001";
@@ -69,6 +69,7 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff3.2--ijk0.7.5--20161205--001
     IJKNotificationManager *_notificationManager;
 
     AVAppAsyncStatistic _asyncStat;
+    IjkIOAppCacheStatistic _cacheStat;
     BOOL _shouldShowHudView;
     NSTimer *_hudTimer;
 }
@@ -573,12 +574,16 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     NSTimeInterval demux_cache = ((NSTimeInterval)ijkmp_get_playable_duration(_mediaPlayer)) / 1000;
 
     int64_t buf_forwards = _asyncStat.buf_forwards;
-    if (buf_forwards > 0) {
-        int64_t bit_rate = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_BIT_RATE, 0);
-        if (bit_rate > 0) {
-            NSTimeInterval io_cache = ((float)buf_forwards) * 8 / bit_rate;
-            return io_cache + demux_cache;
-        }
+    int64_t cache_forwards = _cacheStat.cache_buf_forwards;
+    int64_t bit_rate = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_BIT_RATE, 0);
+
+    if (buf_forwards > 0 && bit_rate > 0) {
+        NSTimeInterval io_cache = ((float)buf_forwards) * 8 / bit_rate;
+        demux_cache += io_cache;
+    }
+    if (cache_forwards > 0 && bit_rate > 0) {
+        NSTimeInterval cache_cache = ((float)cache_forwards) * 8 / bit_rate;
+        demux_cache += cache_cache;
     }
 
     return demux_cache;
@@ -1241,6 +1246,16 @@ static int onInjectAsyncStatistic(IJKFFMoviePlayerController *mpc, int type, voi
     return 0;
 }
 
+static int onInectIJKIOStatistic(IJKFFMoviePlayerController *mpc, int type, void *data, size_t data_size)
+{
+    IjkIOAppCacheStatistic *realData = data;
+    assert(realData);
+    assert(sizeof(IjkIOAppCacheStatistic) == data_size);
+
+    mpc->_cacheStat = *realData;
+    return 0;
+}
+
 static int64_t calculateElapsed(int64_t begin, int64_t end)
 {
     if (begin <= 0)
@@ -1353,6 +1368,8 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
             return onInjectIOControl(mpc, mpc.liveOpenDelegate, message, data, data_size);
         case AVAPP_EVENT_ASYNC_STATISTIC:
             return onInjectAsyncStatistic(mpc, message, data, data_size);
+        case IJKIOAPP_EVENT_CACHE_STATISTIC:
+            return onInectIJKIOStatistic(mpc, message, data, data_size);
         case AVAPP_CTRL_DID_TCP_OPEN:
             return onInjectTcpIOControl(mpc, mpc.tcpOpenDelegate, message, data, data_size);
         case AVAPP_EVENT_WILL_HTTP_OPEN:
