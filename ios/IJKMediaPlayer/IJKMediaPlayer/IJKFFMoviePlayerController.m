@@ -811,9 +811,15 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
         return;
     }
     _shouldShowHudView = shouldShowHudView;
-    if (shouldShowHudView)
+    if (shouldShowHudView) {
+        // test
+        NSLog(@"%d", [self getSubtitleCount]);
+        for (int i = 0; i < [self getSubtitleCount]; i++) {
+            NSLog(@"%@", [self getSubtitleName:i]);
+        }
+        [self setSubtitleIndex:1];
         [self startHudTimer];
-    else
+    } else
         [self stopHudTimer];
 }
 
@@ -989,7 +995,6 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             }
             ijkmp_set_playback_rate(_mediaPlayer, [self playbackRate]);
             ijkmp_set_playback_volume(_mediaPlayer, [self playbackVolume]);
-            NSLog(@"%@", _monitor.mediaMeta[@"streams"]);
             [self startHudTimer];
             _isPreparedToPlay = YES;
 
@@ -1374,23 +1379,41 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
     }
 }
 
+#pragma mark Subtitle
+
+- (int)getSubtitleCount {
+    return ijkmp_get_subtitle_count(_mediaPlayer);
+}
+
+- (NSString *)getSubtitleName:(int)index {
+    NSString *name = [NSString stringWithUTF8String:ijkmp_get_subtitle_name(_mediaPlayer, index)];
+    if ([name isEqualToString:@"sub"]) {
+        name = [name stringByAppendingFormat:@"%d", index];
+    }
+    return name;
+}
+
+- (void)setSubtitleIndex:(int)index {
+    ijkmp_set_subtitle_index(_mediaPlayer, index);
+}
+
 #pragma mark Airplay
 
--(BOOL)allowsMediaAirPlay
+- (BOOL)allowsMediaAirPlay
 {
     if (!self)
         return NO;
     return _allowsMediaAirPlay;
 }
 
--(void)setAllowsMediaAirPlay:(BOOL)b
+- (void)setAllowsMediaAirPlay:(BOOL)b
 {
     if (!self)
         return;
     _allowsMediaAirPlay = b;
 }
 
--(BOOL)airPlayMediaActive
+- (BOOL)airPlayMediaActive
 {
     if (!self)
         return NO;
@@ -1400,12 +1423,12 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
     return NO;
 }
 
--(BOOL)isDanmakuMediaAirPlay
+- (BOOL)isDanmakuMediaAirPlay
 {
     return _isDanmakuMediaAirPlay;
 }
 
--(void)setIsDanmakuMediaAirPlay:(BOOL)isDanmakuMediaAirPlay
+- (void)setIsDanmakuMediaAirPlay:(BOOL)isDanmakuMediaAirPlay
 {
     _isDanmakuMediaAirPlay = isDanmakuMediaAirPlay;
     if (_isDanmakuMediaAirPlay) {

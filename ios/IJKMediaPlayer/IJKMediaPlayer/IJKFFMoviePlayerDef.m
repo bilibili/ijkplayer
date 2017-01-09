@@ -25,7 +25,7 @@
 @implementation IJKFFMoviePlayerMessage
 @end
 
-@implementation IJKFFMoviePlayerMessagePool{
+@implementation IJKFFMoviePlayerMessagePool {
     NSMutableArray *_array;
 }
 

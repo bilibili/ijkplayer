@@ -447,24 +447,6 @@ int ijkmp_start(IjkMediaPlayer *mp)
     int retval = ijkmp_start_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_start()=%d\n", retval);
-    
-    for (int i = 0; i < mp->ffplayer->is->ic->nb_streams; i++) {
-        AVStream *st = mp->ffplayer->is->ic->streams[i];
-        enum AVMediaType type = st->codecpar->codec_type;
-        
-        AVDictionaryEntry *entry = av_dict_get(st->metadata, "language", NULL, 0);
-        if (entry) {
-            printf("%s", entry->value);
-        }
-        
-        if (type >= 0)
-            if (avformat_match_stream_specifier(mp->ffplayer->is->ic, st, "s:1") > 0) {
-                printf("find: %d\n", i);
-                ijkmp_set_stream_selected(mp, i, 1);
-                ijkmp_seek_to(mp, ijkmp_get_current_position(mp));
-            }
-    }
-    
     return retval;
 }
 
@@ -650,6 +632,65 @@ long ijkmp_get_playable_duration(IjkMediaPlayer *mp)
     long retval = ijkmp_get_playable_duration_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     return retval;
+}
+
+int ijkmp_get_subtitle_count(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int count = 0;
+    for (int i = 0; i < mp->ffplayer->is->ic->nb_streams; i++) {
+        AVStream *st = mp->ffplayer->is->ic->streams[i];
+        enum AVMediaType type = st->codecpar->codec_type;
+        if (type == AVMEDIA_TYPE_SUBTITLE) {
+            count += 1;
+        }
+    }
+    pthread_mutex_unlock(&mp->mutex);
+    return count;
+}
+
+const char *ijkmp_get_subtitle_name(IjkMediaPlayer *mp, int index)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    int count = 0;
+    const char *ret = "sub";
+    for (int i = 0; i < mp->ffplayer->is->ic->nb_streams; i++) {
+        AVStream *st = mp->ffplayer->is->ic->streams[i];
+        enum AVMediaType type = st->codecpar->codec_type;
+        if (type == AVMEDIA_TYPE_SUBTITLE) {
+            if (count == index) {
+                AVDictionaryEntry *entry = av_dict_get(st->metadata, "language", NULL, 0);
+                if (entry) {
+                    ret = entry->value;
+                }
+                break;
+            }
+            count += 1;
+        }
+    }
+    pthread_mutex_unlock(&mp->mutex);
+    return ret;
+}
+
+void ijkmp_set_subtitle_index(IjkMediaPlayer *mp, int index)
+{
+    assert(mp);
+    char spec[50];
+    snprintf(spec, 2+index/10+1, "s:%d", index);
+    printf("%s", spec);
+    for (int i = 0; i < mp->ffplayer->is->ic->nb_streams; i++) {
+        AVStream *st = mp->ffplayer->is->ic->streams[i];
+        enum AVMediaType type = st->codecpar->codec_type;
+        if (type == AVMEDIA_TYPE_SUBTITLE)
+            if (avformat_match_stream_specifier(mp->ffplayer->is->ic, st, spec) > 0) {
+                printf("find: %d\n", i);
+                ijkmp_set_stream_selected(mp, i, 1);
+                
+            }
+    }
+    ijkmp_seek_to(mp, ijkmp_get_current_position(mp));
 }
 
 void ijkmp_set_loop(IjkMediaPlayer *mp, int loop)
