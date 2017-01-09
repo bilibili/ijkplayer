@@ -3437,7 +3437,7 @@ static int ijkio_app_func_event(IjkIOApplicationContext *h, int message ,void *d
         ffp->stat.cache_count_bytes       = statistic->cache_count_bytes;
     }
 
-    return 0;
+    return inject_callback(ffp->inject_opaque, IJKIOAPP_EVENT_CACHE_STATISTIC, data, size);
 }
 
 void *ffp_set_ijkio_inject_opaque(FFPlayer *ffp, void *opaque)

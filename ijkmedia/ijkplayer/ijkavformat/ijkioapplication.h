@@ -27,7 +27,7 @@
 #include <stdint.h>
 
 #define CACHE_FILE_PATH_MAX_LEN        512
-#define IJKIOAPP_EVENT_CACHE_STATISTIC 0x1003  //IJKIOAppCacheStatistic
+#define IJKIOAPP_EVENT_CACHE_STATISTIC 0x1003  //IJKIOAppCacheStatistic share with avutil/application.h
 
 typedef struct IjkIOAppCacheStatistic {
     int64_t cache_physical_pos;
