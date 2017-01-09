@@ -678,7 +678,7 @@ void ijkmp_set_subtitle_index(IjkMediaPlayer *mp, int index)
 {
     assert(mp);
     char spec[50];
-    snprintf(spec, 2+index/10+1, "s:%d", index);
+    snprintf(spec, 4+index/10, "s:%d", index);
     printf("%s", spec);
     for (int i = 0; i < mp->ffplayer->is->ic->nb_streams; i++) {
         AVStream *st = mp->ffplayer->is->ic->streams[i];

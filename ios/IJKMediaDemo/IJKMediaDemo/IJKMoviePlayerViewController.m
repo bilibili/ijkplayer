@@ -289,7 +289,7 @@
     NSNumber *start = notification.userInfo[@"start"];
     NSNumber *end = notification.userInfo[@"end"];
     
-    if ([end integerValue] > [start integerValue]) {
+    if ([end integerValue] >= [start integerValue]) {
         self.subtitleLabel.text = text;
         double endValue = [end doubleValue];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(endValue/1000.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
