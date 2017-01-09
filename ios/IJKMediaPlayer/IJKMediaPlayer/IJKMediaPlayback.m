@@ -24,6 +24,8 @@
 
 NSString *const IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification = @"IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification";
 
+NSString *const IJKMPMoviePlayerSubtitleDisplayNotification = @"IJKMPMoviePlayerSubtitleDisplayNotification";
+
 NSString *const IJKMPMoviePlayerPlaybackDidFinishNotification = @"IJKMPMoviePlayerPlaybackDidFinishNotification";
 NSString *const IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey =
     @"IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey";
@@ -42,6 +44,7 @@ NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification = @"IJKMPMov
 NSString *const IJKMPMoviePlayerDidSeekCompleteNotification = @"IJKMPMoviePlayerDidSeekCompleteNotification";
 NSString *const IJKMPMoviePlayerDidSeekCompleteTargetKey = @"IJKMPMoviePlayerDidSeekCompleteTargetKey";
 NSString *const IJKMPMoviePlayerDidSeekCompleteErrorKey = @"IJKMPMoviePlayerDidSeekCompleteErrorKey";
+
 
 @implementation IJKMediaUrlOpenData {
     NSString *_url;

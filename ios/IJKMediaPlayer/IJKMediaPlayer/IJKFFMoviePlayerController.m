@@ -989,7 +989,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             }
             ijkmp_set_playback_rate(_mediaPlayer, [self playbackRate]);
             ijkmp_set_playback_volume(_mediaPlayer, [self playbackVolume]);
-
+            NSLog(@"%@", _monitor.mediaMeta[@"streams"]);
             [self startHudTimer];
             _isPreparedToPlay = YES;
 
@@ -1107,6 +1107,16 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMPMoviePlayerFirstAudioFrameRenderedNotification
              object:self];
+            break;
+        }
+        case FFP_MSG_TIMED_TEXT: {
+            NSLog(@"FFP_MSG_TIMED_TEXT:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerSubtitleDisplayNotification
+             object:self
+             userInfo:@{@"text": [NSString stringWithUTF8String:avmsg->obj],
+                        @"start": [NSNumber numberWithInt:avmsg->arg1],
+                        @"end": [NSNumber numberWithInt:avmsg->arg2]}];
             break;
         }
         default:

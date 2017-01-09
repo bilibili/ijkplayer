@@ -688,13 +688,11 @@ static void video_image_display2(FFPlayer *ffp)
                             char buffered_text[4096];
                             if (sp->sub.rects[0]->text) {
                                 strncpy(buffered_text, sp->sub.rects[0]->text, 4096);
-                                printf("%s\n", buffered_text);
                             }
                             else if (sp->sub.rects[0]->ass) {
                                 parse_ass_subtitle(sp->sub.rects[0]->ass, buffered_text);
-                                printf("%s\n", buffered_text);
                             }
-                            ffp_notify_msg4(ffp, FFP_MSG_TIMED_TEXT, 0, 0, buffered_text, sizeof(buffered_text));
+                            ffp_notify_msg4(ffp, FFP_MSG_TIMED_TEXT, sp->sub.start_display_time, sp->sub.end_display_time, buffered_text, sizeof(buffered_text));
                         }
                         sp->uploaded = 1;
                     }
@@ -2639,9 +2637,7 @@ static int read_thread(void *arg)
         AVStream *st = ic->streams[i];
         enum AVMediaType type = st->codecpar->codec_type;
         st->discard = AVDISCARD_ALL;
-        
-        printf("%s", ffp->wanted_stream_spec[type]);
-        
+
         if (type >= 0 && ffp->wanted_stream_spec[type] && st_index[type] == -1)
             if (avformat_match_stream_specifier(ic, st, ffp->wanted_stream_spec[type]) > 0)
                 st_index[type] = i;
@@ -4091,7 +4087,7 @@ int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
     }
 
     codecpar = ic->streams[stream]->codecpar;
-
+    
     if (selected) {
         switch (codecpar->codec_type) {
             case AVMEDIA_TYPE_VIDEO:

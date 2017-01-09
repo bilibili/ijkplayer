@@ -22,6 +22,7 @@
 
 @property(atomic,strong) NSURL *url;
 @property(atomic, retain) id<IJKMediaPlayback> player;
+@property(nonatomic, strong) UILabel *subtitleLabel;
 
 - (id)initWithURL:(NSURL *)url;
 

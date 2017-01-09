@@ -134,6 +134,9 @@ IJK_EXTERN NSString* const IJKMPMoviePlayerLoadStateDidChangeNotification;
 // Posted when the movie player begins or ends playing video via AirPlay.
 IJK_EXTERN NSString* const IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification;
 
+// Posted when the movie player need to show subtitle
+IJK_EXTERN NSString* const IJKMPMoviePlayerSubtitleDisplayNotification;
+
 // -----------------------------------------------------------------------------
 // Movie Property Notifications
 

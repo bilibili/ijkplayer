@@ -85,6 +85,12 @@
     [self.view addSubview:self.mediaControl];
 
     self.mediaControl.delegatePlayer = self.player;
+    
+    // subtitle
+    self.subtitleLabel = [[UILabel alloc] init];
+    self.subtitleLabel.textAlignment = NSTextAlignmentCenter;
+    self.subtitleLabel.textColor = [UIColor whiteColor];
+    [self.view addSubview:self.subtitleLabel];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -115,6 +121,11 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)viewWillLayoutSubviews {
+    self.subtitleLabel.frame = CGRectMake(0, 0, self.view.bounds.size.width, 60);
+    self.subtitleLabel.center = CGPointMake(self.view.bounds.size.width/2, self.view.bounds.size.height-30);
 }
 
 #pragma mark IBAction
@@ -271,6 +282,24 @@
     }
 }
 
+- (void)moviePlayerShowSubtitle:(NSNotification*)notification
+{
+    NSLog(@"%@", notification.userInfo);
+    NSString *text = notification.userInfo[@"text"];
+    NSNumber *start = notification.userInfo[@"start"];
+    NSNumber *end = notification.userInfo[@"end"];
+    
+    if ([end integerValue] > [start integerValue]) {
+        self.subtitleLabel.text = text;
+        double endValue = [end doubleValue];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(endValue/1000.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            self.subtitleLabel.text = @"";
+        });
+    }
+    
+    return;
+}
+
 #pragma mark Install Movie Notifications
 
 /* Register observers for the various movie object notifications. */
@@ -294,6 +323,11 @@
 	[[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(moviePlayBackStateDidChange:)
                                                  name:IJKMPMoviePlayerPlaybackStateDidChangeNotification
+                                               object:_player];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(moviePlayerShowSubtitle:)
+                                                 name:IJKMPMoviePlayerSubtitleDisplayNotification
                                                object:_player];
 }
 

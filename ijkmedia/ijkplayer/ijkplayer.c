@@ -120,7 +120,7 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
         goto fail;
 
     mp->ffplayer = ffp_create();
-    mp->ffplayer->wanted_stream_spec[AVMEDIA_TYPE_SUBTITLE] = "s:1";
+//    mp->ffplayer->wanted_stream_spec[AVMEDIA_TYPE_SUBTITLE] = "s:1"; // test
     if (!mp->ffplayer)
         goto fail;
 
@@ -435,7 +435,7 @@ static int ijkmp_start_l(IjkMediaPlayer *mp)
     ffp_remove_msg(mp->ffplayer, FFP_REQ_START);
     ffp_remove_msg(mp->ffplayer, FFP_REQ_PAUSE);
     ffp_notify_msg1(mp->ffplayer, FFP_REQ_START);
-
+    
     return 0;
 }
 
@@ -447,6 +447,24 @@ int ijkmp_start(IjkMediaPlayer *mp)
     int retval = ijkmp_start_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_start()=%d\n", retval);
+    
+    for (int i = 0; i < mp->ffplayer->is->ic->nb_streams; i++) {
+        AVStream *st = mp->ffplayer->is->ic->streams[i];
+        enum AVMediaType type = st->codecpar->codec_type;
+        
+        AVDictionaryEntry *entry = av_dict_get(st->metadata, "language", NULL, 0);
+        if (entry) {
+            printf("%s", entry->value);
+        }
+        
+        if (type >= 0)
+            if (avformat_match_stream_specifier(mp->ffplayer->is->ic, st, "s:1") > 0) {
+                printf("find: %d\n", i);
+                ijkmp_set_stream_selected(mp, i, 1);
+                ijkmp_seek_to(mp, ijkmp_get_current_position(mp));
+            }
+    }
+    
     return retval;
 }
 
