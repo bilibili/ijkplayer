@@ -21,8 +21,9 @@
     AVCodec         *pCodec;
     AVFrame         *pFrame;
     AVPacket        *packet;
-    int             frameFinished;
+    int             frameFinished = 0;
     int             ret = 0;
+    double          timebase = 0;
     uint8_t         *buffer;
     int videoStream;
     
@@ -39,8 +40,6 @@
         NSLog(@"IJKMediaHelper::Couldn't find stream information");
         return;
     }
-    
-    // TODO: SEEK
     
     // Find the first video stream
     videoStream = -1;
@@ -65,12 +64,29 @@
     // Alloc Codec Context
     pCodecCtx = avcodec_alloc_context3(pCodec);
     avcodec_parameters_to_context(pCodecCtx, pFormatCtx->streams[videoStream]->codecpar);
-
+    
     // Open Codec
     if (avcodec_open2(pCodecCtx, pCodec, NULL) < 0) {
         return;
     }
     
+    // Determine Timebase
+    AVStream *st = pFormatCtx->streams[videoStream];
+    if (st->time_base.den && st->time_base.num) {
+        timebase = av_q2d(st->time_base);
+    } else if (pCodecCtx->time_base.den && pCodecCtx->time_base.num) {
+        timebase = av_q2d(pCodecCtx->time_base);
+    } else {
+        timebase = 0.04; // default
+    }
+    
+    // Seek File
+    int64_t ts = (int64_t)(time / timebase);
+    avformat_seek_file(pFormatCtx, videoStream, INT64_MIN, ts, INT64_MAX, AVSEEK_FLAG_FRAME);
+//    av_seek_frame(pFormatCtx, videoStream, ts, 0);
+    avcodec_flush_buffers(pCodecCtx);
+    
+    // Read Frame
     pFrame = av_frame_alloc();
     buffer = av_malloc(av_image_get_buffer_size(AV_PIX_FMT_YUV420P, pCodecCtx->width, pCodecCtx->height, 1));
     av_image_fill_arrays(pFrame->data, pFrame->linesize, buffer, AV_PIX_FMT_YUV420P, pCodecCtx->width, pCodecCtx->height, 1);
@@ -81,20 +97,16 @@
         if (packet->stream_index == videoStream) {
             ret = avcodec_decode_video2(pCodecCtx, pFrame, &frameFinished, packet);
         }
+        av_packet_unref(packet);
         if (ret < 0) {
             NSLog(@"Decode Error");
             return;
         }
         if (frameFinished) {
             UIImage *imaage = [self imageFromeAVFrame:pFrame];
-//            [UIImageJPEGRepresentation(imaage, 0.8) writeToFile:@"/Users/lsc/Desktop/test.jpg" atomically:YES];
-            i++;
-            if (i > 1000) {
-                return;
-            }
+            [UIImageJPEGRepresentation(imaage, 0.8) writeToFile:@"/Users/lsc/Desktop/test.jpg" atomically:YES];
+            break;
         }
-//        av_free_packet(packet);
-        av_packet_unref(packet);
     }
     
     free(buffer);
@@ -118,6 +130,10 @@
     if (avformat_find_stream_info(pFormatCtx, NULL) < 0) {
         NSLog(@"IJKMediaHelper::Couldn't find stream information");
         return 0;
+    }
+    
+    if (pFormatCtx->duration == AV_NOPTS_VALUE) {
+        return MAXFLOAT;
     }
     
     NSInteger duration = pFormatCtx->duration * 1.0 / AV_TIME_BASE;
