@@ -183,7 +183,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         _scalingMode = IJKMPMovieScalingModeAspectFit;
         _shouldAutoplay = YES;
         memset(&_asyncStat, 0, sizeof(_asyncStat));
-
+        memset(&_cacheStat, 0, sizeof(_cacheStat));
         _monitor = [[IJKFFMonitor alloc] init];
 
         // init media resource
@@ -671,8 +671,8 @@ inline static NSString *formatedDurationBytesAndBitrate(int64_t bytes, int64_t b
 }
 
 inline static NSString *formatedSize(int64_t bytes) {
-    if (bytes >= 100 * 1000) {
-        return [NSString stringWithFormat:@"%.2f MB", ((float)bytes) / 1000 / 1000];
+    if (bytes >= 100 * 1024) {
+        return [NSString stringWithFormat:@"%.2f MB", ((float)bytes) / 1000 / 1024];
     } else if (bytes >= 100) {
         return [NSString stringWithFormat:@"%.1f KB", ((float)bytes) / 1000];
     } else {
@@ -748,6 +748,12 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     [_glView setHudValue:[NSString stringWithFormat:@"%.3f %.3f", avdelay, -avdiff] forKey:@"delay"];
 
     int64_t bitRate = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_BIT_RATE, 0);
+    [_glView setHudValue:[NSString stringWithFormat:@"-%@, %@",
+                         formatedSize(_cacheStat.cache_buf_forwards),
+                          formatedDurationBytesAndBitrate(_cacheStat.cache_buf_forwards, bitRate)] forKey:@"cache-forwards"];
+    [_glView setHudValue:formatedSize(_cacheStat.cache_physical_pos) forKey:@"cache-physical-pos"];
+    [_glView setHudValue:formatedSize(_cacheStat.cache_file_pos) forKey:@"cache-file-pos"];
+    [_glView setHudValue:formatedSize(_cacheStat.cache_count_bytes) forKey:@"cache-bytes"];
     [_glView setHudValue:[NSString stringWithFormat:@"-%@, %@",
                           formatedSize(_asyncStat.buf_backwards),
                           formatedDurationBytesAndBitrate(_asyncStat.buf_backwards, bitRate)]
