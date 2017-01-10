@@ -8,11 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-typedef void (^CreateScreenshotCompletionHandler) (NSString *screenshotPath);
-
 @interface IJKMediaHelper : NSObject
 
-+ (void)createScreenshotOfVideoAtPath:(NSString*)path atTime:(NSTimeInterval)time size:(CGSize)size completion:(CreateScreenshotCompletionHandler)completion;
++ (UIImage *)thumbnailOfVideoAtPath:(NSString*)path atTime:(NSTimeInterval)time;
 + (NSTimeInterval)durationOfVideoAtPath:(NSString*)path;
 
 @end

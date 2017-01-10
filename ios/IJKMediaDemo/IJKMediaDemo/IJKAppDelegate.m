@@ -31,11 +31,18 @@
 
     [self.window makeKeyAndVisible];
     
-    [IJKMediaHelper createScreenshotOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv" atTime:10.0 size:CGSizeMake(0, 0) completion:nil];
-    
+    // test
     NSTimeInterval time = [IJKMediaHelper durationOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv"];
     NSLog(@"%lf", time);
     
+    NSTimeInterval time2 = [IJKMediaHelper durationOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv1"];
+    NSLog(@"%lf", time2);
+    
+    UIImage *image = [IJKMediaHelper thumbnailOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv" atTime:5.0];
+    NSLog(@"%lf, %lf", image.size.width, image.size.height);
+    
+    UIImage *image2 = [IJKMediaHelper thumbnailOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv1" atTime:5.0];
+    NSLog(@"%lf, %lf", image2.size.width, image2.size.height);
     
     return YES;
 }

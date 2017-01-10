@@ -12,10 +12,11 @@
 #import <libavformat/avformat.h>
 #import <libavutil/imgutils.h>
 #import <libswscale/swscale.h>
+#import <libavutil/timestamp.h>
 
 @implementation IJKMediaHelper
 
-+ (void)createScreenshotOfVideoAtPath:(NSString*)path atTime:(NSTimeInterval)time size:(CGSize)size completion:(CreateScreenshotCompletionHandler)completion {
++ (UIImage *)thumbnailOfVideoAtPath:(NSString*)path atTime:(NSTimeInterval)time {
     AVFormatContext *pFormatCtx;
     AVCodecContext  *pCodecCtx;
     AVCodec         *pCodec;
@@ -25,7 +26,8 @@
     int             ret = 0;
     double          timebase = 0;
     uint8_t         *buffer;
-    int videoStream;
+    int             videoStream;
+    UIImage         *image;
     
     av_register_all();
     avformat_network_init();
@@ -33,12 +35,12 @@
     
     if (avformat_open_input(&pFormatCtx, [path UTF8String], NULL, NULL) != 0) {
         NSLog(@"IJKMediaHelper::Couldn't open input stream");
-        return;
+        return nil;
     }
     
     if (avformat_find_stream_info(pFormatCtx, NULL) < 0) {
         NSLog(@"IJKMediaHelper::Couldn't find stream information");
-        return;
+        return nil;
     }
     
     // Find the first video stream
@@ -52,13 +54,13 @@
     
     if (videoStream == -1) {
         NSLog(@"IJKMediaHelper::Couldn't find a video stream");
-        return;
+        return nil;
     }
     
     // Find the decoder for the video streams
     pCodec = avcodec_find_decoder(pFormatCtx->streams[videoStream]->codecpar->codec_id);
     if (pCodec == NULL) {
-        return;
+        return nil;
     }
 
     // Alloc Codec Context
@@ -67,7 +69,7 @@
     
     // Open Codec
     if (avcodec_open2(pCodecCtx, pCodec, NULL) < 0) {
-        return;
+        return nil;
     }
     
     // Determine Timebase
@@ -83,7 +85,6 @@
     // Seek File
     int64_t ts = (int64_t)(time / timebase);
     avformat_seek_file(pFormatCtx, videoStream, INT64_MIN, ts, INT64_MAX, AVSEEK_FLAG_FRAME);
-//    av_seek_frame(pFormatCtx, videoStream, ts, 0);
     avcodec_flush_buffers(pCodecCtx);
     
     // Read Frame
@@ -92,7 +93,6 @@
     av_image_fill_arrays(pFrame->data, pFrame->linesize, buffer, AV_PIX_FMT_YUV420P, pCodecCtx->width, pCodecCtx->height, 1);
     packet = (AVPacket *)av_malloc(sizeof(AVPacket));
     
-    int i = 0;
     while (av_read_frame(pFormatCtx, packet) >= 0) {
         if (packet->stream_index == videoStream) {
             ret = avcodec_decode_video2(pCodecCtx, pFrame, &frameFinished, packet);
@@ -100,11 +100,10 @@
         av_packet_unref(packet);
         if (ret < 0) {
             NSLog(@"Decode Error");
-            return;
+            break;
         }
         if (frameFinished) {
-            UIImage *imaage = [self imageFromeAVFrame:pFrame];
-            [UIImageJPEGRepresentation(imaage, 0.8) writeToFile:@"/Users/lsc/Desktop/test.jpg" atomically:YES];
+            image = [self imageFromeAVFrame:pFrame];
             break;
         }
     }
@@ -113,6 +112,8 @@
     av_free(pFrame);
     avcodec_close(pCodecCtx);
     avformat_close_input(&pFormatCtx);
+    
+    return image;
 }
 
 + (NSTimeInterval)durationOfVideoAtPath:(NSString *)path {
