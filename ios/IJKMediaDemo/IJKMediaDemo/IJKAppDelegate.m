@@ -16,6 +16,7 @@
 
 #import "IJKAppDelegate.h"
 #import "IJKDemoMainViewController.h"
+#import <IJKMediaFramework/IJKMediaFramework.h>
 
 @implementation IJKAppDelegate
 
@@ -30,6 +31,10 @@
 
     [self.window makeKeyAndVisible];
     
+    NSTimeInterval time = [IJKMediaHelper durationOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv"];
+    NSLog(@"%lf", time);
+    
+    [IJKMediaHelper createScreenshotOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv" atTime:0 size:CGSizeMake(0, 0) completion:nil];
     return YES;
 }
 
