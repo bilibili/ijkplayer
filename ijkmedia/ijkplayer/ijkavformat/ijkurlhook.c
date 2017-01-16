@@ -251,7 +251,10 @@ static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDiction
 
     c->app_ctx = (AVApplicationContext *)(intptr_t)c->app_ctx_intptr;
     c->scheme = "ijkhttphook:";
-    c->inner_scheme = "http:";
+    if (av_stristart(arg, "ijkhttphook:https:", NULL))
+        c->inner_scheme = "https:";
+    else
+        c->inner_scheme = "http:";
 
     ret = ijkurlhook_init(h, arg, flags, options);
     if (ret)

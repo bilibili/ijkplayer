@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.SurfaceTexture;
+import android.graphics.Rect;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.RingtoneManager;
@@ -108,6 +109,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     public static final int FFP_PROP_INT64_SELECTED_VIDEO_STREAM            = 20001;
     public static final int FFP_PROP_INT64_SELECTED_AUDIO_STREAM            = 20002;
+    public static final int FFP_PROP_INT64_SELECTED_TIMEDTEXT_STREAM        = 20011;
 
     public static final int FFP_PROP_INT64_VIDEO_DECODER                    = 20003;
     public static final int FFP_PROP_INT64_AUDIO_DECODER                    = 20004;
@@ -584,6 +586,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 trackInfo.setTrackType(ITrackInfo.MEDIA_TRACK_TYPE_VIDEO);
             } else if (streamMeta.mType.equalsIgnoreCase(IjkMediaMeta.IJKM_VAL_TYPE__AUDIO)) {
                 trackInfo.setTrackType(ITrackInfo.MEDIA_TRACK_TYPE_AUDIO);
+            } else if (streamMeta.mType.equalsIgnoreCase(IjkMediaMeta.IJKM_VAL_TYPE__TIMEDTEXT)) {
+                trackInfo.setTrackType(ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
             }
             trackInfos.add(trackInfo);
         }
@@ -598,6 +602,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 return (int)_getPropertyLong(FFP_PROP_INT64_SELECTED_VIDEO_STREAM, -1);
             case ITrackInfo.MEDIA_TRACK_TYPE_AUDIO:
                 return (int)_getPropertyLong(FFP_PROP_INT64_SELECTED_AUDIO_STREAM, -1);
+            case ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT:
+                return (int)_getPropertyLong(FFP_PROP_INT64_SELECTED_TIMEDTEXT_STREAM, -1);
             default:
                 return -1;
         }
@@ -715,12 +721,10 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private native int _getLoopCount();
 
-    @TargetApi(Build.VERSION_CODES.M)
     public void setSpeed(float speed) {
         _setPropertyFloat(FFP_PROP_FLOAT_PLAYBACK_RATE, speed);
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
     public float getSpeed(float speed) {
         return _getPropertyFloat(FFP_PROP_FLOAT_PLAYBACK_RATE, .0f);
     }
@@ -968,9 +972,13 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 // No real default action so far.
                 return;
             case MEDIA_TIMED_TEXT:
-                // do nothing
-                break;
-
+                if (msg.obj == null) {
+                    player.notifyOnTimedText(null);
+                } else {
+                    IjkTimedText text = new IjkTimedText(new Rect(0, 0, 1, 1), (String)msg.obj);
+                    player.notifyOnTimedText(text);
+                }
+                return;
             case MEDIA_NOP: // interface test message - ignore
                 break;
 

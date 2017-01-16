@@ -60,7 +60,7 @@
 {
     if (!msg)
         return;
-
+    msg_free_res(&msg->_msg);
     @synchronized(self) {
         if ([_array count] <= 10)
             [_array addObject:msg];

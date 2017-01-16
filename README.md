@@ -2,8 +2,8 @@
 
  Platform | Build Status
  -------- | ------------
- Android | [![Build Status](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-android.svg?branch=master)](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-android)
- iOS | [![Build Status](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-ios.svg?branch=master)](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-ios)
+ Android | [![Build Status](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-android.svg?branch=master)](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-android)
+ iOS | [![Build Status](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-ios.svg?branch=master)](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-ios)
 
 Video player based on [ffplay](http://ffmpeg.org)
 
@@ -21,17 +21,17 @@ allprojects {
 
 dependencies {
     # required, enough for most devices.
-    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.6.2'
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.6.2'
+    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.7.6'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.7.6'
 
     # Other ABIs: optional
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.6.2'
-    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.6.2'
-    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.6.2'
-    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.2'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.7.6'
+    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.7.6'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.7.6'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.7.6'
 
     # ExoPlayer as IMediaPlayer: optional, experimental
-    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.6.2'
+    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.7.6'
 }
 ```
 - iOS
@@ -137,7 +137,7 @@ sudo dpkg-reconfigure dash
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest k0.6.2
+git checkout -B latest k0.7.6
 
 ./init-android.sh
 
@@ -191,7 +191,7 @@ cd ..
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
-git checkout -B latest k0.6.2
+git checkout -B latest k0.7.6
 
 ./init-ios.sh
 

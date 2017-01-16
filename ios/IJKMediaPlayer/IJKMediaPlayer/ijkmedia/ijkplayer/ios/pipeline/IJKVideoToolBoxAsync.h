@@ -1,9 +1,8 @@
-/*
- * IJKSDLAudioQueueController.h
+/*****************************************************************************
+ * IJKVideoToolBox.h
+ *****************************************************************************
  *
- * Copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
- *
- * based on https://github.com/kolyvan/kxmovie
+ * copyright (c) 2014 Zhou Quan <zhouqicy@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -22,23 +21,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <Foundation/Foundation.h>
+#ifndef IJKMediaPlayer_videotoolbox_async_h
+#define IJKMediaPlayer_videotoolbox_async_h
 
-#include "ijksdl/ijksdl_aout.h"
+#include "ff_ffplay.h"
 
-@interface IJKSDLAudioQueueController : NSObject
+typedef struct Ijk_VideoToolBox_Opaque Ijk_VideoToolBox_Opaque;
 
-- (id)initWithAudioSpec:(const SDL_AudioSpec *)aSpec;
+Ijk_VideoToolBox_Opaque* videotoolbox_async_create(FFPlayer* ffp, AVCodecContext* ic);
 
-- (void)play;
-- (void)pause;
-- (void)flush;
-- (void)stop;
-- (void)close;
-- (void)setPlaybackRate:(float)playbackRate;
-- (void)setPlaybackVolume:(float)playbackVolume;
-- (double)get_latency_seconds;
+int videotoolbox_async_decode_frame(Ijk_VideoToolBox_Opaque* opaque);
 
-@property (nonatomic, readonly) SDL_AudioSpec spec;
-    
-@end
+void videotoolbox_async_free(Ijk_VideoToolBox_Opaque* opaque);
+
+#endif

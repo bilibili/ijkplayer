@@ -38,6 +38,8 @@
 @property(nonatomic, readonly) int       sampleRate;
 @property(nonatomic, readonly) int64_t   channelLayout;
 
+@property(nonatomic) NSString *vdecoder;
+
 @property(nonatomic) int       tcpError;
 @property(nonatomic) NSString *remoteIp;
 

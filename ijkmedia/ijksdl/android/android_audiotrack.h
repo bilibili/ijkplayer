@@ -29,6 +29,8 @@
 #include "../ijksdl_audio.h"
 #include "../ijksdl_aout.h"
 
+#define AUDIOTRACK_PLAYBACK_MAXSPEED (2)
+
 typedef struct SDL_Android_AudioTrack_Spec {
     enum StreamType {
         STREAM_VOICE_CALL = 0,

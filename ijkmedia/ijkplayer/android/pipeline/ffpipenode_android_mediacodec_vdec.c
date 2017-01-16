@@ -110,6 +110,7 @@ typedef struct IJKFF_Pipenode_Opaque {
     double                    last_queued_pts;
 
     SDL_SpeedSampler          sampler;
+    volatile bool             abort;
 } IJKFF_Pipenode_Opaque;
 
 static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
@@ -480,9 +481,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                 if (change_ret < 0) {
                     avcodec_free_context(&new_avctx);
                     return change_ret;
-                }
-
-                if (got_picture) {
+                } else {
                     if (opaque->codecpar->width  != new_avctx->width &&
                         opaque->codecpar->height != new_avctx->height) {
                         ALOGW("AV_PKT_DATA_NEW_EXTRADATA: %d x %d\n", new_avctx->width, new_avctx->height);
@@ -716,7 +715,7 @@ static int enqueue_thread_func(void *arg)
         goto fail;
     }
 
-    while (!q->abort_request) {
+    while (!q->abort_request && !opaque->abort) {
         ret = feed_input_buffer(env, node, AMC_INPUT_TIMEOUT_US, &dequeue_count);
         if (ret != 0) {
             goto fail;
@@ -857,7 +856,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
 #endif
 #ifdef FFP_AMC_DISABLE_OUTPUT
         if (!(bufferInfo.flags & AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME)) {
-            SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);   
+            SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
         }
         goto done;
 #endif
@@ -1054,6 +1053,8 @@ static int func_run_sync(IJKFF_Pipenode *node)
 
 fail:
     av_frame_free(&frame);
+    opaque->abort = true;
+    SDL_WaitThread(opaque->enqueue_thread, NULL);
     SDL_AMediaCodecFake_abort(opaque->acodec);
     if (opaque->n_buf_out) {
         free(opaque->amc_buf_out);
@@ -1067,7 +1068,6 @@ fail:
         SDL_LockMutex(opaque->acodec_mutex);
         SDL_UnlockMutex(opaque->acodec_mutex);
     }
-    SDL_WaitThread(opaque->enqueue_thread, NULL);
     SDL_AMediaCodec_stop(opaque->acodec);
     SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
     ALOGI("MediaCodec: %s: exit: %d", __func__, ret);

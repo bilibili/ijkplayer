@@ -209,10 +209,8 @@ SDL_Android_AudioTrack *SDL_Android_AudioTrack_new_from_spec(JNIEnv *env, SDL_An
         return NULL;
     }
 
-    if (J4A_GetSystemAndroidApiLevel(env) >= 23) {
-        // for fast playback
-        min_buffer_size *= 2;
-    }
+    // for fast playback
+    min_buffer_size *= AUDIOTRACK_PLAYBACK_MAXSPEED;
 
     atrack->thiz = J4AC_AudioTrack__AudioTrack__asGlobalRef__catchAll(env, 
         atrack->spec.stream_type,

@@ -18,7 +18,7 @@
 # IJK_FFMPEG_UPSTREAM=git://git.videolan.org/ffmpeg.git
 IJK_FFMPEG_UPSTREAM=https://github.com/Bilibili/FFmpeg.git
 IJK_FFMPEG_FORK=https://github.com/Bilibili/FFmpeg.git
-IJK_FFMPEG_COMMIT=ff3.1--ijk0.6.2--20160926--001
+IJK_FFMPEG_COMMIT=ff3.2--ijk0.7.5--20161205--001
 IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
 IJK_GASP_UPSTREAM=https://github.com/Bilibili/gas-preprocessor.git
@@ -72,6 +72,10 @@ function pull_fork_all() {
     done
 }
 
+function sync_ff_version() {
+    sed -i '' "s/static const char \*kIJKFFRequiredFFmpegVersion\ \=\ .*/static const char *kIJKFFRequiredFFmpegVersion = \"${IJK_FFMPEG_COMMIT}\";/g" ios/IJKMediaPlayer/IJKMediaPlayer/IJKFFMoviePlayerController.m
+}
+
 #----------
 case "$FF_TARGET" in
     ffmpeg-version)
@@ -86,3 +90,6 @@ case "$FF_TARGET" in
         pull_fork_all
     ;;
 esac
+
+sync_ff_version
+
