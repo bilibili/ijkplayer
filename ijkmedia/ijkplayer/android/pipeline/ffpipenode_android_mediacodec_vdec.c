@@ -612,7 +612,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                     !opaque->acodec_reconfigure_request &&
                     !opaque->acodec_flush_request &&
                     opaque->acodec_first_dequeue_output_request) {
-                    SDL_CondWaitTimeout(opaque->acodec_first_dequeue_output_cond, opaque->acodec_first_dequeue_output_mutex, 1000);
+                    SDL_CondWaitTimeout(opaque->acodec_first_dequeue_output_cond, opaque->acodec_first_dequeue_output_mutex, 100);
                 }
                 SDL_UnlockMutex(opaque->acodec_first_dequeue_output_mutex);
 
