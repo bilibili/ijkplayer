@@ -3407,8 +3407,10 @@ static int app_func_event(AVApplicationContext *h, int message ,void *data, size
         return 0;
     if (message == AVAPP_EVENT_IO_TRAFFIC && sizeof(AVAppIOTraffic) == size) {
         AVAppIOTraffic *event = (AVAppIOTraffic *)(intptr_t)data;
-        if (event->bytes > 0)
+        if (event->bytes > 0) {
+            ffp->stat.byte_count += event->bytes;
             SDL_SpeedSampler2Add(&ffp->stat.tcp_read_sampler, event->bytes);
+        }
     } else if (message == AVAPP_EVENT_ASYNC_STATISTIC && sizeof(AVAppAsyncStatistic) == size) {
         AVAppAsyncStatistic *statistic =  (AVAppAsyncStatistic *) (intptr_t)data;
         ffp->stat.buf_backwards = statistic->buf_backwards;
@@ -4228,6 +4230,8 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             return ffp->stat.buf_capacity;
         case FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION:
             return ffp ? ffp->stat.latest_seek_load_duration : default_value;
+        case FFP_PROP_INT64_TRAFFIC_STATISTIC_BYTE_COUNT:
+            return ffp ? ffp->stat.byte_count : default_value;
         default:
             return default_value;
     }

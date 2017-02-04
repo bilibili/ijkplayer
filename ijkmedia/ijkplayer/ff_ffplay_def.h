@@ -466,6 +466,7 @@ typedef struct FFStatistic
     int64_t buf_capacity;
     SDL_SpeedSampler2 tcp_read_sampler;
     int64_t latest_seek_load_duration;
+    int64_t byte_count;
 } FFStatistic;
 
 #define FFP_TCP_READ_SAMPLE_RANGE 2000
