@@ -126,9 +126,10 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_BACKWARDS    = 20201;
     public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_FORWARDS     = 20202;
     public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_CAPACITY     = 20203;
+    public static final int FFP_PROP_INT64_TRAFFIC_STATISTIC_BYTE_COUNT     = 20204;
     public static final int FFP_PROP_INT64_BIT_RATE                         = 20100;
     public static final int FFP_PROP_INT64_TCP_SPEED                        = 20200;
-    public static final int FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION               = 20300;
+    public static final int FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION        = 20300;
     //----------------------------------------
 
     @AccessedByNative
@@ -775,6 +776,10 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     public long getAsyncStatisticBufCapacity() {
         return _getPropertyLong(FFP_PROP_INT64_ASYNC_STATISTIC_BUF_CAPACITY, 0);
+    }
+
+    public long getTrafficStatisticByteCount() {
+        return _getPropertyLong(FFP_PROP_INT64_TRAFFIC_STATISTIC_BYTE_COUNT, 0);
     }
 
     public long getBitRate() {
