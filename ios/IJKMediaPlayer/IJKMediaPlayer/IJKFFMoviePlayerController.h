@@ -130,11 +130,13 @@ typedef enum IJKLogLevel {
 @property (nonatomic, readonly) IJKFFMonitor *monitor;
 
 #pragma mark - E7
-@property (strong, nonatomic) NSString *serverProtocol;
-@property (strong, nonatomic) NSString *liveProtocol;
-@property (strong, nonatomic) NSString *liveId;
-@property (strong, nonatomic) NSString *provider;
-@property (strong, nonatomic) NSString *streamIp;
+@property (copy, nonatomic) NSString *serverProtocol;
+@property (copy, nonatomic) NSString *liveProtocol;
+@property (copy, nonatomic) NSString *commentProtocol;
+@property (copy, nonatomic) NSString *liveId;
+@property (copy, nonatomic) NSString *provider;
+@property (copy, nonatomic) NSString *streamIp;
+
 - (void)syncWithHighWaterMark:(uint16_t)highWaterMark
                  lowWaterMark:(uint16_t)lowWaterMark
             timestampCallback:(uint64_t (^)(uint64_t timestamp))tsCallback

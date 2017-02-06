@@ -715,13 +715,14 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
         _streamURL = [NSURL URLWithString:_urlString];
         [_glView setHudValue:_serverProtocol forKey:@"server-protocol"];
         [_glView setHudValue:_liveProtocol forKey:@"live-protocol"];
+        [_glView setHudValue:_commentProtocol forKey:@"comment-protocol"];
         [_glView setHudValue:_liveId forKey:@"live-id"];
         [_glView setHudValue:_provider forKey:@"provider"];
         [_glView setHudValue:_streamURL.scheme forKey:@"scheme"];
         [_glView setHudValue:_streamURL.host forKey:@"host"];
         [_glView setHudValue:_urlString forKey:@"path"];
     }
-    
+
     int64_t vdec = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_VIDEO_DECODER, FFP_PROPV_DECODER_UNKNOWN);
     float   vdps = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND, .0f);
     float   vfps = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND, .0f);
@@ -1583,6 +1584,16 @@ void e7_player_sync_finish(uint64_t timestamp, void *userData)
         ijkmp_sync_baseline_register(_mediaPlayer, NULL, 0, 0, NULL);
         ijkmp_sync_finish_register(_mediaPlayer, NULL, NULL);
     }
+}
+
+#pragma mark Setter
+
+- (void)setCommentProtocol:(NSString *)commentProtocol {
+    if (_commentProtocol != commentProtocol) {
+        _commentProtocol = commentProtocol;
+    }
+    
+    [_glView setHudValue:_commentProtocol forKey:@"comment-protocol"];
 }
 
 #pragma mark -
