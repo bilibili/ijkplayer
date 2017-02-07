@@ -131,6 +131,8 @@
     if (!_audioQueueRef)
         return;
 
+    self.spec.callback(self.spec.userdata, NULL, 0);
+
     @synchronized(_lock) {
         _isPaused = NO;
         NSError *error = nil;
