@@ -237,7 +237,7 @@ cd ios
 ### License
 
 ```
-Copyright (C) 2013-2016 Zhang Rui <bbcallen@gmail.com> 
+Copyright (c) 2017 Bilibili
 Licensed under LGPLv2.1 or later
 ```
 

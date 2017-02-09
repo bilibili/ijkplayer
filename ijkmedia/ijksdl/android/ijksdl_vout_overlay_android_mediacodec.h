@@ -2,6 +2,7 @@
  * ijksdl_vout_overlay_android_mediacodec.h
  *****************************************************************************
  *
+ * Copyright (c) 2014 Bilibili
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.

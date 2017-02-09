@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Bilibili
  * Copyright (c) 2016 Raymond Zheng <raymondzheng1412@gmail.com>
  *
  * This file is part of ijkPlayer.
