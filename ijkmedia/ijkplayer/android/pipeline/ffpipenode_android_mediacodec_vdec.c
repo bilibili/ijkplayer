@@ -1,6 +1,7 @@
 /*
  * ffpipenode_android_mediacodec_vdec.c
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -612,7 +613,7 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                     !opaque->acodec_reconfigure_request &&
                     !opaque->acodec_flush_request &&
                     opaque->acodec_first_dequeue_output_request) {
-                    SDL_CondWaitTimeout(opaque->acodec_first_dequeue_output_cond, opaque->acodec_first_dequeue_output_mutex, 1000);
+                    SDL_CondWaitTimeout(opaque->acodec_first_dequeue_output_cond, opaque->acodec_first_dequeue_output_mutex, 100);
                 }
                 SDL_UnlockMutex(opaque->acodec_first_dequeue_output_mutex);
 

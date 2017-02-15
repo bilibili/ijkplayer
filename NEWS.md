@@ -1,6 +1,12 @@
 tag next
 --------------------------------
 
+tag k0.7.7
+--------------------------------
+- ffmpeg: enable ijkio protocol
+- ffmpeg: avoid some unreasonable pts
+- ios: fix a crash caused by videotoolbox sync initialization fail
+
 tag k0.7.6
 --------------------------------
 - ffmpeg: ass subtitle support

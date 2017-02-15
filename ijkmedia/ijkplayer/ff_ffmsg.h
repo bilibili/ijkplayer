@@ -2,6 +2,7 @@
  * ff_ffmsg.h
  *      based on PacketQueue in ffplay.c
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -78,6 +79,16 @@
 #define FFP_PROP_INT64_ASYNC_STATISTIC_BUF_BACKWARDS    20201
 #define FFP_PROP_INT64_ASYNC_STATISTIC_BUF_FORWARDS     20202
 #define FFP_PROP_INT64_ASYNC_STATISTIC_BUF_CAPACITY     20203
+#define FFP_PROP_INT64_TRAFFIC_STATISTIC_BYTE_COUNT     20204
 
-#define FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION               20300
+#define FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION        20300
+
+#define FFP_PROP_INT64_CACHE_STATISTIC_PHYSICAL_POS     20205
+
+#define FFP_PROP_INT64_CACHE_STATISTIC_BUF_FORWARDS     20206
+
+#define FFP_PROP_INT64_CACHE_STATISTIC_FILE_POS         20207
+
+#define FFP_PROP_INT64_CACHE_STATISTIC_COUNT_BYTES      20208
+
 #endif

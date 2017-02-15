@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "IJKVideoToolBoxAsync.h"
+#include "IJKVideoToolBoxSync.h"
 #include "ijksdl_vout_overlay_videotoolbox.h"
 #include "ffpipeline_ios.h"
 #include <mach/mach_time.h>
@@ -1034,6 +1034,6 @@ Ijk_VideoToolBox_Opaque* videotoolbox_sync_create(FFPlayer* ffp, AVCodecContext*
     return context_vtb;
 
 fail:
-    videotoolbox_async_free(context_vtb);
+    videotoolbox_sync_free(context_vtb);
     return NULL;
 }

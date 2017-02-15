@@ -1,3 +1,4 @@
+# Copyright (c) 2013 Bilibili
 # copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
 #
 # This file is part of ijkPlayer.
@@ -70,8 +71,8 @@ LOCAL_SRC_FILES += android/ijksdl_vout_android_nativewindow.c
 LOCAL_SRC_FILES += android/ijksdl_vout_android_surface.c
 LOCAL_SRC_FILES += android/ijksdl_vout_overlay_android_mediacodec.c
 
-LOCAL_SHARED_LIBRARIES := ijkffmpeg ijkj4a
-LOCAL_STATIC_LIBRARIES := cpufeatures yuv_static
+LOCAL_SHARED_LIBRARIES := ijkffmpeg
+LOCAL_STATIC_LIBRARIES := cpufeatures yuv_static ijkj4a
 
 LOCAL_MODULE := ijksdl
 include $(BUILD_SHARED_LIBRARY)

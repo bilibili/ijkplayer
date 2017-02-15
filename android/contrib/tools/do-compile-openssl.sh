@@ -90,6 +90,8 @@ elif [ "$FF_ARCH" = "x86" ]; then
 
     FF_PLATFORM_CFG_FLAGS="android-x86"
 
+    FF_CFG_FLAGS="$FF_CFG_FLAGS no-asm"
+
 elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_ANDROID_PLATFORM=android-21
 

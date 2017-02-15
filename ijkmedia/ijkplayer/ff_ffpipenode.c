@@ -1,6 +1,7 @@
 /*
  * ff_ffpipeline_vdec.c
  *
+ * Copyright (c) 2003 Bilibili
  * Copyright (c) 2003 Fabrice Bellard
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *

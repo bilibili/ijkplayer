@@ -1,6 +1,7 @@
 /*
  * ffpipenode_android_mediacodec_vdec.h
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2006 Bilibili
  * Copyright (C) 2006 The Android Open Source Project
  * Copyright (C) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -53,6 +54,7 @@ import java.util.Map;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
 import tv.danmaku.ijk.media.player.annotations.CalledByNative;
+import tv.danmaku.ijk.media.player.misc.IIjkIOHttp;
 import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.player.misc.IjkTrackInfo;
@@ -60,7 +62,7 @@ import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 /**
  * @author bbcallen
- * 
+ *
  *         Java wrapper of ffplay.
  */
 public final class IjkMediaPlayer extends AbstractMediaPlayer {
@@ -126,15 +128,23 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_BACKWARDS    = 20201;
     public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_FORWARDS     = 20202;
     public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_CAPACITY     = 20203;
+    public static final int FFP_PROP_INT64_TRAFFIC_STATISTIC_BYTE_COUNT     = 20204;
+    public static final int FFP_PROP_INT64_CACHE_STATISTIC_PHYSICAL_POS     = 20205;
+    public static final int FFP_PROP_INT64_CACHE_STATISTIC_BUF_FORWARDS     = 20206;
+    public static final int FFP_PROP_INT64_CACHE_STATISTIC_FILE_POS         = 20207;
+    public static final int FFP_PROP_INT64_CACHE_STATISTIC_COUNT_BYTES      = 20208;
     public static final int FFP_PROP_INT64_BIT_RATE                         = 20100;
     public static final int FFP_PROP_INT64_TCP_SPEED                        = 20200;
-    public static final int FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION               = 20300;
+    public static final int FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION        = 20300;
     //----------------------------------------
 
     @AccessedByNative
     private long mNativeMediaPlayer;
     @AccessedByNative
     private long mNativeMediaDataSource;
+
+    @AccessedByNative
+    private long mNativeIjkIOHttp;
 
     @AccessedByNative
     private int mNativeSurfaceTexture;
@@ -242,13 +252,13 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     /**
      * Sets the {@link SurfaceHolder} to use for displaying the video portion of
      * the media.
-     * 
+     *
      * Either a surface holder or surface must be set if a display or video sink
      * is needed. Not calling this method or {@link #setSurface(Surface)} when
      * playing back a video will result in only the audio track being played. A
      * null surface holder or surface will result in only the audio track being
      * played.
-     * 
+     *
      * @param sh
      *            the SurfaceHolder to use for video display
      */
@@ -271,7 +281,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      * does not support {@link #setScreenOnWhilePlaying(boolean)}. Setting a
      * Surface will un-set any Surface or SurfaceHolder that was previously set.
      * A null surface will result in only the audio track being played.
-     * 
+     *
      * If the Surface sends frames to a {@link SurfaceTexture}, the timestamps
      * returned from {@link SurfaceTexture#getTimestamp()} will have an
      * unspecified zero point. These timestamps cannot be directly compared
@@ -279,7 +289,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      * source, or multiple runs of the same program. The timestamp is normally
      * monotonically increasing and is unaffected by time-of-day adjustments,
      * but it is reset when the position is set.
-     * 
+     *
      * @param surface
      *            The {@link Surface} to be used for the video portion of the
      *            media.
@@ -369,13 +379,13 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     /**
      * Sets the data source (file-path or http/rtsp URL) to use.
-     * 
+     *
      * @param path
      *            the path of the file, or the http/rtsp URL of the stream you
      *            want to play
      * @throws IllegalStateException
      *             if it is called in an invalid state
-     * 
+     *
      *             <p>
      *             When <code>path</code> refers to a local file, the file may
      *             actually be opened by a process other than the calling
@@ -471,6 +481,11 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         _setDataSource(mediaDataSource);
     }
 
+    public void setDataSourceIjkIOHttp(IIjkIOHttp ijkIOHttp)
+            throws IllegalArgumentException, SecurityException, IllegalStateException {
+        _setDataSourceIjkIOHttp(ijkIOHttp);
+    }
+
     private native void _setDataSource(String path, String[] keys, String[] values)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
@@ -478,6 +493,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
     private native void _setDataSource(IMediaDataSource mediaDataSource)
+            throws IllegalArgumentException, SecurityException, IllegalStateException;
+
+    private native void _setDataSourceIjkIOHttp(IIjkIOHttp ijkIOHttp)
             throws IllegalArgumentException, SecurityException, IllegalStateException;
 
     @Override
@@ -775,6 +793,26 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     public long getAsyncStatisticBufCapacity() {
         return _getPropertyLong(FFP_PROP_INT64_ASYNC_STATISTIC_BUF_CAPACITY, 0);
+    }
+
+    public long getTrafficStatisticByteCount() {
+        return _getPropertyLong(FFP_PROP_INT64_TRAFFIC_STATISTIC_BYTE_COUNT, 0);
+    }
+
+    public long getCacheStatisticPhysicalPos() {
+        return _getPropertyLong(FFP_PROP_INT64_CACHE_STATISTIC_PHYSICAL_POS, 0);
+    }
+
+    public long getCacheStatisticBufForwards() {
+        return _getPropertyLong(FFP_PROP_INT64_CACHE_STATISTIC_BUF_FORWARDS, 0);
+    }
+
+    public long getCacheStatisticFilePos() {
+        return _getPropertyLong(FFP_PROP_INT64_CACHE_STATISTIC_FILE_POS, 0);
+    }
+
+    public long getCacheStatisticCountBytes() {
+        return _getPropertyLong(FFP_PROP_INT64_CACHE_STATISTIC_COUNT_BYTES, 0);
     }
 
     public long getBitRate() {

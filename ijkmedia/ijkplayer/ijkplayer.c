@@ -1,6 +1,7 @@
 /*
  * ijkplayer.c
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -141,6 +142,16 @@ void *ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque)
 
     MPTRACE("%s(%p)\n", __func__, opaque);
     void *prev_weak_thiz = ffp_set_inject_opaque(mp->ffplayer, opaque);
+    MPTRACE("%s()=void\n", __func__);
+    return prev_weak_thiz;
+}
+
+void *ijkmp_set_ijkio_inject_opaque(IjkMediaPlayer *mp, void *opaque)
+{
+    assert(mp);
+
+    MPTRACE("%s(%p)\n", __func__, opaque);
+    void *prev_weak_thiz = ffp_set_ijkio_inject_opaque(mp->ffplayer, opaque);
     MPTRACE("%s()=void\n", __func__);
     return prev_weak_thiz;
 }

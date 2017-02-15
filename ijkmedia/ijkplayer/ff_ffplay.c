@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2003 Bilibili
  * Copyright (c) 2003 Fabrice Bellard
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -3407,8 +3408,10 @@ static int app_func_event(AVApplicationContext *h, int message ,void *data, size
         return 0;
     if (message == AVAPP_EVENT_IO_TRAFFIC && sizeof(AVAppIOTraffic) == size) {
         AVAppIOTraffic *event = (AVAppIOTraffic *)(intptr_t)data;
-        if (event->bytes > 0)
+        if (event->bytes > 0) {
+            ffp->stat.byte_count += event->bytes;
             SDL_SpeedSampler2Add(&ffp->stat.tcp_read_sampler, event->bytes);
+        }
     } else if (message == AVAPP_EVENT_ASYNC_STATISTIC && sizeof(AVAppAsyncStatistic) == size) {
         AVAppAsyncStatistic *statistic =  (AVAppAsyncStatistic *) (intptr_t)data;
         ffp->stat.buf_backwards = statistic->buf_backwards;
@@ -3416,6 +3419,41 @@ static int app_func_event(AVApplicationContext *h, int message ,void *data, size
         ffp->stat.buf_capacity = statistic->buf_capacity;
     }
     return inject_callback(ffp->inject_opaque, message , data, size);
+}
+
+static int ijkio_app_func_event(IjkIOApplicationContext *h, int message ,void *data, size_t size)
+{
+    if (!h || !h->opaque || !data)
+        return 0;
+
+    FFPlayer *ffp = (FFPlayer *)h->opaque;
+    if (!ffp->ijkio_inject_opaque)
+        return 0;
+
+    if (message == IJKIOAPP_EVENT_CACHE_STATISTIC && sizeof(IjkIOAppCacheStatistic) == size) {
+        IjkIOAppCacheStatistic *statistic =  (IjkIOAppCacheStatistic *) (intptr_t)data;
+        ffp->stat.cache_physical_pos      = statistic->cache_physical_pos;
+        ffp->stat.cache_buf_forwards      = statistic->cache_buf_forwards;
+        ffp->stat.cache_file_pos          = statistic->cache_file_pos;
+        ffp->stat.cache_count_bytes       = statistic->cache_count_bytes;
+    }
+
+    return inject_callback(ffp->inject_opaque, IJKIOAPP_EVENT_CACHE_STATISTIC, data, size);
+}
+
+void *ffp_set_ijkio_inject_opaque(FFPlayer *ffp, void *opaque)
+{
+    if (!ffp)
+        return NULL;
+    void *prev_weak_thiz = ffp->ijkio_inject_opaque;
+    ffp->ijkio_inject_opaque = opaque;
+
+    ijkio_manager_destroyp(&ffp->ijkio_manager_ctx);
+    ijkio_manager_create(&ffp->ijkio_manager_ctx, ffp);
+    ijkio_manager_set_callback(ffp->ijkio_manager_ctx, ijkio_app_func_event);
+    ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkiomanager", (int64_t)(intptr_t)ffp->ijkio_manager_ctx);
+
+    return prev_weak_thiz;
 }
 
 void *ffp_set_inject_opaque(FFPlayer *ffp, void *opaque)
@@ -4228,6 +4266,25 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             return ffp->stat.buf_capacity;
         case FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION:
             return ffp ? ffp->stat.latest_seek_load_duration : default_value;
+        case FFP_PROP_INT64_TRAFFIC_STATISTIC_BYTE_COUNT:
+            return ffp ? ffp->stat.byte_count : default_value;
+        case FFP_PROP_INT64_CACHE_STATISTIC_PHYSICAL_POS:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.cache_physical_pos;
+       case FFP_PROP_INT64_CACHE_STATISTIC_BUF_FORWARDS:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.cache_buf_forwards;
+
+       case FFP_PROP_INT64_CACHE_STATISTIC_FILE_POS:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.cache_file_pos;
+       case FFP_PROP_INT64_CACHE_STATISTIC_COUNT_BYTES:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.cache_count_bytes;
         default:
             return default_value;
     }

@@ -1,6 +1,7 @@
 /*
  * IJKSDLGLView.m
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * based on https://github.com/kolyvan/kxmovie
