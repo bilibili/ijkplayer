@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 #
+# Copyright (C) 2013-2014 Bilibili
 # Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

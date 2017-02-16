@@ -1,6 +1,7 @@
 /*
  * IJKFFOptions.h
  *
+ * Copyright (c) 2013-2015 Bilibili
  * Copyright (c) 2013-2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.

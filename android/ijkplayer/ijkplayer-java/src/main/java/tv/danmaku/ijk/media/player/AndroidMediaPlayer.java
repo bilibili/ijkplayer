@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2006 Bilibili
  * Copyright (C) 2006 The Android Open Source Project
  * Copyright (C) 2013 Zhang Rui <bbcallen@gmail.com>
  *

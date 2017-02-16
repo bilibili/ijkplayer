@@ -1,6 +1,7 @@
 /*
  * ijkavformat.h
  *
+ * Copyright (c) 2003 Bilibili
  * Copyright (c) 2003 Fabrice Bellard
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
