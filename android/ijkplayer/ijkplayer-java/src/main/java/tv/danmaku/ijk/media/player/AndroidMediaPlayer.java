@@ -425,6 +425,10 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
             if (self == null)
                 return;
 
+            //To avoid the Meizu or GIONEE crash when the callback was invoked.
+            if (text == null)
+                return;
+
             IjkTimedText ijkText = new IjkTimedText(text.getBounds(), text.getText());
             notifyOnTimedText(ijkText);
         }
