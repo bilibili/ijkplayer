@@ -2754,7 +2754,7 @@ static int read_thread(void *arg)
     }
     /* offset should be seeked*/
     if (ffp->seek_at_start > 0) {
-        ffp_seek_to_l(ffp, ffp->seek_at_start);
+        ffp_seek_to_l(ffp, (long)(ffp->seek_at_start));
     }
 
     for (;;) {
