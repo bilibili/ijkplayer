@@ -29,7 +29,7 @@ FOUNDATION_EXPORT double IJKMediaFrameworkVersionNumber;
 //! Project version string for IJKMediaFramework.
 FOUNDATION_EXPORT const unsigned char IJKMediaFrameworkVersionString[];
 
-// In this header, you should import all the public headers of your framework using statements like #import <IJKMediaFramework/PublicHeader.h>
+// In this header, you should import all the public headers of your framework using statements like #import <IJKMediaFrameworkWithSSL/PublicHeader.h>
 #import <IJKMediaFramework/IJKMediaPlayback.h>
 #import <IJKMediaFramework/IJKMPMoviePlayerController.h>
 #import <IJKMediaFramework/IJKFFOptions.h>
