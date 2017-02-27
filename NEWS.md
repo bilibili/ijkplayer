@@ -1,5 +1,6 @@
 tag next
 --------------------------------
+- ios: add ijkplayer dynamic target with ssl
 
 tag k0.7.7
 --------------------------------
