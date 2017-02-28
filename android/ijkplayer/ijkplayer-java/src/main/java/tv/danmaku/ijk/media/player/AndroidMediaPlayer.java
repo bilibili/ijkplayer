@@ -425,7 +425,12 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
             if (self == null)
                 return;
 
-            IjkTimedText ijkText = new IjkTimedText(text.getBounds(), text.getText());
+            IjkTimedText ijkText = null;
+
+            if (text != null) {
+                ijkText = new IjkTimedText(text.getBounds(), text.getText());
+            }
+
             notifyOnTimedText(ijkText);
         }
     }
