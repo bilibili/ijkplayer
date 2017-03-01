@@ -30,6 +30,8 @@ typedef struct J4AC_android_os_Bundle {
     jmethodID method_getString;
     jmethodID method_putString;
     jmethodID method_putParcelableArrayList;
+    jmethodID method_getLong;
+    jmethodID method_putLong;
 } J4AC_android_os_Bundle;
 static J4AC_android_os_Bundle class_J4AC_android_os_Bundle;
 
@@ -437,6 +439,100 @@ fail:
     J4A_DeleteLocalRef__p(env, &key);
 }
 
+jlong J4AC_android_os_Bundle__getLong(JNIEnv *env, jobject thiz, jstring key)
+{
+    return (*env)->CallLongMethod(env, thiz, class_J4AC_android_os_Bundle.method_getLong, key);
+}
+
+jlong J4AC_android_os_Bundle__getLong__catchAll(JNIEnv *env, jobject thiz, jstring key)
+{
+    jlong ret_value = J4AC_android_os_Bundle__getLong(env, thiz, key);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        return 0;
+    }
+
+    return ret_value;
+}
+
+jlong J4AC_android_os_Bundle__getLong__withCString(JNIEnv *env, jobject thiz, const char *key_cstr__)
+{
+    jlong ret_value = 0;
+    jstring key = NULL;
+
+    key = (*env)->NewStringUTF(env, key_cstr__);
+    if (J4A_ExceptionCheck__throwAny(env) || !key)
+        goto fail;
+
+    ret_value = J4AC_android_os_Bundle__getLong(env, thiz, key);
+    if (J4A_ExceptionCheck__throwAny(env)) {
+        ret_value = 0;
+        goto fail;
+    }
+
+fail:
+    J4A_DeleteLocalRef__p(env, &key);
+    return ret_value;
+}
+
+jlong J4AC_android_os_Bundle__getLong__withCString__catchAll(JNIEnv *env, jobject thiz, const char *key_cstr__)
+{
+    jlong ret_value = 0;
+    jstring key = NULL;
+
+    key = (*env)->NewStringUTF(env, key_cstr__);
+    if (J4A_ExceptionCheck__catchAll(env) || !key)
+        goto fail;
+
+    ret_value = J4AC_android_os_Bundle__getLong__catchAll(env, thiz, key);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        ret_value = 0;
+        goto fail;
+    }
+
+fail:
+    J4A_DeleteLocalRef__p(env, &key);
+    return ret_value;
+}
+
+void J4AC_android_os_Bundle__putLong(JNIEnv *env, jobject thiz, jstring key, jlong value)
+{
+    (*env)->CallVoidMethod(env, thiz, class_J4AC_android_os_Bundle.method_putLong, key, value);
+}
+
+void J4AC_android_os_Bundle__putLong__catchAll(JNIEnv *env, jobject thiz, jstring key, jlong value)
+{
+    J4AC_android_os_Bundle__putLong(env, thiz, key, value);
+    J4A_ExceptionCheck__catchAll(env);
+}
+
+void J4AC_android_os_Bundle__putLong__withCString(JNIEnv *env, jobject thiz, const char *key_cstr__, jlong value)
+{
+    jstring key = NULL;
+
+    key = (*env)->NewStringUTF(env, key_cstr__);
+    if (J4A_ExceptionCheck__throwAny(env) || !key)
+        goto fail;
+
+    J4AC_android_os_Bundle__putLong(env, thiz, key, value);
+
+fail:
+    J4A_DeleteLocalRef__p(env, &key);
+}
+
+void J4AC_android_os_Bundle__putLong__withCString__catchAll(JNIEnv *env, jobject thiz, const char *key_cstr__, jlong value)
+{
+    jstring key = NULL;
+
+    key = (*env)->NewStringUTF(env, key_cstr__);
+    if (J4A_ExceptionCheck__catchAll(env) || !key)
+        goto fail;
+
+    J4AC_android_os_Bundle__putLong__catchAll(env, thiz, key, value);
+
+fail:
+    J4A_DeleteLocalRef__p(env, &key);
+}
+
 int J4A_loadClass__J4AC_android_os_Bundle(JNIEnv *env)
 {
     int         ret                   = -1;
@@ -493,6 +589,20 @@ int J4A_loadClass__J4AC_android_os_Bundle(JNIEnv *env)
     sign     = "(Ljava/lang/String;Ljava/util/ArrayList;)V";
     class_J4AC_android_os_Bundle.method_putParcelableArrayList = J4A_GetMethodID__catchAll(env, class_id, name, sign);
     if (class_J4AC_android_os_Bundle.method_putParcelableArrayList == NULL)
+        goto fail;
+
+    class_id = class_J4AC_android_os_Bundle.id;
+    name     = "getLong";
+    sign     = "(Ljava/lang/String;)J";
+    class_J4AC_android_os_Bundle.method_getLong = J4A_GetMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_android_os_Bundle.method_getLong == NULL)
+        goto fail;
+
+    class_id = class_J4AC_android_os_Bundle.id;
+    name     = "putLong";
+    sign     = "(Ljava/lang/String;J)V";
+    class_J4AC_android_os_Bundle.method_putLong = J4A_GetMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_android_os_Bundle.method_putLong == NULL)
         goto fail;
 
     J4A_ALOGD("J4ALoader: OK: '%s' loaded\n", "android.os.Bundle");

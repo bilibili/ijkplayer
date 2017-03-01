@@ -53,6 +53,14 @@ void J4AC_android_os_Bundle__putParcelableArrayList(JNIEnv *env, jobject thiz, j
 void J4AC_android_os_Bundle__putParcelableArrayList__catchAll(JNIEnv *env, jobject thiz, jstring key, jobject value);
 void J4AC_android_os_Bundle__putParcelableArrayList__withCString(JNIEnv *env, jobject thiz, const char *key_cstr__, jobject value);
 void J4AC_android_os_Bundle__putParcelableArrayList__withCString__catchAll(JNIEnv *env, jobject thiz, const char *key_cstr__, jobject value);
+jlong J4AC_android_os_Bundle__getLong(JNIEnv *env, jobject thiz, jstring key);
+jlong J4AC_android_os_Bundle__getLong__catchAll(JNIEnv *env, jobject thiz, jstring key);
+jlong J4AC_android_os_Bundle__getLong__withCString(JNIEnv *env, jobject thiz, const char *key_cstr__);
+jlong J4AC_android_os_Bundle__getLong__withCString__catchAll(JNIEnv *env, jobject thiz, const char *key_cstr__);
+void J4AC_android_os_Bundle__putLong(JNIEnv *env, jobject thiz, jstring key, jlong value);
+void J4AC_android_os_Bundle__putLong__catchAll(JNIEnv *env, jobject thiz, jstring key, jlong value);
+void J4AC_android_os_Bundle__putLong__withCString(JNIEnv *env, jobject thiz, const char *key_cstr__, jlong value);
+void J4AC_android_os_Bundle__putLong__withCString__catchAll(JNIEnv *env, jobject thiz, const char *key_cstr__, jlong value);
 int J4A_loadClass__J4AC_android_os_Bundle(JNIEnv *env);
 
 #define J4A_HAVE_SIMPLE__J4AC_android_os_Bundle
@@ -86,6 +94,14 @@ int J4A_loadClass__J4AC_android_os_Bundle(JNIEnv *env);
 #define J4AC_Bundle__putParcelableArrayList__catchAll J4AC_android_os_Bundle__putParcelableArrayList__catchAll
 #define J4AC_Bundle__putParcelableArrayList__withCString J4AC_android_os_Bundle__putParcelableArrayList__withCString
 #define J4AC_Bundle__putParcelableArrayList__withCString__catchAll J4AC_android_os_Bundle__putParcelableArrayList__withCString__catchAll
+#define J4AC_Bundle__getLong J4AC_android_os_Bundle__getLong
+#define J4AC_Bundle__getLong__catchAll J4AC_android_os_Bundle__getLong__catchAll
+#define J4AC_Bundle__getLong__withCString J4AC_android_os_Bundle__getLong__withCString
+#define J4AC_Bundle__getLong__withCString__catchAll J4AC_android_os_Bundle__getLong__withCString__catchAll
+#define J4AC_Bundle__putLong J4AC_android_os_Bundle__putLong
+#define J4AC_Bundle__putLong__catchAll J4AC_android_os_Bundle__putLong__catchAll
+#define J4AC_Bundle__putLong__withCString J4AC_android_os_Bundle__putLong__withCString
+#define J4AC_Bundle__putLong__withCString__catchAll J4AC_android_os_Bundle__putLong__withCString__catchAll
 #define J4A_loadClass__J4AC_Bundle J4A_loadClass__J4AC_android_os_Bundle
 
 #endif//J4A__android_os_Bundle__H

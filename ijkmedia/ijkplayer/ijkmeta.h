@@ -46,6 +46,7 @@
 #define IJKM_KEY_CODEC_LEVEL        "codec_level"
 #define IJKM_KEY_CODEC_LONG_NAME    "codec_long_name"
 #define IJKM_KEY_CODEC_PIXEL_FORMAT "codec_pixel_format"
+#define IJKM_KEY_CODEC_PROFILE_ID   "codec_profile_id"
 
 // stream: video
 #define IJKM_KEY_WIDTH          "width"

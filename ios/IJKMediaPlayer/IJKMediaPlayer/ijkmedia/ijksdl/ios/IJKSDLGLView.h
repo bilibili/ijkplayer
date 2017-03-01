@@ -33,6 +33,7 @@
 
 - (UIImage*) snapshot;
 - (void)setHudValue:(NSString *)value forKey:(NSString *)key;
+- (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhiteBeingMovedToWindow __attribute__((deprecated("unused")));
 
 @property(nonatomic,strong) NSLock  *appActivityLock;
 @property(nonatomic)        CGFloat  fps;

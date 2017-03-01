@@ -23,7 +23,6 @@
 #include "libavformat/avformat.h"
 #include "libavformat/url.h"
 #include "libavformat/version.h"
-#include "libavformat/ijkavformat.h"
 
 #define IJK_REGISTER_DEMUXER(x)                                         \
     {                                                                   \
@@ -33,8 +32,9 @@
 
 #define IJK_REGISTER_PROTOCOL(x)                                        \
     {                                                                   \
-        extern URLProtocol ijkff_##x##_protocol;                        \
-        ijkav_register_##x##_protocol(&ijkff_##x##_protocol, sizeof(URLProtocol));  \
+        extern URLProtocol ijkimp_ff_##x##_protocol;                        \
+        int ijkav_register_##x##_protocol(URLProtocol *protocol, int protocol_size);\
+        ijkav_register_##x##_protocol(&ijkimp_ff_##x##_protocol, sizeof(URLProtocol));  \
     }
 
 static struct AVInputFormat *ijkav_find_input_format(const char *iformat_name)
@@ -61,6 +61,7 @@ static void ijkav_register_input_format(AVInputFormat *iformat)
     }
 }
 
+
 void ijkav_register_all(void)
 {
     static int initialized;
@@ -76,7 +77,11 @@ void ijkav_register_all(void)
 #ifdef __ANDROID__
     IJK_REGISTER_PROTOCOL(ijkmediadatasource);
 #endif
-
+    IJK_REGISTER_PROTOCOL(async);
+    IJK_REGISTER_PROTOCOL(ijklongurl);
+    IJK_REGISTER_PROTOCOL(ijktcphook);
+    IJK_REGISTER_PROTOCOL(ijkhttphook);
+    IJK_REGISTER_PROTOCOL(ijksegment);
     /* demuxers */
     IJK_REGISTER_DEMUXER(ijklivehook);
     av_log(NULL, AV_LOG_INFO, "===== custom modules end =====\n");

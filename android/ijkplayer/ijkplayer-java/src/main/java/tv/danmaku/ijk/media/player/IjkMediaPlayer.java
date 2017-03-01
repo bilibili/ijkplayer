@@ -102,25 +102,31 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     //----------------------------------------
     // properties
-    public static final int PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND = 10001;
-    public static final int PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND = 10002;
-    public static final int FFP_PROP_FLOAT_PLAYBACK_RATE              = 10003;
+    public static final int PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND       = 10001;
+    public static final int PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND       = 10002;
+    public static final int FFP_PROP_FLOAT_PLAYBACK_RATE                    = 10003;
 
-    public static final int FFP_PROP_INT64_SELECTED_VIDEO_STREAM      = 20001;
-    public static final int FFP_PROP_INT64_SELECTED_AUDIO_STREAM      = 20002;
+    public static final int FFP_PROP_INT64_SELECTED_VIDEO_STREAM            = 20001;
+    public static final int FFP_PROP_INT64_SELECTED_AUDIO_STREAM            = 20002;
 
-    public static final int FFP_PROP_INT64_VIDEO_DECODER              = 20003;
-    public static final int FFP_PROP_INT64_AUDIO_DECODER              = 20004;
-    public static final int     FFP_PROPV_DECODER_UNKNOWN             = 0;
-    public static final int     FFP_PROPV_DECODER_AVCODEC             = 1;
-    public static final int     FFP_PROPV_DECODER_MEDIACODEC          = 2;
-    public static final int     FFP_PROPV_DECODER_VIDEOTOOLBOX        = 3;
-    public static final int FFP_PROP_INT64_VIDEO_CACHED_DURATION      = 20005;
-    public static final int FFP_PROP_INT64_AUDIO_CACHED_DURATION      = 20006;
-    public static final int FFP_PROP_INT64_VIDEO_CACHED_BYTES         = 20007;
-    public static final int FFP_PROP_INT64_AUDIO_CACHED_BYTES         = 20008;
-    public static final int FFP_PROP_INT64_VIDEO_CACHED_PACKETS       = 20009;
-    public static final int FFP_PROP_INT64_AUDIO_CACHED_PACKETS       = 20010;
+    public static final int FFP_PROP_INT64_VIDEO_DECODER                    = 20003;
+    public static final int FFP_PROP_INT64_AUDIO_DECODER                    = 20004;
+    public static final int     FFP_PROPV_DECODER_UNKNOWN                   = 0;
+    public static final int     FFP_PROPV_DECODER_AVCODEC                   = 1;
+    public static final int     FFP_PROPV_DECODER_MEDIACODEC                = 2;
+    public static final int     FFP_PROPV_DECODER_VIDEOTOOLBOX              = 3;
+    public static final int FFP_PROP_INT64_VIDEO_CACHED_DURATION            = 20005;
+    public static final int FFP_PROP_INT64_AUDIO_CACHED_DURATION            = 20006;
+    public static final int FFP_PROP_INT64_VIDEO_CACHED_BYTES               = 20007;
+    public static final int FFP_PROP_INT64_AUDIO_CACHED_BYTES               = 20008;
+    public static final int FFP_PROP_INT64_VIDEO_CACHED_PACKETS             = 20009;
+    public static final int FFP_PROP_INT64_AUDIO_CACHED_PACKETS             = 20010;
+    public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_BACKWARDS    = 20201;
+    public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_FORWARDS     = 20202;
+    public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_CAPACITY     = 20203;
+    public static final int FFP_PROP_INT64_BIT_RATE                         = 20100;
+    public static final int FFP_PROP_INT64_TCP_SPEED                        = 20200;
+    public static final int FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION               = 20300;
     //----------------------------------------
 
     @AccessedByNative
@@ -403,6 +409,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                     sb.append(entry.getValue());
                 sb.append("\r\n");
                 setOption(OPT_CATEGORY_FORMAT, "headers", sb.toString());
+                setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "protocol_whitelist", "async,cache,crypto,file,http,https,ijkhttphook,ijkinject,ijklivehook,ijklongurl,ijksegment,ijktcphook,pipe,rtp,tcp,tls,udp,ijkurlhook,data");
             }
         }
         setDataSource(path);
@@ -754,6 +761,30 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         return _getPropertyLong(FFP_PROP_INT64_AUDIO_CACHED_PACKETS, 0);
     }
 
+    public long getAsyncStatisticBufBackwards() {
+        return _getPropertyLong(FFP_PROP_INT64_ASYNC_STATISTIC_BUF_BACKWARDS, 0);
+    }
+
+    public long getAsyncStatisticBufForwards() {
+        return _getPropertyLong(FFP_PROP_INT64_ASYNC_STATISTIC_BUF_FORWARDS, 0);
+    }
+
+    public long getAsyncStatisticBufCapacity() {
+        return _getPropertyLong(FFP_PROP_INT64_ASYNC_STATISTIC_BUF_CAPACITY, 0);
+    }
+
+    public long getBitRate() {
+        return _getPropertyLong(FFP_PROP_INT64_BIT_RATE, 0);
+    }
+
+    public long getTcpSpeed() {
+        return _getPropertyLong(FFP_PROP_INT64_TCP_SPEED, 0);
+    }
+
+    public long getSeekLoadDuration() {
+        return _getPropertyLong(FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION, 0);
+    }
+
     private native float _getPropertyFloat(int property, float defaultValue);
     private native void  _setPropertyFloat(int property, float value);
     private native long  _getPropertyLong(int property, long defaultValue);
@@ -1009,15 +1040,31 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     }
 
     public interface OnNativeInvokeListener {
-        int ON_CONCAT_RESOLVE_SEGMENT = 0x10000;
-        int ON_TCP_OPEN = 0x10001;
-        int ON_HTTP_OPEN = 0x10002;
-        // int ON_HTTP_RETRY = 0x10003;
-        int ON_LIVE_RETRY = 0x10004;
+
+        int CTRL_WILL_TCP_OPEN = 0x20001;               // NO ARGS
+        int CTRL_DID_TCP_OPEN = 0x20002;                // ARG_ERROR, ARG_FAMILIY, ARG_IP, ARG_PORT, ARG_FD
+
+        int CTRL_WILL_HTTP_OPEN = 0x20003;              // ARG_URL, ARG_SEGMENT_INDEX, ARG_RETRY_COUNTER
+        int CTRL_WILL_LIVE_OPEN = 0x20005;              // ARG_URL, ARG_RETRY_COUNTER
+        int CTRL_WILL_CONCAT_RESOLVE_SEGMENT = 0x20007; // ARG_URL, ARG_SEGMENT_INDEX, ARG_RETRY_COUNTER
+
+        int EVENT_WILL_HTTP_OPEN = 0x1;                 // ARG_URL
+        int EVENT_DID_HTTP_OPEN = 0x2;                  // ARG_URL, ARG_ERROR, ARG_HTTP_CODE
+        int EVENT_WILL_HTTP_SEEK = 0x3;                 // ARG_URL, ARG_OFFSET
+        int EVENT_DID_HTTP_SEEK = 0x4;                  // ARG_URL, ARG_OFFSET, ARG_ERROR, ARG_HTTP_CODE
 
         String ARG_URL = "url";
         String ARG_SEGMENT_INDEX = "segment_index";
         String ARG_RETRY_COUNTER = "retry_counter";
+
+        String ARG_ERROR = "error";
+        String ARG_FAMILIY = "family";
+        String ARG_IP = "ip";
+        String ARG_PORT = "port";
+        String ARG_FD = "fd";
+
+        String ARG_OFFSET = "offset";
+        String ARG_HTTP_CODE = "http_code";
 
         /*
          * @return true if invoke is handled
@@ -1043,7 +1090,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             return true;
 
         switch (what) {
-            case OnNativeInvokeListener.ON_CONCAT_RESOLVE_SEGMENT: {
+            case OnNativeInvokeListener.CTRL_WILL_CONCAT_RESOLVE_SEGMENT: {
                 OnControlMessageListener onControlMessageListener = player.mOnControlMessageListener;
                 if (onControlMessageListener == null)
                     return false;
