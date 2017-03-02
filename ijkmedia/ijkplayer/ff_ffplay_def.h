@@ -128,6 +128,8 @@
 
 #define MIN_PKT_DURATION 15
 
+#define MAX_KEY_FRAME_INTERVAL 1000  // max key frame interval is 1000
+
 #ifdef FFP_MERGE
 #define CURSOR_HIDE_DELAY 1000000
 
@@ -381,6 +383,14 @@ typedef struct VideoState {
 
     volatile int latest_seek_load_serial;
     volatile int64_t latest_seek_load_start_at;
+
+    int drop_aframe_count;
+    int drop_vframe_count;
+    int audio_accurate_seek_req;
+    int video_accurate_seek_req;
+    SDL_mutex *accurate_seek_mutex;
+    SDL_cond  *video_accurate_seek_cond;
+    SDL_cond  *audio_accurate_seek_cond;
 } VideoState;
 
 /* options specified by the user */
@@ -665,6 +675,7 @@ typedef struct FFPlayer {
     AVApplicationContext *app_ctx;
     IjkIOManagerContext *ijkio_manager_ctx;
 
+    int enable_accurate_seek;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
@@ -741,6 +752,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->start_on_prepared      = 1;
     ffp->first_video_frame_rendered = 0;
     ffp->sync_av_start          = 1;
+    ffp->enable_accurate_seek   = 0;
 
     ffp->playable_duration_ms           = 0;
 

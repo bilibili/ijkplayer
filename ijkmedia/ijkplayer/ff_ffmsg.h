@@ -42,6 +42,7 @@
 #define FFP_MSG_SEEK_COMPLETE               600     /* arg1 = seek position,                   arg2 = error */
 #define FFP_MSG_PLAYBACK_STATE_CHANGED      700
 #define FFP_MSG_TIMED_TEXT                  800
+#define FFP_MSG_ACCURATE_SEEK_COMPLETE      900     /* arg1 = current position*/
 
 #define FFP_MSG_VIDEO_DECODER_OPEN          10001
 

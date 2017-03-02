@@ -133,6 +133,8 @@ enum media_info_type {
     //100xx
     MEDIA_INFO_VIDEO_ROTATION_CHANGED = 10001,
     MEDIA_INFO_AUDIO_RENDERING_START = 10002,
+
+    MEDIA_INFO_MEDIA_ACCURATE_SEEK_COMPLETE = 10100,
 };
 
 typedef struct ijkmp_mediacodecinfo_context
