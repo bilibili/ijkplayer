@@ -98,7 +98,7 @@ NSString *const IJKMPMoviePlayerDidSeekCompleteErrorKey = @"IJKMPMoviePlayerDidS
     if (url == _url)
         return;
 
-    if ([self.url compare:url]) {
+    if (![self.url isEqualToString:url]) {
         _urlChanged = YES;
         _url = url;
     }
