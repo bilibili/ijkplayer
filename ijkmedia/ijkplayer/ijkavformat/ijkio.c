@@ -66,7 +66,7 @@ static int ijkio_open(URLContext *h, const char *arg, int flags, AVDictionary **
     ret = ijkio_manager_io_open(manager_ctx, arg, flags, &opts);
     ijk_av_dict_free(&opts);
 
-    if (ret < 0) {
+    if (ret != 0) {
         ijkio_manager_io_close(manager_ctx);
     }
 

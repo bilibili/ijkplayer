@@ -152,7 +152,7 @@ int ijkio_manager_io_open(IjkIOManagerContext *h, const char *url, int flags, Ij
             ijk_map_put(h->ijk_ctx_map, (int64_t)(intptr_t)h->cur_ffmpeg_ctx, inner);
         }
         ret = inner->prot->url_open2(inner, url, flags, options);
-        if (ret < 0)
+        if (ret != 0)
             goto fail;
 
         return ret;
@@ -182,7 +182,7 @@ int ijkio_manager_io_read(IjkIOManagerContext *h, unsigned char *buf, int size) 
         if (inner->state == IJKURL_PAUSED) {
             if (inner->prot->url_resume) {
                 ret = inner->prot->url_resume(inner);
-                if (ret < 0) {
+                if (ret != 0) {
                     return ret;
                 }
             }
@@ -228,6 +228,7 @@ int ijkio_manager_io_close(IjkIOManagerContext *h) {
             ret = inner->prot->url_close(inner);
         }
         ijk_map_remove(h->ijk_ctx_map, (int64_t)(intptr_t)h->cur_ffmpeg_ctx);
+        ijk_av_freep(&inner->priv_data);
         ijk_av_freep(&inner);
     }
 
