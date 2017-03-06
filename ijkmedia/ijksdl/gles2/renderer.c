@@ -143,7 +143,7 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_base(const char *fragment_shader_s
 
 fail:
 
-    if (renderer->program)
+    if (renderer && renderer->program)
         IJK_GLES2_printProgramInfo(renderer->program);
 
     IJK_GLES2_Renderer_free(renderer);

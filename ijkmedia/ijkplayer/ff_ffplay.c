@@ -3858,7 +3858,7 @@ void ffp_track_statistic_l(FFPlayer *ffp, AVStream *st, PacketQueue *q, FFTrackC
         cache->packets = q->nb_packets;
     }
 
-    if (st && st->time_base.den > 0 && st->time_base.num > 0) {
+    if (q && st && st->time_base.den > 0 && st->time_base.num > 0) {
         cache->duration = q->duration * av_q2d(st->time_base) * 1000;
     }
 }
