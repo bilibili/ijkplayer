@@ -87,24 +87,25 @@
         propValue = kAudioQueueTimePitchAlgorithm_Spectral;
         AudioQueueSetProperty(_audioQueueRef, kAudioQueueProperty_TimePitchAlgorithm, &propValue, sizeof(propValue));
 
+        /*
         status = AudioQueueStart(audioQueueRef, NULL);
         if (status != noErr) {
             NSLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
             self = nil;
             return nil;
-        }
+        }*/
 
         SDL_CalculateAudioSpec(&_spec);
 
         _audioQueueRef = audioQueueRef;
-
+        /*
         for (int i = 0;i < kIJKAudioQueueNumberBuffers; i++)
         {
             AudioQueueAllocateBuffer(audioQueueRef, _spec.size, &_audioQueueBufferRefArray[i]);
             _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
             memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
             AudioQueueEnqueueBuffer(audioQueueRef, _audioQueueBufferRefArray[i], 0, NULL);
-        }
+        }*/
         /*-
         status = AudioQueueStart(audioQueueRef, NULL);
         if (status != noErr) {
@@ -140,6 +141,14 @@
             NSLog(@"AudioQueue: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
         }
 
+        for (int i = 0;i < kIJKAudioQueueNumberBuffers; i++)
+        {
+            AudioQueueAllocateBuffer(_audioQueueRef, _spec.size, &_audioQueueBufferRefArray[i]);
+            _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
+            memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
+            AudioQueueEnqueueBuffer(_audioQueueRef, _audioQueueBufferRefArray[i], 0, NULL);
+        }
+        
         OSStatus status = AudioQueueStart(_audioQueueRef, NULL);
         if (status != noErr)
             NSLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
@@ -159,6 +168,9 @@
         OSStatus status = AudioQueuePause(_audioQueueRef);
         if (status != noErr)
             NSLog(@"AudioQueue: AudioQueuePause failed (%d)\n", (int)status);
+        status = AudioQueueReset(_audioQueueRef);
+        if (status != noErr)
+            NSLog(@"AudioQueue: AudioQueueReset failed (%d)\n", (int)status);
     }
 }
 
