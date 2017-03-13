@@ -29,7 +29,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 
-#define kIJKAudioQueueNumberBuffers (3)
+#define kIJKAudioQueueNumberBuffers (2)
 
 @implementation IJKSDLAudioQueueController {
     AudioQueueRef _audioQueueRef;
@@ -39,6 +39,28 @@
 
     volatile BOOL _isAborted;
     NSLock *_lock;
+}
+
+- (void) allocateAudioQueueBuffers {
+    for (int i = 0; i < kIJKAudioQueueNumberBuffers; i++)
+    {
+        if (!_audioQueueBufferRefArray[i]) {
+            AudioQueueAllocateBuffer(_audioQueueRef, _spec.size, &_audioQueueBufferRefArray[i]);
+            _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
+            memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
+            AudioQueueEnqueueBuffer(_audioQueueRef, _audioQueueBufferRefArray[i], 0, NULL);
+        }
+    }
+}
+
+- (void) freeAudioQueueBuffers {
+    for (int i = 0; i < kIJKAudioQueueNumberBuffers; i++)
+    {
+        if (_audioQueueBufferRefArray[i]) {
+            AudioQueueFreeBuffer(_audioQueueRef, _audioQueueBufferRefArray[i]);
+            _audioQueueBufferRefArray[i] = NULL;
+        }
+    }
 }
 
 - (id)initWithAudioSpec:(const SDL_AudioSpec *)aSpec
@@ -140,15 +162,7 @@
         if (NO == [[AVAudioSession sharedInstance] setActive:YES error:&error]) {
             NSLog(@"AudioQueue: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
         }
-
-        for (int i = 0;i < kIJKAudioQueueNumberBuffers; i++)
-        {
-            AudioQueueAllocateBuffer(_audioQueueRef, _spec.size, &_audioQueueBufferRefArray[i]);
-            _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
-            memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
-            AudioQueueEnqueueBuffer(_audioQueueRef, _audioQueueBufferRefArray[i], 0, NULL);
-        }
-        
+        [self allocateAudioQueueBuffers];
         OSStatus status = AudioQueueStart(_audioQueueRef, NULL);
         if (status != noErr)
             NSLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
@@ -171,6 +185,7 @@
         status = AudioQueueReset(_audioQueueRef);
         if (status != noErr)
             NSLog(@"AudioQueue: AudioQueueReset failed (%d)\n", (int)status);
+        [self freeAudioQueueBuffers];
     }
 }
 
@@ -202,6 +217,7 @@
     // do not lock AudioQueueStop, or may be run into deadlock
     AudioQueueStop(_audioQueueRef, true);
     AudioQueueDispose(_audioQueueRef, true);
+    [self freeAudioQueueBuffers];
 }
 
 - (void)close
