@@ -1,6 +1,7 @@
 /*
  * IJKSDLAudioQueueController.m
  *
+ * Copyright (c) 2013-2014 Bilibili
  * Copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * based on https://github.com/kolyvan/kxmovie
@@ -86,7 +87,6 @@
         propValue = kAudioQueueTimePitchAlgorithm_Spectral;
         AudioQueueSetProperty(_audioQueueRef, kAudioQueueProperty_TimePitchAlgorithm, &propValue, sizeof(propValue));
 
-
         status = AudioQueueStart(audioQueueRef, NULL);
         if (status != noErr) {
             NSLog(@"AudioQueue: AudioQueueStart failed (%d)\n", (int)status);
@@ -105,7 +105,6 @@
             memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
             AudioQueueEnqueueBuffer(audioQueueRef, _audioQueueBufferRefArray[i], 0, NULL);
         }
-
         /*-
         status = AudioQueueStart(audioQueueRef, NULL);
         if (status != noErr) {
@@ -131,6 +130,8 @@
 {
     if (!_audioQueueRef)
         return;
+
+    self.spec.callback(self.spec.userdata, NULL, 0);
 
     @synchronized(_lock) {
         _isPaused = NO;
@@ -207,6 +208,16 @@
         UInt32 propValue = 0;
         AudioQueueSetProperty(_audioQueueRef, kAudioQueueProperty_TimePitchBypass, &propValue, sizeof(propValue));
         AudioQueueSetParameter(_audioQueueRef, kAudioQueueParam_PlayRate, playbackRate);
+    }
+}
+
+- (void)setPlaybackVolume:(float)playbackVolume
+{
+    float aq_volume = playbackVolume;
+    if (fabsf(aq_volume - 1.0f) <= 0.000001) {
+        AudioQueueSetParameter(_audioQueueRef, kAudioQueueParam_Volume, 1.f);
+    } else {
+        AudioQueueSetParameter(_audioQueueRef, kAudioQueueParam_Volume, aq_volume);
     }
 }
 

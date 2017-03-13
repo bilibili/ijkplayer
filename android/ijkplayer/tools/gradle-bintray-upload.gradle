@@ -32,6 +32,7 @@ bintray {
     pkg {
         repo = 'maven'
         name = POM_NAME
+        userOrg = POM_USER_ORG
         desc = POM_DESCRIPTION
         websiteUrl = POM_URL
         vcsUrl = POM_SCM_URL

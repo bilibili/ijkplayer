@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 #
+# Copyright (C) 2013-2014 Bilibili
 # Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,14 +140,20 @@ elif [ "$FF_TARGET" = "check" ]; then
     echo_archs
 elif [ "$FF_TARGET" = "clean" ]; then
     echo_archs
+    echo "=================="
     for ARCH in $FF_ALL_ARCHS
     do
+        echo "clean ffmpeg-$ARCH"
+        echo "=================="
         cd ffmpeg-$ARCH && git clean -xdf && cd -
     done
+    echo "clean build cache"
+    echo "================="
     rm -rf build/ffmpeg-*
     rm -rf build/openssl-*
     rm -rf build/universal/include
     rm -rf build/universal/lib
+    echo "clean success"
 else
     echo "Usage:"
     echo "  compile-ffmpeg.sh armv7|arm64|i386|x86_64"

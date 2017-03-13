@@ -2,6 +2,7 @@
  * ijksdl_aout.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -102,6 +103,14 @@ void SDL_AoutSetPlaybackRate(SDL_Aout *aout, float playbackRate)
     if (aout) {
         if (aout->func_set_playback_rate)
             aout->func_set_playback_rate(aout, playbackRate);
+    }
+}
+
+void SDL_AoutSetPlaybackVolume(SDL_Aout *aout, float volume)
+{
+    if (aout) {
+        if (aout->func_set_playback_volume)
+            aout->func_set_playback_volume(aout, volume);
     }
 }
 

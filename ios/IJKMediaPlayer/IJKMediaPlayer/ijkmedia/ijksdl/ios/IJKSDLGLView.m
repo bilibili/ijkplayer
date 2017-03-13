@@ -1,6 +1,7 @@
 /*
  * IJKSDLGLView.m
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * based on https://github.com/kolyvan/kxmovie
@@ -28,6 +29,12 @@
 #include "ijksdl/ijksdl_gles2.h"
 #import "IJKSDLHudViewController.h"
 
+typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
+    IJKSDLGLViewApplicationUnknownState = 0,
+    IJKSDLGLViewApplicationForegroundState = 1,
+    IJKSDLGLViewApplicationBackgroundState = 2
+};
+
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
 @property(atomic) BOOL glActivePaused;
@@ -52,9 +59,12 @@
     int             _tryLockErrorCount;
     BOOL            _didSetupGL;
     BOOL            _didStopGL;
+    BOOL            _didLockedDueToMovedToWindow;
+    BOOL            _shouldLockWhileBeingMovedToWindow;
     NSMutableArray *_registeredNotifications;
 
     IJKSDLHudViewController *_hudViewController;
+    IJKSDLGLViewApplicationState _applicationState;
 }
 
 + (Class) layerClass
@@ -67,7 +77,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         _tryLockErrorCount = 0;
-
+        _shouldLockWhileBeingMovedToWindow = YES;
         self.glActiveLock = [[NSRecursiveLock alloc] init];
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
@@ -80,6 +90,28 @@
     }
 
     return self;
+}
+
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+    if (!_shouldLockWhileBeingMovedToWindow) {
+        [super willMoveToWindow:newWindow];
+        return;
+    }
+    if (newWindow && !_didLockedDueToMovedToWindow) {
+        [self lockGLActive];
+        _didLockedDueToMovedToWindow = YES;
+    }
+    [super willMoveToWindow:newWindow];
+}
+
+- (void)didMoveToWindow
+{
+    [super didMoveToWindow];
+    if (self.window && _didLockedDueToMovedToWindow) {
+        [self unlockGLActive];
+        _didLockedDueToMovedToWindow = NO;
+    }
 }
 
 - (BOOL)setupEAGLContext:(EAGLContext *)context
@@ -171,14 +203,22 @@
 
 - (BOOL)isApplicationActive
 {
-    UIApplicationState appState = [UIApplication sharedApplication].applicationState;
-    switch (appState) {
-        case UIApplicationStateActive:
+    switch (_applicationState) {
+        case IJKSDLGLViewApplicationForegroundState:
             return YES;
-        case UIApplicationStateInactive:
-        case UIApplicationStateBackground:
-        default:
+        case IJKSDLGLViewApplicationBackgroundState:
             return NO;
+        default: {
+            UIApplicationState appState = [UIApplication sharedApplication].applicationState;
+            switch (appState) {
+                case UIApplicationStateActive:
+                    return YES;
+                case UIApplicationStateInactive:
+                case UIApplicationStateBackground:
+                default:
+                    return NO;
+            }
+        }
     }
 }
 
@@ -467,6 +507,7 @@
 - (void)applicationWillEnterForeground
 {
     NSLog(@"IJKSDLGLView:applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
+    _applicationState = IJKSDLGLViewApplicationForegroundState;
     [self toggleGLPaused:NO];
 }
 
@@ -485,6 +526,7 @@
 - (void)applicationDidEnterBackground
 {
     NSLog(@"IJKSDLGLView:applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
+    _applicationState = IJKSDLGLViewApplicationBackgroundState;
     [self toggleGLPaused:YES];
 }
 
@@ -518,6 +560,9 @@
 
 - (UIImage*)snapshotInternalOnIOS7AndLater
 {
+    if (CGSizeEqualToSize(self.bounds.size, CGSizeZero)) {
+        return nil;
+    }
     UIGraphicsBeginImageContextWithOptions(self.bounds.size, NO, 0.0);
     // Render our snapshot into the image context
     [self drawViewHierarchyInRect:self.bounds afterScreenUpdates:NO];
@@ -599,6 +644,11 @@
             [self setHudValue:value forKey:key];
         });
     }
+}
+
+- (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhileBeingMovedToWindow
+{
+    _shouldLockWhileBeingMovedToWindow = shouldLockWhileBeingMovedToWindow;
 }
 
 - (void)setShouldShowHudView:(BOOL)shouldShowHudView

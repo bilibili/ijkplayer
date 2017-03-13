@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 #
+# Copyright (C) 2013-2015 Bilibili
 # Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +19,7 @@
 # IJK_FFMPEG_UPSTREAM=git://git.videolan.org/ffmpeg.git
 IJK_FFMPEG_UPSTREAM=https://github.com/Bilibili/FFmpeg.git
 IJK_FFMPEG_FORK=https://github.com/Bilibili/FFmpeg.git
-IJK_FFMPEG_COMMIT=ff3.1--ijk0.6.0--20160718--001
+IJK_FFMPEG_COMMIT=ff3.2--ijk0.7.6--20170203--001
 IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
 set -e

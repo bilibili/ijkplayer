@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 #
+# Copyright (C) 2013-2015 Bilibili
 # Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +18,7 @@
 
 IJK_EXO_UPSTREAM=https://github.com/google/ExoPlayer.git
 IJK_EXO_FORK=https://github.com/google/ExoPlayer.git
-IJK_EXO_COMMIT=r1.5.9
+IJK_EXO_COMMIT=r1.5.11
 IJK_EXO_LOCAL_REPO=extra/ExoPlayer
 
 set -e

@@ -1,6 +1,7 @@
 /*
  * IJKFFMoviePlayerController.h
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -89,9 +90,7 @@ typedef enum IJKLogLevel {
 + (void)setLogLevel:(IJKLogLevel)logLevel;
 + (BOOL)checkIfFFmpegVersionMatch:(BOOL)showAlert;
 + (BOOL)checkIfPlayerVersionMatch:(BOOL)showAlert
-                            major:(unsigned int)major
-                            minor:(unsigned int)minor
-                            micro:(unsigned int)micro;
+                            version:(NSString *)version;
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;

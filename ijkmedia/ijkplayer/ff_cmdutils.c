@@ -2,6 +2,7 @@
  * ff_cmdutils.c
  *      based on ffmpeg/cmdutils.c
  *
+ * Copyright (c) 2000-2003 Bilibili
  * Copyright (c) 2000-2003 Fabrice Bellard
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *

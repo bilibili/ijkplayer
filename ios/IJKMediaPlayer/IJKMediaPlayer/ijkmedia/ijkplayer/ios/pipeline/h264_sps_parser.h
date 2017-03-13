@@ -264,7 +264,7 @@ static void parseh264_sps(uint8_t *sps, uint32_t sps_size,  int *level, int *pro
     *max_ref_frames = (int)sps_info.max_num_ref_frames;
 }
 
-bool validate_avcC_spc(uint8_t *extradata, uint32_t extrasize, int32_t *max_ref_frames, int *level, int *profile)
+static bool validate_avcC_spc(uint8_t *extradata, uint32_t extrasize, int32_t *max_ref_frames, int *level, int *profile)
 {
     // check the avcC atom's sps for number of reference frames and
     // bail if interlaced, VDA does not handle interlaced h264.

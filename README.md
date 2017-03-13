@@ -2,8 +2,8 @@
 
  Platform | Build Status
  -------- | ------------
- Android | [![Build Status](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-android.svg?branch=master)](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-android)
- iOS | [![Build Status](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-ios.svg?branch=master)](https://travis-ci.org/bbcallen/ci-ijk-ffmpeg-ios)
+ Android | [![Build Status](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-android.svg?branch=master)](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-android)
+ iOS | [![Build Status](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-ios.svg?branch=master)](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-ios)
 
 Video player based on [ffplay](http://ffmpeg.org)
 
@@ -21,17 +21,17 @@ allprojects {
 
 dependencies {
     # required, enough for most devices.
-    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.6.0'
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.7.7.1'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.7.7.1'
 
     # Other ABIs: optional
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.6.0'
-    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.6.0'
-    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.6.0'
-    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.7.7.1'
+    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.7.7.1'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.7.7.1'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.7.7.1'
 
     # ExoPlayer as IMediaPlayer: optional, experimental
-    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.7.7.1'
 }
 ```
 - iOS
@@ -42,8 +42,8 @@ dependencies {
  - Mac OS X 10.11.5
 - Android
  - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
- - Android Studio 2.1.2
- - Gradle 2.10
+ - Android Studio 2.1.3
+ - Gradle 2.14.1
 - iOS
  - Xcode 7.3 (7D175)
 - [HomeBrew](http://brew.sh)
@@ -66,7 +66,7 @@ dependencies {
  - hw-decoder: MediaCodec (API 16+, Android 4.1+)
  - alternative-backend: android.media.MediaPlayer, ExoPlayer
 - iOS
- - platform: iOS 6.0~9.3.x
+ - platform: iOS 7.0~10.2.x
  - cpu: armv7, arm64, i386, x86_64, (armv7s is obselete)
  - api: [MediaPlayer.framework-like](ios/IJKMediaPlayer/IJKMediaPlayer/IJKMediaPlayback.h)
  - video-output: OpenGL ES 2.0
@@ -137,7 +137,7 @@ sudo dpkg-reconfigure dash
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest k0.6.0
+git checkout -B latest k0.7.7.1
 
 ./init-android.sh
 
@@ -160,6 +160,20 @@ cd ..
 #       targetSdkVersion = 23        // depending on your sdk version
 #     }
 #
+# If you want to enable debugging ijkplayer(native modules) on Android Studio 2.2+: (experimental)
+#     sh android/patch-debugging-with-lldb.sh armv7a
+#     Install Android Studio 2.2(+)
+#     Preference -> Android SDK -> SDK Tools
+#     Select (LLDB, NDK, Android SDK Build-tools,Cmake) and install
+#     Open an existing Android Studio project
+#     Select android/ijkplayer
+#     Sync Project with Gradle Files
+#     Run -> Edit Configurations -> Debugger -> Symbol Directories
+#     Add "ijkplayer-armv7a/.externalNativeBuild/ndkBuild/release/obj/local/armeabi-v7a" to Symbol Directories
+#     Run -> Debug 'ijkplayer-example'
+#     if you want to reverse patches:
+#     sh patch-debugging-with-lldb.sh reverse armv7a
+#
 # Eclipse: (obselete)
 #     File -> New -> Project -> Android Project from Existing Code
 #     Select android/ and import all project
@@ -177,7 +191,7 @@ cd ..
 ```
 git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
-git checkout -B latest k0.6.0
+git checkout -B latest k0.7.7.1
 
 ./init-ios.sh
 
@@ -223,7 +237,7 @@ cd ios
 ### License
 
 ```
-Copyright (C) 2013-2016 Zhang Rui <bbcallen@gmail.com> 
+Copyright (c) 2017 Bilibili
 Licensed under LGPLv2.1 or later
 ```
 

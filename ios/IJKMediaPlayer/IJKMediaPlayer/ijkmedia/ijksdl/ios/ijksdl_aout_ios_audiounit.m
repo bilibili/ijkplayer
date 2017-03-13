@@ -1,6 +1,7 @@
 /*
  * ijksdl_aout_ios_audiounit.m
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -90,6 +91,14 @@ static void aout_set_playback_rate(SDL_Aout *aout, float playbackRate)
     [opaque->aoutController setPlaybackRate:playbackRate];
 }
 
+static void aout_set_playback_volume(SDL_Aout *aout, float volume)
+{
+    SDLTRACE("aout_set_volume()\n");
+    SDL_Aout_Opaque *opaque = aout->opaque;
+
+    [opaque->aoutController setPlaybackVolume:volume];
+}
+
 static double auout_get_latency_seconds(SDL_Aout *aout)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
@@ -132,6 +141,7 @@ SDL_Aout *SDL_AoutIos_CreateForAudioUnit()
     aout->close_audio = aout_close_audio;
 
     aout->func_set_playback_rate = aout_set_playback_rate;
+    aout->func_set_playback_volume = aout_set_playback_volume;
     aout->func_get_latency_seconds = auout_get_latency_seconds;
     aout->func_get_audio_persecond_callbacks = aout_get_persecond_callbacks;
     return aout;

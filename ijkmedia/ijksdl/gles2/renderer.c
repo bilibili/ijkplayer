@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Bilibili
  * copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -143,7 +144,7 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_base(const char *fragment_shader_s
 
 fail:
 
-    if (renderer->program)
+    if (renderer && renderer->program)
         IJK_GLES2_printProgramInfo(renderer->program);
 
     IJK_GLES2_Renderer_free(renderer);

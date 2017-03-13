@@ -1,6 +1,7 @@
 /*
  * IJKMPMoviePlayerController.m
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -158,6 +159,16 @@
 }
 
 -(float)playbackRate
+{
+    return 1.0f;
+}
+
+-(void)setPlaybackVolume:(float)playbackVolume
+{
+    NSLog(@"[MPMoviePlayerController setPlaybackVolume] is not supported\n");
+}
+
+-(float)playbackVolume
 {
     return 1.0f;
 }

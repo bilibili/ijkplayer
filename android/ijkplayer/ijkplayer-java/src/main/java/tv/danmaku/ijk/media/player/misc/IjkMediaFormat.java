@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015 Bilibili
  * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +30,7 @@ import tv.danmaku.ijk.media.player.IjkMediaMeta;
 public class IjkMediaFormat implements IMediaFormat {
     // Common
     public static final String KEY_IJK_CODEC_LONG_NAME_UI = "ijk-codec-long-name-ui";
+    public static final String KEY_IJK_CODEC_NAME_UI = "ijk-codec-name-ui";
     public static final String KEY_IJK_BIT_RATE_UI = "ijk-bit-rate-ui";
 
     // Video
@@ -101,6 +103,12 @@ public class IjkMediaFormat implements IMediaFormat {
                 return mMediaFormat.getString(IjkMediaMeta.IJKM_KEY_CODEC_LONG_NAME);
             }
         });
+        sFormatterMap.put(KEY_IJK_CODEC_NAME_UI, new Formatter() {
+            @Override
+            public String doFormat(IjkMediaFormat mediaFormat) {
+                return mMediaFormat.getString(IjkMediaMeta.IJKM_KEY_CODEC_NAME);
+            }
+        });
         sFormatterMap.put(KEY_IJK_BIT_RATE_UI, new Formatter() {
             @Override
             protected String doFormat(IjkMediaFormat mediaFormat) {
@@ -117,9 +125,51 @@ public class IjkMediaFormat implements IMediaFormat {
         sFormatterMap.put(KEY_IJK_CODEC_PROFILE_LEVEL_UI, new Formatter() {
             @Override
             protected String doFormat(IjkMediaFormat mediaFormat) {
-                String profile = mediaFormat.getString(IjkMediaMeta.IJKM_KEY_CODEC_PROFILE);
-                if (TextUtils.isEmpty(profile))
-                    return null;
+                int profileIndex = mediaFormat.getInteger(IjkMediaMeta.IJKM_KEY_CODEC_PROFILE_ID);
+                String profile;
+                switch (profileIndex) {
+                    case IjkMediaMeta.FF_PROFILE_H264_BASELINE:
+                        profile = "Baseline";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_CONSTRAINED_BASELINE:
+                        profile = "Constrained Baseline";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_MAIN:
+                        profile = "Main";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_EXTENDED:
+                        profile = "Extended";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH:
+                        profile = "High";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_10:
+                        profile = "High 10";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_10_INTRA:
+                        profile = "High 10 Intra";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_422:
+                        profile = "High 4:2:2";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_422_INTRA:
+                        profile = "High 4:2:2 Intra";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_444:
+                        profile = "High 4:4:4";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_444_PREDICTIVE:
+                        profile = "High 4:4:4 Predictive";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_HIGH_444_INTRA:
+                        profile = "High 4:4:4 Intra";
+                        break;
+                    case IjkMediaMeta.FF_PROFILE_H264_CAVLC_444:
+                        profile = "CAVLC 4:4:4";
+                        break;
+                    default:
+                        return null;
+                }
 
                 StringBuilder sb = new StringBuilder();
                 sb.append(profile);

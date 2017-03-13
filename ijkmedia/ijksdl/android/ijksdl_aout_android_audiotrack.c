@@ -2,6 +2,7 @@
  * ijksdl_aout_android_audiotrack.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -105,9 +106,7 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
         }
         if (opaque->speed_changed) {
             opaque->speed_changed = 0;
-            if (J4A_GetSystemAndroidApiLevel(env) >= 23) {
-                SDL_Android_AudioTrack_setSpeed(env, atrack, opaque->speed);
-            }
+            SDL_Android_AudioTrack_setSpeed(env, atrack, opaque->speed);
         }
         SDL_UnlockMutex(opaque->wakeup_mutex);
 

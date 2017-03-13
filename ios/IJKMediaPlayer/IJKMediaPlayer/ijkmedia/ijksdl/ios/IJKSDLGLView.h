@@ -1,6 +1,7 @@
 /*
  * IJKSDLGLView.h
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * based on https://github.com/kolyvan/kxmovie
@@ -33,9 +34,9 @@
 
 - (UIImage*) snapshot;
 - (void)setHudValue:(NSString *)value forKey:(NSString *)key;
+- (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhiteBeingMovedToWindow __attribute__((deprecated("unused")));
 
-@property(nonatomic,strong) NSLock  *appActivityLock;
-@property(nonatomic)        CGFloat  fps;
+@property(nonatomic, readonly)        CGFloat  fps;
 @property(nonatomic)        CGFloat  scaleFactor;
 @property(nonatomic)        BOOL     shouldShowHudView;
 

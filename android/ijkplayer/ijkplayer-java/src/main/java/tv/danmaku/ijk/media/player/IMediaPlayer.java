@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013-2014 Bilibili
  * Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -132,6 +133,8 @@ public interface IMediaPlayer {
 
     void setOnInfoListener(OnInfoListener listener);
 
+    void setOnTimedTextListener(OnTimedTextListener listener);
+
     /*--------------------
      * Listeners
      */
@@ -162,6 +165,10 @@ public interface IMediaPlayer {
 
     interface OnInfoListener {
         boolean onInfo(IMediaPlayer mp, int what, int extra);
+    }
+
+    interface OnTimedTextListener {
+        void onTimedText(IMediaPlayer mp, IjkTimedText text);
     }
 
     /*--------------------
