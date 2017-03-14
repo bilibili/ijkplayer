@@ -217,7 +217,6 @@
     // do not lock AudioQueueStop, or may be run into deadlock
     AudioQueueStop(_audioQueueRef, true);
     AudioQueueDispose(_audioQueueRef, true);
-    [self freeAudioQueueBuffers];
 }
 
 - (void)close
