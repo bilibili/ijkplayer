@@ -207,6 +207,9 @@ bool            ijkmp_is_playing(IjkMediaPlayer *mp);
 long            ijkmp_get_current_position(IjkMediaPlayer *mp);
 long            ijkmp_get_duration(IjkMediaPlayer *mp);
 long            ijkmp_get_playable_duration(IjkMediaPlayer *mp);
+int             ijkmp_get_subtitle_count(IjkMediaPlayer *mp);
+const char     *ijkmp_get_subtitle_name(IjkMediaPlayer *mp, int index);
+void            ijkmp_set_subtitle_index(IjkMediaPlayer *mp, int index);
 void            ijkmp_set_loop(IjkMediaPlayer *mp, int loop);
 int             ijkmp_get_loop(IjkMediaPlayer *mp);
 

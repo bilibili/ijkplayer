@@ -39,6 +39,7 @@ FOUNDATION_EXPORT const unsigned char IJKMediaFrameworkVersionString[];
 #import <IJKMediaFramework/IJKMediaPlayer.h>
 #import <IJKMediaFramework/IJKNotificationManager.h>
 #import <IJKMediaFramework/IJKKVOController.h>
+#import <IJKMediaFramework/IJKMediaHelper.h>
 
 // backward compatible for old names
 #define IJKMediaPlaybackIsPreparedToPlayDidChangeNotification IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification

@@ -17,6 +17,7 @@
 
 #import "IJKAppDelegate.h"
 #import "IJKDemoMainViewController.h"
+#import <IJKMediaFramework/IJKMediaFramework.h>
 
 @implementation IJKAppDelegate
 
@@ -30,6 +31,19 @@
     self.window.rootViewController = self.viewController;
 
     [self.window makeKeyAndVisible];
+    
+    // test
+    NSTimeInterval time = [IJKMediaHelper durationOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv"];
+    NSLog(@"%lf", time);
+    
+    NSTimeInterval time2 = [IJKMediaHelper durationOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv1"];
+    NSLog(@"%lf", time2);
+    
+    UIImage *image = [IJKMediaHelper thumbnailOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv" atTime:5.0];
+    NSLog(@"%lf, %lf", image.size.width, image.size.height);
+    
+    UIImage *image2 = [IJKMediaHelper thumbnailOfVideoAtPath:@"/Users/lsc/Desktop/叶问3.mkv1" atTime:5.0];
+    NSLog(@"%lf, %lf", image2.size.width, image2.size.height);
     
     return YES;
 }

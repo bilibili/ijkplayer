@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4175350C1E238E5800064742 /* IJKMediaHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 4175350A1E238E5800064742 /* IJKMediaHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4175350D1E238E5800064742 /* IJKMediaHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 4175350B1E238E5800064742 /* IJKMediaHelper.m */; };
 		5407EC291DF7F93B00457BFE /* IJKVideoToolBox.h in Headers */ = {isa = PBXBuildFile; fileRef = 5407EC271DF7F93B00457BFE /* IJKVideoToolBox.h */; };
 		5407EC2A1DF7F93B00457BFE /* IJKVideoToolBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 5407EC281DF7F93B00457BFE /* IJKVideoToolBox.m */; };
 		5407EC2D1DF81D2600457BFE /* IJKVideoToolBoxSync.h in Headers */ = {isa = PBXBuildFile; fileRef = 5407EC2B1DF81D2600457BFE /* IJKVideoToolBoxSync.h */; };
@@ -267,6 +269,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4175350A1E238E5800064742 /* IJKMediaHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKMediaHelper.h; path = IJKMediaPlayer/IJKMediaHelper.h; sourceTree = "<group>"; };
+		4175350B1E238E5800064742 /* IJKMediaHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKMediaHelper.m; path = IJKMediaPlayer/IJKMediaHelper.m; sourceTree = "<group>"; };
 		454316201A66493700676070 /* ffpipeline_ios.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ffpipeline_ios.c; path = ijkmedia/ijkplayer/ios/pipeline/ffpipeline_ios.c; sourceTree = "<group>"; };
 		454316211A66493700676070 /* ffpipeline_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ffpipeline_ios.h; path = ijkmedia/ijkplayer/ios/pipeline/ffpipeline_ios.h; sourceTree = "<group>"; };
 		454316221A66493700676070 /* ffpipenode_ios_videotoolbox_vdec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ffpipenode_ios_videotoolbox_vdec.h; path = ijkmedia/ijkplayer/ios/pipeline/ffpipenode_ios_videotoolbox_vdec.h; sourceTree = "<group>"; };
@@ -939,6 +943,8 @@
 				E698089F1C7EB2040048A46C /* IJKNotificationManager.m */,
 				E69808991C7EB13A0048A46C /* NSString+IJKMedia.h */,
 				E698089A1C7EB13A0048A46C /* NSString+IJKMedia.m */,
+				4175350A1E238E5800064742 /* IJKMediaHelper.h */,
+				4175350B1E238E5800064742 /* IJKMediaHelper.m */,
 			);
 			name = IJKMediaPlayer;
 			sourceTree = "<group>";
@@ -1013,6 +1019,7 @@
 				54CF8A351E1526F800309DD5 /* ijkioapplication.h in Headers */,
 				54CF8A3B1E1526F800309DD5 /* ijkioprotocol.h in Headers */,
 				E654EAE71B6B295200B0F2D0 /* IJKMediaPlayback.h in Headers */,
+				4175350C1E238E5800064742 /* IJKMediaHelper.h in Headers */,
 				E654EAED1B6B29C100B0F2D0 /* IJKMediaPlayer.h in Headers */,
 				E6C459961C7030B6004831EC /* internal.h in Headers */,
 				5407EC2D1DF81D2600457BFE /* IJKVideoToolBoxSync.h in Headers */,
@@ -1089,11 +1096,12 @@
 		E6903EB117EAF6C500CFD954 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = bilibili;
 				TargetAttributes = {
 					E654EA891B6B27E600B0F2D0 = {
 						CreatedOnToolsVersion = 6.4;
+						LastSwiftMigration = 0820;
 					};
 					E654EA931B6B27E600B0F2D0 = {
 						CreatedOnToolsVersion = 6.4;
@@ -1290,6 +1298,7 @@
 				E6C459BA1C706A13004831EC /* ijksdl_egl.c in Sources */,
 				54CF8A331E1526F800309DD5 /* ijkio.c in Sources */,
 				E654EAA31B6B283700B0F2D0 /* IJKAudioKit.m in Sources */,
+				4175350D1E238E5800064742 /* IJKMediaHelper.m in Sources */,
 				E654EAAA1B6B284300B0F2D0 /* IJKMPMoviePlayerController.m in Sources */,
 				E68B7AD01C1E97B0001DE241 /* IJKSDLHudViewCell.m in Sources */,
 				E654EACB1B6B288A00B0F2D0 /* ijksdl_vout_overlay_videotoolbox.m in Sources */,
@@ -1477,7 +1486,7 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
@@ -1503,7 +1512,7 @@
 				);
 				INFOPLIST_FILE = IJKMediaFramework/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1514,6 +1523,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "tv.danmaku.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1527,7 +1538,7 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1549,7 +1560,7 @@
 				);
 				INFOPLIST_FILE = IJKMediaFramework/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1560,6 +1571,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "tv.danmaku.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1642,26 +1654,34 @@
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
 				GCC_WARN_SHADOW = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -1681,18 +1701,26 @@
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
 				GCC_WARN_SHADOW = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
 				VALIDATE_PRODUCT = YES;

@@ -695,7 +695,7 @@ static void video_image_display2(FFPlayer *ffp)
                             else if (sp->sub.rects[0]->ass) {
                                 parse_ass_subtitle(sp->sub.rects[0]->ass, buffered_text);
                             }
-                            ffp_notify_msg4(ffp, FFP_MSG_TIMED_TEXT, 0, 0, buffered_text, sizeof(buffered_text));
+                            ffp_notify_msg4(ffp, FFP_MSG_TIMED_TEXT, sp->sub.start_display_time, sp->sub.end_display_time, buffered_text, sizeof(buffered_text));
                         }
                         sp->uploaded = 1;
                     }
@@ -2559,8 +2559,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
 
         break;
     case AVMEDIA_TYPE_SUBTITLE:
-        if (!ffp->subtitle) break;
-
+//        if (!ffp->subtitle) break;
+        
         is->subtitle_stream = stream_index;
         is->subtitle_st = ic->streams[stream_index];
 
@@ -2750,6 +2750,7 @@ static int read_thread(void *arg)
         AVStream *st = ic->streams[i];
         enum AVMediaType type = st->codecpar->codec_type;
         st->discard = AVDISCARD_ALL;
+
         if (type >= 0 && ffp->wanted_stream_spec[type] && st_index[type] == -1)
             if (avformat_match_stream_specifier(ic, st, ffp->wanted_stream_spec[type]) > 0)
                 st_index[type] = i;
@@ -4268,7 +4269,7 @@ int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
     }
 
     codecpar = ic->streams[stream]->codecpar;
-
+    
     if (selected) {
         switch (codecpar->codec_type) {
             case AVMEDIA_TYPE_VIDEO:
