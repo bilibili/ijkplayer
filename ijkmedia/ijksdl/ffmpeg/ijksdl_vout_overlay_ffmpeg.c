@@ -175,7 +175,9 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
         case SDL_FCC_I420:
             if (frame->format == AV_PIX_FMT_YUV420P || frame->format == AV_PIX_FMT_YUVJ420P) {
                 // ALOGE("direct draw frame");
-                use_linked_frame = 1;
+#if defined(__ANDROID__)
+                use_linked_frame = 1;//wing modify@031617
+#endif
                 dst_format = frame->format;
             } else {
                 // ALOGE("copy draw frame");
