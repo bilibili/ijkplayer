@@ -30,7 +30,7 @@
 #include "j4a/class/android/os/Bundle.h"
 #include "j4a/class/tv/danmaku/ijk/media/player/IjkMediaPlayer.h"
 #include "j4a/class/tv/danmaku/ijk/media/player/misc/IMediaDataSource.h"
-#include "j4a/class/tv/danmaku/ijk/media/player/misc/IIjkIOHttp.h"
+#include "j4a/class/tv/danmaku/ijk/media/player/misc/IAndroidIO.h"
 #include "ijksdl/ijksdl_log.h"
 #include "../ff_ffplay.h"
 #include "ffmpeg_api_jni.h"
@@ -120,30 +120,31 @@ fail:
     return nativeMediaDataSource;
 }
 
-static int64_t jni_set_ijkio_http(JNIEnv* env, jobject thiz, jobject ijk_io)
+static int64_t jni_set_ijkio_androidio(JNIEnv* env, jobject thiz, jobject ijk_io)
 {
-    int64_t nativeIjkIOHttp = 0;
+    int64_t nativeAndroidIO = 0;
 
     pthread_mutex_lock(&g_clazz.mutex);
 
-    jobject old = (jobject) (intptr_t) J4AC_IjkMediaPlayer__mNativeIjkIOHttp__get__catchAll(env, thiz);
+    jobject old = (jobject) (intptr_t) J4AC_IjkMediaPlayer__mNativeAndroidIO__get__catchAll(env, thiz);
     if (old) {
-        J4AC_IIjkIOHttp__close__catchAll(env, old);
+        J4AC_IAndroidIO__close__catchAll(env, old);
         J4A_DeleteGlobalRef__p(env, &old);
-        J4AC_IjkMediaPlayer__mNativeIjkIOHttp__set__catchAll(env, thiz, 0);
+        J4AC_IjkMediaPlayer__mNativeAndroidIO__set__catchAll(env, thiz, 0);
     }
 
     if (ijk_io) {
-        jobject global_ijkio_http = (*env)->NewGlobalRef(env, ijk_io);
-        if (J4A_ExceptionCheck__catchAll(env) || !global_ijkio_http)
+        jobject global_ijkio_androidio = (*env)->NewGlobalRef(env, ijk_io);
+        if (J4A_ExceptionCheck__catchAll(env) || !global_ijkio_androidio)
             goto fail;
-        nativeIjkIOHttp = (int64_t) (intptr_t) global_ijkio_http;
-        J4AC_IjkMediaPlayer__mNativeIjkIOHttp__set__catchAll(env, thiz, (jlong) nativeIjkIOHttp);
+
+        nativeAndroidIO = (int64_t) (intptr_t) global_ijkio_androidio;
+        J4AC_IjkMediaPlayer__mNativeAndroidIO__set__catchAll(env, thiz, (jlong) nativeAndroidIO);
     }
 
 fail:
     pthread_mutex_unlock(&g_clazz.mutex);
-    return nativeIjkIOHttp;
+    return nativeAndroidIO;
 }
 
 static int message_loop(void *arg);
@@ -222,21 +223,21 @@ LABEL_RETURN:
 }
 
 static void
-IjkMediaPlayer_setDataSourceIjkIOHttpCallback(JNIEnv *env, jobject thiz, jobject callback) {
+IjkMediaPlayer_setDataSourceAndroidIOCallback(JNIEnv *env, jobject thiz, jobject callback) {
     MPTRACE("%s\n", __func__);
     int retval = 0;
     char uri[128];
-    int64_t nativeIjkIOHttp = 0;
+    int64_t nativeAndroidIO = 0;
 
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(callback, env, "java/lang/IllegalArgumentException", "mpjni: setDataSourceIjkIOCallback: null fd", LABEL_RETURN);
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setDataSourceIjkIOCallback: null mp", LABEL_RETURN);
 
-    nativeIjkIOHttp = jni_set_ijkio_http(env, thiz, callback);
-    JNI_CHECK_GOTO(nativeIjkIOHttp, env, "java/lang/IllegalStateException", "mpjni: jni_set_ijkio_http: NewGlobalRef", LABEL_RETURN);
+    nativeAndroidIO = jni_set_ijkio_androidio(env, thiz, callback);
+    JNI_CHECK_GOTO(nativeAndroidIO, env, "java/lang/IllegalStateException", "mpjni: jni_set_ijkio_androidio: NewGlobalRef", LABEL_RETURN);
 
-    ALOGV("setDataSourceIjkIOHttpCallback: %"PRId64"\n", nativeIjkIOHttp);
-    snprintf(uri, sizeof(uri), "ijkio:http:%"PRId64, nativeIjkIOHttp);
+    ALOGV("setDataSourceAndroidIOCallback: %"PRId64"\n", nativeAndroidIO);
+    snprintf(uri, sizeof(uri), "ijkio:androidio:%"PRId64, nativeAndroidIO);
 
     retval = ijkmp_set_data_source(mp, uri);
 
@@ -1081,7 +1082,7 @@ static JNINativeMethod g_methods[] = {
     },
     { "_setDataSourceFd",       "(I)V",     (void *) IjkMediaPlayer_setDataSourceFd },
     { "_setDataSource",         "(Ltv/danmaku/ijk/media/player/misc/IMediaDataSource;)V", (void *)IjkMediaPlayer_setDataSourceCallback },
-    { "_setDataSourceIjkIOHttp",    "(Ltv/danmaku/ijk/media/player/misc/IIjkIOHttp;)V", (void *)IjkMediaPlayer_setDataSourceIjkIOHttpCallback },
+    { "_setDataSourceAndroidIO",    "(Ltv/danmaku/ijk/media/player/misc/IAndroidIO;)V", (void *)IjkMediaPlayer_setDataSourceAndroidIOCallback },
 
     { "_setVideoSurface",       "(Landroid/view/Surface;)V", (void *) IjkMediaPlayer_setVideoSurface },
     { "_prepareAsync",          "()V",      (void *) IjkMediaPlayer_prepareAsync },

@@ -29,7 +29,7 @@
 #include "ijkplayer/ijkavutil/opt.h"
 #include "ijkplayer/ijkavutil/ijkutils.h"
 
-#include "j4a/class/tv/danmaku/ijk/media/player/misc/IIjkIOHttp.h"
+#include "j4a/class/tv/danmaku/ijk/media/player/misc/IAndroidIO.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 #include <assert.h>
 
@@ -49,7 +49,7 @@ static int ijkio_androidio_open(IjkURLContext *h, const char *url, int flags, Ij
     if (!c)
         return -1;
 
-    av_strstart(url, "androidio:http:", &url);
+    av_strstart(url, "androidio:", &url);
 
     ijkio_http = (jobject) (intptr_t) strtoll(url, &final, 10);
     if (!ijkio_http)
@@ -60,7 +60,7 @@ static int ijkio_androidio_open(IjkURLContext *h, const char *url, int flags, Ij
         return AVERROR(EINVAL);
     }
 
-    jint ret = J4AC_IIjkIOHttp__open(env, ijkio_http);
+    jint ret = J4AC_IAndroidIO__open(env, ijkio_http);
     if (J4A_ExceptionCheck__catchAll(env)) {
         return AVERROR(EINVAL);
     } else if (ret < 0) {
@@ -116,7 +116,7 @@ static int ijkio_androidio_read(IjkURLContext *h, unsigned char *buf, int size) 
     if (!jbuffer)
         return AVERROR(ENOMEM);
 
-    ret = J4AC_IIjkIOHttp__read(env, c->ijkio_http, jbuffer, size);
+    ret = J4AC_IAndroidIO__read(env, c->ijkio_http, jbuffer, size);
     if (J4A_ExceptionCheck__catchAll(env))
         return AVERROR(EIO);
     else if (ret < 0)
@@ -144,7 +144,7 @@ static int64_t ijkio_androidio_seek(IjkURLContext *h, int64_t offset, int whence
         return AVERROR(EINVAL);
     }
 
-    ret = J4AC_IIjkIOHttp__seek(env, c->ijkio_http, offset, whence);
+    ret = J4AC_IAndroidIO__seek(env, c->ijkio_http, offset, whence);
     if (J4A_ExceptionCheck__catchAll(env))
         return AVERROR(EIO);
 
@@ -166,7 +166,7 @@ static int ijkio_androidio_close(IjkURLContext *h) {
     J4A_DeleteGlobalRef__p(env, &c->jbuffer);
 
     if (c->ijkio_http) {
-        J4AC_IIjkIOHttp__close__catchAll(env, c->ijkio_http);
+        J4AC_IAndroidIO__close__catchAll(env, c->ijkio_http);
         J4A_DeleteGlobalRef__p(env, &c->ijkio_http);
     }
 

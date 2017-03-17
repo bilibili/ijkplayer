@@ -44,7 +44,7 @@ int ijkio_alloc_url(IjkURLContext **ph, const char *url) {
         h->priv_data = calloc(1, ijkio_ffio_protocol.priv_data_size);
     }
 #ifdef __ANDROID__
-      else if (!strncmp(url, "android:", strlen("android:"))) {
+      else if (!strncmp(url, "androidio:", strlen("androidio:"))) {
         h = (IjkURLContext *)calloc(1, sizeof(IjkURLContext));
         h->prot = &ijkio_androidio_protocol;
         h->priv_data = calloc(1, ijkio_androidio_protocol.priv_data_size);
