@@ -54,7 +54,7 @@ import java.util.Map;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
 import tv.danmaku.ijk.media.player.annotations.CalledByNative;
-import tv.danmaku.ijk.media.player.misc.IIjkIOHttp;
+import tv.danmaku.ijk.media.player.misc.IAndroidIO;
 import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.player.misc.IjkTrackInfo;
@@ -144,7 +144,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private long mNativeMediaDataSource;
 
     @AccessedByNative
-    private long mNativeIjkIOHttp;
+    private long mNativeAndroidIO;
 
     @AccessedByNative
     private int mNativeSurfaceTexture;
@@ -481,9 +481,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         _setDataSource(mediaDataSource);
     }
 
-    public void setDataSourceIjkIOHttp(IIjkIOHttp ijkIOHttp)
+    public void setDataSourceAndroidIO(IAndroidIO androidIO)
             throws IllegalArgumentException, SecurityException, IllegalStateException {
-        _setDataSourceIjkIOHttp(ijkIOHttp);
+        _setDataSourceAndroidIO(androidIO);
     }
 
     private native void _setDataSource(String path, String[] keys, String[] values)
@@ -495,7 +495,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private native void _setDataSource(IMediaDataSource mediaDataSource)
             throws IllegalArgumentException, SecurityException, IllegalStateException;
 
-    private native void _setDataSourceIjkIOHttp(IIjkIOHttp ijkIOHttp)
+    private native void _setDataSourceAndroidIO(IAndroidIO androidIO)
             throws IllegalArgumentException, SecurityException, IllegalStateException;
 
     @Override
