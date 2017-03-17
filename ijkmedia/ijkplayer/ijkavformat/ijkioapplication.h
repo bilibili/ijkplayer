@@ -47,6 +47,7 @@ struct IjkIOApplicationContext {
     void *cache_info_map;
     void *opaque;
     int64_t cache_count_bytes;
+    int fd;
     int (*func_ijkio_on_app_event)(IjkIOApplicationContext *h, int event_type ,void *obj, int size);
 };
 
