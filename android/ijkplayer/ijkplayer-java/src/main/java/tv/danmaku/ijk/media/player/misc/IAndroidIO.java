@@ -20,7 +20,7 @@ package tv.danmaku.ijk.media.player.misc;
 import java.io.IOException;
 
 @SuppressWarnings("RedundantThrows")
-public interface IIjkIOHttp {
+public interface IAndroidIO {
     int  open() throws IOException;
     int  read(byte[] buffer, int size) throws IOException;
     long seek(long offset, int whence) throws IOException;
