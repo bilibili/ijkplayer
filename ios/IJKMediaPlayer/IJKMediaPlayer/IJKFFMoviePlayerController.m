@@ -866,6 +866,13 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     return ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_PLAYBACK_VOLUME, 1.0f);
 }
 
+- (int64_t)trafficStatistic
+{
+    if (!_mediaPlayer)
+        return 0;
+    return ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_TRAFFIC_STATISTIC_BYTE_COUNT, 0);
+}
+
 inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *rawMeta, const char *name, NSString *defaultValue)
 {
     if (!meta || !rawMeta || !name)
@@ -1121,6 +1128,14 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMPMoviePlayerFirstAudioFrameRenderedNotification
              object:self];
+            break;
+        }
+        case FFP_MSG_ACCURATE_SEEK_COMPLETE: {
+            NSLog(@"FFP_MSG_ACCURATE_SEEK_COMPLETE:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerAccurateSeekCompleteNotification
+             object:self
+             userInfo:@{IJKMPMoviePlayerDidAccurateSeekCompleteCurPos: @(avmsg->arg1)}];
             break;
         }
         default:
