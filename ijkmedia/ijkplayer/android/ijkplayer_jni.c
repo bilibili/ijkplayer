@@ -223,25 +223,18 @@ LABEL_RETURN:
 }
 
 static void
-IjkMediaPlayer_setDataSourceAndroidIOCallback(JNIEnv *env, jobject thiz, jobject callback) {
+IjkMediaPlayer_setAndroidIOCallback(JNIEnv *env, jobject thiz, jobject callback) {
     MPTRACE("%s\n", __func__);
-    int retval = 0;
-    char uri[128];
     int64_t nativeAndroidIO = 0;
 
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(callback, env, "java/lang/IllegalArgumentException", "mpjni: setDataSourceIjkIOCallback: null fd", LABEL_RETURN);
-    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setDataSourceIjkIOCallback: null mp", LABEL_RETURN);
+    JNI_CHECK_GOTO(callback, env, "java/lang/IllegalArgumentException", "mpjni: setAndroidIOCallback: null fd", LABEL_RETURN);
+    JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setAndroidIOCallback: null mp", LABEL_RETURN);
 
     nativeAndroidIO = jni_set_ijkio_androidio(env, thiz, callback);
     JNI_CHECK_GOTO(nativeAndroidIO, env, "java/lang/IllegalStateException", "mpjni: jni_set_ijkio_androidio: NewGlobalRef", LABEL_RETURN);
 
-    ALOGV("setDataSourceAndroidIOCallback: %"PRId64"\n", nativeAndroidIO);
-    snprintf(uri, sizeof(uri), "ijkio:androidio:%"PRId64, nativeAndroidIO);
-
-    retval = ijkmp_set_data_source(mp, uri);
-
-    IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
+    ijkmp_set_option_int(mp, FFP_OPT_CATEGORY_FORMAT, "androidio-inject-callback", nativeAndroidIO);
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
@@ -1082,7 +1075,7 @@ static JNINativeMethod g_methods[] = {
     },
     { "_setDataSourceFd",       "(I)V",     (void *) IjkMediaPlayer_setDataSourceFd },
     { "_setDataSource",         "(Ltv/danmaku/ijk/media/player/misc/IMediaDataSource;)V", (void *)IjkMediaPlayer_setDataSourceCallback },
-    { "_setDataSourceAndroidIO",    "(Ltv/danmaku/ijk/media/player/misc/IAndroidIO;)V", (void *)IjkMediaPlayer_setDataSourceAndroidIOCallback },
+    { "_setAndroidIOCallback",  "(Ltv/danmaku/ijk/media/player/misc/IAndroidIO;)V", (void *)IjkMediaPlayer_setAndroidIOCallback },
 
     { "_setVideoSurface",       "(Landroid/view/Surface;)V", (void *) IjkMediaPlayer_setVideoSurface },
     { "_prepareAsync",          "()V",      (void *) IjkMediaPlayer_prepareAsync },
