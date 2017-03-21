@@ -32,14 +32,14 @@ typedef struct J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO {
 
 static J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO class_J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO;
 
-jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open(JNIEnv *env, jobject thiz)
+jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open(JNIEnv *env, jobject thiz, jstring url)
 {
-    return (*env)->CallIntMethod(env, thiz, class_J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO.method_open);
+    return (*env)->CallIntMethod(env, thiz, class_J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO.method_open, url);
 }
 
-jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__catchAll(JNIEnv *env, jobject thiz)
+jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__catchAll(JNIEnv *env, jobject thiz, jstring url)
 {
-    jint ret_value = J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open(env, thiz);
+    jint ret_value = J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open(env, thiz, url);
     if (J4A_ExceptionCheck__catchAll(env)) {
         return 0;
     }
@@ -110,7 +110,7 @@ int J4A_loadClass__J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO(JNIEnv *env)
 
     class_id = class_J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO.id;
     name     = "open";
-    sign     = "()I";
+    sign     = "(Ljava/lang/String;)I";
     class_J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO.method_open = J4A_GetMethodID__catchAll(env, class_id, name, sign);
     if (class_J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO.method_open == NULL)
         goto fail;

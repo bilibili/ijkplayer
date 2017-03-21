@@ -24,8 +24,8 @@
 
 #include "j4a/j4a_base.h"
 
-jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open(JNIEnv *env, jobject thiz);
-jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__catchAll(JNIEnv *env, jobject thiz);
+jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open(JNIEnv *env, jobject thiz, jstring url);
+jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__catchAll(JNIEnv *env, jobject thiz, jstring url);
 jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__read(JNIEnv *env, jobject thiz, jbyteArray buffer, jint size);
 jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__read__catchAll(JNIEnv *env, jobject thiz, jbyteArray buffer, jint size);
 jlong J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__seek(JNIEnv *env, jobject thiz, jlong offset, jint whence);
