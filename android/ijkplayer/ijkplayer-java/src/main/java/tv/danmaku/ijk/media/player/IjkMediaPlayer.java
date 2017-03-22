@@ -481,9 +481,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         _setDataSource(mediaDataSource);
     }
 
-    public void setDataSourceAndroidIO(IAndroidIO androidIO)
+    public void setAndroidIOCallback(IAndroidIO androidIO)
             throws IllegalArgumentException, SecurityException, IllegalStateException {
-        _setDataSourceAndroidIO(androidIO);
+        _setAndroidIOCallback(androidIO);
     }
 
     private native void _setDataSource(String path, String[] keys, String[] values)
@@ -495,7 +495,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private native void _setDataSource(IMediaDataSource mediaDataSource)
             throws IllegalArgumentException, SecurityException, IllegalStateException;
 
-    private native void _setDataSourceAndroidIO(IAndroidIO androidIO)
+    private native void _setAndroidIOCallback(IAndroidIO androidIO)
             throws IllegalArgumentException, SecurityException, IllegalStateException;
 
     @Override
