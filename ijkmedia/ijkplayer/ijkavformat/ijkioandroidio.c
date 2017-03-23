@@ -59,27 +59,27 @@ static int ijkio_androidio_open(IjkURLContext *h, const char *url, int flags, Ij
         return -1;
     }
 
-    if (!ijkio_androidio)
-        return AVERROR(EINVAL);
-
     if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
         av_log(h, AV_LOG_ERROR, "%s: SDL_JNI_SetupThreadEnv: failed", __func__);
         return AVERROR(EINVAL);
     }
 
-    jstring urlString = NULL;
-    urlString = (*env)->NewStringUTF(env, url);
-
-    jint ret = J4AC_IAndroidIO__open(env, ijkio_androidio, urlString);
-    if (J4A_ExceptionCheck__catchAll(env)) {
+    if (!ijkio_androidio)
         return AVERROR(EINVAL);
-    } else if (ret < 0) {
-        return ret;
-    }
 
     c->ijkio_androidio = (*env)->NewGlobalRef(env, ijkio_androidio);
     if (J4A_ExceptionCheck__catchAll(env) || !c->ijkio_androidio) {
         return AVERROR(ENOMEM);
+    }
+
+    jstring urlString = NULL;
+    urlString = (*env)->NewStringUTF(env, url);
+
+    jint ret = J4AC_IAndroidIO__open(env, c->ijkio_androidio, urlString);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        return AVERROR(EINVAL);
+    } else if (ret < 0) {
+        return ret;
     }
 
     return 0;
@@ -165,13 +165,13 @@ static int ijkio_androidio_close(IjkURLContext *h) {
     IjkIOAndroidioContext *c = h->priv_data;
     JNIEnv *env = NULL;
 
-    if (!c || !c->ijkio_androidio)
-        return AVERROR(EINVAL);
-
     if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
         av_log(h, AV_LOG_ERROR, "%s: SDL_JNI_SetupThreadEnv: failed", __func__);
         return AVERROR(EINVAL);
     }
+
+    if (!c || !c->ijkio_androidio)
+        return AVERROR(EINVAL);
 
     J4A_DeleteGlobalRef__p(env, &c->jbuffer);
 
