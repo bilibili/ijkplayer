@@ -181,6 +181,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(mediacodec_handle_resolution_change),     OPTION_INT(0, 0, 1) },
     { "opensles",                           "OpenSL ES: enable",
         OPTION_OFFSET(opensles),            OPTION_INT(0, 0, 1) },
+    { "soundtouch",                           "SoundTouch: enable",
+        OPTION_OFFSET(soundtouch_enable),            OPTION_INT(0, 0, 1) },
 
     { NULL }
 };

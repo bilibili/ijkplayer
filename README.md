@@ -246,6 +246,7 @@ ijkplayer required features are based on or derives from projects below:
   - [FFmpeg](http://git.videolan.org/?p=ffmpeg.git)
   - [libVLC](http://git.videolan.org/?p=vlc.git)
   - [kxmovie](https://github.com/kolyvan/kxmovie)
+  - [soundtouch](http://www.surina.net/soundtouch/sourcecode.html)
 - zlib license
   - [SDL](http://www.libsdl.org)
 - BSD-style license

@@ -287,7 +287,7 @@ typedef struct VideoState {
     int audio_stream;
 
     int av_sync_type;
-
+    void *handle;
     double audio_clock;
     int audio_clock_serial;
     double audio_diff_cum; /* used for AV difference average computation */
@@ -299,8 +299,10 @@ typedef struct VideoState {
     int audio_hw_buf_size;
     uint8_t *audio_buf;
     uint8_t *audio_buf1;
+    short *audio_new_buf;  /* for soundtouch buf */
     unsigned int audio_buf_size; /* in bytes */
     unsigned int audio_buf1_size;
+    unsigned int audio_new_buf_size;
     int audio_buf_index; /* in bytes */
     int audio_write_buf_size;
     int audio_volume;
@@ -646,6 +648,7 @@ typedef struct FFPlayer {
     int mediacodec_auto_rotate;
 
     int opensles;
+    int soundtouch_enable;
 
     char *iformat_name;
 
@@ -774,6 +777,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->mediacodec_auto_rotate         = 0; // option
 
     ffp->opensles                       = 0; // option
+    ffp->soundtouch_enable              = 0; // option
 
     ffp->iformat_name                   = NULL; // option
 

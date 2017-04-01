@@ -74,7 +74,7 @@ LOCAL_SRC_FILES += ijkavutil/ijktree.c
 LOCAL_SRC_FILES += ijkavutil/ijkfifo.c
 LOCAL_SRC_FILES += ijkavutil/ijkstl.cpp
 
-LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl
+LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl ijksoundtouch
 LOCAL_STATIC_LIBRARIES := android-ndk-profiler
 
 LOCAL_MODULE := ijkplayer
