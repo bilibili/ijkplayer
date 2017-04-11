@@ -183,6 +183,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(opensles),            OPTION_INT(0, 0, 1) },
     { "soundtouch",                           "SoundTouch: enable",
         OPTION_OFFSET(soundtouch_enable),            OPTION_INT(0, 0, 1) },
+    { "mediacodec-sync",                 "mediacodec: use msg_queue for synchronise",
+        OPTION_OFFSET(mediacodec_sync),           OPTION_INT(0, 0, 1) },
 
     { NULL }
 };

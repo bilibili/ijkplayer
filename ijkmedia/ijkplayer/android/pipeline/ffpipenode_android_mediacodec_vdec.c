@@ -47,6 +47,9 @@
 
 #define MAX_FAKE_FRAMES (2)
 
+#define ACODEC_RETRY -1
+#define ACODEC_EXIT  -2
+
 typedef struct AMC_Buf_Out {
     int port;
     int acodec_serial;
@@ -378,6 +381,249 @@ static int amc_fill_frame(
 fail:
     *got_frame = 0;
     return -1;
+}
+
+static int feed_input_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *enqueue_count)
+{
+    IJKFF_Pipenode_Opaque *opaque   = node->opaque;
+    FFPlayer              *ffp      = opaque->ffp;
+    IJKFF_Pipeline        *pipeline = opaque->pipeline;
+    VideoState            *is       = ffp->is;
+    Decoder               *d        = &is->viddec;
+    PacketQueue           *q        = d->queue;
+    sdl_amedia_status_t    amc_ret  = 0;
+    int                    ret      = 0;
+    ssize_t  input_buffer_index     = 0;
+    ssize_t  copy_size              = 0;
+    int64_t  time_stamp             = 0;
+    uint32_t queue_flags            = 0;
+
+    if (enqueue_count)
+        *enqueue_count = 0;
+
+    if (d->queue->abort_request) {
+        ret = ACODEC_EXIT;
+        goto fail;
+    }
+
+    if (!d->packet_pending || d->queue->serial != d->pkt_serial) {
+#if AMC_USE_AVBITSTREAM_FILTER
+#else
+        H264ConvertState convert_state = {0, 0};
+#endif
+        AVPacket pkt;
+        do {
+            if (d->queue->nb_packets == 0)
+                SDL_CondSignal(d->empty_queue_cond);
+            if (ffp_packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0) {
+                ret = -1;
+                goto fail;
+            }
+            if (ffp_is_flush_packet(&pkt) || opaque->acodec_flush_request) {
+                // request flush before lock, or never get mutex
+                opaque->acodec_flush_request = true;
+                SDL_LockMutex(opaque->acodec_mutex);
+                if (SDL_AMediaCodec_isStarted(opaque->acodec)) {
+                    if (opaque->input_packet_count > 0) {
+                        // flush empty queue cause error on OMX.SEC.AVC.Decoder (Nexus S)
+                        SDL_VoutAndroid_invalidateAllBuffers(opaque->weak_vout);
+                        SDL_AMediaCodec_flush(opaque->acodec);
+                        opaque->input_packet_count = 0;
+                    }
+                    // If codec is configured in synchronous mode, codec will resume automatically
+                    // SDL_AMediaCodec_start(opaque->acodec);
+                }
+                opaque->acodec_flush_request = false;
+                SDL_CondSignal(opaque->acodec_cond);
+                SDL_UnlockMutex(opaque->acodec_mutex);
+                d->finished = 0;
+                d->next_pts = d->start_pts;
+                d->next_pts_tb = d->start_pts_tb;
+            }
+        } while (ffp_is_flush_packet(&pkt) || d->queue->serial != d->pkt_serial);
+        av_packet_split_side_data(&pkt);
+        av_packet_unref(&d->pkt);
+        d->pkt_temp = d->pkt = pkt;
+        d->packet_pending = 1;
+
+        if (opaque->ffp->mediacodec_handle_resolution_change &&
+            opaque->codecpar->codec_id == AV_CODEC_ID_H264) {
+            uint8_t  *size_data      = NULL;
+            int       size_data_size = 0;
+            AVPacket *avpkt          = &d->pkt_temp;
+            size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
+            // minimum avcC(sps,pps) = 7
+            if (size_data && size_data_size >= 7) {
+                int             got_picture = 0;
+                AVFrame        *frame      = av_frame_alloc();
+                AVDictionary   *codec_opts = NULL;
+                const AVCodec  *codec      = opaque->decoder->avctx->codec;
+                AVCodecContext *new_avctx  = avcodec_alloc_context3(codec);
+                int change_ret = 0;
+
+                if (!new_avctx)
+                    return AVERROR(ENOMEM);
+
+                avcodec_parameters_to_context(new_avctx, opaque->codecpar);
+                av_freep(&new_avctx->extradata);
+                new_avctx->extradata = av_mallocz(size_data_size + AV_INPUT_BUFFER_PADDING_SIZE);
+                if (!new_avctx->extradata) {
+                    avcodec_free_context(&new_avctx);
+                    return AVERROR(ENOMEM);
+                }
+                memcpy(new_avctx->extradata, size_data, size_data_size);
+                new_avctx->extradata_size = size_data_size;
+
+                av_dict_set(&codec_opts, "threads", "1", 0);
+                change_ret = avcodec_open2(new_avctx, codec, &codec_opts);
+                av_dict_free(&codec_opts);
+                if (change_ret < 0) {
+                    avcodec_free_context(&new_avctx);
+                    return change_ret;
+                }
+
+                change_ret = avcodec_decode_video2(new_avctx, frame, &got_picture, avpkt);
+                if (change_ret < 0) {
+                    avcodec_free_context(&new_avctx);
+                    return change_ret;
+                } else {
+                    if (opaque->codecpar->width  != new_avctx->width &&
+                        opaque->codecpar->height != new_avctx->height) {
+                        ALOGW("AV_PKT_DATA_NEW_EXTRADATA: %d x %d\n", new_avctx->width, new_avctx->height);
+                        avcodec_parameters_from_context(opaque->codecpar, new_avctx);
+                        opaque->aformat_need_recreate = true;
+                        ffpipeline_set_surface_need_reconfigure_l(pipeline, true);
+                    }
+                }
+
+                av_frame_unref(frame);
+                avcodec_free_context(&new_avctx);
+            }
+        }
+
+        if (opaque->codecpar->codec_id == AV_CODEC_ID_H264 || opaque->codecpar->codec_id == AV_CODEC_ID_HEVC) {
+            convert_h264_to_annexb(d->pkt_temp.data, d->pkt_temp.size, opaque->nal_size, &convert_state);
+            int64_t time_stamp = d->pkt_temp.pts;
+            if (!time_stamp && d->pkt_temp.dts)
+                time_stamp = d->pkt_temp.dts;
+            if (time_stamp > 0) {
+                time_stamp = av_rescale_q(time_stamp, is->video_st->time_base, AV_TIME_BASE_Q);
+            } else {
+                time_stamp = 0;
+            }
+        }
+    }
+
+    if (d->pkt_temp.data) {
+        // reconfigure surface if surface changed
+        // NULL surface cause no display
+        if (ffpipeline_is_surface_need_reconfigure_l(pipeline)) {
+            jobject new_surface = NULL;
+
+            // request reconfigure before lock, or never get mutex
+            ffpipeline_lock_surface(pipeline);
+            ffpipeline_set_surface_need_reconfigure_l(pipeline, false);
+            new_surface = ffpipeline_get_surface_as_global_ref_l(env, pipeline);
+            ffpipeline_unlock_surface(pipeline);
+
+            if (!opaque->aformat_need_recreate &&
+                (opaque->jsurface == new_surface ||
+                (opaque->jsurface && new_surface && (*env)->IsSameObject(env, new_surface, opaque->jsurface)))) {
+                ALOGI("%s: same surface, reuse previous surface\n", __func__);
+                J4A_DeleteGlobalRef__p(env, &new_surface);
+            } else {
+                if (opaque->aformat_need_recreate) {
+                    ALOGI("%s: recreate aformat\n", __func__);
+                    ret = recreate_format_l(env, node);
+                    if (ret) {
+                        ALOGE("amc: recreate_format_l failed\n");
+                        goto fail;
+                    }
+                    opaque->aformat_need_recreate = false;
+                }
+
+                ret = reconfigure_codec_l(env, node, new_surface);
+
+                J4A_DeleteGlobalRef__p(env, &new_surface);
+
+                if (ret != 0) {
+                    ALOGE("%s: reconfigure_codec failed\n", __func__);
+                    ret = 0;
+                    goto fail;
+                }
+
+                if (q->abort_request || opaque->acodec_flush_request) {
+                    ret = 0;
+                    goto fail;
+                }
+            }
+        }
+
+        queue_flags = 0;
+        input_buffer_index = SDL_AMediaCodec_dequeueInputBuffer(opaque->acodec, timeUs);
+        if (input_buffer_index < 0) {
+            if (SDL_AMediaCodec_isInputBuffersValid(opaque->acodec)) {
+                // timeout
+                ret = 0;
+                goto fail;
+            } else {
+                // enqueue fake frame
+                queue_flags |= AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME;
+                copy_size    = d->pkt_temp.size;
+            }
+        } else {
+            SDL_AMediaCodecFake_flushFakeFrames(opaque->acodec);
+
+            copy_size = SDL_AMediaCodec_writeInputData(opaque->acodec, input_buffer_index, d->pkt_temp.data, d->pkt_temp.size);
+            if (!copy_size) {
+                ALOGE("%s: SDL_AMediaCodec_getInputBuffer failed\n", __func__);
+                ret = -1;
+                goto fail;
+            }
+        }
+
+        time_stamp = d->pkt_temp.pts;
+        if (time_stamp == AV_NOPTS_VALUE && d->pkt_temp.dts != AV_NOPTS_VALUE)
+            time_stamp = d->pkt_temp.dts;
+        if (time_stamp >= 0) {
+            time_stamp = av_rescale_q(time_stamp, is->video_st->time_base, AV_TIME_BASE_Q);
+        } else {
+            time_stamp = 0;
+        }
+        // ALOGE("queueInputBuffer, %lld\n", time_stamp);
+        amc_ret = SDL_AMediaCodec_queueInputBuffer(opaque->acodec, input_buffer_index, 0, copy_size, time_stamp, queue_flags);
+        if (amc_ret != SDL_AMEDIA_OK) {
+            ALOGE("%s: SDL_AMediaCodec_getInputBuffer failed\n", __func__);
+            ret = -1;
+            goto fail;
+        }
+        // ALOGE("%s: queue %d/%d", __func__, (int)copy_size, (int)input_buffer_size);
+        opaque->input_packet_count++;
+        if (enqueue_count)
+            ++*enqueue_count;
+    }
+
+    if (copy_size < 0) {
+        d->packet_pending = 0;
+    } else {
+        d->pkt_temp.dts =
+        d->pkt_temp.pts = AV_NOPTS_VALUE;
+        if (d->pkt_temp.data) {
+            d->pkt_temp.data += copy_size;
+            d->pkt_temp.size -= copy_size;
+            if (d->pkt_temp.size <= 0)
+                d->packet_pending = 0;
+        } else {
+            // FIXME: detect if decode finished
+            // if (!got_frame) {
+                d->packet_pending = 0;
+                d->finished = d->pkt_serial;
+            // }
+        }
+    }
+
+fail:
+    return ret;
 }
 
 static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *enqueue_count)
@@ -934,6 +1180,150 @@ fail:
     return ret;
 }
 
+static int drain_output_buffer2_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count, AVFrame *frame, int *got_frame)
+{
+    IJKFF_Pipenode_Opaque *opaque         = node->opaque;
+    FFPlayer              *ffp            = opaque->ffp;
+    SDL_AMediaCodecBufferInfo bufferInfo;
+    ssize_t          output_buffer_index  = 0;
+
+    if (dequeue_count)
+        *dequeue_count = 0;
+
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("%s:create: SetupThreadEnv failed\n", __func__);
+        return ACODEC_RETRY;
+    }
+
+    output_buffer_index = SDL_AMediaCodecFake_dequeueOutputBuffer(opaque->acodec, &bufferInfo, timeUs);
+    if (output_buffer_index == AMEDIACODEC__INFO_OUTPUT_BUFFERS_CHANGED) {
+        ALOGI("AMEDIACODEC__INFO_OUTPUT_BUFFERS_CHANGED\n");
+        return ACODEC_RETRY;
+    } else if (output_buffer_index == AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED) {
+        ALOGI("AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n");
+        SDL_AMediaFormat_deleteP(&opaque->output_aformat);
+        opaque->output_aformat = SDL_AMediaCodec_getOutputFormat(opaque->acodec);
+        if (opaque->output_aformat) {
+            int width        = 0;
+            int height       = 0;
+            int color_format = 0;
+            int stride       = 0;
+            int slice_height = 0;
+            int crop_left    = 0;
+            int crop_top     = 0;
+            int crop_right   = 0;
+            int crop_bottom  = 0;
+
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "width",          &width);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "height",         &height);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "color-format",   &color_format);
+
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "stride",         &stride);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "slice-height",   &slice_height);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-left",      &crop_left);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-top",       &crop_top);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-right",     &crop_right);
+            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-bottom",    &crop_bottom);
+
+            // TI decoder could crash after reconfigure
+            // ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, width, height);
+            // opaque->frame_width  = width;
+            // opaque->frame_height = height;
+            ALOGI(
+                "AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n"
+                "    width-height: (%d x %d)\n"
+                "    color-format: (%s: 0x%x)\n"
+                "    stride:       (%d)\n"
+                "    slice-height: (%d)\n"
+                "    crop:         (%d, %d, %d, %d)\n"
+                ,
+                width, height,
+                SDL_AMediaCodec_getColorFormatName(color_format), color_format,
+                stride,
+                slice_height,
+                crop_left, crop_top, crop_right, crop_bottom);
+        }
+        return ACODEC_RETRY;
+        // continue;
+    } else if (output_buffer_index == AMEDIACODEC__INFO_TRY_AGAIN_LATER) {
+        ALOGI("AMEDIACODEC__INFO_TRY_AGAIN_LATER\n");
+        return 0;
+        // continue;
+    } else if (output_buffer_index < 0) {
+        ALOGI("AMEDIACODEC__INFO_TRY_AGAIN_LATER 2\n");
+        return 0;
+    } else if (output_buffer_index >= 0) {
+        ffp->stat.vdps = SDL_SpeedSamplerAdd(&opaque->sampler, FFP_SHOW_VDPS_MEDIACODEC, "vdps[MediaCodec]");
+
+        if (dequeue_count)
+            ++*dequeue_count;
+
+        if (opaque->n_buf_out) {
+            AMC_Buf_Out *buf_out;
+            if (opaque->off_buf_out < opaque->n_buf_out) {
+                // ALOGD("filling buffer... %d", opaque->off_buf_out);
+                buf_out = &opaque->amc_buf_out[opaque->off_buf_out++];
+                buf_out->acodec_serial = SDL_AMediaCodec_getSerial(opaque->acodec);
+                buf_out->port = output_buffer_index;
+                buf_out->info = bufferInfo;
+                buf_out->pts = pts_from_buffer_info(node, &bufferInfo);
+                sort_amc_buf_out(opaque->amc_buf_out, opaque->off_buf_out);
+            } else {
+                double pts;
+
+                pts = pts_from_buffer_info(node, &bufferInfo);
+                if (opaque->last_queued_pts != AV_NOPTS_VALUE &&
+                    pts < opaque->last_queued_pts) {
+                    // FIXME: drop unordered picture to avoid dither
+                    // ALOGE("early picture, drop!");
+                    // SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
+                    // goto done;
+                }
+                /* already sorted */
+                buf_out = &opaque->amc_buf_out[opaque->off_buf_out - 1];
+                /* new picture is the most aged, send now */
+                if (pts < buf_out->pts) {
+                    amc_fill_frame(node, frame, got_frame, output_buffer_index, SDL_AMediaCodec_getSerial(opaque->acodec), &bufferInfo);
+                    opaque->last_queued_pts = pts;
+                    // ALOGD("pts = %f", pts);
+                    ALOGI("AMEDIACODEC__INFO_TRY_AGAIN_LATER 3\n");
+                } else {
+                    int i;
+
+                    /* find one to send */
+                    for (i = opaque->off_buf_out - 1; i >= 0; i--) {
+                        buf_out = &opaque->amc_buf_out[i];
+                        if (pts > buf_out->pts) {
+                            amc_fill_frame(node, frame, got_frame, buf_out->port, buf_out->acodec_serial, &buf_out->info);
+                            opaque->last_queued_pts = buf_out->pts;
+                            // ALOGD("pts = %f", buf_out->pts);
+                            /* replace for sort later */
+                            buf_out->acodec_serial = SDL_AMediaCodec_getSerial(opaque->acodec);
+                            buf_out->port = output_buffer_index;
+                            buf_out->info = bufferInfo;
+                            buf_out->pts = pts_from_buffer_info(node, &bufferInfo);
+                            sort_amc_buf_out(opaque->amc_buf_out, opaque->n_buf_out);
+                            break;
+                        }
+                    }
+                    /* need to discard current buffer */
+                    if (i < 0) {
+                        // ALOGE("buffer too small, drop picture!");
+                        if (!(bufferInfo.flags & AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME)) {
+                            SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, output_buffer_index, false);
+                            return 0;
+                        }
+                    }
+                }
+            }
+        } else {
+            amc_fill_frame(node, frame, got_frame, output_buffer_index, SDL_AMediaCodec_getSerial(opaque->acodec), &bufferInfo);
+        }
+    }
+
+    return 0;
+}
+
 static int drain_output_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count, AVFrame *frame, int *got_frame)
 {
     IJKFF_Pipenode_Opaque *opaque = node->opaque;
@@ -985,6 +1375,96 @@ static void func_destroy(IJKFF_Pipenode *node)
             SDL_JNI_DeleteGlobalRefP(env, &opaque->jsurface);
         }
     }
+}
+
+static int drain_output_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count, AVFrame *frame, AVRational frame_rate)
+{
+    IJKFF_Pipenode_Opaque *opaque    = node->opaque;
+    FFPlayer              *ffp       = opaque->ffp;
+    VideoState            *is        = ffp->is;
+    AVRational            tb         = is->video_st->time_base;
+    int                   got_frame  = 0;
+    int                   ret        = -1;
+    double                duration;
+    double                pts;
+    while (ret) {
+        got_frame = 0;
+        ret = drain_output_buffer2_l(env, node, timeUs, dequeue_count, frame, &got_frame);
+
+        if (opaque->decoder->queue->abort_request) {
+            if (got_frame && frame->opaque)
+                SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
+
+            return ACODEC_EXIT;
+        }
+
+        if (ret != 0) {
+            if (got_frame && frame->opaque)
+                SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
+        }
+    }
+
+    if (got_frame) {
+        duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
+        pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+        ret = ffp_queue_picture(ffp, frame, pts, duration, av_frame_get_pkt_pos(frame), is->viddec.pkt_serial);
+        if (ret) {
+            if (frame->opaque)
+                SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
+        }
+        av_frame_unref(frame);
+    }
+
+    return ret;
+}
+
+static int func_run_sync_loop(IJKFF_Pipenode *node) {
+    JNIEnv                *env           = NULL;
+    IJKFF_Pipenode_Opaque *opaque        = node->opaque;
+    FFPlayer              *ffp           = opaque->ffp;
+    VideoState            *is            = ffp->is;
+    Decoder               *d             = &is->viddec;
+    PacketQueue           *q             = d->queue;
+    int                    ret           = 0;
+    int                    dequeue_count = 0;
+    int                    enqueue_count = 0;
+    AVFrame               *frame         = NULL;
+    AVRational             frame_rate    = av_guess_frame_rate(is->ic, is->video_st, NULL);
+    if (!opaque->acodec) {
+        return ffp_video_thread(ffp);
+    }
+
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("%s: SetupThreadEnv failed\n", __func__);
+        return -1;
+    }
+
+    frame = av_frame_alloc();
+    if (!frame)
+        goto fail;
+
+    while (!q->abort_request) {
+        ret = drain_output_buffer2(env, node, AMC_OUTPUT_TIMEOUT_US, &dequeue_count, frame, frame_rate);
+        ret = feed_input_buffer2(env, node, AMC_INPUT_TIMEOUT_US, &enqueue_count);
+    }
+
+fail:
+    av_frame_free(&frame);
+    opaque->abort = true;
+    if (opaque->n_buf_out) {
+        free(opaque->amc_buf_out);
+        opaque->n_buf_out = 0;
+        opaque->amc_buf_out = NULL;
+        opaque->off_buf_out = 0;
+        opaque->last_queued_pts = AV_NOPTS_VALUE;
+    }
+    if (opaque->acodec) {
+        SDL_VoutAndroid_invalidateAllBuffers(opaque->weak_vout);
+    }
+    SDL_AMediaCodec_stop(opaque->acodec);
+    SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
+    ALOGI("MediaCodec: %s: exit: %d", __func__, ret);
+    return ret;
 }
 
 static int func_run_sync(IJKFF_Pipenode *node)
@@ -1112,7 +1592,11 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     jobject                jsurface = NULL;
 
     node->func_destroy  = func_destroy;
-    node->func_run_sync = func_run_sync;
+    if (ffp->mediacodec_sync) {
+        node->func_run_sync = func_run_sync_loop;
+    } else {
+        node->func_run_sync = func_run_sync;
+    }
     node->func_flush    = func_flush;
     opaque->pipeline    = pipeline;
     opaque->ffp         = ffp;
