@@ -85,7 +85,6 @@ void ijkio_manager_destroy(IjkIOManagerContext *h)
             if (h->ijkio_app_ctx->fd >= 0) {
                 close(h->ijkio_app_ctx->fd);
             }
-            remove(h->ijkio_app_ctx->cache_file_path);
         }
 
         ijkio_application_closep(&h->ijkio_app_ctx);

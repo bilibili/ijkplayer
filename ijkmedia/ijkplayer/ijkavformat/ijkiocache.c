@@ -694,7 +694,7 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
             if (c->ijkio_app_ctx->fd >= 0) {
                 c->fd = c->ijkio_app_ctx->fd;
             } else {
-                c->fd = open(c->cache_file_path, O_RDWR | O_BINARY | O_CREAT, 0600);
+                c->fd = open(c->cache_file_path, O_RDWR | O_BINARY | O_CREAT | O_TRUNC, 0600);
                 c->ijkio_app_ctx->fd = c->fd;
             }
             if (c->fd < 0) {
