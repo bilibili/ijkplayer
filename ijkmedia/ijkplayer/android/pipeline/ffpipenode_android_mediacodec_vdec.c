@@ -532,6 +532,11 @@ static int feed_input_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs,
                 ALOGI("%s: same surface, reuse previous surface\n", __func__);
                 J4A_DeleteGlobalRef__p(env, &new_surface);
             } else {
+                if (d->queue->abort_request) {
+                    ret = ACODEC_EXIT;
+                    goto fail;
+                }
+
                 if (opaque->aformat_need_recreate) {
                     ALOGI("%s: recreate aformat\n", __func__);
                     ret = recreate_format_l(env, node);
@@ -1407,6 +1412,28 @@ static int drain_output_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeU
     if (got_frame) {
         duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
         pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+        if (ffp->framedrop > 0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
+            if (frame->pts != AV_NOPTS_VALUE) {
+                double dpts = pts;
+                double diff = dpts - ffp_get_master_clock(is);
+                if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
+                    diff - is->frame_last_filter_delay < 0 &&
+                    is->viddec.pkt_serial == is->vidclk.serial &&
+                    is->videoq.nb_packets) {
+                    is->frame_drops_early++;
+                    is->continuous_frame_drops_early++;
+                    if (is->continuous_frame_drops_early > ffp->framedrop) {
+                        is->continuous_frame_drops_early = 0;
+                    } else {
+                        if (frame->opaque) {
+                            SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
+                        }
+                        av_frame_unref(frame);
+                        return ret;
+                    }
+                }
+            }
+        }
         ret = ffp_queue_picture(ffp, frame, pts, duration, av_frame_get_pkt_pos(frame), is->viddec.pkt_serial);
         if (ret) {
             if (frame->opaque)
@@ -1523,6 +1550,28 @@ static int func_run_sync(IJKFF_Pipenode *node)
         if (got_frame) {
             duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
             pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+            if (ffp->framedrop > 0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
+                if (frame->pts != AV_NOPTS_VALUE) {
+                    double dpts = pts;
+                    double diff = dpts - ffp_get_master_clock(is);
+                    if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
+                        diff - is->frame_last_filter_delay < 0 &&
+                        is->viddec.pkt_serial == is->vidclk.serial &&
+                        is->videoq.nb_packets) {
+                        is->frame_drops_early++;
+                        is->continuous_frame_drops_early++;
+                        if (is->continuous_frame_drops_early > ffp->framedrop) {
+                            is->continuous_frame_drops_early = 0;
+                        } else {
+                            if (frame->opaque) {
+                                SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
+                            }
+                            av_frame_unref(frame);
+                            continue;
+                        }
+                    }
+                }
+            }
             ret = ffp_queue_picture(ffp, frame, pts, duration, av_frame_get_pkt_pos(frame), is->viddec.pkt_serial);
             if (ret) {
                 if (frame->opaque)
