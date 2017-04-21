@@ -45,6 +45,9 @@
 #define AMC_INPUT_TIMEOUT_US  (100 * 1000)
 #define AMC_OUTPUT_TIMEOUT_US (100 * 1000)
 
+#define AMC_SYNC_INPUT_TIMEOUT_US  (0)
+#define AMC_SYNC_OUTPUT_TIMEOUT_US (10 * 1000)
+
 #define MAX_FAKE_FRAMES (2)
 
 #define ACODEC_RETRY -1
@@ -422,7 +425,6 @@ static int feed_input_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs,
             if (ffp_is_flush_packet(&pkt) || opaque->acodec_flush_request) {
                 // request flush before lock, or never get mutex
                 opaque->acodec_flush_request = true;
-                SDL_LockMutex(opaque->acodec_mutex);
                 if (SDL_AMediaCodec_isStarted(opaque->acodec)) {
                     if (opaque->input_packet_count > 0) {
                         // flush empty queue cause error on OMX.SEC.AVC.Decoder (Nexus S)
@@ -434,8 +436,6 @@ static int feed_input_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs,
                     // SDL_AMediaCodec_start(opaque->acodec);
                 }
                 opaque->acodec_flush_request = false;
-                SDL_CondSignal(opaque->acodec_cond);
-                SDL_UnlockMutex(opaque->acodec_mutex);
                 d->finished = 0;
                 d->next_pts = d->start_pts;
                 d->next_pts_tb = d->start_pts_tb;
@@ -1202,10 +1202,10 @@ static int drain_output_buffer2_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t tim
 
     output_buffer_index = SDL_AMediaCodecFake_dequeueOutputBuffer(opaque->acodec, &bufferInfo, timeUs);
     if (output_buffer_index == AMEDIACODEC__INFO_OUTPUT_BUFFERS_CHANGED) {
-        ALOGI("AMEDIACODEC__INFO_OUTPUT_BUFFERS_CHANGED\n");
+        ALOGD("AMEDIACODEC__INFO_OUTPUT_BUFFERS_CHANGED\n");
         return ACODEC_RETRY;
     } else if (output_buffer_index == AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED) {
-        ALOGI("AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n");
+        ALOGD("AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n");
         SDL_AMediaFormat_deleteP(&opaque->output_aformat);
         opaque->output_aformat = SDL_AMediaCodec_getOutputFormat(opaque->acodec);
         if (opaque->output_aformat) {
@@ -1251,11 +1251,9 @@ static int drain_output_buffer2_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t tim
         return ACODEC_RETRY;
         // continue;
     } else if (output_buffer_index == AMEDIACODEC__INFO_TRY_AGAIN_LATER) {
-        ALOGI("AMEDIACODEC__INFO_TRY_AGAIN_LATER\n");
         return 0;
         // continue;
     } else if (output_buffer_index < 0) {
-        ALOGI("AMEDIACODEC__INFO_TRY_AGAIN_LATER 2\n");
         return 0;
     } else if (output_buffer_index >= 0) {
         ffp->stat.vdps = SDL_SpeedSamplerAdd(&opaque->sampler, FFP_SHOW_VDPS_MEDIACODEC, "vdps[MediaCodec]");
@@ -1291,7 +1289,6 @@ static int drain_output_buffer2_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t tim
                     amc_fill_frame(node, frame, got_frame, output_buffer_index, SDL_AMediaCodec_getSerial(opaque->acodec), &bufferInfo);
                     opaque->last_queued_pts = pts;
                     // ALOGD("pts = %f", pts);
-                    ALOGI("AMEDIACODEC__INFO_TRY_AGAIN_LATER 3\n");
                 } else {
                     int i;
 
@@ -1410,6 +1407,7 @@ static int drain_output_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeU
     }
 
     if (got_frame) {
+        ffp->stat.decode_frame_count++;
         duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
         pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
         if (ffp->framedrop > 0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
@@ -1425,6 +1423,8 @@ static int drain_output_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeU
                     if (is->continuous_frame_drops_early > ffp->framedrop) {
                         is->continuous_frame_drops_early = 0;
                     } else {
+                        ffp->stat.drop_frame_count++;
+                        ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float) (ffp->stat.decode_frame_count);
                         if (frame->opaque) {
                             SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
                         }
@@ -1471,8 +1471,8 @@ static int func_run_sync_loop(IJKFF_Pipenode *node) {
         goto fail;
 
     while (!q->abort_request) {
-        ret = drain_output_buffer2(env, node, AMC_OUTPUT_TIMEOUT_US, &dequeue_count, frame, frame_rate);
-        ret = feed_input_buffer2(env, node, AMC_INPUT_TIMEOUT_US, &enqueue_count);
+        ret = drain_output_buffer2(env, node, AMC_SYNC_OUTPUT_TIMEOUT_US, &dequeue_count, frame, frame_rate);
+        ret = feed_input_buffer2(env, node, AMC_SYNC_INPUT_TIMEOUT_US, &enqueue_count);
     }
 
 fail:
@@ -1548,6 +1548,7 @@ static int func_run_sync(IJKFF_Pipenode *node)
             goto fail;
         }
         if (got_frame) {
+            ffp->stat.decode_frame_count++;
             duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
             pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
             if (ffp->framedrop > 0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
@@ -1563,6 +1564,8 @@ static int func_run_sync(IJKFF_Pipenode *node)
                         if (is->continuous_frame_drops_early > ffp->framedrop) {
                             is->continuous_frame_drops_early = 0;
                         } else {
+                            ffp->stat.drop_frame_count++;
+                            ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float) (ffp->stat.decode_frame_count);
                             if (frame->opaque) {
                                 SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
                             }
