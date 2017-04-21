@@ -486,6 +486,9 @@ typedef struct FFStatistic
     int64_t cache_buf_forwards;
     int64_t cache_file_pos;
     int64_t cache_count_bytes;
+    int drop_frame_count;
+    int decode_frame_count;
+    float drop_frame_rate;
 } FFStatistic;
 
 #define FFP_TCP_READ_SAMPLE_RANGE 2000

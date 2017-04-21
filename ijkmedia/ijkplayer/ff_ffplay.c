@@ -1428,7 +1428,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
             dpts = av_q2d(is->video_st->time_base) * frame->pts;
 
         frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(is->ic, is->video_st, frame);
-
+        ffp->stat.decode_frame_count++;
         if (ffp->framedrop>0 || (ffp->framedrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
             if (frame->pts != AV_NOPTS_VALUE) {
                 double diff = dpts - get_master_clock(is);
@@ -1441,6 +1441,8 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
                     if (is->continuous_frame_drops_early > ffp->framedrop) {
                         is->continuous_frame_drops_early = 0;
                     } else {
+                        ffp->stat.drop_frame_count++;
+                        ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float) (ffp->stat.decode_frame_count);
                         av_frame_unref(frame);
                         got_picture = 0;
                     }
@@ -4366,6 +4368,8 @@ float ffp_get_property_float(FFPlayer *ffp, int id, float default_value)
             return ffp ? ffp->stat.avdiff : default_value;
         case FFP_PROP_FLOAT_PLAYBACK_VOLUME:
             return ffp ? ffp->pf_playback_volume : default_value;
+        case FFP_PROP_FLOAT_DROP_FRAME_RATE:
+            return ffp ? ffp->stat.drop_frame_rate : default_value;
         default:
             return default_value;
     }
