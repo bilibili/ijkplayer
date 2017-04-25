@@ -635,6 +635,7 @@ typedef struct FFPlayer {
     int packet_buffering;
     int pictq_size;
     int max_fps;
+    int startup_volume;
 
     int videotoolbox;
     int vtb_max_frame_width;

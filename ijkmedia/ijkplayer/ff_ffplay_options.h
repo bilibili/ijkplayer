@@ -68,6 +68,8 @@ static const AVOption ffp_context_options[] = {
     // TODO: ss
     { "nodisp",                         "disable graphical display",
         OPTION_OFFSET(display_disable), OPTION_INT(0, 0, 1) },
+    { "volume",                         "set startup volume 0=min 100=max",
+        OPTION_OFFSET(startup_volume),   OPTION_INT(100, 0, 100) },
     // FFP_MERGE: f, pix_fmt, stats
     { "fast",                           "non spec compliant optimizations",
         OPTION_OFFSET(fast),            OPTION_INT(0, 0, 1) },

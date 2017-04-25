@@ -3233,7 +3233,13 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     init_clock(&is->audclk, &is->audioq.serial);
     init_clock(&is->extclk, &is->extclk.serial);
     is->audio_clock_serial = -1;
-    is->audio_volume = SDL_MIX_MAXVOLUME;
+    if (ffp->startup_volume < 0)
+        av_log(NULL, AV_LOG_WARNING, "-volume=%d < 0, setting to 0\n", ffp->startup_volume);
+    if (ffp->startup_volume > 100)
+        av_log(NULL, AV_LOG_WARNING, "-volume=%d > 100, setting to 100\n", ffp->startup_volume);
+    ffp->startup_volume = av_clip(ffp->startup_volume, 0, 100);
+    ffp->startup_volume = av_clip(SDL_MIX_MAXVOLUME * ffp->startup_volume / 100, 0, SDL_MIX_MAXVOLUME);
+    is->audio_volume = ffp->startup_volume;
     is->muted = 0;
     is->av_sync_type = ffp->av_sync_type;
 
