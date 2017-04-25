@@ -108,6 +108,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND       = 10001;
     public static final int PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND       = 10002;
     public static final int FFP_PROP_FLOAT_PLAYBACK_RATE                    = 10003;
+    public static final int FFP_PROP_FLOAT_DROP_FRAME_RATE                  = 10007;
 
     public static final int FFP_PROP_INT64_SELECTED_VIDEO_STREAM            = 20001;
     public static final int FFP_PROP_INT64_SELECTED_AUDIO_STREAM            = 20002;
@@ -831,6 +832,10 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private native void  _setPropertyFloat(int property, float value);
     private native long  _getPropertyLong(int property, long defaultValue);
     private native void  _setPropertyLong(int property, long value);
+
+    public float getDropFrameRate() {
+        return _getPropertyFloat(FFP_PROP_FLOAT_DROP_FRAME_RATE, .0f);
+    }
 
     @Override
     public native void setVolume(float leftVolume, float rightVolume);
