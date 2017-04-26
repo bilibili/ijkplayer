@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Raymond Zheng <raymondzheng1412@gmail.com>
+ * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@
 
 jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open(JNIEnv *env, jobject thiz, jstring url);
 jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__catchAll(JNIEnv *env, jobject thiz, jstring url);
+jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__withCString(JNIEnv *env, jobject thiz, const char *url_cstr__);
+jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__withCString__catchAll(JNIEnv *env, jobject thiz, const char *url_cstr__);
 jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__read(JNIEnv *env, jobject thiz, jbyteArray buffer, jint size);
 jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__read__catchAll(JNIEnv *env, jobject thiz, jbyteArray buffer, jint size);
 jlong J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__seek(JNIEnv *env, jobject thiz, jlong offset, jint whence);
@@ -38,6 +40,8 @@ int J4A_loadClass__J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO(JNIEnv *env)
 
 #define J4AC_IAndroidIO__open J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open
 #define J4AC_IAndroidIO__open__catchAll J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__catchAll
+#define J4AC_IAndroidIO__open__withCString J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__withCString
+#define J4AC_IAndroidIO__open__withCString__catchAll J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__withCString__catchAll
 #define J4AC_IAndroidIO__read J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__read
 #define J4AC_IAndroidIO__read__catchAll J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__read__catchAll
 #define J4AC_IAndroidIO__seek J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__seek

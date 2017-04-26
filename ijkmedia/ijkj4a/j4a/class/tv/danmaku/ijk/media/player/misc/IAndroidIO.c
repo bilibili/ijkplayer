@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Raymond Zheng <raymondzheng1412@gmail.com>
+ * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ typedef struct J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO {
     jmethodID method_seek;
     jmethodID method_close;
 } J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO;
-
 static J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO class_J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO;
 
 jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open(JNIEnv *env, jobject thiz, jstring url)
@@ -44,6 +43,46 @@ jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__catchAll(JNIEnv *en
         return 0;
     }
 
+    return ret_value;
+}
+
+jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__withCString(JNIEnv *env, jobject thiz, const char *url_cstr__)
+{
+    jint ret_value = 0;
+    jstring url = NULL;
+
+    url = (*env)->NewStringUTF(env, url_cstr__);
+    if (J4A_ExceptionCheck__throwAny(env) || !url)
+        goto fail;
+
+    ret_value = J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open(env, thiz, url);
+    if (J4A_ExceptionCheck__throwAny(env)) {
+        ret_value = 0;
+        goto fail;
+    }
+
+fail:
+    J4A_DeleteLocalRef__p(env, &url);
+    return ret_value;
+}
+
+jint J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__withCString__catchAll(JNIEnv *env, jobject thiz, const char *url_cstr__)
+{
+    jint ret_value = 0;
+    jstring url = NULL;
+
+    url = (*env)->NewStringUTF(env, url_cstr__);
+    if (J4A_ExceptionCheck__catchAll(env) || !url)
+        goto fail;
+
+    ret_value = J4AC_tv_danmaku_ijk_media_player_misc_IAndroidIO__open__catchAll(env, thiz, url);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        ret_value = 0;
+        goto fail;
+    }
+
+fail:
+    J4A_DeleteLocalRef__p(env, &url);
     return ret_value;
 }
 
