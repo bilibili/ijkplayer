@@ -339,6 +339,7 @@ static void VTDecoderCallback(void *decompressionOutputRefCon,
                 dpts = av_q2d(is->video_st->time_base) * newFrame->pic.pts;
 
             if (ffp->framedrop>0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
+                ffp->stat.decode_frame_count++;
                 if (newFrame->pic.pts != AV_NOPTS_VALUE) {
                     double diff = dpts - ffp_get_master_clock(is);
                     if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
@@ -350,6 +351,8 @@ static void VTDecoderCallback(void *decompressionOutputRefCon,
                         if (is->continuous_frame_drops_early > ffp->framedrop) {
                             is->continuous_frame_drops_early = 0;
                         } else {
+                            ffp->stat.drop_frame_count++;
+                            ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float)(ffp->stat.decode_frame_count);
                             // drop too late frame
                             goto failed;
                         }
