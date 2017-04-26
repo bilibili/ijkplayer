@@ -1428,8 +1428,9 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
             dpts = av_q2d(is->video_st->time_base) * frame->pts;
 
         frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(is->ic, is->video_st, frame);
-        ffp->stat.decode_frame_count++;
+
         if (ffp->framedrop>0 || (ffp->framedrop && get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
+            ffp->stat.decode_frame_count++;
             if (frame->pts != AV_NOPTS_VALUE) {
                 double diff = dpts - get_master_clock(is);
                 if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
@@ -1442,7 +1443,7 @@ static int get_video_frame(FFPlayer *ffp, AVFrame *frame)
                         is->continuous_frame_drops_early = 0;
                     } else {
                         ffp->stat.drop_frame_count++;
-                        ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float) (ffp->stat.decode_frame_count);
+                        ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float)(ffp->stat.decode_frame_count);
                         av_frame_unref(frame);
                         got_picture = 0;
                     }

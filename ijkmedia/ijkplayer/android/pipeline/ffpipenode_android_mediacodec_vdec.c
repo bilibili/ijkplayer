@@ -1407,10 +1407,10 @@ static int drain_output_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeU
     }
 
     if (got_frame) {
-        ffp->stat.decode_frame_count++;
         duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
         pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
         if (ffp->framedrop > 0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
+            ffp->stat.decode_frame_count++;
             if (frame->pts != AV_NOPTS_VALUE) {
                 double dpts = pts;
                 double diff = dpts - ffp_get_master_clock(is);
@@ -1424,7 +1424,7 @@ static int drain_output_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeU
                         is->continuous_frame_drops_early = 0;
                     } else {
                         ffp->stat.drop_frame_count++;
-                        ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float) (ffp->stat.decode_frame_count);
+                        ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float)(ffp->stat.decode_frame_count);
                         if (frame->opaque) {
                             SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
                         }
@@ -1548,10 +1548,10 @@ static int func_run_sync(IJKFF_Pipenode *node)
             goto fail;
         }
         if (got_frame) {
-            ffp->stat.decode_frame_count++;
             duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
             pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
             if (ffp->framedrop > 0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
+                ffp->stat.decode_frame_count++;
                 if (frame->pts != AV_NOPTS_VALUE) {
                     double dpts = pts;
                     double diff = dpts - ffp_get_master_clock(is);
@@ -1565,7 +1565,7 @@ static int func_run_sync(IJKFF_Pipenode *node)
                             is->continuous_frame_drops_early = 0;
                         } else {
                             ffp->stat.drop_frame_count++;
-                            ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float) (ffp->stat.decode_frame_count);
+                            ffp->stat.drop_frame_rate = (float)(ffp->stat.drop_frame_count) / (float)(ffp->stat.decode_frame_count);
                             if (frame->opaque) {
                                 SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
                             }
