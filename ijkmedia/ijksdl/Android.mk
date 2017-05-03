@@ -38,6 +38,7 @@ LOCAL_SRC_FILES += ijksdl_stdinc.c
 LOCAL_SRC_FILES += ijksdl_thread.c
 LOCAL_SRC_FILES += ijksdl_timer.c
 LOCAL_SRC_FILES += ijksdl_vout.c
+LOCAL_SRC_FILES += ijksdl_extra_log.c
 LOCAL_SRC_FILES += gles2/color.c
 LOCAL_SRC_FILES += gles2/common.c
 LOCAL_SRC_FILES += gles2/renderer.c
