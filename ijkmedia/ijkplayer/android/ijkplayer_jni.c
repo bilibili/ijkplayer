@@ -991,7 +991,10 @@ static int message_loop(void *arg)
     MPTRACE("%s\n", __func__);
 
     JNIEnv *env = NULL;
-    (*g_jvm)->AttachCurrentThread(g_jvm, &env, NULL );
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("%s: SetupThreadEnv failed\n", __func__);
+        return -1;
+    }
 
     IjkMediaPlayer *mp = (IjkMediaPlayer*) arg;
     JNI_CHECK_GOTO(mp, env, NULL, "mpjni: native_message_loop: null mp", LABEL_RETURN);
@@ -1000,7 +1003,6 @@ static int message_loop(void *arg)
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
-    (*g_jvm)->DetachCurrentThread(g_jvm);
 
     MPTRACE("message_loop exit");
     return 0;
