@@ -130,8 +130,6 @@ typedef enum IJKLogLevel {
 @property (nonatomic, readonly) IJKFFMonitor *monitor;
 
 #pragma mark - E7
-@property (copy, nonatomic) NSString *serverProtocol;
-@property (copy, nonatomic) NSString *liveProtocol;
 @property (copy, nonatomic) NSString *commentProtocol;
 @property (copy, nonatomic) NSString *liveId;
 @property (copy, nonatomic) NSString *provider;

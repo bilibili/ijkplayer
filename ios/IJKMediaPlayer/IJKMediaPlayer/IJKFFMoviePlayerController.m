@@ -713,8 +713,6 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
 
     if (!_streamURL) {
         _streamURL = [NSURL URLWithString:_urlString];
-        [_glView setHudValue:_serverProtocol forKey:@"server-protocol"];
-        [_glView setHudValue:_liveProtocol forKey:@"live-protocol"];
         [_glView setHudValue:_commentProtocol forKey:@"comment-protocol"];
         [_glView setHudValue:_liveId forKey:@"live-id"];
         [_glView setHudValue:_provider forKey:@"provider"];
