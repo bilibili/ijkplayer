@@ -39,6 +39,10 @@ do :
     # frameworks' executables with lipo.
     lipo -create -output "${OUTPUT_FRAMEWORK_PATH}/${FRAMEWORK_NAME}" "${SRCROOT}/build/${THE_CONFIGURATION}-iphoneos/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" "${SRCROOT}/build/${THE_CONFIGURATION}-iphonesimulator/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}"
 
+
+    rm -rf "{OUTPUT_FRAMEWORK_PATH}/include"
+    cp -r "../build/universal/include" "${OUTPUT_FRAMEWORK_PATH}/"
+
 done
 
 
