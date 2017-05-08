@@ -23,7 +23,7 @@ do :
 
     # Build the framework for device and for simulator (using
     # all needed architectures).
-    xcodebuild -target "${FRAMEWORK_NAME}" -configuration "${THE_CONFIGURATION}" -arch arm64 -arch armv7 -arch armv7s only_active_arch=no defines_module=yes -sdk "iphoneos"
+    xcodebuild -target "${FRAMEWORK_NAME}" -configuration "${THE_CONFIGURATION}" -arch arm64 -arch armv7 only_active_arch=no defines_module=yes -sdk "iphoneos"
     xcodebuild -target "${FRAMEWORK_NAME}" -configuration "${THE_CONFIGURATION}" -arch x86_64 only_active_arch=no defines_module=yes -sdk "iphonesimulator"
 
     # Remove .framework file if exists from previous run.
