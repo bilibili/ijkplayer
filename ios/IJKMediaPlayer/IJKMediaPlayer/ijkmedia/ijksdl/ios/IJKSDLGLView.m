@@ -756,7 +756,6 @@
 //                }
 //            });
             dispatch_async(dispatch_get_main_queue(), ^{
-                NSLog(@"%@", _self);
                 if (_self.monitorCallback)
                     _self.monitorCallback(YES);
             });
