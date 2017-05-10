@@ -326,6 +326,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     [self stopHudTimer];
     ijkmp_stop(_mediaPlayer);
+    
+    IJKFFMoviePlayerController *ffpController = (__bridge_transfer IJKFFMoviePlayerController *)ijkmp_set_weak_thiz(_mediaPlayer, NULL);
+    ffpController = nil;
 }
 
 - (BOOL)isPlaying
