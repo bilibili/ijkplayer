@@ -4264,6 +4264,7 @@ void ffp_set_playback_rate(FFPlayer *ffp, float rate)
     if (!ffp)
         return;
 
+    av_log(ffp, AV_LOG_INFO, "Playback rate: %f\n", rate);
     ffp->pf_playback_rate = rate;
     ffp->pf_playback_rate_changed = 1;
 }
