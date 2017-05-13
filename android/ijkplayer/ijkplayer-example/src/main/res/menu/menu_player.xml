@@ -23,4 +23,20 @@
         android:id="@+id/action_show_tracks"
         android:title="@string/tracks"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_fast"
+        android:title="Fast"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_slow"
+        android:title="Slow"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_negate"
+        android:title="Negate"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_sepia"
+        android:title="Sepia"
+        app:showAsAction="ifRoom" />
 </menu>
