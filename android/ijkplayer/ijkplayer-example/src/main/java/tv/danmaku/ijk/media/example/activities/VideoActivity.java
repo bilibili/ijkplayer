@@ -38,8 +38,6 @@ import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
-import tv.danmaku.ijk.media.player.IjkMediaPlayer;
-import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.application.Settings;
 import tv.danmaku.ijk.media.example.content.RecentMediaStorage;
@@ -47,12 +45,14 @@ import tv.danmaku.ijk.media.example.fragments.TracksFragment;
 import tv.danmaku.ijk.media.example.widget.media.AndroidMediaController;
 import tv.danmaku.ijk.media.example.widget.media.IjkVideoView;
 import tv.danmaku.ijk.media.example.widget.media.MeasureHelper;
+import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 
 public class VideoActivity extends AppCompatActivity implements TracksFragment.ITrackHolder {
     private static final String TAG = "VideoActivity";
 
     private String mVideoPath;
-    private Uri    mVideoUri;
+    private Uri mVideoUri;
 
     private AndroidMediaController mMediaController;
     private IjkVideoView mVideoView;
@@ -219,6 +219,14 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
                 transaction.commit();
                 mDrawerLayout.openDrawer(mRightDrawer);
             }
+        } else if (id == R.id.action_fast) {
+            mVideoView.setVfilter("setpts=0.25*PTS");
+        } else if (id == R.id.action_slow) {
+            mVideoView.setVfilter("setpts=2.0*PTS");
+        } else if (id == R.id.action_negate) {
+            mVideoView.setVfilter("negate");
+        } else if (id == R.id.action_sepia) {
+            mVideoView.setVfilter("colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131");
         }
 
         return super.onOptionsItemSelected(item);
