@@ -1,6 +1,15 @@
 tag next
 --------------------------------
 
+tag k0.8.0
+--------------------------------
+- ffmpeg: upgrade to 3.3
+- ffmpeg: enable flac
+- android: support sync mediacodec
+- android: support framedrop when use mediacodec
+- openssl: upgrade to 1.0.2k
+- jni4android: upgrade to v0.0.2
+
 tag k0.7.9
 --------------------------------
 - ffmpeg: add tcp timeout control
