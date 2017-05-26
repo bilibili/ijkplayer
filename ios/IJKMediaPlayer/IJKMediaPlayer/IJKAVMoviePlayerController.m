@@ -311,7 +311,7 @@ static IJKAVMoviePlayerController* instance;
                                                   object:_playerItem];
     
     [_playerKVO safelyRemoveAllObservers];
-    
+    [[IJKAudioKit sharedInstance] removeAudioSession];
     [self unregisterApplicationObservers];
     
     if (_avView != nil) {
