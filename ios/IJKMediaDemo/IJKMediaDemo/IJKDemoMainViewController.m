@@ -84,7 +84,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     switch (section) {
         case 0:
-            if (IOS_NEWER_OR_EQUAL_TO_7) {
+            if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_7_0) {
                 return self.tableViewCellTitles.count;
             } else {
                 return self.tableViewCellTitles.count - 1;
