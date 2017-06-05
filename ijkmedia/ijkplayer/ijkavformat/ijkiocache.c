@@ -92,6 +92,7 @@ typedef struct IjkIOCacheContext {
     IjkURLContext *inner;
     IjkThreadPoolContext *threadpool_ctx;
     IjkIOApplicationContext *ijkio_app_ctx;
+    int init_node_by_inject;
 } IjkIOCacheContext;
 
 typedef struct IjkCacheEntry {
@@ -631,6 +632,43 @@ static void ijkio_cache_task(void *h, void *r) {
     pthread_mutex_unlock(&c->mutex);
 }
 
+static void ijkio_cache_init_tree_insert(IjkIOCacheContext *c, int index, int64_t file_logical_pos, int64_t physical_pos, int64_t size) {
+    IjkCacheEntry *entry = NULL;
+    struct IjkAVTreeNode *node = NULL;
+    entry = malloc(sizeof(*entry));
+    node = ijk_av_tree_node_alloc();
+    if (!entry || !node) {
+        return;
+    }
+    entry->logical_pos = file_logical_pos;
+    entry->physical_pos = physical_pos;
+    entry->size = size;
+
+    IjkCacheTreeInfo *tree_info = ijk_map_get(c->ijkio_app_ctx->cache_info_map, index);
+    if (tree_info) {
+        ijk_av_tree_insert(&tree_info->root, entry, cmp, &node);
+    }
+}
+
+static int jkio_cache_init_node(IjkIOCacheContext *c) {
+    int64_t max_physical_pos = -1;
+    for (int i = 0; i < c->ijkio_app_ctx->init_node_count; i++) {
+        IjkIOAppCacheInitNode *node = (IjkIOAppCacheInitNode *)(c->ijkio_app_ctx->ijkio_cache_init_node + i);
+        if (node) {
+            int64_t physical_byte_count = node->physical_pos + node->cache_size;
+            c->logical_size = node->file_size;
+            if (physical_byte_count > max_physical_pos)
+                max_physical_pos = physical_byte_count;
+            ijkio_cache_init_tree_insert(c, node->index, node->file_logical_pos, node->physical_pos, node->cache_size);
+        }
+    }
+    if (max_physical_pos > 0) {
+        *c->last_physical_pos = max_physical_pos;
+        *c->cache_count_bytes = max_physical_pos;
+    }
+    return max_physical_pos;
+}
+
 static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVDictionary **options) {
     IjkIOCacheContext *c= h->priv_data;
     int ret;
@@ -642,6 +680,7 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
         return -1;
     }
 
+    c->init_node_by_inject = 0;
     c->ijkio_interrupt_callback = h->ijkio_app_ctx->ijkio_interrupt_callback;
 
     ijk_av_strstart(url, "cache:", &url);
@@ -694,7 +733,12 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
             if (c->ijkio_app_ctx->fd >= 0) {
                 c->fd = c->ijkio_app_ctx->fd;
             } else {
-                c->fd = open(c->cache_file_path, O_RDWR | O_BINARY | O_CREAT | O_TRUNC, 0600);
+                if (jkio_cache_init_node(c) > 0) {
+                    c->fd = open(c->cache_file_path, O_RDWR | O_BINARY | O_CREAT, 0600);
+                    c->init_node_by_inject = 1;
+                } else {
+                    c->fd = open(c->cache_file_path, O_RDWR | O_BINARY | O_CREAT | O_TRUNC, 0600);
+                }
                 c->ijkio_app_ctx->fd = c->fd;
             }
             if (c->fd < 0) {
@@ -717,9 +761,8 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
             if (c->tree_info == NULL) {
                 c->tree_info = calloc(1, sizeof(IjkCacheTreeInfo));
                 c->tree_info->physical_init_pos = *c->last_physical_pos;
+                ijk_map_put(c->cache_info_map, (int64_t)c->cur_file_no, c->tree_info);
             }
-
-            ijk_map_put(c->cache_info_map, (int64_t)c->cur_file_no, c->tree_info);
 
             if (*c->cache_limit_file_pos <= 0)
                 *c->cache_limit_file_pos = c->cache_max_capacity;

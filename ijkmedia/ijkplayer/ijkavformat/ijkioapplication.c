@@ -44,6 +44,8 @@ int  ijkio_application_open(IjkIOApplicationContext **ph, void *opaque) {
 }
 
 void ijkio_application_close(IjkIOApplicationContext *h) {
+    if (!h && !h->ijkio_cache_init_node)
+        free(h->ijkio_cache_init_node);
     free(h);
 }
 

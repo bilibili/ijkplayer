@@ -55,6 +55,47 @@ int ijkio_manager_create(IjkIOManagerContext **ph, void *opaque)
     return ijkio_manager_alloc(ph, opaque);
 }
 
+void ijkio_manager_inject_node(IjkIOManagerContext *h, int index, int64_t file_logical_pos, int64_t physical_pos, int64_t cache_size, int64_t file_size) {
+    if (!h->ijkio_app_ctx)
+        return;
+    if (!h->ijkio_app_ctx->ijkio_cache_init_node) {
+        h->ijkio_app_ctx->ijkio_cache_init_node = (IjkIOAppCacheInitNode *)calloc(1, sizeof(IjkIOAppCacheInitNode));
+        if (!h->ijkio_app_ctx->ijkio_cache_init_node)
+            return;
+        h->ijkio_app_ctx->ijkio_cache_init_node->file_logical_pos = file_logical_pos;
+        h->ijkio_app_ctx->ijkio_cache_init_node->physical_pos = physical_pos;
+        h->ijkio_app_ctx->ijkio_cache_init_node->cache_size = cache_size;
+        h->ijkio_app_ctx->ijkio_cache_init_node->file_size = file_size;
+        h->ijkio_app_ctx->ijkio_cache_init_node->index = index;
+        h->ijkio_app_ctx->init_node_count++;
+
+        IjkCacheTreeInfo *tree_info = ijk_map_get(h->ijkio_app_ctx->cache_info_map, index);
+        if (tree_info == NULL) {
+            IjkCacheTreeInfo *tree_info = calloc(1, sizeof(IjkCacheTreeInfo));
+            tree_info->physical_init_pos = physical_pos;
+            ijk_map_put(h->ijkio_app_ctx->cache_info_map, (int64_t)index, tree_info);
+        }
+    } else {
+        h->ijkio_app_ctx->ijkio_cache_init_node = (IjkIOAppCacheInitNode *)realloc(h->ijkio_app_ctx->ijkio_cache_init_node, sizeof(IjkIOAppCacheInitNode) * (h->ijkio_app_ctx->init_node_count + 1));
+        IjkIOAppCacheInitNode *node = (IjkIOAppCacheInitNode *)(h->ijkio_app_ctx->ijkio_cache_init_node + h->ijkio_app_ctx->init_node_count);
+        if (!node)
+            return;
+        node->file_logical_pos = file_logical_pos;
+        node->physical_pos = physical_pos;
+        node->cache_size = cache_size;
+        node->file_size = file_size;
+        node->index = index;
+        h->ijkio_app_ctx->init_node_count++;
+        IjkCacheTreeInfo *tree_info = ijk_map_get(h->ijkio_app_ctx->cache_info_map, index);
+        if (tree_info == NULL) {
+            IjkCacheTreeInfo *tree_info = calloc(1, sizeof(IjkCacheTreeInfo));
+            tree_info->physical_init_pos = physical_pos;
+            ijk_map_put(h->ijkio_app_ctx->cache_info_map, (int64_t)index, tree_info);
+        }
+    }
+
+}
+
 static int enu_free(void *opaque, void *elem)
 {
     free(elem);

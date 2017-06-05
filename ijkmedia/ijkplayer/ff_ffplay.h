@@ -46,6 +46,7 @@ void      ffp_reset(FFPlayer *ffp);
 
 /* set options before ffp_prepare_async_l() */
 
+void     ffp_set_ijkio_inject_node(FFPlayer *ffp, int index, int64_t file_logical_pos, int64_t physical_pos, int64_t cache_size, int64_t file_size);
 void     *ffp_set_inject_opaque(FFPlayer *ffp, void *opaque);
 void     *ffp_set_ijkio_inject_opaque(FFPlayer *ffp, void *opaque);
 void      ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const char *value);

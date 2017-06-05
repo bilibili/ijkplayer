@@ -3624,6 +3624,14 @@ static int ijkio_app_func_event(IjkIOApplicationContext *h, int message ,void *d
     return inject_callback(ffp->inject_opaque, IJKIOAPP_EVENT_CACHE_STATISTIC, data, size);
 }
 
+void ffp_set_ijkio_inject_node(FFPlayer *ffp, int index, int64_t file_logical_pos, int64_t physical_pos, int64_t cache_size, int64_t file_size)
+{
+    if (!ffp || !ffp->ijkio_manager_ctx)
+        return NULL;
+
+    ijkio_manager_inject_node(ffp->ijkio_manager_ctx, index, file_logical_pos, physical_pos, cache_size, file_size);
+}
+
 void *ffp_set_ijkio_inject_opaque(FFPlayer *ffp, void *opaque)
 {
     if (!ffp)

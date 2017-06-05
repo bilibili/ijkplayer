@@ -40,6 +40,7 @@ int ijkio_manager_create(IjkIOManagerContext **ph, void *opaque);
 void ijkio_manager_destroy(IjkIOManagerContext *h);
 void ijkio_manager_destroyp(IjkIOManagerContext **ph);
 int ijkio_manager_set_callback(IjkIOManagerContext *h, void *callback);
+void ijkio_manager_inject_node(IjkIOManagerContext *h, int index, int64_t file_logical_pos, int64_t physical_pos, int64_t cache_size, int64_t file_size);
 
 int ijkio_manager_io_open(IjkIOManagerContext *h, const char *url, int flags, IjkAVDictionary **options);
 int ijkio_manager_io_read(IjkIOManagerContext *h, unsigned char *buf, int size);
