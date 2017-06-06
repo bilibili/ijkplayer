@@ -307,6 +307,7 @@ static int reconfigure_codec_l(JNIEnv *env, IJKFF_Pipenode *node, jobject new_su
             if (opaque->quirk_reconfigure_with_new_codec) {
                 ALOGI("quirk: reconfigure with new codec");
                 SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
+                SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, NULL);
 
                 opaque->acodec = create_codec_l(env, node);
                 if (!opaque->acodec) {
