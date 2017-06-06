@@ -2,6 +2,7 @@
  * ijksdl_vout_overlay_android_mediacodec.h
  *****************************************************************************
  *
+ * Copyright (c) 2014 Bilibili
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -30,7 +31,7 @@
 typedef struct SDL_AMediaCodec           SDL_AMediaCodec;
 typedef struct SDL_AMediaCodecBufferInfo SDL_AMediaCodecBufferInfo;
 
-SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout);
+SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, SDL_Vout *vout);
 
 bool SDL_VoutOverlayAMediaCodec_isKindOf(SDL_VoutOverlay *overlay);
 int  SDL_VoutOverlayAMediaCodec_releaseFrame_l(SDL_VoutOverlay *overlay, SDL_AMediaCodec *acodec, bool render);

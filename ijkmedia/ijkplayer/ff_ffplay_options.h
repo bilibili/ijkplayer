@@ -1,6 +1,7 @@
 /*
  * ff_ffplaye_options.h
  *
+ * Copyright (c) 2015 Bilibili
  * Copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -30,7 +31,18 @@
     .min = min__, \
     .max = max__, \
     .flags = AV_OPT_FLAG_DECODING_PARAM
-
+#define OPTION_INT64(default__, min__, max__) \
+    .type = AV_OPT_TYPE_INT64, \
+    { .i64 = default__ }, \
+    .min = min__, \
+    .max = max__, \
+    .flags = AV_OPT_FLAG_DECODING_PARAM
+#define OPTION_DOUBLE(default__, min__, max__) \
+    .type = AV_OPT_TYPE_DOUBLE, \
+    { .dbl = default__ }, \
+    .min = min__, \
+    .max = max__, \
+    .flags = AV_OPT_FLAG_DECODING_PARAM
 #define OPTION_CONST(default__) \
     .type = AV_OPT_TYPE_CONST, \
     { .i64 = default__ }, \
@@ -56,6 +68,8 @@ static const AVOption ffp_context_options[] = {
     // TODO: ss
     { "nodisp",                         "disable graphical display",
         OPTION_OFFSET(display_disable), OPTION_INT(0, 0, 1) },
+    { "volume",                         "set startup volume 0=min 100=max",
+        OPTION_OFFSET(startup_volume),   OPTION_INT(100, 0, 100) },
     // FFP_MERGE: f, pix_fmt, stats
     { "fast",                           "non spec compliant optimizations",
         OPTION_OFFSET(fast),            OPTION_INT(0, 0, 1) },
@@ -66,6 +80,10 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(infinite_buffer), OPTION_INT(0, 0, 1) },
     { "framedrop",                      "drop frames when cpu is too slow",
         OPTION_OFFSET(framedrop),       OPTION_INT(0, -1, 120) },
+    { "seek-at-start",                  "set offset of player should be seeked",
+        OPTION_OFFSET(seek_at_start),       OPTION_INT64(0, 0, INT_MAX) },
+    { "subtitle",                       "decode subtitle stream",
+        OPTION_OFFSET(subtitle),        OPTION_INT(0, 0, 1) },
     // FFP_MERGE: window_title
 #if CONFIG_AVFILTER
     { "af",                             "audio filters",
@@ -80,11 +98,12 @@ static const AVOption ffp_context_options[] = {
 
     // extended options in ff_ffplay.c
     { "max-fps",                        "drop frames in video whose fps is greater than max-fps",
-        OPTION_OFFSET(max_fps),         OPTION_INT(31, 0, 121) },
+        OPTION_OFFSET(max_fps),         OPTION_INT(31, -1, 121) },
 
     { "overlay-format",                 "fourcc of overlay format",
         OPTION_OFFSET(overlay_format),  OPTION_INT(SDL_FCC_RV32, INT_MIN, INT_MAX),
         .unit = "overlay-format" },
+    { "fcc-_es2",                       "", 0, OPTION_CONST(SDL_FCC__GLES2), .unit = "overlay-format" },
     { "fcc-i420",                       "", 0, OPTION_CONST(SDL_FCC_I420), .unit = "overlay-format" },
     { "fcc-yv12",                       "", 0, OPTION_CONST(SDL_FCC_YV12), .unit = "overlay-format" },
     { "fcc-rv16",                       "", 0, OPTION_CONST(SDL_FCC_RV16), .unit = "overlay-format" },
@@ -100,7 +119,24 @@ static const AVOption ffp_context_options[] = {
                                                        VIDEO_PICTURE_QUEUE_SIZE_MAX) },
 
     { "max-buffer-size",                    "max buffer size should be pre-read",
-        OPTION_OFFSET(max_buffer_size),     OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
+        OPTION_OFFSET(dcc.max_buffer_size), OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
+    { "min-frames",                         "minimal frames to stop pre-reading",
+        OPTION_OFFSET(dcc.min_frames),      OPTION_INT(DEFAULT_MIN_FRAMES, MIN_MIN_FRAMES, MAX_MIN_FRAMES) },
+    { "first-high-water-mark-ms",           "first chance to wakeup read_thread",
+        OPTION_OFFSET(dcc.first_high_water_mark_in_ms),
+        OPTION_INT(DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_LAST_HIGH_WATER_MARK_IN_MS) },
+    { "next-high-water-mark-ms",            "second chance to wakeup read_thread",
+        OPTION_OFFSET(dcc.next_high_water_mark_in_ms),
+        OPTION_INT(DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_LAST_HIGH_WATER_MARK_IN_MS) },
+    { "last-high-water-mark-ms",            "last chance to wakeup read_thread",
+        OPTION_OFFSET(dcc.last_high_water_mark_in_ms),
+        OPTION_INT(DEFAULT_LAST_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS,
+                   DEFAULT_LAST_HIGH_WATER_MARK_IN_MS) },
 
     { "packet-buffering",                   "pause output until enough packets have been read after stalling",
         OPTION_OFFSET(packet_buffering),    OPTION_INT(1, 0, 1) },
@@ -108,10 +144,15 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(sync_av_start),       OPTION_INT(1, 0, 1) },
     { "iformat",                            "force format",
         OPTION_OFFSET(iformat_name),        OPTION_STR(NULL) },
-    { "min-frames",                         "minimal frames to stop pre-reading",
-        OPTION_OFFSET(min_frames),          OPTION_INT(DEFAULT_MIN_FRAMES, MIN_MIN_FRAMES, MAX_MIN_FRAMES) },
+    { "no-time-adjust",                     "return player's real time from the media stream instead of the adjusted time",
+        OPTION_OFFSET(no_time_adjust),      OPTION_INT(0, 0, 1) },
+    { "preset-5-1-center-mix-level",        "preset center-mix-level for 5.1 channel",
+        OPTION_OFFSET(preset_5_1_center_mix_level), OPTION_DOUBLE(M_SQRT1_2, -32, 32) },
 
-    // iOS only options
+    { "enable-accurate-seek",                      "enable accurate seek",
+        OPTION_OFFSET(enable_accurate_seek),       OPTION_INT(0, 0, 1) },
+
+        // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
         OPTION_OFFSET(videotoolbox),        OPTION_INT(0, 0, 1) },
     { "videotoolbox-max-frame-width",       "VideoToolbox: max width of output frame",
@@ -120,6 +161,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(vtb_async),           OPTION_INT(0, 0, 1) },
     { "videotoolbox-wait-async",            "VideoToolbox: call VTDecompressionSessionWaitForAsynchronousFrames()",
         OPTION_OFFSET(vtb_wait_async),      OPTION_INT(1, 0, 1) },
+    { "videotoolbox-handle-resolution-change",          "VideoToolbox: handle resolution change automatically",
+        OPTION_OFFSET(vtb_handle_resolution_change),    OPTION_INT(0, 0, 1) },
 
     // Android only options
     { "mediacodec",                             "MediaCodec: enable H264 (deprecated by 'mediacodec-avc')",
@@ -132,10 +175,19 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(mediacodec_avc),          OPTION_INT(0, 0, 1) },
     { "mediacodec-hevc",                        "MediaCodec: enable HEVC",
         OPTION_OFFSET(mediacodec_hevc),         OPTION_INT(0, 0, 1) },
-
+    { "mediacodec-mpeg2",                       "MediaCodec: enable MPEG2VIDEO",
+        OPTION_OFFSET(mediacodec_mpeg2),        OPTION_INT(0, 0, 1) },
+    { "mediacodec-mpeg4",                       "MediaCodec: enable MPEG4",
+        OPTION_OFFSET(mediacodec_mpeg4),        OPTION_INT(0, 0, 1) },
+    { "mediacodec-handle-resolution-change",                    "MediaCodec: handle resolution change automatically",
+        OPTION_OFFSET(mediacodec_handle_resolution_change),     OPTION_INT(0, 0, 1) },
     { "opensles",                           "OpenSL ES: enable",
         OPTION_OFFSET(opensles),            OPTION_INT(0, 0, 1) },
-    
+    { "soundtouch",                           "SoundTouch: enable",
+        OPTION_OFFSET(soundtouch_enable),            OPTION_INT(0, 0, 1) },
+    { "mediacodec-sync",                 "mediacodec: use msg_queue for synchronise",
+        OPTION_OFFSET(mediacodec_sync),           OPTION_INT(0, 0, 1) },
+
     { NULL }
 };
 

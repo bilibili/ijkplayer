@@ -1,3 +1,4 @@
+# Copyright (c) 2013-2014 Bilibili
 # copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
 #
 # This file is part of ijkPlayer.
@@ -19,8 +20,10 @@
 APP_OPTIM := release
 APP_PLATFORM := android-9
 APP_ABI := x86
-NDK_TOOLCHAIN_VERSION=4.8
+NDK_TOOLCHAIN_VERSION=4.9
 APP_PIE := false
+
+APP_STL := stlport_static
 
 APP_CFLAGS := -O3 -Wall -pipe \
     -ffast-math \

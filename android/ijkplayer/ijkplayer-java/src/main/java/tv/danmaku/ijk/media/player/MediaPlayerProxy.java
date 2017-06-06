@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015 Bilibili
  * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +32,7 @@ import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 
 public class MediaPlayerProxy implements IMediaPlayer {
-    protected IMediaPlayer mBackEndMediaPlayer;
+    protected final IMediaPlayer mBackEndMediaPlayer;
 
     public MediaPlayerProxy(IMediaPlayer backEndMediaPlayer) {
         mBackEndMediaPlayer = backEndMediaPlayer;
@@ -278,6 +279,21 @@ public class MediaPlayerProxy implements IMediaPlayer {
             });
         } else {
             mBackEndMediaPlayer.setOnInfoListener(null);
+        }
+    }
+
+    @Override
+    public void setOnTimedTextListener(OnTimedTextListener listener) {
+        if (listener != null) {
+            final OnTimedTextListener finalListener = listener;
+            mBackEndMediaPlayer.setOnTimedTextListener(new OnTimedTextListener() {
+                @Override
+                public void onTimedText(IMediaPlayer mp, IjkTimedText text) {
+                    finalListener.onTimedText(MediaPlayerProxy.this, text);
+                }
+            });
+        } else {
+            mBackEndMediaPlayer.setOnTimedTextListener(null);
         }
     }
 

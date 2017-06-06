@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015 Bilibili
  * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +17,8 @@
 
 package tv.danmaku.ijk.media.player.misc;
 
+import android.text.TextUtils;
+
 import tv.danmaku.ijk.media.player.IjkMediaMeta;
 
 public class IjkTrackInfo implements ITrackInfo {
@@ -26,13 +29,21 @@ public class IjkTrackInfo implements ITrackInfo {
         mStreamMeta = streamMeta;
     }
 
+    public void setMediaMeta(IjkMediaMeta.IjkStreamMeta streamMeta) {
+        mStreamMeta = streamMeta;
+    }
+
     @Override
     public IMediaFormat getFormat() {
         return new IjkMediaFormat(mStreamMeta);
     }
 
-    public void setMediaMeta(IjkMediaMeta.IjkStreamMeta streamMeta) {
-        mStreamMeta = streamMeta;
+    @Override
+    public String getLanguage() {
+        if (mStreamMeta == null || TextUtils.isEmpty(mStreamMeta.mLanguage))
+            return "und";
+
+        return mStreamMeta.mLanguage;
     }
 
     @Override
@@ -46,12 +57,7 @@ public class IjkTrackInfo implements ITrackInfo {
 
     @Override
     public String toString() {
-        StringBuilder out = new StringBuilder(128);
-        out.append(getClass().getSimpleName());
-        out.append('{');
-        out.append(getInfoInline());
-        out.append("}");
-        return out.toString();
+        return getClass().getSimpleName() + '{' + getInfoInline() + "}";
     }
 
     @Override
@@ -78,6 +84,8 @@ public class IjkTrackInfo implements ITrackInfo {
                 break;
             case MEDIA_TRACK_TYPE_TIMEDTEXT:
                 out.append("TIMEDTEXT");
+                out.append(", ");
+                out.append(mStreamMeta.mLanguage);
                 break;
             case MEDIA_TRACK_TYPE_SUBTITLE:
                 out.append("SUBTITLE");

@@ -1,5 +1,107 @@
 tag next
 --------------------------------
+
+tag k0.8.0
+--------------------------------
+- ffmpeg: upgrade to 3.3
+- ffmpeg: enable flac
+- android: support sync mediacodec
+- android: support framedrop when use mediacodec
+- openssl: upgrade to 1.0.2k
+- jni4android: upgrade to v0.0.2
+
+tag k0.7.9
+--------------------------------
+- ffmpeg: add tcp timeout control
+- android: support soundtouch
+
+tag k0.7.8
+--------------------------------
+- ffplay: support accurate seek
+- ijkio: fix some issue
+- ios: add ijkplayer dynamic target with ssl
+
+tag k0.7.7
+--------------------------------
+- ffmpeg: enable ijkio protocol
+- ffmpeg: avoid some unreasonable pts
+- ios: fix a crash caused by videotoolbox sync initialization fail
+
+tag k0.7.6
+--------------------------------
+- ffmpeg: ass subtitle support
+- msg_queue: add resource for msg_queue
+- ios: separate vtb sync mode from mixed vtb
+- android: fix some thread competition
+- android: support setSpeed for pre-M(api<23) versions
+
+tag k0.7.5
+--------------------------------
+- ffmpeg: disable-asm on architecture x86
+- ffmpeg: revert some cutted demuxer and decoder
+- ios: add playback volume interface
+
+tag k0.7.4
+--------------------------------
+- ffplay: fix sample buffer leak introduced in k0.7.1
+- doc: add takeoff checklist
+
+tag k0.7.3
+--------------------------------
+- ios: turn videotoolbox into singleton
+- ffmpeg: merge ipv6 issue in tcp.c
+
+tag k0.7.2
+-------------------------------
+- ios: fix a compile error
+
+tag k0.7.1
+-------------------------------
+- ffmpeg: upgrade to n3.2
+
+tag k0.6.3
+--------------------------------
+- ffmpeg: disable clock_gettime added in xcode8
+- android: make NDKr13 happy
+
+tag k0.6.2
+--------------------------------
+- ffmpeg: fix wild pointer when decoder was not found
+- player: fix bug introduced in k0.6.0
+
+tag k0.6.1
+--------------------------------
+- concat: fix crash introduced in k0.6.0
+- flvdec: fix seek problem introduced in k0.6.0
+- hls: fix regression with ranged media segments
+
+tag k0.6.0
+--------------------------------
+- openssl: upgrade to 1.0.2h
+- ffmpeg: upgrade to n3.1
+- MediaCodec: add options to enable resolution change.
+- VideoToolbox: add options to enable resolution change.
+
+tag k0.5.1
+--------------------------------
+- ffmpeg: fix crash introduced in k0.5.0
+
+tag k0.5.0
+--------------------------------
+- ffmpeg: upgrade to n3.0
+- android: support NDKr11
+
+tag k0.4.5
+--------------------------------
+- ios: support playbackRate change. (iOS 7.0 or later)
+- android: support speed change. (Android 6.0 or later)
+- player: do not link avfilter by default.
+- android: add x86_64 support
+- android: move jjk out to jni4android project
+- android: support OpenGL ES2 render
+
+tag k0.4.4
+--------------------------------
 - ios: replace MPMoviePlayerXXX with IJKMPMoviePlayerXXX
 - ios: remove target 'IjkMediaPlayer'. 'IjkMediaFramework' should be used instead.
 - android: switch ExoPlayer to r1.5.2

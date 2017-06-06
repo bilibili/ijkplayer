@@ -15,14 +15,14 @@ import java.util.TreeMap;
 public class IjkMediaCodecInfo {
     private final static String TAG = "IjkMediaCodecInfo";
 
-    public static int RANK_MAX = 1000;
-    public static int RANK_TESTED = 800;
-    public static int RANK_ACCEPTABLE = 700;
-    public static int RANK_LAST_CHANCE = 600;
-    public static int RANK_SECURE = 300;
-    public static int RANK_SOFTWARE = 200;
-    public static int RANK_NON_STANDARD = 100;
-    public static int RANK_NO_SENSE = 0;
+    public static final int RANK_MAX = 1000;
+    public static final int RANK_TESTED = 800;
+    public static final int RANK_ACCEPTABLE = 700;
+    public static final int RANK_LAST_CHANCE = 600;
+    public static final int RANK_SECURE = 300;
+    public static final int RANK_SOFTWARE = 200;
+    public static final int RANK_NON_STANDARD = 100;
+    public static final int RANK_NO_SENSE = 0;
 
     public MediaCodecInfo mCodecInfo;
     public int mRank = 0;

@@ -2,6 +2,7 @@
  * ijksdl_vout_dummy.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -34,7 +35,7 @@ struct SDL_Vout_Opaque {
     char dummy;
 };
 
-static void vout_free_l(SDL_Vout *vout)
+static void func_free_l(SDL_Vout *vout)
 {
     if (!vout)
         return;
@@ -46,15 +47,15 @@ static void vout_free_l(SDL_Vout *vout)
     SDL_Vout_FreeInternal(vout);
 }
 
-static int voud_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
+static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     return 0;
 }
 
-static int voud_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
+static int func_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     SDL_LockMutex(vout->mutex);
-    int retval = voud_display_overlay_l(vout, overlay);
+    int retval = func_display_overlay_l(vout, overlay);
     SDL_UnlockMutex(vout->mutex);
     return retval;
 }
@@ -67,8 +68,8 @@ SDL_Vout *SDL_VoutDummy_Create()
 
     // SDL_Vout_Opaque *opaque = vout->opaque;
 
-    vout->free_l = vout_free_l;
-    vout->display_overlay = voud_display_overlay;
+    vout->free_l = func_free_l;
+    vout->display_overlay = func_display_overlay;
 
     return vout;
 }

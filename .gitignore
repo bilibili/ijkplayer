@@ -8,6 +8,7 @@ ios/openssl-*
 extra
 .DS_Store
 ijkmedia/ijkyuv/
+ijkmedia/ijksoundtouch
 ijkprof/android-ndk-profiler/
 
 # built application files
@@ -25,6 +26,7 @@ bin/
 gen/
 libs/
 obj/
+ijkmedia/ijkplayer/ijkversion.h
 
 # Local configuration file (sdk path, etc)
 local.properties

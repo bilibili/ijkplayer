@@ -85,7 +85,7 @@ static void func_unref(SDL_VoutOverlay *overlay)
 
 static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
 {
-    assert(frame->format == SDL_FCC__VTB);
+    assert(frame->format == IJK_AV_PIX_FMT__VIDEO_TOOLBOX);
 
     CVBufferRef pixel_buffer = CVBufferRetain(frame->opaque);
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
@@ -96,7 +96,7 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
     overlay->format = SDL_FCC__VTB;
     overlay->planes = 2;
 
-#if 0
+#if 1
     if (CVPixelBufferLockBaseAddress(pixel_buffer, 0) != kCVReturnSuccess) {
         overlay->pixels[0]  = NULL;
         overlay->pixels[1]  = NULL;
@@ -108,18 +108,20 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
         opaque->pixel_buffer = NULL;
         return -1;
     }
-    overlay->pixels[0]  = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 0);
-    overlay->pixels[1]  = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 1);
-    overlay->pitches[0] = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 0);
-    overlay->pitches[1] = CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, 1);
+    // overlay->pixels[0]  = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 0);
+    // overlay->pixels[1]  = CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, 1);
+    overlay->pixels[0]  = NULL;
+    overlay->pixels[1]  = NULL;
+    overlay->pitches[0] = CVPixelBufferGetWidthOfPlane(pixel_buffer, 0);
+    overlay->pitches[1] = CVPixelBufferGetWidthOfPlane(pixel_buffer, 1);
     CVPixelBufferUnlockBaseAddress(pixel_buffer, 0);
 #else
     overlay->pixels[0]  = NULL;
     overlay->pixels[1]  = NULL;
     overlay->pitches[0] = 0;
     overlay->pitches[1] = 0;
-    overlay->is_private = 1;
 #endif
+    overlay->is_private = 1;
 
     overlay->w = (int)frame->width;
     overlay->h = (int)frame->height;
@@ -154,9 +156,10 @@ CVPixelBufferRef SDL_VoutOverlayVideoToolBox_GetCVPixelBufferRef(SDL_VoutOverlay
     return opaque->pixel_buffer;
 }
 
-SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *display)
+SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, SDL_Vout *display)
 {
-    SDLTRACE("SDL_VoutVideoToolBox_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, dp=%p)\n", width, height, (const char*) &format, format, display);
+    SDLTRACE("SDL_VoutVideoToolBox_CreateOverlay(w=%d, h=%d, fmt=_VTB, dp=%p)\n",
+             width, height, display);
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
     if (!overlay) {
         ALOGE("overlay allocation failed");
@@ -164,7 +167,7 @@ SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, Uint3
     }
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     overlay->opaque_class = &g_vout_overlay_videotoolbox_class;
-    overlay->format     = format;
+    overlay->format     = SDL_FCC__VTB;
     overlay->w          = width;
     overlay->h          = height;
     overlay->pitches    = opaque->pitches;

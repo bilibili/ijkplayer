@@ -1,6 +1,7 @@
 /*
  * ijkplayer.h
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -147,6 +148,7 @@ struct SDL_Vout;
 #define IJKMP_OPT_CATEGORY_CODEC  FFP_OPT_CATEGORY_CODEC
 #define IJKMP_OPT_CATEGORY_SWS    FFP_OPT_CATEGORY_SWS
 #define IJKMP_OPT_CATEGORY_PLAYER FFP_OPT_CATEGORY_PLAYER
+#define IJKMP_OPT_CATEGORY_SWR    FFP_OPT_CATEGORY_SWR
 
 
 void            ijkmp_global_init();
@@ -154,8 +156,7 @@ void            ijkmp_global_uninit();
 void            ijkmp_global_set_log_report(int use_report);
 void            ijkmp_global_set_log_level(int log_level);   // log_level = AV_LOG_xxx
 void            ijkmp_global_set_inject_callback(ijk_inject_callback cb);
-const char     *ijkmp_version_ident();
-unsigned int    ijkmp_version_int();
+const char     *ijkmp_version();
 void            ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes));
 void            ijkmp_io_stat_complete_register(void (*cb)(const char *url,
                                                            int64_t read_bytes, int64_t total_size,
@@ -163,7 +164,8 @@ void            ijkmp_io_stat_complete_register(void (*cb)(const char *url,
 
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*));
-void            ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque);
+void*            ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque);
+void*            ijkmp_set_ijkio_inject_opaque(IjkMediaPlayer *mp, void *opaque);
 
 void            ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, const char *value);
 void            ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const char *name, int64_t value);
@@ -171,6 +173,8 @@ void            ijkmp_set_option_int(IjkMediaPlayer *mp, int opt_category, const
 int             ijkmp_get_video_codec_info(IjkMediaPlayer *mp, char **codec_info);
 int             ijkmp_get_audio_codec_info(IjkMediaPlayer *mp, char **codec_info);
 void            ijkmp_set_playback_rate(IjkMediaPlayer *mp, float rate);
+void            ijkmp_set_playback_volume(IjkMediaPlayer *mp, float rate);
+
 int             ijkmp_set_stream_selected(IjkMediaPlayer *mp, int stream, int selected);
 
 float           ijkmp_get_property_float(IjkMediaPlayer *mp, int id, float default_value);
@@ -210,6 +214,7 @@ void           *ijkmp_get_weak_thiz(IjkMediaPlayer *mp);
 void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 
 /* return < 0 if aborted, 0 if no packet and > 0 if packet.  */
+/* need to call msg_free_res for freeing the resouce obtained in msg */
 int             ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block);
 
 #endif

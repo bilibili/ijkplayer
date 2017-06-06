@@ -2,6 +2,7 @@
  * ijksdl_vout_overlay_ffmpeg.h
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -29,6 +30,6 @@
 #include "ijksdl_inc_ffmpeg.h"
 
 // TODO: 9 alignment to speed up memcpy when display
-SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout);
+SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, int frame_format, SDL_Vout *vout);
 
 #endif

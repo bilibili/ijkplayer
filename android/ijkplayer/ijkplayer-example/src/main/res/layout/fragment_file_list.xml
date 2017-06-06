@@ -1,0 +1,27 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="0dp"
+    android:paddingLeft="@dimen/ijk_horizontal_margin"
+    android:paddingRight="@dimen/ijk_horizontal_margin"
+    android:paddingTop="0dp">
+
+    <EditText
+        android:id="@+id/path_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="none"
+        android:editable="false"
+        android:visibility="gone"
+        android:lines="1" />
+
+    <ListView
+        android:id="@+id/file_list_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:choiceMode="singleChoice"
+        tools:context=".file_list_view" />
+
+</LinearLayout>

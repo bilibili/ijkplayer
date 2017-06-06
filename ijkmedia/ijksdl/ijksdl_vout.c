@@ -2,6 +2,7 @@
  * ijksdl_vout.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -58,10 +59,19 @@ int SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     return -1;
 }
 
-SDL_VoutOverlay *SDL_Vout_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *vout)
+int SDL_VoutSetOverlayFormat(SDL_Vout *vout, Uint32 overlay_format)
+{
+    if (!vout)
+        return -1;
+
+    vout->overlay_format = overlay_format;
+    return 0;
+}
+
+SDL_VoutOverlay *SDL_Vout_CreateOverlay(int width, int height, int frame_format, SDL_Vout *vout)
 {
     if (vout && vout->create_overlay)
-        return vout->create_overlay(width, height, format, vout);
+        return vout->create_overlay(width, height, frame_format, vout);
 
     return NULL;
 }

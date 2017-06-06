@@ -2,6 +2,7 @@
  * ijksdl_android.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -24,8 +25,7 @@
 #include "ijksdl_android_jni.h"
 
 #include <unistd.h>
-#include <sys/system_properties.h>
-#include "ijksdl/android/jjk/c/android/os/Build.h"
+#include "j4a/class/android/os/Build.h"
 #include "ijksdl_inc_internal_android.h"
 #include "ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl_codec_android_mediacodec_java.h"
@@ -143,7 +143,7 @@ jobject SDL_JNI_NewObjectAsGlobalRef(JNIEnv *env, jclass clazz, jmethodID method
 
     jobject global_object = NULL;
     jobject local_object = (*env)->NewObjectV(env, clazz, methodID, args);
-    if (!JJK_ExceptionCheck__throwAny(env) && local_object) {
+    if (!J4A_ExceptionCheck__throwAny(env) && local_object) {
         global_object = (*env)->NewGlobalRef(env, local_object);
         SDL_JNI_DeleteLocalRefP(env, &local_object);
     }
@@ -183,7 +183,7 @@ int SDL_Android_GetApiLevel()
         return 0;
     }
 
-    SDK_INT = JJKC_android_os_Build__VERSION__SDK_INT__get__catchAll(env);
+    SDK_INT = J4AC_android_os_Build__VERSION__SDK_INT__get__catchAll(env);
     ALOGI("API-Level: %d\n", SDK_INT);
     return SDK_INT;
 #if 0
@@ -206,7 +206,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
         return -1;
     }
 
-    retval = JJK_LoadAll__catchAll(env);
+    retval = J4A_LoadAll__catchAll(env);
     JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
 
     return JNI_VERSION_1_4;

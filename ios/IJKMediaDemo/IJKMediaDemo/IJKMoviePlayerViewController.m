@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013-2015 Bilibili
  * Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -73,7 +74,6 @@
     // [IJKFFMoviePlayerController checkIfPlayerVersionMatch:YES major:1 minor:0 micro:0];
 
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
-    [options setFormatOptionValue:@"ijktcphook" forKey:@"http-tcp-hook"];
 
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
@@ -81,24 +81,11 @@
     self.player.scalingMode = IJKMPMovieScalingModeAspectFit;
     self.player.shouldAutoplay = YES;
 
-    IJKFFMoviePlayerController *ffp = self.player;
-    ffp.httpOpenDelegate = self;
-
     self.view.autoresizesSubviews = YES;
     [self.view addSubview:self.player.view];
     [self.view addSubview:self.mediaControl];
 
     self.mediaControl.delegatePlayer = self.player;
-}
-
-- (NSString *)onHttpOpen:(int)streamIndex url:(NSString *)url
-{
-    return url;
-}
-
-- (NSString *)onTcpOpen:(int)streamIndex url:(NSString *)url
-{
-    return url;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -143,10 +130,18 @@
     [self.mediaControl hide];
 }
 
-- (IBAction)onClickBack:(id)sender
+- (IBAction)onClickDone:(id)sender
 {
-    if (self.presentingViewController) {
-        [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+    [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (IBAction)onClickHUD:(UIBarButtonItem *)sender
+{
+    if ([self.player isKindOfClass:[IJKFFMoviePlayerController class]]) {
+        IJKFFMoviePlayerController *player = self.player;
+        player.shouldShowHudView = !player.shouldShowHudView;
+        
+        sender.title = (player.shouldShowHudView ? @"HUD On" : @"HUD Off");
     }
 }
 

@@ -41,12 +41,15 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
     if (ffp->videotoolbox) {
         node = ffpipenode_create_video_decoder_from_ios_videotoolbox(ffp);
+        if (!node)
+            ALOGE("vtb fail!!! switch to ffmpeg decode!!!! \n");
     }
     if (node == NULL) {
-        ALOGE("vtb fail!!! switch to ffmpeg decode!!!! \n");
         node = ffpipenode_create_video_decoder_from_ffplay(ffp);
+        ffp->stat.vdec_type = FFP_PROPV_DECODER_AVCODEC;
         opaque->is_videotoolbox_open = false;
     } else {
+        ffp->stat.vdec_type = FFP_PROPV_DECODER_VIDEOTOOLBOX;
         opaque->is_videotoolbox_open = true;
     }
     ffp_notify_msg2(ffp, FFP_MSG_VIDEO_DECODER_OPEN, opaque->is_videotoolbox_open);

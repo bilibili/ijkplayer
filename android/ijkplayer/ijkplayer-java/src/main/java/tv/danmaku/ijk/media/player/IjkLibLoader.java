@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013-2014 Bilibili
  * Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,6 @@
 package tv.danmaku.ijk.media.player;
 
 public interface IjkLibLoader {
-    public void loadLibrary(String libName) throws UnsatisfiedLinkError,
+    void loadLibrary(String libName) throws UnsatisfiedLinkError,
             SecurityException;
 }

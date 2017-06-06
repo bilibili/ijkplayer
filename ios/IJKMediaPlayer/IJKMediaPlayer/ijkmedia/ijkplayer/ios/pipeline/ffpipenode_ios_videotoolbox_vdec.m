@@ -34,72 +34,11 @@ struct IJKFF_Pipenode_Opaque {
     IJKFF_Pipeline           *pipeline;
     FFPlayer                 *ffp;
     Decoder                  *decoder;
-    VideoToolBoxContext      *context;
+    Ijk_VideoToolBox         *context;
     AVCodecContext           *avctx; // not own
     SDL_Thread*              video_fill_thread;
     SDL_Thread              _video_fill_thread;
 };
-
-
-
-int decoder_decode_frame_videotoolbox(VideoToolBoxContext* context) {
-
-    FFPlayer *ffp = context->ffp;
-    VideoState *is = ffp->is;
-    Decoder *d = &is->viddec;
-    int got_frame = 0;
-    do {
-        int ret = -1;
-        if (is->abort_request || d->queue->abort_request) {
-            return -1;
-        }
-
-        if (!d->packet_pending || d->queue->serial != d->pkt_serial) {
-            AVPacket pkt;
-            do {
-                if (d->queue->nb_packets == 0)
-                    SDL_CondSignal(d->empty_queue_cond);
-                if (ffp_packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0)
-                    return -1;
-                if (ffp_is_flush_packet(&pkt)) {
-                    avcodec_flush_buffers(d->avctx);
-                    context->refresh_request = true;
-                    context->serial += 1;
-                    d->finished = 0;
-                     ALOGI("flushed last keyframe pts %lld \n",d->pkt.pts);
-                    d->next_pts = d->start_pts;
-                    d->next_pts_tb = d->start_pts_tb;
-                }
-            } while (ffp_is_flush_packet(&pkt) || d->queue->serial != d->pkt_serial);
-
-            av_free_packet(&d->pkt);
-            d->pkt_temp = d->pkt = pkt;
-            d->packet_pending = 1;
-        }
-
-        ret = videotoolbox_decode_video(context, d->avctx, &d->pkt_temp, &got_frame);
-        if (ret < 0) {
-            d->packet_pending = 0;
-        } else {
-            d->pkt_temp.dts =
-            d->pkt_temp.pts = AV_NOPTS_VALUE;
-            if (d->pkt_temp.data) {
-                if (d->avctx->codec_type != AVMEDIA_TYPE_AUDIO)
-                    ret = d->pkt_temp.size;
-                d->pkt_temp.data += ret;
-                d->pkt_temp.size -= ret;
-                if (d->pkt_temp.size <= 0)
-                    d->packet_pending = 0;
-            } else {
-                if (!got_frame) {
-                    d->packet_pending = 0;
-                    d->finished = d->pkt_serial;
-                }
-            }
-        }
-    } while (!got_frame && !d->finished);
-    return got_frame;
-}
 
 int videotoolbox_video_thread(void *arg)
 {
@@ -108,7 +47,6 @@ int videotoolbox_video_thread(void *arg)
     VideoState *is = ffp->is;
     Decoder   *d = &is->viddec;
     int ret = 0;
-    opaque->context->ffp = ffp;
 
     for (;;) {
 
@@ -116,7 +54,7 @@ int videotoolbox_video_thread(void *arg)
             return -1;
         }
         @autoreleasepool {
-            ret = decoder_decode_frame_videotoolbox(opaque->context);
+            ret = opaque->context->decode_frame(opaque->context->opaque);
         }
         if (ret < 0)
             goto the_end;
@@ -143,7 +81,7 @@ static int func_run_sync(IJKFF_Pipenode *node)
     int ret = videotoolbox_video_thread(opaque);
 
     if (opaque->context) {
-        dealloc_videotoolbox(opaque->context);
+        opaque->context->free(opaque->context->opaque);
         free(opaque->context);
         opaque->context = NULL;
     }
@@ -174,7 +112,10 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ios_videotoolbox(FFPlayer *
     opaque->avctx = opaque->decoder->avctx;
     switch (opaque->avctx->codec_id) {
     case AV_CODEC_ID_H264:
-        opaque->context = init_videotoolbox(ffp, opaque->avctx);
+            if (ffp->vtb_async)
+                opaque->context = Ijk_VideoToolbox_Async_Create(ffp, opaque->avctx);
+            else
+                opaque->context = Ijk_VideoToolbox_Sync_Create(ffp, opaque->avctx);
         break;
     default:
         ALOGI("Videotoolbox-pipeline:open_video_decoder: not H264\n");

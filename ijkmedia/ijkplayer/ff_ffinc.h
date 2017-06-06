@@ -2,6 +2,7 @@
  * ff_ffinc.h
  *      ffmpeg headers
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -31,6 +32,7 @@
 #include "libavformat/avformat.h"
 #include "libavcodec/avfft.h"
 #include "libswscale/swscale.h"
+#include "libavutil/application.h"
 #include "libavutil/base64.h"
 #include "libavutil/error.h"
 #include "libavutil/opt.h"

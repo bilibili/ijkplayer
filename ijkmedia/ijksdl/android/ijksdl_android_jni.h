@@ -2,6 +2,7 @@
  * ijksdl_android_jni.h
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -25,7 +26,8 @@
 #define IJKSDL_ANDROID__IJKSDL_ANDROID_JNI_H
 
 #include <jni.h>
-#include "ijksdl/android/jjk/internal/jjk_internal.h"
+#include "j4a/j4a_base.h"
+#include "j4a/j4a_allclasses.h"
 
 #define IJK_API_1_BASE                      1   // 1.0
 #define IJK_API_2_BASE_1_1                  2   // 1.1
@@ -69,12 +71,12 @@ int     SDL_Android_GetApiLevel();
 #define IJK_FIND_JAVA_CLASS(env__, var__, classsign__) \
     do { \
         jclass clazz = (*env__)->FindClass(env__, classsign__); \
-        if (JJK_ExceptionCheck__catchAll(env) || !(clazz)) { \
+        if (J4A_ExceptionCheck__catchAll(env) || !(clazz)) { \
             ALOGE("FindClass failed: %s", classsign__); \
             return -1; \
         } \
         var__ = (*env__)->NewGlobalRef(env__, clazz); \
-        if (JJK_ExceptionCheck__catchAll(env) || !(var__)) { \
+        if (J4A_ExceptionCheck__catchAll(env) || !(var__)) { \
             ALOGE("FindClass::NewGlobalRef failed: %s", classsign__); \
             (*env__)->DeleteLocalRef(env__, clazz); \
             return -1; \

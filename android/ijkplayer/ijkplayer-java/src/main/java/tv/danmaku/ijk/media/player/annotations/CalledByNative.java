@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013-2014 Bilibili
  * Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,5 +32,5 @@ public @interface CalledByNative {
     /*
      * If present, tells which inner class the method belongs to.
      */
-    public String value() default "";
+    String value() default "";
 }

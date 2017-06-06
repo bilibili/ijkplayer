@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015 Bilibili
  * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +32,9 @@ import tv.danmaku.ijk.media.exo.demo.EventLogger;
 import tv.danmaku.ijk.media.exo.demo.player.DemoPlayer;
 import tv.danmaku.ijk.media.exo.demo.player.DemoPlayer.RendererBuilder;
 import tv.danmaku.ijk.media.exo.demo.player.ExtractorRendererBuilder;
+import tv.danmaku.ijk.media.exo.demo.player.HlsRendererBuilder;
+import tv.danmaku.ijk.media.exo.demo.player.SmoothStreamingRendererBuilder;
+import tv.danmaku.ijk.media.exo.demo.SmoothStreamingTestMediaDrmCallback;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.MediaInfo;
@@ -44,11 +48,6 @@ public class IjkExoMediaPlayer extends AbstractMediaPlayer {
     private int mVideoWidth;
     private int mVideoHeight;
     private Surface mSurface;
-
-    public static final int TYPE_DASH = 0;
-    public static final int TYPE_SS = 1;
-    public static final int TYPE_HLS = 2;
-    public static final int TYPE_OTHER = 3;
 
     private RendererBuilder mRendererBuilder;
 
@@ -79,7 +78,7 @@ public class IjkExoMediaPlayer extends AbstractMediaPlayer {
     @Override
     public void setDataSource(Context context, Uri uri) {
         mDataSource = uri.toString();
-        mRendererBuilder = new ExtractorRendererBuilder(context, getUserAgent(), uri);
+        mRendererBuilder = getRendererBuilder();
     }
 
     @Override
@@ -181,7 +180,7 @@ public class IjkExoMediaPlayer extends AbstractMediaPlayer {
             case ExoPlayer.STATE_IDLE:
             case ExoPlayer.STATE_PREPARING:
             case ExoPlayer.STATE_ENDED:
-                default:
+            default:
                 return false;
         }
     }
@@ -296,8 +295,41 @@ public class IjkExoMediaPlayer extends AbstractMediaPlayer {
         }
     }
 
-    private String getUserAgent() {
-        return Util.getUserAgent(mAppContext, "IjkExoMediaPlayer");
+    public int getBufferedPercentage() {
+        if (mInternalPlayer == null)
+            return 0;
+
+        return mInternalPlayer.getBufferedPercentage();
+    }
+
+    private RendererBuilder getRendererBuilder() {
+        Uri contentUri = Uri.parse(mDataSource);
+        String userAgent = Util.getUserAgent(mAppContext, "IjkExoMediaPlayer");
+        int contentType = inferContentType(contentUri);
+        switch (contentType) {
+            case Util.TYPE_SS:
+                return new SmoothStreamingRendererBuilder(mAppContext, userAgent, contentUri.toString(),
+                        new SmoothStreamingTestMediaDrmCallback());
+         /*   case Util.TYPE_DASH:
+                return new DashRendererBuilder(mAppContext , userAgent, contentUri.toString(),
+                        new WidevineTestMediaDrmCallback(contentId, provider));*/
+            case Util.TYPE_HLS:
+                return new HlsRendererBuilder(mAppContext, userAgent, contentUri.toString());
+            case Util.TYPE_OTHER:
+            default:
+                return new ExtractorRendererBuilder(mAppContext, userAgent, contentUri);
+        }
+    }
+    
+    /**
+     * Makes a best guess to infer the type from a media {@link Uri}
+     *
+     * @param uri The {@link Uri} of the media.
+     * @return The inferred type.
+     */
+    private static int inferContentType(Uri uri) {
+        String lastPathSegment = uri.getLastPathSegment();
+        return Util.inferContentType(lastPathSegment);
     }
 
     private class DemoPlayerListener implements DemoPlayer.Listener {

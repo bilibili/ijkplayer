@@ -1,6 +1,7 @@
 /*
  * ijksdl_vout_ios_gles2.h
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.

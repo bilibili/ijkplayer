@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015 Bilibili
  * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,7 @@ package tv.danmaku.ijk.media.player.misc;
 
 import java.io.IOException;
 
+@SuppressWarnings("RedundantThrows")
 public interface IMediaDataSource {
     int	 readAt(long position, byte[] buffer, int offset, int size) throws IOException;
 

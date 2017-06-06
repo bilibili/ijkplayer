@@ -2,6 +2,7 @@
  * ijksdl_vout_overlay_ffmpeg.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -78,11 +79,11 @@ static AVFrame *opaque_setup_frame(SDL_VoutOverlay_Opaque* opaque, enum AVPixelF
     opaque->frame_buffer  = frame_buffer_ref;
      */
 
-    AVPicture *pic = (AVPicture *) managed_frame;
     managed_frame->format = format;
     managed_frame->width  = width;
     managed_frame->height = height;
-    avpicture_fill(pic, NULL, format, width, height);
+    av_image_fill_arrays(managed_frame->data, managed_frame->linesize ,NULL,
+                         format, width, height, 1);
     opaque->managed_frame = managed_frame;
     opaque->linked_frame  = linked_frame;
     return managed_frame;
@@ -94,13 +95,13 @@ static AVFrame *opaque_obtain_managed_frame_buffer(SDL_VoutOverlay_Opaque* opaqu
         return opaque->managed_frame;
 
     AVFrame *managed_frame = opaque->managed_frame;
-    int frame_bytes = avpicture_get_size(managed_frame->format, managed_frame->width, managed_frame->height);
+    int frame_bytes = av_image_get_buffer_size(managed_frame->format, managed_frame->width, managed_frame->height, 1);
     AVBufferRef *frame_buffer_ref = av_buffer_alloc(frame_bytes);
     if (!frame_buffer_ref)
         return NULL;
 
-    AVPicture *pic = (AVPicture *) managed_frame;
-    avpicture_fill(pic, frame_buffer_ref->data, managed_frame->format, managed_frame->width, managed_frame->height);
+    av_image_fill_arrays(managed_frame->data, managed_frame->linesize,
+                         frame_buffer_ref->data, managed_frame->format, managed_frame->width, managed_frame->height, 1);
     opaque->frame_buffer  = frame_buffer_ref;
     return opaque->managed_frame;
 }
@@ -136,12 +137,11 @@ static void func_free_l(SDL_VoutOverlay *overlay)
 
 static void overlay_fill(SDL_VoutOverlay *overlay, AVFrame *frame, int planes)
 {
-    AVPicture *pic = (AVPicture *) frame;
     overlay->planes = planes;
 
     for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i) {
-        overlay->pixels[i] = pic->data[i];
-        overlay->pitches[i] = pic->linesize[i];
+        overlay->pixels[i] = frame->data[i];
+        overlay->pitches[i] = frame->linesize[i];
     }
 }
 
@@ -161,7 +161,7 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
 {
     assert(overlay);
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
-    AVPicture swscale_dst_pic = { { 0 } };
+    AVFrame swscale_dst_pic = { { 0 } };
 
     av_frame_unref(opaque->linked_frame);
 
@@ -180,6 +180,16 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
             } else {
                 // ALOGE("copy draw frame");
                 dst_format = AV_PIX_FMT_YUV420P;
+            }
+            break;
+        case SDL_FCC_I444P10LE:
+            if (frame->format == AV_PIX_FMT_YUV444P10LE) {
+                // ALOGE("direct draw frame");
+                use_linked_frame = 1;
+                dst_format = frame->format;
+            } else {
+                // ALOGE("copy draw frame");
+                dst_format = AV_PIX_FMT_YUV444P10LE;
             }
             break;
         case SDL_FCC_RV32:
@@ -271,10 +281,32 @@ static SDL_Class g_vout_overlay_ffmpeg_class = {
 };
 
 #ifndef __clang_analyzer__
-SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 format, SDL_Vout *display)
+SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, int frame_format, SDL_Vout *display)
 {
+    Uint32 overlay_format = display->overlay_format;
+    switch (overlay_format) {
+        case SDL_FCC__GLES2: {
+            switch (frame_format) {
+                case AV_PIX_FMT_YUV444P10LE:
+                    overlay_format = SDL_FCC_I444P10LE;
+                    break;
+                case AV_PIX_FMT_YUV420P:
+                case AV_PIX_FMT_YUVJ420P:
+                default:
+#if defined(__ANDROID__)
+                    overlay_format = SDL_FCC_YV12;
+#else
+                    overlay_format = SDL_FCC_I420;
+#endif
+                    break;
+            }
+            break;
+        }
+    }
+
     SDLTRACE("SDL_VoutFFmpeg_CreateOverlay(w=%d, h=%d, fmt=%.4s(0x%x, dp=%p)\n",
-        width, height, (const char*) &format, format, display);
+        width, height, (const char*) &overlay_format, overlay_format, display);
+
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
     if (!overlay) {
         ALOGE("overlay allocation failed");
@@ -286,7 +318,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     opaque->sws_flags     = SWS_BILINEAR;
 
     overlay->opaque_class = &g_vout_overlay_ffmpeg_class;
-    overlay->format       = format;
+    overlay->format       = overlay_format;
     overlay->pitches      = opaque->pitches;
     overlay->pixels       = opaque->pixels;
     overlay->w            = width;
@@ -299,10 +331,27 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
     enum AVPixelFormat ff_format = AV_PIX_FMT_NONE;
     int buf_width = width;
     int buf_height = height;
-    switch (format) {
+    switch (overlay_format) {
     case SDL_FCC_I420:
     case SDL_FCC_YV12: {
         ff_format = AV_PIX_FMT_YUV420P;
+        // FIXME: need runtime config
+#if defined(__ANDROID__)
+        // 16 bytes align pitch for arm-neon image-convert
+        buf_width = IJKALIGN(width, 16); // 1 bytes per pixel for Y-plane
+#elif defined(__APPLE__)
+        // 2^n align for width
+        buf_width = width;
+        if (width > 0)
+            buf_width = 1 << (sizeof(int) * 8 - __builtin_clz(width));
+#else
+        buf_width = IJKALIGN(width, 16); // unknown platform
+#endif
+        opaque->planes = 3;
+        break;
+    }
+    case SDL_FCC_I444P10LE: {
+        ff_format = AV_PIX_FMT_YUV444P10LE;
         // FIXME: need runtime config
 #if defined(__ANDROID__)
         // 16 bytes align pitch for arm-neon image-convert
@@ -344,7 +393,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, Uint32 form
         break;
     }
     default:
-        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...): unknown format %.4s(0x%x)\n", (char*)&format, format);
+        ALOGE("SDL_VoutFFmpeg_CreateOverlay(...): unknown format %.4s(0x%x)\n", (char*)&overlay_format, overlay_format);
         goto fail;
     }
 

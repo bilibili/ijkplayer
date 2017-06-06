@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 #
+# Copyright (C) 2013-2015 Bilibili
 # Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +19,13 @@
 # IJK_FFMPEG_UPSTREAM=git://git.videolan.org/ffmpeg.git
 IJK_FFMPEG_UPSTREAM=https://github.com/Bilibili/FFmpeg.git
 IJK_FFMPEG_FORK=https://github.com/Bilibili/FFmpeg.git
-IJK_FFMPEG_COMMIT=ff2.8--ijk0.4.1.1--dev0.3.3--rc4
+IJK_FFMPEG_COMMIT=ff3.3--ijk0.8.0--20170518--001
 IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
 set -e
 TOOLS=tools
+
+git --version
 
 echo "== pull ffmpeg base =="
 sh $TOOLS/pull-repo-base.sh $IJK_FFMPEG_UPSTREAM $IJK_FFMPEG_LOCAL_REPO
@@ -36,10 +39,12 @@ function pull_fork()
     cd -
 }
 
-pull_fork "armv7a"
 pull_fork "armv5"
-pull_fork "x86"
+pull_fork "armv7a"
 pull_fork "arm64"
+pull_fork "x86"
+pull_fork "x86_64"
 
 ./init-config.sh
 ./init-android-libyuv.sh
+./init-android-soundtouch.sh

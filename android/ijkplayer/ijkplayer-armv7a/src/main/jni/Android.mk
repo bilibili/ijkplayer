@@ -1,3 +1,4 @@
+# Copyright (c) 2013 Bilibili
 # copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
 #
 # This file is part of ijkPlayer.
@@ -30,12 +31,16 @@ ifeq ($(TARGET_ARCH_ABI),armeabi)
 MY_APP_FFMPEG_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/ffmpeg-armv5/output)
 MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_FFMPEG_OUTPUT_PATH)/include)
 endif
+ifeq ($(TARGET_ARCH_ABI),arm64-v8a)
+MY_APP_FFMPEG_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/ffmpeg-arm64/output)
+MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_FFMPEG_OUTPUT_PATH)/include)
+endif
 ifeq ($(TARGET_ARCH_ABI),x86)
 MY_APP_FFMPEG_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/ffmpeg-x86/output)
 MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_FFMPEG_OUTPUT_PATH)/include)
 endif
-ifeq ($(TARGET_ARCH_ABI),arm64-v8a)
-MY_APP_FFMPEG_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/ffmpeg-arm64/output)
+ifeq ($(TARGET_ARCH_ABI),x86_64)
+MY_APP_FFMPEG_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/ffmpeg-x86_64/output)
 MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_FFMPEG_OUTPUT_PATH)/include)
 endif
 
