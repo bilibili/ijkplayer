@@ -35,7 +35,10 @@ dependencies {
 }
 ```
 - iOS
- - in coming...
+ - CocoaPods
+```ruby
+pod "IJKMediaPlayer", "~> 0.7.5"
+```
 
 ### My Build Environment
 - Common
