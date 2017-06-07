@@ -1577,6 +1577,29 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
     }
 }
 
+
+//==========================Modify==================================
+- (NSString *)getTcpSpeedStr
+{
+    int64_t tcpSpeed = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_TCP_SPEED, 0);
+    return formatedSpeed(tcpSpeed, 1000);
+}
+
+- (int64_t)getTcpSpeed
+{
+    int64_t tcpSpeed = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_TCP_SPEED, 0);
+    return tcpSpeed;
+}
+
+- (int64_t)getBitrate
+{
+    return ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_BIT_RATE, 0);
+}
+//==================================================================
+
+
+
+
 - (void)applicationWillEnterForeground
 {
     NSLog(@"IJKFFMoviePlayerController:applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
