@@ -179,17 +179,17 @@ IjkMediaPlayer_setDataSourceFd(JNIEnv *env, jobject thiz, jint fd)
 {
     MPTRACE("%s\n", __func__);
     int retval = 0;
-    int dupFd = 0;
-    char uri[128];
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     JNI_CHECK_GOTO(fd > 0, env, "java/lang/IllegalArgumentException", "mpjni: setDataSourceFd: null fd", LABEL_RETURN);
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setDataSourceFd: null mp", LABEL_RETURN);
 
-    dupFd = dup(fd);
-
-    ALOGV("setDataSourceFd: dup(%d)=%d\n", fd, dupFd);
-    snprintf(uri, sizeof(uri), "pipe:%d", dupFd);
-    retval = ijkmp_set_data_source(mp, uri);
+    char filename[256] = {0};
+    char symName[40] = {0};
+    snprintf(symName, sizeof(symName), "/proc/%d/fd/%d", getpid(), fd);
+    retval = readlink(symName, filename, (sizeof(filename) - 1));
+    JNI_CHECK_GOTO(retval = -1, env, "java/lang/IllegalStateException", "mpjni: setDataSourceFd: fail to readlink", LABEL_RETURN);
+    ALOGV("setDataSourceFd: path %s", filename);
+    retval = ijkmp_set_data_source(mp, filename);
 
     IJK_CHECK_MPRET_GOTO(retval, env, LABEL_RETURN);
 
