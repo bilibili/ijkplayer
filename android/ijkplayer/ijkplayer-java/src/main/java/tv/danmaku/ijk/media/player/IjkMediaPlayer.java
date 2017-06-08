@@ -499,6 +499,12 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private native void _setAndroidIOCallback(IAndroidIO androidIO)
             throws IllegalArgumentException, SecurityException, IllegalStateException;
 
+    private native void _injectCacheNode(int index, long fileLogicalPos, long physicalPos, long cacheSize, long fileSize);
+
+    public void injectCacheNode(int index, long fileLogicalPos, long physicalPos, long cacheSize, long fileSize) {
+        _injectCacheNode(index, fileLogicalPos, physicalPos, cacheSize, fileSize);
+     }
+
     @Override
     public String getDataSource() {
         return mDataSource;
