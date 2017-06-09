@@ -838,6 +838,11 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
+    public void setRate(float rate) {
+        // TODO: Not support
+    }
+
+    @Override
     public native void setVolume(float leftVolume, float rightVolume);
 
     @Override

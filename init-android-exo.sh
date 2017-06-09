@@ -18,7 +18,7 @@
 
 IJK_EXO_UPSTREAM=https://github.com/google/ExoPlayer.git
 IJK_EXO_FORK=https://github.com/google/ExoPlayer.git
-IJK_EXO_COMMIT=r1.5.11
+IJK_EXO_COMMIT=r2.4.1
 IJK_EXO_LOCAL_REPO=extra/ExoPlayer
 
 set -e
@@ -32,26 +32,24 @@ cd extra/ExoPlayer
 git checkout ${IJK_EXO_COMMIT} -B ijkplayer
 cd -
 
-SRC_EXO_DIR=extra/ExoPlayer/demo/src/main/java/com/google/android/exoplayer/demo
+SRC_EXO_DIR=extra/ExoPlayer/demo/src/main/java/com/google/android/exoplayer2/demo
 DST_EXO_DIR=android/ijkplayer/ijkplayer-exo/src/main/java/tv/danmaku/ijk/media/exo/demo
 
-mkdir -p $DST_EXO_DIR/player
 
 function install_java()
 {
     JAVA_FILE=$1
     cat $SRC_EXO_DIR/$JAVA_FILE \
-    | sed "s/^package com.google.android.exoplayer.demo/package tv.danmaku.ijk.media.exo.demo/g" \
-    | sed "s/^import com.google.android.exoplayer.demo/import tv.danmaku.ijk.media.exo.demo/g" \
+    | sed "s/^package com.google.android.exoplayer2.demo/package tv.danmaku.ijk.media.exo.demo/g" \
+    | sed "s/^import com.google.android.exoplayer2.demo/import tv.danmaku.ijk.media.exo.demo/g" \
     | sed "s/@link/link/g" \
     > $DST_EXO_DIR/$JAVA_FILE
 }
 
-install_java player/DashRendererBuilder.java
-install_java player/DemoPlayer.java
-install_java player/ExtractorRendererBuilder.java
-install_java player/HlsRendererBuilder.java
-install_java player/SmoothStreamingRendererBuilder.java
+# install_java DemoApplication.java
+install_java DemoUtil.java
 install_java EventLogger.java
-install_java SmoothStreamingTestMediaDrmCallback.java
+# install_java PlayerActivity.java
+# install_java SampleChooserActivity.java
+# install_java TrackSelectionHelper.java
 # install_java WidevineTestMediaDrmCallback.java

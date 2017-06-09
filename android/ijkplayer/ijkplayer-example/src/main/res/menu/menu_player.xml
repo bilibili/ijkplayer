@@ -23,4 +23,13 @@
         android:id="@+id/action_show_tracks"
         android:title="@string/tracks"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_fast_speed"
+        android:title="2x"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_slow_speed"
+        android:title="0.5x"
+        app:showAsAction="ifRoom" />
 </menu>

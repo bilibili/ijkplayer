@@ -153,6 +153,9 @@ public class MediaPlayerProxy implements IMediaPlayer {
     }
 
     @Override
+    public void setRate(float rate) { mBackEndMediaPlayer.setRate(rate); }
+
+    @Override
     public void setVolume(float leftVolume, float rightVolume) {
         mBackEndMediaPlayer.setVolume(leftVolume, rightVolume);
     }
