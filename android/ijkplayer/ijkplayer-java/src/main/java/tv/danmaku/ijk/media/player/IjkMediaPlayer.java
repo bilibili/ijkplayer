@@ -839,7 +839,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public void setRate(float rate) {
-        // TODO: Not support
+        setSpeed(rate);
     }
 
     @Override
