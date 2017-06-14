@@ -31,6 +31,7 @@ android {
         // arm64 { minSdkVersion 21 }
         // x86 {}
     }
+    buildToolsVersion '25.0.0'
 }
 
 dependencies {
@@ -44,15 +45,15 @@ dependencies {
     compile project(':ijkplayer-java')
     compile project(':ijkplayer-exo')
 
-    all32Compile project(':ijkplayer-armv5')
+//    all32Compile project(':ijkplayer-armv5')
     all32Compile project(':ijkplayer-armv7a')
-    all32Compile project(':ijkplayer-x86')
+//    all32Compile project(':ijkplayer-x86')
 
-    all64Compile project(':ijkplayer-armv5')
+//    all64Compile project(':ijkplayer-armv5')
     all64Compile project(':ijkplayer-armv7a')
-    all64Compile project(':ijkplayer-arm64')
-    all64Compile project(':ijkplayer-x86')
-    all64Compile project(':ijkplayer-x86_64')
+//    all64Compile project(':ijkplayer-arm64')
+//    all64Compile project(':ijkplayer-x86')
+//    all64Compile project(':ijkplayer-x86_64')
 
     // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.8.0'
     // compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.8.0'

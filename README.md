@@ -83,7 +83,8 @@ dependencies {
 ### Before Build
 ```
 # install homebrew, git, yasm
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
+echo 'export PATH="$HOME/.linuxbrew/bin:$PATH"' >>~/.bash_profile
 brew install git
 brew install yasm
 

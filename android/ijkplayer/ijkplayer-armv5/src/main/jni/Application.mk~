@@ -1,5 +1,5 @@
-# Copyright (c) 2013 Bilibili
-# copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+# Copyright (c) 2013-2014 Bilibili
+# copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
 #
 # This file is part of ijkPlayer.
 #
@@ -17,13 +17,16 @@
 # License along with ijkPlayer; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-LOCAL_PATH := $(call my-dir)
+APP_OPTIM := release
+APP_PLATFORM := android-24
+APP_ABI := armeabi
+NDK_TOOLCHAIN_VERSION=4.9
+APP_PIE := false
 
-MY_APP_JNI_ROOT := $(realpath $(LOCAL_PATH))
-MY_APP_PRJ_ROOT := $(realpath $(MY_APP_JNI_ROOT)/..)
-MY_APP_ANDROID_ROOT := $(realpath $(MY_APP_PRJ_ROOT)/../../../..)
+APP_STL := stlport_static
 
-MY_APP_FFMPEG_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/ffmpeg-armv7a/output)
-MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_FFMPEG_OUTPUT_PATH)/include)
-
-include $(call all-subdir-makefiles)
+APP_CFLAGS := -O3 -Wall -pipe \
+    -ffast-math \
+    -fstrict-aliasing -Werror=strict-aliasing \
+    -Wno-psabi -Wa,--noexecstack \
+    -DANDROID -DNDEBUG

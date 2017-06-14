@@ -10,17 +10,44 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion rootProject.ext.targetSdkVersion
+
+        externalNativeBuild {
+            ndkBuild {
+                arguments "NDK_APPLICATION_MK:=src/main/jni/Application.mk"
+//,"APP_ABI=armeabi-v7a","NDK_ALL_ABIS=armeabi-v7a"//,"NDK_LIBS_OUT:=src/main/libs"
+                //                cFlags "-DTEST_C_FLAG1", "-DTEST_C_FLAG2"  // output dir -> 'src/main/libs'
+                //                cppFlags "-DTEST_CPP_FLAG2", "-DTEST_CPP_FLAG2"
+                abiFilters "armeabi-v7a"
+            }
+        }
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+
+        debug {
+            debuggable true
+            jniDebuggable true
+            ndk {
+                debuggable true
+            }
+        }
     }
-    sourceSets.main {
+    /*sourceSets.main {
         jniLibs.srcDirs 'src/main/libs'
         jni.srcDirs = [] // This prevents the auto generation of Android.mk
+    }*/
+
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/jni/Android.mk'
+        }
     }
+
+    buildToolsVersion '25.0.0'
 }
 
 dependencies {
