@@ -1,6 +1,11 @@
 tag next
 --------------------------------
 
+tag k0.8.1
+--------------------------------
+- ffmpeg: support dns cache
+- ijkio: support inject extra node
+
 tag k0.8.0
 --------------------------------
 - ffmpeg: upgrade to 3.3
