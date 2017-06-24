@@ -61,8 +61,8 @@ static GLboolean rgb565_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_VoutOver
 
     int     planes[1]    = { 0 };
     const GLsizei widths[1]    = { overlay->pitches[0] / 2 };
-    const GLsizei heights[3]   = { overlay->h };
-    const GLubyte *pixels[3]   = { overlay->pixels[0] };
+    const GLsizei heights[1]   = { overlay->h };
+    const GLubyte *pixels[1]   = { overlay->pixels[0] };
 
     switch (overlay->format) {
         case SDL_FCC_RV16:
@@ -127,8 +127,8 @@ static GLboolean rgb888_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_VoutOver
 
     int     planes[1]    = { 0 };
     const GLsizei widths[1]    = { overlay->pitches[0] / 3 };
-    const GLsizei heights[3]   = { overlay->h };
-    const GLubyte *pixels[3]   = { overlay->pixels[0] };
+    const GLsizei heights[1]   = { overlay->h };
+    const GLubyte *pixels[1]   = { overlay->pixels[0] };
 
     switch (overlay->format) {
         case SDL_FCC_RV24:
@@ -193,8 +193,8 @@ static GLboolean rgbx8888_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_VoutOv
 
           int     planes[1]    = { 0 };
     const GLsizei widths[1]    = { overlay->pitches[0] / 4 };
-    const GLsizei heights[3]   = { overlay->h };
-    const GLubyte *pixels[3]   = { overlay->pixels[0] };
+    const GLsizei heights[1]   = { overlay->h };
+    const GLubyte *pixels[1]   = { overlay->pixels[0] };
 
     switch (overlay->format) {
         case SDL_FCC_RV32:
