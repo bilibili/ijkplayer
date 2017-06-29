@@ -3162,9 +3162,16 @@ static int read_thread(void *arg)
 
         if (ffp->packet_buffering) {
             io_tick_counter = SDL_GetTickHR();
-            if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
-                prev_io_tick_counter = io_tick_counter;
-                ffp_check_buffering_l(ffp);
+            if (!ffp->first_video_frame_rendered) {
+                if (abs((int)(io_tick_counter - prev_io_tick_counter)) > FAST_BUFFERING_CHECK_PER_MILLISECONDS) {
+                    prev_io_tick_counter = io_tick_counter;
+                    ffp_check_buffering_l(ffp);
+                }
+            } else {
+                if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
+                    prev_io_tick_counter = io_tick_counter;
+                    ffp_check_buffering_l(ffp);
+                }
             }
         }
     }
