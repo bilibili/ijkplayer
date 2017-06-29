@@ -177,7 +177,7 @@ int ijkio_manager_io_open(IjkIOManagerContext *h, const char *url, int flags, Ij
     if (!h)
         return ret;
     IjkAVDictionaryEntry *t = NULL;
-    t = ijk_av_dict_get(*options, "cache_file_path", t, IJK_AV_DICT_IGNORE_SUFFIX);
+    t = ijk_av_dict_get(*options, "cache_file_path", t, IJK_AV_DICT_MATCH_CASE);
     if (t) {
         strcpy(h->ijkio_app_ctx->cache_file_path, t->value);
     }
