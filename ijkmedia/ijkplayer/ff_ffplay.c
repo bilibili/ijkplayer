@@ -2895,7 +2895,7 @@ static int read_thread(void *arg)
     ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
     if (!ffp->start_on_prepared) {
         while (is->pause_req && !is->abort_request) {
-            SDL_Delay(100);
+            SDL_Delay(20);
         }
     }
     if (ffp->auto_resume) {
