@@ -151,6 +151,8 @@ static const AVOption ffp_context_options[] = {
 
     { "enable-accurate-seek",                      "enable accurate seek",
         OPTION_OFFSET(enable_accurate_seek),       OPTION_INT(0, 0, 1) },
+    { "skip-calc-frame-rate",                      "don't calculate real frame rate",
+        OPTION_OFFSET(skip_calc_frame_rate),       OPTION_INT(0, 0, 1) },
 
         // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",

@@ -128,6 +128,8 @@ static int open_inner(AVFormatContext *avf)
     AVFormatContext *new_avf    = NULL;
     int ret = -1;
     int i   = 0;
+    AVDictionaryEntry *t = NULL;
+    int fps_flag = 0;
 
     new_avf = avformat_alloc_context();
     if (!new_avf) {
@@ -143,6 +145,14 @@ static int open_inner(AVFormatContext *avf)
     av_dict_set_int(&tmp_opts, "analyzeduration",   avf->max_analyze_duration, 0);
     av_dict_set_int(&tmp_opts, "fpsprobesize",      avf->fps_probe_size, 0);
     av_dict_set_int(&tmp_opts, "max_ts_probe",      avf->max_ts_probe, 0);
+
+    t = av_dict_get(tmp_opts, "skip-calc-frame-rate", NULL, AV_DICT_MATCH_CASE);
+    if (t) {
+        fps_flag = (int) strtol(t->value, NULL, 10);
+        if (fps_flag > 0) {
+            av_dict_set_int(&new_avf->metadata, "skip-calc-frame-rate", fps_flag, 0);
+        }
+    }
 
     new_avf->interrupt_callback = avf->interrupt_callback;
     ret = avformat_open_input(&new_avf, c->io_control.url, NULL, &tmp_opts);

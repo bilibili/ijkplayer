@@ -685,6 +685,7 @@ typedef struct FFPlayer {
 
     int enable_accurate_seek;
     int mediacodec_sync;
+    int skip_calc_frame_rate;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
