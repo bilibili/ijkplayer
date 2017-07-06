@@ -23,6 +23,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaDataSource;
 import android.media.MediaPlayer;
+import android.media.PlaybackParams;
 import android.media.TimedText;
 import android.net.Uri;
 import android.os.Build;
@@ -275,6 +276,17 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
     @Override
     public boolean isLooping() {
         return mInternalMediaPlayer.isLooping();
+    }
+
+    @TargetApi(23)
+    @Override
+    public void setRate(float rate) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            PlaybackParams p = new PlaybackParams();
+            p.setPitch(rate);
+            p.setSpeed(rate);
+            mInternalMediaPlayer.setPlaybackParams(p);
+        }
     }
 
     @Override

@@ -219,6 +219,10 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
                 transaction.commit();
                 mDrawerLayout.openDrawer(mRightDrawer);
             }
+        } else if (id == R.id.action_fast_speed) {
+            mVideoView.setRate(2);
+        } else if (id == R.id.action_slow_speed) {
+            mVideoView.setRate(0.5f);
         }
 
         return super.onOptionsItemSelected(item);

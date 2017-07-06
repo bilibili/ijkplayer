@@ -61,4 +61,13 @@
 @property(nonatomic) int64_t   lastPrerollStartTick;
 @property(nonatomic) int64_t   lastPrerollDuration;
 
+@property(nonatomic) int64_t   videoCahcedBytes;
+@property(nonatomic) int64_t   audioCahcedBytes;
+@property(nonatomic) int64_t   videoCahcedDuration;
+@property(nonatomic) int64_t   audioCahcedDuration;
+@property(nonatomic) int64_t   videoCahcedPacket;
+@property(nonatomic) int64_t   audioCahcedPacket;
+@property(nonatomic) int64_t   cahcedBytes;
+
+@property(nonatomic) int64_t   tcpSpeed;
 @end
