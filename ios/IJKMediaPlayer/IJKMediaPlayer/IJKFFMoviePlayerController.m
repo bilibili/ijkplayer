@@ -480,6 +480,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     _liveOpenDelegate       = nil;
     _nativeInvokeDelegate   = nil;
 
+    __unused id weakPlayer = (__bridge_transfer IJKFFMoviePlayerController*)ijkmp_set_weak_thiz(_mediaPlayer, NULL);
     __unused id weakHolder = (__bridge_transfer IJKWeakHolder*)ijkmp_set_inject_opaque(_mediaPlayer, NULL);
     __unused id weakijkHolder = (__bridge_transfer IJKWeakHolder*)ijkmp_set_ijkio_inject_opaque(_mediaPlayer, NULL);
     ijkmp_dec_ref_p(&_mediaPlayer);
@@ -704,7 +705,9 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
 {
     if (_mediaPlayer == nil)
         return;
-
+    
+    _glView.shouldShowHudView = _shouldShowHudView;
+    
     int64_t vdec = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_VIDEO_DECODER, FFP_PROPV_DECODER_UNKNOWN);
     float   vdps = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND, .0f);
     float   vfps = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND, .0f);
@@ -779,18 +782,24 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
                           formatedDurationMilli(_monitor.lastHttpSeekDuration),
                           _monitor.httpSeekCount]
                   forKey:@"t-http-seek"];
+    
+    _monitor.videoCahcedBytes = vcacheb;
+    _monitor.audioCahcedBytes = acacheb;
+    _monitor.videoCahcedDuration = vcached;
+    _monitor.audioCahcedDuration = acached;
+    _monitor.videoCahcedPacket = vcachep;
+    _monitor.audioCahcedPacket = acachep;
+    _monitor.cahcedBytes = _cacheStat.cache_count_bytes;
+    _monitor.tcpSpeed = tcpSpeed;
 }
 
 - (void)startHudTimer
 {
-    if (!_shouldShowHudView)
-        return;
 
     if (_hudTimer != nil)
         return;
 
     if ([[NSThread currentThread] isMainThread]) {
-        _glView.shouldShowHudView = YES;
         _hudTimer = [NSTimer scheduledTimerWithTimeInterval:.5f
                                                      target:self
                                                    selector:@selector(refreshHudView)

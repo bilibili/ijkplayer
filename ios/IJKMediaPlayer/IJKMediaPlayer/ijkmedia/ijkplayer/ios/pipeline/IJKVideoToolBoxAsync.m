@@ -285,7 +285,8 @@ static CMSampleBufferRef CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc,
                                       &sBufOut);
     }
 
-    CFRelease(newBBufOut);
+    if (newBBufOut)
+        CFRelease(newBBufOut);
     if (status == 0) {
         return sBufOut;
     } else {
@@ -846,6 +847,7 @@ static int decode_video(Ijk_VideoToolBox_Opaque* context, AVCodecContext *avctx,
                 ret = decode_video_internal(context, avctx, pkt, got_picture_ptr);
             }
         } else {
+            context->idr_based_identified = false;
             context->recovery_drop_packet = true;
             ret = -1;
             ALOGE("recovery error!!!!\n");
