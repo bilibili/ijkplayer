@@ -37,6 +37,7 @@ typedef struct IjkCacheTreeInfo {
     struct IjkAVTreeNode *root;
     int64_t physical_init_pos;
     int64_t physical_size;
+    int64_t file_size;
 } IjkCacheTreeInfo;
 
 #define FFDIFFSIGN(x,y) (((x)>(y)) - ((x)<(y)))
