@@ -694,9 +694,9 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             } else {
                 // FIXME: 1: onError() ?
                 av_log(mp->ffplayer, AV_LOG_DEBUG, "FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING\n");
-            }
-            if (ffp_is_paused_l(mp->ffplayer)) {
-                ijkmp_change_state_l(mp, MP_STATE_PAUSED);
+                if (ffp_is_paused_l(mp->ffplayer)) {
+                    ijkmp_change_state_l(mp, MP_STATE_PAUSED);
+                }
             }
             pthread_mutex_unlock(&mp->mutex);
             break;
