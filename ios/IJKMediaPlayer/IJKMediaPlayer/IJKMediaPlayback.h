@@ -99,7 +99,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property (nonatomic) float playbackVolume;
 
 - (UIImage *)thumbnailImageAtCurrentTime;
-
+- (void)setDegree:(int)degree;
 #pragma mark Notifications
 
 #ifdef __cplusplus

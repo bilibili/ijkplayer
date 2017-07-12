@@ -75,6 +75,7 @@ typedef struct IJK_GLES2_Renderer
     int     frame_sar_den;
 
     GLsizei last_buffer_width;
+    int     degree;
 } IJK_GLES2_Renderer;
 
 typedef struct IJK_GLES_Matrix

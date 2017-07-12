@@ -636,6 +636,14 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     _scalingMode = newScalingMode;
 }
 
+- (void)setDegree: (int)degree
+{
+    if ([_view isKindOfClass:[IJKSDLGLView class]]) {
+        IJKSDLGLView *glView = (IJKSDLGLView *)_view;
+        [glView setDegree:degree];
+    }
+}
+
 // deprecated, for MPMoviePlayerController compatiable
 - (UIImage *)thumbnailImageAtTime:(NSTimeInterval)playbackTime timeOption:(IJKMPMovieTimeOption)option
 {

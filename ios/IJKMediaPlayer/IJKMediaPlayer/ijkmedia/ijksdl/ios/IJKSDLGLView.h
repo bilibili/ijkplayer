@@ -39,5 +39,6 @@
 @property(nonatomic, readonly)        CGFloat  fps;
 @property(nonatomic)        CGFloat  scaleFactor;
 @property(nonatomic)        BOOL     shouldShowHudView;
+- (void)setDegree:(int)degree;
 
 @end

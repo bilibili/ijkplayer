@@ -53,6 +53,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 
     IJK_GLES2_Renderer *_renderer;
     int                 _rendererGravity;
+    int             _rendererDegree;
 
     BOOL            _isRenderBufferInvalidated;
 
@@ -299,6 +300,14 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     [self invalidateRenderBuffer];
 }
 
+- (void)setDegree:(int)degree
+{
+    if (_rendererDegree != degree) {
+        _rendererDegree = degree;
+        [self invalidateRenderBuffer];
+    }
+}
+
 - (BOOL)setupRenderer: (SDL_VoutOverlay *) overlay
 {
     if (overlay == nil)
@@ -318,6 +327,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
             return NO;
 
         IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
+        IJK_GLES2_Renderer_setDegree(_renderer, _rendererDegree);
     }
 
     return YES;
@@ -389,6 +399,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
         IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
+        IJK_GLES2_Renderer_setDegree(_renderer, _rendererDegree);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);

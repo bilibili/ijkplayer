@@ -221,7 +221,7 @@ static void IJK_GLES2_Renderer_Vertices_reset(IJK_GLES2_Renderer *renderer)
     renderer->vertices[7] =  1.0f;
 }
 
-static void IJK_GLES2_Renderer_Vertices_apply(IJK_GLES2_Renderer *renderer)
+static void IJK_GLES2_Renderer_Vertices_apply(IJK_GLES2_Renderer *renderer, bool rotate)
 {
     switch (renderer->gravity) {
         case IJK_GLES2_GRAVITY_RESIZE_ASPECT:
@@ -249,7 +249,11 @@ static void IJK_GLES2_Renderer_Vertices_apply(IJK_GLES2_Renderer *renderer)
 
     float width     = renderer->frame_width;
     float height    = renderer->frame_height;
-
+    if (rotate) {
+        float tmp = width;
+        width = height;
+        height = tmp;
+    }
     if (renderer->frame_sar_num > 0 && renderer->frame_sar_den > 0) {
         width = width * renderer->frame_sar_num / renderer->frame_sar_den;
     }
@@ -307,6 +311,17 @@ GLboolean IJK_GLES2_Renderer_setGravity(IJK_GLES2_Renderer *renderer, int gravit
     return GL_TRUE;
 }
 
+GLboolean IJK_GLES2_Renderer_setDegree(IJK_GLES2_Renderer *renderer, int degree)
+{
+    if (renderer->degree != degree)
+        renderer->vertices_changed = 1;
+    else
+        return GL_TRUE;
+    
+    renderer->degree      = degree;
+    return GL_TRUE;
+}
+
 static void IJK_GLES2_Renderer_TexCoords_reset(IJK_GLES2_Renderer *renderer)
 {
     renderer->texcoords[0] = 0.0f;
@@ -319,17 +334,46 @@ static void IJK_GLES2_Renderer_TexCoords_reset(IJK_GLES2_Renderer *renderer)
     renderer->texcoords[7] = 0.0f;
 }
 
-static void IJK_GLES2_Renderer_TexCoords_cropRight(IJK_GLES2_Renderer *renderer, GLfloat cropRight)
+static void IJK_GLES2_Renderer_TexCoords_cropRight(IJK_GLES2_Renderer *renderer, GLint degree, GLfloat cropRight)
 {
     ALOGE("IJK_GLES2_Renderer_TexCoords_cropRight\n");
-    renderer->texcoords[0] = 0.0f;
-    renderer->texcoords[1] = 1.0f;
-    renderer->texcoords[2] = 1.0f - cropRight;
-    renderer->texcoords[3] = 1.0f;
-    renderer->texcoords[4] = 0.0f;
-    renderer->texcoords[5] = 0.0f;
-    renderer->texcoords[6] = 1.0f - cropRight;
-    renderer->texcoords[7] = 0.0f;
+    const GLfloat noRotation[] = {
+        0.0f, 1.0f,
+        1.0f - cropRight, 1.0f,
+        0.0f, 0.0f,
+        1.0f - cropRight, 0.0f,
+    };
+    
+    const GLfloat rotateRight[] = {
+        1.0f - cropRight, 1.0f ,
+        1.0f - cropRight, 0.0f ,
+        0.0f, 1.0f,
+        0.0f, 0.0f,
+    };
+    
+    const GLfloat rotateLeft[] = {
+        0.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f - cropRight, 0.0f,
+        1.0f - cropRight, 1.0f,
+    };
+    
+    const GLfloat rotate180[] = {
+        1.0f - cropRight, 0.0f,
+        0.0f, 0.0f,
+        1.0f - cropRight, 1.0f,
+        0.0f, 1.0f,
+    };
+    
+    switch(degree)
+    {
+        case 0:     memcpy(renderer->texcoords, noRotation, sizeof(renderer->texcoords)); break;
+        case 270:   memcpy(renderer->texcoords, rotateLeft, sizeof(renderer->texcoords)); break;
+        case 90:    memcpy(renderer->texcoords, rotateRight, sizeof(renderer->texcoords)); break;
+        case 180:   memcpy(renderer->texcoords, rotate180, sizeof(renderer->texcoords)); break;
+        default:
+            break;
+    }
 }
 
 static void IJK_GLES2_Renderer_TexCoords_reloadVertex(IJK_GLES2_Renderer *renderer)
@@ -409,7 +453,7 @@ GLboolean IJK_GLES2_Renderer_renderOverlay(IJK_GLES2_Renderer *renderer, SDL_Vou
 
         renderer->vertices_changed = 0;
 
-        IJK_GLES2_Renderer_Vertices_apply(renderer);
+        IJK_GLES2_Renderer_Vertices_apply(renderer, (renderer->degree == 90 || renderer->degree == 270));
         IJK_GLES2_Renderer_Vertices_reloadVertex(renderer);
 
         renderer->buffer_width  = buffer_width;
@@ -419,7 +463,7 @@ GLboolean IJK_GLES2_Renderer_renderOverlay(IJK_GLES2_Renderer *renderer, SDL_Vou
         GLfloat padding_normalized = ((GLfloat)padding_pixels) / buffer_width;
 
         IJK_GLES2_Renderer_TexCoords_reset(renderer);
-        IJK_GLES2_Renderer_TexCoords_cropRight(renderer, padding_normalized);
+        IJK_GLES2_Renderer_TexCoords_cropRight(renderer, renderer->degree, padding_normalized);
         IJK_GLES2_Renderer_TexCoords_reloadVertex(renderer);
     }
 
