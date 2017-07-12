@@ -88,6 +88,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property(nonatomic, readonly) int64_t numberOfBytesTransferred;
 
 @property(nonatomic, readonly) CGSize naturalSize;
+@property(nonatomic, readonly) CGSize videoSize;
 @property(nonatomic) IJKMPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;
 

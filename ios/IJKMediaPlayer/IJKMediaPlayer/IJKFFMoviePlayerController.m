@@ -97,7 +97,7 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff3.3--ijk0.8.0--20170518--001
 @synthesize isDanmakuMediaAirPlay = _isDanmakuMediaAirPlay;
 
 @synthesize monitor = _monitor;
-
+@dynamic videoSize;
 #define FFP_IO_STAT_STEP (50 * 1024)
 
 // as an example
@@ -594,6 +594,11 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 - (CGSize)naturalSize
 {
     return _naturalSize;
+}
+
+- (CGSize)videoSize
+{
+    return CGSizeMake(_videoWidth, _videoHeight);
 }
 
 - (void)changeNaturalSize

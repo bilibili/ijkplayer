@@ -962,6 +962,11 @@ static IJKAVMoviePlayerController* instance;
     return [videoTracks objectAtIndex:0].naturalSize;
 }
 
+- (CGSize)videoSize
+{
+    return [self naturalSize];
+}
+
 - (void)setScalingMode: (IJKMPMovieScalingMode) aScalingMode
 {
     IJKMPMovieScalingMode newScalingMode = aScalingMode;
