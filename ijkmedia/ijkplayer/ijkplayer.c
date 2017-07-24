@@ -155,6 +155,15 @@ void ijkmp_set_ijkio_inject_node(IjkMediaPlayer *mp, int index, int64_t file_log
     MPTRACE("%s()=void\n", __func__);
 }
 
+void ijkmp_set_frame_at_time(IjkMediaPlayer *mp, const char *path, int64_t start_time, int64_t end_time, int num, int definition)
+{
+    assert(mp);
+
+    MPTRACE("%s(%s,%lld,%lld,%d,%d)\n", __func__, path, start_time, end_time, num, definition);
+    ffp_set_frame_at_time(mp->ffplayer, path, start_time, end_time, num, definition);
+    MPTRACE("%s()=void\n", __func__);
+}
+
 
 void *ijkmp_set_ijkio_inject_opaque(IjkMediaPlayer *mp, void *opaque)
 {
