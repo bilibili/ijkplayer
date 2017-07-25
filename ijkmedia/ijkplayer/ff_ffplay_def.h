@@ -79,6 +79,7 @@
 
 #define BUFFERING_CHECK_PER_BYTES               (512)
 #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
+#define FAST_BUFFERING_CHECK_PER_MILLISECONDS   (100)
 
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #ifdef FFP_MERGE
@@ -684,6 +685,7 @@ typedef struct FFPlayer {
 
     int enable_accurate_seek;
     int mediacodec_sync;
+    int skip_calc_frame_rate;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))

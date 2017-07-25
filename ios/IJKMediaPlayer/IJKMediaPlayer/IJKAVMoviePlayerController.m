@@ -326,10 +326,19 @@ static IJKAVMoviePlayerController* instance;
 - (UIImage *)thumbnailImageAtCurrentTime
 {
     AVAssetImageGenerator *imageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:_playAsset];
-    NSError *error = nil;
-    CMTime time = CMTimeMakeWithSeconds(self.currentPlaybackTime, 1);
-    CMTime actualTime;
-    CGImageRef cgImage = [imageGenerator copyCGImageAtTime:time actualTime:&actualTime error:&error];
+    CMTime expectedTime = _playerItem.currentTime;
+    CGImageRef cgImage = NULL;
+    
+    imageGenerator.requestedTimeToleranceBefore = kCMTimeZero;
+    imageGenerator.requestedTimeToleranceAfter = kCMTimeZero;
+    cgImage = [imageGenerator copyCGImageAtTime:expectedTime actualTime:NULL error:NULL];
+    
+    if (!cgImage) {
+        imageGenerator.requestedTimeToleranceBefore = kCMTimePositiveInfinity;
+        imageGenerator.requestedTimeToleranceAfter = kCMTimePositiveInfinity;
+        cgImage = [imageGenerator copyCGImageAtTime:expectedTime actualTime:NULL error:NULL];
+    }
+    
     UIImage *image = [UIImage imageWithCGImage:cgImage];
     return image;
 }

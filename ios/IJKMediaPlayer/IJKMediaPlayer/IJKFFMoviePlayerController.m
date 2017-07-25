@@ -33,7 +33,7 @@
 #import "ijkioapplication.h"
 #include "string.h"
 
-static const char *kIJKFFRequiredFFmpegVersion = "ff3.3--ijk0.8.0--20170615--001";
+static const char *kIJKFFRequiredFFmpegVersion = "ff3.3--ijk0.8.0--20170710--001";
 
 // It means you didn't call shutdown if you found this object leaked.
 @interface IJKWeakHolder : NSObject
@@ -1325,6 +1325,7 @@ static int onInjectOnHttpEvent(IJKFFMoviePlayerController *mpc, int type, void *
 
             if (delegate != nil) {
                 dict[IJKMediaEventAttrKey_host]         = [NSString ijk_stringBeEmptyIfNil:host];
+                dict[IJKMediaEventAttrKey_url]          = [NSString ijk_stringBeEmptyIfNil:monitor.httpUrl];
                 [delegate invoke:type attributes:dict];
             }
             break;
