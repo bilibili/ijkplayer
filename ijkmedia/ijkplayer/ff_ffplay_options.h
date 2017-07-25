@@ -122,6 +122,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(dcc.max_buffer_size), OPTION_INT(MAX_QUEUE_SIZE, 0, MAX_QUEUE_SIZE) },
     { "min-frames",                         "minimal frames to stop pre-reading",
         OPTION_OFFSET(dcc.min_frames),      OPTION_INT(DEFAULT_MIN_FRAMES, MIN_MIN_FRAMES, MAX_MIN_FRAMES) },
+    { "max-buffer-size",                         "max buffer size to stop pre-reading",
+        OPTION_OFFSET(dcc.max_buffer_size),      OPTION_INT(MAX_QUEUE_SIZE, 2 * 1024 * 1024, MAX_QUEUE_SIZE) },
     { "first-high-water-mark-ms",           "first chance to wakeup read_thread",
         OPTION_OFFSET(dcc.first_high_water_mark_in_ms),
         OPTION_INT(DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS,
