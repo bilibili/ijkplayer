@@ -91,6 +91,12 @@ static int ijkio_urlhook_call_inject(IjkURLContext *h)
             ret = IJKAVERROR_EXIT;
             goto fail;
         }
+
+        AVAppIOControl user_control_data = c->app_io_ctrl;
+        if (strncmp(c->app_io_ctrl.url, "ffio:", strlen("ffio:"))) {
+            snprintf(c->app_io_ctrl.url, sizeof(c->app_io_ctrl.url), "%s%s", "ffio:", user_control_data.url);
+        }
+
         if (!c->app_io_ctrl.is_url_changed && strcmp(control_data_backup.url, c->app_io_ctrl.url)) {
             // force a url compare
             c->app_io_ctrl.is_url_changed = 1;
