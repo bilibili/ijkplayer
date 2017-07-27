@@ -160,6 +160,12 @@ public class TextureRenderView extends TextureView implements IRenderView {
                 SurfaceTexture surfaceTexture = textureHolder.getSurfaceTexture();
                 if (surfaceTexture != null) {
                     mTextureView.setSurfaceTexture(surfaceTexture);
+                    // release new useless surface, and reset surface to the old which is held
+                    if (mSurfaceTexture != surfaceTexture) {
+                        mSurfaceTexture.release();
+                        mSurfaceTexture = surfaceTexture;
+                        mTextureView.mSurfaceCallback.mSurfaceTexture = surfaceTexture;
+                    }
                 } else {
                     textureHolder.setSurfaceTexture(mSurfaceTexture);
                     textureHolder.setSurfaceTextureHost(mTextureView.mSurfaceCallback);
