@@ -4,6 +4,8 @@ import fnmatch
 import fileinput
 import shutil
 import errno
+import sys
+import getopt
 
 __doc__ = '''
 
@@ -11,7 +13,7 @@ __doc__ = '''
     cd android/contrib
     ./compile-ffmpeg.sh all
     cd ../..
-    ./init-android-liteav.py
+    ./init-android-tencent.py
     cd android
     ./compile-ijk.sh all
 
@@ -36,27 +38,27 @@ def get_filepaths(directory):
 
     return file_paths  # Self-explanatory.
 
-# Run the above function and store its results in a variable.   
-paths = get_filepaths("./ijkmedia")
-paths = paths + get_filepaths("./android/ijkplayer")
-paths = paths + get_filepaths("./android/patches")
-for fp in paths:
-    x = fileinput.input(fp, inplace=True)
-    for line in x:
-        line = line.replace("tv.danmaku.ijk", "com.tencent.liteav")
-        line = line.replace("tv_danmaku_ijk", "com_tencent_liteav")
-        line = line.replace("tv/danmaku/ijk", "com/tencent/liteav")
-        print line,
-    x.close()
 
 print "== rename folder"
 def mv_target(root):
-    os.system("mkdir -p {0}/com/tencent/liteav".format(root))
-    os.system("rm -rf {0}/com/tencent/liteav/*".format(root))
-    os.system("cp -rf {0}/tv/danmaku/ijk/ {0}/com/tencent/liteav".format(root))
+    os.system("mkdir -p {0}/com/tencent".format(root))
+    os.system("rm -rf {0}/com/tencent/*".format(root))
+    os.system("cp -rf {0}/tv/danmaku/ {0}/com/tencent".format(root))
     os.system("rm -rf {0}/tv".format(root))
 
-def do_liteav():
+def do_tencent():
+    paths = get_filepaths("./ijkmedia")
+    paths = paths + get_filepaths("./android/ijkplayer")
+    paths = paths + get_filepaths("./android/patches")
+    for fp in paths:
+        x = fileinput.input(fp, inplace=True)
+        for line in x:
+            line = line.replace("tv.danmaku", "com.tencent")
+            line = line.replace("tv_danmaku", "com_tencent")
+            line = line.replace("tv/danmaku", "com/tencent")
+            print line,
+        x.close()
+
     mv_target("ijkmedia/ijkj4a/j4a/class")
     mv_target("ijkmedia/ijkj4a/java")
     mv_target("android/ijkplayer/ijkplayer-armv5/src/main/java")
@@ -67,7 +69,7 @@ def do_liteav():
     mv_target("android/ijkplayer/ijkplayer-exo/src/main/java")
     mv_target("android/ijkplayer/ijkplayer-java/src/main/java")
 
-def clean_liteav():
+def clean_tencent():
     os.system("rm -rf ijkmedia/ijkj4a/j4a/class/com/tencent")
     os.system("rm -rf ijkmedia/ijkj4a/java/com/tencent")
     os.system("rm -rf android/ijkplayer/ijkplayer-armv5/src/main/java/com/tencent")
@@ -86,10 +88,10 @@ def main(argv):
 
     for opt, arg in opts:
         if opt in ("-c", "--clean"):
-            clean_liteav()
+            clean_tencent()
             sys.exit()
             
-    do_liteav()
+    do_tencent()
 
 if __name__ == "__main__":
     main(sys.argv[1:])
