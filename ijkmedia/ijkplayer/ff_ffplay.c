@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include "libavutil/avstring.h"
 #include "libavutil/eval.h"
