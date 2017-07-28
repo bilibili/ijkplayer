@@ -244,6 +244,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         native_setup(new WeakReference<IjkMediaPlayer>(this));
     }
 
+    private native void _setFrameAtTime(String imgCachePath, long startTime, long endTime, int num, int imgDefinition)
+            throws IllegalArgumentException, IllegalStateException;
+
     /*
      * Update the IjkMediaPlayer SurfaceTexture. Call after setting a new
      * display surface.
