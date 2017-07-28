@@ -29,10 +29,12 @@ import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.decoder.DecoderCounters;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -55,6 +57,7 @@ import com.google.android.exoplayer2.util.Util;
 
 import java.io.FileDescriptor;
 import java.util.Map;
+import java.util.Objects;
 
 import tv.danmaku.ijk.media.exo.demo.EventLogger;
 import tv.danmaku.ijk.media.player.AbstractMediaPlayer;
@@ -327,6 +330,18 @@ public class IjkExoMediaPlayer extends AbstractMediaPlayer implements ExoPlayer.
             return 0;
 
         return player.getBufferedPercentage();
+    }
+
+    public Format getVideoFormat() {
+        return player.getVideoFormat();
+    }
+
+    public int getObservedBitrate() {
+        return eventLogger.getObservedBitrate();
+    }
+
+    public DecoderCounters getVideoDecoderCounters() {
+        return player.getVideoDecoderCounters();
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension) {

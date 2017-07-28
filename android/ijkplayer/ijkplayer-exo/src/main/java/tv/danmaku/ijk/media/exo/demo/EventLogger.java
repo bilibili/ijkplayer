@@ -315,11 +315,15 @@ public class EventLogger implements ExoPlayer.EventListener,
 
   // AdaptiveMediaSourceEventListener
 
+  private long mBytesLoaded = 0;
+  private long mBytesLoadedSeconds = 0;
+  private long mLastBytesLoadedTime = 0;
+
   @Override
   public void onLoadStarted(DataSpec dataSpec, int dataType, int trackType, Format trackFormat,
       int trackSelectionReason, Object trackSelectionData, long mediaStartTimeMs,
       long mediaEndTimeMs, long elapsedRealtimeMs) {
-    // Do nothing.
+    if(mLastBytesLoadedTime == 0) mLastBytesLoadedTime = System.currentTimeMillis();
   }
 
   @Override
@@ -341,7 +345,34 @@ public class EventLogger implements ExoPlayer.EventListener,
   public void onLoadCompleted(DataSpec dataSpec, int dataType, int trackType, Format trackFormat,
       int trackSelectionReason, Object trackSelectionData, long mediaStartTimeMs,
       long mediaEndTimeMs, long elapsedRealtimeMs, long loadDurationMs, long bytesLoaded) {
-    // Do nothing.
+    long now = System.currentTimeMillis();
+      if (mLastBytesLoadedTime == 0) {
+          return;
+      }
+    float diffInSeconds = (now - mLastBytesLoadedTime) / 1000;
+    logBytesLoadedInSeconds(bytesLoaded, diffInSeconds); // helper function, explain bellow
+    mLastBytesLoadedTime = now;
+  }
+
+  /**
+   * Logs an amount of bytes loaded in an amount of seconds
+   *
+   * @param bytes amount of bytes loaded
+   * @param seconds time in seconds that it took to load those bytes
+   */
+  private void logBytesLoadedInSeconds(long bytes, float seconds){
+    mBytesLoaded += bytes;
+    mBytesLoadedSeconds += seconds;
+  }
+
+  public int getObservedBitrate() {
+    if(mBytesLoadedSeconds != 0) {
+      double bytesPerSecond = mBytesLoaded / mBytesLoadedSeconds;
+      double bitsPerSecond = bytesPerSecond * 8; // (8 bits in a byte)
+      Log.d(TAG," mBytesLoaded " + mBytesLoaded + " in "+mBytesLoadedSeconds+" seconds ("+(int)bitsPerSecond+" b/s indicated ");
+      return (int)bitsPerSecond;
+    }
+    return 0;
   }
 
   @Override
