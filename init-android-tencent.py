@@ -70,14 +70,14 @@ def do_tencent():
     mv_target("android/ijkplayer/ijkplayer-java/src/main/java")
 
 def clean_tencent():
-    os.system("rm -rf ijkmedia/ijkj4a/j4a/class/com/tencent")
-    os.system("rm -rf ijkmedia/ijkj4a/java/com/tencent")
-    os.system("rm -rf android/ijkplayer/ijkplayer-armv5/src/main/java/com/tencent")
-    os.system("rm -rf android/ijkplayer/ijkplayer-armv7a/src/main/java/com/tencent")
-    os.system("rm -rf android/ijkplayer/ijkplayer-arm64/src/main/java/com/tencent")
-    os.system("rm -rf android/ijkplayer/ijkplayer-x86/src/main/java/com/tencent")
-    os.system("rm -rf android/ijkplayer/ijkplayer-exo/src/main/java/com/tencent")
-    os.system("rm -rf android/ijkplayer/ijkplayer-java/src/main/java/com/tencent")
+    os.system("rm -rf ijkmedia/ijkj4a/j4a/class/com")
+    os.system("rm -rf ijkmedia/ijkj4a/java/com")
+    os.system("rm -rf android/ijkplayer/ijkplayer-armv5/src/main/java/com")
+    os.system("rm -rf android/ijkplayer/ijkplayer-armv7a/src/main/java/com")
+    os.system("rm -rf android/ijkplayer/ijkplayer-arm64/src/main/java/com")
+    os.system("rm -rf android/ijkplayer/ijkplayer-x86/src/main/java/com")
+    os.system("rm -rf android/ijkplayer/ijkplayer-exo/src/main/java/com")
+    os.system("rm -rf android/ijkplayer/ijkplayer-java/src/main/java/com")
 
 def main(argv): 
     try:                                
