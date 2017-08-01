@@ -95,6 +95,7 @@ static void *KVO_AVPlayer_currentItem   = &KVO_AVPlayer_currentItem;
 static void *KVO_AVPlayer_airplay   = &KVO_AVPlayer_airplay;
 
 static void *KVO_AVPlayerItem_state                     = &KVO_AVPlayerItem_state;
+static void *KVO_AVPlayerItem_duration                  = &KVO_AVPlayerItem_duration;
 static void *KVO_AVPlayerItem_loadedTimeRanges          = &KVO_AVPlayerItem_loadedTimeRanges;
 static void *KVO_AVPlayerItem_playbackLikelyToKeepUp    = &KVO_AVPlayerItem_playbackLikelyToKeepUp;
 static void *KVO_AVPlayerItem_playbackBufferFull        = &KVO_AVPlayerItem_playbackBufferFull;
@@ -551,6 +552,11 @@ static IJKAVMoviePlayerController* instance;
                               options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
                               context:KVO_AVPlayerItem_playbackBufferFull];
     
+ [_playerItemKVO safelyAddObserver:self
+                           forKeyPath:@"duration"
+                              options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                              context:KVO_AVPlayerItem_duration];
+ 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(playerItemDidReachEnd:)
                                                  name:AVPlayerItemDidPlayToEndTimeNotification
@@ -791,6 +797,16 @@ static IJKAVMoviePlayerController* instance;
         
         [self didPlaybackStateChange];
         [self didLoadStateChange];
+    }
+    else if (context == KVO_AVPlayerItem_duration)
+    {
+        AVPlayerItem *playerItem = (AVPlayerItem *)object;
+        NSTimeInterval duration = CMTimeGetSeconds(playerItem.duration);
+        if (duration <= 0)
+            self.duration = 0.0f;
+        else
+            self.duration = duration;
+        
     }
     else if (context == KVO_AVPlayerItem_loadedTimeRanges)
     {
