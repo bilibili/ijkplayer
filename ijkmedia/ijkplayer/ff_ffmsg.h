@@ -94,4 +94,6 @@
 
 #define FFP_PROP_INT64_CACHE_STATISTIC_COUNT_BYTES      20208
 
+#define FFP_PROP_INT64_LOGICAL_FILE_SIZE                20209
+
 #endif

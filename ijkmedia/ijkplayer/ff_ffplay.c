@@ -3813,6 +3813,7 @@ static int ijkio_app_func_event(IjkIOApplicationContext *h, int message ,void *d
         ffp->stat.cache_file_forwards     = statistic->cache_file_forwards;
         ffp->stat.cache_file_pos          = statistic->cache_file_pos;
         ffp->stat.cache_count_bytes       = statistic->cache_count_bytes;
+        ffp->stat.logical_file_size       = statistic->logical_file_size;
     }
 
     return inject_callback(ffp->inject_opaque, IJKIOAPP_EVENT_CACHE_STATISTIC, data, size);
@@ -4712,6 +4713,10 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             if (!ffp)
                 return default_value;
             return ffp->stat.cache_count_bytes;
+       case FFP_PROP_INT64_LOGICAL_FILE_SIZE:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.logical_file_size;
         default:
             return default_value;
     }

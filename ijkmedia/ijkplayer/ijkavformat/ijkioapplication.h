@@ -35,6 +35,7 @@ typedef struct IjkIOAppCacheStatistic {
     int64_t cache_file_forwards;
     int64_t cache_file_pos;
     int64_t cache_count_bytes;
+    int64_t logical_file_size;
 } IjkIOAppCacheStatistic;
 
 typedef struct IjkIOAppCacheInitNode {

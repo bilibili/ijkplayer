@@ -115,6 +115,7 @@ static void call_inject_statistic(IjkURLContext *h)
         statistic.cache_file_forwards = c->file_logical_pos - c->read_logical_pos;
         statistic.cache_file_pos      = c->file_logical_pos;
         statistic.cache_count_bytes   = *c->cache_count_bytes;
+        statistic.logical_file_size   = c->logical_size;
         ijkio_application_on_cache_statistic(c->ijkio_app_ctx, &statistic);
     }
 }
