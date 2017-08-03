@@ -28,7 +28,7 @@ dependencies {
     compile 'com.google.android.exoplayer:exoplayer:r1.5.11'
 
     compile project(':ijkplayer-java')
-    // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.8.1.2'
+    // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.8.2'
 }
 
 gradle.startParameter.taskNames.each { task ->
