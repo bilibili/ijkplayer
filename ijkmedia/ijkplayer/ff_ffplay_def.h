@@ -501,7 +501,7 @@ typedef struct FFStatistic
     int64_t latest_seek_load_duration;
     int64_t byte_count;
     int64_t cache_physical_pos;
-    int64_t cache_buf_forwards;
+    int64_t cache_file_forwards;
     int64_t cache_file_pos;
     int64_t cache_count_bytes;
     int drop_frame_count;

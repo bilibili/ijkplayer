@@ -112,7 +112,7 @@ static void call_inject_statistic(IjkURLContext *h)
     if (c->ijkio_app_ctx) {
         IjkIOAppCacheStatistic statistic = {0};
         statistic.cache_physical_pos  = c->cache_physical_pos;
-        statistic.cache_buf_forwards  = c->file_logical_pos - c->read_logical_pos;
+        statistic.cache_file_forwards = c->file_logical_pos - c->read_logical_pos;
         statistic.cache_file_pos      = c->file_logical_pos;
         statistic.cache_count_bytes   = *c->cache_count_bytes;
         ijkio_application_on_cache_statistic(c->ijkio_app_ctx, &statistic);
