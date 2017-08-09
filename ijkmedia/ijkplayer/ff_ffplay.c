@@ -3178,8 +3178,12 @@ static int read_thread(void *arg)
                 is->drop_aframe_count = 0;
                 is->drop_vframe_count = 0;
                 SDL_LockMutex(is->accurate_seek_mutex);
-                is->audio_accurate_seek_req = 1;
-                is->video_accurate_seek_req = 1;
+                if (is->video_stream >= 0) {
+                    is->video_accurate_seek_req = 1;
+                }
+                if (is->audio_stream >= 0) {
+                    is->audio_accurate_seek_req = 1;
+                }
                 SDL_CondSignal(is->audio_accurate_seek_cond);
                 SDL_CondSignal(is->video_accurate_seek_cond);
                 SDL_UnlockMutex(is->accurate_seek_mutex);
