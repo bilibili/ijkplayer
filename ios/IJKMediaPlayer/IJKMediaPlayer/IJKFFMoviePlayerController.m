@@ -862,6 +862,13 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     return ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_PLAYBACK_VOLUME, 1.0f);
 }
 
+- (int64_t)getFileSize
+{
+    if (!_mediaPlayer)
+        return 0;
+    return ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_LOGICAL_FILE_SIZE, 0);
+}
+
 - (int64_t)trafficStatistic
 {
     if (!_mediaPlayer)
