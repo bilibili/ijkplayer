@@ -26,6 +26,7 @@
 
 #include "ijksdl/ijksdl_mutex.h"
 
+#define AMEDIACODEC_EXCEPTION -666
 typedef struct IJKFF_Pipenode_Opaque IJKFF_Pipenode_Opaque;
 typedef struct IJKFF_Pipenode IJKFF_Pipenode;
 struct IJKFF_Pipenode {

@@ -1080,6 +1080,10 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
     } else if (output_buffer_index == AMEDIACODEC__INFO_TRY_AGAIN_LATER) {
         AMCTRACE("AMEDIACODEC__INFO_TRY_AGAIN_LATER\n");
         // continue;
+    } else if (output_buffer_index == AMEDIACODEC__UNKNOWN_ERROR) {
+        ALOGI("AMEDIACODEC__UNKNOWN_ERROR\n");
+        ret = AMEDIACODEC_EXCEPTION;
+        goto fail;
     } else if (output_buffer_index < 0) {
         SDL_LockMutex(opaque->any_input_mutex);
         SDL_CondWaitTimeout(opaque->any_input_cond, opaque->any_input_mutex, 1000);
@@ -1543,7 +1547,9 @@ static int func_run_sync(IJKFF_Pipenode *node)
             SDL_UnlockMutex(opaque->acodec_first_dequeue_output_mutex);
         }
         if (ret != 0) {
-            ret = -1;
+            if (ret != AMEDIACODEC_EXCEPTION) {
+	        ret = -1;
+            }
             if (got_frame && frame->opaque)
                 SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
             goto fail;

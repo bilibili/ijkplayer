@@ -2158,6 +2158,12 @@ static int video_thread(void *arg)
     if (ffp->node_vdec) {
         ret = ffpipenode_run_sync(ffp->node_vdec);
     }
+    if (ret == AMEDIACODEC_EXCEPTION) {
+        ffp->node_vdec = ffpipenode_create_video_decoder_from_ffplay(ffp);
+        if (ffp->node_vdec) {
+            ret = ffpipenode_run_sync(ffp->node_vdec);
+        }
+    }
     return ret;
 }
 
