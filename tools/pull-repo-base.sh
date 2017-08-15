@@ -10,6 +10,6 @@ elif [ ! -d $LOCAL_WORKSPACE ]; then
     git clone $REMOTE_REPO $LOCAL_WORKSPACE
 else
     cd $LOCAL_WORKSPACE
-    git pull --rebase
+    git fetch --all --tags
     cd -
 fi

@@ -1,6 +1,7 @@
 /*
  * ffpipeline_ffplay.h
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -25,9 +26,7 @@
 
 #include "../ff_ffpipeline.h"
 
-typedef struct FFPlayer       FFPlayer;
-typedef struct IJKFF_Pipeline IJKFF_Pipeline;
-
-IJKFF_Pipeline *ffpipeline_create_from_ffplay(FFPlayer *ffp);
+// There is no default aout for ffplay.
+// IJKFF_Pipeline *ffpipeline_create_from_ffplay(FFPlayer *ffp);
 
 #endif

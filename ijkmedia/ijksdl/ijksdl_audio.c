@@ -2,6 +2,7 @@
  * ijksdl_audio.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -36,4 +37,12 @@ void SDL_CalculateAudioSpec(SDL_AudioSpec * spec)
     spec->size = SDL_AUDIO_BITSIZE(spec->format) / 8;
     spec->size *= spec->channels;
     spec->size *= spec->samples;
+}
+
+void SDL_MixAudio(Uint8*       dst,
+                  const Uint8* src,
+                  Uint32       len,
+                  int          volume)
+{
+    // do nothing;
 }

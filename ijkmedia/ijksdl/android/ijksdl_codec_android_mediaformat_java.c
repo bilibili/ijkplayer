@@ -2,6 +2,7 @@
  * ijksdl_codec_android_mediaformat_java.c
  *****************************************************************************
  *
+ * Copyright (c) 2014 Bilibili
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -23,58 +24,17 @@
 
 #include "ijksdl_codec_android_mediaformat_java.h"
 
+#include "j4a/class/android/media/MediaFormat.h"
+#include "j4au/class/java/nio/ByteBuffer.util.h"
 #include "ijksdl_android_jni.h"
 #include "ijksdl_codec_android_mediaformat_internal.h"
 #include "ijksdl_inc_internal_android.h"
-#include "android_bytebuffer.h"
 
 typedef struct SDL_AMediaFormat_Opaque {
     jobject android_media_format;
 
     jobject android_byte_buffer;
 } SDL_AMediaFormat_Opaque;
-
-typedef struct SDL_AMediaFormatJava_fields_t {
-    jclass clazz;
-
-    jmethodID jmid__ctor;
-
-    jmethodID jmid_createAudioFormat;
-    jmethodID jmid_createVideoFormat;
-
-    jmethodID jmid_getInteger;
-    jmethodID jmid_setInteger;
-
-    jmethodID jmid_setByteBuffer;
-
-} SDL_AMediaFormatJava_fields_t;
-static SDL_AMediaFormatJava_fields_t g_clazz;
-
-int SDL_AMediaFormatJava__loadClass(JNIEnv *env)
-{
-    jint sdk_int = SDL_Android_GetApiLevel();
-    if (sdk_int < IJK_API_16_JELLY_BEAN) {
-        return 0;
-    }
-
-    IJK_FIND_JAVA_CLASS( env, g_clazz.clazz, "android/media/MediaFormat");
-
-    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_createAudioFormat,    g_clazz.clazz,
-        "createAudioFormat",    "(Ljava/lang/String;II)Landroid/media/MediaFormat;");
-    IJK_FIND_JAVA_STATIC_METHOD(env, g_clazz.jmid_createVideoFormat,    g_clazz.clazz,
-        "createVideoFormat",    "(Ljava/lang/String;II)Landroid/media/MediaFormat;");
-
-    IJK_FIND_JAVA_METHOD(env, g_clazz.jmid__ctor,           g_clazz.clazz,
-        "<init>"    ,           "()V");
-    IJK_FIND_JAVA_METHOD(env, g_clazz.jmid_getInteger,      g_clazz.clazz,
-        "getInteger",           "(Ljava/lang/String;)I");
-    IJK_FIND_JAVA_METHOD(env, g_clazz.jmid_setInteger,      g_clazz.clazz,
-        "setInteger",           "(Ljava/lang/String;I)V");
-    IJK_FIND_JAVA_METHOD(env, g_clazz.jmid_setByteBuffer,   g_clazz.clazz,
-        "setByteBuffer",        "(Ljava/lang/String;Ljava/nio/ByteBuffer;)V");
-
-    return 0;
-}
 
 jobject SDL_AMediaFormatJava_getObject(JNIEnv *env, const SDL_AMediaFormat *thiz)
 {
@@ -131,15 +91,8 @@ static bool SDL_AMediaFormatJava_getInt32(SDL_AMediaFormat* aformat, const char*
         return false;
     }
 
-    jstring jname = (*env)->NewStringUTF(env, name);
-    if (SDL_JNI_CatchException(env) || !jname) {
-        ALOGE("%s: NewStringUTF: failed", __func__);
-        return false;
-    }
-
-    jint ret = (*env)->CallIntMethod(env, android_media_format, g_clazz.jmid_getInteger, jname);
-    SDL_JNI_DeleteLocalRefP(env, &jname);
-    if (SDL_JNI_CatchException(env)) {
+    jint ret = J4AC_MediaFormat__getInteger__withCString(env, android_media_format, name);
+    if (J4A_ExceptionCheck__catchAll(env)) {
         ALOGE("%s: CallIntMethod: failed", __func__);
         return false;
     }
@@ -163,15 +116,8 @@ static void SDL_AMediaFormatJava_setInt32(SDL_AMediaFormat* aformat, const char*
         return;
     }
 
-    jstring jname = (*env)->NewStringUTF(env, name);
-    if (SDL_JNI_CatchException(env) || !jname) {
-        ALOGE("%s: NewStringUTF: failed", __func__);
-        return;
-    }
-
-    (*env)->CallVoidMethod(env, android_media_format, g_clazz.jmid_setInteger, jname, value);
-    SDL_JNI_DeleteLocalRefP(env, &jname);
-    if (SDL_JNI_CatchException(env)) {
+    J4AC_MediaFormat__setInteger__withCString(env, android_media_format, name, value);
+    if (J4A_ExceptionCheck__catchAll(env)) {
         ALOGE("%s: CallVoidMethod: failed", __func__);
         return;
     }
@@ -179,6 +125,7 @@ static void SDL_AMediaFormatJava_setInt32(SDL_AMediaFormat* aformat, const char*
 
 static void SDL_AMediaFormatJava_setBuffer(SDL_AMediaFormat* aformat, const char* name, void* data, size_t size)
 {
+    int    ret  = -1;
     JNIEnv *env = NULL;
     if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
         ALOGE("%s: SDL_JNI_SetupThreadEnv: failed", __func__);
@@ -188,29 +135,21 @@ static void SDL_AMediaFormatJava_setBuffer(SDL_AMediaFormat* aformat, const char
     SDL_AMediaFormat_Opaque *opaque = (SDL_AMediaFormat_Opaque *)aformat->opaque;
     jobject android_media_format = opaque->android_media_format;
     if (!opaque->android_byte_buffer) {
-        jobject local_android_byte_buffer = ASDK_ByteBuffer_allocateDirectAsGlobalRef(env, size);
-        if (SDL_JNI_CatchException(env) || !local_android_byte_buffer) {
-            ALOGE("%s: ASDK_ByteBuffer_allocateDirectAsGlobalRef: failed", __func__);
+        opaque->android_byte_buffer = J4AC_ByteBuffer__allocateDirect__asGlobalRef__catchAll(env, size);
+        if (!opaque->android_byte_buffer) {
+            J4A_FUNC_FAIL_TRACE();
             return;
         }
-        opaque->android_byte_buffer = local_android_byte_buffer;;
     }
 
-    ASDK_ByteBuffer__setDataLimited(env, opaque->android_byte_buffer, data, size);
-    if (SDL_JNI_CatchException(env)) {
-        ALOGE("%s: ASDK_ByteBuffer__setDataLimited: failed", __func__);
+    ret = J4AC_ByteBuffer__assignData__catchAll(env, opaque->android_byte_buffer, data, size);
+    if (ret < 0) {
+        J4A_FUNC_FAIL_TRACE();
         return;
     }
 
-    jstring jname = (*env)->NewStringUTF(env, name);
-    if (SDL_JNI_CatchException(env) || !jname) {
-        ALOGE("%s: NewStringUTF: failed", __func__);
-        return;
-    }
-
-    (*env)->CallVoidMethod(env, android_media_format, g_clazz.jmid_setByteBuffer, jname, opaque->android_byte_buffer);
-    SDL_JNI_DeleteLocalRefP(env, &jname);
-    if (SDL_JNI_CatchException(env)) {
+    J4AC_MediaFormat__setByteBuffer__withCString(env, android_media_format, name, opaque->android_byte_buffer);
+    if (J4A_ExceptionCheck__catchAll(env)) {
         ALOGE("%s: call jmid_setByteBuffer: failed", __func__);
         return;
     }
@@ -226,29 +165,11 @@ static void setup_aformat(SDL_AMediaFormat *aformat, jobject android_media_forma
     aformat->func_setBuffer = SDL_AMediaFormatJava_setBuffer;
 }
 
-SDL_AMediaFormat *SDL_AMediaFormatJava_new(JNIEnv *env)
-{
-    SDLTRACE("%s", __func__);
-    jobject android_media_format = SDL_JNI_NewObjectAsGlobalRef(env, g_clazz.clazz, g_clazz.jmid__ctor);
-    if (SDL_JNI_CatchException(env) || !android_media_format) {
-        return NULL;
-    }
-
-    SDL_AMediaFormat *aformat = SDL_AMediaFormat_CreateInternal(sizeof(SDL_AMediaFormat_Opaque));
-    if (!aformat) {
-        SDL_JNI_DeleteGlobalRefP(env, &android_media_format);
-        return NULL;
-    }
-
-    setup_aformat(aformat, android_media_format);
-    return aformat;
-}
-
 SDL_AMediaFormat *SDL_AMediaFormatJava_init(JNIEnv *env, jobject android_format)
 {
     SDLTRACE("%s", __func__);
     jobject global_android_media_format = (*env)->NewGlobalRef(env, android_format);
-    if (SDL_JNI_CatchException(env) || !global_android_media_format) {
+    if (J4A_ExceptionCheck__catchAll(env) || !global_android_media_format) {
         return NULL;
     }
 
@@ -265,30 +186,19 @@ SDL_AMediaFormat *SDL_AMediaFormatJava_init(JNIEnv *env, jobject android_format)
 SDL_AMediaFormat *SDL_AMediaFormatJava_createVideoFormat(JNIEnv *env, const char *mime, int width, int height)
 {
     SDLTRACE("%s", __func__);
-    jstring jmime = (*env)->NewStringUTF(env, mime);
-    if (SDL_JNI_CatchException(env) || !jmime) {
-        return NULL;
-    }
 
-    jobject local_android_media_format = (*env)->CallStaticObjectMethod(env, g_clazz.clazz, g_clazz.jmid_createVideoFormat, jmime, width, height);
-    SDL_JNI_DeleteLocalRefP(env, &jmime);
-    if (SDL_JNI_CatchException(env) || !local_android_media_format) {
-        return NULL;
-    }
-
-    jobject global_android_media_format = (*env)->NewGlobalRef(env, local_android_media_format);
-    SDL_JNI_DeleteLocalRefP(env, &local_android_media_format);
-    if (SDL_JNI_CatchException(env) || !global_android_media_format) {
+    jobject android_media_format = J4AC_MediaFormat__createVideoFormat__withCString__asGlobalRef__catchAll(env, mime, width, height);
+    if (J4A_ExceptionCheck__catchAll(env) || !android_media_format) {
         return NULL;
     }
 
     SDL_AMediaFormat *aformat = SDL_AMediaFormat_CreateInternal(sizeof(SDL_AMediaFormat_Opaque));
     if (!aformat) {
-        SDL_JNI_DeleteGlobalRefP(env, &global_android_media_format);
+        SDL_JNI_DeleteGlobalRefP(env, &android_media_format);
         return NULL;
     }
 
-    setup_aformat(aformat, global_android_media_format);
+    setup_aformat(aformat, android_media_format);
     SDL_AMediaFormat_setInt32(aformat, AMEDIAFORMAT_KEY_MAX_INPUT_SIZE, 0);
     return aformat;
 }

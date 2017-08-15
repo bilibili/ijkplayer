@@ -1,6 +1,7 @@
 /*
  * ffpipenode_ffplay_vdec.h
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -25,8 +26,8 @@
 
 #include "../ff_ffpipenode.h"
 
-typedef struct FFPlayer FFPlayer;
+struct FFPlayer;
 
-IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ffplay(FFPlayer *ffp);
+IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ffplay(struct FFPlayer *ffp);
 
 #endif

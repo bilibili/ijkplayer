@@ -1,6 +1,7 @@
 /*
  * ff_ffpipeline.c
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -67,7 +68,7 @@ IJKFF_Pipenode* ffpipeline_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlayer
     return pipeline->func_open_video_decoder(pipeline, ffp);
 }
 
-IJKFF_Pipenode* ffpipeline_open_video_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
+SDL_Aout *ffpipeline_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
 {
-    return pipeline->func_open_video_output(pipeline, ffp);
+    return pipeline->func_open_audio_output(pipeline, ffp);
 }

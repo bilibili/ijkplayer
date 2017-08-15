@@ -2,6 +2,7 @@
  * ijksdl_vout_android_surface.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -36,8 +37,13 @@ SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface()
 void SDL_VoutAndroid_SetAndroidSurface(JNIEnv *env, SDL_Vout *vout, jobject android_surface)
 {
     ANativeWindow *native_window = NULL;
-    if (android_surface)
+    if (android_surface) {
         native_window = ANativeWindow_fromSurface(env, android_surface);
+        if (!native_window) {
+            ALOGE("%s: ANativeWindow_fromSurface: failed\n", __func__);
+            // do not return fail here;
+        }
+    }
 
     SDL_VoutAndroid_SetNativeWindow(vout, native_window);
     if (native_window)

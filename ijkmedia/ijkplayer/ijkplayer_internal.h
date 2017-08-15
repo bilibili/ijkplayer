@@ -1,6 +1,7 @@
 /*
  * ijkplayer_internal.h
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -29,7 +30,7 @@
 #include "ff_ffplay.h"
 #include "ijkplayer.h"
 
-typedef struct IjkMediaPlayer {
+struct IjkMediaPlayer {
     volatile int ref_count;
     pthread_mutex_t mutex;
     FFPlayer *ffplayer;
@@ -42,9 +43,10 @@ typedef struct IjkMediaPlayer {
     char *data_source;
     void *weak_thiz;
 
+    int restart;
     int restart_from_beginning;
     int seek_req;
     long seek_msec;
-} IjkMediaPlayer;
+};
 
 #endif

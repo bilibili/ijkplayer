@@ -1,0 +1,4 @@
+build
+ffmpeg-*
+libsoxr-*
+openssl-*

@@ -1,6 +1,7 @@
 /*
  * ijkmeta.h
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -33,16 +34,22 @@
 #define IJKM_KEY_BITRATE        "bitrate"
 #define IJKM_KEY_VIDEO_STREAM   "video"
 #define IJKM_KEY_AUDIO_STREAM   "audio"
+#define IJKM_KEY_TIMEDTEXT_STREAM "timedtext"
 
 // stream meta
 #define IJKM_KEY_TYPE           "type"
 #define IJKM_VAL_TYPE__VIDEO    "video"
 #define IJKM_VAL_TYPE__AUDIO    "audio"
+#define IJKM_VAL_TYPE__TIMEDTEXT "timedtext"
 #define IJKM_VAL_TYPE__UNKNOWN  "unknown"
+#define IJKM_KEY_LANGUAGE       "language"
 
-#define IJKM_KEY_CODEC_NAME      "codec_name"
-#define IJKM_KEY_CODEC_PROFILE   "codec_profile"
-#define IJKM_KEY_CODEC_LONG_NAME "codec_long_name"
+#define IJKM_KEY_CODEC_NAME         "codec_name"
+#define IJKM_KEY_CODEC_PROFILE      "codec_profile"
+#define IJKM_KEY_CODEC_LEVEL        "codec_level"
+#define IJKM_KEY_CODEC_LONG_NAME    "codec_long_name"
+#define IJKM_KEY_CODEC_PIXEL_FORMAT "codec_pixel_format"
+#define IJKM_KEY_CODEC_PROFILE_ID   "codec_profile_id"
 
 // stream: video
 #define IJKM_KEY_WIDTH          "width"
@@ -60,11 +67,11 @@
 // reserved for user
 #define IJKM_KEY_STREAMS        "streams"
 
-
+struct AVFormatContext;
 typedef struct IjkMediaMeta IjkMediaMeta;
-typedef struct AVFormatContext AVFormatContext;
 
 IjkMediaMeta *ijkmeta_create();
+void ijkmeta_reset(IjkMediaMeta *meta);
 void ijkmeta_destroy(IjkMediaMeta *meta);
 void ijkmeta_destroy_p(IjkMediaMeta **meta);
 
@@ -74,7 +81,7 @@ void ijkmeta_unlock(IjkMediaMeta *meta);
 void ijkmeta_append_child_l(IjkMediaMeta *meta, IjkMediaMeta *child);
 void ijkmeta_set_int64_l(IjkMediaMeta *meta, const char *name, int64_t value);
 void ijkmeta_set_string_l(IjkMediaMeta *meta, const char *name, const char *value);
-void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic);
+void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, struct AVFormatContext *ic);
 
 // must be freed with free();
 const char   *ijkmeta_get_string_l(IjkMediaMeta *meta, const char *name);

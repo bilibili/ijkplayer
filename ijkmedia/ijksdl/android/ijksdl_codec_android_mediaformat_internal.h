@@ -2,6 +2,7 @@
  * ijksdl_codec_android_mediaformat_internal.h
  *****************************************************************************
  *
+ * Copyright (c) 2014 Bilibili
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -25,7 +26,6 @@
 #define IJKSDL_ANDROID__ANDROID_CODEC_ANDROID_MEDIAFORMAT_INTERNAL_H
 
 #include "ijksdl_codec_android_mediaformat.h"
-#include "ijkutil/ijkutil.h"
 
 inline static SDL_AMediaFormat *SDL_AMediaFormat_CreateInternal(size_t opaque_size)
 {

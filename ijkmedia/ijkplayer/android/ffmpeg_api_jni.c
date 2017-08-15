@@ -1,6 +1,7 @@
 /*
  * ffmpeg_api_jni.c
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -26,7 +27,7 @@
 #include <string.h>
 #include <jni.h>
 #include "../ff_ffinc.h"
-#include "ijkutil/ijkutil.h"
+#include "ijksdl/ijksdl_log.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
 
 #define JNI_CLASS_FFMPEG_API "tv/danmaku/ijk/media/player/ffmpeg/FFmpegApi"

@@ -1,6 +1,7 @@
 /*****************************************************************************
  * yuv_rgb.c : ARM NEONv1 YUV to RGB32 chroma conversion for VLC
  *****************************************************************************
+ * Copyright (C) 2011 Bilibili
  * Copyright (C) 2011 Sébastien Toque
  *                    Rémi Denis-Courmont
  * Copyright (C) 2013 Zhang Rui <bbcallen@gmail.com>
@@ -27,7 +28,7 @@
 
 int ijk_image_convert(int width, int height,
     enum AVPixelFormat dst_format, uint8_t **dst_data, int *dst_linesize,
-    enum AVPixelFormat src_format, const uint8_t **src_data, int *src_linesize)
+    enum AVPixelFormat src_format, const uint8_t **src_data, const int *src_linesize)
 {
 #if defined(__ANDROID__)
     switch (src_format) {

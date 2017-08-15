@@ -1,6 +1,7 @@
 /*
- * ffpipenode_android_mediacodec_vdec.c
+ * h264_nal.h
  *
+ * Copyright (c) 2010-2011 Bilibili
  * Copyright (c) 2010-2011 Jean-Baptiste Kempf <jb@videolan.org>
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
@@ -23,7 +24,7 @@
 
 #include <limits.h>
 #include "libavcodec/avcodec.h"
-#include "ijkutil/ijklog.h"
+#include "ijksdl/ijksdl_log.h"
 #if 1
 /* Parse the SPS/PPS Metadata and convert it to annex b format */
 static int convert_sps_pps( const uint8_t *p_buf, size_t i_buf_size,

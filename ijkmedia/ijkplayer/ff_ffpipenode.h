@@ -1,6 +1,7 @@
 /*
  * ff_ffpipenode.h
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -25,18 +26,16 @@
 
 #include "ijksdl/ijksdl_mutex.h"
 
-typedef struct FFPlayer FFPlayer;
-
 typedef struct IJKFF_Pipenode_Opaque IJKFF_Pipenode_Opaque;
 typedef struct IJKFF_Pipenode IJKFF_Pipenode;
-typedef struct IJKFF_Pipenode {
+struct IJKFF_Pipenode {
     SDL_mutex *mutex;
     void *opaque;
 
     void (*func_destroy) (IJKFF_Pipenode *node);
     int  (*func_run_sync)(IJKFF_Pipenode *node);
     int  (*func_flush)   (IJKFF_Pipenode *node); // optional
-} IJKFF_Pipenode;
+};
 
 IJKFF_Pipenode *ffpipenode_alloc(size_t opaque_size);
 void ffpipenode_free(IJKFF_Pipenode *node);

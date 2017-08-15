@@ -2,6 +2,7 @@
  * ijksdl_aout_android_audiotrack.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -35,6 +36,7 @@
 #ifdef SDLTRACE
 #undef SDLTRACE
 #define SDLTRACE(...)
+//#define SDLTRACE ALOGE
 #endif
 
 static SDL_Class g_audiotrack_class = {
@@ -60,6 +62,11 @@ typedef struct SDL_Aout_Opaque {
 
     SDL_Thread *audio_tid;
     SDL_Thread _audio_tid;
+
+    int audio_session_id;
+
+    volatile float speed;
+    volatile bool speed_changed;
 } SDL_Aout_Opaque;
 
 static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
@@ -97,6 +104,10 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
             opaque->need_set_volume = 0;
             SDL_Android_AudioTrack_set_volume(env, atrack, opaque->left_volume, opaque->right_volume);
         }
+        if (opaque->speed_changed) {
+            opaque->speed_changed = 0;
+            SDL_Android_AudioTrack_setSpeed(env, atrack, opaque->speed);
+        }
         SDL_UnlockMutex(opaque->wakeup_mutex);
 
         audio_cblk(userdata, buffer, copy_size);
@@ -109,7 +120,7 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
             opaque->need_flush = 0;
             SDL_Android_AudioTrack_flush(env, atrack);
         } else {
-            int written = SDL_Android_AudioTrack_write_byte(env, atrack, buffer, copy_size);
+            int written = SDL_Android_AudioTrack_write(env, atrack, buffer, copy_size);
             if (written != copy_size) {
                 ALOGW("AudioTrack: not all data copied %d/%d", (int)written, (int)copy_size);
             }
@@ -168,6 +179,9 @@ static int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, const SDL_AudioSpec *d
         SDL_Android_AudioTrack_get_target_spec(opaque->atrack, obtained);
         SDLTRACE("audio target format fmt:0x%x, channel:0x%x", (int)obtained->format, (int)obtained->channels);
     }
+
+    opaque->audio_session_id = SDL_Android_AudioTrack_getAudioSessionId(env, opaque->atrack);
+    ALOGI("audio_session_id = %d\n", opaque->audio_session_id);
 
     opaque->pause_on = 1;
     opaque->abort_request = 0;
@@ -242,6 +256,13 @@ static void aout_close_audio(SDL_Aout *aout)
     opaque->audio_tid = NULL;
 }
 
+static int aout_get_audio_session_id(SDL_Aout *aout)
+{
+    SDL_Aout_Opaque *opaque = aout->opaque;
+
+    return opaque->audio_session_id;
+}
+
 static void aout_free_l(SDL_Aout *aout)
 {
     if (!aout)
@@ -262,6 +283,20 @@ static void aout_free_l(SDL_Aout *aout)
     SDL_Aout_FreeInternal(aout);
 }
 
+static void func_set_playback_rate(SDL_Aout *aout, float speed)
+{
+    if (!aout)
+        return;
+
+    SDL_Aout_Opaque *opaque = aout->opaque;
+    SDL_LockMutex(opaque->wakeup_mutex);
+    SDLTRACE("%s %f", __func__, (double)speed);
+    opaque->speed = speed;
+    opaque->speed_changed = 1;
+    SDL_CondSignal(opaque->wakeup_cond);
+    SDL_UnlockMutex(opaque->wakeup_mutex);
+}
+
 SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack()
 {
     SDL_Aout *aout = SDL_Aout_CreateInternal(sizeof(SDL_Aout_Opaque));
@@ -271,6 +306,7 @@ SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack()
     SDL_Aout_Opaque *opaque = aout->opaque;
     opaque->wakeup_cond  = SDL_CreateCond();
     opaque->wakeup_mutex = SDL_CreateMutex();
+    opaque->speed        = 1.0f;
 
     aout->opaque_class = &g_audiotrack_class;
     aout->free_l       = aout_free_l;
@@ -279,6 +315,8 @@ SDL_Aout *SDL_AoutAndroid_CreateForAudioTrack()
     aout->flush_audio  = aout_flush_audio;
     aout->set_volume   = aout_set_volume;
     aout->close_audio  = aout_close_audio;
+    aout->func_get_audio_session_id = aout_get_audio_session_id;
+    aout->func_set_playback_rate    = func_set_playback_rate;
 
     return aout;
 }

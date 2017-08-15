@@ -1,6 +1,7 @@
 /*
  * IJKMediaPlayback.m
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -22,12 +23,85 @@
 
 #import "IJKMediaPlayback.h"
 
-NSString *const IJKMediaPlaybackIsPreparedToPlayDidChangeNotification = @"IJKMediaPlaybackIsPreparedToPlayDidChangeNotification";
+NSString *const IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification = @"IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification";
 
-NSString *const IJKMoviePlayerLoadStateDidChangeNotification = @"IJKMoviePlayerLoadStateDidChangeNotification";
-NSString *const IJKMoviePlayerPlaybackDidFinishNotification = @"IJKMoviePlayerPlaybackDidFinishNotification";
-NSString *const IJKMoviePlayerPlaybackStateDidChangeNotification = @"IJKMoviePlayerPlaybackStateDidChangeNotification";
+NSString *const IJKMPMoviePlayerPlaybackDidFinishNotification = @"IJKMPMoviePlayerPlaybackDidFinishNotification";
+NSString *const IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey =
+    @"IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey";
+NSString *const IJKMPMoviePlayerPlaybackStateDidChangeNotification = @"IJKMPMoviePlayerPlaybackStateDidChangeNotification";
+NSString *const IJKMPMoviePlayerLoadStateDidChangeNotification = @"IJKMPMoviePlayerLoadStateDidChangeNotification";
 
-NSString *const IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification = @"IJKMoviePlayerIsAirPlayVideoActiveDidChangeNotification";
+NSString *const IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification = @"IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification";
 
-NSString *const IJKMoviePlayerVideoDecoderOpenNotification = @"IJKMoviePlayerVideoDecoderOpenNotification";
+NSString *const IJKMPMovieNaturalSizeAvailableNotification = @"IJKMPMovieNaturalSizeAvailableNotification";
+
+NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification = @"IJKMPMoviePlayerVideoDecoderOpenNotification";
+
+NSString *const IJKMPMoviePlayerFirstVideoFrameRenderedNotification = @"IJKMPMoviePlayerFirstVideoFrameRenderedNotification";
+NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification = @"IJKMPMoviePlayerFirstAudioFrameRenderedNotification";
+
+NSString *const IJKMPMoviePlayerAccurateSeekCompleteNotification = @"IJKMPMoviePlayerAccurateSeekCompleteNotification";
+
+NSString *const IJKMPMoviePlayerDidSeekCompleteNotification = @"IJKMPMoviePlayerDidSeekCompleteNotification";
+NSString *const IJKMPMoviePlayerDidSeekCompleteTargetKey = @"IJKMPMoviePlayerDidSeekCompleteTargetKey";
+NSString *const IJKMPMoviePlayerDidSeekCompleteErrorKey = @"IJKMPMoviePlayerDidSeekCompleteErrorKey";
+NSString *const IJKMPMoviePlayerDidAccurateSeekCompleteCurPos = @"IJKMPMoviePlayerDidAccurateSeekCompleteCurPos";
+
+@implementation IJKMediaUrlOpenData {
+    NSString *_url;
+    BOOL _handled;
+    BOOL _urlChanged;
+}
+
+- (id)initWithUrl:(NSString *)url
+            event:(IJKMediaEvent)event
+     segmentIndex:(int)segmentIndex
+     retryCounter:(int)retryCounter
+{
+    self = [super init];
+    if (self) {
+        self->_url          = url;
+        self->_event        = event;
+        self->_segmentIndex = segmentIndex;
+        self->_retryCounter = retryCounter;
+
+        self->_error        = 0;
+        self->_handled      = NO;
+        self->_urlChanged   = NO;
+    }
+    return self;
+}
+
+- (void)setHandled:(BOOL)handled
+{
+    _handled = handled;
+}
+
+- (BOOL)isHandled
+{
+    return _handled;
+}
+
+- (BOOL)isUrlChanged
+{
+    return _urlChanged;
+}
+
+- (NSString *)url
+{
+    return _url;
+}
+
+- (void)setUrl:(NSString *)url
+{
+    assert(url);
+
+    _handled = YES;
+
+    if (![self.url isEqualToString:url]) {
+        _urlChanged = YES;
+        _url = url;
+    }
+}
+
+@end

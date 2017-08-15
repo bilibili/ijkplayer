@@ -7,15 +7,9 @@ ios/ffmpeg-*
 ios/openssl-*
 extra
 .DS_Store
-android/ijkmediaplayer/.settings/*
-android/ijkmediaplayer-x86/.settings/*
-android/ijkmediaplayer-armv5/.settings/*
-android/ijkmediaplayer-arm64-v8a/.settings/*
-android/ijkmediawidget/.settings/*
-android/ijkmediademo/.settings/*
-android/contrib/appcompat/.settings/
-android/ijkmediademo/lint.xml
 ijkmedia/ijkyuv/
+ijkmedia/ijksoundtouch
+ijkprof/android-ndk-profiler/
 
 # built application files
 *.apk
@@ -32,6 +26,7 @@ bin/
 gen/
 libs/
 obj/
+ijkmedia/ijkplayer/ijkversion.h
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -40,3 +35,9 @@ local.properties
 .idea
 .gradle
 build/
+
+# Xcode
+xcuserdata
+xcshareddata
+*.xccheckout
+

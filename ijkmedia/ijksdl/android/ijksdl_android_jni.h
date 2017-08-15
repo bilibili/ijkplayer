@@ -2,6 +2,7 @@
  * ijksdl_android_jni.h
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -25,6 +26,8 @@
 #define IJKSDL_ANDROID__IJKSDL_ANDROID_JNI_H
 
 #include <jni.h>
+#include "j4a/j4a_base.h"
+#include "j4a/j4a_allclasses.h"
 
 #define IJK_API_1_BASE                      1   // 1.0
 #define IJK_API_2_BASE_1_1                  2   // 1.1
@@ -47,14 +50,16 @@
 #define IJK_API_19_KITKAT                   19  // 4.4
 #define IJK_API_20_KITKAT_WATCH             20  // 4.4W
 #define IJK_API_21_LOLLIPOP                 21  // 5.0
+#define IJK_API_22_LOLLIPOP_MR1             22  // 5.1
+#define IJK_API_23_M                        23  // 6.0
 
 JavaVM *SDL_JNI_GetJvm();
 
 jint    SDL_JNI_SetupThreadEnv(JNIEnv **p_env);
+void    SDL_JNI_DetachThreadEnv();
 
-void     SDL_JNI_ThrowException(JNIEnv *env, const char* msg);
-jboolean SDL_JNI_RethrowException(JNIEnv *env);
-jboolean SDL_JNI_CatchException(JNIEnv *env);
+int      SDL_JNI_ThrowException(JNIEnv *env, const char *exception, const char* msg);
+int      SDL_JNI_ThrowIllegalStateException(JNIEnv *env, const char* msg);
 
 jobject SDL_JNI_NewObjectAsGlobalRef(JNIEnv *env, jclass clazz, jmethodID methodID, ...);
 
@@ -66,12 +71,12 @@ int     SDL_Android_GetApiLevel();
 #define IJK_FIND_JAVA_CLASS(env__, var__, classsign__) \
     do { \
         jclass clazz = (*env__)->FindClass(env__, classsign__); \
-        if (SDL_JNI_CatchException(env) || !(clazz)) { \
+        if (J4A_ExceptionCheck__catchAll(env) || !(clazz)) { \
             ALOGE("FindClass failed: %s", classsign__); \
             return -1; \
         } \
         var__ = (*env__)->NewGlobalRef(env__, clazz); \
-        if (SDL_JNI_CatchException(env) || !(var__)) { \
+        if (J4A_ExceptionCheck__catchAll(env) || !(var__)) { \
             ALOGE("FindClass::NewGlobalRef failed: %s", classsign__); \
             (*env__)->DeleteLocalRef(env__, clazz); \
             return -1; \
@@ -79,40 +84,34 @@ int     SDL_Android_GetApiLevel();
         (*env__)->DeleteLocalRef(env__, clazz); \
     } while(0);
 
-#define IJK_FIND_JAVA_METHOD(env__, var__, clazz__, name__, sign__) \
+#define JNI_CHECK_GOTO(condition__, env__, exception__, msg__, label__) \
     do { \
-        (var__) = (*env__)->GetMethodID((env__), (clazz__), (name__), (sign__)); \
-        if (SDL_JNI_CatchException(env) || !(var__)) { \
-            ALOGE("GetMethodID failed: %s", name__); \
-            return -1; \
+        if (!(condition__)) { \
+            if (exception__) { \
+                SDL_JNI_ThrowException(env__, exception__, msg__); \
+            } \
+            goto label__; \
         } \
-    } while(0);
+    }while(0)
 
-#define IJK_FIND_JAVA_STATIC_METHOD(env__, var__, clazz__, name__, sign__) \
+#define JNI_CHECK_RET_VOID(condition__, env__, exception__, msg__) \
     do { \
-        (var__) = (*env__)->GetStaticMethodID((env__), (clazz__), (name__), (sign__)); \
-        if (SDL_JNI_CatchException(env) || !(var__)) { \
-            ALOGE("GetStaticMethodID failed: %s", name__); \
-            return -1; \
+        if (!(condition__)) { \
+            if (exception__) { \
+                SDL_JNI_ThrowException(env__, exception__, msg__); \
+            } \
+            return; \
         } \
-    } while(0);
+    }while(0)
 
-#define IJK_FIND_JAVA_FIELD(env__, var__, clazz__, name__, sign__) \
+#define JNI_CHECK_RET(condition__, env__, exception__, msg__, ret__) \
     do { \
-        (var__) = (*env__)->GetFieldID((env__), (clazz__), (name__), (sign__)); \
-        if (SDL_JNI_CatchException(env) || !(var__)) { \
-            ALOGE("GetFieldID failed: %s", name__); \
-            return -1; \
+        if (!(condition__)) { \
+            if (exception__) { \
+                SDL_JNI_ThrowException(env__, exception__, msg__); \
+            } \
+            return ret__; \
         } \
-    } while(0);
-
-#define IJK_FIND_JAVA_STATIC_FIELD(env__, var__, clazz__, name__, sign__) \
-    do { \
-        (var__) = (*env__)->GetStaticFieldID((env__), (clazz__), (name__), (sign__)); \
-        if (SDL_JNI_CatchException(env) || !(var__)) { \
-            ALOGE("GetStaticFieldID failed: %s", name__); \
-            return -1; \
-        } \
-    } while(0);
+    }while(0)
 
 #endif

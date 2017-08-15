@@ -1,10 +1,18 @@
-//
-//  IJKDemoLocalFolderViewController.m
-//  IJKMediaDemo
-//
-//  Created by Gdier on 5/27/15.
-//  Copyright (c) 2015 bilibili. All rights reserved.
-//
+/*
+ * Copyright (C) 2015 Gdier
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #import "IJKDemoLocalFolderViewController.h"
 #import "IJKMoviePlayerViewController.h"
@@ -22,6 +30,7 @@
 - (instancetype)initWithFolderPath:(NSString *)folderPath {
     self = [super init];
     if (self) {
+        folderPath = [folderPath stringByStandardizingPath];
         self.title = [folderPath lastPathComponent];
         
         _folderPath = folderPath;
@@ -37,6 +46,8 @@
     NSError *error = nil;
     BOOL isDirectory = NO;
     NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:_folderPath error:&error];
+
+    [_subpaths addObject:@".."];
 
     for (NSString *fileName in files) {
         NSString *fullFileName = [_folderPath stringByAppendingPathComponent:fileName];
@@ -112,6 +123,8 @@
         } break;
         case 1: {
             NSString *fileName = [_folderPath stringByAppendingPathComponent:_files[indexPath.row]];
+
+            fileName = [fileName stringByStandardizingPath];
             
             [IJKVideoViewController presentFromViewController:self withTitle:[NSString stringWithFormat:@"File: %@", fileName] URL:[NSURL fileURLWithPath:fileName] completion:^{
             }];

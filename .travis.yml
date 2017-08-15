@@ -1,0 +1,13 @@
+language: android
+android:
+  components:
+    - platform-tools
+    - tools
+    - build-tools-23.0.3
+    - android-23
+    - extra-android-support
+    - extra-android-m2repository
+
+script:
+    - cd android/ijkplayer
+    - ./gradlew assemble

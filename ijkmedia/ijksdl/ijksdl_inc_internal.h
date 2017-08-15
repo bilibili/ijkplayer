@@ -1,6 +1,7 @@
 /*
  * ijksdl_inc_internal.h
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -25,10 +26,10 @@
 
 #include <stdint.h>
 
-#include "ijkutil/ijkutil.h"
-
+#include "ijksdl_log.h"
+#include "ijksdl_misc.h"
 #include "ijksdl_stdinc.h"
 
-#define SDLTRACE ALOGW
+#define SDLTRACE ALOGD
 
 #endif

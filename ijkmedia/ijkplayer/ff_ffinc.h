@@ -2,6 +2,7 @@
  * ff_ffinc.h
  *      ffmpeg headers
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -31,24 +32,21 @@
 #include "libavformat/avformat.h"
 #include "libavcodec/avfft.h"
 #include "libswscale/swscale.h"
+#include "libavutil/application.h"
 #include "libavutil/base64.h"
 #include "libavutil/error.h"
 #include "libavutil/opt.h"
+#include "libavutil/version.h"
 #include "libswresample/swresample.h"
 
 #include "ijksdl/ijksdl.h"
-#include "ijkutil/ijkutil.h"
 
-typedef int (*ijk_format_control_message)(void *opaque, int type, void *data, size_t data_size);
-
-// for compatible
-#ifndef AV_PKT_FLAG_MP4_PF
-#define AV_PKT_FLAG_MP4_PF 0x4000
-#endif
+typedef int (*ijk_inject_callback)(void *opaque, int type, void *data, size_t data_size);
 
 #define FFP_OPT_CATEGORY_FORMAT 1
 #define FFP_OPT_CATEGORY_CODEC  2
 #define FFP_OPT_CATEGORY_SWS    3
 #define FFP_OPT_CATEGORY_PLAYER 4
+#define FFP_OPT_CATEGORY_SWR    5
 
 #endif

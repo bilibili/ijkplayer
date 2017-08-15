@@ -2,6 +2,7 @@
  * ijksdl.h
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -28,6 +29,8 @@
 #include "ijksdl_aout.h"
 #include "ijksdl_class.h"
 #include "ijksdl_error.h"
+#include "ijksdl_log.h"
+#include "ijksdl_misc.h"
 #include "ijksdl_mutex.h"
 #include "ijksdl_thread.h"
 #include "ijksdl_timer.h"

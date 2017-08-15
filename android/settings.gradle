@@ -1,6 +1,0 @@
-include ':ijkmediaplayer'
-include ':ijkmediaplayer-x86'
-// include ':ijkmediaplayer-arm64-v8a'
-include ':ijkmediademo'
-// include ':ijkmediaplayer-armv5'
-include ':ijkmediawidget'

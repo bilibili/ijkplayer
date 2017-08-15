@@ -1,0 +1,83 @@
+/*
+ * Copyright 2015 Zhang Rui <bbcallen@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+group = GROUP
+version = VERSION_NAME
+
+bintray {
+    user = project.hasProperty('BINTRAY_USER') ? BINTRAY_USER : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('BINTRAY_APIKEY') ? BINTRAY_APIKEY : System.getenv('BINTRAY_APIKEY')
+
+    configurations = ['archives']
+
+    dryRun = false
+    publish = true
+
+    pkg {
+        repo = 'maven'
+        name = POM_NAME
+        userOrg = POM_USER_ORG
+        desc = POM_DESCRIPTION
+        websiteUrl = POM_URL
+        vcsUrl = POM_SCM_URL
+        licenses = [POM_LICENSE_NAME]
+        labels = ['FFmpeg', 'Android', 'player']
+        publicDownloadNumbers = true
+        version {
+            name = VERSION_NAME
+            gpg {
+                sign = true
+                passphrase = project.hasProperty('GPG_PASSWORD') ? GPG_PASSWORD : System.getenv('GPG_PASSWORD')
+            }
+        }
+    }
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name POM_NAME
+            packaging POM_PACKAGING
+            description POM_DESCRIPTION
+            url POM_URL
+
+            licenses {
+                license {
+                    name POM_LICENSE_NAME
+                    url POM_LICENSE_URL
+                    distribution POM_LICENSE_DIST
+                }
+            }
+
+            scm {
+                url POM_SCM_URL
+                connection POM_SCM_CONNECTION
+                developerConnection POM_SCM_DEV_CONNECTION
+            }
+
+            developers {
+                developer {
+                    id POM_DEVELOPER_ID
+                    name POM_DEVELOPER_NAME
+                    email POM_DEVELOPER_EMAIL
+                }
+            }
+        }
+    }
+}

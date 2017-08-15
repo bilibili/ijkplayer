@@ -2,6 +2,7 @@
  * ijksdl_android.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -23,13 +24,9 @@
 
 #include "ijksdl_android_jni.h"
 
-#include <sys/system_properties.h>
+#include <unistd.h>
+#include "j4a/class/android/os/Build.h"
 #include "ijksdl_inc_internal_android.h"
-#include "android_arraylist.h"
-#include "android_audiotrack.h"
-#include "android_build.h"
-#include "android_bundle.h"
-#include "android_bytebuffer.h"
 #include "ijksdl_codec_android_mediaformat_java.h"
 #include "ijksdl_codec_android_mediacodec_java.h"
 
@@ -47,6 +44,7 @@ static void SDL_JNI_ThreadDestroyed(void* value)
 {
     JNIEnv *env = (JNIEnv*) value;
     if (env != NULL) {
+        ALOGE("%s: [%d] didn't call SDL_JNI_DetachThreadEnv() explicity\n", __func__, (int)gettid());
         (*g_jvm)->DetachCurrentThread(g_jvm);
         pthread_setspecific(g_thread_key, NULL);
     }
@@ -82,30 +80,60 @@ jint SDL_JNI_SetupThreadEnv(JNIEnv **p_env)
     return -1;
 }
 
-void SDL_JNI_ThrowException(JNIEnv *env, const char* msg)
+void SDL_JNI_DetachThreadEnv()
 {
-    jniThrowException(env, "java/lang/IllegalStateException", msg);
+    JavaVM *jvm = g_jvm;
+
+    ALOGI("%s: [%d]\n", __func__, (int)gettid());
+
+    pthread_once(&g_key_once, make_thread_key);
+
+    JNIEnv *env = pthread_getspecific(g_thread_key);
+    if (!env)
+        return;
+    pthread_setspecific(g_thread_key, NULL);
+
+    if ((*jvm)->DetachCurrentThread(jvm) == JNI_OK)
+        return;
+
+    return;
 }
 
-jboolean SDL_JNI_RethrowException(JNIEnv *env)
+int SDL_JNI_ThrowException(JNIEnv* env, const char* className, const char* msg)
 {
     if ((*env)->ExceptionCheck(env)) {
-        (*env)->ExceptionDescribe(env);
-        return JNI_TRUE;
-    }
-
-    return JNI_FALSE;
-}
-
-jboolean SDL_JNI_CatchException(JNIEnv *env)
-{
-    if ((*env)->ExceptionCheck(env)) {
-        (*env)->ExceptionDescribe(env);
+        jthrowable exception = (*env)->ExceptionOccurred(env);
         (*env)->ExceptionClear(env);
-        return JNI_TRUE;
+
+        if (exception != NULL) {
+            ALOGW("Discarding pending exception (%s) to throw", className);
+            (*env)->DeleteLocalRef(env, exception);
+        }
     }
 
-    return JNI_FALSE;
+    jclass exceptionClass = (*env)->FindClass(env, className);
+    if (exceptionClass == NULL) {
+        ALOGE("Unable to find exception class %s", className);
+        /* ClassNotFoundException now pending */
+        goto fail;
+    }
+
+    if ((*env)->ThrowNew(env, exceptionClass, msg) != JNI_OK) {
+        ALOGE("Failed throwing '%s' '%s'", className, msg);
+        /* an exception, most likely OOM, will now be pending */
+        goto fail;
+    }
+
+    return 0;
+fail:
+    if (exceptionClass)
+        (*env)->DeleteLocalRef(env, exceptionClass);
+    return -1;
+}
+
+int SDL_JNI_ThrowIllegalStateException(JNIEnv *env, const char* msg)
+{
+    return SDL_JNI_ThrowException(env, "java/lang/IllegalStateException", msg);
 }
 
 jobject SDL_JNI_NewObjectAsGlobalRef(JNIEnv *env, jclass clazz, jmethodID methodID, ...)
@@ -115,7 +143,7 @@ jobject SDL_JNI_NewObjectAsGlobalRef(JNIEnv *env, jclass clazz, jmethodID method
 
     jobject global_object = NULL;
     jobject local_object = (*env)->NewObjectV(env, clazz, methodID, args);
-    if (!SDL_JNI_RethrowException(env) && local_object) {
+    if (!J4A_ExceptionCheck__throwAny(env) && local_object) {
         global_object = (*env)->NewGlobalRef(env, local_object);
         SDL_JNI_DeleteLocalRefP(env, &local_object);
     }
@@ -155,7 +183,8 @@ int SDL_Android_GetApiLevel()
         return 0;
     }
 
-    SDK_INT = ASDK_Build_VERSION__SDK_INT(env);
+    SDK_INT = J4AC_android_os_Build__VERSION__SDK_INT__get__catchAll(env);
+    ALOGI("API-Level: %d\n", SDK_INT);
     return SDK_INT;
 #if 0
     char value[PROP_VALUE_MAX];
@@ -177,21 +206,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
         return -1;
     }
 
-    retval = ASDK_ArrayList__loadClass(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-    retval = ASDK_Build__loadClass(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-    retval = ASDK_Bundle__loadClass(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-
-    retval = SDL_Android_AudioTrack_global_init(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-
-    retval = ASDK_ByteBuffer__loadClass(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-    retval = SDL_AMediaFormatJava__loadClass(env);
-    JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
-    retval = SDL_AMediaCodecJava__loadClass(env);
+    retval = J4A_LoadAll__catchAll(env);
     JNI_CHECK_RET(retval == 0, env, NULL, NULL, -1);
 
     return JNI_VERSION_1_4;

@@ -1,6 +1,7 @@
 /*
  * ffpipeline_android.c
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -23,10 +24,10 @@
 #include "ffpipeline_android.h"
 #include <jni.h>
 #include "ffpipenode_android_mediacodec_vdec.h"
-#include "ffpipenode_android_mediacodec_vout.h"
 #include "../../pipeline/ffpipenode_ffplay_vdec.h"
 #include "../../ff_ffplay.h"
 #include "ijksdl/android/ijksdl_android_jni.h"
+#include "ijksdl/android/ijksdl_android.h"
 
 static SDL_Class g_pipeline_class = {
     .name = "ffpipeline_android_media",
@@ -40,9 +41,11 @@ typedef struct IJKFF_Pipeline_Opaque {
 
     bool         (*mediacodec_select_callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc);
     void          *mediacodec_select_callback_opaque;
-    bool           mediacodec_enabled;
 
     SDL_Vout      *weak_vout;
+
+    float          left_volume;
+    float          right_volume;
 } IJKFF_Pipeline_Opaque;
 
 static void func_destroy(IJKFF_Pipeline *pipeline)
@@ -67,18 +70,28 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
     IJKFF_Pipenode        *node = NULL;
 
-    if (opaque->mediacodec_enabled)
+    if (ffp->mediacodec_all_videos || ffp->mediacodec_avc || ffp->mediacodec_hevc || ffp->mediacodec_mpeg2)
         node = ffpipenode_create_video_decoder_from_android_mediacodec(ffp, pipeline, opaque->weak_vout);
-    if (!node)
+    if (!node) {
         node = ffpipenode_create_video_decoder_from_ffplay(ffp);
+    }
 
     return node;
 }
 
-static IJKFF_Pipenode *func_open_video_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
+static SDL_Aout *func_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
 {
-    return ffpipenode_create_video_output_from_android_mediacodec(ffp);
+    SDL_Aout *aout = NULL;
+    if (ffp->opensles) {
+        aout = SDL_AoutAndroid_CreateForOpenSLES();
+    } else {
+        aout = SDL_AoutAndroid_CreateForAudioTrack();
+    }
+    if (aout)
+        SDL_AoutSetStereoVolume(aout, pipeline->opaque->left_volume, pipeline->opaque->right_volume);
+    return aout;
 }
+
 
 inline static bool check_ffpipeline(IJKFF_Pipeline* pipeline, const char *func_name)
 {
@@ -105,6 +118,8 @@ IJKFF_Pipeline *ffpipeline_create_from_android(FFPlayer *ffp)
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
     opaque->ffp                   = ffp;
     opaque->surface_mutex         = SDL_CreateMutex();
+    opaque->left_volume           = 1.0f;
+    opaque->right_volume          = 1.0f;
     if (!opaque->surface_mutex) {
         ALOGE("ffpipeline-android:create SDL_CreateMutex failed\n");
         goto fail;
@@ -112,7 +127,7 @@ IJKFF_Pipeline *ffpipeline_create_from_android(FFPlayer *ffp)
 
     pipeline->func_destroy            = func_destroy;
     pipeline->func_open_video_decoder = func_open_video_decoder;
-    pipeline->func_open_video_output  = func_open_video_output;
+    pipeline->func_open_audio_output  = func_open_audio_output;
 
     return pipeline;
 fail:
@@ -120,7 +135,19 @@ fail:
     return NULL;
 }
 
-jobject ffpipeline_get_surface_as_global_ref(JNIEnv *env, IJKFF_Pipeline* pipeline)
+int ffpipeline_lock_surface(IJKFF_Pipeline* pipeline)
+{
+    IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
+    return SDL_LockMutex(opaque->surface_mutex);
+}
+
+int ffpipeline_unlock_surface(IJKFF_Pipeline* pipeline)
+{
+    IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
+    return SDL_UnlockMutex(opaque->surface_mutex);
+}
+
+jobject ffpipeline_get_surface_as_global_ref_l(JNIEnv *env, IJKFF_Pipeline* pipeline)
 {
     if (!check_ffpipeline(pipeline, __func__))
         return NULL;
@@ -130,14 +157,18 @@ jobject ffpipeline_get_surface_as_global_ref(JNIEnv *env, IJKFF_Pipeline* pipeli
         return NULL;
 
     jobject global_ref = NULL;
-    SDL_LockMutex(opaque->surface_mutex);
-    {
-        if (opaque->jsurface)
-            global_ref = (*env)->NewGlobalRef(env, opaque->jsurface);
-    }
-    SDL_UnlockMutex(opaque->surface_mutex);
+    if (opaque->jsurface)
+        global_ref = (*env)->NewGlobalRef(env, opaque->jsurface);
 
     return global_ref;
+}
+
+jobject ffpipeline_get_surface_as_global_ref(JNIEnv *env, IJKFF_Pipeline* pipeline)
+{
+    ffpipeline_lock_surface(pipeline);
+    jobject new_surface = ffpipeline_get_surface_as_global_ref_l(env, pipeline);
+    ffpipeline_unlock_surface(pipeline);
+    return new_surface;
 }
 
 void ffpipeline_set_vout(IJKFF_Pipeline* pipeline, SDL_Vout *vout)
@@ -159,7 +190,7 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
     if (!opaque->surface_mutex)
         return -1;
 
-    SDL_LockMutex(opaque->surface_mutex);
+    ffpipeline_lock_surface(pipeline);
     {
         jobject prev_surface = opaque->jsurface;
 
@@ -167,6 +198,7 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
             (surface && prev_surface && (*env)->IsSameObject(env, surface, prev_surface))) {
             // same object, no need to reconfigure
         } else {
+            SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, NULL);
             if (surface) {
                 opaque->jsurface = (*env)->NewGlobalRef(env, surface);
             } else {
@@ -174,15 +206,17 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
             }
             opaque->is_surface_need_reconfigure = true;
 
-            SDL_JNI_DeleteGlobalRefP(env, &prev_surface);
+            if (prev_surface != NULL) {
+                SDL_JNI_DeleteGlobalRefP(env, &prev_surface);
+            }
         }
     }
-    SDL_UnlockMutex(opaque->surface_mutex);
+    ffpipeline_unlock_surface(pipeline);
 
     return 0;
 }
 
-bool ffpipeline_is_surface_need_reconfigure(IJKFF_Pipeline* pipeline)
+bool ffpipeline_is_surface_need_reconfigure_l(IJKFF_Pipeline* pipeline)
 {
     if (!check_ffpipeline(pipeline, __func__))
         return false;
@@ -190,7 +224,7 @@ bool ffpipeline_is_surface_need_reconfigure(IJKFF_Pipeline* pipeline)
     return pipeline->opaque->is_surface_need_reconfigure;
 }
 
-void ffpipeline_set_surface_need_reconfigure(IJKFF_Pipeline* pipeline, bool need_reconfigure)
+void ffpipeline_set_surface_need_reconfigure_l(IJKFF_Pipeline* pipeline, bool need_reconfigure)
 {
     ALOGD("%s(%d)\n", __func__, (int)need_reconfigure);
     if (!check_ffpipeline(pipeline, __func__))
@@ -209,16 +243,7 @@ void ffpipeline_set_mediacodec_select_callback(IJKFF_Pipeline* pipeline, bool (*
     pipeline->opaque->mediacodec_select_callback_opaque = opaque;
 }
 
-void ffpipeline_set_mediacodec_enabled(IJKFF_Pipeline* pipeline, bool enabled)
-{
-    ALOGD("%s\n", __func__);
-    if (!check_ffpipeline(pipeline, __func__))
-        return;
-
-    pipeline->opaque->mediacodec_enabled = enabled;
-}
-
-bool ffpipeline_select_mediacodec(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo_context *mcc)
+bool ffpipeline_select_mediacodec_l(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo_context *mcc)
 {
     ALOGD("%s\n", __func__);
     if (!check_ffpipeline(pipeline, __func__))
@@ -228,4 +253,19 @@ bool ffpipeline_select_mediacodec(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo
         return false;
 
     return pipeline->opaque->mediacodec_select_callback(pipeline->opaque->mediacodec_select_callback_opaque, mcc);
+}
+
+void ffpipeline_set_volume(IJKFF_Pipeline* pipeline, float left, float right)
+{
+    ALOGD("%s\n", __func__);
+    if (!check_ffpipeline(pipeline, __func__))
+        return;
+
+    IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
+    opaque->left_volume  = left;
+    opaque->right_volume = right;
+
+    if (opaque->ffp && opaque->ffp->aout) {
+        SDL_AoutSetStereoVolume(opaque->ffp->aout, left, right);
+    }
 }

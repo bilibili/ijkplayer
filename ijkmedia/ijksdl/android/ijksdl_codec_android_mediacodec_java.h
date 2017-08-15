@@ -2,6 +2,7 @@
  * ijksdl_codec_android_mediacodec_java.h
  *****************************************************************************
  *
+ * Copyright (c) 2014 Bilibili
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -28,10 +29,7 @@
 
 typedef struct ASDK_MediaCodec ASDK_MediaCodec;
 
-int SDL_AMediaCodecJava__loadClass(JNIEnv *env);
-
 SDL_AMediaCodec  *SDL_AMediaCodecJava_createByCodecName(JNIEnv *env, const char *codec_name);
-SDL_AMediaCodec  *SDL_AMediaCodecJava_createDecoderByType(JNIEnv *env, const char *mime_type);
 jobject           SDL_AMediaCodecJava_getObject(JNIEnv *env, const SDL_AMediaCodec *thiz);
 
 #endif

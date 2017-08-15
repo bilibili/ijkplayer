@@ -1,6 +1,7 @@
 /*
  * IJKFFMoviePlayerDef.m
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -60,7 +61,7 @@
 {
     if (!msg)
         return;
-
+    msg_free_res(&msg->_msg);
     @synchronized(self) {
         if ([_array count] <= 10)
             [_array addObject:msg];

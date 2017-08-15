@@ -2,6 +2,7 @@
  * ff_ffmsg_queue.h
  *      based on PacketQueue in ffplay.c
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -33,6 +34,8 @@ typedef struct AVMessage {
     int what;
     int arg1;
     int arg2;
+    void *obj;
+    void (*free_l)(void *obj);
     struct AVMessage *next;
 } AVMessage;
 
@@ -48,7 +51,15 @@ typedef struct MessageQueue {
     int alloc_count;
 } MessageQueue;
 
-// TODO: 9 msg pool
+inline static void msg_free_res(AVMessage *msg)
+{
+    if (!msg || !msg->obj)
+        return;
+    assert(msg->free_l);
+    msg->free_l(msg->obj);
+    msg->obj = NULL;
+}
+
 inline static int msg_queue_put_private(MessageQueue *q, AVMessage *msg)
 {
     AVMessage *msg1;
@@ -70,13 +81,12 @@ inline static int msg_queue_put_private(MessageQueue *q, AVMessage *msg)
 #ifdef FFP_SHOW_MSG_RECYCLE
     int total_count = q->recycle_count + q->alloc_count;
     if (!(total_count % 10)) {
-        ALOGE("msg-recycle \t%d + \t%d = \t%d\n", q->recycle_count, q->alloc_count, total_count);
+        av_log(NULL, AV_LOG_DEBUG, "msg-recycle \t%d + \t%d = \t%d\n", q->recycle_count, q->alloc_count, total_count);
     }
 #endif
 #endif
     if (!msg1)
         return -1;
-    // ALOGE("msg-recycle %d, %d, %d\n", msg->what, msg->arg1, msg->arg2);
 
     *msg1 = *msg;
     msg1->next = NULL;
@@ -134,6 +144,24 @@ inline static void msg_queue_put_simple3(MessageQueue *q, int what, int arg1, in
     msg_queue_put(q, &msg);
 }
 
+inline static void msg_obj_free_l(void *obj)
+{
+    av_free(obj);
+}
+
+inline static void msg_queue_put_simple4(MessageQueue *q, int what, int arg1, int arg2, void *obj, int obj_len)
+{
+    AVMessage msg;
+    msg_init_msg(&msg);
+    msg.what = what;
+    msg.arg1 = arg1;
+    msg.arg2 = arg2;
+    msg.obj = av_malloc(obj_len);
+    memcpy(msg.obj, obj, obj_len);
+    msg.free_l = msg_obj_free_l;
+    msg_queue_put(q, &msg);
+}
+
 inline static void msg_queue_init(MessageQueue *q)
 {
     memset(q, 0, sizeof(MessageQueue));
@@ -171,6 +199,7 @@ inline static void msg_queue_destroy(MessageQueue *q)
         AVMessage *msg = q->recycle_msg;
         if (msg)
             q->recycle_msg = msg->next;
+        msg_free_res(msg);
         av_freep(&msg);
     }
     SDL_UnlockMutex(q->mutex);
@@ -223,6 +252,7 @@ inline static int msg_queue_get(MessageQueue *q, AVMessage *msg, int block)
                 q->last_msg = NULL;
             q->nb_messages--;
             *msg = *msg1;
+            msg1->obj = NULL;
 #ifdef FFP_MERGE
             av_free(msg1);
 #else
@@ -244,8 +274,10 @@ inline static int msg_queue_get(MessageQueue *q, AVMessage *msg, int block)
 
 inline static void msg_queue_remove(MessageQueue *q, int what)
 {
-    AVMessage **p_msg, *msg, *last_msg = q->first_msg;
+    AVMessage **p_msg, *msg, *last_msg;
     SDL_LockMutex(q->mutex);
+
+    last_msg = q->first_msg;
 
     if (!q->abort_request && q->first_msg) {
         p_msg = &q->first_msg;
@@ -253,17 +285,16 @@ inline static void msg_queue_remove(MessageQueue *q, int what)
             msg = *p_msg;
 
             if (msg->what == what) {
-                // ALOGE("remove msg %d", msg->what);
                 *p_msg = msg->next;
-                p_msg = &msg->next;
 #ifdef FFP_MERGE
                 av_free(msg);
 #else
+                msg_free_res(msg);
                 msg->next = q->recycle_msg;
                 q->recycle_msg = msg;
 #endif
+                q->nb_messages--;
             } else {
-                // ALOGE("retain msg %d", msg->what);
                 last_msg = msg;
                 p_msg = &msg->next;
             }
