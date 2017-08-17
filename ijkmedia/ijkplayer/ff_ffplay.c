@@ -379,14 +379,40 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
     AVFrame *dst_frame = NULL;
     AVPacket avpkt;
     int got_packet = 0;
-    int dst_width = img_info->width;
-    int dst_height = img_info->height;
+    int dst_width = 0;
+    int dst_height = 0;
     int bytes = 0;
     void *buffer = NULL;
     char file_path[1024] = {0};
     char file_name[16] = {0};
     int fd = -1;
     int ret = 0;
+    int tmp = 0;
+    float origin_dar = 0;
+    float dar = 0;
+
+    if (!height || !width || !img_info->width || !img_info->height) {
+        return -1;
+    }
+
+    origin_dar = (float) width / height;
+    dar = (float) img_info->width / img_info->height;
+
+    if ((int)(origin_dar * 1000) != (int)(dar * 1000)) {
+        if (width < height) {
+            tmp = img_info->width;
+            img_info->width  = img_info->height;
+            img_info->height = tmp;
+        }
+
+        dar = (float) img_info->width / img_info->height;
+        if ((int)(origin_dar * 1000) != (int)(dar * 1000)) {
+            img_info->width = origin_dar * img_info->height;
+        }
+    }
+
+    dst_width = img_info->width;
+    dst_height = img_info->height;
 
     av_init_packet(&avpkt);
     avpkt.size = 0;
