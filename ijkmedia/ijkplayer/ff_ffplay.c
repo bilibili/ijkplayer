@@ -3847,7 +3847,7 @@ static int ijkio_app_func_event(IjkIOApplicationContext *h, int message ,void *d
         ffp->stat.logical_file_size       = statistic->logical_file_size;
     }
 
-    return inject_callback(ffp->inject_opaque, IJKIOAPP_EVENT_CACHE_STATISTIC, data, size);
+    return 0;
 }
 
 void ffp_set_frame_at_time(FFPlayer *ffp, const char *path, int64_t start_time, int64_t end_time, int num, int definition) {

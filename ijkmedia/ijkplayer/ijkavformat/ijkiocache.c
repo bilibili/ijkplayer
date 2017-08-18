@@ -355,6 +355,8 @@ static int ijkio_cache_io_open(IjkURLContext *h, const char *url, int flags, Ijk
             c->tree_info->file_size = c->logical_size;
         }
     }
+
+    call_inject_statistic(h);
     return ret;
 }
 
@@ -669,6 +671,7 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
             ijk_av_dict_copy(&c->inner_options, *options, 0);
             strcpy(c->inner_url, url);
             c->inner_flags = flags;
+            call_inject_statistic(h);
         }
     }
 
@@ -977,6 +980,7 @@ static int ijkio_cache_read(IjkURLContext *h, unsigned char *buf, int size) {
         if (ret >= 0) {
             c->read_logical_pos += ret;
         }
+        call_inject_statistic(h);
         return ret;
     }
 
