@@ -79,14 +79,14 @@
 
 #define BUFFERING_CHECK_PER_BYTES               (512)
 #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
-#define FAST_BUFFERING_CHECK_PER_MILLISECONDS   (100)
+#define FAST_BUFFERING_CHECK_PER_MILLISECONDS   (50)
 
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #ifdef FFP_MERGE
 #define MIN_FRAMES 25
 #endif
 #define DEFAULT_MIN_FRAMES  50000
-#define MIN_MIN_FRAMES      5
+#define MIN_MIN_FRAMES      2
 #define MAX_MIN_FRAMES      50000
 #define MIN_FRAMES (ffp->dcc.min_frames)
 #define EXTERNAL_CLOCK_MIN_FRAMES 2
