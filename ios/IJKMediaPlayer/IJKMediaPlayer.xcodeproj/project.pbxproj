@@ -1232,6 +1232,7 @@
 				A8286EDF1EBC3D4A00E86322 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E654EAA11B6B27E600B0F2D0 /* Build configuration list for PBXNativeTarget "IJKMediaFramework" */ = {
 			isa = XCConfigurationList;
