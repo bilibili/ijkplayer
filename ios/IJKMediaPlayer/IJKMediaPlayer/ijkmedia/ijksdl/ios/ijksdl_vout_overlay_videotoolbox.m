@@ -186,6 +186,7 @@ SDL_VoutOverlay *SDL_VoutVideoToolBox_CreateOverlay(int width, int height, SDL_V
 
 SDL_VoutOverlay *SDL_VoutVideoToolBox_DuplicateOverlay(SDL_VoutOverlay *display)
 {
+
     SDL_VoutOverlay *overlay = SDL_VoutOverlay_CreateInternal(sizeof(SDL_VoutOverlay_Opaque));
     if (!overlay) {
         ALOGE("overlay allocation failed");
@@ -216,8 +217,6 @@ SDL_VoutOverlay *SDL_VoutVideoToolBox_DuplicateOverlay(SDL_VoutOverlay *display)
 
 void SDL_VoutVideoToolBox_UnrefOverlay(SDL_VoutOverlay *display)
 {
-    SDL_DestroyMutex(display->opaque->mutex);
-    CVPixelBufferRelease(display->opaque->pixel_buffer);
-    free(display);
+    SDL_VoutFreeYUVOverlay(display);
 }
 
