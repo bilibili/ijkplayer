@@ -3367,12 +3367,7 @@ static int read_thread(void *arg)
                     packet_queue_put_nullpacket(&is->subtitleq, is->subtitle_stream);
                 is->eof = 1;
                 ffp->error = pb_error;
-                av_log(ffp, AV_LOG_ERROR, "av_read_frame error: %x(%c,%c,%c,%c): %s\n", ffp->error,
-                      (char) (0xff & (ffp->error >> 24)),
-                      (char) (0xff & (ffp->error >> 16)),
-                      (char) (0xff & (ffp->error >> 8)),
-                      (char) (0xff & (ffp->error)),
-                      ffp_get_error_string(ffp->error));
+                av_log(ffp, AV_LOG_ERROR, "av_read_frame error: %s\n", ffp_get_error_string(ffp->error));
                 // break;
             } else {
                 ffp->error = 0;
