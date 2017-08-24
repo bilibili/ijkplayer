@@ -376,6 +376,7 @@ static void decoder_init(Decoder *d, AVCodecContext *avctx, PacketQueue *queue, 
 
 static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pts, int width, int height) {
     GetImgInfo *img_info = ffp->get_img_info;
+    VideoState *is = ffp->is;
     AVFrame *dst_frame = NULL;
     AVPacket avpkt;
     int got_packet = 0;
@@ -390,25 +391,39 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
     int tmp = 0;
     float origin_dar = 0;
     float dar = 0;
+    AVRational display_aspect_ratio;
 
     if (!height || !width || !img_info->width || !img_info->height) {
-        return -1;
+        ret = -1;
+        return ret;
     }
 
-    origin_dar = (float) width / height;
     dar = (float) img_info->width / img_info->height;
 
-    if ((int)(origin_dar * 1000) != (int)(dar * 1000)) {
-        if (width < height) {
-            tmp = img_info->width;
-            img_info->width  = img_info->height;
+    if (is->viddec.avctx) {
+        av_reduce(&display_aspect_ratio.num, &display_aspect_ratio.den,
+            is->viddec.avctx->width * (int64_t)is->viddec.avctx->sample_aspect_ratio.num,
+            is->viddec.avctx->height * (int64_t)is->viddec.avctx->sample_aspect_ratio.den,
+            1024 * 1024);
+
+        if (!display_aspect_ratio.num || !display_aspect_ratio.den) {
+            origin_dar = (float) width / height;
+        } else {
+            origin_dar = (float) display_aspect_ratio.num / display_aspect_ratio.den;
+        }
+    } else {
+        ret = -1;
+        return ret;
+    }
+
+    if ((int)(origin_dar * 100) != (int)(dar * 100)) {
+        tmp = img_info->width / origin_dar;
+        if (tmp > img_info->height) {
+            img_info->width = img_info->height * origin_dar;
+        } else {
             img_info->height = tmp;
         }
-
-        dar = (float) img_info->width / img_info->height;
-        if ((int)(origin_dar * 1000) != (int)(dar * 1000)) {
-            img_info->width = origin_dar * img_info->height;
-        }
+        av_log(NULL, AV_LOG_INFO, "%s img_info->width = %d, img_info->height = %d\n", __func__, img_info->width, img_info->height);
     }
 
     dst_width = img_info->width;
@@ -432,6 +447,7 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
 
         if (!img_info->frame_img_convert_ctx) {
             ret = -1;
+            av_log(NULL, AV_LOG_ERROR, "%s sws_getContext failed\n", __func__);
             goto fail0;
         }
     }
@@ -440,11 +456,13 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
         AVCodec *image_codec = avcodec_find_encoder(AV_CODEC_ID_PNG);
         if (!image_codec) {
             ret = -1;
+            av_log(NULL, AV_LOG_ERROR, "%s avcodec_find_encoder failed\n", __func__);
             goto fail0;
         }
 	    img_info->frame_img_codec_ctx = avcodec_alloc_context3(image_codec);
         if (!img_info->frame_img_codec_ctx) {
             ret = -1;
+            av_log(NULL, AV_LOG_ERROR, "%s avcodec_alloc_context3 failed\n", __func__);
             goto fail0;
         }
         img_info->frame_img_codec_ctx->bit_rate = ffp->stat.bit_rate;
@@ -460,12 +478,14 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
     dst_frame = av_frame_alloc();
     if (!dst_frame) {
         ret = -1;
+        av_log(NULL, AV_LOG_ERROR, "%s av_frame_alloc failed\n", __func__);
         goto fail0;
     }
     bytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, dst_width, dst_height, 1);
 	buffer = (uint8_t *) av_malloc(bytes * sizeof(uint8_t));
     if (!buffer) {
         ret = -1;
+        av_log(NULL, AV_LOG_ERROR, "%s av_image_get_buffer_size failed\n", __func__);
         goto fail1;
     }
 
@@ -483,6 +503,7 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
 
     if (ret < 0) {
         ret = -1;
+        av_log(NULL, AV_LOG_ERROR, "%s av_image_fill_arrays failed\n", __func__);
         goto fail2;
     }
 
@@ -496,6 +517,7 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
 
     if (ret <= 0) {
         ret = -1;
+        av_log(NULL, AV_LOG_ERROR, "%s sws_scale failed\n", __func__);
         goto fail2;
     }
 
@@ -511,6 +533,7 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
         fd = open(file_path, O_RDWR | O_TRUNC | O_CREAT, 0600);
         if (fd < 0) {
             ret = -1;
+            av_log(NULL, AV_LOG_ERROR, "%s open path = %s failed %s\n", __func__, file_path, strerror(errno));
             goto fail2;
         }
         write(fd, avpkt.data, avpkt.size);
@@ -522,6 +545,8 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
             ffp_notify_msg4(ffp, FFP_MSG_GET_IMG_STATE, (int) src_frame_pts, 1, file_name, strlen(file_name) + 1);
         else
             ffp_notify_msg4(ffp, FFP_MSG_GET_IMG_STATE, (int) src_frame_pts, 0, file_name, strlen(file_name) + 1);
+
+        ret = 0;
     }
 
 fail2:
@@ -530,9 +555,6 @@ fail1:
     av_frame_free(&dst_frame);
 fail0:
     av_packet_unref(&avpkt);
-    if (ret < 0) {
-        ffp_notify_msg3(ffp, FFP_MSG_GET_IMG_STATE, 0, ret);
-    }
 
     return ret;
 }
@@ -2044,6 +2066,7 @@ static int ffplay_video_thread(void *arg)
     AVRational frame_rate = av_guess_frame_rate(is->ic, is->video_st, NULL);
     int64_t dst_pts = -1;
     int64_t last_dst_pts = -1;
+    int retry_convert_image = 0;
 
 #if CONFIG_AVFILTER
     AVFilterGraph *graph = avfilter_graph_alloc();
@@ -2093,8 +2116,19 @@ static int ffplay_video_thread(void *arg)
             pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
             pts = pts * 1000;
             if (pts >= dst_pts) {
-                ret = convert_image(ffp, frame, (int64_t)pts, frame->width, frame->height);
-                if (ret < 0 || ffp->get_img_info->count <= 0) {
+                while (retry_convert_image <= MAX_RETRY_CONVERT_IMAGE) {
+                    ret = convert_image(ffp, frame, (int64_t)pts, frame->width, frame->height);
+                    if (!ret) {
+                        break;
+                    }
+                    retry_convert_image++;
+                }
+
+                retry_convert_image = 0;
+                if (ret || ffp->get_img_info->count <= 0) {
+                    if (ret) {
+                        ffp_notify_msg3(ffp, FFP_MSG_GET_IMG_STATE, 0, ret);
+                    }
                     goto the_end;
                 }
             } else {
