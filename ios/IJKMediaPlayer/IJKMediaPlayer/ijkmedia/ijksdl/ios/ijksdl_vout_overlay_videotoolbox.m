@@ -216,6 +216,8 @@ SDL_VoutOverlay *SDL_VoutVideoToolBox_DuplicateOverlay(SDL_VoutOverlay *display)
 
 void SDL_VoutVideoToolBox_UnrefOverlay(SDL_VoutOverlay *display)
 {
-    SDL_VoutFreeYUVOverlay(display);
+    SDL_DestroyMutex(display->opaque->mutex);
+    CVPixelBufferRelease(display->opaque->pixel_buffer);
+    free(display);
 }
 
