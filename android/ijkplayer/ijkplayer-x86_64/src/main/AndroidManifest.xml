@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.ijkplayer_x86_64">
+    package="tv.danmaku.ijk.media.player_x86_64">
 
     <uses-sdk
         android:minSdkVersion="21" />

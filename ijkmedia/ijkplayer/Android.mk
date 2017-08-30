@@ -1,4 +1,5 @@
 #
+# Copyright (c) 2013 Bilibili
 # Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
 #
 # This file is part of ijkPlayer.
@@ -53,14 +54,29 @@ LOCAL_SRC_FILES += android/pipeline/ffpipenode_android_mediacodec_vdec.c
 LOCAL_SRC_FILES += ijkavformat/allformats.c
 LOCAL_SRC_FILES += ijkavformat/ijklivehook.c
 LOCAL_SRC_FILES += ijkavformat/ijkmediadatasource.c
+LOCAL_SRC_FILES += ijkavformat/ijkio.c
+LOCAL_SRC_FILES += ijkavformat/ijkiomanager.c
+LOCAL_SRC_FILES += ijkavformat/ijkiocache.c
+LOCAL_SRC_FILES += ijkavformat/ijkioffio.c
+LOCAL_SRC_FILES += ijkavformat/ijkioandroidio.c
+LOCAL_SRC_FILES += ijkavformat/ijkioprotocol.c
+LOCAL_SRC_FILES += ijkavformat/ijkioapplication.c
+LOCAL_SRC_FILES += ijkavformat/ijkiourlhook.c
 
 LOCAL_SRC_FILES  += ijkavformat/ijkasync.c
 LOCAL_SRC_FILES  += ijkavformat/ijkurlhook.c
 LOCAL_SRC_FILES  += ijkavformat/ijklongurl.c
 LOCAL_SRC_FILES  += ijkavformat/ijksegment.c
 
+LOCAL_SRC_FILES += ijkavutil/ijkdict.c
+LOCAL_SRC_FILES += ijkavutil/ijkutils.c
+LOCAL_SRC_FILES += ijkavutil/ijkthreadpool.c
+LOCAL_SRC_FILES += ijkavutil/ijktree.c
+LOCAL_SRC_FILES += ijkavutil/ijkfifo.c
+LOCAL_SRC_FILES += ijkavutil/ijkstl.cpp
+
 LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl
-LOCAL_STATIC_LIBRARIES := android-ndk-profiler
+LOCAL_STATIC_LIBRARIES := android-ndk-profiler ijksoundtouch
 
 LOCAL_MODULE := ijkplayer
 

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013-2014 Bilibili
  * Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,6 +51,7 @@ public interface IMediaPlayer {
 
     int MEDIA_INFO_VIDEO_ROTATION_CHANGED = 10001;
     int MEDIA_INFO_AUDIO_RENDERING_START = 10002;
+    int MEDIA_INFO_MEDIA_ACCURATE_SEEK_COMPLETE = 10100;
 
     int MEDIA_ERROR_UNKNOWN = 1;
     int MEDIA_ERROR_SERVER_DIED = 100;
@@ -132,6 +134,8 @@ public interface IMediaPlayer {
 
     void setOnInfoListener(OnInfoListener listener);
 
+    void setOnTimedTextListener(OnTimedTextListener listener);
+
     /*--------------------
      * Listeners
      */
@@ -162,6 +166,10 @@ public interface IMediaPlayer {
 
     interface OnInfoListener {
         boolean onInfo(IMediaPlayer mp, int what, int extra);
+    }
+
+    interface OnTimedTextListener {
+        void onTimedText(IMediaPlayer mp, IjkTimedText text);
     }
 
     /*--------------------

@@ -1,6 +1,7 @@
 /*
  * IJKSDLAudioQueueController.m
  *
+ * Copyright (c) 2013-2014 Bilibili
  * Copyright (c) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * based on https://github.com/kolyvan/kxmovie
@@ -65,6 +66,13 @@
         AudioStreamBasicDescription streamDescription;
         IJKSDLGetAudioStreamBasicDescriptionFromSpec(&_spec, &streamDescription);
 
+        SDL_CalculateAudioSpec(&_spec);
+
+        if (_spec.size == 0) {
+            NSLog(@"aout_open_audio: unexcepted audio spec size %u", _spec.size);
+            return nil;
+        }
+
         /* Set the desired format */
         AudioQueueRef audioQueueRef;
         OSStatus status = AudioQueueNewOutput(&streamDescription,
@@ -93,8 +101,6 @@
             self = nil;
             return nil;
         }
-
-        SDL_CalculateAudioSpec(&_spec);
 
         _audioQueueRef = audioQueueRef;
 
@@ -130,6 +136,8 @@
 {
     if (!_audioQueueRef)
         return;
+
+    self.spec.callback(self.spec.userdata, NULL, 0);
 
     @synchronized(_lock) {
         _isPaused = NO;

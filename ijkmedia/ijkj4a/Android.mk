@@ -36,6 +36,7 @@ LOCAL_SRC_FILES += j4a/class/java/nio/Buffer.c
 LOCAL_SRC_FILES += j4a/class/java/nio/ByteBuffer.c
 LOCAL_SRC_FILES += j4a/class/java/util/ArrayList.c
 LOCAL_SRC_FILES += j4a/class/tv/danmaku/ijk/media/player/misc/IMediaDataSource.c
+LOCAL_SRC_FILES += j4a/class/tv/danmaku/ijk/media/player/misc/IAndroidIO.c
 LOCAL_SRC_FILES += j4a/class/tv/danmaku/ijk/media/player/IjkMediaPlayer.c
 
 LOCAL_SRC_FILES += j4au/class/android/media/AudioTrack.util.c

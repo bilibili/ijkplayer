@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2015 Bilibili
  * Copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -239,6 +240,7 @@ static int ijkhttphook_reconnect_at(URLContext *h, int64_t offset)
     AVDictionary *extra_opts = NULL;
 
     av_dict_set_int(&extra_opts, "offset", offset, 0);
+    av_dict_set_int(&extra_opts, "dns_cache_clear", 1, 0);
     ret = ijkurlhook_reconnect(h, extra_opts);
     av_dict_free(&extra_opts);
     return ret;
@@ -251,7 +253,10 @@ static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDiction
 
     c->app_ctx = (AVApplicationContext *)(intptr_t)c->app_ctx_intptr;
     c->scheme = "ijkhttphook:";
-    c->inner_scheme = "http:";
+    if (av_stristart(arg, "ijkhttphook:https:", NULL))
+        c->inner_scheme = "https:";
+    else
+        c->inner_scheme = "http:";
 
     ret = ijkurlhook_init(h, arg, flags, options);
     if (ret)
@@ -281,7 +286,7 @@ static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDiction
             goto fail;
 
         av_log(h, AV_LOG_INFO, "%s: will reconnect at start\n", __func__);
-        ret = ijkurlhook_reconnect(h, NULL);
+        ret = ijkhttphook_reconnect_at(h, 0);
         av_log(h, AV_LOG_INFO, "%s: did reconnect at start: %d\n", __func__, ret);
         if (ret)
             c->app_io_ctrl.retry_counter++;

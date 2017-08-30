@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2003 Bilibili
  * Copyright (c) 2003 Fabrice Bellard
  * Copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
@@ -77,6 +78,7 @@ void ijkav_register_all(void)
 #ifdef __ANDROID__
     IJK_REGISTER_PROTOCOL(ijkmediadatasource);
 #endif
+    IJK_REGISTER_PROTOCOL(ijkio);
     IJK_REGISTER_PROTOCOL(async);
     IJK_REGISTER_PROTOCOL(ijklongurl);
     IJK_REGISTER_PROTOCOL(ijktcphook);

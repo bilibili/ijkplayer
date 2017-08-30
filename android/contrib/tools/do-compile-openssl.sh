@@ -90,6 +90,8 @@ elif [ "$FF_ARCH" = "x86" ]; then
 
     FF_PLATFORM_CFG_FLAGS="android-x86"
 
+    FF_CFG_FLAGS="$FF_CFG_FLAGS no-asm"
+
 elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_ANDROID_PLATFORM=android-21
 
@@ -123,7 +125,7 @@ FF_SYSROOT=$FF_TOOLCHAIN_PATH/sysroot
 FF_PREFIX=$FF_BUILD_ROOT/build/$FF_BUILD_NAME/output
 
 mkdir -p $FF_PREFIX
-mkdir -p $FF_SYSROOT
+# mkdir -p $FF_SYSROOT
 
 
 #--------------------

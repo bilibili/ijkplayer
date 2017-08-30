@@ -1,6 +1,7 @@
 /*
  * ijkmeta.h
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -33,11 +34,13 @@
 #define IJKM_KEY_BITRATE        "bitrate"
 #define IJKM_KEY_VIDEO_STREAM   "video"
 #define IJKM_KEY_AUDIO_STREAM   "audio"
+#define IJKM_KEY_TIMEDTEXT_STREAM "timedtext"
 
 // stream meta
 #define IJKM_KEY_TYPE           "type"
 #define IJKM_VAL_TYPE__VIDEO    "video"
 #define IJKM_VAL_TYPE__AUDIO    "audio"
+#define IJKM_VAL_TYPE__TIMEDTEXT "timedtext"
 #define IJKM_VAL_TYPE__UNKNOWN  "unknown"
 #define IJKM_KEY_LANGUAGE       "language"
 

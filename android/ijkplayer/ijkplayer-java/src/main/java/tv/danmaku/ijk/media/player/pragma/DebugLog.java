@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013 Bilibili
  * Copyright (C) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

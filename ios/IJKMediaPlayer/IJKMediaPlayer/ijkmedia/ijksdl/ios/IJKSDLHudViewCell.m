@@ -33,7 +33,9 @@
             _column[i].font = [UIFont fontWithName:@"Menlo" size:9];
             _column[i].numberOfLines = 0;
             _column[i].minimumScaleFactor = 0.1;
-
+            _column[i].adjustsFontSizeToFitWidth = YES;
+//            _column[i].numberOfLines = 1;
+//            _column[i].minimumScaleFactor = 0.5;
             [self.contentView addSubview:_column[i]];
         }
     }

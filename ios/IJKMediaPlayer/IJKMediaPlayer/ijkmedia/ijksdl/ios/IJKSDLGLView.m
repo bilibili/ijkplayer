@@ -1,6 +1,7 @@
 /*
  * IJKSDLGLView.m
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * based on https://github.com/kolyvan/kxmovie
@@ -32,6 +33,12 @@
 #include "ijksdl_vout_overlay_videotoolbox.h"
 
 #include <time.h>
+
+typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
+    IJKSDLGLViewApplicationUnknownState = 0,
+    IJKSDLGLViewApplicationForegroundState = 1,
+    IJKSDLGLViewApplicationBackgroundState = 2
+};
 
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
@@ -75,6 +82,7 @@
     NSMutableArray *_registeredNotifications;
 
     IJKSDLHudViewController *_hudViewController;
+    IJKSDLGLViewApplicationState _applicationState;
 }
 
 + (Class) layerClass
@@ -219,14 +227,22 @@
 
 - (BOOL)isApplicationActive
 {
-    UIApplicationState appState = [UIApplication sharedApplication].applicationState;
-    switch (appState) {
-        case UIApplicationStateActive:
+    switch (_applicationState) {
+        case IJKSDLGLViewApplicationForegroundState:
             return YES;
-        case UIApplicationStateInactive:
-        case UIApplicationStateBackground:
-        default:
+        case IJKSDLGLViewApplicationBackgroundState:
             return NO;
+        default: {
+            UIApplicationState appState = [UIApplication sharedApplication].applicationState;
+            switch (appState) {
+                case UIApplicationStateActive:
+                    return YES;
+                case UIApplicationStateInactive:
+                case UIApplicationStateBackground:
+                default:
+                    return NO;
+            }
+        }
     }
 }
 
@@ -565,6 +581,7 @@
 - (void)applicationWillEnterForeground
 {
     IJKLog(@"IJKSDLGLView:applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
+    _applicationState = IJKSDLGLViewApplicationForegroundState;
     [self toggleGLPaused:NO];
 }
 
@@ -583,6 +600,7 @@
 - (void)applicationDidEnterBackground
 {
     IJKLog(@"IJKSDLGLView:applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
+    _applicationState = IJKSDLGLViewApplicationBackgroundState;
     [self toggleGLPaused:YES];
 }
 
@@ -616,6 +634,9 @@
 
 - (UIImage*)snapshotInternalOnIOS7AndLater
 {
+    if (CGSizeEqualToSize(self.bounds.size, CGSizeZero)) {
+        return nil;
+    }
     UIGraphicsBeginImageContextWithOptions(self.bounds.size, NO, 0.0);
     // Render our snapshot into the image context
     [self drawViewHierarchyInRect:self.bounds afterScreenUpdates:NO];

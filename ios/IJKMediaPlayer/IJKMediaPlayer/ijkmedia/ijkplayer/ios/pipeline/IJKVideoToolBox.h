@@ -21,27 +21,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKMediaPlayer_videotoolbox_core_h
-#define IJKMediaPlayer_videotoolbox_core_h
+#ifndef IJKMediaPlayer_videotoolbox_h
+#define IJKMediaPlayer_videotoolbox_h
 
-
-#import <VideoToolbox/VideoToolbox.h>
-#include "ff_ffinc.h"
-#include "ff_fferror.h"
-#include "ff_ffmsg.h"
 #include "ff_ffplay.h"
-#include "ijksdl/ios/ijksdl_vout_overlay_videotoolbox.h"
 
+typedef struct Ijk_VideoToolBox_Opaque Ijk_VideoToolBox_Opaque;
+typedef struct Ijk_VideoToolBox Ijk_VideoToolBox;
 
-#define MAX_PKT_QUEUE_DEEP   350
-#define VTB_MAX_DECODING_SAMPLES 3
+struct Ijk_VideoToolBox {
 
-typedef struct VideoToolBoxContext VideoToolBoxContext;
+    Ijk_VideoToolBox_Opaque *opaque;
 
-VideoToolBoxContext* videotoolbox_create(FFPlayer* ffp, AVCodecContext* ic);
+    int  (*decode_frame)(Ijk_VideoToolBox_Opaque *opaque);
+    void (*free)(Ijk_VideoToolBox_Opaque *opaque);
+};
 
-int videotoolbox_decode_frame(VideoToolBoxContext* context);
-
-void videotoolbox_free(VideoToolBoxContext* context);
+Ijk_VideoToolBox *Ijk_VideoToolbox_Async_Create(FFPlayer* ffp, AVCodecContext* ic);
+Ijk_VideoToolBox *Ijk_VideoToolbox_Sync_Create(FFPlayer* ffp, AVCodecContext* ic);
 
 #endif

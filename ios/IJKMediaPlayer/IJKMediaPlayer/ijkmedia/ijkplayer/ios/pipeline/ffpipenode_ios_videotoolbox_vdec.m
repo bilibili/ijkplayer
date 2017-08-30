@@ -34,7 +34,7 @@ struct IJKFF_Pipenode_Opaque {
     IJKFF_Pipeline           *pipeline;
     FFPlayer                 *ffp;
     Decoder                  *decoder;
-    VideoToolBoxContext      *context;
+    Ijk_VideoToolBox         *context;
     AVCodecContext           *avctx; // not own
     SDL_Thread*              video_fill_thread;
     SDL_Thread              _video_fill_thread;
@@ -54,7 +54,7 @@ int videotoolbox_video_thread(void *arg)
             return -1;
         }
         @autoreleasepool {
-            ret = videotoolbox_decode_frame(opaque->context);
+            ret = opaque->context->decode_frame(opaque->context->opaque);
         }
         if (ret < 0)
             goto the_end;
@@ -81,7 +81,7 @@ static int func_run_sync(IJKFF_Pipenode *node)
     int ret = videotoolbox_video_thread(opaque);
 
     if (opaque->context) {
-        videotoolbox_free(opaque->context);
+        opaque->context->free(opaque->context->opaque);
         free(opaque->context);
         opaque->context = NULL;
     }
@@ -112,7 +112,10 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ios_videotoolbox(FFPlayer *
     opaque->avctx = opaque->decoder->avctx;
     switch (opaque->avctx->codec_id) {
     case AV_CODEC_ID_H264:
-        opaque->context = videotoolbox_create(ffp, opaque->avctx);
+            if (ffp->vtb_async)
+                opaque->context = Ijk_VideoToolbox_Async_Create(ffp, opaque->avctx);
+            else
+                opaque->context = Ijk_VideoToolbox_Sync_Create(ffp, opaque->avctx);
         break;
     default:
         ALOGI("Videotoolbox-pipeline:open_video_decoder: not H264\n");

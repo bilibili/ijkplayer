@@ -1,6 +1,7 @@
 /*
  * IJKMediaPlayback.h
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -154,6 +155,8 @@ IJK_EXTERN NSString *const IJKMPMoviePlayerVideoFrameRenderResumedNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteTargetKey;
 IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteErrorKey;
+IJK_EXTERN NSString *const IJKMPMoviePlayerDidAccurateSeekCompleteCurPos;
+IJK_EXTERN NSString *const IJKMPMoviePlayerAccurateSeekCompleteNotification;
 
 @end
 
