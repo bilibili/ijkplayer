@@ -14,7 +14,7 @@
 #else
 #define IJKLog
 #endif
-
+/*
 void
 print_bytes(void   *start,
             size_t  length)
@@ -30,5 +30,5 @@ print_bytes(void   *start,
         printf("%02X%s", base[idx] & 0xFF, (idx + 1) % 16 == 0 ? "\n" : " ");
     printf("\n");
 }
-
+*/
 #endif /* IJKLog_h */

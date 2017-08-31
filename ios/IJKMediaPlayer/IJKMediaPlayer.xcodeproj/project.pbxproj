@@ -9,9 +9,9 @@
 /* Begin PBXAggregateTarget section */
 		A8286EDD1EBC3D4A00E86322 /* IJKMediaFramework-CreateUniversalFramework */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = A8286EE01EBC3D4A00E86322 /* Build configuration list for PBXAggregateTarget "IJKMediaFramework-CreateUniversalFramework" */;
+			buildConfigurationList = BE35EB671F56AEDB00B615DF /* Build configuration list */;
 			buildPhases = (
-				A8286EE11EBC3D4F00E86322 /* ShellScript */,
+				BE35EB641F56AEDB00B615DF /* ShellScript */,
 			);
 			dependencies = (
 			);
@@ -307,7 +307,6 @@
 		54A029B31D4700E6001C61C1 /* ijklongurl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijklongurl.c; sourceTree = "<group>"; };
 		54A029B41D4700E6001C61C1 /* ijksegment.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijksegment.c; sourceTree = "<group>"; };
 		54A029B51D4700E6001C61C1 /* ijkurlhook.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijkurlhook.c; sourceTree = "<group>"; };
-		BE51DC4F1D868E1700B9F5D5 /* IJKLog.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = IJKLog.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		54CF8A291E1526F800309DD5 /* ijkio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijkio.c; sourceTree = "<group>"; };
 		54CF8A2A1E1526F800309DD5 /* ijkioapplication.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijkioapplication.c; sourceTree = "<group>"; };
 		54CF8A2B1E1526F800309DD5 /* ijkioapplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkioapplication.h; sourceTree = "<group>"; };
@@ -330,6 +329,7 @@
 		54CF8A461E15287D00309DD5 /* ijktree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijktree.h; sourceTree = "<group>"; };
 		54CF8A471E15287D00309DD5 /* ijkutils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijkutils.c; sourceTree = "<group>"; };
 		54CF8A481E15287D00309DD5 /* ijkutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkutils.h; sourceTree = "<group>"; };
+		BE51DC4F1D868E1700B9F5D5 /* IJKLog.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = IJKLog.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		E607FFDE1B7B60F9005F11A6 /* IJKDeviceModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKDeviceModel.h; path = IJKMediaPlayer/IJKDeviceModel.h; sourceTree = "<group>"; };
 		E607FFDF1B7B60F9005F11A6 /* IJKDeviceModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKDeviceModel.m; path = IJKMediaPlayer/IJKDeviceModel.m; sourceTree = "<group>"; };
 		E62139BC180FA89A00553533 /* IJKFFOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IJKFFOptions.h; sourceTree = "<group>"; };
@@ -1198,6 +1198,19 @@
 			shellPath = /bin/sh;
 			shellScript = "sh \"${PROJECT_DIR}/../../ijkmedia/ijkplayer/version.sh\" \"${PROJECT_DIR}/../../ijkmedia/ijkplayer\" \"ijkversion.h\"";
 		};
+		BE35EB641F56AEDB00B615DF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/bin/sh ./Aggregate-CreateUniversalFramework.sh";
+			shellScript = "";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1508,6 +1521,25 @@
 			};
 			name = Release;
 		};
+		BE35EB651F56AEDB00B615DF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "IJKMediaFramework-CreateUniversalFramework";
+			};
+			name = Debug;
+		};
+		BE35EB661F56AEDB00B615DF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				PRODUCT_NAME = "IJKMediaFramework-CreateUniversalFramework";
+			};
+			name = Release;
+		};
 		E654EA9D1B6B27E600B0F2D0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1745,6 +1777,15 @@
 			buildConfigurations = (
 				5450B0411E63EA4300568494 /* Debug */,
 				5450B0421E63EA4300568494 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BE35EB671F56AEDB00B615DF /* Build configuration list */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE35EB651F56AEDB00B615DF /* Debug */,
+				BE35EB661F56AEDB00B615DF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
