@@ -38,27 +38,24 @@ typedef struct IjkIOAppCacheStatistic {
     int64_t logical_file_size;
 } IjkIOAppCacheStatistic;
 
-typedef struct IjkIOAppCacheInitNode {
-    int index;
-    int64_t file_logical_pos;
+typedef struct IjkCacheEntry {
+    int64_t logical_pos;
     int64_t physical_pos;
-    int64_t cache_size;
-    int64_t file_size;
-} IjkIOAppCacheInitNode;
+    int64_t size;
+} IjkCacheEntry;
 
 typedef struct IjkIOApplicationContext IjkIOApplicationContext;
 struct IjkIOApplicationContext {
     IjkThreadPoolContext *threadpool_ctx;
     IjkAVIOInterruptCB *ijkio_interrupt_callback;
-    IjkIOAppCacheInitNode *ijkio_cache_init_node;
-    int init_node_count;
     char cache_file_path[CACHE_FILE_PATH_MAX_LEN];
     int64_t last_physical_pos;
-    int64_t cache_limit_file_pos;
     void *cache_info_map;
     void *opaque;
     int64_t cache_count_bytes;
     int fd;
+    pthread_mutex_t mutex;
+    int shared;
     int (*func_ijkio_on_app_event)(IjkIOApplicationContext *h, int event_type ,void *obj, int size);
 };
 

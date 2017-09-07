@@ -2067,6 +2067,7 @@ static int ffplay_video_thread(void *arg)
     int64_t dst_pts = -1;
     int64_t last_dst_pts = -1;
     int retry_convert_image = 0;
+    int convert_frame_count = 0;
 
 #if CONFIG_AVFILTER
     AVFilterGraph *graph = avfilter_graph_alloc();
@@ -2119,15 +2120,20 @@ static int ffplay_video_thread(void *arg)
                 while (retry_convert_image <= MAX_RETRY_CONVERT_IMAGE) {
                     ret = convert_image(ffp, frame, (int64_t)pts, frame->width, frame->height);
                     if (!ret) {
+                        convert_frame_count++;
                         break;
                     }
                     retry_convert_image++;
+                    av_log(NULL, AV_LOG_ERROR, "convert image error retry_convert_image = %d\n", retry_convert_image);
                 }
 
                 retry_convert_image = 0;
                 if (ret || ffp->get_img_info->count <= 0) {
                     if (ret) {
+                        av_log(NULL, AV_LOG_ERROR, "convert image abort ret = %d\n", ret);
                         ffp_notify_msg3(ffp, FFP_MSG_GET_IMG_STATE, 0, ret);
+                    } else {
+                        av_log(NULL, AV_LOG_INFO, "convert image complete convert_frame_count = %d\n", convert_frame_count);
                     }
                     goto the_end;
                 }
@@ -2206,6 +2212,7 @@ static int ffplay_video_thread(void *arg)
 #if CONFIG_AVFILTER
     avfilter_graph_free(&graph);
 #endif
+    av_log(NULL, AV_LOG_INFO, "convert image convert_frame_count = %d\n", convert_frame_count);
     av_frame_free(&frame);
     return 0;
 }
@@ -3923,14 +3930,6 @@ void ffp_set_frame_at_time(FFPlayer *ffp, const char *path, int64_t start_time, 
     }
 }
 
-void ffp_set_ijkio_inject_node(FFPlayer *ffp, int index, int64_t file_logical_pos, int64_t physical_pos, int64_t cache_size, int64_t file_size)
-{
-    if (!ffp || !ffp->ijkio_manager_ctx)
-        return;
-
-    ijkio_manager_inject_node(ffp->ijkio_manager_ctx, index, file_logical_pos, physical_pos, cache_size, file_size);
-}
-
 void *ffp_set_ijkio_inject_opaque(FFPlayer *ffp, void *opaque)
 {
     if (!ffp)
@@ -4800,6 +4799,15 @@ void ffp_set_property_int64(FFPlayer *ffp, int id, int64_t value)
     switch (id) {
         // case FFP_PROP_INT64_SELECTED_VIDEO_STREAM:
         // case FFP_PROP_INT64_SELECTED_AUDIO_STREAM:
+        case FFP_PROP_INT64_SHARE_CACHE_DATA:
+            if (ffp) {
+                if (value) {
+                    ijkio_manager_will_share_cache_map(ffp->ijkio_manager_ctx);
+                } else {
+                    ijkio_manager_did_share_cache_map(ffp->ijkio_manager_ctx);
+                }
+            }
+            break;
         default:
             break;
     }

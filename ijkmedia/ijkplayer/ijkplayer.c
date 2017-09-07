@@ -146,15 +146,6 @@ void *ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque)
     return prev_weak_thiz;
 }
 
-void ijkmp_set_ijkio_inject_node(IjkMediaPlayer *mp, int index, int64_t file_logical_pos, int64_t physical_pos, int64_t cache_size, int64_t file_size)
-{
-    assert(mp);
-
-    MPTRACE("%s(%d,%lld,%lld,%lld,%lld)\n", __func__, index, file_logical_pos, physical_pos, cache_size, file_size);
-    ffp_set_ijkio_inject_node(mp->ffplayer, index, file_logical_pos, physical_pos, cache_size, file_size);
-    MPTRACE("%s()=void\n", __func__);
-}
-
 void ijkmp_set_frame_at_time(IjkMediaPlayer *mp, const char *path, int64_t start_time, int64_t end_time, int num, int definition)
 {
     assert(mp);
