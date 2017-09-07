@@ -193,7 +193,7 @@ SDL_VoutOverlay *SDL_VoutVideoToolBox_DuplicateOverlay(SDL_VoutOverlay *display)
     }
     SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
     overlay->opaque_class = display->opaque_class;
-    overlay->format     = SDL_FCC__VTB;
+    overlay->format     = display->format;
     overlay->w          = display->w;
     overlay->h          = display->h;
     overlay->pitches    = display->pitches;
@@ -218,6 +218,8 @@ void SDL_VoutVideoToolBox_UnrefOverlay(SDL_VoutOverlay *display)
 {
     SDL_DestroyMutex(display->opaque->mutex);
     CVPixelBufferRelease(display->opaque->pixel_buffer);
+    if (display->opaque)
+        free(display->opaque);
     free(display);
 }
 
