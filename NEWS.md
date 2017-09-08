@@ -1,6 +1,12 @@
 tag next
 --------------------------------
 
+tag k0.8.2
+--------------------------------
+- ffmpeg: fix some bug
+- ijkio: update and modify features
+- ijkplayer: support don't calculate real frame rate, the first frame will speed up
+
 tag k0.8.1
 --------------------------------
 - ffmpeg: support dns cache

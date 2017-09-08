@@ -33,6 +33,9 @@
 #include <limits.h>
 #include <signal.h>
 #include <stdint.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "libavutil/avstring.h"
 #include "libavutil/eval.h"
@@ -369,6 +372,143 @@ static void decoder_init(Decoder *d, AVCodecContext *avctx, PacketQueue *queue, 
     d->first_frame_decoded = 0;
 
     SDL_ProfilerReset(&d->decode_profiler, -1);
+}
+
+static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pts, int width, int height) {
+    GetImgInfo *img_info = ffp->get_img_info;
+    AVFrame *dst_frame = NULL;
+    AVPacket avpkt;
+    int got_packet = 0;
+    int dst_width = img_info->width;
+    int dst_height = img_info->height;
+    int bytes = 0;
+    void *buffer = NULL;
+    char file_path[1024] = {0};
+    char file_name[16] = {0};
+    int fd = -1;
+    int ret = 0;
+
+    av_init_packet(&avpkt);
+    avpkt.size = 0;
+    avpkt.data = NULL;
+
+    if (!img_info->frame_img_convert_ctx) {
+        img_info->frame_img_convert_ctx = sws_getContext(width,
+		    height,
+		    src_frame->format,
+		    dst_width,
+		    dst_height,
+		    AV_PIX_FMT_RGB24,
+		    SWS_BICUBIC,
+		    NULL,
+		    NULL,
+		    NULL);
+
+        if (!img_info->frame_img_convert_ctx) {
+            ret = -1;
+            goto fail0;
+        }
+    }
+
+    if (!img_info->frame_img_codec_ctx) {
+        AVCodec *image_codec = avcodec_find_encoder(AV_CODEC_ID_PNG);
+        if (!image_codec) {
+            ret = -1;
+            goto fail0;
+        }
+	    img_info->frame_img_codec_ctx = avcodec_alloc_context3(image_codec);
+        if (!img_info->frame_img_codec_ctx) {
+            ret = -1;
+            goto fail0;
+        }
+        img_info->frame_img_codec_ctx->bit_rate = ffp->stat.bit_rate;
+        img_info->frame_img_codec_ctx->width = dst_width;
+        img_info->frame_img_codec_ctx->height = dst_height;
+        img_info->frame_img_codec_ctx->pix_fmt = AV_PIX_FMT_RGB24;
+        img_info->frame_img_codec_ctx->codec_type = AVMEDIA_TYPE_VIDEO;
+        img_info->frame_img_codec_ctx->time_base.num = ffp->is->video_st->time_base.num;
+        img_info->frame_img_codec_ctx->time_base.den = ffp->is->video_st->time_base.den;
+        avcodec_open2(img_info->frame_img_codec_ctx, image_codec, NULL);
+    }
+
+    dst_frame = av_frame_alloc();
+    if (!dst_frame) {
+        ret = -1;
+        goto fail0;
+    }
+    bytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, dst_width, dst_height, 1);
+	buffer = (uint8_t *) av_malloc(bytes * sizeof(uint8_t));
+    if (!buffer) {
+        ret = -1;
+        goto fail1;
+    }
+
+    dst_frame->format = AV_PIX_FMT_RGB24;
+    dst_frame->width = dst_width;
+    dst_frame->height = dst_height;
+
+    ret = av_image_fill_arrays(dst_frame->data,
+            dst_frame->linesize,
+            buffer,
+            AV_PIX_FMT_RGB24,
+            dst_width,
+            dst_height,
+            1);
+
+    if (ret < 0) {
+        ret = -1;
+        goto fail2;
+    }
+
+    ret = sws_scale(img_info->frame_img_convert_ctx,
+            (const uint8_t * const *) src_frame->data,
+            src_frame->linesize,
+            0,
+            src_frame->height,
+            dst_frame->data,
+            dst_frame->linesize);
+
+    if (ret <= 0) {
+        ret = -1;
+        goto fail2;
+    }
+
+    ret = avcodec_encode_video2(img_info->frame_img_codec_ctx, &avpkt, dst_frame, &got_packet);
+
+    if (ret >= 0 && got_packet > 0) {
+        strcpy(file_path, img_info->img_path);
+        strcat(file_path, "/");
+        sprintf(file_name, "%lld", src_frame_pts);
+        strcat(file_name, ".png");
+        strcat(file_path, file_name);
+
+        fd = open(file_path, O_RDWR | O_TRUNC | O_CREAT, 0600);
+        if (fd < 0) {
+            ret = -1;
+            goto fail2;
+        }
+        write(fd, avpkt.data, avpkt.size);
+        close(fd);
+
+        img_info->count--;
+
+        if (img_info->count <= 0)
+            ffp_notify_msg4(ffp, FFP_MSG_GET_IMG_STATE, (int) src_frame_pts, 1, file_name, strlen(file_name) + 1);
+        else
+            ffp_notify_msg4(ffp, FFP_MSG_GET_IMG_STATE, (int) src_frame_pts, 0, file_name, strlen(file_name) + 1);
+    }
+
+fail2:
+    av_free(buffer);
+fail1:
+    av_frame_free(&dst_frame);
+fail0:
+    av_packet_unref(&avpkt);
+    if (ret < 0) {
+        ffp_notify_msg3(ffp, FFP_MSG_GET_IMG_STATE, 0, ret);
+    }
+
+    return ret;
 }
 
 static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSubtitle *sub) {
@@ -826,6 +966,16 @@ static void stream_close(FFPlayer *ffp)
         ijk_soundtouch_destroy(is->handle);
     }
 #endif
+    if (ffp->get_img_info) {
+        if (ffp->get_img_info->frame_img_convert_ctx) {
+            sws_freeContext(ffp->get_img_info->frame_img_convert_ctx);
+        }
+        if (ffp->get_img_info->frame_img_codec_ctx) {
+            avcodec_free_context(&ffp->get_img_info->frame_img_codec_ctx);
+        }
+        av_freep(&ffp->get_img_info->img_path);
+        av_freep(&ffp->get_img_info);
+    }
     av_free(is->filename);
     av_free(is);
     ffp->is = NULL;
@@ -1866,6 +2016,8 @@ static int ffplay_video_thread(void *arg)
     int ret;
     AVRational tb = is->video_st->time_base;
     AVRational frame_rate = av_guess_frame_rate(is->ic, is->video_st, NULL);
+    int64_t dst_pts = -1;
+    int64_t last_dst_pts = -1;
 
 #if CONFIG_AVFILTER
     AVFilterGraph *graph = avfilter_graph_alloc();
@@ -1897,6 +2049,34 @@ static int ffplay_video_thread(void *arg)
             goto the_end;
         if (!ret)
             continue;
+
+        if (ffp->get_frame_mode) {
+            if (!ffp->get_img_info || ffp->get_img_info->count <= 0) {
+                av_frame_unref(frame);
+                continue;
+            }
+
+            last_dst_pts = dst_pts;
+
+            if (dst_pts < 0) {
+                dst_pts = ffp->get_img_info->start_time;
+            } else {
+                dst_pts += (ffp->get_img_info->end_time - ffp->get_img_info->start_time) / (ffp->get_img_info->num - 1);
+            }
+
+            pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+            pts = pts * 1000;
+            if (pts >= dst_pts) {
+                ret = convert_image(ffp, frame, (int64_t)pts, frame->width, frame->height);
+                if (ret < 0 || ffp->get_img_info->count <= 0) {
+                    goto the_end;
+                }
+            } else {
+                dst_pts = last_dst_pts;
+            }
+            av_frame_unref(frame);
+            continue;
+        }
 
 #if CONFIG_AVFILTER
         if (   last_w != frame->width
@@ -3215,6 +3395,7 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
         is->handle = ijk_soundtouch_create();
     }
 #endif
+
     /* start video display */
     if (frame_queue_init(&is->pictq, &is->videoq, ffp->pictq_size, 1) < 0)
         goto fail;
@@ -3629,12 +3810,43 @@ static int ijkio_app_func_event(IjkIOApplicationContext *h, int message ,void *d
     if (message == IJKIOAPP_EVENT_CACHE_STATISTIC && sizeof(IjkIOAppCacheStatistic) == size) {
         IjkIOAppCacheStatistic *statistic =  (IjkIOAppCacheStatistic *) (intptr_t)data;
         ffp->stat.cache_physical_pos      = statistic->cache_physical_pos;
-        ffp->stat.cache_buf_forwards      = statistic->cache_buf_forwards;
+        ffp->stat.cache_file_forwards     = statistic->cache_file_forwards;
         ffp->stat.cache_file_pos          = statistic->cache_file_pos;
         ffp->stat.cache_count_bytes       = statistic->cache_count_bytes;
     }
 
     return inject_callback(ffp->inject_opaque, IJKIOAPP_EVENT_CACHE_STATISTIC, data, size);
+}
+
+void ffp_set_frame_at_time(FFPlayer *ffp, const char *path, int64_t start_time, int64_t end_time, int num, int definition) {
+    if (!ffp->get_img_info) {
+        ffp->get_img_info = av_mallocz(sizeof(GetImgInfo));
+        if (!ffp->get_img_info) {
+            ffp_notify_msg3(ffp, FFP_MSG_GET_IMG_STATE, 0, -1);
+            return;
+        }
+    }
+
+    if (start_time >= 0 && num > 0 && end_time >= 0 && end_time >= start_time) {
+        ffp->get_img_info->img_path   = av_strdup(path);
+        ffp->get_img_info->start_time = start_time;
+        ffp->get_img_info->end_time   = end_time;
+        ffp->get_img_info->num        = num;
+        ffp->get_img_info->count      = num;
+        if (definition== HD_IMAGE) {
+            ffp->get_img_info->width  = 640;
+            ffp->get_img_info->height = 360;
+        } else if (definition == SD_IMAGE) {
+            ffp->get_img_info->width  = 320;
+            ffp->get_img_info->height = 180;
+        } else {
+            ffp->get_img_info->width  = 160;
+            ffp->get_img_info->height = 90;
+        }
+    } else {
+        ffp->get_img_info->count = 0;
+        ffp_notify_msg3(ffp, FFP_MSG_GET_IMG_STATE, 0, -1);
+    }
 }
 
 void ffp_set_ijkio_inject_node(FFPlayer *ffp, int index, int64_t file_logical_pos, int64_t physical_pos, int64_t cache_size, int64_t file_size)
@@ -4488,11 +4700,10 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             if (!ffp)
                 return default_value;
             return ffp->stat.cache_physical_pos;
-       case FFP_PROP_INT64_CACHE_STATISTIC_BUF_FORWARDS:
+       case FFP_PROP_INT64_CACHE_STATISTIC_FILE_FORWARDS:
             if (!ffp)
                 return default_value;
-            return ffp->stat.cache_buf_forwards;
-
+            return ffp->stat.cache_file_forwards;
        case FFP_PROP_INT64_CACHE_STATISTIC_FILE_POS:
             if (!ffp)
                 return default_value;

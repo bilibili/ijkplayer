@@ -139,6 +139,23 @@
 static unsigned sws_flags = SWS_BICUBIC;
 #endif
 
+#define HD_IMAGE 2  // 640*360
+#define SD_IMAGE 1  // 320*180
+#define LD_IMAGE 0  // 160*90
+
+typedef struct GetImgInfo {
+    char *img_path;
+    int64_t start_time;
+    int64_t end_time;
+    int64_t frame_interval;
+    int num;
+    int count;
+    int width;
+    int height;
+    AVCodecContext *frame_img_codec_ctx;
+    struct SwsContext *frame_img_convert_ctx;
+} GetImgInfo;
+
 typedef struct MyAVPacketList {
     AVPacket pkt;
     struct MyAVPacketList *next;
@@ -484,7 +501,7 @@ typedef struct FFStatistic
     int64_t latest_seek_load_duration;
     int64_t byte_count;
     int64_t cache_physical_pos;
-    int64_t cache_buf_forwards;
+    int64_t cache_file_forwards;
     int64_t cache_file_pos;
     int64_t cache_count_bytes;
     int drop_frame_count;
@@ -686,6 +703,8 @@ typedef struct FFPlayer {
     int enable_accurate_seek;
     int mediacodec_sync;
     int skip_calc_frame_rate;
+    int get_frame_mode;
+    GetImgInfo *get_img_info;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))

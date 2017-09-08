@@ -25,7 +25,7 @@
 #include "ijkplayer/ijkavutil/ijkutils.h"
 #include "ijkplayer/ijkavutil/ijkthreadpool.h"
 #include "ijkplayer/ijkavutil/ijkstl.h"
-#include "ijkplayer/ijkavutil/ijkfifo.h"
+#include "libavutil/log.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -37,12 +37,12 @@
 #include <unistd.h>
 #include <assert.h>
 
-#define DEFAULT_CACHE_MAX_CAPACITY            (521 * 1024 * 1024)
-#define DEFAULT_CACHE_FORWARDS_FIFO_CAPACITY  (8 * 1024 * 1024)
+#define DEFAULT_CACHE_MAX_CAPACITY            (512 * 1024 * 1024)
 #define DEFAULT_CACHE_FILE_FORWARDS_CAPACITY  (8 * 1024 * 1024)
 #   ifndef O_BINARY
 #       define O_BINARY 0
 #   endif
+#define FILE_RW_ERROR  (-100)
 
 typedef struct IjkIOCacheContext {
     char *cache_file_path;
@@ -51,17 +51,14 @@ typedef struct IjkIOCacheContext {
     int64_t logical_size;
     int64_t read_logical_pos;
     int64_t file_logical_pos;
-    int64_t fifo_logical_pos;
+    int64_t seek_file_logical_pos;
     int64_t cache_physical_pos;
     int64_t file_inner_pos;
     int64_t file_logical_end;
     int64_t cache_max_capacity;
-    int64_t cache_forwards_fifo_capacity;
     int64_t cache_file_forwards_capacity;
     int cache_file_close;
-    int fifo_pos_reset;
     int io_eof_reached;
-    int fifo_eof_reached;
     int io_error;
     int inner_io_error;
     int read_file_inner_error;
@@ -79,12 +76,11 @@ typedef struct IjkIOCacheContext {
     int64_t *cache_limit_file_pos;
     int64_t *cache_count_bytes;
 
-    IjkFifoBuffer      *fifo;
-    int64_t            physical_fifo_pos;
     pthread_cond_t     cond_wakeup_main;
-    pthread_cond_t     cond_wakeup_background;
+    pthread_cond_t     cond_wakeup_file_background;
     pthread_cond_t     cond_wakeup_exit;
-    pthread_mutex_t    mutex;
+    pthread_cond_t     cond_wakeup_write_file_exit;
+    pthread_mutex_t    file_mutex;
     int                abort_request;
     IjkAVIOInterruptCB *ijkio_interrupt_callback;
     int task_is_running;
@@ -92,7 +88,10 @@ typedef struct IjkIOCacheContext {
     IjkURLContext *inner;
     IjkThreadPoolContext *threadpool_ctx;
     IjkIOApplicationContext *ijkio_app_ctx;
-    int init_node_by_inject;
+    int async_open;
+    IjkAVDictionary *inner_options;
+    char inner_url[4096];
+    int inner_flags;
 } IjkIOCacheContext;
 
 typedef struct IjkCacheEntry {
@@ -113,9 +112,9 @@ static void call_inject_statistic(IjkURLContext *h)
     if (c->ijkio_app_ctx) {
         IjkIOAppCacheStatistic statistic = {0};
         statistic.cache_physical_pos  = c->cache_physical_pos;
-        statistic.cache_buf_forwards  = ijk_av_fifo_size(c->fifo);
+        statistic.cache_file_forwards = c->file_logical_pos - c->read_logical_pos;
         statistic.cache_file_pos      = c->file_logical_pos;
-        statistic.cache_count_bytes         = *c->cache_count_bytes;
+        statistic.cache_count_bytes   = *c->cache_count_bytes;
         ijkio_application_on_cache_statistic(c->ijkio_app_ctx, &statistic);
     }
 }
@@ -156,7 +155,9 @@ static int tree_destroy(void *elem)
 }
 
 static int ijkio_cache_file_error(IjkURLContext *h) {
-    IjkIOCacheContext *c= h->priv_data;
+    IjkIOCacheContext *c = h->priv_data;
+
+    av_log(NULL, AV_LOG_WARNING, "ijkio_cache_file_error\n");
     if (c && c->file_handle_retry_count > 3) {
         c->file_error_count++;
         ijk_map_traversal_handle(c->cache_info_map, tree_destroy);
@@ -166,24 +167,30 @@ static int ijkio_cache_file_error(IjkURLContext *h) {
         c->cache_physical_pos    = 0;
         c->file_inner_pos        = 0;
         c->io_eof_reached        = 0;
-        c->file_logical_pos      = c->fifo_logical_pos;
+        c->file_logical_pos      = c->read_logical_pos;
         close(c->fd);
         c->fd = -1;
         c->ijkio_app_ctx->fd = -1;
         if (c->file_error_count > 3) {
-            c->fifo_pos_reset = 1;
             c->cache_file_close = 1;
             remove(c->cache_file_path);
-            return 0;
+            av_log(NULL, AV_LOG_WARNING, "ijkio_cache_file_error will remove file\n");
+            return FILE_RW_ERROR;
         }
         c->fd = open(c->cache_file_path, O_RDWR | O_BINARY | O_CREAT | O_TRUNC, 0600);
         c->ijkio_app_ctx->fd = c->fd;
         if (c->fd >= 0) {
             c->file_handle_retry_count = 0;
             c->tree_info = calloc(1, sizeof(IjkCacheTreeInfo));
+            if (!c->tree_info) {
+                c->cache_file_close = 1;
+                return FILE_RW_ERROR;
+            }
+            ijk_map_put(c->cache_info_map, (int64_t)c->cur_file_no, c->tree_info);
         } else {
-            c->fifo_pos_reset = 1;
+            av_log(NULL, AV_LOG_WARNING, "ijkio_cache_file_error will cache_file_close\n");
             c->cache_file_close = 1;
+            return FILE_RW_ERROR;
         }
     }
 
@@ -191,13 +198,14 @@ static int ijkio_cache_file_error(IjkURLContext *h) {
 }
 
 static int64_t ijkio_cache_file_overrang(IjkURLContext *h, int64_t *cur_pos, int size) {
-    IjkIOCacheContext *c= h->priv_data;
+    IjkIOCacheContext *c = h->priv_data;
     IjkCacheTreeInfo *tree_info = NULL;
-    int64_t free_space   = 0;
-    int64_t min_root_id      = 0;
-    int is_first_pos     = 1;
+    int64_t free_space = 0;
+    int64_t min_root_id = 0;
+    int is_first_pos = 1;
 
     if (1 == ijk_map_size(c->cache_info_map)) {
+        av_log(NULL, AV_LOG_INFO, "ijkio_cache_file_overrang will remove all\n");
         tree_info = ijk_map_index_get(c->cache_info_map, 0);
         free_space += tree_info->physical_size;
         *cur_pos = lseek(c->fd, 0, SEEK_SET);
@@ -205,7 +213,7 @@ static int64_t ijkio_cache_file_overrang(IjkURLContext *h, int64_t *cur_pos, int
         ijk_av_tree_enumerate(tree_info->root, NULL, NULL, enu_free);
         ijk_av_tree_destroy(tree_info->root);
         memset(c->tree_info, 0, sizeof(IjkCacheTreeInfo));
-        c->file_logical_pos   = c->fifo_logical_pos;
+        c->file_logical_pos   = c->read_logical_pos;
         c->io_eof_reached     = 0;
         *c->last_physical_pos = 0;
         c->cache_physical_pos = 0;
@@ -216,6 +224,8 @@ static int64_t ijkio_cache_file_overrang(IjkURLContext *h, int64_t *cur_pos, int
 
     while (1) {
         min_root_id = ijk_map_get_min_key(c->cache_info_map);
+        av_log(NULL, AV_LOG_INFO, "ijkio_cache_file_overrang will remove min_root_id = %lld\n", min_root_id);
+
         if (min_root_id >= 0)
             tree_info = ijk_map_get(c->cache_info_map, min_root_id);
         else
@@ -260,20 +270,18 @@ static int64_t add_entry(IjkURLContext *h, const unsigned char *buf, int size)
 {
     IjkIOCacheContext *c= h->priv_data;
     int64_t pos = -1;
-    int64_t ret;
+    int64_t ret = 0;
     IjkCacheEntry *entry = NULL, *next[2] = {NULL, NULL};
-    IjkCacheEntry *entry_ret;
+    IjkCacheEntry *entry_ret = NULL;
     struct IjkAVTreeNode *node = NULL;
-    int64_t free_space;
+    int64_t free_space = 0;
 
     //FIXME avoid lseek
     pos = lseek(c->fd, *c->last_physical_pos, SEEK_SET);
 
     if (pos < 0) {
-        ret = IJKAVERROR(errno);
         c->file_handle_retry_count++;
-        ijkio_cache_file_error(h);
-        return ret;
+        return ijkio_cache_file_error(h);
     } else {
         c->cache_physical_pos = pos;
         *c->last_physical_pos = pos;
@@ -282,15 +290,12 @@ static int64_t add_entry(IjkURLContext *h, const unsigned char *buf, int size)
     if (pos + size >= *c->cache_limit_file_pos) {
         free_space = ijkio_cache_file_overrang(h, &pos, size);
         if (free_space < size) {
-            c->fifo_pos_reset = 1;
             c->cache_file_close = 1;
-            return -1;
+            return FILE_RW_ERROR;
         }
         if (pos < 0) {
-            ret = IJKAVERROR(errno);
             c->file_handle_retry_count++;
-            ijkio_cache_file_error(h);
-            return ret;
+            return ijkio_cache_file_error(h);
         }
         if (free_space == c->cache_max_capacity)
             return 0;
@@ -298,10 +303,8 @@ static int64_t add_entry(IjkURLContext *h, const unsigned char *buf, int size)
 
     ret = write(c->fd, buf, size);
     if (ret < 0) {
-        ret = IJKAVERROR(errno);
         c->file_handle_retry_count++;
-        ijkio_cache_file_error(h);
-        return ret;
+        return ijkio_cache_file_error(h);
     } else {
         c->file_handle_retry_count = 0;
     }
@@ -317,8 +320,7 @@ static int64_t add_entry(IjkURLContext *h, const unsigned char *buf, int size)
 
     if (!entry ||
         entry->logical_pos  + entry->size != c->file_logical_pos ||
-        entry->physical_pos + entry->size != pos
-    ) {
+        entry->physical_pos + entry->size != pos) {
         entry = malloc(sizeof(*entry));
         node = ijk_av_tree_node_alloc();
         if (!entry || !node) {
@@ -332,7 +334,7 @@ static int64_t add_entry(IjkURLContext *h, const unsigned char *buf, int size)
         entry_ret = ijk_av_tree_insert(&c->tree_info->root, entry, cmp, &node);
         if (entry_ret && entry_ret != entry) {
             ret = -1;
-            // av_log(h, AV_LOG_ERROR, "av_tree_insert failed\n");
+            av_log(NULL, AV_LOG_ERROR, "av_tree_insert failed\n");
             goto fail;
         }
     } else
@@ -347,9 +349,8 @@ fail:
     return ret;
 }
 
-static int wrapped_file_read(void *src, void *dst, int size)
+static int wrapped_file_read(IjkURLContext *h, void *dst, int size)
 {
-    IjkURLContext     *h   = src;
     IjkIOCacheContext *c   = h->priv_data;
     int ret;
 
@@ -358,9 +359,8 @@ static int wrapped_file_read(void *src, void *dst, int size)
     return ret;
 }
 
-static int wrapped_url_read(void *src, void *dst, int size)
+static int wrapped_url_read(IjkURLContext *h, void *dst, int size)
 {
-    IjkURLContext     *h   = src;
     IjkIOCacheContext *c   = h->priv_data;
     int ret;
 
@@ -374,140 +374,35 @@ static int wrapped_url_read(void *src, void *dst, int size)
     return ret;
 }
 
-static int64_t ijkio_cache_fill_fifo(IjkURLContext *h) {
-    IjkIOCacheContext *c= h->priv_data;
-    if (!c)
+static int64_t ijkio_cache_ffurl_size(IjkURLContext *h) {
+    int64_t pos, size;
+    IjkIOCacheContext *c= ((IjkURLContext *)h)->priv_data;
+    if (!c || !c->inner || !c->inner->prot)
         return IJKAVERROR(ENOSYS);
-
-    int to_copy, fifo_space;
-    IjkCacheEntry *entry, *next[2] = {NULL, NULL};
-    int64_t r = 0;
-    pthread_mutex_lock(&c->mutex);
-    if (ijkio_cache_check_interrupt(h)) {
-        c->io_eof_reached   = 1;
-        c->fifo_eof_reached = 1;
-        c->io_error         = IJKAVERROR_EXIT;
-        pthread_cond_signal(&c->cond_wakeup_main);
-        pthread_mutex_unlock(&c->mutex);
-        return IJKAVERROR_EXIT;
+    size = c->inner->prot->url_seek(c->inner, 0, IJKAVSEEK_SIZE);
+    if (size < 0) {
+        pos = c->inner->prot->url_seek(c->inner, 0, SEEK_CUR);
+        if ((size = c->inner->prot->url_seek(c->inner, -1, SEEK_END)) < 0)
+            return size;
+        size++;
+        c->inner->prot->url_seek(c->inner, pos, SEEK_SET);
     }
+    return size;
+}
 
-    if (c->seek_request) {
-        c->io_eof_reached   = 0;
-        c->fifo_eof_reached = 0;
-        c->io_error         = 0;
-
-        c->seek_completed   = 1;
-        c->seek_request     = 0;
-        c->fifo_logical_pos = c->seek_pos;
-        c->file_logical_pos = c->seek_pos;
-        c->seek_ret         = c->seek_pos;
-
-        ijk_av_fifo_reset(c->fifo);
-        if (c->cache_file_close) {
-            if (!c->inner || !c->inner->prot || !c->inner->prot) {
-                c->seek_ret = IJKAVERROR(ENOSYS);
-            } else {
-                c->seek_ret = c->inner->prot->url_seek(c->inner, c->fifo_logical_pos, SEEK_SET);
-            }
-        }
-    }
-
-    fifo_space = ijk_av_fifo_space(c->fifo);
-
-    if (c->cache_file_close) {
-        if (c->fifo_eof_reached || fifo_space <= 0) {
-            pthread_cond_signal(&c->cond_wakeup_main);
-            pthread_cond_wait(&c->cond_wakeup_background, &c->mutex);
-            pthread_mutex_unlock(&c->mutex);
-            return 0;
-        }
+static int ijkio_cache_io_open(IjkURLContext *h, const char *url, int flags, IjkAVDictionary **options) {
+    int ret = 0;
+    IjkIOCacheContext *c= h->priv_data;
+    ret = c->inner->prot->url_open2(c->inner, url, flags, options);
+    if (ret != 0) {
+        return ret;
     } else {
-        int64_t file_forwards_spece = c->file_logical_pos - c->fifo_logical_pos;
-        if (c->fifo_eof_reached || fifo_space <= 0) {
-            pthread_cond_signal(&c->cond_wakeup_main);
-            if ((file_forwards_spece >= c->cache_file_forwards_capacity) || c->io_eof_reached) {
-                pthread_cond_wait(&c->cond_wakeup_background, &c->mutex);
-            }
-            pthread_mutex_unlock(&c->mutex);
-            return 0;
+        c->logical_size = ijkio_cache_ffurl_size(h);
+        if (c->tree_info && !c->cache_file_close) {
+            c->tree_info->file_size = c->logical_size;
         }
     }
-
-    pthread_mutex_unlock(&c->mutex);
-    to_copy = FFMIN(4096, fifo_space);
-
-    if (to_copy <= 0) {
-        pthread_cond_signal(&c->cond_wakeup_main);
-        return r;
-    }
-
-    if (!c->cache_file_close) {
-        entry = ijk_av_tree_find(c->tree_info->root, &c->fifo_logical_pos, cmp, (void**)next);
-        if (!entry)
-            entry = next[0];
-
-        if (entry) {
-            int64_t in_block_pos = c->fifo_logical_pos - entry->logical_pos;
-            assert(entry->logical_pos <= c->fifo_logical_pos);
-            if (in_block_pos < entry->size) {
-                int64_t physical_target = entry->physical_pos + in_block_pos;
-                if (c->cache_physical_pos != physical_target) {
-                    r = lseek(c->fd, physical_target, SEEK_SET);
-                    if (r < 0) {
-                        c->file_handle_retry_count++;
-                        ijkio_cache_file_error(h);
-                    }
-                } else {
-                    r = c->cache_physical_pos;
-                }
-
-                if (r >= 0) {
-                    to_copy = (int)FFMIN(to_copy, entry->size - in_block_pos);
-                    r = ijk_av_fifo_generic_write(c->fifo, h, to_copy, wrapped_file_read);
-                    if (r > 0) {
-                        c->fifo_logical_pos       += r;
-                    } else {
-                        if(c->read_file_inner_error) {
-                            c->file_handle_retry_count++;
-                            ijkio_cache_file_error(h);
-                        }
-                    }
-                }
-            } else {
-                if (c->io_eof_reached)
-                    c->fifo_eof_reached = 1;
-            }
-        } else {
-            if (c->io_eof_reached)
-                c->fifo_eof_reached = 1;
-        }
-    } else {
-        if (!c->inner || !c->inner->prot || !c->inner->prot) {
-            r = IJKAVERROR(ENOSYS);
-        } else {
-            if (c->fifo_pos_reset) {
-                r = c->inner->prot->url_seek(c->inner, c->fifo_logical_pos, SEEK_SET);
-                if (r < 0)
-                    return r;
-
-                c->fifo_pos_reset = 0;
-            }
-
-            r = ijk_av_fifo_generic_write(c->fifo, h, to_copy, wrapped_url_read);
-            if (r > 0) {
-                c->fifo_logical_pos += r;
-            } else {
-                c->io_eof_reached = 1;
-                c->fifo_eof_reached = 1;
-                if (c->inner_io_error < 0)
-                    c->io_error = c->inner_io_error;
-            }
-        }
-    }
-
-    pthread_cond_signal(&c->cond_wakeup_main);
-    return r;
+    return ret;
 }
 
 static int64_t ijkio_cache_write_file(IjkURLContext *h) {
@@ -519,7 +414,7 @@ static int64_t ijkio_cache_write_file(IjkURLContext *h) {
 
     IjkCacheEntry *root = NULL ,*l_entry = NULL, *r_entry = NULL, *next[2] = {NULL, NULL};
 
-    if (!c || !c->inner || !c->inner->prot || !c->inner->prot)
+    if (!c || !c->inner || !c->inner->prot)
         return IJKAVERROR(ENOSYS);
 
     root = ijk_av_tree_find(c->tree_info->root, &c->file_logical_pos, cmp, (void**)next);
@@ -561,9 +456,19 @@ static int64_t ijkio_cache_write_file(IjkURLContext *h) {
         c->io_eof_reached = 1;
         return 0;
     }
-
     if (c->file_logical_pos != c->file_inner_pos) {
+        if (c->async_open > 0) {
+            r = ijkio_cache_io_open(h, c->inner_url, c->inner_flags, &c->inner_options);
+            if (r != 0) {
+                c->io_eof_reached = 1;
+                c->io_error = (int)r;
+                return r;
+            }
+            c->async_open = 0;
+        }
+
         r = c->inner->prot->url_seek(c->inner, c->file_logical_pos, SEEK_SET);
+
         if (r < 0) {
             c->io_eof_reached = 1;
             if (c->file_logical_end == c->file_logical_pos) {
@@ -572,6 +477,15 @@ static int64_t ijkio_cache_write_file(IjkURLContext *h) {
             return r;
         }
         c->file_inner_pos = r;
+    }
+    if (c->async_open > 0) {
+        r = ijkio_cache_io_open(h, c->inner_url, c->inner_flags, &c->inner_options);
+        if (r != 0) {
+            c->io_eof_reached = 1;
+            c->io_error = (int)r;
+            return r;
+        }
+        c->async_open = 0;
     }
     r = c->inner->prot->url_read(c->inner, buf, (int)to_copy);
     if (r == 0 && to_copy > 0) {
@@ -585,51 +499,70 @@ static int64_t ijkio_cache_write_file(IjkURLContext *h) {
     *c->cache_count_bytes += r;
     c->file_inner_pos += r;
 
+    pthread_mutex_lock(&c->file_mutex);
     r = add_entry(h, buf, (int)r);
 
-    if (r > 0)
+    if (r > 0) {
         c->file_logical_pos += r;
+        pthread_cond_signal(&c->cond_wakeup_file_background);
+    }
+    pthread_mutex_unlock(&c->file_mutex);
 
     return r;
 }
 
-static int64_t ijkio_cache_ffurl_size(IjkURLContext *h) {
-    int64_t pos, size;
-    IjkIOCacheContext *c= ((IjkURLContext *)h)->priv_data;
-    if (!c || !c->inner || !c->inner->prot)
-        return IJKAVERROR(ENOSYS);
-    size = c->inner->prot->url_seek(c->inner, 0, IJKAVSEEK_SIZE);
-    if (size < 0) {
-        pos = c->inner->prot->url_seek(c->inner, 0, SEEK_CUR);
-        if ((size = c->inner->prot->url_seek(c->inner, -1, SEEK_END)) < 0)
-            return size;
-        size++;
-        c->inner->prot->url_seek(c->inner, pos, SEEK_SET);
-    }
-    return size;
-}
-
 static void ijkio_cache_task(void *h, void *r) {
-    int64_t ret;
     IjkIOCacheContext *c= ((IjkURLContext *)h)->priv_data;
     c->task_is_running = 1;
-    while(1) {
-        ret = ijkio_cache_fill_fifo(h);
-        if (ret == IJKAVERROR_EXIT)
-            break;
+    int ret = 0;
 
-        if (!c->cache_file_close &&
-            (c->file_logical_pos - c->fifo_logical_pos <= c->cache_file_forwards_capacity)
-            && !c->io_eof_reached) {
-            ijkio_cache_write_file(h);
+    while(1) {
+        if (c->cache_file_close) {
+            break;
+        }
+        if (ijkio_cache_check_interrupt(h)) {
+            c->io_eof_reached   = 1;
+            c->io_error         = IJKAVERROR_EXIT;
+            break;
+        }
+
+        if (c->seek_request) {
+            pthread_mutex_lock(&c->file_mutex);
+            c->io_eof_reached    = 0;
+            c->io_error          = 0;
+            c->seek_completed    = 1;
+            c->seek_request      = 0;
+            c->read_logical_pos  = c->seek_pos;
+            c->file_logical_pos  = c->seek_pos;
+            c->seek_ret          = c->seek_pos;
+            pthread_cond_signal(&c->cond_wakeup_main);
+            pthread_mutex_unlock(&c->file_mutex);
+        }
+
+        if (((c->file_logical_pos - c->read_logical_pos > c->cache_file_forwards_capacity)
+            || c->io_eof_reached)) {
+            pthread_mutex_lock(&c->file_mutex);
+            pthread_cond_signal(&c->cond_wakeup_main);
+            pthread_cond_wait(&c->cond_wakeup_file_background, &c->file_mutex);
+            pthread_mutex_unlock(&c->file_mutex);
+        } else {
+            ret = ijkio_cache_write_file(h);
+            if (ret > 0) {
+                pthread_mutex_lock(&c->file_mutex);
+                pthread_cond_signal(&c->cond_wakeup_main);
+                pthread_mutex_unlock(&c->file_mutex);
+            } else if (ret == FILE_RW_ERROR) {
+                break;
+            }
         }
 
         call_inject_statistic(h);
     }
-    pthread_mutex_lock(&c->mutex);
+    pthread_mutex_lock(&c->file_mutex);
     c->task_is_running = 0;
+    pthread_cond_signal(&c->cond_wakeup_main);
     pthread_cond_signal(&c->cond_wakeup_exit);
-    pthread_mutex_unlock(&c->mutex);
+    pthread_mutex_unlock(&c->file_mutex);
 }
 
 static void ijkio_cache_init_tree_insert(IjkIOCacheContext *c, int index, int64_t file_logical_pos, int64_t physical_pos, int64_t size) {
@@ -671,7 +604,7 @@ static int jkio_cache_init_node(IjkIOCacheContext *c) {
 
 static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVDictionary **options) {
     IjkIOCacheContext *c= h->priv_data;
-    int ret;
+    int ret = 0;
     if (!c)
         return IJKAVERROR(ENOSYS);
 
@@ -680,35 +613,32 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
         return -1;
     }
 
-    c->init_node_by_inject = 0;
+    c->async_open = 0;
     c->ijkio_interrupt_callback = h->ijkio_app_ctx->ijkio_interrupt_callback;
 
     ijk_av_strstart(url, "cache:", &url);
-    c->cache_forwards_fifo_capacity = DEFAULT_CACHE_FORWARDS_FIFO_CAPACITY;
     c->cache_file_forwards_capacity = DEFAULT_CACHE_FILE_FORWARDS_CAPACITY;
     c->cache_max_capacity = DEFAULT_CACHE_MAX_CAPACITY;
+    c->seek_file_logical_pos = -1;
 
     IjkAVDictionaryEntry *t = NULL;
-    t = ijk_av_dict_get(*options, "cache_max_capacity", NULL, IJK_AV_DICT_IGNORE_SUFFIX);
+    t = ijk_av_dict_get(*options, "cache_max_capacity", NULL, IJK_AV_DICT_MATCH_CASE);
     if (t) {
         c->cache_max_capacity = strtoll(t->value, NULL, 10);
     }
-    t = ijk_av_dict_get(*options, "cache_forwards_fifo_capacity", NULL, IJK_AV_DICT_IGNORE_SUFFIX);
-    if (t) {
-        c->cache_forwards_fifo_capacity = strtoll(t->value, NULL, 10);
-    }
-    t = ijk_av_dict_get(*options, "cache_file_forwards_capacity", NULL, IJK_AV_DICT_IGNORE_SUFFIX);
+
+    t = ijk_av_dict_get(*options, "cache_file_forwards_capacity", NULL, IJK_AV_DICT_MATCH_CASE);
     if (t) {
         c->cache_file_forwards_capacity = strtoll(t->value, NULL, 10);
     }
 
-    t = ijk_av_dict_get(*options, "cache_file_close", NULL, IJK_AV_DICT_IGNORE_SUFFIX);
+    t = ijk_av_dict_get(*options, "cache_file_close", NULL, IJK_AV_DICT_MATCH_CASE);
     if (t) {
         c->cache_file_close = (int)strtol(t->value, NULL, 10);
         c->cache_file_close = c->cache_file_close != 0 ? 1 : 0;
     }
 
-    t = ijk_av_dict_get(*options, "cur_file_no", NULL, IJK_AV_DICT_IGNORE_SUFFIX);
+    t = ijk_av_dict_get(*options, "cur_file_no", NULL, IJK_AV_DICT_MATCH_CASE);
     if (t) {
         c->cur_file_no = (int)strtol(t->value, NULL, 10);
     }
@@ -734,8 +664,8 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
                 c->fd = c->ijkio_app_ctx->fd;
             } else {
                 if (jkio_cache_init_node(c) > 0) {
-                    c->fd = open(c->cache_file_path, O_RDWR | O_BINARY | O_CREAT, 0600);
-                    c->init_node_by_inject = 1;
+                    c->fd = open(c->cache_file_path, O_RDWR | O_BINARY, 0600);
+                    c->async_open = 1;
                 } else {
                     c->fd = open(c->cache_file_path, O_RDWR | O_BINARY | O_CREAT | O_TRUNC, 0600);
                 }
@@ -762,6 +692,11 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
                 c->tree_info = calloc(1, sizeof(IjkCacheTreeInfo));
                 c->tree_info->physical_init_pos = *c->last_physical_pos;
                 ijk_map_put(c->cache_info_map, (int64_t)c->cur_file_no, c->tree_info);
+            } else {
+                if (c->tree_info->physical_size > 200 * 1024 && c->tree_info->file_size > 0) {
+                    c->logical_size = c->tree_info->file_size;
+                    c->async_open = 1;
+                }
             }
 
             if (*c->cache_limit_file_pos <= 0)
@@ -769,98 +704,174 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
         } while(0);
     }
 
-    c->fifo = ijk_av_fifo_alloc((unsigned int)c->cache_forwards_fifo_capacity);
-
     ret = ijkio_alloc_url(&(c->inner), url);
     if (c->inner && !ret) {
         c->inner->ijkio_app_ctx = c->ijkio_app_ctx;
-        ret = c->inner->prot->url_open2(c->inner, url, flags, options);
-        if (ret != 0)
-            goto url_fail;
-        else
-            c->logical_size = ijkio_cache_ffurl_size(h);
+        if (c->logical_size <= 0 || c->async_open == 0) {
+            c->async_open = 0;
+            ret = ijkio_cache_io_open(h, url, flags, options);
+            if (ret != 0)
+                goto url_fail;
+        } else {
+            c->tree_info->file_size = c->logical_size;
+            ijk_av_dict_copy(&c->inner_options, *options, 0);
+            strcpy(c->inner_url, url);
+            c->inner_flags = flags;
+        }
     }
 
-    ret = pthread_mutex_init(&c->mutex, NULL);
+    ret = pthread_mutex_init(&c->file_mutex, NULL);
     if (ret != 0) {
-        // av_log(h, AV_LOG_ERROR, "pthread_mutex_init failed : %s\n", av_err2str(ret));
-        goto mutex_fail;
+        av_log(NULL, AV_LOG_ERROR, "pthread_mutex_init failed : %s\n", av_err2str(ret));
+        goto file_mutex_fail;
     }
 
     ret = pthread_cond_init(&c->cond_wakeup_main, NULL);
     if (ret != 0) {
-        // av_log(h, AV_LOG_ERROR, "pthread_cond_init failed : %s\n", av_err2str(ret));
+        av_log(NULL, AV_LOG_ERROR, "pthread_cond_init failed : %s\n", av_err2str(ret));
         goto cond_wakeup_main_fail;
     }
 
-    ret = pthread_cond_init(&c->cond_wakeup_background, NULL);
+    ret = pthread_cond_init(&c->cond_wakeup_file_background, NULL);
     if (ret != 0) {
-        // av_log(h, AV_LOG_ERROR, "pthread_cond_init failed : %s\n", av_err2str(ret));
-        goto cond_wakeup_background_fail;
+        av_log(NULL, AV_LOG_ERROR, "pthread_cond_init failed : %s\n", av_err2str(ret));
+        goto cond_wakeup_file_background_fail;
     }
 
     ret = pthread_cond_init(&c->cond_wakeup_exit, NULL);
     if (ret != 0) {
-        // av_log(h, AV_LOG_ERROR, "pthread_cond_init failed : %s\n", av_err2str(ret));
+        av_log(NULL, AV_LOG_ERROR, "pthread_cond_init failed : %s\n", av_err2str(ret));
         goto cond_wakeup_exit_fail;
     }
 
-    c->task_is_running = 1;
-    ret = ijk_threadpool_add(c->threadpool_ctx, ijkio_cache_task, h, NULL, 0);
-    if (ret) {
-        c->task_is_running = 0;
-        pthread_cond_signal(&c->cond_wakeup_exit);
-        goto thread_fail;
+    if (!c->cache_file_close) {
+        c->task_is_running = 1;
+        ret = ijk_threadpool_add(c->threadpool_ctx, ijkio_cache_task, h, NULL, 0);
+        if (ret) {
+            c->task_is_running = 0;
+            pthread_cond_signal(&c->cond_wakeup_exit);
+            goto thread_fail;
+        }
     }
 
     return 0;
+
 thread_fail:
     pthread_cond_destroy(&c->cond_wakeup_exit);
 cond_wakeup_exit_fail:
-    pthread_cond_destroy(&c->cond_wakeup_background);
-cond_wakeup_background_fail:
+    pthread_cond_destroy(&c->cond_wakeup_file_background);
+cond_wakeup_file_background_fail:
     pthread_cond_destroy(&c->cond_wakeup_main);
 cond_wakeup_main_fail:
-    pthread_mutex_destroy(&c->mutex);
-mutex_fail:
+    pthread_mutex_destroy(&c->file_mutex);
+file_mutex_fail:
+    if (c->async_open) {
+        if (c->inner_options) {
+            ijk_av_dict_free(&c->inner_options);
+        }
+    } else {
+        if (c->inner) {
+            if (c->inner->prot && c->inner->prot->url_close) {
+                c->inner->prot->url_close(c->inner);
+            }
+        }
+    }
+url_fail:
     if (c->inner) {
-        if (c->inner->prot && c->inner->prot->url_close)
-            ret = c->inner->prot->url_close(c->inner);
         ijk_av_freep(&c->inner->priv_data);
         ijk_av_freep(&c->inner);
     }
-url_fail:
-    ijk_av_fifo_freep(&c->fifo);
-    if (c->tree_info)
-        ijk_map_put(c->cache_info_map, (int64_t)c->cur_file_no, c->tree_info);
+    return ret;
+}
+
+static int ijkio_file_read(IjkURLContext *h, void *dest, int to_read)
+{
+    IjkIOCacheContext *c   = h->priv_data;
+    IjkCacheEntry *entry   = NULL;
+    IjkCacheEntry *next[2] = {NULL, NULL};
+    int ret                = 0;
+    int to_copy            = 0;
+
+    if (!c->tree_info)
+        return ret;
+
+    entry = ijk_av_tree_find(c->tree_info->root, &c->read_logical_pos, cmp, (void**)next);
+    if (!entry)
+        entry = next[0];
+
+    if (entry) {
+        int64_t in_block_pos = c->read_logical_pos - entry->logical_pos;
+        if (in_block_pos < entry->size && entry->logical_pos <= c->read_logical_pos) {
+            int64_t physical_target = entry->physical_pos + in_block_pos;
+            if (c->cache_physical_pos != physical_target) {
+                ret = lseek(c->fd, physical_target, SEEK_SET);
+                if (ret < 0) {
+                    c->file_handle_retry_count++;
+                    ijkio_cache_file_error(h);
+                }
+            } else {
+                ret = c->cache_physical_pos;
+            }
+
+            if (ret >= 0) {
+                to_copy = (int)FFMIN(to_read, entry->size - in_block_pos);
+                ret = wrapped_file_read(h, dest, to_copy);
+                if (ret < 0) {
+                    if(c->read_file_inner_error) {
+                        c->file_handle_retry_count++;
+                        ijkio_cache_file_error(h);
+                    }
+                }
+            }
+        }
+    }
     return ret;
 }
 
 static int ijkio_cache_read(IjkURLContext *h, unsigned char *buf, int size) {
-    IjkIOCacheContext *c  = h->priv_data;
-    int           to_read = size;
-    int           ret     = 0;
-    unsigned char *dst    = buf;
-    if (!c)
+    IjkIOCacheContext *c = h->priv_data;
+    int              ret = 0;
+    int          to_read = size;
+    unsigned char  *dest = buf;
+    int          to_copy = 0;
+
+    if (!c || !c->inner || !c->inner->prot)
         return IJKAVERROR(ENOSYS);
-    pthread_mutex_lock(&c->mutex);
+
+    if (c->cache_file_close) {
+        return wrapped_url_read(h, dest, to_read);
+    }
+
+    pthread_mutex_lock(&c->file_mutex);
     while (to_read > 0) {
-        int fifo_size, to_copy;
         if (ijkio_cache_check_interrupt(h)) {
             ret = IJKAVERROR_EXIT;
             break;
         }
-        fifo_size = ijk_av_fifo_size(c->fifo);
-        to_copy   = FFMIN(to_read, fifo_size);
+
+        if (c->cache_file_close) {
+            ret = c->inner->prot->url_seek(c->inner, c->read_logical_pos, SEEK_SET);
+            if (ret < 0) {
+                pthread_mutex_unlock(&c->file_mutex);
+                return ret;
+            }
+
+            to_copy  = wrapped_url_read(h, dest, to_read);
+            to_read -= to_copy;
+            ret      = size - to_read;
+            pthread_mutex_unlock(&c->file_mutex);
+            return ret;
+        }
+
+        to_copy = ijkio_file_read(h, dest, to_read);
         if (to_copy > 0) {
-            ijk_av_fifo_generic_read(c->fifo, dst, to_copy, NULL);
             to_read             -= to_copy;
             ret                  = size - to_read;
-            dst                 += to_copy;
+            dest                += to_copy;
             c->read_logical_pos += to_copy;
             if (to_read <= 0)
                 break;
-        } else if (c->fifo_eof_reached) {
+        } else if (c->io_eof_reached) {
             if (ret <= 0) {
                 if (c->io_error)
                     ret = c->io_error;
@@ -869,18 +880,21 @@ static int ijkio_cache_read(IjkURLContext *h, unsigned char *buf, int size) {
             }
             break;
         }
-        pthread_cond_signal(&c->cond_wakeup_background);
-        pthread_cond_wait(&c->cond_wakeup_main, &c->mutex);
+        pthread_cond_signal(&c->cond_wakeup_file_background);
+        pthread_cond_wait(&c->cond_wakeup_main, &c->file_mutex);
     }
 
-    pthread_cond_signal(&c->cond_wakeup_background);
-    pthread_mutex_unlock(&c->mutex);
+    if (ret != size || (!c->io_eof_reached && (c->file_logical_pos - c->read_logical_pos) <= c->cache_file_forwards_capacity)) {
+        pthread_cond_signal(&c->cond_wakeup_file_background);
+    }
+    pthread_mutex_unlock(&c->file_mutex);
     return ret;
 }
 
 static int64_t ijkio_cache_seek(IjkURLContext *h, int64_t pos, int whence) {
     IjkIOCacheContext *c= h->priv_data;
-    int64_t ret, new_logical_pos;
+    int64_t ret = 0;
+    int64_t new_logical_pos = 0;
     if (!c || !c->inner || !c->inner->prot)
         return IJKAVERROR(ENOSYS);
 
@@ -896,8 +910,10 @@ static int64_t ijkio_cache_seek(IjkURLContext *h, int64_t pos, int whence) {
     if (new_logical_pos < 0)
         return IJKAVERROR(EINVAL);
 
-    pthread_mutex_lock(&c->mutex);
-
+    if (c->cache_file_close) {
+        return c->inner->prot->url_seek(c->inner, new_logical_pos, SEEK_SET);
+    }
+    pthread_mutex_lock(&c->file_mutex);
     c->seek_request   = 1;
     c->seek_pos       = new_logical_pos;
     c->seek_whence    = SEEK_SET;
@@ -910,39 +926,41 @@ static int64_t ijkio_cache_seek(IjkURLContext *h, int64_t pos, int whence) {
         }
         if (c->seek_completed) {
             ret = c->seek_ret;
-            c->read_logical_pos = c->seek_pos;
             break;
         }
-        pthread_cond_signal(&c->cond_wakeup_background);
-        pthread_cond_wait(&c->cond_wakeup_main, &c->mutex);
+        pthread_cond_signal(&c->cond_wakeup_file_background);
+        pthread_cond_wait(&c->cond_wakeup_main, &c->file_mutex);
     }
 
-    pthread_mutex_unlock(&c->mutex);
+    pthread_mutex_unlock(&c->file_mutex);
     return ret;
 }
 
 static int ijkio_cache_close(IjkURLContext *h) {
     IjkIOCacheContext *c = h->priv_data;
-    int      ret;
+    int              ret = 0;
+
     if (!c || !c->inner || !c->inner->prot)
         return IJKAVERROR(ENOSYS);
-    pthread_mutex_lock(&c->mutex);
+
+    pthread_mutex_lock(&c->file_mutex);
     c->abort_request = 1;
-    pthread_cond_signal(&c->cond_wakeup_background);
-    if (c->task_is_running) {
-        pthread_cond_wait(&c->cond_wakeup_exit, &c->mutex);
+    pthread_cond_signal(&c->cond_wakeup_file_background);
+    while (c->task_is_running) {
+        pthread_cond_wait(&c->cond_wakeup_exit, &c->file_mutex);
     }
-    pthread_mutex_unlock(&c->mutex);
+    pthread_mutex_unlock(&c->file_mutex);
 
-
-    pthread_cond_destroy(&c->cond_wakeup_background);
+    pthread_cond_destroy(&c->cond_wakeup_file_background);
     pthread_cond_destroy(&c->cond_wakeup_main);
     pthread_cond_destroy(&c->cond_wakeup_exit);
-    pthread_mutex_destroy(&c->mutex);
+    pthread_mutex_destroy(&c->file_mutex);
 
     ret = c->inner->prot->url_close(c->inner);
-    ijk_av_fifo_freep(&c->fifo);
 
+    if (c->inner_options) {
+        ijk_av_dict_free(&c->inner_options);
+    }
     ijk_av_freep(&c->inner->priv_data);
 
     ijk_av_freep(&c->inner);
@@ -955,17 +973,17 @@ static int ijkio_cache_pause(IjkURLContext *h) {
     if (!c || !c->inner || !c->inner->prot)
         return IJKAVERROR(ENOSYS);
 
-    pthread_mutex_lock(&c->mutex);
-    c->abort_request = 1;
-    pthread_cond_signal(&c->cond_wakeup_background);
-    if (c->task_is_running) {
-        pthread_cond_wait(&c->cond_wakeup_exit, &c->mutex);
-    }
-    pthread_mutex_unlock(&c->mutex);
-
     if (c->inner->prot->url_pause) {
         ret = c->inner->prot->url_pause(c->inner);
     }
+
+    pthread_mutex_lock(&c->file_mutex);
+    c->abort_request = 1;
+    pthread_cond_signal(&c->cond_wakeup_file_background);
+    while (c->task_is_running) {
+        pthread_cond_wait(&c->cond_wakeup_exit, &c->file_mutex);
+    }
+    pthread_mutex_unlock(&c->file_mutex);
 
     return ret;
 }
@@ -976,7 +994,7 @@ static int ijkio_cache_resume(IjkURLContext *h) {
     if (!c || !c->inner || !c->inner->prot)
         return IJKAVERROR(ENOSYS);
 
-    if (c->cache_file_path == NULL || 0 == strlen(c->cache_file_path)) {
+    if (!c->cache_file_path || 0 == strlen(c->cache_file_path) || c->cache_file_close) {
         c->cache_file_close = 1;
     } else {
         int64_t seek_ret = lseek(c->fd, *c->last_physical_pos, SEEK_SET);
@@ -999,13 +1017,14 @@ static int ijkio_cache_resume(IjkURLContext *h) {
 
     c->abort_request = 0;
 
-    c->task_is_running = 1;
-    ret = ijk_threadpool_add(c->threadpool_ctx, ijkio_cache_task, h, NULL, 0);
-    if (ret) {
-        c->task_is_running = 0;
-        pthread_cond_signal(&c->cond_wakeup_exit);
+    if (!c->cache_file_close) {
+        c->task_is_running = 1;
+        ret = ijk_threadpool_add(c->threadpool_ctx, ijkio_cache_task, h, NULL, 0);
+        if (ret) {
+            c->task_is_running = 0;
+            pthread_cond_signal(&c->cond_wakeup_exit);
+        }
     }
-
     return ret;
 }
 

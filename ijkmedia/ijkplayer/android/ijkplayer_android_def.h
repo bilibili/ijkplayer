@@ -36,6 +36,7 @@ enum media_event_type {
     MEDIA_BUFFERING_UPDATE  = 3,        // arg1 = percentage, arg2 = cached duration
     MEDIA_SEEK_COMPLETE     = 4,
     MEDIA_SET_VIDEO_SIZE    = 5,        // arg1 = width, arg2 = height
+    MEDIA_GET_IMG_STATE     = 6,        // arg1 = timestamp, arg2 = result code, obj = file name
     MEDIA_TIMED_TEXT        = 99,       // not supported yet
     MEDIA_ERROR             = 100,      // arg1, arg2
     MEDIA_INFO              = 200,      // arg1, arg2

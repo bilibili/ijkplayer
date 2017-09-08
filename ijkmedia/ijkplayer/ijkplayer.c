@@ -155,6 +155,15 @@ void ijkmp_set_ijkio_inject_node(IjkMediaPlayer *mp, int index, int64_t file_log
     MPTRACE("%s()=void\n", __func__);
 }
 
+void ijkmp_set_frame_at_time(IjkMediaPlayer *mp, const char *path, int64_t start_time, int64_t end_time, int num, int definition)
+{
+    assert(mp);
+
+    MPTRACE("%s(%s,%lld,%lld,%d,%d)\n", __func__, path, start_time, end_time, num, definition);
+    ffp_set_frame_at_time(mp->ffplayer, path, start_time, end_time, num, definition);
+    MPTRACE("%s()=void\n", __func__);
+}
+
 
 void *ijkmp_set_ijkio_inject_opaque(IjkMediaPlayer *mp, void *opaque)
 {
@@ -705,7 +714,7 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
                 // FIXME: 1: onError() ?
                 av_log(mp->ffplayer, AV_LOG_DEBUG, "FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING\n");
             }
-            if (ffp_is_paused_l(mp->ffplayer)) {
+            if (!mp->ffplayer->start_on_prepared) {
                 ijkmp_change_state_l(mp, MP_STATE_PAUSED);
             }
             pthread_mutex_unlock(&mp->mutex);

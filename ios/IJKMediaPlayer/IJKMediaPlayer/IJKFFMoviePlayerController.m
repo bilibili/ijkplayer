@@ -576,16 +576,11 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     NSTimeInterval demux_cache = ((NSTimeInterval)ijkmp_get_playable_duration(_mediaPlayer)) / 1000;
 
     int64_t buf_forwards = _asyncStat.buf_forwards;
-    int64_t cache_forwards = _cacheStat.cache_buf_forwards;
     int64_t bit_rate = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_BIT_RATE, 0);
 
     if (buf_forwards > 0 && bit_rate > 0) {
         NSTimeInterval io_cache = ((float)buf_forwards) * 8 / bit_rate;
         demux_cache += io_cache;
-    }
-    if (cache_forwards > 0 && bit_rate > 0) {
-        NSTimeInterval cache_cache = ((float)cache_forwards) * 8 / bit_rate;
-        demux_cache += cache_cache;
     }
 
     return demux_cache;
@@ -751,8 +746,8 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
 
     int64_t bitRate = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_BIT_RATE, 0);
     [_glView setHudValue:[NSString stringWithFormat:@"-%@, %@",
-                         formatedSize(_cacheStat.cache_buf_forwards),
-                          formatedDurationBytesAndBitrate(_cacheStat.cache_buf_forwards, bitRate)] forKey:@"cache-forwards"];
+                         formatedSize(_cacheStat.cache_file_forwards),
+                          formatedDurationBytesAndBitrate(_cacheStat.cache_file_forwards, bitRate)] forKey:@"cache-forwards"];
     [_glView setHudValue:formatedSize(_cacheStat.cache_physical_pos) forKey:@"cache-physical-pos"];
     [_glView setHudValue:formatedSize(_cacheStat.cache_file_pos) forKey:@"cache-file-pos"];
     [_glView setHudValue:formatedSize(_cacheStat.cache_count_bytes) forKey:@"cache-bytes"];
