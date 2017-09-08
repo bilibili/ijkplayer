@@ -374,7 +374,7 @@ int ijkio_manager_io_open(IjkIOManagerContext *h, const char *url, int flags, Ij
     t = ijk_av_dict_get(*options, "cache_map_path", NULL, IJK_AV_DICT_MATCH_CASE);
     if (t) {
         strcpy(h->cache_map_path, t->value);
-        if (h->ijkio_app_ctx->cache_info_map) {
+        if (h->ijkio_app_ctx->cache_info_map && !ijk_map_size(h->ijkio_app_ctx->cache_info_map)) {
             t = ijk_av_dict_get(*options, "parse_cache_map", NULL, IJK_AV_DICT_MATCH_CASE);
             if (t) {
                 parse_cache_map_file = (int)strtol(t->value, NULL, 10);
