@@ -212,7 +212,15 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      * </p>
      */
     public IjkMediaPlayer() {
-        this(sLocalLibLoader);
+        this(sLocalLibLoader,null);
+    }
+
+    /**
+     * constructor with event looper
+     * @param looper specify event handler's looper
+     */
+    public IjkMediaPlayer(Looper looper) {
+        this(sLocalLibLoader,looper);
     }
 
     /**
@@ -220,18 +228,18 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      * @param libLoader
      *              custom library loader, can be null.
      */
-    public IjkMediaPlayer(IjkLibLoader libLoader) {
-        initPlayer(libLoader);
+    public IjkMediaPlayer(IjkLibLoader libLoader,Looper looper) {
+        initPlayer(libLoader,looper);
     }
 
-    private void initPlayer(IjkLibLoader libLoader) {
+    private void initPlayer(IjkLibLoader libLoader, Looper looper) {
         loadLibrariesOnce(libLoader);
         initNativeOnce();
 
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
+        if (looper == null) {
+            looper = Looper.myLooper() != null ? Looper.myLooper() : Looper.getMainLooper();
+        }
+        if (looper != null) {
             mEventHandler = new EventHandler(this, looper);
         } else {
             mEventHandler = null;
