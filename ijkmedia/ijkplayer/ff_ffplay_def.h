@@ -83,6 +83,7 @@
 #define MAX_RETRY_CONVERT_IMAGE                 (3)
 
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
+#define MAX_ACCURATE_SEEK_TIMEOUT (5000)
 #ifdef FFP_MERGE
 #define MIN_FRAMES 25
 #endif
@@ -129,8 +130,6 @@
 #define SAMPLE_ARRAY_SIZE (8 * 65536)
 
 #define MIN_PKT_DURATION 15
-
-#define MAX_KEY_FRAME_INTERVAL 1000  // max key frame interval is 1000
 
 #ifdef FFP_MERGE
 #define CURSOR_HIDE_DELAY 1000000
@@ -407,6 +406,8 @@ typedef struct VideoState {
 
     int drop_aframe_count;
     int drop_vframe_count;
+    int64_t accurate_seek_start_time;
+    int64_t accurate_seek_vframe_pts;
     int audio_accurate_seek_req;
     int video_accurate_seek_req;
     SDL_mutex *accurate_seek_mutex;
@@ -703,6 +704,7 @@ typedef struct FFPlayer {
     IjkIOManagerContext *ijkio_manager_ctx;
 
     int enable_accurate_seek;
+    int accurate_seek_timeout;
     int mediacodec_sync;
     int skip_calc_frame_rate;
     int get_frame_mode;
@@ -784,6 +786,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->first_video_frame_rendered = 0;
     ffp->sync_av_start          = 1;
     ffp->enable_accurate_seek   = 0;
+    ffp->accurate_seek_timeout  = MAX_ACCURATE_SEEK_TIMEOUT;
 
     ffp->playable_duration_ms           = 0;
 
