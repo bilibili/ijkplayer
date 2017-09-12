@@ -32,6 +32,7 @@ typedef struct IjkIOManagerContext IjkIOManagerContext;
 struct IjkIOManagerContext {
     IjkAVIOInterruptCB *ijkio_interrupt_callback;
     IjkIOApplicationContext *ijkio_app_ctx;
+    int auto_save_map;
     void *cur_ffmpeg_ctx;
     void *ijk_ctx_map;
     void *opaque;

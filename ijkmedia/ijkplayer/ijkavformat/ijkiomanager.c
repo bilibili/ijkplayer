@@ -74,9 +74,75 @@ static int tree_destroy(void *parm, int64_t key, void *elem)
     return 0;
 }
 
+static int enu_save(void *opaque, void *elem) {
+    FILE *fp = opaque;
+    IjkCacheEntry *entry = elem;
+    char string[CONFIG_MAX_LINE] = {0};
+
+    if (entry && fp) {
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "entry_logical_pos:%lld\n", entry->logical_pos);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "entry_physical_pos:%lld\n", entry->physical_pos);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "entry_size:%lld\n", entry->size);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "entry-info-flush\n");
+        fwrite(string, strlen(string), 1, fp);
+    }
+    return 0;
+}
+
+static int ijkio_manager_save_tree_to_file(void *parm, int64_t key, void *elem)
+{
+    IjkCacheTreeInfo *info = elem;
+    FILE *fp = parm;
+    char string[CONFIG_MAX_LINE] = {0};
+    if (key >= 0 && info) {
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "tree_index:%lld\n", key);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "tree_physical_init_pos:%lld\n", info->physical_init_pos);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "tree_physical_size:%lld\n", info->physical_size);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "tree_file_size:%lld\n", info->file_size);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "tree-info-flush\n");
+        fwrite(string, strlen(string), 1, fp);
+
+        ijk_av_tree_enumerate(info->root, parm, NULL, enu_save);
+    }
+    return 0;
+}
+
 void ijkio_manager_destroy(IjkIOManagerContext *h)
 {
+    FILE *map_tree_info_fp = NULL;
+
     if (h->ijkio_app_ctx) {
+        if (h->auto_save_map) {
+            map_tree_info_fp = fopen(h->cache_map_path, "w");
+            if (map_tree_info_fp) {
+                ijk_map_traversal_handle(h->ijkio_app_ctx->cache_info_map, map_tree_info_fp, ijkio_manager_save_tree_to_file);
+                fclose(map_tree_info_fp);
+            }
+        }
+
         ijk_map_traversal_handle(h->ijkio_app_ctx->cache_info_map, NULL, tree_destroy);
         ijk_map_destroy(h->ijkio_app_ctx->cache_info_map);
         h->ijkio_app_ctx->cache_info_map = NULL;
@@ -270,62 +336,6 @@ static void ijkio_manager_parse_cache_info(IjkIOApplicationContext *app_ctx, cha
     fclose(fp);
 }
 
-static int enu_save(void *opaque, void *elem) {
-    FILE *fp = opaque;
-    IjkCacheEntry *entry = elem;
-    char string[CONFIG_MAX_LINE] = {0};
-
-    if (entry && fp) {
-        memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "entry_logical_pos:%lld\n", entry->logical_pos);
-        fwrite(string, strlen(string), 1, fp);
-
-        memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "entry_physical_pos:%lld\n", entry->physical_pos);
-        fwrite(string, strlen(string), 1, fp);
-
-        memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "entry_size:%lld\n", entry->size);
-        fwrite(string, strlen(string), 1, fp);
-
-        memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "entry-info-flush\n");
-        fwrite(string, strlen(string), 1, fp);
-    }
-    return 0;
-}
-
-static int ijkio_manager_save_tree_to_file(void *parm, int64_t key, void *elem)
-{
-    IjkCacheTreeInfo *info = elem;
-    FILE *fp = parm;
-    char string[CONFIG_MAX_LINE] = {0};
-    if (key >= 0 && info) {
-        memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "tree_index:%lld\n", key);
-        fwrite(string, strlen(string), 1, fp);
-
-        memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "tree_physical_init_pos:%lld\n", info->physical_init_pos);
-        fwrite(string, strlen(string), 1, fp);
-
-        memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "tree_physical_size:%lld\n", info->physical_size);
-        fwrite(string, strlen(string), 1, fp);
-
-        memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "tree_file_size:%lld\n", info->file_size);
-        fwrite(string, strlen(string), 1, fp);
-
-        memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "tree-info-flush\n");
-        fwrite(string, strlen(string), 1, fp);
-
-        ijk_av_tree_enumerate(info->root, parm, NULL, enu_save);
-    }
-    return 0;
-}
-
 void ijkio_manager_will_share_cache_map(IjkIOManagerContext *h) {
     av_log(NULL, AV_LOG_INFO, "will share cache\n");
     if (!h || !h->ijkio_app_ctx || !strlen(h->cache_map_path)) {
@@ -366,14 +376,22 @@ int ijkio_manager_io_open(IjkIOManagerContext *h, const char *url, int flags, Ij
     if (!h->ijkio_app_ctx) {
         return -1;
     }
+
     IjkAVDictionaryEntry *t = NULL;
     t = ijk_av_dict_get(*options, "cache_file_path", NULL, IJK_AV_DICT_MATCH_CASE);
     if (t) {
         strcpy(h->ijkio_app_ctx->cache_file_path, t->value);
     }
+
     t = ijk_av_dict_get(*options, "cache_map_path", NULL, IJK_AV_DICT_MATCH_CASE);
     if (t) {
         strcpy(h->cache_map_path, t->value);
+
+        t = ijk_av_dict_get(*options, "auto_save_map", NULL, IJK_AV_DICT_MATCH_CASE);
+        if (t) {
+            h->auto_save_map = (int)strtol(t->value, NULL, 10);
+        }
+
         if (h->ijkio_app_ctx->cache_info_map && !ijk_map_size(h->ijkio_app_ctx->cache_info_map)) {
             t = ijk_av_dict_get(*options, "parse_cache_map", NULL, IJK_AV_DICT_MATCH_CASE);
             if (t) {
