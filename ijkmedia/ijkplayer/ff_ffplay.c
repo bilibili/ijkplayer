@@ -1481,18 +1481,20 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
     int video_accurate_seek_fail = 0;
     int64_t video_seek_pos = 0;
     int64_t now = 0;
+    int64_t deviation = 0;
 
     if (ffp->enable_accurate_seek && is->video_accurate_seek_req && !is->seek_req) {
         if (!isnan(pts)) {
             video_seek_pos = is->seek_pos;
-            if (pts * 1000 * 1000 < is->seek_pos) {
+            is->accurate_seek_vframe_pts = pts * 1000 * 1000;
+            deviation = llabs((int64_t)(pts * 1000 * 1000) - is->seek_pos);
+            if ((pts * 1000 * 1000 < is->seek_pos) || deviation > MAX_DEVIATION) {
                 now = av_gettime_relative() / 1000;
                 if (is->drop_vframe_count == 0) {
                     is->accurate_seek_start_time = now;
                     av_log(NULL, AV_LOG_INFO, "video accurate_seek start, is->seek_pos=%lld, pts=%lf, is->accurate_seek_time = %lld\n", is->seek_pos, pts, is->accurate_seek_start_time);
                 }
                 is->drop_vframe_count++;
-                is->accurate_seek_vframe_pts = pts * 1000 * 1000;
                 if ((now - is->accurate_seek_start_time) <= ffp->accurate_seek_timeout) {
                     return 1;  // drop some old frame when do accurate seek
                 } else {
@@ -1542,6 +1544,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         }
         is->accurate_seek_start_time = 0;
         video_accurate_seek_fail = 0;
+        is->accurate_seek_vframe_pts = 0;
     }
 
 #if defined(DEBUG_SYNC)
@@ -1927,6 +1930,9 @@ static int audio_thread(void *arg)
     int64_t now = 0;
     double samples_duration = 0;
     int accurate_seek_wait_count = 0;
+    int64_t deviation = 0;
+    int64_t deviation2 = 0;
+    int64_t deviation3 = 0;
 
     if (!frame)
         return AVERROR(ENOMEM);
@@ -1945,7 +1951,8 @@ static int audio_thread(void *arg)
                         samples_duration = (double) frame->nb_samples / frame->sample_rate;
                         audio_clock = frame_pts + samples_duration;
                         audio_seek_pos = is->seek_pos;
-                        if (audio_clock * 1000 * 1000 < is->seek_pos) {
+                        deviation = llabs((int64_t)(audio_clock * 1000 * 1000) - is->seek_pos);
+                        if ((audio_clock * 1000 * 1000 < is->seek_pos ) || deviation > MAX_DEVIATION) {
                             if (is->drop_aframe_count == 0) {
                                 is->accurate_seek_start_time = now;
                                 av_log(NULL, AV_LOG_INFO, "audio accurate_seek start, is->seek_pos=%lld, audio_clock=%lf, is->accurate_seek_start_time = %lld\n", is->seek_pos, audio_clock, is->accurate_seek_start_time);
@@ -1953,7 +1960,9 @@ static int audio_thread(void *arg)
                             is->drop_aframe_count++;
                             accurate_seek_wait_count = 0;
                             while (is->video_accurate_seek_req && !is->abort_request && accurate_seek_wait_count < 100) {
-                                if (is->accurate_seek_vframe_pts > audio_clock * 1000 * 1000) {
+                                deviation2 = is->accurate_seek_vframe_pts - audio_clock * 1000 * 1000;
+                                deviation3 = is->accurate_seek_vframe_pts - is->seek_pos;
+                                if (deviation2 > 0 && deviation3 < 0) {
                                     break;
                                 } else {
                                     av_usleep(20 * 1000);

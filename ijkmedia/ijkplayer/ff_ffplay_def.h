@@ -142,6 +142,7 @@ static unsigned sws_flags = SWS_BICUBIC;
 #define HD_IMAGE 2  // 640*360
 #define SD_IMAGE 1  // 320*180
 #define LD_IMAGE 0  // 160*90
+#define MAX_DEVIATION 1200000   // 1200ms
 
 typedef struct GetImgInfo {
     char *img_path;
@@ -407,7 +408,7 @@ typedef struct VideoState {
     int drop_aframe_count;
     int drop_vframe_count;
     int64_t accurate_seek_start_time;
-    int64_t accurate_seek_vframe_pts;
+    volatile int64_t accurate_seek_vframe_pts;
     int audio_accurate_seek_req;
     int video_accurate_seek_req;
     SDL_mutex *accurate_seek_mutex;
