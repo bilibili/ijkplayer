@@ -33,7 +33,9 @@
 #import "ijkioapplication.h"
 #include "string.h"
 
+// 17media
 #import "IJKLog.h"
+#import "RKStreamLog.h"
 
 static const char *kIJKFFRequiredFFmpegVersion = "ff3.3--ijk0.8.0--20170710--001";
 
@@ -85,6 +87,11 @@ typedef void(^VideoSyncFinishCallback)(uint64_t timestamp);
     NSTimer *_hudTimer;
     
     NSURL *_streamURL;
+    
+    NSTimeInterval _playerInitTime;
+    NSTimeInterval _bufferingStart;
+    NSInteger _bufferingTimes;
+    NSTimeInterval _bitrateLogTime;
 }
 
 @synthesize view = _view;
@@ -201,6 +208,15 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         // init media resource
         _urlString = aUrlString;
+        _streamURL = [NSURL URLWithString:_urlString];
+        _playerInitTime = [NSDate date].timeIntervalSince1970;
+        
+        [RKStreamLog logger].url = _urlString;
+        [RKStreamLog logger].pt = _streamURL.scheme;
+        __weak typeof(self) wSelf = self;
+        [RKStreamLog logger].logCallback = ^(NSDictionary *log) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMoviePlayerStreamLogNotification object:wSelf userInfo:log];
+        };
 
         // init player
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
@@ -253,6 +269,37 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         [self registerApplicationObservers];
     }
     return self;
+}
+
+// 17 media
+- (void)setProvider:(NSString *)provider {
+    _provider = provider;
+    [RKStreamLog logger].pd = provider;
+}
+
+- (void)setLiveId:(NSString *)liveId {
+    _liveId = liveId;
+    [RKStreamLog logger].sid = liveId;
+}
+
+- (void)setUserId:(NSString *)userId {
+    [RKStreamLog logger].uid = userId;
+}
+
+- (void)setLongitude:(NSString *)longitude {
+    [RKStreamLog logger].lnt = longitude;
+}
+
+- (void)setLatitude:(NSString *)latitude {
+    [RKStreamLog logger].ltt = latitude;
+}
+
+- (void)setRegion:(NSString *)region {
+    [RKStreamLog logger].rg = region;
+}
+
+- (void)setAppVersion:(NSString *)appVersion {
+    [RKStreamLog logger].av17 = appVersion;
 }
 
 - (void)setScreenOn: (BOOL)on
@@ -345,6 +392,13 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     ijkmp_stop(_mediaPlayer);
     
     [_glView monitorDisplay:nil];
+    
+    NSTimeInterval end = [NSDate date].timeIntervalSince1970;
+    [[RKStreamLog logger] logWithDict:@{@"lt": @"bft",
+                                        @"pst": @(_playerInitTime),
+                                        @"psd": @(end),
+                                        @"num": @(_bufferingTimes)
+                                        }];
 }
 
 - (BOOL)isPlaying
@@ -1062,6 +1116,10 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
              postNotificationName:IJKMPMoviePlayerLoadStateDidChangeNotification
              object:self];
 
+            // 17 media
+            [RKStreamLog logger].host = self.monitor.remoteIp;
+            [[RKStreamLog logger] fetchHostStatus];
+            
             break;
         }
         case FFP_MSG_COMPLETED: {
@@ -1097,6 +1155,9 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         case FFP_MSG_BUFFERING_START: {
             IJKLog(@"FFP_MSG_BUFFERING_START:\n");
 
+            _bufferingStart = [NSDate date].timeIntervalSince1970;
+            _bufferingTimes++;
+            
             _monitor.lastPrerollStartTick = (int64_t)SDL_GetTickHR();
 
             _loadState = IJKMPMovieLoadStateStalled;
@@ -1109,6 +1170,13 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         case FFP_MSG_BUFFERING_END: {
             IJKLog(@"FFP_MSG_BUFFERING_END:\n");
 
+            NSTimeInterval end = [NSDate date].timeIntervalSince1970;
+            [[RKStreamLog logger] logWithDict:@{@"lt": @"dt",
+                                                @"bt": @(_bufferingStart),
+                                                @"bd": @(end),
+                                                @"bi": @(end - _bufferingStart)
+                                                }];
+            
             _monitor.lastPrerollDuration = (int64_t)SDL_GetTickHR() - _monitor.lastPrerollStartTick;
 
             _loadState = IJKMPMovieLoadStatePlayable | IJKMPMovieLoadStatePlaythroughOK;
@@ -1184,6 +1252,19 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
              userInfo:@{IJKMPMoviePlayerDidAccurateSeekCompleteCurPos: @(avmsg->arg1)}];
             break;
         }
+        // 17media
+        case FFP_MSG_VIDEO_BITRATE: {
+            int bitrate = avmsg->arg2;
+            IJKLog(@"FFP_MSG_VIDEO_BITRATE: %d\n",bitrate);
+            NSTimeInterval time = [NSDate date].timeIntervalSince1970;
+            if (_bitrateLogTime == 0 || time - _bitrateLogTime >= 10) {
+                [[RKStreamLog logger] logWithDict:@{@"lt": @"rb",
+                                                    @"bt": @(bitrate)
+                                                    }];
+                _bitrateLogTime = time;
+            }
+        }
+            break;
         default:
             // IJKLog(@"unknown FFP_MSG_xxx(%d)\n", avmsg->what);
             break;

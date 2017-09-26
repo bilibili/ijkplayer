@@ -178,6 +178,18 @@
 		54CF8A521E15287D00309DD5 /* ijktree.h in Headers */ = {isa = PBXBuildFile; fileRef = 54CF8A461E15287D00309DD5 /* ijktree.h */; };
 		54CF8A531E15287D00309DD5 /* ijkutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 54CF8A471E15287D00309DD5 /* ijkutils.c */; };
 		54CF8A541E15287D00309DD5 /* ijkutils.h in Headers */ = {isa = PBXBuildFile; fileRef = 54CF8A481E15287D00309DD5 /* ijkutils.h */; };
+		BE35EBA41F74C6D300B615DF /* RKStreamLog.h in Headers */ = {isa = PBXBuildFile; fileRef = BE35EBA21F74C6D300B615DF /* RKStreamLog.h */; };
+		BE35EBA51F74C6D300B615DF /* RKStreamLog.h in Headers */ = {isa = PBXBuildFile; fileRef = BE35EBA21F74C6D300B615DF /* RKStreamLog.h */; };
+		BE35EBA61F74C6D300B615DF /* RKStreamLog.m in Sources */ = {isa = PBXBuildFile; fileRef = BE35EBA31F74C6D300B615DF /* RKStreamLog.m */; };
+		BE35EBA71F74C6D300B615DF /* RKStreamLog.m in Sources */ = {isa = PBXBuildFile; fileRef = BE35EBA31F74C6D300B615DF /* RKStreamLog.m */; };
+		BE35EBAD1F74C71B00B615DF /* STDPingServices.h in Headers */ = {isa = PBXBuildFile; fileRef = BE35EBA91F74C71B00B615DF /* STDPingServices.h */; };
+		BE35EBAE1F74C71B00B615DF /* STDPingServices.h in Headers */ = {isa = PBXBuildFile; fileRef = BE35EBA91F74C71B00B615DF /* STDPingServices.h */; };
+		BE35EBAF1F74C71B00B615DF /* STDPingServices.m in Sources */ = {isa = PBXBuildFile; fileRef = BE35EBAA1F74C71B00B615DF /* STDPingServices.m */; };
+		BE35EBB01F74C71B00B615DF /* STDPingServices.m in Sources */ = {isa = PBXBuildFile; fileRef = BE35EBAA1F74C71B00B615DF /* STDPingServices.m */; };
+		BE35EBB11F74C71B00B615DF /* STSimplePing.h in Headers */ = {isa = PBXBuildFile; fileRef = BE35EBAB1F74C71B00B615DF /* STSimplePing.h */; };
+		BE35EBB21F74C71B00B615DF /* STSimplePing.h in Headers */ = {isa = PBXBuildFile; fileRef = BE35EBAB1F74C71B00B615DF /* STSimplePing.h */; };
+		BE35EBB31F74C71B00B615DF /* STSimplePing.m in Sources */ = {isa = PBXBuildFile; fileRef = BE35EBAC1F74C71B00B615DF /* STSimplePing.m */; };
+		BE35EBB41F74C71B00B615DF /* STSimplePing.m in Sources */ = {isa = PBXBuildFile; fileRef = BE35EBAC1F74C71B00B615DF /* STSimplePing.m */; };
 		E607FFE11B7B62E3005F11A6 /* IJKDeviceModel.m in Sources */ = {isa = PBXBuildFile; fileRef = E607FFDF1B7B60F9005F11A6 /* IJKDeviceModel.m */; };
 		E653C6F61BCE5A750016835A /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E653C6EF1BCE5A750016835A /* libavcodec.a */; };
 		E653C6F81BCE5A750016835A /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E653C6F01BCE5A750016835A /* libavfilter.a */; };
@@ -329,6 +341,12 @@
 		54CF8A461E15287D00309DD5 /* ijktree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijktree.h; sourceTree = "<group>"; };
 		54CF8A471E15287D00309DD5 /* ijkutils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ijkutils.c; sourceTree = "<group>"; };
 		54CF8A481E15287D00309DD5 /* ijkutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ijkutils.h; sourceTree = "<group>"; };
+		BE35EBA21F74C6D300B615DF /* RKStreamLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RKStreamLog.h; path = IJKMediaPlayer/RKStreamLog.h; sourceTree = "<group>"; };
+		BE35EBA31F74C6D300B615DF /* RKStreamLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RKStreamLog.m; path = IJKMediaPlayer/RKStreamLog.m; sourceTree = "<group>"; };
+		BE35EBA91F74C71B00B615DF /* STDPingServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDPingServices.h; sourceTree = "<group>"; };
+		BE35EBAA1F74C71B00B615DF /* STDPingServices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDPingServices.m; sourceTree = "<group>"; };
+		BE35EBAB1F74C71B00B615DF /* STSimplePing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimplePing.h; sourceTree = "<group>"; };
+		BE35EBAC1F74C71B00B615DF /* STSimplePing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimplePing.m; sourceTree = "<group>"; };
 		BE51DC4F1D868E1700B9F5D5 /* IJKLog.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = IJKLog.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		E607FFDE1B7B60F9005F11A6 /* IJKDeviceModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKDeviceModel.h; path = IJKMediaPlayer/IJKDeviceModel.h; sourceTree = "<group>"; };
 		E607FFDF1B7B60F9005F11A6 /* IJKDeviceModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKDeviceModel.m; path = IJKMediaPlayer/IJKDeviceModel.m; sourceTree = "<group>"; };
@@ -546,6 +564,18 @@
 			path = IJKMediaFrameworkWithSSL;
 			sourceTree = "<group>";
 		};
+		BE35EBA81F74C71B00B615DF /* ping */ = {
+			isa = PBXGroup;
+			children = (
+				BE35EBA91F74C71B00B615DF /* STDPingServices.h */,
+				BE35EBAA1F74C71B00B615DF /* STDPingServices.m */,
+				BE35EBAB1F74C71B00B615DF /* STSimplePing.h */,
+				BE35EBAC1F74C71B00B615DF /* STSimplePing.m */,
+			);
+			name = ping;
+			path = IJKMediaPlayer/ping;
+			sourceTree = "<group>";
+		};
 		E63FC27217F013DE003551EB /* dummy */ = {
 			isa = PBXGroup;
 			children = (
@@ -597,6 +627,9 @@
 				E67C4E0219D15B0600415CEE /* IJKAVMoviePlayerController */,
 				E66F8DBE17EEC5DE00354D80 /* IJKMPMoviePlayerController */,
 				E6903EBE17EAF6C500CFD954 /* IJKFFMoviePlayerController */,
+				BE35EBA81F74C71B00B615DF /* ping */,
+				BE35EBA21F74C6D300B615DF /* RKStreamLog.h */,
+				BE35EBA31F74C6D300B615DF /* RKStreamLog.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -984,10 +1017,12 @@
 				5450B0291E63EA4300568494 /* ff_ffplay_options.h in Headers */,
 				5450B02B1E63EA4300568494 /* IJKKVOController.h in Headers */,
 				5450B02C1E63EA4300568494 /* IJKNotificationManager.h in Headers */,
+				BE35EBAE1F74C71B00B615DF /* STDPingServices.h in Headers */,
 				5450B02D1E63EA4300568494 /* ijkthreadpool.h in Headers */,
 				5450B02E1E63EA4300568494 /* ijkiomanager.h in Headers */,
 				5450B02F1E63EA4300568494 /* ijkstl.h in Headers */,
 				5450B0301E63EA4300568494 /* IJKMediaModule.h in Headers */,
+				BE35EBA51F74C6D300B615DF /* RKStreamLog.h in Headers */,
 				5450B0311E63EA4300568494 /* ijkfifo.h in Headers */,
 				5450B0321E63EA4300568494 /* ijktree.h in Headers */,
 				5450B0331E63EA4300568494 /* opt.h in Headers */,
@@ -999,6 +1034,7 @@
 				5450B0391E63EA4300568494 /* IJKVideoToolBoxSync.h in Headers */,
 				5450B03A1E63EA4300568494 /* IJKMPMoviePlayerController.h in Headers */,
 				5450B03B1E63EA4300568494 /* ijkavformat.h in Headers */,
+				BE35EBB21F74C71B00B615DF /* STSimplePing.h in Headers */,
 				5450B03C1E63EA4300568494 /* IJKSDLHudViewCell.h in Headers */,
 				5450B03D1E63EA4300568494 /* IJKVideoToolBox.h in Headers */,
 				5450B03E1E63EA4300568494 /* NSString+IJKMedia.h in Headers */,
@@ -1023,10 +1059,12 @@
 				E654EA8F1B6B27E600B0F2D0 /* IJKMediaFramework.h in Headers */,
 				E6C2E7BE1C92BD3600E59229 /* IJKKVOController.h in Headers */,
 				E69808A01C7EB2040048A46C /* IJKNotificationManager.h in Headers */,
+				BE35EBAD1F74C71B00B615DF /* STDPingServices.h in Headers */,
 				54CF8A501E15287D00309DD5 /* ijkthreadpool.h in Headers */,
 				54CF8A391E1526F800309DD5 /* ijkiomanager.h in Headers */,
 				54CF8A4E1E15287D00309DD5 /* ijkstl.h in Headers */,
 				E654EAE61B6B295200B0F2D0 /* IJKMediaModule.h in Headers */,
+				BE35EBA41F74C6D300B615DF /* RKStreamLog.h in Headers */,
 				54CF8A4C1E15287D00309DD5 /* ijkfifo.h in Headers */,
 				54CF8A521E15287D00309DD5 /* ijktree.h in Headers */,
 				E69BE5571B93FED300AFBA3F /* opt.h in Headers */,
@@ -1038,6 +1076,7 @@
 				5407EC2D1DF81D2600457BFE /* IJKVideoToolBoxSync.h in Headers */,
 				E654EAE91B6B295200B0F2D0 /* IJKMPMoviePlayerController.h in Headers */,
 				54A029B71D4700E6001C61C1 /* ijkavformat.h in Headers */,
+				BE35EBB11F74C71B00B615DF /* STSimplePing.h in Headers */,
 				E68B7ACF1C1E97B0001DE241 /* IJKSDLHudViewCell.h in Headers */,
 				5407EC291DF7F93B00457BFE /* IJKVideoToolBox.h in Headers */,
 				E698089B1C7EB13A0048A46C /* NSString+IJKMedia.h in Headers */,
@@ -1236,6 +1275,7 @@
 				5450AFD31E63EA4300568494 /* ijksdl_error.c in Sources */,
 				5450AFD41E63EA4300568494 /* IJKDeviceModel.m in Sources */,
 				5450AFD51E63EA4300568494 /* ijkiocache.c in Sources */,
+				BE35EBB41F74C71B00B615DF /* STSimplePing.m in Sources */,
 				5450AFD61E63EA4300568494 /* ijksdl_egl.c in Sources */,
 				5450AFD71E63EA4300568494 /* ijkio.c in Sources */,
 				5450AFD81E63EA4300568494 /* IJKAudioKit.m in Sources */,
@@ -1261,8 +1301,10 @@
 				5450AFEB1E63EA4300568494 /* NSString+IJKMedia.m in Sources */,
 				5450AFEC1E63EA4300568494 /* ijksdl_vout_overlay_ffmpeg.c in Sources */,
 				5450AFED1E63EA4300568494 /* ijksdl_mutex.c in Sources */,
+				BE35EBB01F74C71B00B615DF /* STDPingServices.m in Sources */,
 				5450AFEE1E63EA4300568494 /* ijktree.c in Sources */,
 				5450AFEF1E63EA4300568494 /* IJKSDLAudioQueueController.m in Sources */,
+				BE35EBA71F74C6D300B615DF /* RKStreamLog.m in Sources */,
 				5450AFF01E63EA4300568494 /* ijksdl_thread.c in Sources */,
 				5450AFF11E63EA4300568494 /* yuv420sp.fsh.c in Sources */,
 				5450AFF21E63EA4300568494 /* ff_ffplay.c in Sources */,
@@ -1327,6 +1369,7 @@
 				E654EAC21B6B287E00B0F2D0 /* ijksdl_error.c in Sources */,
 				E607FFE11B7B62E3005F11A6 /* IJKDeviceModel.m in Sources */,
 				54CF8A361E1526F800309DD5 /* ijkiocache.c in Sources */,
+				BE35EBB31F74C71B00B615DF /* STSimplePing.m in Sources */,
 				E6C459BA1C706A13004831EC /* ijksdl_egl.c in Sources */,
 				54CF8A331E1526F800309DD5 /* ijkio.c in Sources */,
 				E654EAA31B6B283700B0F2D0 /* IJKAudioKit.m in Sources */,
@@ -1352,8 +1395,10 @@
 				E698089C1C7EB13A0048A46C /* NSString+IJKMedia.m in Sources */,
 				E654EABF1B6B287600B0F2D0 /* ijksdl_vout_overlay_ffmpeg.c in Sources */,
 				E654EAC31B6B287E00B0F2D0 /* ijksdl_mutex.c in Sources */,
+				BE35EBAF1F74C71B00B615DF /* STDPingServices.m in Sources */,
 				54CF8A511E15287D00309DD5 /* ijktree.c in Sources */,
 				E654EACD1B6B288A00B0F2D0 /* IJKSDLAudioQueueController.m in Sources */,
+				BE35EBA61F74C6D300B615DF /* RKStreamLog.m in Sources */,
 				E654EAC51B6B287E00B0F2D0 /* ijksdl_thread.c in Sources */,
 				E6C459C81C7095E5004831EC /* yuv420sp.fsh.c in Sources */,
 				E654EAB21B6B285900B0F2D0 /* ff_ffplay.c in Sources */,

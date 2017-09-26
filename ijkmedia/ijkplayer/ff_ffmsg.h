@@ -34,6 +34,10 @@
 #define FFP_MSG_VIDEO_RENDERING_START       402
 #define FFP_MSG_AUDIO_RENDERING_START       403
 #define FFP_MSG_VIDEO_ROTATION_CHANGED      404     /* arg1 = degree */
+
+// 17media
+#define FFP_MSG_VIDEO_BITRATE               405     /* arg1 = degree,arg2=bitrate */
+
 #define FFP_MSG_BUFFERING_START             500
 #define FFP_MSG_BUFFERING_END               501
 #define FFP_MSG_BUFFERING_UPDATE            502     /* arg1 = buffering head position in time, arg2 = minimum percent in time or bytes */

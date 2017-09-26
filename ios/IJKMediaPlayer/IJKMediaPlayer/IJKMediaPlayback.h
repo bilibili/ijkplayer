@@ -158,6 +158,8 @@ IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteErrorKey;
 IJK_EXTERN NSString *const IJKMPMoviePlayerDidAccurateSeekCompleteCurPos;
 IJK_EXTERN NSString *const IJKMPMoviePlayerAccurateSeekCompleteNotification;
 
+IJK_EXTERN NSString *const IJKMPMoviePlayerStreamLogNotification;
+
 @end
 
 #pragma mark IJKMediaUrlOpenDelegate

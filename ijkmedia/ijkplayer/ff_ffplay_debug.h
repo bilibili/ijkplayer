@@ -37,8 +37,9 @@
 // #define FFP_SHOW_BUF_POS
 // #define FFP_SHOW_PKT_RECYCLE
 
-// #define FFP_NOTIFY_BUF_TIME
-// #define FFP_NOTIFY_BUF_BYTES
+// 17media
+ #define FFP_NOTIFY_BUF_TIME
+ #define FFP_NOTIFY_BUF_BYTES
 
 // #define FFP_SHOW_VTB_IN_DECODING
 // #define FFP_VTB_DISABLE_OUTPUT

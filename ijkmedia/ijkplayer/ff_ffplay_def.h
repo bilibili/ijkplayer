@@ -75,7 +75,7 @@
  */
 #define DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS     (100)
 #define DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS      (1 * 1000)
-#define DEFAULT_LAST_HIGH_WATER_MARK_IN_MS      (2 * 1000)
+#define DEFAULT_LAST_HIGH_WATER_MARK_IN_MS      (5 * 1000) // 17media for decrease Buffering times when playing.
 
 #define BUFFERING_CHECK_PER_BYTES               (512)
 #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
@@ -724,6 +724,11 @@ typedef struct FFPlayer {
 
     struct FFVideoSync *video_sync;
     int64_t accumulated_bytes;
+    
+    // 17media log usage
+    int64_t log_last_pts;
+    int log_duration;
+    int log_bytes_size;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))

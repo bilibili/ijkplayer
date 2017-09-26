@@ -2840,6 +2840,23 @@ static int is_realtime(AVFormatContext *s)
     return 0;
 }
     
+/* 17media log */
+static void stat_bitrate(AVPacket* pkt,FFPlayer *ffp,AVFormatContext *ic) {
+    int interval = pkt->pts - ffp->log_last_pts;
+    ffp->log_duration += interval;
+    ffp->log_bytes_size += pkt->size;
+    ffp->log_last_pts = pkt->pts;
+    if (ffp->log_duration >= 1000) {
+        int realBitRate = (ffp->log_bytes_size * 8 * 1000) / ffp->log_duration;
+        av_log(ffp, AV_LOG_DEBUG, "realBitRate:%d vdpfs:%.2f bytes:%d duration:%d \r\n",realBitRate,ffp->stat.vdps,ffp->log_bytes_size, ffp->log_duration);
+        //notify
+        ffp_notify_msg3(ffp, FFP_MSG_VIDEO_BITRATE, 0, realBitRate);
+        //reset
+        ffp->log_duration = 0;
+        ffp->log_bytes_size = 0;
+    }
+}
+
 /* this thread gets the stream from the disk or the network */
 static int read_thread(void *arg)
 {
@@ -3338,7 +3355,11 @@ static int read_thread(void *arg)
 //                } else if (pkt->stream_index == is->video_stream) {
 //                    ALOGE("[VIDEO][IN] ------------- %llu\n", pkt_ts);
 //                }
+        // 17media
         ffp->accumulated_bytes += pkt->size;
+        if (pkt->stream_index == is->video_stream) {
+            stat_bitrate(pkt,ffp,ic);
+        }
         
         pkt_in_play_range = ffp->duration == AV_NOPTS_VALUE ||
                 (pkt_ts - (stream_start_time != AV_NOPTS_VALUE ? stream_start_time : 0)) *

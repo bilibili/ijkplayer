@@ -135,6 +135,12 @@ typedef enum IJKLogLevel {
 @property (copy, nonatomic) NSString *liveId;
 @property (copy, nonatomic) NSString *provider;
 @property (copy, nonatomic) NSString *streamIp;
+// 17 log
+@property (nonatomic) NSString *userId;
+@property (nonatomic) NSString *longitude;
+@property (nonatomic) NSString *latitude;
+@property (nonatomic) NSString *region;
+@property (nonatomic) NSString *appVersion;
 
 - (void)syncWithHighWaterMark:(uint16_t)highWaterMark
                  lowWaterMark:(uint16_t)lowWaterMark
