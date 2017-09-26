@@ -1929,7 +1929,6 @@ static int audio_thread(void *arg)
     double audio_clock = 0;
     int64_t now = 0;
     double samples_duration = 0;
-    int accurate_seek_wait_count = 0;
     int64_t deviation = 0;
     int64_t deviation2 = 0;
     int64_t deviation3 = 0;
@@ -1958,8 +1957,7 @@ static int audio_thread(void *arg)
                                 av_log(NULL, AV_LOG_INFO, "audio accurate_seek start, is->seek_pos=%lld, audio_clock=%lf, is->accurate_seek_start_time = %lld\n", is->seek_pos, audio_clock, is->accurate_seek_start_time);
                             }
                             is->drop_aframe_count++;
-                            accurate_seek_wait_count = 0;
-                            while (is->video_accurate_seek_req && !is->abort_request && accurate_seek_wait_count < 100) {
+                            while (is->video_accurate_seek_req && !is->abort_request) {
                                 deviation2 = is->accurate_seek_vframe_pts - audio_clock * 1000 * 1000;
                                 deviation3 = is->accurate_seek_vframe_pts - is->seek_pos;
                                 if (deviation2 > 0 && deviation3 < 0) {
@@ -1967,12 +1965,16 @@ static int audio_thread(void *arg)
                                 } else {
                                     av_usleep(20 * 1000);
                                 }
-                                accurate_seek_wait_count++;
+                                now = av_gettime_relative() / 1000;
+                                if ((now - is->accurate_seek_start_time) > ffp->accurate_seek_timeout) {
+                                    break;
+                                }
                             }
 
                             if(!is->video_accurate_seek_req && is->video_stream >= 0 && audio_clock * 1000 * 1000 > is->accurate_seek_vframe_pts) {
                                 audio_accurate_seek_fail = 1;
                             } else {
+                                now = av_gettime_relative() / 1000;
                                 if ((now - is->accurate_seek_start_time) <= ffp->accurate_seek_timeout) {
                                     av_frame_unref(frame);
                                     continue;  // drop some old frame when do accurate seek
