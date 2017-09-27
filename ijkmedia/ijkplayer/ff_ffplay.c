@@ -1491,7 +1491,11 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
             if ((pts * 1000 * 1000 < is->seek_pos) || deviation > MAX_DEVIATION) {
                 now = av_gettime_relative() / 1000;
                 if (is->drop_vframe_count == 0) {
-                    is->accurate_seek_start_time = now;
+                    SDL_LockMutex(is->accurate_seek_mutex);
+                    if (is->accurate_seek_start_time <= 0 && (is->audio_stream < 0 || is->audio_accurate_seek_req)) {
+                        is->accurate_seek_start_time = now;
+                    }
+                    SDL_UnlockMutex(is->accurate_seek_mutex);
                     av_log(NULL, AV_LOG_INFO, "video accurate_seek start, is->seek_pos=%lld, pts=%lf, is->accurate_seek_time = %lld\n", is->seek_pos, pts, is->accurate_seek_start_time);
                 }
                 is->drop_vframe_count++;
@@ -1953,7 +1957,11 @@ static int audio_thread(void *arg)
                         deviation = llabs((int64_t)(audio_clock * 1000 * 1000) - is->seek_pos);
                         if ((audio_clock * 1000 * 1000 < is->seek_pos ) || deviation > MAX_DEVIATION) {
                             if (is->drop_aframe_count == 0) {
-                                is->accurate_seek_start_time = now;
+                                SDL_LockMutex(is->accurate_seek_mutex);
+                                if (is->accurate_seek_start_time <= 0 && (is->video_stream < 0 || is->video_accurate_seek_req)) {
+                                    is->accurate_seek_start_time = now;
+                                }
+                                SDL_UnlockMutex(is->accurate_seek_mutex);
                                 av_log(NULL, AV_LOG_INFO, "audio accurate_seek start, is->seek_pos=%lld, audio_clock=%lf, is->accurate_seek_start_time = %lld\n", is->seek_pos, audio_clock, is->accurate_seek_start_time);
                             }
                             is->drop_aframe_count++;
@@ -4249,11 +4257,20 @@ int ffp_seek_to_l(FFPlayer *ffp, long msec)
 {
     assert(ffp);
     VideoState *is = ffp->is;
+    int64_t start_time = 0;
+    int64_t seek_pos = milliseconds_to_fftime(msec);
+    int64_t duration = milliseconds_to_fftime(ffp_get_duration_l(ffp));
+
     if (!is)
         return EIJK_NULL_IS_PTR;
 
-    int64_t seek_pos = milliseconds_to_fftime(msec);
-    int64_t start_time = is->ic->start_time;
+    if (duration > 0 && seek_pos >= duration && ffp->enable_accurate_seek) {
+        toggle_pause(ffp, 1);
+        ffp_notify_msg1(ffp, FFP_MSG_COMPLETED);
+        return 0;
+    }
+
+    start_time = is->ic->start_time;
     if (start_time > 0 && start_time != AV_NOPTS_VALUE)
         seek_pos += start_time;
 
