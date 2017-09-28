@@ -9,7 +9,7 @@
 /* Begin PBXAggregateTarget section */
 		A8286EDD1EBC3D4A00E86322 /* IJKMediaFramework-CreateUniversalFramework */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = BE35EB671F56AEDB00B615DF /* Build configuration list */;
+			buildConfigurationList = BE35EB671F56AEDB00B615DF /* Build configuration list for PBXAggregateTarget "IJKMediaFramework-CreateUniversalFramework" */;
 			buildPhases = (
 				BE35EB641F56AEDB00B615DF /* ShellScript */,
 			);
@@ -1781,7 +1781,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BE35EB671F56AEDB00B615DF /* Build configuration list */ = {
+		BE35EB671F56AEDB00B615DF /* Build configuration list for PBXAggregateTarget "IJKMediaFramework-CreateUniversalFramework" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BE35EB651F56AEDB00B615DF /* Debug */,
