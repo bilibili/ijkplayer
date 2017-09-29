@@ -482,7 +482,7 @@ static int64_t ijkio_cache_write_file(IjkURLContext *h) {
 static void ijkio_cache_task(void *h, void *r) {
     IjkIOCacheContext *c= ((IjkURLContext *)h)->priv_data;
     c->task_is_running = 1;
-    int ret = 0;
+    int64_t ret = 0;
 
     while(1) {
         if (c->cache_file_close) {
@@ -736,11 +736,11 @@ static int ijkio_file_read(IjkURLContext *h, void *dest, int to_read)
     IjkIOCacheContext *c   = h->priv_data;
     IjkCacheEntry *entry   = NULL;
     IjkCacheEntry *next[2] = {NULL, NULL};
-    int ret                = 0;
+    int64_t ret            = 0;
     int to_copy            = 0;
 
     if (!c->tree_info)
-        return ret;
+        return 0;
 
     entry = ijk_av_tree_find(c->tree_info->root, &c->read_logical_pos, cmp, (void**)next);
     if (!entry)
@@ -772,7 +772,7 @@ static int ijkio_file_read(IjkURLContext *h, void *dest, int to_read)
             }
         }
     }
-    return ret;
+    return (int)ret;
 }
 
 static int64_t sync_add_entry(IjkURLContext *h, const unsigned char *buf, int size)
@@ -854,7 +854,7 @@ fail:
 
 static int ijkio_cache_sync_read(IjkURLContext *h, unsigned char *buf, int size) {
     IjkIOCacheContext *c= h->priv_data;
-    int ret = 0;
+    int64_t ret = 0;
     int to_read = size;
     int to_copy = 0;
     IjkCacheEntry *entry = NULL, *next_entry = NULL, *next[2] = {NULL, NULL};
@@ -889,7 +889,7 @@ static int ijkio_cache_sync_read(IjkURLContext *h, unsigned char *buf, int size)
                 ret = wrapped_file_read(h, buf, to_copy);
                 if (ret >= 0) {
                     c->cache_physical_pos += ret;
-                    return ret;
+                    return (int)ret;
                 }
             }
 
@@ -920,7 +920,7 @@ static int ijkio_cache_sync_read(IjkURLContext *h, unsigned char *buf, int size)
     if (c->async_open > 0) {
         ret = ijkio_cache_io_open(h, c->inner_url, c->inner_flags, &c->inner_options);
         if (ret != 0) {
-            return ret;
+            return (int)ret;
         }
         c->async_open = 0;
     }
@@ -928,34 +928,34 @@ static int ijkio_cache_sync_read(IjkURLContext *h, unsigned char *buf, int size)
     if (c->read_inner_pos != c->read_logical_pos) {
         ret = c->inner->prot->url_seek(c->inner, c->read_logical_pos, SEEK_SET);
         if (ret < 0) {
-            return ret;
+            return (int)ret;
         }
         c->read_inner_pos = ret;
     }
 
     next_entry = next[1];
     if (next_entry && next_entry->logical_pos > c->read_logical_pos) {
-        to_copy = FFMIN(to_read, next_entry->logical_pos - c->read_logical_pos);
+        to_copy = (int)FFMIN(to_read, next_entry->logical_pos - c->read_logical_pos);
     } else {
         to_copy = to_read;
     }
 
     ret = wrapped_url_read(h, buf, to_copy);
     if (ret <= 0)
-        return ret;
+        return (int)ret;
 
     c->read_inner_pos   += ret;
 
     if (c->fd >= 0 && c->tree_info && !c->only_read_file) {
-        sync_add_entry(h, buf, ret);
+        sync_add_entry(h, buf, (int)ret);
     }
 
-    return ret;
+    return (int)ret;
 }
 
 static int ijkio_cache_read(IjkURLContext *h, unsigned char *buf, int size) {
     IjkIOCacheContext *c = h->priv_data;
-    int              ret = 0;
+    int64_t          ret = 0;
     int          to_read = size;
     unsigned char  *dest = buf;
     int          to_copy = 0;
@@ -973,7 +973,7 @@ static int ijkio_cache_read(IjkURLContext *h, unsigned char *buf, int size) {
             c->read_logical_pos += ret;
         }
         call_inject_statistic(h);
-        return ret;
+        return (int)ret;
     }
 
     pthread_mutex_lock(&c->file_mutex);
@@ -987,14 +987,14 @@ static int ijkio_cache_read(IjkURLContext *h, unsigned char *buf, int size) {
             ret = c->inner->prot->url_seek(c->inner, c->read_logical_pos, SEEK_SET);
             if (ret < 0) {
                 pthread_mutex_unlock(&c->file_mutex);
-                return ret;
+                return (int)ret;
             }
 
             to_copy  = wrapped_url_read(h, dest, to_read);
             to_read -= to_copy;
             ret      = size - to_read;
             pthread_mutex_unlock(&c->file_mutex);
-            return ret;
+            return (int)ret;
         }
 
         to_copy = ijkio_file_read(h, dest, to_read);
@@ -1022,7 +1022,7 @@ static int ijkio_cache_read(IjkURLContext *h, unsigned char *buf, int size) {
         pthread_cond_signal(&c->cond_wakeup_file_background);
     }
     pthread_mutex_unlock(&c->file_mutex);
-    return ret;
+    return (int)ret;
 }
 
 static int64_t ijkio_cache_seek(IjkURLContext *h, int64_t pos, int whence) {

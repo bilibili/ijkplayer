@@ -392,6 +392,7 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
     float origin_dar = 0;
     float dar = 0;
     AVRational display_aspect_ratio;
+    int file_name_length = 0;
 
     if (!height || !width || !img_info->width || !img_info->height) {
         ret = -1;
@@ -541,10 +542,12 @@ static int convert_image(FFPlayer *ffp, AVFrame *src_frame, int64_t src_frame_pt
 
         img_info->count--;
 
+        file_name_length = (int)strlen(file_name) + 1;
+
         if (img_info->count <= 0)
-            ffp_notify_msg4(ffp, FFP_MSG_GET_IMG_STATE, (int) src_frame_pts, 1, file_name, strlen(file_name) + 1);
+            ffp_notify_msg4(ffp, FFP_MSG_GET_IMG_STATE, (int) src_frame_pts, 1, file_name, file_name_length);
         else
-            ffp_notify_msg4(ffp, FFP_MSG_GET_IMG_STATE, (int) src_frame_pts, 0, file_name, strlen(file_name) + 1);
+            ffp_notify_msg4(ffp, FFP_MSG_GET_IMG_STATE, (int) src_frame_pts, 0, file_name, file_name_length);
 
         ret = 0;
     }
@@ -2404,7 +2407,9 @@ static int audio_decode_frame(FFPlayer *ffp)
     av_unused double audio_clock0;
     int wanted_nb_samples;
     Frame *af;
+#if defined(__ANDROID__)
     int translate_time = 1;
+#endif
 
     if (is->paused || is->step)
         return -1;
@@ -3104,8 +3109,7 @@ static int read_thread(void *arg)
 
     is->realtime = is_realtime(ic);
 
-    if (true || ffp->show_status)
-        av_dump_format(ic, 0, is->filename, 0);
+    av_dump_format(ic, 0, is->filename, 0);
 
     int video_stream_count = 0;
     int h264_stream_count = 0;

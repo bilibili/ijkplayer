@@ -210,7 +210,7 @@ static int cmp(const void *key, const void *node)
 static void ijkio_manager_parse_cache_info(IjkIOApplicationContext *app_ctx, char *file_path) {
     char string_line[CONFIG_MAX_LINE] = {0};
     char **ptr = (char **)&string_line;
-    int str_len                     = 0;
+    uint64_t str_len                = 0;
     int tree_index                  = 0;
     int64_t tree_physical_init_pos  = 0;
     int64_t tree_physical_size      = 0;
@@ -243,7 +243,7 @@ static void ijkio_manager_parse_cache_info(IjkIOApplicationContext *app_ctx, cha
                     break;
                 }
             }
-            tree_index = strtol(*ptr, NULL, 10);
+            tree_index = (int)strtol(*ptr, NULL, 10);
         } else if (ijk_av_strstart(string_line, "tree_physical_init_pos:", (const char **)ptr)) {
             str_len = strlen(*ptr);
             for (int i = 0; i < str_len; i++) {
