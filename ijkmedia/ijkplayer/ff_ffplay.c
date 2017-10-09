@@ -1625,6 +1625,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         frame_queue_push(&is->pictq);
         if (!is->viddec.first_frame_decoded) {
             ALOGD("Video: first frame decoded\n");
+            ffp_notify_msg1(ffp, FFP_MSG_VIDEO_DECODED_START);
             is->viddec.first_frame_decoded_time = SDL_GetTickHR();
             is->viddec.first_frame_decoded = 1;
         }
@@ -2564,6 +2565,7 @@ reload:
 #endif
     if (!is->auddec.first_frame_decoded) {
         ALOGD("avcodec/Audio: first frame decoded\n");
+        ffp_notify_msg1(ffp, FFP_MSG_AUDIO_DECODED_START);
         is->auddec.first_frame_decoded_time = SDL_GetTickHR();
         is->auddec.first_frame_decoded = 1;
     }
@@ -3032,6 +3034,8 @@ static int read_thread(void *arg)
         ret = -1;
         goto fail;
     }
+    ffp_notify_msg1(ffp, FFP_MSG_OPEN_INPUT);
+
     if (scan_all_pmts_set)
         av_dict_set(&ffp->format_opts, "scan_all_pmts", NULL, AV_DICT_MATCH_CASE);
 
@@ -3065,6 +3069,7 @@ static int read_thread(void *arg)
         }
         err = avformat_find_stream_info(ic, opts);
     } while(0);
+    ffp_notify_msg1(ffp, FFP_MSG_FIND_STREAM_INFO);
 
     for (i = 0; i < orig_nb_streams; i++)
         av_dict_free(&opts[i]);
@@ -3183,6 +3188,7 @@ static int read_thread(void *arg)
     if (st_index[AVMEDIA_TYPE_SUBTITLE] >= 0) {
         stream_component_open(ffp, st_index[AVMEDIA_TYPE_SUBTITLE]);
     }
+    ffp_notify_msg1(ffp, FFP_MSG_COMPONENT_OPEN);
 
     ijkmeta_set_avformat_context_l(ffp->meta, ic);
     ffp->stat.bit_rate = ic->bit_rate;
