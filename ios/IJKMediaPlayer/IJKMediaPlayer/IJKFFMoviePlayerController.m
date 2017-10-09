@@ -1140,6 +1140,41 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
              object:self];
             break;
         }
+        case FFP_MSG_AUDIO_DECODED_START: {
+            NSLog(@"FFP_MSG_AUDIO_DECODED_START:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerFirstAudioFrameDecodedNotification
+             object:self];
+            break;
+        }
+        case FFP_MSG_VIDEO_DECODED_START: {
+            NSLog(@"FFP_MSG_VIDEO_DECODED_START:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerFirstVideoFrameDecodedNotification
+             object:self];
+            break;
+        }
+        case FFP_MSG_OPEN_INPUT: {
+            NSLog(@"FFP_MSG_OPEN_INPUT:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerOpenInputNotification
+             object:self];
+            break;
+        }
+        case FFP_MSG_FIND_STREAM_INFO: {
+            NSLog(@"FFP_MSG_FIND_STREAM_INFO:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerFindStreamInfoNotification
+             object:self];
+            break;
+        }
+        case FFP_MSG_COMPONENT_OPEN: {
+            NSLog(@"FFP_MSG_COMPONENT_OPEN:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerComponentOpenNotification
+             object:self];
+            break;
+        }
         case FFP_MSG_ACCURATE_SEEK_COMPLETE: {
             NSLog(@"FFP_MSG_ACCURATE_SEEK_COMPLETE:\n");
             [[NSNotificationCenter defaultCenter]
