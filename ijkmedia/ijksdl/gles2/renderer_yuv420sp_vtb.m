@@ -104,7 +104,10 @@ static GLboolean yuv420sp_vtb_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_Vo
     }
 
     CFTypeRef color_attachments = CVBufferGetAttachment(pixel_buffer, kCVImageBufferYCbCrMatrixKey, NULL);
-    if (color_attachments != opaque->color_attachments) {
+    NSString *color_attachmentsString = (__bridge NSString *)color_attachments;
+    NSString *opaque_color_attachmentsString = (__bridge NSString *)opaque->color_attachments;
+    
+    if (![color_attachmentsString isEqualToString:opaque_color_attachmentsString]) {
         if (color_attachments == nil) {
             glUniformMatrix3fv(renderer->um3_color_conversion, 1, GL_FALSE, IJK_GLES2_getColorMatrix_bt709());
         } else if (opaque->color_attachments != nil &&
