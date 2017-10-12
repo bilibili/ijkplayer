@@ -79,14 +79,16 @@
 
 #define BUFFERING_CHECK_PER_BYTES               (512)
 #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
-#define FAST_BUFFERING_CHECK_PER_MILLISECONDS   (100)
+#define FAST_BUFFERING_CHECK_PER_MILLISECONDS   (50)
+#define MAX_RETRY_CONVERT_IMAGE                 (3)
 
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
+#define MAX_ACCURATE_SEEK_TIMEOUT (5000)
 #ifdef FFP_MERGE
 #define MIN_FRAMES 25
 #endif
 #define DEFAULT_MIN_FRAMES  50000
-#define MIN_MIN_FRAMES      5
+#define MIN_MIN_FRAMES      2
 #define MAX_MIN_FRAMES      50000
 #define MIN_FRAMES (ffp->dcc.min_frames)
 #define EXTERNAL_CLOCK_MIN_FRAMES 2
@@ -129,8 +131,6 @@
 
 #define MIN_PKT_DURATION 15
 
-#define MAX_KEY_FRAME_INTERVAL 1000  // max key frame interval is 1000
-
 #ifdef FFP_MERGE
 #define CURSOR_HIDE_DELAY 1000000
 
@@ -142,6 +142,7 @@ static unsigned sws_flags = SWS_BICUBIC;
 #define HD_IMAGE 2  // 640*360
 #define SD_IMAGE 1  // 320*180
 #define LD_IMAGE 0  // 160*90
+#define MAX_DEVIATION 1200000   // 1200ms
 
 typedef struct GetImgInfo {
     char *img_path;
@@ -406,6 +407,8 @@ typedef struct VideoState {
 
     int drop_aframe_count;
     int drop_vframe_count;
+    int64_t accurate_seek_start_time;
+    volatile int64_t accurate_seek_vframe_pts;
     int audio_accurate_seek_req;
     int video_accurate_seek_req;
     SDL_mutex *accurate_seek_mutex;
@@ -504,6 +507,7 @@ typedef struct FFStatistic
     int64_t cache_file_forwards;
     int64_t cache_file_pos;
     int64_t cache_count_bytes;
+    int64_t logical_file_size;
     int drop_frame_count;
     int decode_frame_count;
     float drop_frame_rate;
@@ -701,6 +705,7 @@ typedef struct FFPlayer {
     IjkIOManagerContext *ijkio_manager_ctx;
 
     int enable_accurate_seek;
+    int accurate_seek_timeout;
     int mediacodec_sync;
     int skip_calc_frame_rate;
     int get_frame_mode;
@@ -782,6 +787,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->first_video_frame_rendered = 0;
     ffp->sync_av_start          = 1;
     ffp->enable_accurate_seek   = 0;
+    ffp->accurate_seek_timeout  = MAX_ACCURATE_SEEK_TIMEOUT;
 
     ffp->playable_duration_ms           = 0;
 

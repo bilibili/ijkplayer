@@ -24,11 +24,14 @@
 #include "ijkplayer/ijkavutil/ijkutils.h"
 #include "ijkplayer/ijkavutil/ijktree.h"
 #include "ijkplayer/ijkavutil/ijkstl.h"
+#include "libavutil/log.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+
+#define CONFIG_MAX_LINE 1024
 
 static int ijkio_manager_alloc(IjkIOManagerContext **ph, void *opaque)
 {
@@ -43,6 +46,7 @@ static int ijkio_manager_alloc(IjkIOManagerContext **ph, void *opaque)
 
     ijkio_application_open(&h->ijkio_app_ctx, opaque);
 
+    pthread_mutex_init(&h->ijkio_app_ctx->mutex, NULL);
     h->ijkio_app_ctx->threadpool_ctx = ijk_threadpool_create(5, 5, 0);
     h->ijkio_app_ctx->cache_info_map = ijk_map_create();
     h->ijkio_app_ctx->fd             = -1;
@@ -55,54 +59,13 @@ int ijkio_manager_create(IjkIOManagerContext **ph, void *opaque)
     return ijkio_manager_alloc(ph, opaque);
 }
 
-void ijkio_manager_inject_node(IjkIOManagerContext *h, int index, int64_t file_logical_pos, int64_t physical_pos, int64_t cache_size, int64_t file_size) {
-    if (!h->ijkio_app_ctx)
-        return;
-    if (!h->ijkio_app_ctx->ijkio_cache_init_node) {
-        h->ijkio_app_ctx->ijkio_cache_init_node = (IjkIOAppCacheInitNode *)calloc(1, sizeof(IjkIOAppCacheInitNode));
-        if (!h->ijkio_app_ctx->ijkio_cache_init_node)
-            return;
-        h->ijkio_app_ctx->ijkio_cache_init_node->file_logical_pos = file_logical_pos;
-        h->ijkio_app_ctx->ijkio_cache_init_node->physical_pos = physical_pos;
-        h->ijkio_app_ctx->ijkio_cache_init_node->cache_size = cache_size;
-        h->ijkio_app_ctx->ijkio_cache_init_node->file_size = file_size;
-        h->ijkio_app_ctx->ijkio_cache_init_node->index = index;
-        h->ijkio_app_ctx->init_node_count++;
-
-        IjkCacheTreeInfo *tree_info = ijk_map_get(h->ijkio_app_ctx->cache_info_map, index);
-        if (tree_info == NULL) {
-            IjkCacheTreeInfo *tree_info = calloc(1, sizeof(IjkCacheTreeInfo));
-            tree_info->physical_init_pos = physical_pos;
-            ijk_map_put(h->ijkio_app_ctx->cache_info_map, (int64_t)index, tree_info);
-        }
-    } else {
-        h->ijkio_app_ctx->ijkio_cache_init_node = (IjkIOAppCacheInitNode *)realloc(h->ijkio_app_ctx->ijkio_cache_init_node, sizeof(IjkIOAppCacheInitNode) * (h->ijkio_app_ctx->init_node_count + 1));
-        IjkIOAppCacheInitNode *node = (IjkIOAppCacheInitNode *)(h->ijkio_app_ctx->ijkio_cache_init_node + h->ijkio_app_ctx->init_node_count);
-        if (!node)
-            return;
-        node->file_logical_pos = file_logical_pos;
-        node->physical_pos = physical_pos;
-        node->cache_size = cache_size;
-        node->file_size = file_size;
-        node->index = index;
-        h->ijkio_app_ctx->init_node_count++;
-        IjkCacheTreeInfo *tree_info = ijk_map_get(h->ijkio_app_ctx->cache_info_map, index);
-        if (tree_info == NULL) {
-            IjkCacheTreeInfo *tree_info = calloc(1, sizeof(IjkCacheTreeInfo));
-            tree_info->physical_init_pos = physical_pos;
-            ijk_map_put(h->ijkio_app_ctx->cache_info_map, (int64_t)index, tree_info);
-        }
-    }
-
-}
-
 static int enu_free(void *opaque, void *elem)
 {
     free(elem);
     return 0;
 }
 
-static int tree_destroy(void *elem)
+static int tree_destroy(void *parm, int64_t key, void *elem)
 {
     IjkCacheTreeInfo *info = elem;
     ijk_av_tree_enumerate(info->root, NULL, NULL, enu_free);
@@ -111,10 +74,76 @@ static int tree_destroy(void *elem)
     return 0;
 }
 
+static int enu_save(void *opaque, void *elem) {
+    FILE *fp = opaque;
+    IjkCacheEntry *entry = elem;
+    char string[CONFIG_MAX_LINE] = {0};
+
+    if (entry && fp) {
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "entry_logical_pos:%lld\n", entry->logical_pos);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "entry_physical_pos:%lld\n", entry->physical_pos);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "entry_size:%lld\n", entry->size);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "entry-info-flush\n");
+        fwrite(string, strlen(string), 1, fp);
+    }
+    return 0;
+}
+
+static int ijkio_manager_save_tree_to_file(void *parm, int64_t key, void *elem)
+{
+    IjkCacheTreeInfo *info = elem;
+    FILE *fp = parm;
+    char string[CONFIG_MAX_LINE] = {0};
+    if (key >= 0 && info) {
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "tree_index:%lld\n", key);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "tree_physical_init_pos:%lld\n", info->physical_init_pos);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "tree_physical_size:%lld\n", info->physical_size);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "tree_file_size:%lld\n", info->file_size);
+        fwrite(string, strlen(string), 1, fp);
+
+        memset(string, 0, CONFIG_MAX_LINE);
+        snprintf(string, CONFIG_MAX_LINE, "tree-info-flush\n");
+        fwrite(string, strlen(string), 1, fp);
+
+        ijk_av_tree_enumerate(info->root, parm, NULL, enu_save);
+    }
+    return 0;
+}
+
 void ijkio_manager_destroy(IjkIOManagerContext *h)
 {
+    FILE *map_tree_info_fp = NULL;
+
     if (h->ijkio_app_ctx) {
-        ijk_map_traversal_handle(h->ijkio_app_ctx->cache_info_map, tree_destroy);
+        if (h->auto_save_map) {
+            map_tree_info_fp = fopen(h->cache_map_path, "w");
+            if (map_tree_info_fp) {
+                ijk_map_traversal_handle(h->ijkio_app_ctx->cache_info_map, map_tree_info_fp, ijkio_manager_save_tree_to_file);
+                fclose(map_tree_info_fp);
+            }
+        }
+
+        ijk_map_traversal_handle(h->ijkio_app_ctx->cache_info_map, NULL, tree_destroy);
         ijk_map_destroy(h->ijkio_app_ctx->cache_info_map);
         h->ijkio_app_ctx->cache_info_map = NULL;
 
@@ -127,6 +156,7 @@ void ijkio_manager_destroy(IjkIOManagerContext *h)
                 close(h->ijkio_app_ctx->fd);
             }
         }
+        pthread_mutex_destroy(&h->ijkio_app_ctx->mutex);
 
         ijkio_application_closep(&h->ijkio_app_ctx);
     }
@@ -172,17 +202,205 @@ static void ijkio_manager_set_all_ctx_pause(IjkIOManagerContext *h) {
     }
 }
 
+static int cmp(const void *key, const void *node)
+{
+    return FFDIFFSIGN(*(const int64_t *)key, ((const IjkCacheEntry *) node)->logical_pos);
+}
+
+static void ijkio_manager_parse_cache_info(IjkIOApplicationContext *app_ctx, char *file_path) {
+    char string_line[CONFIG_MAX_LINE] = {0};
+    char **ptr = (char **)&string_line;
+    uint64_t str_len                = 0;
+    int tree_index                  = 0;
+    int64_t tree_physical_init_pos  = 0;
+    int64_t tree_physical_size      = 0;
+    int64_t tree_file_size          = 0;
+    int64_t entry_logical_pos       = 0;
+    int64_t entry_physical_pos      = 0;
+    int64_t entry_size              = 0;
+    void *cache_info_map            = app_ctx->cache_info_map;
+    IjkCacheTreeInfo *cur_tree_info = NULL;
+    IjkCacheEntry *cur_entry        = NULL;
+    IjkCacheEntry *entry_ret        = NULL;
+    struct IjkAVTreeNode *cur_node  = NULL;
+
+    FILE *fp = fopen(file_path, "r");
+    if (!fp) {
+        return;
+    }
+
+    while (!feof(fp)) {
+        memset(string_line, 0 , CONFIG_MAX_LINE);
+        fgets(string_line, CONFIG_MAX_LINE, fp);
+
+        av_log(NULL, AV_LOG_INFO, "cache config info: %s\n", string_line);
+
+        if (ijk_av_strstart(string_line, "tree_index:", (const char **)ptr)) {
+            str_len = strlen(*ptr);
+            for (int i = 0; i < str_len; i++) {
+                if ((*ptr)[i] < '0' || (*ptr)[i] > '9') {
+                    (*ptr)[i] = '\0';
+                    break;
+                }
+            }
+            tree_index = (int)strtol(*ptr, NULL, 10);
+        } else if (ijk_av_strstart(string_line, "tree_physical_init_pos:", (const char **)ptr)) {
+            str_len = strlen(*ptr);
+            for (int i = 0; i < str_len; i++) {
+                if ((*ptr)[i] < '0' || (*ptr)[i] > '9') {
+                    (*ptr)[i] = '\0';
+                    break;
+                }
+            }
+            tree_physical_init_pos = strtoll(*ptr, NULL, 10);
+        } else if (ijk_av_strstart(string_line, "tree_physical_size:", (const char **)ptr)) {
+            str_len = strlen(*ptr);
+            for (int i = 0; i < str_len; i++) {
+                if ((*ptr)[i] < '0' || (*ptr)[i] > '9') {
+                    (*ptr)[i] = '\0';
+                    break;
+                }
+            }
+            tree_physical_size = strtoll(*ptr, NULL, 10);
+            app_ctx->last_physical_pos += tree_physical_size;
+        } else if (ijk_av_strstart(string_line, "tree_file_size:", (const char **)ptr)) {
+            str_len = strlen(*ptr);
+            for (int i = 0; i < str_len; i++) {
+                if ((*ptr)[i] < '0' || (*ptr)[i] > '9') {
+                    (*ptr)[i] = '\0';
+                    break;
+                }
+            }
+            tree_file_size = strtoll(*ptr, NULL, 10);
+        } else if (ijk_av_strstart(string_line, "tree-info-flush", (const char **)ptr)) {
+            cur_tree_info = calloc(1, sizeof(IjkCacheTreeInfo));
+            if (cur_tree_info) {
+                cur_tree_info->physical_init_pos  = tree_physical_init_pos;
+                cur_tree_info->physical_size      = tree_physical_size;
+                cur_tree_info->file_size          = tree_file_size;
+                ijk_map_put(cache_info_map, tree_index, cur_tree_info);
+            } else {
+                break;
+            }
+            tree_index             = 0;
+            tree_physical_init_pos = 0;
+            tree_physical_size     = 0;
+            tree_file_size         = 0;
+        } else if (ijk_av_strstart(string_line, "entry_logical_pos:", (const char **)ptr)) {
+            str_len = strlen(*ptr);
+            for (int i = 0; i < str_len; i++) {
+                if ((*ptr)[i] < '0' || (*ptr)[i] > '9') {
+                    (*ptr)[i] = '\0';
+                    break;
+                }
+            }
+            entry_logical_pos = strtoll(*ptr, NULL, 10);
+        } else if (ijk_av_strstart(string_line, "entry_physical_pos:", (const char **)ptr)) {
+            str_len = strlen(*ptr);
+            for (int i = 0; i < str_len; i++) {
+                if ((*ptr)[i] < '0' || (*ptr)[i] > '9') {
+                    (*ptr)[i] = '\0';
+                    break;
+                }
+            }
+            entry_physical_pos = strtoll(*ptr, NULL, 10);
+        } else if (ijk_av_strstart(string_line, "entry_size:", (const char **)ptr)) {
+            str_len = strlen(*ptr);
+            for (int i = 0; i < str_len; i++) {
+                if ((*ptr)[i] < '0' || (*ptr)[i] > '9') {
+                    (*ptr)[i] = '\0';
+                    break;
+                }
+            }
+            entry_size = strtoll(*ptr, NULL, 10);
+        } else if (ijk_av_strstart(string_line, "entry-info-flush", (const char **)ptr)) {
+            if (cur_tree_info) {
+                cur_entry = calloc(1, sizeof(IjkCacheEntry));
+                cur_node  = ijk_av_tree_node_alloc();
+                if (!cur_entry || !cur_node) {
+                    break;
+                }
+
+                cur_entry->logical_pos  = entry_logical_pos;
+                cur_entry->physical_pos = entry_physical_pos;
+                cur_entry->size         = entry_size;
+
+                entry_ret = ijk_av_tree_insert(&cur_tree_info->root, cur_entry, cmp, &cur_node);
+                if (entry_ret && entry_ret != cur_entry) {
+                    break;
+                }
+            }
+        }
+    }
+
+    fclose(fp);
+}
+
+void ijkio_manager_will_share_cache_map(IjkIOManagerContext *h) {
+    av_log(NULL, AV_LOG_INFO, "will share cache\n");
+    if (!h || !h->ijkio_app_ctx || !strlen(h->cache_map_path)) {
+        return;
+    }
+
+    pthread_mutex_lock(&h->ijkio_app_ctx->mutex);
+    FILE *map_tree_info_fp = fopen(h->cache_map_path, "w");
+    if (!map_tree_info_fp) {
+        pthread_mutex_unlock(&h->ijkio_app_ctx->mutex);
+        return;
+    }
+    h->ijkio_app_ctx->shared = 1;
+    ijk_map_traversal_handle(h->ijkio_app_ctx->cache_info_map, map_tree_info_fp, ijkio_manager_save_tree_to_file);
+    fclose(map_tree_info_fp);
+    if (h->ijkio_app_ctx->fd >= 0) {
+        fsync(h->ijkio_app_ctx->fd);
+    }
+    pthread_mutex_unlock(&h->ijkio_app_ctx->mutex);
+}
+
+void ijkio_manager_did_share_cache_map(IjkIOManagerContext *h) {
+    av_log(NULL, AV_LOG_INFO, "did share cache\n");
+    if (!h || !h->ijkio_app_ctx) {
+        return;
+    }
+    pthread_mutex_lock(&h->ijkio_app_ctx->mutex);
+    h->ijkio_app_ctx->shared = 0;
+    pthread_mutex_unlock(&h->ijkio_app_ctx->mutex);
+}
+
 int ijkio_manager_io_open(IjkIOManagerContext *h, const char *url, int flags, IjkAVDictionary **options) {
     int ret = -1;
+    int parse_cache_map_file = 0;
     if (!h)
         return ret;
+
+    if (!h->ijkio_app_ctx) {
+        return -1;
+    }
+
     IjkAVDictionaryEntry *t = NULL;
-    t = ijk_av_dict_get(*options, "cache_file_path", t, IJK_AV_DICT_MATCH_CASE);
+    t = ijk_av_dict_get(*options, "cache_file_path", NULL, IJK_AV_DICT_MATCH_CASE);
     if (t) {
         strcpy(h->ijkio_app_ctx->cache_file_path, t->value);
     }
-    if (h->ijkio_app_ctx == NULL) {
-        return -1;
+
+    t = ijk_av_dict_get(*options, "cache_map_path", NULL, IJK_AV_DICT_MATCH_CASE);
+    if (t) {
+        strcpy(h->cache_map_path, t->value);
+
+        t = ijk_av_dict_get(*options, "auto_save_map", NULL, IJK_AV_DICT_MATCH_CASE);
+        if (t) {
+            h->auto_save_map = (int)strtol(t->value, NULL, 10);
+        }
+
+        if (h->ijkio_app_ctx->cache_info_map && !ijk_map_size(h->ijkio_app_ctx->cache_info_map)) {
+            t = ijk_av_dict_get(*options, "parse_cache_map", NULL, IJK_AV_DICT_MATCH_CASE);
+            if (t) {
+                parse_cache_map_file = (int)strtol(t->value, NULL, 10);
+                if (parse_cache_map_file) {
+                    ijkio_manager_parse_cache_info(h->ijkio_app_ctx, h->cache_map_path);
+                }
+            }
+        }
     }
 
     h->ijkio_app_ctx->ijkio_interrupt_callback = h->ijkio_interrupt_callback;

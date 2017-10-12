@@ -148,6 +148,11 @@ IJK_EXTERN NSString* const IJKMPMovieNaturalSizeAvailableNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerFirstVideoFrameRenderedNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerFirstAudioFrameDecodedNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerFirstVideoFrameDecodedNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerOpenInputNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerFindStreamInfoNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerComponentOpenNotification;
 
 IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteTargetKey;

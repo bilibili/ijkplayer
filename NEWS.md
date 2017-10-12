@@ -1,6 +1,18 @@
 tag next
 --------------------------------
 
+tag k0.8.4
+--------------------------------
+- ffmpeg: enable hevc by default
+- ijkio: support cache share
+- ijkplayer: fix some bug
+
+tag k0.8.3
+--------------------------------
+- ffmpeg: dns cache refactor
+- ijkio: cache support synchronize read avoid frequent lseek
+- ijkplayer: fix some bug
+
 tag k0.8.2
 --------------------------------
 - ffmpeg: fix some bug

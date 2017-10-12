@@ -33,7 +33,7 @@
 #import "ijkioapplication.h"
 #include "string.h"
 
-static const char *kIJKFFRequiredFFmpegVersion = "ff3.3--ijk0.8.0--20170710--001";
+static const char *kIJKFFRequiredFFmpegVersion = "ff3.3--ijk0.8.0--20170829--001";
 
 // It means you didn't call shutdown if you found this object leaked.
 @interface IJKWeakHolder : NSObject
@@ -862,6 +862,13 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     return ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_PLAYBACK_VOLUME, 1.0f);
 }
 
+- (int64_t)getFileSize
+{
+    if (!_mediaPlayer)
+        return 0;
+    return ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_LOGICAL_FILE_SIZE, 0);
+}
+
 - (int64_t)trafficStatistic
 {
     if (!_mediaPlayer)
@@ -1130,6 +1137,41 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             NSLog(@"FFP_MSG_AUDIO_RENDERING_START:\n");
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMPMoviePlayerFirstAudioFrameRenderedNotification
+             object:self];
+            break;
+        }
+        case FFP_MSG_AUDIO_DECODED_START: {
+            NSLog(@"FFP_MSG_AUDIO_DECODED_START:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerFirstAudioFrameDecodedNotification
+             object:self];
+            break;
+        }
+        case FFP_MSG_VIDEO_DECODED_START: {
+            NSLog(@"FFP_MSG_VIDEO_DECODED_START:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerFirstVideoFrameDecodedNotification
+             object:self];
+            break;
+        }
+        case FFP_MSG_OPEN_INPUT: {
+            NSLog(@"FFP_MSG_OPEN_INPUT:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerOpenInputNotification
+             object:self];
+            break;
+        }
+        case FFP_MSG_FIND_STREAM_INFO: {
+            NSLog(@"FFP_MSG_FIND_STREAM_INFO:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerFindStreamInfoNotification
+             object:self];
+            break;
+        }
+        case FFP_MSG_COMPONENT_OPEN: {
+            NSLog(@"FFP_MSG_COMPONENT_OPEN:\n");
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerComponentOpenNotification
              object:self];
             break;
         }

@@ -939,6 +939,26 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             MPTRACE("FFP_MSG_VIDEO_ROTATION_CHANGED: %d\n", msg.arg1);
             post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_ROTATION_CHANGED, msg.arg1);
             break;
+        case FFP_MSG_AUDIO_DECODED_START:
+            MPTRACE("FFP_MSG_AUDIO_DECODED_START:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_DECODED_START, 0);
+            break;
+        case FFP_MSG_VIDEO_DECODED_START:
+            MPTRACE("FFP_MSG_VIDEO_DECODED_START:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_DECODED_START, 0);
+            break;
+        case FFP_MSG_OPEN_INPUT:
+            MPTRACE("FFP_MSG_OPEN_INPUT:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_OPEN_INPUT, 0);
+            break;
+        case FFP_MSG_FIND_STREAM_INFO:
+            MPTRACE("FFP_MSG_FIND_STREAM_INFO:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_FIND_STREAM_INFO, 0);
+            break;
+        case FFP_MSG_COMPONENT_OPEN:
+            MPTRACE("FFP_MSG_COMPONENT_OPEN:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_COMPONENT_OPEN, 0);
+            break;
         case FFP_MSG_BUFFERING_START:
             MPTRACE("FFP_MSG_BUFFERING_START:\n");
             post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
@@ -1075,17 +1095,6 @@ IjkMediaPlayer_native_setLogLevel(JNIEnv *env, jclass clazz, jint level)
 }
 
 static void
-IjkMediaPlayer_injectCacheNode(JNIEnv *env, jobject thiz, jint index, jlong file_logical_pos, jlong physical_pos, jlong cache_size, jlong file_size) {
-    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
-    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: injectCacheNode: null mp", LABEL_RETURN);
-    ijkmp_set_ijkio_inject_node(mp, index, file_logical_pos, physical_pos, cache_size, file_size);
-
-LABEL_RETURN:
-    ijkmp_dec_ref_p(&mp);
-    return;
-}
-
-static void
 IjkMediaPlayer_setFrameAtTime(JNIEnv *env, jobject thiz, jstring path, jlong start_time, jlong end_time, jint num, jint definition) {
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
     const char *c_path = NULL;
@@ -1156,8 +1165,7 @@ static JNINativeMethod g_methods[] = {
     { "native_profileEnd",      "()V",                      (void *) IjkMediaPlayer_native_profileEnd },
 
     { "native_setLogLevel",     "(I)V",                     (void *) IjkMediaPlayer_native_setLogLevel },
-    { "_injectCacheNode",       "(IJJJJ)V",                 (void *) IjkMediaPlayer_injectCacheNode },
-    { "_setFrameAtTime",         "(Ljava/lang/String;JJII)V", (void *) IjkMediaPlayer_setFrameAtTime },
+    { "_setFrameAtTime",        "(Ljava/lang/String;JJII)V", (void *) IjkMediaPlayer_setFrameAtTime },
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
