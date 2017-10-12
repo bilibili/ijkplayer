@@ -682,17 +682,17 @@ static int decode_video(Ijk_VideoToolBox_Opaque* context, AVCodecContext *avctx,
             av_frame_unref(frame);
             avcodec_free_context(&new_avctx);
         }
-    } else {
-        if (ff_avpacket_is_idr(avpkt) == true) {
-            context->idr_based_identified = true;
-        }
-        if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
-            ResetPktBuffer(context);
-            context->recovery_drop_packet = false;
-        }
-        if (context->recovery_drop_packet == true) {
-            return -1;
-        }
+    }
+    
+    if (ff_avpacket_is_idr(avpkt) == true) {
+        context->idr_based_identified = true;
+    }
+    if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
+        ResetPktBuffer(context);
+        context->recovery_drop_packet = false;
+    }
+    if (context->recovery_drop_packet == true) {
+        return -1;
     }
 
     DuplicatePkt(context, avpkt);
