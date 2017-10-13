@@ -104,8 +104,11 @@ static int vout_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         ijk_overlay.pixels = overlay->pixels;
         ijk_overlay.sar_num = overlay->sar_num;
         ijk_overlay.sar_den = overlay->sar_den;
-        ijk_overlay.pixel_buffer = SDL_VoutOverlayVideoToolBox_GetCVPixelBufferRef(overlay);
-
+#ifdef __APPLE__
+        if (ijk_overlay.format == SDL_FCC__VTB) {
+            ijk_overlay.pixel_buffer = SDL_VoutOverlayVideoToolBox_GetCVPixelBufferRef(overlay);
+        }
+#endif
         if ([gl_view respondsToSelector:@selector(display_pixels:)]) {
              [gl_view display_pixels:&ijk_overlay];
         }
