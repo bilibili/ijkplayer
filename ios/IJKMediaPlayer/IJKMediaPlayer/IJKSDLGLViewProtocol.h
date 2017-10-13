@@ -1,10 +1,8 @@
 /*
- * IJKSDLGLView.h
+ * IJKSDLGLViewProtocol.h
  *
- * Copyright (c) 2013 Bilibili
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
- *
- * based on https://github.com/kolyvan/kxmovie
+ * Copyright (c) 2017 Bilibili
+ * Copyright (c) 2017 raymond <raymondzheng1412@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -23,17 +21,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#ifndef IJKSDLGLViewProtocol_h
+#define IJKSDLGLViewProtocol_h
+
 #import <UIKit/UIKit.h>
-#import "IJKSDLGLViewProtocol.h"
 
-#include "ijksdl/ijksdl_vout.h"
+typedef struct IJKOverlay IJKOverlay;
+struct IJKOverlay {
+    int w;
+    int h;
+    UInt32 format;
+    int planes;
+    UInt16 *pitches;
+    UInt8 **pixels;
+    int sar_num;
+    int sar_den;
+    CVPixelBufferRef pixel_buffer;
+};
 
-@interface IJKSDLGLView : UIView <IJKSDLGLViewProtocol>
-
-- (id) initWithFrame:(CGRect)frame;
-- (void) display: (SDL_VoutOverlay *) overlay;
-
+@protocol IJKSDLGLViewProtocol <NSObject>
 - (UIImage*) snapshot;
-- (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhiteBeingMovedToWindow __attribute__((deprecated("unused")));
-
+@property(nonatomic, readonly) CGFloat  fps;
+@property(nonatomic)        CGFloat  scaleFactor;
+@property(nonatomic)        BOOL  isThirdGLView;
+- (void) display_pixels: (IJKOverlay *) overlay;
 @end
+
+#endif /* IJKSDLGLViewProtocol_h */
