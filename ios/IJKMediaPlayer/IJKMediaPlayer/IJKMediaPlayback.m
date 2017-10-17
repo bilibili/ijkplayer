@@ -52,6 +52,8 @@ NSString *const IJKMPMoviePlayerDidSeekCompleteTargetKey = @"IJKMPMoviePlayerDid
 NSString *const IJKMPMoviePlayerDidSeekCompleteErrorKey = @"IJKMPMoviePlayerDidSeekCompleteErrorKey";
 NSString *const IJKMPMoviePlayerDidAccurateSeekCompleteCurPos = @"IJKMPMoviePlayerDidAccurateSeekCompleteCurPos";
 
+NSString *const IJKMPMoviePlayerArtworkKey = @"IJKMPMoviePlayerArtworkKey";
+
 @implementation IJKMediaUrlOpenData {
     NSString *_url;
     BOOL _handled;

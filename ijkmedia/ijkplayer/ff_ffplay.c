@@ -3219,6 +3219,19 @@ static int read_thread(void *arg)
     if (ffp->infinite_buffer < 0 && is->realtime)
         ffp->infinite_buffer = 1;
 
+    
+    // find the first attached picture, if available
+    for (int i = 0; i < ic->nb_streams; i++)
+    {
+        if (ic->streams[i]->disposition & AV_DISPOSITION_ATTACHED_PIC)
+        {
+            AVPacket pkt = ic->streams[i]->attached_pic;
+            ffp_notify_msg4(ffp, FFP_MSG_ARTWORK, pkt.size, 0, pkt.data, pkt.size);
+            break;
+        }
+    }
+    
+
     if (!ffp->start_on_prepared)
         toggle_pause(ffp, 1);
     if (is->video_st && is->video_st->codecpar) {
