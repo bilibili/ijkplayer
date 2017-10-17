@@ -3117,8 +3117,8 @@ static int read_thread(void *arg)
     av_dump_format(ic, 0, is->filename, 0);
 
     int video_stream_count = 0;
-    int h264_stream_count = 0;
-    int first_h264_stream = -1;
+    int highQ_stream_count = 0;
+    int first_highQ_stream = -1;
     for (i = 0; i < ic->nb_streams; i++) {
         AVStream *st = ic->streams[i];
         enum AVMediaType type = st->codecpar->codec_type;
@@ -3127,21 +3127,22 @@ static int read_thread(void *arg)
             if (avformat_match_stream_specifier(ic, st, ffp->wanted_stream_spec[type]) > 0)
                 st_index[type] = i;
 
-        // choose first h264
+        // choose first h264/h265
 
         if (type == AVMEDIA_TYPE_VIDEO) {
             enum AVCodecID codec_id = st->codecpar->codec_id;
             video_stream_count++;
-            if (codec_id == AV_CODEC_ID_H264) {
-                h264_stream_count++;
-                if (first_h264_stream < 0)
-                    first_h264_stream = i;
+            if (codec_id == AV_CODEC_ID_H264 ||
+                codec_id == AV_CODEC_ID_HEVC) {
+                highQ_stream_count++;
+                if (first_highQ_stream < 0)
+                    first_highQ_stream = i;
             }
         }
     }
     if (video_stream_count > 1 && st_index[AVMEDIA_TYPE_VIDEO] < 0) {
-        st_index[AVMEDIA_TYPE_VIDEO] = first_h264_stream;
-        av_log(NULL, AV_LOG_WARNING, "multiple video stream found, prefer first h264 stream: %d\n", first_h264_stream);
+        st_index[AVMEDIA_TYPE_VIDEO] = first_highQ_stream;
+        av_log(NULL, AV_LOG_WARNING, "multiple video stream found, prefer first h264 stream: %d\n", first_highQ_stream);
     }
     if (!ffp->video_disable)
         st_index[AVMEDIA_TYPE_VIDEO] =
