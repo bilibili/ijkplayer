@@ -640,7 +640,8 @@ static int decode_video(Ijk_VideoToolBox_Opaque* context, AVCodecContext *avctx,
     }
 
     if (context->ffp->vtb_handle_resolution_change &&
-        context->codecpar->codec_id == AV_CODEC_ID_H264) {
+        (context->codecpar->codec_id == AV_CODEC_ID_H264 ||
+         context->codecpar->codec_id == AV_CODEC_ID_HEVC )) {
         size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
         // minimum avcC(sps,pps) = 7
         if (size_data && size_data_size > 7) {
@@ -761,7 +762,7 @@ static void dict_set_i32(CFMutableDictionaryRef dict, CFStringRef key,
     CFRelease(number);
 }
 
-static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format_id, int width, int height, const uint8_t *extradata, int extradata_size, uint32_t atom)
+static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format_id, int width, int height, const uint8_t *extradata, int extradata_size)
 {
     CMFormatDescriptionRef fmt_desc = NULL;
     OSStatus status;
@@ -774,7 +775,13 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
     dict_set_i32(par, CFSTR ("HorizontalSpacing"), 0);
     dict_set_i32(par, CFSTR ("VerticalSpacing"), 0);
     /* SampleDescriptionExtensionAtoms dict */
+    if (format_id == kCMVideoCodecType_H264){
     dict_set_data(atoms, CFSTR ("avcC"), (uint8_t *)extradata, extradata_size);
+    }
+    else {
+        dict_set_data(atoms, CFSTR ("hvcC"), (uint8_t *)extradata, extradata_size);
+    }
+    
 
       /* Extensions dict */
     dict_set_string(extensions, CFSTR ("CVImageBufferChromaLocationBottomField"), "left");
@@ -916,14 +923,20 @@ static int vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecParameters *codecpar)
     if (width < 0 || height < 0) {
         goto fail;
     }
-
+    Uint32 format_id;
     switch (codec) {
         case AV_CODEC_ID_H264:
+        case AV_CODEC_ID_HEVC:
             if (extrasize < 7 || extradata == NULL) {
                 ALOGI("%s - avcC atom too data small or missing", __FUNCTION__);
                 goto fail;
             }
-
+            if (codec == AV_CODEC_ID_H264){
+                format_id = kCMVideoCodecType_H264;
+            }
+            else {
+                format_id = kCMVideoCodecType_HEVC;
+            }
             if (extradata[0] == 1) {
                 if (!validate_avcC_spc(extradata, extrasize, &fmt_desc->max_ref_frames, &sps_level, &sps_profile)) {
                     //goto failed;
@@ -943,7 +956,7 @@ static int vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecParameters *codecpar)
                     fmt_desc->convert_3byteTo4byteNALSize = true;
                 }
 
-                fmt_desc->fmt_desc = CreateFormatDescriptionFromCodecData(kCMVideoCodecType_H264, width, height, extradata, extrasize,  IJK_VTB_FCC_AVCC);
+                fmt_desc->fmt_desc = CreateFormatDescriptionFromCodecData(format_id, width, height, extradata, extrasize);
                 if (fmt_desc->fmt_desc == NULL) {
                     goto fail;
                 }
@@ -968,7 +981,8 @@ static int vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecParameters *codecpar)
                         goto fail;
                     }
 
-                    fmt_desc->fmt_desc = CreateFormatDescriptionFromCodecData(kCMVideoCodecType_H264, width, height, extradata, extrasize, IJK_VTB_FCC_AVCC);
+                    
+                    fmt_desc->fmt_desc = CreateFormatDescriptionFromCodecData(format_id, width, height, extradata, extrasize);
                     if (fmt_desc->fmt_desc == NULL) {
                         goto fail;
                     }
