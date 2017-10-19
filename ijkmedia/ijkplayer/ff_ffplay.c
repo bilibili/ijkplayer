@@ -1172,9 +1172,12 @@ static void stream_toggle_pause_l(FFPlayer *ffp, int pause_on)
     } else {
     }
     set_clock(&is->extclk, get_clock(&is->extclk), is->extclk.serial);
-    is->paused = is->audclk.paused = is->vidclk.paused = is->extclk.paused = pause_on;
-
-    SDL_AoutPauseAudio(ffp->aout, pause_on);
+    if (is->step && (is->pause_req || is->buffering_on)) {
+        is->paused = is->vidclk.paused = is->extclk.paused = pause_on;
+    } else {
+        is->paused = is->audclk.paused = is->vidclk.paused = is->extclk.paused = pause_on;
+        SDL_AoutPauseAudio(ffp->aout, pause_on);
+    }
 }
 
 static void stream_update_pause_l(FFPlayer *ffp)
@@ -1209,10 +1212,10 @@ static void toggle_pause(FFPlayer *ffp, int pause_on)
 static void step_to_next_frame_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
+    is->step = 1;
     /* if the stream is paused unpause it, then step */
     if (is->paused)
         stream_toggle_pause_l(ffp, 0);
-    is->step = 1;
 }
 
 static double compute_target_delay(FFPlayer *ffp, double delay, VideoState *is)
@@ -3280,6 +3283,7 @@ static int read_thread(void *arg)
                 if (is->audio_stream >= 0) {
                     packet_queue_flush(&is->audioq);
                     packet_queue_put(&is->audioq, &flush_pkt);
+                    SDL_AoutFlushAudio(ffp->aout);
                 }
                 if (is->subtitle_stream >= 0) {
                     packet_queue_flush(&is->subtitleq);
