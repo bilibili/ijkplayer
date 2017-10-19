@@ -781,13 +781,14 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
 
     if (!_streamURL) {
         _streamURL = [NSURL URLWithString:_urlString];
-        [_glView setHudValue:_commentProtocol forKey:@"comment-protocol"];
-        [_glView setHudValue:_liveId forKey:@"live-id"];
-        [_glView setHudValue:_provider forKey:@"provider"];
-        [_glView setHudValue:_streamURL.scheme forKey:@"scheme"];
-        [_glView setHudValue:_streamURL.host forKey:@"host"];
-        [_glView setHudValue:_urlString forKey:@"path"];
     }
+    [_glView setHudValue:_commentProtocol forKey:@"comment-protocol"];
+    [_glView setHudValue:_liveId forKey:@"live-id"];
+    [_glView setHudValue:_provider forKey:@"provider"];
+    [_glView setHudValue:_streamURL.scheme forKey:@"scheme"];
+    [_glView setHudValue:_streamURL.host forKey:@"host"];
+    [_glView setHudValue:_urlString forKey:@"path"];
+    [_glView setHudValue:_streamDevice forKey:@"device"];
 
     int64_t vdec = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_VIDEO_DECODER, FFP_PROPV_DECODER_UNKNOWN);
     float   vdps = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND, .0f);
