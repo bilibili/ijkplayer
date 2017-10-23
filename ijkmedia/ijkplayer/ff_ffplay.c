@@ -4890,6 +4890,10 @@ void ffp_set_property_int64(FFPlayer *ffp, int id, int64_t value)
                 }
             }
             break;
+        case FFP_PROP_INT64_IMMEDIATE_RECONNECT:
+            if (ffp) {
+                ijkio_manager_immediate_reconnect(ffp->ijkio_manager_ctx);
+            }
         default:
             break;
     }

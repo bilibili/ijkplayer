@@ -102,5 +102,6 @@
 
 #define FFP_PROP_INT64_LOGICAL_FILE_SIZE                20209
 #define FFP_PROP_INT64_SHARE_CACHE_DATA                 20210
+#define FFP_PROP_INT64_IMMEDIATE_RECONNECT              20211
 
 #endif
