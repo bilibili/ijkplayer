@@ -117,6 +117,16 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ios_videotoolbox(FFPlayer *
             else
                 opaque->context = Ijk_VideoToolbox_Sync_Create(ffp, opaque->avctx);
         break;
+    case AV_CODEC_ID_HEVC: 
+            if(!ffp->videotoolbox_hevc) {
+                ALOGE("videotoolbox disable HEVC codec_id:%d\n", opaque->avctx->codec_id);
+                goto fail;
+            }
+            if (ffp->vtb_async)
+                opaque->context = Ijk_VideoToolbox_Async_Create(ffp, opaque->avctx);
+            else
+                opaque->context = Ijk_VideoToolbox_Sync_Create(ffp, opaque->avctx);
+        break;
     default:
         ALOGI("Videotoolbox-pipeline:open_video_decoder: not H264\n");
         goto fail;

@@ -660,6 +660,7 @@ typedef struct FFPlayer {
     int startup_volume;
 
     int videotoolbox;
+    int videotoolbox_hevc;
     int vtb_max_frame_width;
     int vtb_async;
     int vtb_wait_async;
