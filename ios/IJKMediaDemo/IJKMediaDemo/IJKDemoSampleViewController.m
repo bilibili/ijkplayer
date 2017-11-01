@@ -63,7 +63,8 @@
                             @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear5/prog_index.m3u8"]];
     [sampleList addObject:@[@"bipbop advanced 22.050Hz stereo @ 40 kbps",
                             @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear0/prog_index.m3u8"]];
-
+    [sampleList addObject:@[@"bipbop advanced hevc 170601 kbps",
+                            @"http://tungsten.aaplimg.com/VOD/img_bipbop_adv_example_hevc_ernie_170519_clr_ST322_v2_170601_final/master.m3u8"]];
     self.sampleList = sampleList;
 }
 

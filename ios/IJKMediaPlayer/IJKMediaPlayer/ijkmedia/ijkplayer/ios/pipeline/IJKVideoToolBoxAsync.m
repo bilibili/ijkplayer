@@ -771,10 +771,12 @@ static int decode_video(Ijk_VideoToolBox_Opaque* context, AVCodecContext *avctx,
     }
 
     if (context->ffp->vtb_handle_resolution_change &&
-        context->codecpar->codec_id == AV_CODEC_ID_H264) {
+         (context->codecpar->codec_id == AV_CODEC_ID_H264 || context->codecpar->codec_id == AV_CODEC_ID_HEVC)) {
         size_data = av_packet_get_side_data(avpkt, AV_PKT_DATA_NEW_EXTRADATA, &size_data_size);
         // minimum avcC(sps,pps) = 7
-        if (size_data && size_data_size > 7) {
+        // minimum hvcC(vps,sps,pps) = 23
+        if ((context->codecpar->codec_id == AV_CODEC_ID_H264 && size_data && size_data_size > 7)
+            || (context->codecpar->codec_id == AV_CODEC_ID_HEVC && size_data && size_data_size > 23)) {
             int             got_picture = 0;
             AVFrame        *frame      = av_frame_alloc();
             AVDictionary   *codec_opts = NULL;
@@ -907,7 +909,10 @@ static CMFormatDescriptionRef CreateFormatDescriptionFromCodecData(Uint32 format
     dict_set_i32(par, CFSTR ("HorizontalSpacing"), 0);
     dict_set_i32(par, CFSTR ("VerticalSpacing"), 0);
     /* SampleDescriptionExtensionAtoms dict */
-    dict_set_data(atoms, CFSTR ("avcC"), (uint8_t *)extradata, extradata_size);
+    if(format_id == kCMVideoCodecType_H264)
+        dict_set_data(atoms, CFSTR ("avcC"), (uint8_t *)extradata, extradata_size);
+    else if(format_id == kCMVideoCodecType_HEVC)
+        dict_set_data(atoms, CFSTR ("hvcC"), (uint8_t *)extradata, extradata_size);
 
       /* Extensions dict */
     dict_set_string(extensions, CFSTR ("CVImageBufferChromaLocationBottomField"), "left");
@@ -1114,6 +1119,16 @@ static int vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecParameters *codecpar)
                     ALOGI("%s - invalid avcC atom data", __FUNCTION__);
                     goto fail;
                 }
+            }
+            break;
+        case AV_CODEC_ID_HEVC:
+            if (extrasize < 23 || extradata == NULL) {
+                ALOGI("%s - hvcC atom too data small or missing", __FUNCTION__);
+                goto fail;
+            }
+            fmt_desc->fmt_desc = CreateFormatDescriptionFromCodecData(kCMVideoCodecType_HEVC, width, height, extradata, extrasize,  IJK_VTB_FCC_AVCC);
+            if (fmt_desc->fmt_desc == NULL) {
+                goto fail;
             }
             break;
         default:
