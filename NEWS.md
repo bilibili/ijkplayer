@@ -1,6 +1,11 @@
 tag next
 --------------------------------
 
+tag k0.8.5
+--------------------------------
+- ijkplayer: fix opengl config error
+- ijkplayer: fix some bug about audio
+
 tag k0.8.4
 --------------------------------
 - ffmpeg: enable hevc by default
