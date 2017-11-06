@@ -149,9 +149,6 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     if (_didSetupGL)
         return YES;
 
-    if ([self isApplicationActive] == NO)
-        return NO;
-
     CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
     eaglLayer.opaque = YES;
     eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -188,9 +185,6 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 {
     if (_didSetupGL)
         return YES;
-
-    if ([self isApplicationActive] == NO)
-        return NO;
 
     if (![self tryLockGLActive])
         return NO;
@@ -336,7 +330,10 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 
 - (void)display: (SDL_VoutOverlay *) overlay
 {
-    if (![self setupGLOnce])
+    if (_didSetupGL == NO)
+        return;
+
+    if ([self isApplicationActive] == NO)
         return;
 
     if (![self tryLockGLActive]) {
