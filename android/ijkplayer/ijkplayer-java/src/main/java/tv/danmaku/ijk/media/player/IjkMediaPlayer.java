@@ -139,6 +139,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int FFP_PROP_INT64_BIT_RATE                         = 20100;
     public static final int FFP_PROP_INT64_TCP_SPEED                        = 20200;
     public static final int FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION        = 20300;
+    public static final int FFP_PROP_INT64_IMMEDIATE_RECONNECT              = 20211;
     //----------------------------------------
 
     @AccessedByNative
@@ -947,6 +948,10 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     protected void finalize() throws Throwable {
         super.finalize();
         native_finalize();
+    }
+
+    public void httphookReconnect() {
+        _setPropertyLong(FFP_PROP_INT64_IMMEDIATE_RECONNECT, 1);
     }
 
     public void setCacheShare(int share) {
