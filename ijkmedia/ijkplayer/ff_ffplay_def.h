@@ -554,6 +554,11 @@ typedef struct FFVideoSync {
     void (*sync_finish_cb)(uint64_t timestamp, void *userData);
 } FFVideoSync;
 
+typedef struct FFAppSei {
+    void *userData;
+    void (*sei_message_cb)(int contentType, size_t contentSize, const uint8_t *contentData, void *userData);
+} FFAppSei;
+
 #pragma mark -
 
 /* ffplayer */
@@ -724,6 +729,8 @@ typedef struct FFPlayer {
 
     struct FFVideoSync *video_sync;
     int64_t accumulated_bytes;
+    
+    struct FFAppSei *app_sei;
     
     // 17media log usage
     int64_t log_last_pts;

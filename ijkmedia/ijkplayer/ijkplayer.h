@@ -228,6 +228,8 @@ void            ijkmp_sync_baseline_register(IjkMediaPlayer *mp,
 void            ijkmp_sync_finish_register(IjkMediaPlayer *mp, void *userData, void (*sync_finish_cb)(uint64_t timestamp, void *userData));
 
 int64_t         ijkmp_read_total_bytes(IjkMediaPlayer *mp);
+
+void            ijkmp_app_sei_register(IjkMediaPlayer *mp, void *userData, void (*sei_message_cb)(int contentType, size_t contentSize, const uint8_t *contentData, void *userData));
 #pragma mark -
 
 #endif

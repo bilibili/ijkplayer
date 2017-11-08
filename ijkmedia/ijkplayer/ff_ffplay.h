@@ -128,6 +128,8 @@ void      ffp_sync_baseline_register(FFPlayer *ffp,
 void      ffp_sync_finish_register(FFPlayer *ffp, void *userData, void (*sync_finish_cb)(uint64_t timestamp, void *userData));
 
 int64_t   ffp_read_total_bytes(FFPlayer *ffp);
+
+void ffp_app_sei_register(FFPlayer *ffp, void *userData, void (*sei_message_cb)(int contentType, size_t contentSize, const uint8_t *contentData, void *userData));
 #pragma mark -
 
 #endif

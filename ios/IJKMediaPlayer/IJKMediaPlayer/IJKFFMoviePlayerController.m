@@ -212,7 +212,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         _playerInitTime = [NSDate date].timeIntervalSince1970;
         
         [RKStreamLog logger].url = _urlString;
-        [RKStreamLog logger].pt = _streamURL.scheme;
         __weak typeof(self) wSelf = self;
         [RKStreamLog logger].logCallback = ^(NSDictionary *log) {
             [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMoviePlayerStreamLogNotification object:wSelf userInfo:log];
@@ -286,11 +285,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     [RKStreamLog logger].uid = userId;
 }
 
-- (void)setLongitude:(NSString *)longitude {
+- (void)setLongitude:(double)longitude {
     [RKStreamLog logger].lnt = longitude;
 }
 
-- (void)setLatitude:(NSString *)latitude {
+- (void)setLatitude:(double)latitude {
     [RKStreamLog logger].ltt = latitude;
 }
 
@@ -557,6 +556,8 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     _liveOpenDelegate       = nil;
     _nativeInvokeDelegate   = nil;
 
+    self.shouldNotifyAppSEI = NO;
+    
     __unused id weakPlayer = (__bridge_transfer IJKFFMoviePlayerController*)ijkmp_set_weak_thiz(_mediaPlayer, NULL);
     __unused id weakHolder = (__bridge_transfer IJKWeakHolder*)ijkmp_set_inject_opaque(_mediaPlayer, NULL);
     __unused id weakijkHolder = (__bridge_transfer IJKWeakHolder*)ijkmp_set_ijkio_inject_opaque(_mediaPlayer, NULL);
@@ -1256,7 +1257,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         // 17media
         case FFP_MSG_VIDEO_BITRATE: {
             int bitrate = avmsg->arg2;
-            IJKLog(@"FFP_MSG_VIDEO_BITRATE: %d\n",bitrate);
+            //IJKLog(@"FFP_MSG_VIDEO_BITRATE: %d\n",bitrate);
             NSTimeInterval time = [NSDate date].timeIntervalSince1970;
             if (_bitrateLogTime == 0 || time - _bitrateLogTime >= 10) {
                 [[RKStreamLog logger] logWithDict:@{@"lt": @"rb",
@@ -1774,6 +1775,43 @@ void e7_player_sync_finish(uint64_t timestamp, void *userData)
     }
 }
 
+void e7_on_app_sei(int contentType, size_t contentSize, const uint8_t *contentData, void *userData)
+{
+    IJKWeakHolder *weakHolder = (__bridge IJKWeakHolder*)userData;
+    IJKFFMoviePlayerController *mpc = weakHolder.object;
+    if (!mpc) {
+        return;
+    }
+    // json
+    if (contentType == 1) {
+        NSData *data = [NSData dataWithBytes:contentData length:contentSize];
+        NSError *err;
+        id json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&err];
+        if (json) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:IJKFFAppSeiNotification
+                                                                object:mpc
+                                                              userInfo:@{IJKFFAppSeiObjectKey : json}];
+        } else {
+            ALOGE("sei json error = %s\n", [err.localizedDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+        }
+    }
+}
+
+- (void)setShouldNotifyAppSEI:(BOOL)shouldNotifyAppSEI {
+    if (_shouldNotifyAppSEI == shouldNotifyAppSEI) {
+        return;
+    }
+    _shouldNotifyAppSEI = shouldNotifyAppSEI;
+    
+    if (shouldNotifyAppSEI) {
+        IJKWeakHolder *weakHolder = [IJKWeakHolder new];
+        weakHolder.object = self;
+        ijkmp_app_sei_register(_mediaPlayer, (__bridge_retained void *)weakHolder, e7_on_app_sei);
+    } else {
+        ijkmp_app_sei_register(_mediaPlayer, NULL, NULL);
+    }
+}
+
 #pragma mark Setter
 
 - (void)setCommentProtocol:(NSString *)commentProtocol {
@@ -1788,3 +1826,5 @@ void e7_player_sync_finish(uint64_t timestamp, void *userData)
 
 @end
 
+NSString *const IJKFFAppSeiNotification = @"IJKFFAppSeiNotification";
+NSString *const IJKFFAppSeiObjectKey = @"IJKFFAppSeiObjectKey";

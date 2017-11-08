@@ -2848,7 +2848,7 @@ static void stat_bitrate(AVPacket* pkt,FFPlayer *ffp,AVFormatContext *ic) {
     ffp->log_last_pts = pkt->pts;
     if (ffp->log_duration >= 1000) {
         int realBitRate = (ffp->log_bytes_size * 8 * 1000) / ffp->log_duration;
-        av_log(ffp, AV_LOG_DEBUG, "realBitRate:%d vdpfs:%.2f bytes:%d duration:%d \r\n",realBitRate,ffp->stat.vdps,ffp->log_bytes_size, ffp->log_duration);
+        //av_log(ffp, AV_LOG_DEBUG, "realBitRate:%d vdpfs:%.2f bytes:%d duration:%d \r\n",realBitRate,ffp->stat.vdps,ffp->log_bytes_size, ffp->log_duration);
         //notify
         ffp_notify_msg3(ffp, FFP_MSG_VIDEO_BITRATE, 0, realBitRate);
         //reset
@@ -3355,10 +3355,14 @@ static int read_thread(void *arg)
 //                } else if (pkt->stream_index == is->video_stream) {
 //                    ALOGE("[VIDEO][IN] ------------- %llu\n", pkt_ts);
 //                }
-        // 17media
+        // 17 media
         ffp->accumulated_bytes += pkt->size;
         if (pkt->stream_index == is->video_stream) {
             stat_bitrate(pkt,ffp,ic);
+//            uint8_t *data = pkt->data;
+//            if (0x06 == (data[4] & 0x1F) && 0x05 == data[5]) {
+//                ALOGE("sei received\n");
+//            }
         }
         
         pkt_in_play_range = ffp->duration == AV_NOPTS_VALUE ||
@@ -4802,6 +4806,19 @@ int64_t ffp_read_total_bytes(FFPlayer *ffp)
     int64_t total_bytes = ffp->accumulated_bytes;
     ffp->accumulated_bytes = 0;
     return total_bytes;
+}
+            
+void ffp_app_sei_register(FFPlayer *ffp, void *userData, void (*sei_message_cb)(int contentType, size_t contentSize, const uint8_t *contentData, void *userData))
+{
+    if (ffp->app_sei) {
+        free(ffp->app_sei);
+        ffp->app_sei = NULL;
+    }
+    if (sei_message_cb) {
+        ffp->app_sei = (FFAppSei*)calloc(1, sizeof(FFAppSei));
+        ffp->app_sei->userData = userData;
+        ffp->app_sei->sei_message_cb = sei_message_cb;
+    }
 }
             
 #pragma mark -

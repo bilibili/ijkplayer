@@ -828,4 +828,9 @@ int64_t ijkmp_read_total_bytes(IjkMediaPlayer *mp)
     return ffp_read_total_bytes(mp->ffplayer);
 }
 
+void ijkmp_app_sei_register(IjkMediaPlayer *mp, void *userData, void (*sei_message_cb)(int contentType, size_t contentSize, const uint8_t *contentData, void *userData))
+{
+    ffp_app_sei_register(mp->ffplayer, userData, sei_message_cb);
+}
+
 #pragma mark -

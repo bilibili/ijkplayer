@@ -627,7 +627,97 @@ static inline void DuplicatePkt(Ijk_VideoToolBox_Opaque* context, const AVPacket
     context->m_buffer_deep++;
 }
 
+void
+print_bytes(void   *start,
+            size_t  length)
+{
+    uint8_t *base = NULL;
+    size_t   idx = 0;
+    
+    if (!start || length <= 0)
+        return;
+    
+    base = (uint8_t *)(start);
+    for (idx = 0; idx < length; idx++)
+        printf("%02X%s", base[idx] & 0xFF, (idx + 1) % 16 == 0 ? "\n" : " ");
+    printf("\n");
+}
 
+static uint8_t *ff_avpacket_find_sei_nalu(const AVPacket* pkt) {
+    
+    int state = -1;
+    
+    if (pkt->data && pkt->size >= 5) {
+        int offset = 0;
+        while (offset >= 0 && offset + 5 <= pkt->size) {
+            void* nal_start = pkt->data + offset;
+            state = ff_get_nal_units_type(nal_start);
+            if (state == NAL_SEI) {
+                return nal_start;
+            }
+            offset += (bytesToInt(nal_start) + 4);
+        }
+    }
+    return NULL;
+}
+
+static int handle_17_sei(FFPlayer *ffp, uint8_t *data)
+{
+//    ALOGE("parse_h264_sei \n");
+//    print_bytes(data, 128);
+//    ALOGI("\n\n");
+    
+    /**
+     * 17.Media System Time Synchronization UUID
+     * 7627DFE0-4924-4084-B98D-F2C9444B8E98
+     */
+    static const uint8_t time_sync_uuid[] =
+    {0x76, 0x27, 0xDF, 0xE0,
+        0x49, 0x24, 0x40, 0x84,
+        0xB9, 0x8D, 0xF2, 0xC9,
+        0x44, 0x4B, 0x8E, 0x98};
+    
+    const uint8_t *sei       = NULL;
+    const uint8_t *sei_type  = NULL;
+    const uint8_t *uuid      = NULL;
+    const uint8_t *format    = NULL;
+    const uint8_t *content   = NULL;
+    const uint8_t *size_data = NULL;
+    int data_size = 0;
+    int content_size = 0;
+    
+    sei = data + 4;
+    sei_type = sei + 1;
+    
+    // check sei
+    if ((sei[0] & 0x1F) != 0x06 || sei_type[0] != 0x05) {
+        ALOGE("not sei\n");
+        return -1;
+    }
+    size_data = sei_type + 1;
+    while (size_data[0] == 0xFF) {
+        data_size += 255;
+        size_data++;
+    }
+    data_size += size_data[0];
+    
+    uuid = size_data + 1;
+    
+    if (memcmp(time_sync_uuid, uuid, 16) != 0) {
+        ALOGE("not 17app uuid\n");
+        return -1;
+    }
+    
+    format = uuid + 16;
+    content = format + 1;
+    content_size = data_size - 16 - 1;
+    
+    if (ffp->app_sei) {
+        int content_type = format[0];
+        ffp->app_sei->sei_message_cb(content_type, content_size, content, ffp->app_sei->userData);
+    }
+    return 0;
+}
 
 static int decode_video(Ijk_VideoToolBox_Opaque* context, AVCodecContext *avctx, AVPacket *avpkt, int* got_picture_ptr)
 {
@@ -637,6 +727,14 @@ static int decode_video(Ijk_VideoToolBox_Opaque* context, AVCodecContext *avctx,
 
     if (!avpkt || !avpkt->data) {
         return 0;
+    }
+    
+    // 17 media
+    if (context->ffp->app_sei) {
+        uint8_t *sei_nalu = ff_avpacket_find_sei_nalu(avpkt);
+        if (sei_nalu != NULL) {
+            handle_17_sei(context->ffp, sei_nalu);
+        }
     }
 
     if (context->ffp->vtb_handle_resolution_change &&

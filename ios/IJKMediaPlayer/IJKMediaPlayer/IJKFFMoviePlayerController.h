@@ -138,10 +138,12 @@ typedef enum IJKLogLevel {
 @property (copy, nonatomic) NSString *streamDevice;
 // 17 log
 @property (nonatomic) NSString *userId;
-@property (nonatomic) NSString *longitude;
-@property (nonatomic) NSString *latitude;
 @property (nonatomic) NSString *region;
 @property (nonatomic) NSString *appVersion;
+@property (nonatomic) double longitude;
+@property (nonatomic) double latitude;
+
+@property (nonatomic) BOOL shouldNotifyAppSEI;
 
 - (void)syncWithHighWaterMark:(uint16_t)highWaterMark
                  lowWaterMark:(uint16_t)lowWaterMark
@@ -165,3 +167,8 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
                                             int64_t read_bytes, int64_t total_size,
                                             int64_t elpased_time, int64_t total_duration));
 
+
+#pragma mark - Notifications
+
+IJK_EXTERN NSString *const IJKFFAppSeiNotification;
+IJK_EXTERN NSString *const IJKFFAppSeiObjectKey;
