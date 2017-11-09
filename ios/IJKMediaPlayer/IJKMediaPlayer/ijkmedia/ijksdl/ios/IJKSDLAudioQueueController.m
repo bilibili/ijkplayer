@@ -175,16 +175,17 @@
     @synchronized(_lock) {
         if (_isStopped)
             return;
-        AudioQueueReset(_audioQueueRef);
-        for (int i = 0; i < kIJKAudioQueueNumberBuffers; i++)
-        {
-            if (_audioQueueBufferRefArray[i]) {
-                AudioQueueFreeBuffer(_audioQueueRef, _audioQueueBufferRefArray[i]);
+
+        if (_isPaused == YES) {
+            for (int i = 0; i < kIJKAudioQueueNumberBuffers; i++)
+            {
+                if (_audioQueueBufferRefArray[i] && _audioQueueBufferRefArray[i]->mAudioData) {
+                    _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
+                    memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
+                }
             }
-            AudioQueueAllocateBuffer(_audioQueueRef, _spec.size, &_audioQueueBufferRefArray[i]);
-            _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
-            memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
-            AudioQueueEnqueueBuffer(_audioQueueRef, _audioQueueBufferRefArray[i], 0, NULL);
+        } else {
+            AudioQueueFlush(_audioQueueRef);
         }
     }
 }
