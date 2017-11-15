@@ -414,6 +414,7 @@ typedef struct VideoState {
     SDL_mutex *accurate_seek_mutex;
     SDL_cond  *video_accurate_seek_cond;
     SDL_cond  *audio_accurate_seek_cond;
+    volatile int initialized_decoder;
 } VideoState;
 
 /* options specified by the user */
@@ -710,6 +711,9 @@ typedef struct FFPlayer {
     int skip_calc_frame_rate;
     int get_frame_mode;
     GetImgInfo *get_img_info;
+    int async_init_decoder;
+    char *video_mime_type;
+    char *mediacodec_default_name;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
@@ -814,6 +818,9 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->iformat_name                   = NULL; // option
 
     ffp->no_time_adjust                 = 0; // option
+    ffp->async_init_decoder             = 0; // option
+    ffp->video_mime_type                = NULL; // option
+    ffp->mediacodec_default_name        = NULL; // option
 
     ijkmeta_reset(ffp->meta);
 

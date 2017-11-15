@@ -2877,12 +2877,29 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         is->video_stream = stream_index;
         is->video_st = ic->streams[stream_index];
 
-        decoder_init(&is->viddec, avctx, &is->videoq, is->continue_read_thread);
-        ffp->node_vdec = ffpipeline_open_video_decoder(ffp->pipeline, ffp);
-        if (!ffp->node_vdec)
-            goto fail;
+        if (ffp->async_init_decoder) {
+            while (!is->initialized_decoder) {
+                SDL_Delay(5);
+            }
+            if (ffp->node_vdec) {
+                is->viddec.avctx = avctx;
+                ret = ffpipeline_config_video_decoder(ffp->pipeline, ffp);
+            }
+            if (ret || !ffp->node_vdec) {
+                decoder_init(&is->viddec, avctx, &is->videoq, is->continue_read_thread);
+                ffp->node_vdec = ffpipeline_open_video_decoder(ffp->pipeline, ffp);
+                if (!ffp->node_vdec)
+                    goto fail;
+            }
+        } else {
+            decoder_init(&is->viddec, avctx, &is->videoq, is->continue_read_thread);
+            ffp->node_vdec = ffpipeline_open_video_decoder(ffp->pipeline, ffp);
+            if (!ffp->node_vdec)
+                goto fail;
+        }
         if ((ret = decoder_start(&is->viddec, video_thread, ffp, "ff_video_dec")) < 0)
             goto out;
+
         is->queue_attachments_req = 1;
 
         if (ffp->max_fps >= 0) {
@@ -3602,17 +3619,30 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
         return NULL;
     }
 
+    is->initialized_decoder = 0;
     is->read_tid = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp, "ff_read");
     if (!is->read_tid) {
         av_log(NULL, AV_LOG_FATAL, "SDL_CreateThread(): %s\n", SDL_GetError());
-fail:
-        is->abort_request = true;
-        if (is->video_refresh_tid)
-            SDL_WaitThread(is->video_refresh_tid, NULL);
-        stream_close(ffp);
-        return NULL;
+        goto fail;
     }
+
+    if (ffp->async_init_decoder && !ffp->video_disable && ffp->video_mime_type && strlen(ffp->video_mime_type) > 0
+                    && ffp->mediacodec_default_name && strlen(ffp->mediacodec_default_name) > 0) {
+        if (ffp->mediacodec_all_videos || ffp->mediacodec_avc || ffp->mediacodec_hevc || ffp->mediacodec_mpeg2) {
+            decoder_init(&is->viddec, NULL, &is->videoq, is->continue_read_thread);
+            ffp->node_vdec = ffpipeline_init_video_decoder(ffp->pipeline, ffp);
+        }
+    }
+    is->initialized_decoder = 1;
+
     return is;
+fail:
+    is->initialized_decoder = 1;
+    is->abort_request = true;
+    if (is->video_refresh_tid)
+        SDL_WaitThread(is->video_refresh_tid, NULL);
+    stream_close(ffp);
+    return NULL;
 }
 
 // FFP_MERGE: stream_cycle_channel

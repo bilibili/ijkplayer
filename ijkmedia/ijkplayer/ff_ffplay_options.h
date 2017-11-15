@@ -157,6 +157,10 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(skip_calc_frame_rate),       OPTION_INT(0, 0, 1) },
     { "get-frame-mode",                      "warning, this option only for get frame",
         OPTION_OFFSET(get_frame_mode),       OPTION_INT(0, 0, 1) },
+    { "async-init-decoder",                  "async create decoder",
+        OPTION_OFFSET(async_init_decoder),   OPTION_INT(0, 0, 1) },
+    { "video-mime-type",                    "default video mime type",
+        OPTION_OFFSET(video_mime_type),     OPTION_STR(NULL) },
 
         // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
@@ -193,6 +197,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(soundtouch_enable),            OPTION_INT(0, 0, 1) },
     { "mediacodec-sync",                 "mediacodec: use msg_queue for synchronise",
         OPTION_OFFSET(mediacodec_sync),           OPTION_INT(0, 0, 1) },
+    { "mediacodec-default-name",          "mediacodec default name",
+        OPTION_OFFSET(mediacodec_default_name),      OPTION_STR(NULL) },
 
     { NULL }
 };
