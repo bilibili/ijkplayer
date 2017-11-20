@@ -315,8 +315,6 @@ static int ijkio_httphook_open(IjkURLContext *h, const char *arg, int flags, Ijk
         av_log(NULL, AV_LOG_INFO, "%s: will reconnect at start\n", __func__);
         ret = ijkio_httphook_reconnect_at(h, 0);
         av_log(NULL, AV_LOG_INFO, "%s: did reconnect at start: %d\n", __func__, ret);
-        if (ret)
-            c->app_io_ctrl.retry_counter++;
     }
 
 fail:
