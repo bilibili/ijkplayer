@@ -369,6 +369,9 @@ static int configure_codec_l(JNIEnv *env, IJKFF_Pipenode *node, jobject new_surf
 
     strncpy(opaque->acodec_name, mcc->codec_name, sizeof(opaque->acodec_name) / sizeof(*opaque->acodec_name));
     opaque->acodec_name[sizeof(opaque->acodec_name) / sizeof(*opaque->acodec_name) - 1] = 0;
+
+    // QUIRK: always recreate MediaCodec for reconfigure
+    opaque->quirk_reconfigure_with_new_codec = true;
     /* delaying output makes it possible to correct frame order, hopefully */
     if (0 == strncasecmp(mcc->codec_name, "OMX.TI.DUCATI1.", 15)) {
         /* this is the only acceptable value on Nexus S */
@@ -1884,6 +1887,7 @@ IJKFF_Pipenode *ffpipenode_init_decoder_from_android_mediacodec(FFPlayer *ffp, I
     }
 
     ALOGI("%s:use default mediacodec name: %s\n", __func__, ffp->mediacodec_default_name);
+    strcpy(opaque->mcc.codec_name, ffp->mediacodec_default_name);
     opaque->acodec = SDL_AMediaCodecJava_createByCodecName(env, ffp->mediacodec_default_name);
 
     if (!opaque->acodec) {
