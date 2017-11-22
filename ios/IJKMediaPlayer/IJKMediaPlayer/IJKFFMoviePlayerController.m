@@ -307,6 +307,10 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     // [UIApplication sharedApplication].idleTimerDisabled = on;
 }
 
+- (NSURL *)url {
+    return _streamURL;
+}
+
 - (void)dealloc
 {
     IJKLog(@"%s", __FUNCTION__);
@@ -1267,6 +1271,11 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             }
         }
             break;
+        case FFP_MSG_VIDEO_ROTATION_CHANGED: {
+            int videoDegrees = avmsg->arg1;
+            IJKLog(@"FFP_MSG_VIDEO_ROTATION_CHANGED: degrees = %d", videoDegrees);
+            _glView.rotationDegrees = -videoDegrees;
+        }   break;
         default:
             // IJKLog(@"unknown FFP_MSG_xxx(%d)\n", avmsg->what);
             break;

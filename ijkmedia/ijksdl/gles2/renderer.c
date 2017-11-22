@@ -307,6 +307,13 @@ GLboolean IJK_GLES2_Renderer_setGravity(IJK_GLES2_Renderer *renderer, int gravit
     return GL_TRUE;
 }
 
+void IJK_GLES2_Renderer_setRotation(IJK_GLES2_Renderer *renderer, int degrees)
+{
+    if (renderer->rotation_degrees != degrees)
+        renderer->mvp_changed = 1;
+    renderer->rotation_degrees = degrees;
+}
+
 static void IJK_GLES2_Renderer_TexCoords_reset(IJK_GLES2_Renderer *renderer)
 {
     renderer->texcoords[0] = 0.0f;
@@ -338,6 +345,23 @@ static void IJK_GLES2_Renderer_TexCoords_reloadVertex(IJK_GLES2_Renderer *render
     glEnableVertexAttribArray(renderer->av2_texcoord);                                              IJK_GLES2_checkError_TRACE("glEnableVertexAttribArray(av2_texcoord)");
 }
 
+float IJK_GLES2_Renderer_math_degrees_to_radians(float degrees) { return degrees * (M_PI / 180); };
+
+IJK_GLES_Matrix IJK_GLES2_Renderer_matrix4_make_z_rotation(float radians)
+{
+    float cos = cosf(radians);
+    float sin = sinf(radians);
+    
+    IJK_GLES_Matrix m = {
+        cos, sin, 0.0f, 0.0f,
+        -sin, cos, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+    
+    return m;
+}
+
 /*
  * Per-Renderer routine
  */
@@ -351,7 +375,11 @@ GLboolean IJK_GLES2_Renderer_use(IJK_GLES2_Renderer *renderer)
         return GL_FALSE;
 
     IJK_GLES_Matrix modelViewProj;
-    IJK_GLES2_loadOrtho(&modelViewProj, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+    if (renderer->rotation_degrees == 0)
+        IJK_GLES2_loadOrtho(&modelViewProj, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+    else
+        modelViewProj = IJK_GLES2_Renderer_matrix4_make_z_rotation(IJK_GLES2_Renderer_math_degrees_to_radians(renderer->rotation_degrees));
+    
     glUniformMatrix4fv(renderer->um4_mvp, 1, GL_FALSE, modelViewProj.m);                    IJK_GLES2_checkError_TRACE("glUniformMatrix4fv(um4_mvp)");
 
     IJK_GLES2_Renderer_TexCoords_reset(renderer);
@@ -421,6 +449,16 @@ GLboolean IJK_GLES2_Renderer_renderOverlay(IJK_GLES2_Renderer *renderer, SDL_Vou
         IJK_GLES2_Renderer_TexCoords_reset(renderer);
         IJK_GLES2_Renderer_TexCoords_cropRight(renderer, padding_normalized);
         IJK_GLES2_Renderer_TexCoords_reloadVertex(renderer);
+    }
+    
+    if (renderer->mvp_changed) {
+        renderer->mvp_changed = 0;
+        IJK_GLES_Matrix mvp;
+        if (renderer->rotation_degrees == 0)
+            IJK_GLES2_loadOrtho(&mvp, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+        else
+            mvp = IJK_GLES2_Renderer_matrix4_make_z_rotation(IJK_GLES2_Renderer_math_degrees_to_radians(renderer->rotation_degrees));
+        glUniformMatrix4fv(renderer->um4_mvp, 1, GL_FALSE, mvp.m);
     }
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);      IJK_GLES2_checkError_TRACE("glDrawArrays");

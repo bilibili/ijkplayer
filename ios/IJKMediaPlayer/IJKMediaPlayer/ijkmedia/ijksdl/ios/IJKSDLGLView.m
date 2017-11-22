@@ -333,6 +333,22 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     [self invalidateRenderBuffer];
 }
 
+- (void)setRotationDegrees:(int)rotationDegrees {
+    _rotationDegrees = rotationDegrees;
+    [self invalidateRenderBuffer];
+}
+
+- (void)setupRendererGravityAndRotation {
+    if (!_renderer)
+        return;
+    IJK_GLES2_Renderer_setRotation(_renderer, _rotationDegrees);
+    int d = _rotationDegrees % 360;
+    if (d == 0 || d == 180)
+        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
+    else
+        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingHeight, _backingWidth);
+}
+
 - (BOOL)setupRenderer: (SDL_VoutOverlay *) overlay
 {
     if (overlay == nil)
@@ -351,7 +367,9 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         if (!IJK_GLES2_Renderer_use(_renderer))
             return NO;
 
-        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
+//        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
+//        IJK_GLES2_Renderer_setRotation(_renderer, _rotationDegrees);
+        [self setupRendererGravityAndRotation];
     }
 
     return YES;
@@ -469,7 +487,9 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
-        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
+//        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
+//        IJK_GLES2_Renderer_setRotation(_renderer, _rotationDegrees);
+        [self setupRendererGravityAndRotation];
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);

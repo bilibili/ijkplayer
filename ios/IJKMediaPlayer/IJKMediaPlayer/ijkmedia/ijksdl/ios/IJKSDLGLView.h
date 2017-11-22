@@ -42,6 +42,8 @@
 
 #pragma mark - E7
 
+@property (nonatomic) int rotationDegrees;
+
 - (void)invalidate;
 
 /**
