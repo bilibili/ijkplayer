@@ -342,8 +342,8 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     if (!_renderer)
         return;
     IJK_GLES2_Renderer_setRotation(_renderer, _rotationDegrees);
-    int d = _rotationDegrees % 360;
-    if (d == 0 || d == 180)
+    int d = _rotationDegrees % 180;
+    if (d == 0)
         IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
     else
         IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingHeight, _backingWidth);
