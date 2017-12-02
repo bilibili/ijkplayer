@@ -57,6 +57,6 @@ void SDL_AMediaFormat_setInt32(SDL_AMediaFormat* aformat, const char* name, int3
 
 void SDL_AMediaFormat_setBuffer(SDL_AMediaFormat* aformat, const char* name, void* data, size_t size)
 {
-    assert(aformat->func_setInt32);
+    assert(aformat->func_setBuffer);
     aformat->func_setBuffer(aformat, name, data, size);
 }
