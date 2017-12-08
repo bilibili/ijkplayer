@@ -3009,6 +3009,7 @@ static int read_thread(void *arg)
     int last_error = 0;
     int64_t prev_io_tick_counter = 0;
     int64_t io_tick_counter = 0;
+    int init_ijkmeta = 0;
 
     if (!wait_mutex) {
         av_log(NULL, AV_LOG_FATAL, "SDL_CreateMutex(): %s\n", SDL_GetError());
@@ -3210,7 +3211,10 @@ static int read_thread(void *arg)
     }
     ffp_notify_msg1(ffp, FFP_MSG_COMPONENT_OPEN);
 
-    ijkmeta_set_avformat_context_l(ffp->meta, ic);
+    if (!ffp->ijkmeta_delay_init) {
+        ijkmeta_set_avformat_context_l(ffp->meta, ic);
+    }
+
     ffp->stat.bit_rate = ic->bit_rate;
     if (st_index[AVMEDIA_TYPE_VIDEO] >= 0)
         ijkmeta_set_int64_l(ffp->meta, IJKM_KEY_VIDEO_STREAM, st_index[AVMEDIA_TYPE_VIDEO]);
@@ -3515,6 +3519,12 @@ static int read_thread(void *arg)
         }
 
         ffp_statistic_l(ffp);
+
+        if (ffp->ijkmeta_delay_init && !init_ijkmeta &&
+                (ffp->first_video_frame_rendered || !is->video_st) && (ffp->first_audio_frame_rendered || !is->audio_st)) {
+            ijkmeta_set_avformat_context_l(ffp->meta, ic);
+            init_ijkmeta = 1;
+        }
 
         if (ffp->packet_buffering) {
             io_tick_counter = SDL_GetTickHR();

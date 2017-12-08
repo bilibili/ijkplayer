@@ -714,6 +714,7 @@ typedef struct FFPlayer {
     int async_init_decoder;
     char *video_mime_type;
     char *mediacodec_default_name;
+    int ijkmeta_delay_init;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
@@ -821,6 +822,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->async_init_decoder             = 0; // option
     ffp->video_mime_type                = NULL; // option
     ffp->mediacodec_default_name        = NULL; // option
+    ffp->ijkmeta_delay_init             = 0; // option
 
     ijkmeta_reset(ffp->meta);
 
