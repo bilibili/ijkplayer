@@ -460,6 +460,7 @@ static int nb_vfilters = 0;
 static char *afilters = NULL;
 #endif
 static int autorotate = 1;
+static int find_stream_info = 1;
 
 /* current context */
 static int is_full_screen;
@@ -617,7 +618,7 @@ typedef struct FFPlayer {
     char *vfilter0;
 #endif
     int autorotate;
-
+    int find_stream_info;
     unsigned sws_flags;
 
     /* current context */
@@ -765,6 +766,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->vfilter0               = NULL;
 #endif
     ffp->autorotate             = 1;
+    ffp->find_stream_info       = 1;
 
     ffp->sws_flags              = SWS_FAST_BILINEAR;
 

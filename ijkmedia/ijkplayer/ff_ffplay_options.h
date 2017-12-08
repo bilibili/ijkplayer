@@ -96,6 +96,9 @@ static const AVOption ffp_context_options[] = {
     // FFP_MERGE: showmode, default, i, codec, acodec, scodec, vcodec
     // TODO: autorotate
 
+    { "find_stream_info",               "read and decode the streams to fill missing information with heuristics" ,
+        OPTION_OFFSET(find_stream_info),    OPTION_INT(1, 0, 1) },
+
     // extended options in ff_ffplay.c
     { "max-fps",                        "drop frames in video whose fps is greater than max-fps",
         OPTION_OFFSET(max_fps),         OPTION_INT(31, -1, 121) },
