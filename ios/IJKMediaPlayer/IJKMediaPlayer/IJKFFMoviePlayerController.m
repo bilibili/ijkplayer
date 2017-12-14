@@ -750,8 +750,8 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 
 - (UIImage *)thumbnailImageAtCurrentTime
 {
-    if ([_view isKindOfClass:[IJKSDLGLView class]]) {
-        IJKSDLGLView *glView = (IJKSDLGLView *)_view;
+    if ([_view conformsToProtocol:@protocol(IJKSDLGLViewProtocol)]) {
+        id<IJKSDLGLViewProtocol> glView = (id<IJKSDLGLViewProtocol>)_view;
         return [glView snapshot];
     }
 
