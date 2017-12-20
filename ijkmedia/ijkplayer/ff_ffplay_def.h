@@ -409,6 +409,7 @@ typedef struct VideoState {
     int drop_vframe_count;
     int64_t accurate_seek_start_time;
     volatile int64_t accurate_seek_vframe_pts;
+    volatile int64_t accurate_seek_aframe_pts;
     int audio_accurate_seek_req;
     int video_accurate_seek_req;
     SDL_mutex *accurate_seek_mutex;
