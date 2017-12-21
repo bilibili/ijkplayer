@@ -1,6 +1,11 @@
 tag next
 --------------------------------
 
+tag k0.8.6
+--------------------------------
+- ijkplayer: fix opengl config error
+- ffmpeg: fix a concat issue 
+
 tag k0.8.5
 --------------------------------
 - ijkplayer: fix opengl config error
