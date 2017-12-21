@@ -85,7 +85,8 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         [self registerApplicationObservers];
 
         _didSetupGL = NO;
-        [self setupGLOnce];
+        if ([self isApplicationActive] == YES)
+            [self setupGLOnce];
     }
 
     return self;
@@ -496,6 +497,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 - (void)applicationWillEnterForeground
 {
     NSLog(@"IJKSDLGLView:applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
+    [self setupGLOnce];
     _applicationState = IJKSDLGLViewApplicationForegroundState;
     [self toggleGLPaused:NO];
 }
@@ -510,6 +512,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 {
     NSLog(@"IJKSDLGLView:applicationWillResignActive: %d", (int)[UIApplication sharedApplication].applicationState);
     [self toggleGLPaused:YES];
+    glFinish();
 }
 
 - (void)applicationDidEnterBackground
@@ -517,6 +520,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     NSLog(@"IJKSDLGLView:applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
     _applicationState = IJKSDLGLViewApplicationBackgroundState;
     [self toggleGLPaused:YES];
+    glFinish();
 }
 
 - (void)applicationWillTerminate
