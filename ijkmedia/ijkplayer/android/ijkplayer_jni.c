@@ -818,6 +818,7 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
             J4AC_Bundle__putLong__withCString__catchAll(env, jbundle, "offset", real_data->offset);
             J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "error", real_data->error);
             J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "http_code", real_data->http_code);
+            J4AC_Bundle__putLong__withCString__catchAll(env, jbundle, "file_size", real_data->filesize);
             J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
             if (J4A_ExceptionCheck__catchAll(env))
                 goto fail;
