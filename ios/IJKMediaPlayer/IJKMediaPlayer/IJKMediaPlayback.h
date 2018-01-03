@@ -186,6 +186,7 @@ typedef NS_ENUM(NSInteger, IJKMediaEvent) {
 #define IJKMediaEventAttrKey_time_of_event  @"time_of_event"
 #define IJKMediaEventAttrKey_http_code      @"http_code"
 #define IJKMediaEventAttrKey_offset         @"offset"
+#define IJKMediaEventAttrKey_file_size      @"file_size"
 
 // event of IJKMediaUrlOpenEvent_xxx
 @interface IJKMediaUrlOpenData: NSObject
