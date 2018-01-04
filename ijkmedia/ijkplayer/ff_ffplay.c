@@ -901,6 +901,15 @@ static void video_image_display2(FFPlayer *ffp)
                 }
             }
         }
+        if (ffp->render_wait_start && !ffp->start_on_prepared && is->pause_req) {
+            if (!ffp->first_video_frame_rendered) {
+                ffp->first_video_frame_rendered = 1;
+                ffp_notify_msg1(ffp, FFP_MSG_VIDEO_RENDERING_START);
+            }
+            while (is->pause_req && !is->abort_request) {
+                SDL_Delay(20);
+            }
+        }
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
         ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
         if (!ffp->first_video_frame_rendered) {
@@ -2604,6 +2613,12 @@ reload:
         ffp->first_audio_frame_rendered = 1;
         ffp_notify_msg1(ffp, FFP_MSG_AUDIO_RENDERING_START);
     }
+
+    if (ffp->render_wait_start && !ffp->start_on_prepared && is->pause_req) {
+        while (is->pause_req && !is->abort_request) {
+            SDL_Delay(20);
+        }
+    }
     return resampled_data_size;
 }
 
@@ -3099,7 +3114,7 @@ static int read_thread(void *arg)
         ic->flags |= AVFMT_FLAG_GENPTS;
 
     av_format_inject_global_side_data(ic);
-    // 
+    //
     //AVDictionary **opts;
     //int orig_nb_streams;
     //opts = setup_find_stream_info_opts(ic, ffp->codec_opts);
@@ -3276,7 +3291,7 @@ static int read_thread(void *arg)
     if (ffp->infinite_buffer < 0 && is->realtime)
         ffp->infinite_buffer = 1;
 
-    if (!ffp->start_on_prepared)
+    if (!ffp->render_wait_start && !ffp->start_on_prepared)
         toggle_pause(ffp, 1);
     if (is->video_st && is->video_st->codecpar) {
         AVCodecParameters *codecpar = is->video_st->codecpar;
@@ -3285,7 +3300,7 @@ static int read_thread(void *arg)
     }
     ffp->prepared = true;
     ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
-    if (!ffp->start_on_prepared) {
+    if (!ffp->render_wait_start && !ffp->start_on_prepared) {
         while (is->pause_req && !is->abort_request) {
             SDL_Delay(20);
         }
