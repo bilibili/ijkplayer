@@ -84,6 +84,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property(nonatomic, readonly)  BOOL isPreparedToPlay;
 @property(nonatomic, readonly)  IJKMPMoviePlaybackState playbackState;
 @property(nonatomic, readonly)  IJKMPMovieLoadState loadState;
+@property(nonatomic, readonly) int isSeekBuffering;
 
 @property(nonatomic, readonly) int64_t numberOfBytesTransferred;
 

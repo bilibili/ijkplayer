@@ -99,6 +99,7 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff3.4--ijk0.8.7--20180103--001
 
 @synthesize monitor = _monitor;
 @synthesize shouldShowHudView           = _shouldShowHudView;
+@synthesize isSeekBuffering = _isSeekBuffering;
 
 #define FFP_IO_STAT_STEP (50 * 1024)
 
@@ -1180,10 +1181,12 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             _monitor.lastPrerollStartTick = (int64_t)SDL_GetTickHR();
 
             _loadState = IJKMPMovieLoadStateStalled;
+            _isSeekBuffering = avmsg->arg1;
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMPMoviePlayerLoadStateDidChangeNotification
              object:self];
+            _isSeekBuffering = 0;
             break;
         }
         case FFP_MSG_BUFFERING_END: {
@@ -1192,6 +1195,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             _monitor.lastPrerollDuration = (int64_t)SDL_GetTickHR() - _monitor.lastPrerollStartTick;
 
             _loadState = IJKMPMovieLoadStatePlayable | IJKMPMovieLoadStatePlaythroughOK;
+            _isSeekBuffering = avmsg->arg1;
 
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMPMoviePlayerLoadStateDidChangeNotification
@@ -1199,6 +1203,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMPMoviePlayerPlaybackStateDidChangeNotification
              object:self];
+            _isSeekBuffering = 0;
             break;
         }
         case FFP_MSG_BUFFERING_UPDATE:
