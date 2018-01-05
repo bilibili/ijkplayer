@@ -962,11 +962,11 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             break;
         case FFP_MSG_BUFFERING_START:
             MPTRACE("FFP_MSG_BUFFERING_START:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, msg.arg1);
             break;
         case FFP_MSG_BUFFERING_END:
             MPTRACE("FFP_MSG_BUFFERING_END:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, 0);
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, msg.arg1);
             break;
         case FFP_MSG_BUFFERING_UPDATE:
             // MPTRACE("FFP_MSG_BUFFERING_UPDATE: %d, %d", msg.arg1, msg.arg2);
