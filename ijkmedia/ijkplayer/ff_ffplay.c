@@ -4544,12 +4544,22 @@ void ffp_toggle_buffering_l(FFPlayer *ffp, int buffering_on)
         av_log(ffp, AV_LOG_DEBUG, "ffp_toggle_buffering_l: start\n");
         is->buffering_on = 1;
         stream_update_pause_l(ffp);
-        ffp_notify_msg1(ffp, FFP_MSG_BUFFERING_START);
+        if (is->seek_req) {
+            is->seek_buffering = 1;
+            ffp_notify_msg2(ffp, FFP_MSG_BUFFERING_START, 1);
+        } else {
+            ffp_notify_msg2(ffp, FFP_MSG_BUFFERING_START, 0);
+        }
     } else if (!buffering_on && is->buffering_on){
         av_log(ffp, AV_LOG_DEBUG, "ffp_toggle_buffering_l: end\n");
         is->buffering_on = 0;
         stream_update_pause_l(ffp);
-        ffp_notify_msg1(ffp, FFP_MSG_BUFFERING_END);
+        if (is->seek_buffering) {
+            is->seek_buffering = 0;
+            ffp_notify_msg2(ffp, FFP_MSG_BUFFERING_END, 1);
+        } else {
+            ffp_notify_msg2(ffp, FFP_MSG_BUFFERING_END, 0);
+        }
     }
 }
 
