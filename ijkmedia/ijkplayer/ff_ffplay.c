@@ -600,6 +600,8 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                             }
                         }
                         break;
+                    default:
+                        break;
                 }
                 if (ret == AVERROR_EOF) {
                     d->finished = d->pkt_serial;
