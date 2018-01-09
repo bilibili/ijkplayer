@@ -535,8 +535,13 @@ IjkMediaPlayer_setOption(JNIEnv *env, jobject thiz, jint category, jobject name,
     const char *c_value = NULL;
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setOption: null mp", LABEL_RETURN);
 
+    if (!name) {
+        goto LABEL_RETURN;
+    }
+
     c_name = (*env)->GetStringUTFChars(env, name, NULL );
     JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setOption: name.string oom", LABEL_RETURN);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: IjkMediaPlayer_setOption: null name", LABEL_RETURN);
 
     if (value) {
         c_value = (*env)->GetStringUTFChars(env, value, NULL );
