@@ -505,6 +505,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 - (void)applicationDidBecomeActive
 {
     NSLog(@"IJKSDLGLView:applicationDidBecomeActive: %d", (int)[UIApplication sharedApplication].applicationState);
+    [self setupGLOnce];
     [self toggleGLPaused:NO];
 }
 
