@@ -1120,7 +1120,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         int EVENT_WILL_HTTP_OPEN = 0x1;                 // ARG_URL
         int EVENT_DID_HTTP_OPEN = 0x2;                  // ARG_URL, ARG_ERROR, ARG_HTTP_CODE
         int EVENT_WILL_HTTP_SEEK = 0x3;                 // ARG_URL, ARG_OFFSET
-        int EVENT_DID_HTTP_SEEK = 0x4;                  // ARG_URL, ARG_OFFSET, ARG_ERROR, ARG_HTTP_CODE
+        int EVENT_DID_HTTP_SEEK = 0x4;                  // ARG_URL, ARG_OFFSET, ARG_ERROR, ARG_HTTP_CODE, ARG_FILE_SIZE
 
         String ARG_URL = "url";
         String ARG_SEGMENT_INDEX = "segment_index";
@@ -1134,6 +1134,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
         String ARG_OFFSET = "offset";
         String ARG_HTTP_CODE = "http_code";
+        String ARG_FILE_SIZE = "file_size";
 
         /*
          * @return true if invoke is handled
