@@ -23,8 +23,8 @@ do :
 
     # Build the framework for device and for simulator (using
     # all needed architectures).
-    xcodebuild -target "${FRAMEWORK_NAME}" -configuration "${THE_CONFIGURATION}" -arch arm64 -arch armv7 only_active_arch=no defines_module=yes -sdk "iphoneos"
-    xcodebuild -target "${FRAMEWORK_NAME}" -configuration "${THE_CONFIGURATION}" -arch x86_64 only_active_arch=no defines_module=yes -sdk "iphonesimulator"
+    xcodebuild BITCODE_GENERATION_MODE=bitcode OTHER_CFLAGS="-fembed-bitcode" -target "${FRAMEWORK_NAME}" -configuration "${THE_CONFIGURATION}" -arch arm64 -arch armv7 only_active_arch=no defines_module=yes -sdk "iphoneos"
+    xcodebuild BITCODE_GENERATION_MODE=bitcode OTHER_CFLAGS="-fembed-bitcode" -target "${FRAMEWORK_NAME}" -configuration "${THE_CONFIGURATION}" -arch x86_64 only_active_arch=no defines_module=yes -sdk "iphonesimulator"
 
     # Remove .framework file if exists from previous run.
     if [ -d "${OUTPUT_FRAMEWORK_PATH}" ]; then
