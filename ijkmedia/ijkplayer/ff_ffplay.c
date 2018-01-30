@@ -1185,6 +1185,7 @@ static void stream_toggle_pause_l(FFPlayer *ffp, int pause_on)
         }
 #endif
         set_clock(&is->vidclk, get_clock(&is->vidclk), is->vidclk.serial);
+        set_clock(&is->audclk, get_clock(&is->audclk), is->audclk.serial);
     } else {
     }
     set_clock(&is->extclk, get_clock(&is->extclk), is->extclk.serial);
@@ -1209,6 +1210,10 @@ static void stream_update_pause_l(FFPlayer *ffp)
 static void toggle_pause_l(FFPlayer *ffp, int pause_on)
 {
     VideoState *is = ffp->is;
+    if (is->pause_req && !pause_on) {
+        set_clock(&is->vidclk, get_clock(&is->vidclk), is->vidclk.serial);
+        set_clock(&is->audclk, get_clock(&is->audclk), is->audclk.serial);
+    }
     is->pause_req = pause_on;
     ffp->auto_resume = !pause_on;
     stream_update_pause_l(ffp);
