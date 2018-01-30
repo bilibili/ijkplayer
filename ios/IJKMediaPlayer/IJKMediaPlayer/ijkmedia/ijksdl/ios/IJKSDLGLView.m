@@ -258,6 +258,9 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 - (void)layoutSubviews
 {
     [super layoutSubviews];
+    if (self.window.screen != nil) {
+        _scaleFactor = self.window.screen.scale;
+    }
     [self invalidateRenderBuffer];
 }
 
