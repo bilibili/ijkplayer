@@ -1011,6 +1011,14 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
                 post_event2(env, weak_thiz, MEDIA_GET_IMG_STATE, msg.arg1, msg.arg2, NULL);
             }
             break;
+        case FFP_MSG_VIDEO_SEEK_RENDERING_START:
+            MPTRACE("FFP_MSG_VIDEO_SEEK_RENDERING_START:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_SEEK_RENDERING_START, msg.arg1);
+            break;
+        case FFP_MSG_AUDIO_SEEK_RENDERING_START:
+            MPTRACE("FFP_MSG_AUDIO_SEEK_RENDERING_START:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_SEEK_RENDERING_START, msg.arg1);
+            break;
         default:
             ALOGE("unknown FFP_MSG_xxx(%d)\n", msg.what);
             break;
