@@ -877,10 +877,6 @@ static void video_image_display2(FFPlayer *ffp)
 
     vp = frame_queue_peek_last(&is->pictq);
 
-    int latest_seek_load_serial = __atomic_exchange_n(&(is->latest_seek_load_serial), -1, memory_order_seq_cst);
-    if (latest_seek_load_serial == vp->serial)
-        ffp->stat.latest_seek_load_duration = (av_gettime() - is->latest_seek_load_start_at) / 1000;
-
     if (vp->bmp) {
         if (is->subtitle_st) {
             if (frame_queue_nb_remaining(&is->subpq) > 0) {
@@ -917,6 +913,18 @@ static void video_image_display2(FFPlayer *ffp)
         if (!ffp->first_video_frame_rendered) {
             ffp->first_video_frame_rendered = 1;
             ffp_notify_msg1(ffp, FFP_MSG_VIDEO_RENDERING_START);
+        }
+
+        if (is->latest_video_seek_load_serial == vp->serial) {
+            int latest_video_seek_load_serial = __atomic_exchange_n(&(is->latest_video_seek_load_serial), -1, memory_order_seq_cst);
+            if (latest_video_seek_load_serial == vp->serial) {
+                ffp->stat.latest_seek_load_duration = (av_gettime() - is->latest_seek_load_start_at) / 1000;
+                if (ffp->av_sync_type == AV_SYNC_VIDEO_MASTER) {
+                    ffp_notify_msg2(ffp, FFP_MSG_VIDEO_SEEK_RENDERING_START, 1);
+                } else {
+                    ffp_notify_msg2(ffp, FFP_MSG_VIDEO_SEEK_RENDERING_START, 0);
+                }
+            }
         }
     }
 }
@@ -2616,16 +2624,6 @@ reload:
         is->auddec.first_frame_decoded_time = SDL_GetTickHR();
         is->auddec.first_frame_decoded = 1;
     }
-    if (!ffp->first_audio_frame_rendered) {
-        ffp->first_audio_frame_rendered = 1;
-        ffp_notify_msg1(ffp, FFP_MSG_AUDIO_RENDERING_START);
-    }
-
-    if (ffp->render_wait_start && !ffp->start_on_prepared && is->pause_req) {
-        while (is->pause_req && !is->abort_request) {
-            SDL_Delay(20);
-        }
-    }
     return resampled_data_size;
 }
 
@@ -2698,6 +2696,27 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     if (!isnan(is->audio_clock)) {
         set_clock_at(&is->audclk, is->audio_clock - (double)(is->audio_write_buf_size) / is->audio_tgt.bytes_per_sec - SDL_AoutGetLatencySeconds(ffp->aout), is->audio_clock_serial, ffp->audio_callback_time / 1000000.0);
         sync_clock_to_slave(&is->extclk, &is->audclk);
+    }
+    if (!ffp->first_audio_frame_rendered) {
+        ffp->first_audio_frame_rendered = 1;
+        ffp_notify_msg1(ffp, FFP_MSG_AUDIO_RENDERING_START);
+    }
+
+    if (is->latest_audio_seek_load_serial == is->audio_clock_serial) {
+        int latest_audio_seek_load_serial = __atomic_exchange_n(&(is->latest_audio_seek_load_serial), -1, memory_order_seq_cst);
+        if (latest_audio_seek_load_serial == is->audio_clock_serial) {
+            if (ffp->av_sync_type == AV_SYNC_AUDIO_MASTER) {
+                ffp_notify_msg2(ffp, FFP_MSG_AUDIO_SEEK_RENDERING_START, 1);
+            } else {
+                ffp_notify_msg2(ffp, FFP_MSG_AUDIO_SEEK_RENDERING_START, 0);
+            }
+        }
+    }
+
+    if (ffp->render_wait_start && !ffp->start_on_prepared && is->pause_req) {
+        while (is->pause_req && !is->abort_request) {
+            SDL_Delay(20);
+        }
     }
 }
 
@@ -3383,7 +3402,8 @@ static int read_thread(void *arg)
                    set_clock(&is->extclk, seek_target / (double)AV_TIME_BASE, 0);
                 }
 
-                is->latest_seek_load_serial = is->videoq.serial;
+                is->latest_video_seek_load_serial = is->videoq.serial;
+                is->latest_audio_seek_load_serial = is->audioq.serial;
                 is->latest_seek_load_start_at = av_gettime();
             }
             ffp->dcc.current_high_water_mark_in_ms = ffp->dcc.first_high_water_mark_in_ms;

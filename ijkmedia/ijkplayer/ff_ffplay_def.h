@@ -402,7 +402,8 @@ typedef struct VideoState {
 
     PacketQueue *buffer_indicator_queue;
 
-    volatile int latest_seek_load_serial;
+    volatile int latest_video_seek_load_serial;
+    volatile int latest_audio_seek_load_serial;
     volatile int64_t latest_seek_load_start_at;
 
     int drop_aframe_count;
