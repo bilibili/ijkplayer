@@ -100,6 +100,8 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff3.4--ijk0.8.7--20180103--001
 @synthesize monitor = _monitor;
 @synthesize shouldShowHudView           = _shouldShowHudView;
 @synthesize isSeekBuffering = _isSeekBuffering;
+@synthesize isAudioSync = _isAudioSync;
+@synthesize isVideoSync = _isVideoSync;
 
 #define FFP_IO_STAT_STEP (50 * 1024)
 
@@ -1297,6 +1299,24 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
              postNotificationName:IJKMPMoviePlayerAccurateSeekCompleteNotification
              object:self
              userInfo:@{IJKMPMoviePlayerDidAccurateSeekCompleteCurPos: @(avmsg->arg1)}];
+            break;
+        }
+        case FFP_MSG_VIDEO_SEEK_RENDERING_START: {
+            NSLog(@"FFP_MSG_VIDEO_SEEK_RENDERING_START:\n");
+            _isVideoSync = avmsg->arg1;
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerSeekVideoStartNotification
+             object:self];
+            _isVideoSync = 0;
+            break;
+        }
+        case FFP_MSG_AUDIO_SEEK_RENDERING_START: {
+            NSLog(@"FFP_MSG_AUDIO_SEEK_RENDERING_START:\n");
+            _isAudioSync = avmsg->arg1;
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName:IJKMPMoviePlayerSeekAudioStartNotification
+             object:self];
+            _isAudioSync = 0;
             break;
         }
         default:
