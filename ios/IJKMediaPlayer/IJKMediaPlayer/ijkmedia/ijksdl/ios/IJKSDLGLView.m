@@ -217,18 +217,21 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     if ([self isApplicationActive] == NO)
         return NO;
 
-    if (![self tryLockGLActive])
-        return NO;
-
-    __block BOOL didSetupGL;
+    __block BOOL didSetupGL = NO;
+    void (^setupGLBlock)() = ^{
+        if ([self tryLockGLActive]) {
+            didSetupGL = [self setupGL];
+            [self unlockGLActive];
+        }
+    };
+    
     if ([[NSThread currentThread] isMainThread]) {
-        didSetupGL = [self setupGL];
+        setupGLBlock();
     } else {
         dispatch_sync(dispatch_get_main_queue(), ^{
-            didSetupGL = [self setupGL];
+            setupGLBlock();
         });
     }
-    [self unlockGLActive];
     return didSetupGL;
 }
 
