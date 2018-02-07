@@ -353,6 +353,9 @@ void IJK_EGL_free(IJK_EGL *egl)
 
     IJK_EGL_terminate(egl);
 
+    if (egl->opaque)
+        free(egl->opaque);
+
     memset(egl, 0, sizeof(IJK_EGL));
     free(egl);
 }

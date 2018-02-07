@@ -62,6 +62,16 @@ inline static isdl_error ISDL_Array__init(ISDL_Array *array, size_t capacity)
     return 0;
 }
 
+inline static isdl_error ISDL_Array__uninit(ISDL_Array* array)
+{
+    assert(array);
+    if (array->elements)
+        free(array->elements);
+    memset(array, 0, sizeof(ISDL_Array));
+
+    return 0;
+}
+
 inline static isdl_error ISDL_Array__push_back(ISDL_Array *array, void *val)
 {
     assert(array);
