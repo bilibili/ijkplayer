@@ -23,53 +23,70 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    flavorDimensions "architecture"
+
     productFlavors {
-        all32 { minSdkVersion 9 }
-        all64 { minSdkVersion 21 }
-        // armv5 {}
-        // armv7a {}
-        // arm64 { minSdkVersion 21 }
-        // x86 {}
+        all32 {
+            minSdkVersion 9
+            dimension "architecture"
+        }
+        all64 {
+            minSdkVersion 21
+            dimension "architecture"
+        }
+        // armv5 {
+        //     dimension "architecture"
+        // }
+        // armv7a {
+        //     dimension "architecture"
+        // }
+        // arm64 {
+        //     minSdkVersion 21
+        //     dimension "architecture"
+        // }
+        // x86 {
+        //     dimension "architecture"
+        // }
     }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.android.support:preference-v7:23.0.1'
-    compile 'com.android.support:support-annotations:23.0.1'
+    implementation 'com.android.support:appcompat-v7:23.0.1'
+    implementation 'com.android.support:preference-v7:23.0.1'
+    implementation 'com.android.support:support-annotations:23.0.1'
 
-    compile 'com.squareup:otto:1.3.8'
+    implementation 'com.squareup:otto:1.3.8'
 
-    compile project(':ijkplayer-java')
-    compile project(':ijkplayer-exo')
+    implementation project(':ijkplayer-java')
+    implementation project(':ijkplayer-exo')
 
-    all32Compile project(':ijkplayer-armv5')
-    all32Compile project(':ijkplayer-armv7a')
-    all32Compile project(':ijkplayer-x86')
+    all32Implementation project(':ijkplayer-armv5')
+    all32Implementation project(':ijkplayer-armv7a')
+    all32Implementation project(':ijkplayer-x86')
 
-    all64Compile project(':ijkplayer-armv5')
-    all64Compile project(':ijkplayer-armv7a')
-    all64Compile project(':ijkplayer-arm64')
-    all64Compile project(':ijkplayer-x86')
-    all64Compile project(':ijkplayer-x86_64')
+    all64Implementation project(':ijkplayer-armv5')
+    all64Implementation project(':ijkplayer-armv7a')
+    all64Implementation project(':ijkplayer-arm64')
+    all64Implementation project(':ijkplayer-x86')
+    all64Implementation project(':ijkplayer-x86_64')
 
-    // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
-    // compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.8.8'
+    // implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
+    // implementation 'tv.danmaku.ijk.media:ijkplayer-exo:0.8.8'
 
-    // all32Compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.8'
-    // all32Compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.8'
-    // all32Compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.8'
+    // all32Implementation 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.8'
+    // all32Implementation 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.8'
+    // all32Implementation 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.8'
 
-    // all64Compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.8'
-    // all64Compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.8'
-    // all64Compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.8.8'
-    // all64Compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.8'
-    // all64Compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.8'
+    // all64Implementation 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.8'
+    // all64Implementation 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.8'
+    // all64Implementation 'tv.danmaku.ijk.media:ijkplayer-arm64:0.8.8'
+    // all64Implementation 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.8'
+    // all64Implementation 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.8'
 
-    // armv5Compile project(':player-armv5')
-    // armv7aCompile project(':player-armv7a')
-    // arm64Compile project(':player-arm64')
-    // x86Compile project(':player-x86')
-    // x86_64Compile project(':player-x86_64')
+    // armv5Implementation project(':player-armv5')
+    // armv7aImplementation project(':player-armv7a')
+    // arm64Implementation project(':player-arm64')
+    // x86Implementation project(':player-x86')
+    // x86_64Implementation project(':player-x86_64')
 }
