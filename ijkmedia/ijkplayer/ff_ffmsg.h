@@ -106,4 +106,6 @@
 #define FFP_PROP_INT64_SHARE_CACHE_DATA                 20210
 #define FFP_PROP_INT64_IMMEDIATE_RECONNECT              20211
 
+#define FFP_PROP_INT64_DROP_FRAME_COUNT            20212
+
 #endif
