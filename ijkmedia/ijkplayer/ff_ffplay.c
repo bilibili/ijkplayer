@@ -1262,7 +1262,7 @@ static double compute_target_delay(FFPlayer *ffp, double delay, VideoState *is)
            if it is the best guess */
         sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
         /* -- by bbcallen: replace is->max_frame_duration with AV_NOSYNC_THRESHOLD */
-        if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD) {
+        if (!isnan(diff) && fabs(diff) < is->max_frame_duration) {
             if (diff <= -sync_threshold)
                 delay = FFMAX(0, delay + diff);
             else if (diff >= sync_threshold && delay > AV_SYNC_FRAMEDUP_THRESHOLD)
@@ -2425,7 +2425,7 @@ static int synchronize_audio(VideoState *is, int nb_samples)
                 is->audio_diff_avg_count++;
             } else {
                 /* estimate the A-V difference */
-                avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
+                avg_diff = diff;//is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
 
                 if (fabs(avg_diff) >= is->audio_diff_threshold) {
                     wanted_nb_samples = nb_samples + (int)(diff * is->audio_src.freq);
@@ -2440,6 +2440,7 @@ static int synchronize_audio(VideoState *is, int nb_samples)
         } else {
             /* too big difference : may be initial PTS errors, so
                reset A-V filter */
+            av_log(NULL, AV_LOG_TRACE, "too big difference=%f : may be initial PTS errors, so reset A-V filter\n", diff);
             is->audio_diff_avg_count = 0;
             is->audio_diff_cum       = 0;
         }
@@ -2476,6 +2477,7 @@ static int audio_decode_frame(FFPlayer *ffp)
         is->viddec.finished != is->videoq.serial) { /* not finished */
         /* waiting for first video frame */
         Uint64 now = SDL_GetTickHR();
+        //Vivek : Why is pipeline ready before time and why 2000?
         if (now < is->viddec.first_frame_decoded_time ||
             now > is->viddec.first_frame_decoded_time + 2000) {
             is->viddec.first_frame_decoded = 1;
@@ -3146,7 +3148,6 @@ static int read_thread(void *arg)
     //opts = setup_find_stream_info_opts(ic, ffp->codec_opts);
     //orig_nb_streams = ic->nb_streams;
 
-
     if (ffp->find_stream_info) {
         AVDictionary **opts = setup_find_stream_info_opts(ic, ffp->codec_opts);
         int orig_nb_streams = ic->nb_streams;
@@ -3185,7 +3186,7 @@ static int read_thread(void *arg)
         ffp->seek_by_bytes = !!(ic->iformat->flags & AVFMT_TS_DISCONT) && strcmp("ogg", ic->iformat->name);
 
     is->max_frame_duration = (ic->iformat->flags & AVFMT_TS_DISCONT) ? 10.0 : 3600.0;
-    is->max_frame_duration = 10.0;
+    //is->max_frame_duration = 10.0;
     av_log(ffp, AV_LOG_INFO, "max_frame_duration: %.3f\n", is->max_frame_duration);
 
 #ifdef FFP_MERGE
@@ -3273,9 +3274,11 @@ static int read_thread(void *arg)
     if (st_index[AVMEDIA_TYPE_AUDIO] >= 0) {
         stream_component_open(ffp, st_index[AVMEDIA_TYPE_AUDIO]);
     } else {
-        ffp->av_sync_type = AV_SYNC_VIDEO_MASTER;
+        ffp->av_sync_type = AV_SYNC_AUDIO_MASTER;
         is->av_sync_type  = ffp->av_sync_type;
     }
+    
+    av_log(NULL, AV_LOG_WARNING, "miteshg 2 av_sync_type=%d\n", ffp->av_sync_type);
 
     ret = -1;
     if (st_index[AVMEDIA_TYPE_VIDEO] >= 0) {
@@ -3597,6 +3600,8 @@ static int read_thread(void *arg)
             av_packet_unref(pkt);
         }
 
+        av_log(ffp,AV_LOG_INFO, "miteshg1 bit_rate %" PRId64 "\n", ic->bit_rate);
+        ffp->stat.bit_rate = ic->bit_rate;
         ffp_statistic_l(ffp);
 
         if (ffp->ijkmeta_delay_init && !init_ijkmeta &&
@@ -5002,6 +5007,10 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             if (!ffp)
                 return default_value;
             return ffp->stat.logical_file_size;
+        case FFP_PROP_INT64_DROP_FRAME_COUNT:
+            if (!ffp)
+                return default_value;
+            return ffp->stat.drop_frame_count;
         default:
             return default_value;
     }

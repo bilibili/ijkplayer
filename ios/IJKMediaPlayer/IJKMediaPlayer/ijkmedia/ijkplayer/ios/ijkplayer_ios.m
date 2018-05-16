@@ -54,6 +54,14 @@ fail:
     return NULL;
 }
 
+void ijkmp_ios_reset(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    assert(mp->ffplayer);
+    mp->ffplayer->first_video_frame_rendered = 0;
+    mp->ffplayer->first_audio_frame_rendered = 0;
+}
+
 void ijkmp_ios_set_glview_l(IjkMediaPlayer *mp, IJKSDLGLView *glView)
 {
     assert(mp);
