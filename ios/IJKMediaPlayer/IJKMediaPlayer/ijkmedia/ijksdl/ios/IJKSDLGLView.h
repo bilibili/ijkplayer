@@ -24,20 +24,16 @@
  */
 
 #import <UIKit/UIKit.h>
+#import "IJKSDLGLViewProtocol.h"
 
 #include "ijksdl/ijksdl_vout.h"
 
-@interface IJKSDLGLView : UIView
+@interface IJKSDLGLView : UIView <IJKSDLGLViewProtocol>
 
 - (id) initWithFrame:(CGRect)frame;
 - (void) display: (SDL_VoutOverlay *) overlay;
 
 - (UIImage*) snapshot;
-- (void)setHudValue:(NSString *)value forKey:(NSString *)key;
 - (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhiteBeingMovedToWindow __attribute__((deprecated("unused")));
-
-@property(nonatomic, readonly)        CGFloat  fps;
-@property(nonatomic)        CGFloat  scaleFactor;
-@property(nonatomic)        BOOL     shouldShowHudView;
 
 @end

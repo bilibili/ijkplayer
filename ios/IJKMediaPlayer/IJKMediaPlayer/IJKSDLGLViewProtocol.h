@@ -1,8 +1,8 @@
 /*
- * ffpipenode_android_mediacodec_vdec.h
+ * IJKSDLGLViewProtocol.h
  *
- * Copyright (c) 2014 Bilibili
- * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2017 Bilibili
+ * Copyright (c) 2017 raymond <raymondzheng1412@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,17 +21,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef FFPLAY__FF_FFPIPENODE_ANDROID_MEDIACODEC_VDEC_H
-#define FFPLAY__FF_FFPIPENODE_ANDROID_MEDIACODEC_VDEC_H
+#ifndef IJKSDLGLViewProtocol_h
+#define IJKSDLGLViewProtocol_h
 
-#include "../../ff_ffpipenode.h"
-#include "../../ff_ffpipeline.h"
-#include "ijksdl/ijksdl_vout.h"
+#import <UIKit/UIKit.h>
 
-typedef struct FFPlayer FFPlayer;
+typedef struct IJKOverlay IJKOverlay;
+struct IJKOverlay {
+    int w;
+    int h;
+    UInt32 format;
+    int planes;
+    UInt16 *pitches;
+    UInt8 **pixels;
+    int sar_num;
+    int sar_den;
+    CVPixelBufferRef pixel_buffer;
+};
 
-IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer *ffp, IJKFF_Pipeline *pipeline, SDL_Vout *vout);
-IJKFF_Pipenode *ffpipenode_init_decoder_from_android_mediacodec(FFPlayer *ffp, IJKFF_Pipeline *pipeline, SDL_Vout *vout);
-int ffpipenode_config_from_android_mediacodec(FFPlayer *ffp, IJKFF_Pipeline *pipeline, SDL_Vout *vout, IJKFF_Pipenode *node);
+@protocol IJKSDLGLViewProtocol <NSObject>
+- (UIImage*) snapshot;
+@property(nonatomic, readonly) CGFloat  fps;
+@property(nonatomic)        CGFloat  scaleFactor;
+@property(nonatomic)        BOOL  isThirdGLView;
+- (void) display_pixels: (IJKOverlay *) overlay;
+@end
 
-#endif
+#endif /* IJKSDLGLViewProtocol_h */

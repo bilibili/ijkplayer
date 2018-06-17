@@ -402,18 +402,22 @@ typedef struct VideoState {
 
     PacketQueue *buffer_indicator_queue;
 
-    volatile int latest_seek_load_serial;
+    volatile int latest_video_seek_load_serial;
+    volatile int latest_audio_seek_load_serial;
     volatile int64_t latest_seek_load_start_at;
 
     int drop_aframe_count;
     int drop_vframe_count;
     int64_t accurate_seek_start_time;
     volatile int64_t accurate_seek_vframe_pts;
+    volatile int64_t accurate_seek_aframe_pts;
     int audio_accurate_seek_req;
     int video_accurate_seek_req;
     SDL_mutex *accurate_seek_mutex;
     SDL_cond  *video_accurate_seek_cond;
     SDL_cond  *audio_accurate_seek_cond;
+    volatile int initialized_decoder;
+    int seek_buffering;
 } VideoState;
 
 /* options specified by the user */
@@ -458,6 +462,7 @@ static int nb_vfilters = 0;
 static char *afilters = NULL;
 #endif
 static int autorotate = 1;
+static int find_stream_info = 1;
 
 /* current context */
 static int is_full_screen;
@@ -615,7 +620,7 @@ typedef struct FFPlayer {
     char *vfilter0;
 #endif
     int autorotate;
-
+    int find_stream_info;
     unsigned sws_flags;
 
     /* current context */
@@ -710,6 +715,11 @@ typedef struct FFPlayer {
     int skip_calc_frame_rate;
     int get_frame_mode;
     GetImgInfo *get_img_info;
+    int async_init_decoder;
+    char *video_mime_type;
+    char *mediacodec_default_name;
+    int ijkmeta_delay_init;
+    int render_wait_start;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
@@ -759,6 +769,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->vfilter0               = NULL;
 #endif
     ffp->autorotate             = 1;
+    ffp->find_stream_info       = 1;
 
     ffp->sws_flags              = SWS_FAST_BILINEAR;
 
@@ -814,6 +825,11 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->iformat_name                   = NULL; // option
 
     ffp->no_time_adjust                 = 0; // option
+    ffp->async_init_decoder             = 0; // option
+    ffp->video_mime_type                = NULL; // option
+    ffp->mediacodec_default_name        = NULL; // option
+    ffp->ijkmeta_delay_init             = 0; // option
+    ffp->render_wait_start              = 0;
 
     ijkmeta_reset(ffp->meta);
 

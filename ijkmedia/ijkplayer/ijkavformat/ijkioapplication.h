@@ -56,6 +56,7 @@ struct IjkIOApplicationContext {
     int fd;
     pthread_mutex_t mutex;
     int shared;
+    int active_reconnect;
     int (*func_ijkio_on_app_event)(IjkIOApplicationContext *h, int event_type ,void *obj, int size);
 };
 

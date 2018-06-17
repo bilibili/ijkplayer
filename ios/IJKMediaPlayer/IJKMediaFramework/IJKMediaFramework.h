@@ -39,6 +39,7 @@ FOUNDATION_EXPORT const unsigned char IJKMediaFrameworkVersionString[];
 #import <IJKMediaFramework/IJKMediaPlayer.h>
 #import <IJKMediaFramework/IJKNotificationManager.h>
 #import <IJKMediaFramework/IJKKVOController.h>
+#import <IJKMediaFramework/IJKSDLGLViewProtocol.h>
 
 // backward compatible for old names
 #define IJKMediaPlaybackIsPreparedToPlayDidChangeNotification IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification
@@ -57,4 +58,6 @@ FOUNDATION_EXPORT const unsigned char IJKMediaFrameworkVersionString[];
 #define IJKMoviePlayerComponentOpenNotification IJKMPMoviePlayerComponentOpenNotification
 
 #define IJKMPMoviePlayerAccurateSeekCompleteNotification IJKMPMoviePlayerAccurateSeekCompleteNotification
+#define IJKMoviePlayerSeekAudioStartNotification IJKMPMoviePlayerSeekAudioStartNotification
+#define IJKMoviePlayerSeekVideoStartNotification IJKMPMoviePlayerSeekVideoStartNotification
 

@@ -357,6 +357,14 @@ void ijkio_manager_will_share_cache_map(IjkIOManagerContext *h) {
     pthread_mutex_unlock(&h->ijkio_app_ctx->mutex);
 }
 
+void ijkio_manager_immediate_reconnect(IjkIOManagerContext *h) {
+    av_log(NULL, AV_LOG_INFO, "ijkio manager immediate reconnect\n");
+    if (!h || !h->ijkio_app_ctx) {
+        return;
+    }
+    h->ijkio_app_ctx->active_reconnect = 1;
+}
+
 void ijkio_manager_did_share_cache_map(IjkIOManagerContext *h) {
     av_log(NULL, AV_LOG_INFO, "did share cache\n");
     if (!h || !h->ijkio_app_ctx) {

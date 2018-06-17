@@ -96,6 +96,9 @@ static const AVOption ffp_context_options[] = {
     // FFP_MERGE: showmode, default, i, codec, acodec, scodec, vcodec
     // TODO: autorotate
 
+    { "find_stream_info",               "read and decode the streams to fill missing information with heuristics" ,
+        OPTION_OFFSET(find_stream_info),    OPTION_INT(1, 0, 1) },
+
     // extended options in ff_ffplay.c
     { "max-fps",                        "drop frames in video whose fps is greater than max-fps",
         OPTION_OFFSET(max_fps),         OPTION_INT(31, -1, 121) },
@@ -157,6 +160,10 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(skip_calc_frame_rate),       OPTION_INT(0, 0, 1) },
     { "get-frame-mode",                      "warning, this option only for get frame",
         OPTION_OFFSET(get_frame_mode),       OPTION_INT(0, 0, 1) },
+    { "async-init-decoder",                  "async create decoder",
+        OPTION_OFFSET(async_init_decoder),   OPTION_INT(0, 0, 1) },
+    { "video-mime-type",                    "default video mime type",
+        OPTION_OFFSET(video_mime_type),     OPTION_STR(NULL) },
 
         // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
@@ -193,6 +200,12 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(soundtouch_enable),            OPTION_INT(0, 0, 1) },
     { "mediacodec-sync",                 "mediacodec: use msg_queue for synchronise",
         OPTION_OFFSET(mediacodec_sync),           OPTION_INT(0, 0, 1) },
+    { "mediacodec-default-name",          "mediacodec default name",
+        OPTION_OFFSET(mediacodec_default_name),      OPTION_STR(NULL) },
+    { "ijkmeta-delay-init",          "ijkmeta delay init",
+        OPTION_OFFSET(ijkmeta_delay_init),      OPTION_INT(0, 0, 1) },
+    { "render-wait-start",          "render wait start",
+        OPTION_OFFSET(render_wait_start),      OPTION_INT(0, 0, 1) },
 
     { NULL }
 };

@@ -139,6 +139,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int FFP_PROP_INT64_BIT_RATE                         = 20100;
     public static final int FFP_PROP_INT64_TCP_SPEED                        = 20200;
     public static final int FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION        = 20300;
+    public static final int FFP_PROP_INT64_IMMEDIATE_RECONNECT              = 20211;
     //----------------------------------------
 
     @AccessedByNative
@@ -949,6 +950,10 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         native_finalize();
     }
 
+    public void httphookReconnect() {
+        _setPropertyLong(FFP_PROP_INT64_IMMEDIATE_RECONNECT, 1);
+    }
+
     public void setCacheShare(int share) {
         _setPropertyLong(FFP_PROP_INT64_SHARE_CACHE_DATA, (long)share);
     }
@@ -1115,7 +1120,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         int EVENT_WILL_HTTP_OPEN = 0x1;                 // ARG_URL
         int EVENT_DID_HTTP_OPEN = 0x2;                  // ARG_URL, ARG_ERROR, ARG_HTTP_CODE
         int EVENT_WILL_HTTP_SEEK = 0x3;                 // ARG_URL, ARG_OFFSET
-        int EVENT_DID_HTTP_SEEK = 0x4;                  // ARG_URL, ARG_OFFSET, ARG_ERROR, ARG_HTTP_CODE
+        int EVENT_DID_HTTP_SEEK = 0x4;                  // ARG_URL, ARG_OFFSET, ARG_ERROR, ARG_HTTP_CODE, ARG_FILE_SIZE
 
         String ARG_URL = "url";
         String ARG_SEGMENT_INDEX = "segment_index";
@@ -1129,6 +1134,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
         String ARG_OFFSET = "offset";
         String ARG_HTTP_CODE = "http_code";
+        String ARG_FILE_SIZE = "file_size";
 
         /*
          * @return true if invoke is handled

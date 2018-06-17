@@ -344,6 +344,70 @@ fail:
     return ret;
 }
 
+static int configure_codec_l(JNIEnv *env, IJKFF_Pipenode *node, jobject new_surface)
+{
+    IJKFF_Pipenode_Opaque        *opaque = node->opaque;
+    int                              ret = 0;
+    sdl_amedia_status_t          amc_ret = 0;
+    jobject                prev_jsurface = NULL;
+    ijkmp_mediacodecinfo_context *mcc    = &opaque->mcc;
+
+    prev_jsurface = opaque->jsurface;
+    if (new_surface) {
+        opaque->jsurface = (*env)->NewGlobalRef(env, new_surface);
+        if (J4A_ExceptionCheck__catchAll(env) || !opaque->jsurface)
+            goto fail;
+    } else {
+        opaque->jsurface = NULL;
+    }
+
+    SDL_JNI_DeleteGlobalRefP(env, &prev_jsurface);
+
+    if (!opaque->acodec || !mcc) {
+        goto fail;
+    }
+
+    strncpy(opaque->acodec_name, mcc->codec_name, sizeof(opaque->acodec_name) / sizeof(*opaque->acodec_name));
+    opaque->acodec_name[sizeof(opaque->acodec_name) / sizeof(*opaque->acodec_name) - 1] = 0;
+
+    // QUIRK: always recreate MediaCodec for reconfigure
+    opaque->quirk_reconfigure_with_new_codec = true;
+    /* delaying output makes it possible to correct frame order, hopefully */
+    if (0 == strncasecmp(mcc->codec_name, "OMX.TI.DUCATI1.", 15)) {
+        /* this is the only acceptable value on Nexus S */
+        opaque->n_buf_out = 1;
+        ALOGD("using buffered output for %s", mcc->codec_name);
+    }
+
+    if (opaque->frame_rotate_degrees == 90 || opaque->frame_rotate_degrees == 270) {
+        opaque->frame_width  = opaque->codecpar->height;
+        opaque->frame_height = opaque->codecpar->width;
+    } else {
+        opaque->frame_width  = opaque->codecpar->width;
+        opaque->frame_height = opaque->codecpar->height;
+    }
+    amc_ret = SDL_AMediaCodec_configure_surface(env, opaque->acodec, opaque->input_aformat, opaque->jsurface, NULL, 0);
+    if (amc_ret != SDL_AMEDIA_OK) {
+        ALOGE("%s:configure_surface: failed\n", __func__);
+        ret = -1;
+        goto fail;
+    }
+    amc_ret = SDL_AMediaCodec_start(opaque->acodec);
+    if (amc_ret != SDL_AMEDIA_OK) {
+        ALOGE("%s:SDL_AMediaCodec_start: failed\n", __func__);
+        ret = -1;
+        goto fail;
+    }
+
+    opaque->acodec_first_dequeue_output_request = true;
+    ALOGI("%s:new acodec: %p\n", __func__, opaque->acodec);
+    SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, opaque->acodec);
+
+    ret = 0;
+fail:
+    return ret;
+}
+
 #if 0
 static int reconfigure_codec(JNIEnv *env, IJKFF_Pipenode *node)
 {
@@ -1623,6 +1687,218 @@ static int func_flush(IJKFF_Pipenode *node)
     opaque->acodec_flush_request = true;
 
     return 0;
+}
+
+int ffpipenode_config_from_android_mediacodec(FFPlayer *ffp, IJKFF_Pipeline *pipeline, SDL_Vout *vout, IJKFF_Pipenode *node) {
+    int                   ret     = 0;
+    VideoState            *is     = ffp->is;
+    IJKFF_Pipenode_Opaque *opaque = node->opaque;
+    JNIEnv                *env    = NULL;
+    jobject              jsurface = NULL;
+    opaque->decoder               = &is->viddec;
+
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("%s:create: SetupThreadEnv failed\n", __func__);
+        goto fail;
+    }
+
+    ret = avcodec_parameters_from_context(opaque->codecpar, opaque->decoder->avctx);
+    if (ret)
+        goto fail;
+
+    switch (opaque->codecpar->codec_id) {
+    case AV_CODEC_ID_H264:
+        if (!ffp->mediacodec_avc && !ffp->mediacodec_all_videos) {
+            ALOGE("%s: MediaCodec: AVC/H264 is disabled. codec_id:%d \n", __func__, opaque->codecpar->codec_id);
+            goto fail;
+        }
+        switch (opaque->codecpar->profile) {
+            case FF_PROFILE_H264_BASELINE:
+                ALOGI("%s: MediaCodec: H264_BASELINE: enabled\n", __func__);
+                break;
+            case FF_PROFILE_H264_CONSTRAINED_BASELINE:
+                ALOGI("%s: MediaCodec: H264_CONSTRAINED_BASELINE: enabled\n", __func__);
+                break;
+            case FF_PROFILE_H264_MAIN:
+                ALOGI("%s: MediaCodec: H264_MAIN: enabled\n", __func__);
+                break;
+            case FF_PROFILE_H264_EXTENDED:
+                ALOGI("%s: MediaCodec: H264_EXTENDED: enabled\n", __func__);
+                break;
+            case FF_PROFILE_H264_HIGH:
+                ALOGI("%s: MediaCodec: H264_HIGH: enabled\n", __func__);
+                break;
+            case FF_PROFILE_H264_HIGH_10:
+                ALOGW("%s: MediaCodec: H264_HIGH_10: disabled\n", __func__);
+                goto fail;
+            case FF_PROFILE_H264_HIGH_10_INTRA:
+                ALOGW("%s: MediaCodec: H264_HIGH_10_INTRA: disabled\n", __func__);
+                goto fail;
+            case FF_PROFILE_H264_HIGH_422:
+                ALOGW("%s: MediaCodec: H264_HIGH_10_422: disabled\n", __func__);
+                goto fail;
+            case FF_PROFILE_H264_HIGH_422_INTRA:
+                ALOGW("%s: MediaCodec: H264_HIGH_10_INTRA: disabled\n", __func__);
+                goto fail;
+            case FF_PROFILE_H264_HIGH_444:
+                ALOGW("%s: MediaCodec: H264_HIGH_10_444: disabled\n", __func__);
+                goto fail;
+            case FF_PROFILE_H264_HIGH_444_PREDICTIVE:
+                ALOGW("%s: MediaCodec: H264_HIGH_444_PREDICTIVE: disabled\n", __func__);
+                goto fail;
+            case FF_PROFILE_H264_HIGH_444_INTRA:
+                ALOGW("%s: MediaCodec: H264_HIGH_444_INTRA: disabled\n", __func__);
+                goto fail;
+            case FF_PROFILE_H264_CAVLC_444:
+                ALOGW("%s: MediaCodec: H264_CAVLC_444: disabled\n", __func__);
+                goto fail;
+            default:
+                ALOGW("%s: MediaCodec: (%d) unknown profile: disabled\n", __func__, opaque->codecpar->profile);
+                goto fail;
+        }
+        strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_AVC);
+        opaque->mcc.profile = opaque->codecpar->profile;
+        opaque->mcc.level   = opaque->codecpar->level;
+        break;
+    case AV_CODEC_ID_HEVC:
+        if (!ffp->mediacodec_hevc && !ffp->mediacodec_all_videos) {
+            ALOGE("%s: MediaCodec/HEVC is disabled. codec_id:%d \n", __func__, opaque->codecpar->codec_id);
+            goto fail;
+        }
+        strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_HEVC);
+        opaque->mcc.profile = opaque->codecpar->profile;
+        opaque->mcc.level   = opaque->codecpar->level;
+        break;
+    case AV_CODEC_ID_MPEG2VIDEO:
+        if (!ffp->mediacodec_mpeg2 && !ffp->mediacodec_all_videos) {
+            ALOGE("%s: MediaCodec/MPEG2VIDEO is disabled. codec_id:%d \n", __func__, opaque->codecpar->codec_id);
+            goto fail;
+        }
+        strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_MPEG2VIDEO);
+        opaque->mcc.profile = opaque->codecpar->profile;
+        opaque->mcc.level   = opaque->codecpar->level;
+        break;
+    case AV_CODEC_ID_MPEG4:
+        if (!ffp->mediacodec_mpeg4 && !ffp->mediacodec_all_videos) {
+            ALOGE("%s: MediaCodec/MPEG4 is disabled. codec_id:%d \n", __func__, opaque->codecpar->codec_id);
+            goto fail;
+        }
+        if ((opaque->codecpar->codec_tag & 0x0000FFFF) == 0x00005844) {
+            ALOGE("%s: divx is not supported \n", __func__);
+            goto fail;
+        }
+        strcpy(opaque->mcc.mime_type, SDL_AMIME_VIDEO_MPEG4);
+        opaque->mcc.profile = opaque->codecpar->profile >= 0 ? opaque->codecpar->profile : 0;
+        opaque->mcc.level   = opaque->codecpar->level >= 0 ? opaque->codecpar->level : 1;
+        break;
+
+    default:
+        ALOGE("%s:create: not H264 or H265/HEVC, codec_id:%d \n", __func__, opaque->codecpar->codec_id);
+        goto fail;
+    }
+
+    if (strcmp(opaque->mcc.mime_type, ffp->video_mime_type)) {
+        ALOGW("amc: video_mime_type error opaque->mcc.mime_type = %s\n", opaque->mcc.mime_type);
+        goto fail;
+    }
+
+    ret = recreate_format_l(env, node);
+    if (ret) {
+        ALOGE("amc: recreate_format_l failed\n");
+        goto fail;
+    }
+
+    jsurface = ffpipeline_get_surface_as_global_ref(env, pipeline);
+    ret = configure_codec_l(env, node, jsurface);
+    J4A_DeleteGlobalRef__p(env, &jsurface);
+    if (ret != 0)
+        goto fail;
+
+    ffp_set_video_codec_info(ffp, MEDIACODEC_MODULE_NAME, opaque->mcc.codec_name);
+
+    opaque->off_buf_out = 0;
+    if (opaque->n_buf_out) {
+        int i;
+
+        opaque->amc_buf_out = calloc(opaque->n_buf_out, sizeof(*opaque->amc_buf_out));
+        assert(opaque->amc_buf_out != NULL);
+        for (i = 0; i < opaque->n_buf_out; i++)
+            opaque->amc_buf_out[i].pts = AV_NOPTS_VALUE;
+    }
+
+    SDL_SpeedSamplerReset(&opaque->sampler);
+    ffp->stat.vdec_type = FFP_PROPV_DECODER_MEDIACODEC;
+
+    return 0;
+
+fail:
+    ret = -1;
+    ffpipenode_free_p(&node);
+    return ret;
+}
+
+IJKFF_Pipenode *ffpipenode_init_decoder_from_android_mediacodec(FFPlayer *ffp, IJKFF_Pipeline *pipeline, SDL_Vout *vout)
+{
+    if (SDL_Android_GetApiLevel() < IJK_API_16_JELLY_BEAN)
+        return NULL;
+
+    if (!ffp || !ffp->is)
+        return NULL;
+
+    IJKFF_Pipenode *node = ffpipenode_alloc(sizeof(IJKFF_Pipenode_Opaque));
+    if (!node)
+        return node;
+
+    VideoState            *is     = ffp->is;
+    IJKFF_Pipenode_Opaque *opaque = node->opaque;
+    JNIEnv                *env    = NULL;
+
+    node->func_destroy  = func_destroy;
+    if (ffp->mediacodec_sync) {
+        node->func_run_sync = func_run_sync_loop;
+    } else {
+        node->func_run_sync = func_run_sync;
+    }
+    node->func_flush    = func_flush;
+    opaque->pipeline    = pipeline;
+    opaque->ffp         = ffp;
+    opaque->decoder     = &is->viddec;
+    opaque->weak_vout   = vout;
+
+    opaque->acodec_mutex                      = SDL_CreateMutex();
+    opaque->acodec_cond                       = SDL_CreateCond();
+    opaque->acodec_first_dequeue_output_mutex = SDL_CreateMutex();
+    opaque->acodec_first_dequeue_output_cond  = SDL_CreateCond();
+    opaque->any_input_mutex                   = SDL_CreateMutex();
+    opaque->any_input_cond                    = SDL_CreateCond();
+
+    if (!opaque->acodec_cond || !opaque->acodec_cond || !opaque->acodec_first_dequeue_output_mutex || !opaque->acodec_first_dequeue_output_cond) {
+        ALOGE("%s:open_video_decoder: SDL_CreateCond() failed\n", __func__);
+        goto fail;
+    }
+
+    opaque->codecpar = avcodec_parameters_alloc();
+    if (!opaque->codecpar)
+        goto fail;
+
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("%s:create: SetupThreadEnv failed\n", __func__);
+        goto fail;
+    }
+
+    ALOGI("%s:use default mediacodec name: %s\n", __func__, ffp->mediacodec_default_name);
+    strcpy(opaque->mcc.codec_name, ffp->mediacodec_default_name);
+    opaque->acodec = SDL_AMediaCodecJava_createByCodecName(env, ffp->mediacodec_default_name);
+
+    if (!opaque->acodec) {
+        goto fail;
+    }
+
+    return node;
+fail:
+    ALOGW("%s: init fail\n", __func__);
+    ffpipenode_free_p(&node);
+    return NULL;
 }
 
 IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer *ffp, IJKFF_Pipeline *pipeline, SDL_Vout *vout)

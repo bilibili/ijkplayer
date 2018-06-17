@@ -45,6 +45,7 @@ void ijkio_manager_destroyp(IjkIOManagerContext **ph);
 int ijkio_manager_set_callback(IjkIOManagerContext *h, void *callback);
 void ijkio_manager_will_share_cache_map(IjkIOManagerContext *h);
 void ijkio_manager_did_share_cache_map(IjkIOManagerContext *h);
+void ijkio_manager_immediate_reconnect(IjkIOManagerContext *h);
 
 int ijkio_manager_io_open(IjkIOManagerContext *h, const char *url, int flags, IjkAVDictionary **options);
 int ijkio_manager_io_read(IjkIOManagerContext *h, unsigned char *buf, int size);

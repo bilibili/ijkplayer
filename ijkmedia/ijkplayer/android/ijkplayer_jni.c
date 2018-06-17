@@ -42,7 +42,7 @@
 
 #define JNI_MODULE_PACKAGE      "tv/danmaku/ijk/media/player"
 #define JNI_CLASS_IJKPLAYER     "tv/danmaku/ijk/media/player/IjkMediaPlayer"
-#define JNI_IJK_MEDIA_EXCEPTION "tv/danmaku/ijk/media/player/IjkMediaException"
+#define JNI_IJK_MEDIA_EXCEPTION "tv/danmaku/ijk/media/player/exceptions/IjkMediaException"
 
 #define IJK_CHECK_MPRET_GOTO(retval, env, label) \
     JNI_CHECK_GOTO((retval != EIJK_INVALID_STATE), env, "java/lang/IllegalStateException", NULL, label); \
@@ -535,8 +535,13 @@ IjkMediaPlayer_setOption(JNIEnv *env, jobject thiz, jint category, jobject name,
     const char *c_value = NULL;
     JNI_CHECK_GOTO(mp, env, "java/lang/IllegalStateException", "mpjni: setOption: null mp", LABEL_RETURN);
 
+    if (!name) {
+        goto LABEL_RETURN;
+    }
+
     c_name = (*env)->GetStringUTFChars(env, name, NULL );
     JNI_CHECK_GOTO(c_name, env, "java/lang/OutOfMemoryError", "mpjni: setOption: name.string oom", LABEL_RETURN);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: IjkMediaPlayer_setOption: null name", LABEL_RETURN);
 
     if (value) {
         c_value = (*env)->GetStringUTFChars(env, value, NULL );
@@ -818,6 +823,7 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
             J4AC_Bundle__putLong__withCString__catchAll(env, jbundle, "offset", real_data->offset);
             J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "error", real_data->error);
             J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "http_code", real_data->http_code);
+            J4AC_Bundle__putLong__withCString__catchAll(env, jbundle, "file_size", real_data->filesize);
             J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
             if (J4A_ExceptionCheck__catchAll(env))
                 goto fail;
@@ -961,11 +967,11 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             break;
         case FFP_MSG_BUFFERING_START:
             MPTRACE("FFP_MSG_BUFFERING_START:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, 0);
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, msg.arg1);
             break;
         case FFP_MSG_BUFFERING_END:
             MPTRACE("FFP_MSG_BUFFERING_END:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, 0);
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, msg.arg1);
             break;
         case FFP_MSG_BUFFERING_UPDATE:
             // MPTRACE("FFP_MSG_BUFFERING_UPDATE: %d, %d", msg.arg1, msg.arg2);
@@ -1004,6 +1010,14 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             else {
                 post_event2(env, weak_thiz, MEDIA_GET_IMG_STATE, msg.arg1, msg.arg2, NULL);
             }
+            break;
+        case FFP_MSG_VIDEO_SEEK_RENDERING_START:
+            MPTRACE("FFP_MSG_VIDEO_SEEK_RENDERING_START:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_SEEK_RENDERING_START, msg.arg1);
+            break;
+        case FFP_MSG_AUDIO_SEEK_RENDERING_START:
+            MPTRACE("FFP_MSG_AUDIO_SEEK_RENDERING_START:\n");
+            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_SEEK_RENDERING_START, msg.arg1);
             break;
         default:
             ALOGE("unknown FFP_MSG_xxx(%d)\n", msg.what);

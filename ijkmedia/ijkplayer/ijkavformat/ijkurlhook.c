@@ -288,8 +288,6 @@ static int ijkhttphook_open(URLContext *h, const char *arg, int flags, AVDiction
         av_log(h, AV_LOG_INFO, "%s: will reconnect at start\n", __func__);
         ret = ijkhttphook_reconnect_at(h, 0);
         av_log(h, AV_LOG_INFO, "%s: did reconnect at start: %d\n", __func__, ret);
-        if (ret)
-            c->app_io_ctrl.retry_counter++;
     }
 
 fail:

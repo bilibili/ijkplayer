@@ -176,7 +176,17 @@
         if (_isStopped)
             return;
 
-        AudioQueueFlush(_audioQueueRef);
+        if (_isPaused == YES) {
+            for (int i = 0; i < kIJKAudioQueueNumberBuffers; i++)
+            {
+                if (_audioQueueBufferRefArray[i] && _audioQueueBufferRefArray[i]->mAudioData) {
+                    _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
+                    memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
+                }
+            }
+        } else {
+            AudioQueueFlush(_audioQueueRef);
+        }
     }
 }
 

@@ -39,6 +39,8 @@
 #define FFP_MSG_OPEN_INPUT                  407
 #define FFP_MSG_FIND_STREAM_INFO            408
 #define FFP_MSG_COMPONENT_OPEN              409
+#define FFP_MSG_VIDEO_SEEK_RENDERING_START  410
+#define FFP_MSG_AUDIO_SEEK_RENDERING_START  411
 
 #define FFP_MSG_BUFFERING_START             500
 #define FFP_MSG_BUFFERING_END               501
@@ -102,5 +104,6 @@
 
 #define FFP_PROP_INT64_LOGICAL_FILE_SIZE                20209
 #define FFP_PROP_INT64_SHARE_CACHE_DATA                 20210
+#define FFP_PROP_INT64_IMMEDIATE_RECONNECT              20211
 
 #endif
