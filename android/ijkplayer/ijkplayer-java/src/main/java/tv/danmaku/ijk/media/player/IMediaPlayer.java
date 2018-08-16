@@ -67,6 +67,7 @@ public interface IMediaPlayer {
     int MEDIA_ERROR_MALFORMED = -1007;
     int MEDIA_ERROR_UNSUPPORTED = -1010;
     int MEDIA_ERROR_TIMED_OUT = -110;
+    int MEDIA_ERROR_IJK_PLAYER = -10000;
 
     void setDisplay(SurfaceHolder sh);
 
