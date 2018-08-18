@@ -65,6 +65,13 @@
         AudioStreamBasicDescription streamDescription;
         IJKSDLGetAudioStreamBasicDescriptionFromSpec(&_spec, &streamDescription);
 
+        SDL_CalculateAudioSpec(&_spec);
+
+        if (_spec.size == 0) {
+            NSLog(@"aout_open_audio: unexcepted audio spec size %u", _spec.size);
+            return nil;
+        }
+
         /* Set the desired format */
         AudioQueueRef audioQueueRef;
         OSStatus status = AudioQueueNewOutput(&streamDescription,
@@ -93,8 +100,6 @@
             self = nil;
             return nil;
         }
-
-        SDL_CalculateAudioSpec(&_spec);
 
         _audioQueueRef = audioQueueRef;
 
@@ -171,7 +176,17 @@
         if (_isStopped)
             return;
 
-        AudioQueueFlush(_audioQueueRef);
+        if (_isPaused == YES) {
+            for (int i = 0; i < kIJKAudioQueueNumberBuffers; i++)
+            {
+                if (_audioQueueBufferRefArray[i] && _audioQueueBufferRefArray[i]->mAudioData) {
+                    _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
+                    memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
+                }
+            }
+        } else {
+            AudioQueueFlush(_audioQueueRef);
+        }
     }
 }
 

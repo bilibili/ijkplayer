@@ -11,6 +11,10 @@ FFmpeg
 * Modify ffmpeg version in `IJKFFMoviePlayerController` (by running `sh init-ios.sh`)
 * Commit and push
 
+OpenSSL
+----------------------
+* Check openssl latest stable version
+
 ijkplayer
 -----------------------
 * Update version.sh

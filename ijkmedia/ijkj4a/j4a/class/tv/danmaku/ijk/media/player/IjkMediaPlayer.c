@@ -26,7 +26,7 @@ typedef struct J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer {
 
     jfieldID field_mNativeMediaPlayer;
     jfieldID field_mNativeMediaDataSource;
-    jfieldID field_mNativeIjkIOHttp;
+    jfieldID field_mNativeAndroidIO;
     jmethodID method_postEventFromNative;
     jmethodID method_onSelectCodec;
     jmethodID method_onNativeInvoke;
@@ -85,14 +85,14 @@ void J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeMediaDataSource__se
     J4A_ExceptionCheck__catchAll(env);
 }
 
-jlong J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeIjkIOHttp__get(JNIEnv *env, jobject thiz)
+jlong J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeAndroidIO__get(JNIEnv *env, jobject thiz)
 {
-    return (*env)->GetLongField(env, thiz, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.field_mNativeIjkIOHttp);
+    return (*env)->GetLongField(env, thiz, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.field_mNativeAndroidIO);
 }
 
-jlong J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeIjkIOHttp__get__catchAll(JNIEnv *env, jobject thiz)
+jlong J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeAndroidIO__get__catchAll(JNIEnv *env, jobject thiz)
 {
-    jlong ret_value = J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeIjkIOHttp__get(env, thiz);
+    jlong ret_value = J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeAndroidIO__get(env, thiz);
     if (J4A_ExceptionCheck__catchAll(env)) {
         return 0;
     }
@@ -100,14 +100,14 @@ jlong J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeIjkIOHttp__get__ca
     return ret_value;
 }
 
-void J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeIjkIOHttp__set(JNIEnv *env, jobject thiz, jlong value)
+void J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeAndroidIO__set(JNIEnv *env, jobject thiz, jlong value)
 {
-    (*env)->SetLongField(env, thiz, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.field_mNativeIjkIOHttp, value);
+    (*env)->SetLongField(env, thiz, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.field_mNativeAndroidIO, value);
 }
 
-void J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeIjkIOHttp__set__catchAll(JNIEnv *env, jobject thiz, jlong value)
+void J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeAndroidIO__set__catchAll(JNIEnv *env, jobject thiz, jlong value)
 {
-    J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeIjkIOHttp__set(env, thiz, value);
+    J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__mNativeAndroidIO__set(env, thiz, value);
     J4A_ExceptionCheck__catchAll(env);
 }
 
@@ -355,10 +355,10 @@ int J4A_loadClass__J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer(JNIEnv *env)
         goto fail;
 
     class_id = class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id;
-    name     = "mNativeIjkIOHttp";
+    name     = "mNativeAndroidIO";
     sign     = "J";
-    class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.field_mNativeIjkIOHttp = J4A_GetFieldID__catchAll(env, class_id, name, sign);
-    if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.field_mNativeIjkIOHttp == NULL)
+    class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.field_mNativeAndroidIO = J4A_GetFieldID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.field_mNativeAndroidIO == NULL)
         goto fail;
 
     class_id = class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id;

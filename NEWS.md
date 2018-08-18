@@ -1,5 +1,68 @@
 tag next
 --------------------------------
+
+tag k0.8.8
+--------------------------------
+- ffmpeg: upgrade to 3.4
+- ffmpeg: fix hls some issue
+- android: fix seek bug when no audio
+- openssl: upgrade to 1.0.2n
+- ios: vtb support h265
+
+tag k0.8.7
+--------------------------------
+
+tag k0.8.6
+--------------------------------
+- ijkplayer: fix opengl config error
+- ffmpeg: fix a concat issue 
+
+tag k0.8.5
+--------------------------------
+- ijkplayer: fix opengl config error
+- ijkplayer: fix some bug about audio
+
+tag k0.8.4
+--------------------------------
+- ffmpeg: enable hevc by default
+- ijkio: support cache share
+- ijkplayer: fix some bug
+
+tag k0.8.3
+--------------------------------
+- ffmpeg: dns cache refactor
+- ijkio: cache support synchronize read avoid frequent lseek
+- ijkplayer: fix some bug
+
+tag k0.8.2
+--------------------------------
+- ffmpeg: fix some bug
+- ijkio: update and modify features
+- ijkplayer: support don't calculate real frame rate, the first frame will speed up
+
+tag k0.8.1
+--------------------------------
+- ffmpeg: support dns cache
+- ijkio: support inject extra node
+
+tag k0.8.0
+--------------------------------
+- ffmpeg: upgrade to 3.3
+- ffmpeg: enable flac
+- android: support sync mediacodec
+- android: support framedrop when use mediacodec
+- openssl: upgrade to 1.0.2k
+- jni4android: upgrade to v0.0.2
+
+tag k0.7.9
+--------------------------------
+- ffmpeg: add tcp timeout control
+- android: support soundtouch
+
+tag k0.7.8
+--------------------------------
+- ffplay: support accurate seek
+- ijkio: fix some issue
 - ios: add ijkplayer dynamic target with ssl
 
 tag k0.7.7

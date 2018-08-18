@@ -18,7 +18,7 @@
 
 IJK_J4A_UPSTREAM=https://github.com/Bilibili/jni4android.git
 IJK_J4A_FORK=https://github.com/Bilibili/jni4android.git
-IJK_J4A_COMMIT=v0.0.1
+IJK_J4A_COMMIT=v0.0.2
 IJK_J4A_LOCAL_REPO=extra/jni4android
 
 set -e

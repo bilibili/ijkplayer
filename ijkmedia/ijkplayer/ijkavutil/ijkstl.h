@@ -30,7 +30,7 @@ int ijk_map_remove(void *data, int64_t key);
 int ijk_map_size(void *data);
 int ijk_map_max_size(void *data);
 void* ijk_map_index_get(void *data, int index);
-void ijk_map_traversal_handle(void *data, int (*enu)(void *elem));
+void ijk_map_traversal_handle(void *data, void *parm, int (*enu)(void *parm, int64_t key, void *elem));
 int64_t ijk_map_get_min_key(void *data);
 void ijk_map_clear(void *data);
 void ijk_map_destroy(void *data);

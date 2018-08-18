@@ -32,10 +32,17 @@
 
 typedef struct IjkIOAppCacheStatistic {
     int64_t cache_physical_pos;
-    int64_t cache_buf_forwards;
+    int64_t cache_file_forwards;
     int64_t cache_file_pos;
     int64_t cache_count_bytes;
+    int64_t logical_file_size;
 } IjkIOAppCacheStatistic;
+
+typedef struct IjkCacheEntry {
+    int64_t logical_pos;
+    int64_t physical_pos;
+    int64_t size;
+} IjkCacheEntry;
 
 typedef struct IjkIOApplicationContext IjkIOApplicationContext;
 struct IjkIOApplicationContext {
@@ -43,10 +50,13 @@ struct IjkIOApplicationContext {
     IjkAVIOInterruptCB *ijkio_interrupt_callback;
     char cache_file_path[CACHE_FILE_PATH_MAX_LEN];
     int64_t last_physical_pos;
-    int64_t cache_limit_file_pos;
     void *cache_info_map;
     void *opaque;
     int64_t cache_count_bytes;
+    int fd;
+    pthread_mutex_t mutex;
+    int shared;
+    int active_reconnect;
     int (*func_ijkio_on_app_event)(IjkIOApplicationContext *h, int event_type ,void *obj, int size);
 };
 

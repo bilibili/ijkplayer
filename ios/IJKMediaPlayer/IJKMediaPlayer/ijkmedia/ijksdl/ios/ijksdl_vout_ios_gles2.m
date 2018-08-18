@@ -93,7 +93,28 @@ static int vout_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         return -1;
     }
 
-    [gl_view display:overlay];
+    if (gl_view.isThirdGLView) {
+        IJKOverlay ijk_overlay;
+
+        ijk_overlay.w = overlay->w;
+        ijk_overlay.h = overlay->h;
+        ijk_overlay.format = overlay->format;
+        ijk_overlay.planes = overlay->planes;
+        ijk_overlay.pitches = overlay->pitches;
+        ijk_overlay.pixels = overlay->pixels;
+        ijk_overlay.sar_num = overlay->sar_num;
+        ijk_overlay.sar_den = overlay->sar_den;
+#ifdef __APPLE__
+        if (ijk_overlay.format == SDL_FCC__VTB) {
+            ijk_overlay.pixel_buffer = SDL_VoutOverlayVideoToolBox_GetCVPixelBufferRef(overlay);
+        }
+#endif
+        if ([gl_view respondsToSelector:@selector(display_pixels:)]) {
+             [gl_view display_pixels:&ijk_overlay];
+        }
+    } else {
+        [gl_view display:overlay];
+    }
     return 0;
 }
 

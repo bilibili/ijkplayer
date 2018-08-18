@@ -284,7 +284,7 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
 
 const char *ijkmeta_get_string_l(IjkMediaMeta *meta, const char *name)
 {
-    if (!meta || !meta->dict)
+    if (!meta || !meta->dict || !name)
         return NULL;
 
     AVDictionaryEntry *entry = av_dict_get(meta->dict, name, NULL, 0);

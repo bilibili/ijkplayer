@@ -27,8 +27,7 @@
 void J4AC_android_media_AudioTrack__setSpeed(JNIEnv *env, jobject thiz, jfloat speed)
 {
     if (J4A_GetSystemAndroidApiLevel(env) < 23) {
-        jint sample_rate = J4AC_android_media_AudioTrack__getNativeOutputSampleRate__catchAll(env,
-                                                                                              STREAM_MUSIC);
+        jint sample_rate = J4AC_android_media_AudioTrack__getSampleRate(env,thiz);
         if (J4A_ExceptionCheck__throwAny(env)) {
             return;
         }

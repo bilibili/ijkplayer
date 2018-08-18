@@ -33,7 +33,7 @@ extern "C" void* ijk_map_index_get(void *data, int index);
 extern "C" int64_t ijk_map_get_min_key(void *data);
 extern "C" void ijk_map_clear(void *data);
 extern "C" void ijk_map_destroy(void *data);
-extern "C" void ijk_map_traversal_handle(void *data, int (*enu)(void *elem));
+extern "C" void ijk_map_traversal_handle(void *data, void *parm, int (*enu)(void *parm, int64_t key, void *elem));
 
 void* ijk_map_create() {
     IjkMap *data = new IjkMap();
@@ -101,7 +101,7 @@ void* ijk_map_index_get(void *data, int index) {
     return it->second;
 }
 
-void ijk_map_traversal_handle(void *data, int (*enu)(void *elem)) {
+void ijk_map_traversal_handle(void *data, void *parm, int (*enu)(void *parm, int64_t key, void *elem)) {
     IjkMap *map_data = reinterpret_cast<IjkMap *>(data);
     if (!map_data || map_data->empty())
         return;
@@ -109,7 +109,7 @@ void ijk_map_traversal_handle(void *data, int (*enu)(void *elem)) {
     IjkMap::iterator it;
 
     for (it = map_data->begin(); it != map_data->end(); it++) {
-        enu(it->second);
+        enu(parm, it->first, it->second);
     }
 }
 

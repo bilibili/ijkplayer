@@ -2,8 +2,8 @@
 
 set -e
 
-VERSION_CODE=700701
-VERSION_NAME=0.7.7.1
+VERSION_CODE=800800
+VERSION_NAME=0.8.8
 VERSION_TARGET=$1
 
 do_version_readme() {
@@ -58,14 +58,27 @@ do_version_gradle() {
     mv -f android/ijkplayer/ijkplayer-example/build.gradle.new android/ijkplayer/ijkplayer-example/build.gradle
 }
 
+do_version_xcode() {
+    # ios/IJKMediaPlayer/IJKMediaPlayer.xcodeproj/project.pbxproj
+
+    cat ios/IJKMediaPlayer/IJKMediaPlayer.xcodeproj/project.pbxproj \
+    | sed "s/\(CURRENT_PROJECT_VERSION = \).*;/\1$VERSION_NAME;/g" \
+    > ios/IJKMediaPlayer/IJKMediaPlayer.xcodeproj/project.pbxproj.new
+
+    mv -f ios/IJKMediaPlayer/IJKMediaPlayer.xcodeproj/project.pbxproj.new ios/IJKMediaPlayer/IJKMediaPlayer.xcodeproj/project.pbxproj
+}
+
 if [ "$VERSION_TARGET" = "readme" ]; then
     do_version_readme
 elif [ "$VERSION_TARGET" = "gradle" ]; then
     do_version_gradle
 elif [ "$VERSION_TARGET" = "show" ]; then
     echo $VERSION_NAME
+elif [ "$VERSION_TARGET" = "xcode" ]; then
+    do_version_xcode
 else
     do_version_readme
     do_version_gradle
+    do_version_xcode
 fi
 
