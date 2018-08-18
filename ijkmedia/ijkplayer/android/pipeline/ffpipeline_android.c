@@ -215,6 +215,7 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
     if (!opaque->surface_mutex)
         return -1;
 
+    int result = 0;
     ffpipeline_lock_surface(pipeline);
     {
         jobject prev_surface = opaque->jsurface;
@@ -234,11 +235,13 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
             if (prev_surface != NULL) {
                 SDL_JNI_DeleteGlobalRefP(env, &prev_surface);
             }
+
+             result = RE_INIT_MEDIA_CODEC;
         }
     }
     ffpipeline_unlock_surface(pipeline);
 
-    return 0;
+    return result;
 }
 
 bool ffpipeline_is_surface_need_reconfigure_l(IJKFF_Pipeline* pipeline)

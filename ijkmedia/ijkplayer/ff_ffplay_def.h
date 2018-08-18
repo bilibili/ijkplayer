@@ -720,6 +720,8 @@ typedef struct FFPlayer {
     char *mediacodec_default_name;
     int ijkmeta_delay_init;
     int render_wait_start;
+
+    int forceRequestKeyFrame;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
@@ -851,6 +853,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->inject_opaque = NULL;
     ffp->ijkio_inject_opaque = NULL;
+    ffp->forceRequestKeyFrame = 0;
     ffp_reset_statistic(&ffp->stat);
     ffp_reset_demux_cache_control(&ffp->dcc);
 }
