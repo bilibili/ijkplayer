@@ -350,6 +350,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (void)setHudUrl:(NSString *)urlString
 {
+    if (!_shouldShowHudView) {
+        return;
+    }
     if ([[NSThread currentThread] isMainThread]) {
         NSURL *url = [NSURL URLWithString:urlString];
         [_glView setHudValue:url.scheme forKey:@"scheme"];
@@ -1370,7 +1373,9 @@ static int onInjectTcpIOControl(IJKFFMoviePlayerController *mpc, id<IJKMediaUrlO
         case IJKMediaCtrl_DidTcpOpen:
             mpc->_monitor.tcpError = realData->error;
             mpc->_monitor.remoteIp = [NSString stringWithUTF8String:realData->ip];
-            [mpc->_glView setHudValue: mpc->_monitor.remoteIp forKey:@"ip"];
+            if (mpc->_shouldShowHudView) {
+                [mpc->_glView setHudValue: mpc->_monitor.remoteIp forKey:@"ip"];
+            }
             break;
         default:
             assert(!"unexcepted type for tcp io control");
@@ -1392,7 +1397,9 @@ static int onInjectTcpIOControl(IJKFFMoviePlayerController *mpc, id<IJKMediaUrlO
     [delegate willOpenUrl:openData];
     if (openData.error < 0)
         return -1;
-    [mpc->_glView setHudValue: [NSString stringWithFormat:@"fd:%d %@", openData.fd, openData.msg?:@"unknown"] forKey:@"tcp-info"];
+    if (mpc->_shouldShowHudView) {
+        [mpc->_glView setHudValue: [NSString stringWithFormat:@"fd:%d %@", openData.fd, openData.msg?:@"unknown"] forKey:@"tcp-info"];
+    }
     return 0;
 }
 
@@ -1466,7 +1473,9 @@ static int onInjectOnHttpEvent(IJKFFMoviePlayerController *mpc, int type, void *
             monitor.httpOpenCount++;
             monitor.httpOpenTick = 0;
             monitor.lastHttpOpenDuration = elapsed;
-            [mpc->_glView setHudValue:@(realData->http_code).stringValue forKey:@"http"];
+            if (mpc->_shouldShowHudView) {
+                [mpc->_glView setHudValue:@(realData->http_code).stringValue forKey:@"http"];
+            }
 
             if (delegate != nil) {
                 dict[IJKMediaEventAttrKey_time_of_event]    = @(elapsed).stringValue;
@@ -1493,7 +1502,10 @@ static int onInjectOnHttpEvent(IJKFFMoviePlayerController *mpc, int type, void *
             monitor.httpSeekCount++;
             monitor.httpSeekTick = 0;
             monitor.lastHttpSeekDuration = elapsed;
-            [mpc->_glView setHudValue:@(realData->http_code).stringValue forKey:@"http"];
+            // Workaround: callback from FFMPEG frequently when there is not network capability that make CPU usage very high and main thread stuck
+            if (mpc->_shouldShowHudView && realData->error == 0) {
+                [mpc->_glView setHudValue:@(realData->http_code).stringValue forKey:@"http"];
+            }
 
             if (delegate != nil) {
                 dict[IJKMediaEventAttrKey_time_of_event]    = @(elapsed).stringValue;
@@ -1828,7 +1840,9 @@ void e7_on_app_sei(int contentType, size_t contentSize, const uint8_t *contentDa
         _commentProtocol = commentProtocol;
     }
     
-    [_glView setHudValue:_commentProtocol forKey:@"comment-protocol"];
+    if (_shouldShowHudView) {
+        [_glView setHudValue:_commentProtocol forKey:@"comment-protocol"];
+    }
 }
 
 #pragma mark -

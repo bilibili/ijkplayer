@@ -54,6 +54,10 @@
         data = [_hudDataArray objectAtIndex:[index unsignedIntegerValue]];
     }
 
+    if ([data.value isEqualToString:value]) {
+        return;
+    }
+    
     data.value = value;
     [self.tableView reloadData];
 }
