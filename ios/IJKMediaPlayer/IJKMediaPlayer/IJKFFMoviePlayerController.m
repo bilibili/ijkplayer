@@ -1128,7 +1128,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             // 17 media
             [RKStreamLog logger].host = self.monitor.remoteIp;
             [[RKStreamLog logger] fetchHostStatus];
-            
+            [[RKStreamLog logger] fetchInfo];
             break;
         }
         case FFP_MSG_COMPLETED: {
@@ -1181,9 +1181,9 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
 
             NSTimeInterval end = [NSDate date].timeIntervalSince1970;
             [[RKStreamLog logger] logWithDict:@{@"lt": @"dt",
-                                                @"bt": @(_bufferingStart),
-                                                @"bd": @(end),
-                                                @"bi": @(end - _bufferingStart)
+                                                @"bt": @((NSUInteger)(_bufferingStart * 1000)),
+                                                @"bd": @((NSUInteger)(end * 1000)),
+                                                @"bi": @((NSUInteger)((end - _bufferingStart) * 1000))
                                                 }];
             
             _monitor.lastPrerollDuration = (int64_t)SDL_GetTickHR() - _monitor.lastPrerollStartTick;
@@ -1268,7 +1268,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             NSTimeInterval time = [NSDate date].timeIntervalSince1970;
             if (_bitrateLogTime == 0 || time - _bitrateLogTime >= 10) {
                 [[RKStreamLog logger] logWithDict:@{@"lt": @"rb",
-                                                    @"bt": @(bitrate)
+                                                    @"bps": @(bitrate)
                                                     }];
                 _bitrateLogTime = time;
             }
