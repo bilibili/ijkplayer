@@ -399,12 +399,14 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     
     [_glView monitorDisplay:nil];
     
-    NSTimeInterval end = [NSDate date].timeIntervalSince1970;
-    [[RKStreamLog logger] logWithDict:@{@"lt": @"bft",
-                                        @"pst": @(_playerInitTime),
-                                        @"psd": @(end),
-                                        @"num": @(_bufferingTimes)
-                                        }];
+    if (self.shouldLogStream) {
+        NSTimeInterval end = [NSDate date].timeIntervalSince1970;
+        [[RKStreamLog logger] logWithDict:@{@"lt": @"bft",
+                                            @"pst": @(_playerInitTime),
+                                            @"psd": @(end),
+                                            @"num": @(_bufferingTimes)
+                                            }];
+    }
 }
 
 - (BOOL)isPlaying
@@ -1127,8 +1129,10 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
 
             // 17 media
             [RKStreamLog logger].host = self.monitor.remoteIp;
-            [[RKStreamLog logger] fetchHostStatus];
-            [[RKStreamLog logger] fetchInfo];
+            if (self.shouldLogStream) {
+                [[RKStreamLog logger] fetchHostStatus];
+                [[RKStreamLog logger] fetchInfo];
+            }
             break;
         }
         case FFP_MSG_COMPLETED: {
@@ -1179,12 +1183,14 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         case FFP_MSG_BUFFERING_END: {
             IJKLog(@"FFP_MSG_BUFFERING_END:\n");
 
-            NSTimeInterval end = [NSDate date].timeIntervalSince1970;
-            [[RKStreamLog logger] logWithDict:@{@"lt": @"dt",
-                                                @"bt": @((NSUInteger)(_bufferingStart * 1000)),
-                                                @"bd": @((NSUInteger)(end * 1000)),
-                                                @"bi": @((NSUInteger)((end - _bufferingStart) * 1000))
-                                                }];
+            if (self.shouldLogStream) {
+                NSTimeInterval end = [NSDate date].timeIntervalSince1970;
+                [[RKStreamLog logger] logWithDict:@{@"lt": @"dt",
+                                                    @"bt": @((NSUInteger)(_bufferingStart * 1000)),
+                                                    @"bd": @((NSUInteger)(end * 1000)),
+                                                    @"bi": @((NSUInteger)((end - _bufferingStart) * 1000))
+                                                    }];
+            }
             
             _monitor.lastPrerollDuration = (int64_t)SDL_GetTickHR() - _monitor.lastPrerollStartTick;
 
@@ -1263,14 +1269,16 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         }
         // 17media
         case FFP_MSG_VIDEO_BITRATE: {
-            int bitrate = avmsg->arg2;
-            //IJKLog(@"FFP_MSG_VIDEO_BITRATE: %d\n",bitrate);
-            NSTimeInterval time = [NSDate date].timeIntervalSince1970;
-            if (_bitrateLogTime == 0 || time - _bitrateLogTime >= 10) {
-                [[RKStreamLog logger] logWithDict:@{@"lt": @"rb",
-                                                    @"bps": @(bitrate)
-                                                    }];
-                _bitrateLogTime = time;
+            if (self.shouldLogStream) {
+                int bitrate = avmsg->arg2;
+                //IJKLog(@"FFP_MSG_VIDEO_BITRATE: %d\n",bitrate);
+                NSTimeInterval time = [NSDate date].timeIntervalSince1970;
+                if (_bitrateLogTime == 0 || time - _bitrateLogTime >= 10) {
+                    [[RKStreamLog logger] logWithDict:@{@"lt": @"rb",
+                                                        @"bps": @(bitrate)
+                                                        }];
+                    _bitrateLogTime = time;
+                }
             }
         }
             break;
