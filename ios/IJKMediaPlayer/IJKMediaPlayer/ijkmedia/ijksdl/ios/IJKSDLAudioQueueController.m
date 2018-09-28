@@ -105,10 +105,11 @@
 
         for (int i = 0;i < kIJKAudioQueueNumberBuffers; i++)
         {
-            AudioQueueAllocateBuffer(audioQueueRef, _spec.size, &_audioQueueBufferRefArray[i]);
-            _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
-            memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
-            AudioQueueEnqueueBuffer(audioQueueRef, _audioQueueBufferRefArray[i], 0, NULL);
+            if (!AudioQueueAllocateBuffer(audioQueueRef, _spec.size, &_audioQueueBufferRefArray[i])) {
+                _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
+                memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
+                AudioQueueEnqueueBuffer(audioQueueRef, _audioQueueBufferRefArray[i], 0, NULL);
+            }
         }
         /*-
         status = AudioQueueStart(audioQueueRef, NULL);
