@@ -316,7 +316,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     IJKLog(@"%s", __FUNCTION__);
 //    [self unregisterApplicationObservers];
     //ijkmp_global_set_inject_callback(NULL);
-    [_glView invalidate];
 }
 
 - (void)setShouldAutoplay:(BOOL)shouldAutoplay
@@ -369,8 +368,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 {
     if (!_mediaPlayer)
         return;
-    
-    [_glView monitorDisplay:nil];
 
     [self setScreenOn:_keepScreenOnWhilePlaying];
 
@@ -396,8 +393,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     [self stopHudTimer];
     ijkmp_stop(_mediaPlayer);
-    
-    [_glView monitorDisplay:nil];
     
     if (self.shouldLogStream) {
         NSTimeInterval end = [NSDate date].timeIntervalSince1970;
@@ -538,7 +533,6 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     [self stopHudTimer];
     [self unregisterApplicationObservers];
     [self setScreenOn:NO];
-    [_glView monitorDisplay:nil];
 
     [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
 }
@@ -1245,11 +1239,6 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             [[NSNotificationCenter defaultCenter]
              postNotificationName:IJKMPMoviePlayerFirstVideoFrameRenderedNotification
              object:self];
-#pragma mark - E7
-            [_glView monitorDisplay:^(BOOL displaying) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:displaying ? IJKMPMoviePlayerVideoFrameRenderResumedNotification : IJKMPMoviePlayerVideoFrameRenderStoppedNotification object:self];
-            }];
-#pragma mark -
             break;
         }
         case FFP_MSG_AUDIO_RENDERING_START: {

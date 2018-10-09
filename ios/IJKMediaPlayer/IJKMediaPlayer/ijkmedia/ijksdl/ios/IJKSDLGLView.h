@@ -44,12 +44,6 @@
 
 @property (nonatomic) int rotationDegrees;
 
-- (void)invalidate;
-
-/**
- * Start monitoring after first frame displayed.
- */
-- (void)monitorDisplay:(void(^)(BOOL displaying))monitorCallback;
 #pragma mark -
 
 @end
