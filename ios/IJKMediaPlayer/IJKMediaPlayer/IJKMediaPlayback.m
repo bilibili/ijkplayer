@@ -40,9 +40,6 @@ NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification = @"IJKMPMoviePlaye
 NSString *const IJKMPMoviePlayerFirstVideoFrameRenderedNotification = @"IJKMPMoviePlayerFirstVideoFrameRenderedNotification";
 NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification = @"IJKMPMoviePlayerFirstAudioFrameRenderedNotification";
 
-NSString *const IJKMPMoviePlayerVideoFrameRenderStoppedNotification = @"IJKMPMoviePlayerVideoFrameRenderStoppedNotification";
-NSString *const IJKMPMoviePlayerVideoFrameRenderResumedNotification = @"IJKMPMoviePlayerVideoFrameRenderResumedNotification";
-
 NSString *const IJKMPMoviePlayerAccurateSeekCompleteNotification = @"IJKMPMoviePlayerAccurateSeekCompleteNotification";
 
 NSString *const IJKMPMoviePlayerDidSeekCompleteNotification = @"IJKMPMoviePlayerDidSeekCompleteNotification";

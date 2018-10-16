@@ -30,8 +30,6 @@
 #import "IJKSDLHudViewController.h"
 #import "IJKLog.h"
 
-#include "ijksdl_vout_overlay_videotoolbox.h"
-
 #include <time.h>
 
 typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
@@ -43,19 +41,6 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
 @property(atomic) BOOL glActivePaused;
-
-#pragma mark - E7
-
-@property (strong, nonatomic) CADisplayLink *displayTimer;
-@property (nonatomic) SDL_VoutOverlay *overlay;
-@property (nonatomic) uint64_t renderIndex, lastIndex;
-@property (strong, nonatomic) NSObject *indexFence;
-
-@property (nonatomic) int monitorTick;
-@property (nonatomic) BOOL displayPauesed;
-@property (copy, nonatomic) void (^monitorCallback)(BOOL displaying);
-#pragma mark -
-
 @end
 
 @implementation IJKSDLGLView {
@@ -105,12 +90,6 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 
         _hudViewController = [[IJKSDLHudViewController alloc] init];
         [self addSubview:_hudViewController.tableView];
-        
-        _displayTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(renderDisplay)];
-        _displayTimer.frameInterval = 2;
-        [_displayTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
-        [_displayTimer setPaused:YES];
-        _indexFence = [NSObject new];
     }
 
     return self;
@@ -211,11 +190,13 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 
 - (BOOL)setupGLOnce
 {
-    if (_didSetupGL)
+    if (_didSetupGL) {
         return YES;
+    }
 
-    if ([self isApplicationActive] == NO)
+    if ([self isApplicationActive] == NO) {
         return NO;
+    }
 
     __block BOOL didSetupGL = NO;
     void (^setupGLBlock)() = ^{
@@ -287,9 +268,6 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     [self unregisterApplicationObservers];
 
     [self unlockGLActive];
-    
-    [_displayTimer invalidate];
-    _displayTimer = nil;
 }
 
 - (void)setScaleFactor:(CGFloat)scaleFactor
@@ -397,45 +375,9 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     [self unlockGLActive];
 }
 
-- (void)display: (SDL_VoutOverlay *) overlay
-{
-    if (![self setupGLOnce])
+- (void)display:(SDL_VoutOverlay *)overlay {
+    if (![self setupGLOnce]) {
         return;
-    
-#pragma mark - E7
-    if (_overlay) {
-        return;
-    }
-    @synchronized (_indexFence) {
-        _renderIndex++;
-        if (_renderIndex > 10000)
-            _renderIndex = 0;
-        if (overlay) {
-            _overlay = SDL_VoutVideoToolBox_DuplicateOverlay(overlay);
-        }
-    }
-    if (_displayTimer.isPaused) {
-        [_displayTimer setPaused:NO];
-    }
-    
-//    _overlay = overlay;
-//    [self renderDisplay];
-    
-#pragma mark -
-}
-
-- (void)renderDisplay
-{
-    @synchronized (_indexFence) {
-        if (_renderIndex == _lastIndex) {
-            [self renderNoNewFrame];
-            if (_overlay) {
-                SDL_VoutVideoToolBox_UnrefOverlay(_overlay);
-                _overlay = nil;
-            }
-            return;
-        }
-        _lastIndex = _renderIndex;
     }
     
     if (![self tryLockGLActive]) {
@@ -443,10 +385,6 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
             IJKLog(@"IJKSDLGLView:display: unable to tryLock GL active: %d\n", _tryLockErrorCount);
         }
         _tryLockErrorCount++;
-        if (_overlay) {
-            SDL_VoutVideoToolBox_UnrefOverlay(_overlay);
-            _overlay = nil;
-        }
         return;
     }
     
@@ -454,23 +392,15 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     if (_context && !_didStopGL) {
         EAGLContext *prevContext = [EAGLContext currentContext];
         [EAGLContext setCurrentContext:_context];
-        [self displayInternal:_overlay];
+        [self displayInternal:overlay];
         [EAGLContext setCurrentContext:prevContext];
     }
     
     [self unlockGLActive];
-    
-    if (_overlay) {
-        SDL_VoutVideoToolBox_UnrefOverlay(_overlay);
-        _overlay = nil;
-    }
-    
-    [self renderHasNewFrame];
 }
 
 // NOTE: overlay could be NULl
-- (void)displayInternal: (SDL_VoutOverlay *) overlay
-{
+- (void)displayInternal:(SDL_VoutOverlay *)overlay {
     if (![self setupRenderer:overlay]) {
         if (!overlay && !_renderer) {
             IJKLog(@"IJKSDLGLView: setupDisplay not ready\n");
@@ -490,8 +420,6 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
-//        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
-//        IJK_GLES2_Renderer_setRotation(_renderer, _rotationDegrees);
         [self setupRendererGravityAndRotation];
     }
 
@@ -764,59 +692,5 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 {
     return !_hudViewController.tableView.hidden;
 }
-
-#pragma mark - E7
-
-- (void)invalidate
-{
-    [_displayTimer invalidate];
-    _displayTimer = nil;
-}
-
-- (void)monitorDisplay:(void(^)(BOOL displaying))monitorCallback
-{
-    _monitorCallback = monitorCallback;
-}
-
-- (void)renderNoNewFrame
-{
-    if (!_displayPauesed) {
-        _monitorTick++;
-        if (_monitorTick >= 30) {
-            _displayPauesed = YES;
-            if (_monitorCallback) {
-                __weak typeof(self) _self = self;
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (_self.monitorCallback)
-                        _self.monitorCallback(NO);
-                });
-            }
-        }
-    }
-}
-
-- (void)renderHasNewFrame
-{
-    if (_displayPauesed) {
-        _displayPauesed = NO;
-        if (_monitorCallback) {
-            __weak typeof(self) _self = self;
-//            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(15 / 30.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//                if (!_self.displayPauesed) {
-//                    _self.monitorCallback(YES);
-//                }
-//            });
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (_self.monitorCallback)
-                    _self.monitorCallback(YES);
-            });
-        }
-    }
-    if (_monitorTick != 0) {
-        _monitorTick = 0;
-    }
-}
-
-#pragma mark -
 
 @end
