@@ -380,6 +380,14 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         return;
     }
     
+    if ([self isUITest] && _isRenderBufferInvalidated && ![[NSThread currentThread] isMainThread]) {
+        __weak typeof(self) wSelf = self;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [wSelf display:overlay];
+        });
+        return;
+    }
+    
     if (![self tryLockGLActive]) {
         if (0 == (_tryLockErrorCount % 100)) {
             IJKLog(@"IJKSDLGLView:display: unable to tryLock GL active: %d\n", _tryLockErrorCount);
@@ -410,8 +418,10 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         return;
     }
 
-    [[self eaglLayer] setContentsScale:_scaleFactor];
-
+    if (![self isUITest]) {
+        [[self eaglLayer] setContentsScale:_scaleFactor];
+    }
+    
     if (_isRenderBufferInvalidated) {
         IJKLog(@"IJKSDLGLView: renderbufferStorage fromDrawable\n");
         _isRenderBufferInvalidated = NO;
@@ -691,6 +701,10 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 - (BOOL)shouldShowHudView
 {
     return !_hudViewController.tableView.hidden;
+}
+
+- (BOOL)isUITest {
+    return [NSProcessInfo processInfo].environment[@"isUITest"] != nil;
 }
 
 @end
