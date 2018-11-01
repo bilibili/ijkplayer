@@ -164,6 +164,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(async_init_decoder),   OPTION_INT(0, 0, 1) },
     { "video-mime-type",                    "default video mime type",
         OPTION_OFFSET(video_mime_type),     OPTION_STR(NULL) },
+    { "pre_reading_buffer",                      "pre_reading_buffer_size",
+      OPTION_OFFSET(pre_reading_buffer),       OPTION_INT(0, 0, INT_MAX) },		
 
         // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",

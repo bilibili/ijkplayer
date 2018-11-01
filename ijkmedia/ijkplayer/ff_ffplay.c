@@ -614,6 +614,16 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
         }
 
         do {
+			/*pre-reading*/
+			if (!ffp->is_pre_reading_prepared && !ffp->is_queue_full_happened && !ffp->is->eof) {
+				int queue_nb_packets = d->queue->nb_packets;
+				int pre_reading_buffer = ffp->pre_reading_buffer;
+				if (queue_nb_packets >= pre_reading_buffer) {
+					ffp->is_pre_reading_prepared = 1;
+				} 
+				continue;
+			}			
+			
             if (d->queue->nb_packets == 0)
                 SDL_CondSignal(d->empty_queue_cond);
             if (d->packet_pending) {
@@ -3469,6 +3479,9 @@ static int read_thread(void *arg)
             if (!is->eof) {
                 ffp_toggle_buffering(ffp, 0);
             }
+            if (!ffp->is_queue_full_happened){
+                ffp->is_queue_full_happened = 1;
+            }			
             /* wait 10 ms */
             SDL_LockMutex(wait_mutex);
             SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
@@ -5025,6 +5038,9 @@ void ffp_set_property_int64(FFPlayer *ffp, int id, int64_t value)
             if (ffp) {
                 ijkio_manager_immediate_reconnect(ffp->ijkio_manager_ctx);
             }
+        case FFP_PROP_INT64_PRE_READING_BUFFER:
+            ffp->pre_reading_buffer = value;
+            break;			
         default:
             break;
     }

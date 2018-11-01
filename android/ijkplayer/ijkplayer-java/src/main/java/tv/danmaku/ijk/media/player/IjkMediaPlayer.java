@@ -126,6 +126,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int FFP_PROP_INT64_AUDIO_CACHED_BYTES               = 20008;
     public static final int FFP_PROP_INT64_VIDEO_CACHED_PACKETS             = 20009;
     public static final int FFP_PROP_INT64_AUDIO_CACHED_PACKETS             = 20010;
+	public static final int FFP_PROP_INT64_PRE_READING_BUFFER               = 20016;
     public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_BACKWARDS    = 20201;
     public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_FORWARDS     = 20202;
     public static final int FFP_PROP_INT64_ASYNC_STATISTIC_BUF_CAPACITY     = 20203;
@@ -492,6 +493,11 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             throws IllegalArgumentException, SecurityException, IllegalStateException {
         _setAndroidIOCallback(androidIO);
     }
+	
+	public void setPreReadingBuffer(long bufferSize) {
+        _setPropertyLong(FFP_PROP_INT64_PRE_READING_BUFFER, bufferSize);
+    }
+
 
     private native void _setDataSource(String path, String[] keys, String[] values)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;

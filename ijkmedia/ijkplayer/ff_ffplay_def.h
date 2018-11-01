@@ -720,6 +720,10 @@ typedef struct FFPlayer {
     char *mediacodec_default_name;
     int ijkmeta_delay_init;
     int render_wait_start;
+	/* pre-reading-buffer */
+	int pre_reading_buffer;
+    int is_pre_reading_prepared;
+    int is_queue_full_happened;	
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
@@ -843,6 +847,10 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp->pf_playback_rate_changed       = 0;
     ffp->pf_playback_volume             = 1.0f;
     ffp->pf_playback_volume_changed     = 0;
+	/* pre-reading-buffer */
+    ffp->pre_reading_buffer             = 0;
+    ffp->is_pre_reading_prepared        = 0;
+    ffp->is_queue_full_happened         = 0;
 
     av_application_closep(&ffp->app_ctx);
     ijkio_manager_destroyp(&ffp->ijkio_manager_ctx);

@@ -481,6 +481,15 @@ static int feed_input_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs,
 #endif
         AVPacket pkt;
         do {
+			//pre-reading
+            if (!ffp->is_pre_reading_prepared && !ffp->is_queue_full_happened && !ffp->is->eof) {
+                int queue_nb_packets = d->queue->nb_packets;
+                int pre_reading_buffer = ffp->pre_reading_buffer;
+                if (queue_nb_packets >= pre_reading_buffer) {
+                    ffp->is_pre_reading_prepared = 1;
+                }
+                continue;
+            }
             if (d->queue->nb_packets == 0)
                 SDL_CondSignal(d->empty_queue_cond);
             if (ffp_packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0) {
@@ -726,6 +735,15 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
 #endif
         AVPacket pkt;
         do {
+			//pre-reading
+            if (!ffp->is_pre_reading_prepared && !ffp->is_queue_full_happened && !ffp->is->eof) {
+                int queue_nb_packets = d->queue->nb_packets;
+                int pre_reading_buffer = ffp->pre_reading_buffer;
+                if (queue_nb_packets >= pre_reading_buffer) {
+                    ffp->is_pre_reading_prepared = 1;
+                }
+                continue;
+            }
             if (d->queue->nb_packets == 0)
                 SDL_CondSignal(d->empty_queue_cond);
             if (ffp_packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0) {
