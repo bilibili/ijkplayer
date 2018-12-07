@@ -239,6 +239,11 @@ int SDL_Android_NativeWindow_display_l(ANativeWindow *native_window, SDL_VoutOve
             return retval;
         }
 
+        if (NULL != voutDesc) {
+            curr_format = ANativeWindow_getFormat(native_window);
+            voutDesc = native_window_get_desc(curr_format);
+        }
+
         if (!voutDesc) {
             ALOGE("SDL_Android_NativeWindow_display_l: unknown hal format %d", curr_format);
             return -1;
