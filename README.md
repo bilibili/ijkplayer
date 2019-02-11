@@ -242,11 +242,20 @@ Licensed under LGPLv2.1 or later
 ```
 
 ijkplayer required features are based on or derives from projects below:
+- GPLv2+
+  - [FFmpeg](https://git.ffmpeg.org/gitweb/ffmpeg.git) (in non-default
+    configurations, see [FFmpeg's license and legal considerations
+    document](https://www.ffmpeg.org/legal.html))
 - LGPL
-  - [FFmpeg](http://git.videolan.org/?p=ffmpeg.git)
-  - [libVLC](http://git.videolan.org/?p=vlc.git)
+  - [FFmpeg](https://git.ffmpeg.org/gitweb/ffmpeg.git) (see [FFmpeg's license
+    and legal considerations document](https://www.ffmpeg.org/legal.html))
+  - [libVLC](http://git.videolan.org/?p=vlc.git) (see [VLC legal
+    concerns](https://www.videolan.org/legal.html) and [relicensing
+    announcement](https://www.videolan.org/press/lgpl-libvlc.html))
   - [kxmovie](https://github.com/kolyvan/kxmovie)
-  - [soundtouch](http://www.surina.net/soundtouch/sourcecode.html)
+  - [soundtouch](http://www.surina.net/soundtouch/sourcecode.html) (see
+    [Soundtouch license
+    FAQ](http://www.surina.net/soundtouch/faq.html#license))
 - zlib license
   - [SDL](http://www.libsdl.org)
 - BSD-style license
@@ -272,9 +281,14 @@ ijkplayer's build scripts are based on or derives from projects below:
 - [yixia/FFmpeg-Android](https://github.com/yixia/FFmpeg-Android)
 - [kewlbear/FFmpeg-iOS-build-script](https://github.com/kewlbear/FFmpeg-iOS-build-script) 
 
-### Commercial Use
-ijkplayer is licensed under LGPLv2.1 or later, so itself is free for commercial use under LGPLv2.1 or later
+### Use with closed-source software
 
-But ijkplayer is also based on other different projects under various licenses, which I have no idea whether they are compatible to each other or to your product.
+ijkplayer _itself_ is licensed under LGPLv2.1 or later, so it can be used
+with closed-source software, provided that you comply with the terms of the
+license.
+
+However, ijkplayer includes components of other projects which are licensed
+under other terms, the combination and/or configuration of which may make
+the _effective_ license of ijkplayer different.
 
 [IANAL](https://en.wikipedia.org/wiki/IANAL), you should always ask your lawyer for these stuffs before use it in your product.
