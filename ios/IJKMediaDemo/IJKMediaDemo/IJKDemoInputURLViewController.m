@@ -40,6 +40,7 @@
 }
 
 - (void)onClickPlayButton {
+    self.textView.text = @"https://api.huoshan.com/hotsoon/item/video/_playback/?video_id=bea0903abb954f58ac0e17c21226a3c3&line=1&app_id=1115&watermark=1";
     NSURL *url = [NSURL URLWithString:self.textView.text];
     NSString *scheme = [[url scheme] lowercaseString];
     
