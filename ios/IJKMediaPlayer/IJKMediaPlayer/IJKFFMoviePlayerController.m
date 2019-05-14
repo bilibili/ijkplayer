@@ -431,6 +431,13 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     ijkmp_pause(_mediaPlayer);
 }
 
+- (void)pauseVideo:(BOOL)paused
+{
+    if (!_mediaPlayer)
+        return;
+    _glView.videoPaused = paused;
+}
+
 - (void)stop
 {
     if (!_mediaPlayer)

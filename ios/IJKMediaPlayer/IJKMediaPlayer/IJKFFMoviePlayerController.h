@@ -94,6 +94,8 @@ typedef enum IJKLogLevel {
 - (int64_t)trafficStatistic;
 - (float)dropFrameRate;
 
+- (void)pauseVideo:(BOOL)paused;
+
 - (void)setPauseInBackground:(BOOL)pause;
 - (BOOL)isVideoToolboxOpen;
 
