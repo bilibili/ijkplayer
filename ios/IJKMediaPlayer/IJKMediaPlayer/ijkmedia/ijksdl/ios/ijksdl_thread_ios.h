@@ -22,3 +22,17 @@
  */
 
 #import <Foundation/Foundation.h>
+
+static void IJKMainThredExecute(dispatch_block_t block) {
+    if ([NSThread isMainThread]) {
+        if (block) {
+            block();
+        }
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (block) {
+                block();
+            }
+        });
+    }
+}
