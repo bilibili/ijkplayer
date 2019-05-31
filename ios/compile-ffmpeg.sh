@@ -19,11 +19,13 @@
 #----------
 # modify for your build tool
 
-FF_ALL_ARCHS_IOS8_SDK="arm64 x86_64"
 
-FF_ALL_ARCHS_IOS10_SDK="arm64 i386 x86_64"
+FF_ALL_ARCHS_IOS6_SDK="armv7 armv7s i386"
+FF_ALL_ARCHS_IOS7_SDK="armv7 armv7s arm64 i386 x86_64"
+FF_ALL_ARCHS_IOS8_SDK="armv7 arm64 i386 x86_64"
+FF_ALL_ARCHS_IOS12_SDK="arm64 x86_64"
 
-FF_ALL_ARCHS=$FF_ALL_ARCHS_IOS10_SDK
+FF_ALL_ARCHS=$FF_ALL_ARCHS_IOS12_SDK
 
 
 #----------
