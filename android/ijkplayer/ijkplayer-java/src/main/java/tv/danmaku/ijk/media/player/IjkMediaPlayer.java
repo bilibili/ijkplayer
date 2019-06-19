@@ -49,8 +49,10 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
 import tv.danmaku.ijk.media.player.annotations.CalledByNative;
@@ -976,14 +978,36 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             }
 
             switch (msg.what) {
+                case IjkEventListener.FLUSH:
+                case IjkEventListener.ERROR:
+                case IjkEventListener.PREPARED:
+                case IjkEventListener.COMPLETED:
+                case IjkEventListener.VIDEO_SIZE_CHANGED:
+                case IjkEventListener.SAR_CHANGED:
+                case IjkEventListener.VIDEO_RENDERING_START:
+                case IjkEventListener.AUDIO_RENDERING_START:
+                case IjkEventListener.VIDEO_ROTATION_CHANGED:
+                case IjkEventListener.BUFFERING_START:
+                case IjkEventListener.BUFFERING_END:
+                case IjkEventListener.BUFFERING_UPDATE:
+                case IjkEventListener.PLAYBACK_STATE_CHANGED:
+                    for (IjkEventListener listener : player.mEventListeners) {
+                        listener.onEvent(player, msg.what, msg.arg1, msg.arg2, msg.obj);
+                    }
+                    break;
+                default:
+                        break;
+            }
+
+            switch (msg.what) {
             case MEDIA_PREPARED:
                 player.notifyOnPrepared();
-                return;
+                break;
 
             case MEDIA_PLAYBACK_COMPLETE:
                 player.stayAwake(false);
                 player.notifyOnCompletion();
-                return;
+                break;
 
             case MEDIA_BUFFERING_UPDATE:
                 long bufferPosition = msg.arg1;
@@ -1002,18 +1026,18 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
                 // DebugLog.efmt(TAG, "Buffer (%d%%) %d/%d",  percent, bufferPosition, duration);
                 player.notifyOnBufferingUpdate((int)percent);
-                return;
+                break;
 
             case MEDIA_SEEK_COMPLETE:
                 player.notifyOnSeekComplete();
-                return;
+                break;
 
             case MEDIA_SET_VIDEO_SIZE:
                 player.mVideoWidth = msg.arg1;
                 player.mVideoHeight = msg.arg2;
                 player.notifyOnVideoSizeChanged(player.mVideoWidth, player.mVideoHeight,
                         player.mVideoSarNum, player.mVideoSarDen);
-                return;
+                break;
 
             case MEDIA_ERROR:
                 DebugLog.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
@@ -1021,7 +1045,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                     player.notifyOnCompletion();
                 }
                 player.stayAwake(false);
-                return;
+                break;
 
             case MEDIA_INFO:
                 switch (msg.arg1) {
@@ -1031,7 +1055,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 }
                 player.notifyOnInfo(msg.arg1, msg.arg2);
                 // No real default action so far.
-                return;
+                break;
             case MEDIA_TIMED_TEXT:
                 if (msg.obj == null) {
                     player.notifyOnTimedText(null);
@@ -1039,7 +1063,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                     IjkTimedText text = new IjkTimedText(new Rect(0, 0, 1, 1), (String)msg.obj);
                     player.notifyOnTimedText(text);
                 }
-                return;
+                break;
             case MEDIA_NOP: // interface test message - ignore
                 break;
 
@@ -1191,6 +1215,15 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private OnMediaCodecSelectListener mOnMediaCodecSelectListener;
     public void setOnMediaCodecSelectListener(OnMediaCodecSelectListener listener) {
         mOnMediaCodecSelectListener = listener;
+    }
+
+    private Set<IjkEventListener> mEventListeners = new HashSet<>();
+    public final void addIjkEventListener(IjkEventListener listener){
+        mEventListeners.add(listener);
+    }
+
+    public final void removeIjkEventListener(IjkEventListener listener){
+        mEventListeners.remove(listener);
     }
 
     public void resetListeners() {

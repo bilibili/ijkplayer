@@ -25,15 +25,40 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSInteger, IJKMPEventType) {
+    IJKMPET_FLUSH                   = 0,
+    IJKMPET_ERROR                   = 100,
+    IJKMPET_PREPARED                = 200,
+    IJKMPET_COMPLETED               = 300,
+    IJKMPET_VIDEO_SIZE_CHANGED      = 400,
+    IJKMPET_SAR_CHANGED             = 401,
+    IJKMPET_VIDEO_RENDERING_START   = 402,
+    IJKMPET_AUDIO_RENDERING_START   = 403,
+    IJKMPET_VIDEO_ROTATION_CHANGED  = 404,
+    IJKMPET_BUFFERING_START         = 500,
+    IJKMPET_BUFFERING_END           = 501,
+    IJKMPET_BUFFERING_UPDATE        = 502,
+    IJKMPET_PLAYBACK_STATE_CHANGED  = 700,
+};
+
+
+@class IJKFFMediaPlayer;
+
+@protocol IJKMPEventHandler <NSObject>
+
+@required
+- (void) onEvent4Player:(IJKFFMediaPlayer *)player withType:(int)waht andArg1:(int)arg1 andArg2:(int)arg2 andExtra:(void *)extra;
+
+@end
+
 @interface IJKFFMediaPlayer : NSObject
-
-
-- (IJKFFMediaPlayer *)init;
 
 @property (readonly, nonatomic) int videoWidth;
 @property (readonly, nonatomic) int videoHeight;
 @property (readonly, nonatomic) int videoSarNum;
 @property (readonly, nonatomic) int videoSarDen;
+
+- (IJKFFMediaPlayer *)init;
 
 - (void) setDataSource:(NSString *)url;
 - (void) prepareAsync;
@@ -50,6 +75,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setOptionIntValue:(int64_t)value
                    forKey:(NSString *)key
                ofCategory:(IJKFFOptionCategory)category;
+
+
+- (void) addIJKMPEventHandler:(id<IJKMPEventHandler>) handler;
+- (void) removeIJKMPEventHandler:(id<IJKMPEventHandler>) handler;
 
 @end
 

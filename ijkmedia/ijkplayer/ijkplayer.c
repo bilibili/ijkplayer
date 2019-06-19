@@ -110,8 +110,9 @@ void ijkmp_io_stat_complete_register(void (*cb)(const char *url,
 
 void ijkmp_change_state_l(IjkMediaPlayer *mp, int new_state)
 {
+    int old_state = mp->mp_state;
     mp->mp_state = new_state;
-    ffp_notify_msg1(mp->ffplayer, FFP_MSG_PLAYBACK_STATE_CHANGED);
+    ffp_notify_msg3(mp->ffplayer, FFP_MSG_PLAYBACK_STATE_CHANGED, new_state, old_state);
 }
 
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
