@@ -104,7 +104,7 @@
 #define FFP_BUF_MSG_PERIOD (3)
 
 // Reduce delay time
-#define FOR_RTSP_REAL_TIME_SUPPORT
+//#define FOR_RTSP_REAL_TIME_SUPPORT
 
 // static const AVOption ffp_context_options[] = ...
 #include "ff_ffplay_options.h"
@@ -3516,9 +3516,9 @@ static int read_thread(void *arg)
                 ffp_toggle_buffering(ffp, 0);
             }
             /* wait 10 ms */
-            SDL_LockMutex(wait_mutex);
-            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-            SDL_UnlockMutex(wait_mutex);
+//            SDL_LockMutex(wait_mutex);
+//            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
+//            SDL_UnlockMutex(wait_mutex);
             continue;
         }
         if ((!is->paused || completed) &&
@@ -3603,9 +3603,9 @@ static int read_thread(void *arg)
                 ffp_toggle_buffering(ffp, 0);
                 SDL_Delay(100);
             }
-            SDL_LockMutex(wait_mutex);
-            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
-            SDL_UnlockMutex(wait_mutex);
+//            SDL_LockMutex(wait_mutex);
+//            SDL_CondWaitTimeout(is->continue_read_thread, wait_mutex, 10);
+//            SDL_UnlockMutex(wait_mutex);
             ffp_statistic_l(ffp);
             continue;
         } else {
