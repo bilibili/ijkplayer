@@ -436,7 +436,7 @@ static const char* wanted_stream_spec[AVMEDIA_TYPE_NB] = {0};
 static int seek_by_bytes = -1;
 static int display_disable;
 static int show_status = 1;
-static int av_sync_type = AV_SYNC_AUDIO_MASTER;
+static int av_sync_type = AV_SYNC_EXTERNAL_CLOCK;
 static int64_t start_time = AV_NOPTS_VALUE;
 static int64_t duration = AV_NOPTS_VALUE;
 static int fast = 0;
