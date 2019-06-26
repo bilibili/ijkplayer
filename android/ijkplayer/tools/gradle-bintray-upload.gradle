@@ -20,9 +20,15 @@ apply plugin: 'com.jfrog.bintray'
 group = GROUP
 version = VERSION_NAME
 
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def bintray_user = properties.getProperty('BINTRAY_USER')
+def bintray_apikey = properties.getProperty('BINTRAY_APIKEY')
+
 bintray {
-    user = project.hasProperty('BINTRAY_USER') ? BINTRAY_USER : System.getenv('BINTRAY_USER')
-    key = project.hasProperty('BINTRAY_APIKEY') ? BINTRAY_APIKEY : System.getenv('BINTRAY_APIKEY')
+    user = bintray_user ? bintray_user : project.hasProperty('BINTRAY_USER') ? BINTRAY_USER : System.getenv('BINTRAY_USER')
+    key = bintray_apikey ? bintray_apikey : project.hasProperty('BINTRAY_APIKEY') ? BINTRAY_APIKEY : System.getenv('BINTRAY_APIKEY')
 
     configurations = ['archives']
 
@@ -30,7 +36,7 @@ bintray {
     publish = true
 
     pkg {
-        repo = 'maven'
+        repo = 'ijkplayer'
         name = POM_NAME
         userOrg = POM_USER_ORG
         desc = POM_DESCRIPTION
