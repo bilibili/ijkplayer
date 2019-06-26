@@ -205,6 +205,7 @@ int ff_media_player_msg_loop(void* arg)
     __unused id weakHolder = (__bridge_transfer IJKFFWeakHolder*)ijkmp_set_inject_opaque(_nativeMediaPlayer, NULL);
     __unused id weakijkHolder = (__bridge_transfer IJKFFWeakHolder*)ijkmp_set_ijkio_inject_opaque(_nativeMediaPlayer, NULL);
 
+    [_eventHandlers removeAllObjects];
     ijkmp_dec_ref_p(&_nativeMediaPlayer);
 }
 

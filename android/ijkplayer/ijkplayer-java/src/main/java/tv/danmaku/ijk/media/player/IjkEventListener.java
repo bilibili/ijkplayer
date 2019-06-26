@@ -1,6 +1,6 @@
 package tv.danmaku.ijk.media.player;
 
-interface IjkEventListener {
+public interface IjkEventListener {
 
     int FLUSH                   = 0;
     int ERROR                   = 100;

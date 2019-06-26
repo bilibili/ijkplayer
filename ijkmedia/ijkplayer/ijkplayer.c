@@ -130,6 +130,8 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
     ijkmp_inc_ref(mp);
     pthread_mutex_init(&mp->mutex, NULL);
 
+    msg_queue_start(&mp->ffplayer->msg_queue);
+
     return mp;
 
     fail:
@@ -402,8 +404,6 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
     assert(mp->data_source);
 
     ijkmp_change_state_l(mp, MP_STATE_ASYNC_PREPARING);
-
-    msg_queue_start(&mp->ffplayer->msg_queue);
 
     // released in msg_loop
     ijkmp_inc_ref(mp);

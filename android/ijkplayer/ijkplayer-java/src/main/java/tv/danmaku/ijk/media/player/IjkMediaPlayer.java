@@ -991,6 +991,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 case IjkEventListener.BUFFERING_END:
                 case IjkEventListener.BUFFERING_UPDATE:
                 case IjkEventListener.PLAYBACK_STATE_CHANGED:
+                    // DebugLog.dfmt("onEvent", "what %d arg1 %d arg2 %d", msg.what, msg.arg1, msg.arg2);
                     for (IjkEventListener listener : player.mEventListeners) {
                         listener.onEvent(player, msg.what, msg.arg1, msg.arg2, msg.obj);
                     }
@@ -1075,7 +1076,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 break;
 
             default:
-                DebugLog.e(TAG, "Unknown message type " + msg.what);
+                // DebugLog.e(TAG, "Unknown message type " + msg.what);
             }
         }
     }

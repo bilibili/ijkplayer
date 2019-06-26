@@ -65,6 +65,7 @@ typedef NS_ENUM(NSInteger, IJKMPEventType) {
 - (void) start;
 - (void) stop;
 - (void) pause;
+- (void) reset;
 - (BOOL) isPlaying;
 - (void) shutdown;
 
