@@ -20,7 +20,6 @@ Pod::Spec.new do |spec|
   spec.summary      = "ijkplayer iOS video player SDK"
 
   spec.author       = { "befovy" => "befovy@gmail.com" }
-  
   # This description is used to generate tags and improve search results.
   #   * Think: What does it do? Why did you write it? What is the focus?
   #   * Try to keep it short, snappy and to the point.
@@ -76,9 +75,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  # spec.source = { :git => "https://github.com/befovy/ijkplayer.git", :tag => "b0.1.0-alpha" }
-  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/b0.1.1-alpha/FIJKMediaPlayer.tar.gz" }
-
+  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/b0.1.1-alpha/FIJKPlayer.tar.gz" }
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
   #  CocoaPods is smart about how it includes source code. For source files
@@ -119,10 +116,6 @@ Pod::Spec.new do |spec|
 
   # spec.library   = "iconv"
   # spec.libraries = "iconv", "xml2"
-
-  spec.prepare_command = <<-CMD
-    tar xvzf FIJKPlayer.tar.gz
-  CMD
 
 
   # ――― Project Settings ――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #

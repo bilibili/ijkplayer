@@ -86,7 +86,7 @@ int SDL_SetThreadPriority(SDL_ThreadPriority priority)
 
 void SDL_WaitThread(SDL_Thread *thread, int *status)
 {
-    assert(thread);
+    // assert(thread);
     if (!thread)
         return;
 

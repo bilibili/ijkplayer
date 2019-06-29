@@ -185,6 +185,26 @@ cd ..
 #     gradle
 
 ```
+### Build Android via Cmake
+
+Tested on ndk r15c.
+
+```
+git clone https://github.com/befovy/ijkplayer.git ijkplayer-android
+cd ijkplayer-android
+
+./init-android.sh
+
+cp extra/CMakeLists.txt.yuv ijkmedia/ijkyuv/CMakeLists.txt
+cp extra/CMakeLists.txt.soundtouch ijkmedia/ijksoundtouch/CMakeLists.txt
+
+cd android/contrib
+./compile-ffmpeg.sh clean
+./compile-ffmpeg.sh all
+
+cd ../ijkplayer
+./gradlew :ijkplayer-full:assembleDebug
+./gradlew :ijkplayer-example:assembleDebug
 
 
 ### Build iOS
