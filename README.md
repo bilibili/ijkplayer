@@ -195,17 +195,15 @@ cd ijkplayer-android
 
 ./init-android.sh
 
-cp extra/CMakeLists.txt.yuv ijkmedia/ijkyuv/CMakeLists.txt
-cp extra/CMakeLists.txt.soundtouch ijkmedia/ijksoundtouch/CMakeLists.txt
-
 cd android/contrib
 ./compile-ffmpeg.sh clean
 ./compile-ffmpeg.sh all
+```
 
-cd ../ijkplayer
-./gradlew :ijkplayer-full:assembleDebug
-./gradlew :ijkplayer-example:assembleDebug
+just run/debug ijkplayer-example in Android Studio
 
+To get a released aar
+run `./gradlew :fijkplayer-full:assembleRelease`
 
 ### Build iOS
 ```
