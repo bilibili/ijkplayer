@@ -186,6 +186,13 @@ echo "--------------------"
 FF_XCRUN_SDK=`echo $FF_XCRUN_PLATFORM | tr '[:upper:]' '[:lower:]'`
 FF_XCRUN_CC="xcrun -sdk $FF_XCRUN_SDK clang"
 
+if [ "$FF_ARCH" = "arm64" ]
+then
+    FF_AS="gas-preprocessor.pl -arch aarch64 -- $FF_XCRUN_CC"
+else
+    FF_AS="gas-preprocessor.pl -- $FF_XCRUN_CC"
+fi
+
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_CPU"
 
 FFMPEG_CFLAGS=
@@ -236,6 +243,7 @@ else
     ./configure \
         $FFMPEG_CFG_FLAGS \
         --cc="$FF_XCRUN_CC" \
+        --as="$FF_AS" \
         $FFMPEG_CFG_CPU \
         --extra-cflags="$FFMPEG_CFLAGS" \
         --extra-cxxflags="$FFMPEG_CFLAGS" \
