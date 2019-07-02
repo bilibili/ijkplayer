@@ -103,6 +103,17 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 
 - (UIImage *)thumbnailImageAtCurrentTime;
 
+// 录制视频（只能录制RTSP流）格式mov
+/**
+ *  录制视频（只能录制RTSP流）格式mov
+ *
+ *  @param streamURL        流地址
+ *  @param filePath         录制的视频存储的路径
+ *  @param bStop            是否开始录制（NO开始， YES结束）
+ *  @return int             返回-1，录制失败， 0为正常
+ */
+- (int)rtsp2mov:(NSString *)streamURL storageFilePath:(NSString *)filePath isStop:(BOOL)bStop;
+
 #pragma mark Notifications
 
 #ifdef __cplusplus
