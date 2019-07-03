@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2019 Befovy <befovy@gmail.com>
  *
- * This file is part of ijkPlayer.
+ * This file is part of fijkPlayer.
  *
  * ijkPlayer is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
