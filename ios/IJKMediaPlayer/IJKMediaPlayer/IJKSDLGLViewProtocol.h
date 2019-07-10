@@ -47,4 +47,9 @@ struct IJKOverlay {
 - (void) display_pixels: (IJKOverlay *) overlay;
 @end
 
+@protocol IJKCVPBViewProtocol <NSObject>
+@required
+- (void) display_pixelbuffer: (CVPixelBufferRef) pixelbuffer;
+@end
+
 #endif /* IJKSDLGLViewProtocol_h */

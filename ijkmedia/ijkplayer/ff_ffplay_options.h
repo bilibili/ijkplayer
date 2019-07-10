@@ -112,6 +112,7 @@ static const AVOption ffp_context_options[] = {
     { "fcc-rv16",                       "", 0, OPTION_CONST(SDL_FCC_RV16), .unit = "overlay-format" },
     { "fcc-rv24",                       "", 0, OPTION_CONST(SDL_FCC_RV24), .unit = "overlay-format" },
     { "fcc-rv32",                       "", 0, OPTION_CONST(SDL_FCC_RV32), .unit = "overlay-format" },
+    { "fcc-bgra",                       "", 0, OPTION_CONST(SDL_FCC_BGRA), .unit = "overlay-format" },
 
     { "start-on-prepared",                  "automatically start playing on prepared",
         OPTION_OFFSET(start_on_prepared),   OPTION_INT(1, 0, 1) },
