@@ -41,6 +41,7 @@
     IJKFFMoviePlayerMessagePool *_msgPool;
     
     NSMutableSet<id<IJKMPEventHandler>> *_eventHandlers;
+    id<IJKCVPBViewProtocol> _cvPBView;
     
     NSString *_dataSource;
     int _videoWidth;
@@ -48,6 +49,10 @@
     int _videoSarNum;
     int _videoSarDen;
 }
+
+@synthesize fps = _fps;
+@synthesize isThirdGLView = _isThirdGLView;
+@synthesize scaleFactor = _scaleFactor;
 
 - (IJKFFMoviePlayerMessage *) obtainMessage {
     return [_msgPool obtain];
@@ -96,6 +101,9 @@ int ff_media_player_msg_loop(void* arg)
         ijkmp_set_option(_nativeMediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", "fcc-_es2");
         
         [[IJKAudioKit sharedInstance] setupAudioSession];
+        _isThirdGLView = true;
+        _scaleFactor = 1.0f;
+        _fps = 1.0f;
     }
     return self;
 }
@@ -240,6 +248,24 @@ int ff_media_player_msg_loop(void* arg)
 - (void) removeIJKMPEventHandler:(id<IJKMPEventHandler>) handler
 {
     [_eventHandlers removeObject:handler];
+}
+
+- (void) display_pixels:(IJKOverlay *)overlay
+{
+    if (overlay->pixel_buffer != nil && _cvPBView != nil) {
+        [_cvPBView display_pixelbuffer:overlay->pixel_buffer];
+    }
+}
+
+- (void) setupCVPixelBufferView:(id<IJKCVPBViewProtocol>) cvPBView
+{
+    _cvPBView = cvPBView;
+    ijkmp_ios_set_glview(_nativeMediaPlayer, self);
+}
+
+- (UIImage *)snapshot
+{
+    return nil;
 }
 
 @end
