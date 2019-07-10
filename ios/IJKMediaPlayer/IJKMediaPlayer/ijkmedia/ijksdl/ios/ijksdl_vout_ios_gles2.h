@@ -25,6 +25,7 @@
 #include "ijksdl/ijksdl_vout.h"
 
 @class IJKSDLGLView;
+@protocol IJKSDLGLViewProtocol;
 
 SDL_Vout *SDL_VoutIos_CreateForGLES2();
-void SDL_VoutIos_SetGLView(SDL_Vout *vout, IJKSDLGLView *view);
+void SDL_VoutIos_SetGLView(SDL_Vout *vout, id<IJKSDLGLViewProtocol> view);

@@ -76,7 +76,7 @@ set_target_properties( # Specifies the target library.
     ijkffmpeg
     PROPERTIES
     IMPORTED_LOCATION ${FFMPAG_SHARED_DIR}/libijkffmpeg.so
-    )
+)
 
 add_custom_target(cpffmpeg
     COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}

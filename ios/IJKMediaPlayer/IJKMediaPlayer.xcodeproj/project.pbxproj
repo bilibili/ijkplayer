@@ -12,7 +12,7 @@
 		215FF44D22B7E83500FAAD0E /* IJKFFMediaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 215FF44A22B7E83500FAAD0E /* IJKFFMediaPlayer.m */; };
 		215FF44E22B7E83500FAAD0E /* IJKFFMediaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 215FF44A22B7E83500FAAD0E /* IJKFFMediaPlayer.m */; };
 		215FF44F22B7E83500FAAD0E /* IJKFFMediaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 215FF44A22B7E83500FAAD0E /* IJKFFMediaPlayer.m */; };
-		217D1C5122C4567C0046FB63 /* FIJKPlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 217D1C4F22C4567C0046FB63 /* FIJKPlayer.h */; };
+		217D1C5122C4567C0046FB63 /* FIJKPlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 217D1C4F22C4567C0046FB63 /* FIJKPlayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		217D1C5422C457720046FB63 /* universal-framework.sh in Resources */ = {isa = PBXBuildFile; fileRef = 217D1C5322C457720046FB63 /* universal-framework.sh */; };
 		21DAA1592298FEBB007B0784 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5450AF8B1E63E59300568494 /* libcrypto.a */; };
 		21DAA15A2298FEBE007B0784 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5450AF8C1E63E59300568494 /* libssl.a */; };
@@ -1140,10 +1140,10 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				217D1C5122C4567C0046FB63 /* FIJKPlayer.h in Headers */,
 				21E6F4DD22C39D0500611D3D /* IJKFFMonitor.h in Headers */,
 				21E6F4DE22C39D0500611D3D /* ijkiourl.h in Headers */,
 				21E6F4DF22C39D0500611D3D /* IJKFFMoviePlayerController.h in Headers */,
-				217D1C5122C4567C0046FB63 /* FIJKPlayer.h in Headers */,
 				21E6F4E022C39D0500611D3D /* IJKSDLHudViewController.h in Headers */,
 				21E6F4E122C39D0500611D3D /* IJKFFOptions.h in Headers */,
 				21E6F4E222C39D0500611D3D /* ijkutils.h in Headers */,

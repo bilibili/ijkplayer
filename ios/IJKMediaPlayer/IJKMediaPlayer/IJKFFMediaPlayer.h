@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2019 Befovy <befovy@gmail.com>
  *
- * This file is part of ijkPlayer.
+ * This file is part of fijkPlayer.
  *
  * ijkPlayer is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
 
 #import <Foundation/Foundation.h>
 #import "IJKFFOptions.h"
+#import "IJKSDLGLViewProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -51,7 +52,7 @@ typedef NS_ENUM(NSInteger, IJKMPEventType) {
 
 @end
 
-@interface IJKFFMediaPlayer : NSObject
+@interface IJKFFMediaPlayer : NSObject<IJKSDLGLViewProtocol>
 
 @property (readonly, nonatomic) int videoWidth;
 @property (readonly, nonatomic) int videoHeight;
@@ -68,6 +69,8 @@ typedef NS_ENUM(NSInteger, IJKMPEventType) {
 - (void) reset;
 - (BOOL) isPlaying;
 - (void) shutdown;
+
+- (void) setupCVPixelBufferView:(id<IJKCVPBViewProtocol>) view;
 
 - (void)setOptionValue:(NSString *)value
                 forKey:(NSString *)key

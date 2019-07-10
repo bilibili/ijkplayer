@@ -1,10 +1,9 @@
 /*
- * IJKMediaFramework.h
+ * FIJKPlayer.h
  *
- * Copyright (c) 2013 Bilibili
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2019 Befovy <befovy@gmail.com>
  *
- * This file is part of ijkPlayer.
+ * This file is part of fijkPlayer.
  *
  * ijkPlayer is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,13 +22,13 @@
 
 #import <UIKit/UIKit.h>
 
-//! Project version number for IJKMediaFramework.
+//! Project version number for FIJKPlayer.
 FOUNDATION_EXPORT double FIJKPlayerVersionNumber;
 
-//! Project version string for IJKMediaFramework.
+//! Project version string for FIJKPlayer.
 FOUNDATION_EXPORT const unsigned char FIJKPlayerVersionString[];
 
-// In this header, you should import all the public headers of your framework using statements like #import <IJKMediaFrameworkWithSSL/PublicHeader.h>
+// In this header, you should import all the public headers of your framework using statements like #import <FIJKPlayer/PublicHeader.h>
 #import <FIJKPlayer/IJKMediaPlayback.h>
 #import <FIJKPlayer/IJKMPMoviePlayerController.h>
 #import <FIJKPlayer/IJKFFOptions.h>
