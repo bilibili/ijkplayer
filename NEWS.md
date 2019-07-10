@@ -1,6 +1,12 @@
 tag next
 --------------------------------
 
+tag b0.2.0
+--------------------------------
+- ios: add support for flutter texture
+- ios: fix some vtb errors #873
+- ijkplayer: new release bintary and CocoaPods
+
 tag k0.8.8
 --------------------------------
 - ffmpeg: upgrade to 3.4
