@@ -48,7 +48,10 @@
     int _videoHeight;
     int _videoSarNum;
     int _videoSarDen;
+    
+    CFDictionaryRef _optionsDictionary;
 }
+
 
 @synthesize fps = _fps;
 @synthesize isThirdGLView = _isThirdGLView;
@@ -101,6 +104,7 @@ int ff_media_player_msg_loop(void* arg)
         ijkmp_set_option(_nativeMediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", "fcc-_es2");
         
         [[IJKAudioKit sharedInstance] setupAudioSession];
+        _optionsDictionary = nil;
         _isThirdGLView = true;
         _scaleFactor = 1.0f;
         _fps = 1.0f;
@@ -213,6 +217,9 @@ int ff_media_player_msg_loop(void* arg)
     __unused id weakHolder = (__bridge_transfer IJKFFWeakHolder*)ijkmp_set_inject_opaque(_nativeMediaPlayer, NULL);
     __unused id weakijkHolder = (__bridge_transfer IJKFFWeakHolder*)ijkmp_set_ijkio_inject_opaque(_nativeMediaPlayer, NULL);
 
+    if (_optionsDictionary)
+        CFRelease(_optionsDictionary);
+
     [_eventHandlers removeAllObjects];
     ijkmp_dec_ref_p(&_nativeMediaPlayer);
 }
@@ -254,12 +261,39 @@ int ff_media_player_msg_loop(void* arg)
 {
     if (overlay->pixel_buffer != nil && _cvPBView != nil) {
         [_cvPBView display_pixelbuffer:overlay->pixel_buffer];
+    } else if (_cvPBView != nil && overlay->format == SDL_FCC_BGRA){
+        CVPixelBufferRef pixelBuffer;
+        int retval = CVPixelBufferCreateWithBytes(
+                                            kCFAllocatorDefault,
+                                            (size_t) overlay->w,
+                                            (size_t) overlay->h,
+                                            kCVPixelFormatType_32BGRA,
+                                            overlay->pixels[0],
+                                            overlay->pitches[0],
+                                            NULL, NULL, _optionsDictionary,
+                                            &pixelBuffer);
+        if (retval == kCVReturnSuccess) {
+            [_cvPBView display_pixelbuffer:pixelBuffer];
+            CVPixelBufferRelease(pixelBuffer);
+        }
     }
 }
 
 - (void) setupCVPixelBufferView:(id<IJKCVPBViewProtocol>) cvPBView
 {
     _cvPBView = cvPBView;
+    
+    const void *keys[] = {
+        kCVPixelBufferOpenGLESCompatibilityKey,
+        kCVPixelBufferIOSurfacePropertiesKey,
+    };
+    const void *values[] = {
+        (__bridge const void *) (@YES),
+        (__bridge const void *) ([NSDictionary dictionary]),
+    };
+    
+    _optionsDictionary = CFDictionaryCreate(kCFAllocatorDefault, keys, values, 2,
+                                            &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     ijkmp_ios_set_glview(_nativeMediaPlayer, self);
 }
 
