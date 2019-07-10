@@ -207,7 +207,7 @@ run `./gradlew :fijkplayer-full:assembleRelease`
 
 ### Build iOS
 ```
-git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-ios
+git clone https://github.com/befovy/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
 git checkout -B latest k0.8.8
 
@@ -249,7 +249,7 @@ cd ios
 
 ### Support (支持) ###
 - Please do not send e-mail to me. Public technical discussion on github is preferred.
-- 请尽量在 github 上公开讨论[技术问题](https://github.com/bilibili/ijkplayer/issues)，不要以邮件方式私下询问，恕不一一回复。
+- 请尽量在 github 上公开讨论[技术问题](https://github.com/befovy/ijkplayer/issues)，不要以邮件方式私下询问，恕不一一回复。
 
 
 ### License
