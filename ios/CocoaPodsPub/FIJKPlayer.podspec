@@ -87,7 +87,7 @@ Pod::Spec.new do |spec|
   # spec.source_files  = "Classes", "Classes/**/*.{h,m}"
   # spec.exclude_files = "Classes/Exclude"
   spec.vendored_frameworks = 'FIJKPlayer.framework'
-  spec.resource = 'FIJKPlayer.framework'
+  # spec.resource = 'FIJKPlayer.framework'
   
   # spec.public_header_files = "Classes/**/*.h"
 

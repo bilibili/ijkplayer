@@ -13,7 +13,6 @@
 		215FF44E22B7E83500FAAD0E /* IJKFFMediaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 215FF44A22B7E83500FAAD0E /* IJKFFMediaPlayer.m */; };
 		215FF44F22B7E83500FAAD0E /* IJKFFMediaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 215FF44A22B7E83500FAAD0E /* IJKFFMediaPlayer.m */; };
 		217D1C5122C4567C0046FB63 /* FIJKPlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 217D1C4F22C4567C0046FB63 /* FIJKPlayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		217D1C5422C457720046FB63 /* universal-framework.sh in Resources */ = {isa = PBXBuildFile; fileRef = 217D1C5322C457720046FB63 /* universal-framework.sh */; };
 		21DAA1592298FEBB007B0784 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5450AF8B1E63E59300568494 /* libcrypto.a */; };
 		21DAA15A2298FEBE007B0784 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5450AF8C1E63E59300568494 /* libssl.a */; };
 		21DAA15B2298FEC7007B0784 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 5450AF8F1E63E59800568494 /* libz.tbd */; };
@@ -1387,7 +1386,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				217D1C5422C457720046FB63 /* universal-framework.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1799,7 +1797,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../build/universal/lib\"",
 				);
-				MACH_O_TYPE = mh_dylib;
+				MACH_O_TYPE = staticlib;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = (
 					"-read_only_relocs",
@@ -1825,6 +1823,7 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 0.8.8;
@@ -1855,7 +1854,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../build/universal/lib\"",
 				);
-				MACH_O_TYPE = mh_dylib;
+				MACH_O_TYPE = staticlib;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = (
 					"-read_only_relocs",

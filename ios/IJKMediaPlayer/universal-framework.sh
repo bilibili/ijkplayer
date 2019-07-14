@@ -9,7 +9,7 @@ mkdir -p "${UNIVERSAL_OUTPUTFOLDER}"
 
 # Step 1. Build Device and Simulator versions
 xcodebuild -target "${TARGET_NAME}" ONLY_ACTIVE_ARCH=NO -configuration ${CONFIGURATION} -sdk iphoneos -arch armv7 -arch armv7s -arch arm64 -project ${PROJECT_DIR}/${PROJECT_NAME}.xcodeproj BUILD_DIR="${BUILD_DIR}" BUILD_ROOT="${BUILD_ROOT}" clean build
-xcodebuild -target "${TARGET_NAME}" -configuration ${CONFIGURATION} -sdk iphonesimulator -project ${PROJECT_DIR}/${PROJECT_NAME}.xcodeproj ONLY_ACTIVE_ARCH=NO BUILD_DIR="${BUILD_DIR}" BUILD_ROOT="${BUILD_ROOT}" clean build
+xcodebuild -target "${TARGET_NAME}" ONLY_ACTIVE_ARCH=NO -configuration ${CONFIGURATION} -sdk iphonesimulator -project ${PROJECT_DIR}/${PROJECT_NAME}.xcodeproj  BUILD_DIR="${BUILD_DIR}" BUILD_ROOT="${BUILD_ROOT}" clean build
 
 
 # Step 2. Copy the framework structure (from iphoneos build) to the universal folder
