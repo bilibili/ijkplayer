@@ -114,6 +114,12 @@ Pod::Spec.new do |spec|
   spec.frameworks  = "AudioToolbox", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "MobileCoreServices", "OpenGLES", "QuartzCore", "VideoToolbox", "Foundation", "UIKit", "MediaPlayer"
   spec.libraries   = "bz2", "z", "stdc++"
 
+  spec.requires_arc = true
+
+  spec.prepare_command = <<-CMD
+    tar -xvf ./FIJKPlayer.tar.xz
+  CMD
+
   # spec.library   = "iconv"
   # spec.libraries = "iconv", "xml2"
 
@@ -124,7 +130,6 @@ Pod::Spec.new do |spec|
   #  where they will only apply to your library. If you depend on other Podspecs
   #  you can include multiple dependencies to ensure it works.
 
-  # spec.requires_arc = true
 
   # spec.xcconfig = { "HEADER_SEARCH_PATHS" => "$(SDKROOT)/usr/include/libxml2" }
   # spec.dependency "JSONKit", "~> 1.4"

@@ -25,13 +25,23 @@ fi
 lipo -create -output "${UNIVERSAL_OUTPUTFOLDER}/${TARGET_NAME}.framework/${TARGET_NAME}" "${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/${TARGET_NAME}.framework/${TARGET_NAME}" "${BUILD_DIR}/${CONFIGURATION}-iphoneos/${TARGET_NAME}.framework/${TARGET_NAME}"
 
 # Step 5. Convenience step to copy the framework to the project's directory
-cp -R "${UNIVERSAL_OUTPUTFOLDER}/${TARGET_NAME}.framework" "${PROJECT_DIR}/../CocoaPodsPub"
+cp -R "${UNIVERSAL_OUTPUTFOLDER}/${TARGET_NAME}.framework" "${PROJECT_DIR}/../"
 
-rm "${PROJECT_DIR}/../CocoaPodsPub/FIJKPlayer.tar.gz" || true
+rm "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.xz" || true
+rm "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.gz" || true
+rm "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.framework" || true
+
+
 cp -v "${PROJECT_DIR}/../../COPYING.LGPLv3" "${PROJECT_DIR}/../CocoaPodsPub/LICENSE"
-cd "${PROJECT_DIR}/../CocoaPodsPub"
+cd "${PROJECT_DIR}/.."
+
+tar vcfJ "CocoaPodsPub/${TARGET_NAME}.tar.xz" "${TARGET_NAME}.framework"
+
+cd CocoaPodsPub
+
 tar -zcvf "${PROJECT_DIR}/../${TARGET_NAME}.tar.gz" ./
 mv "${PROJECT_DIR}/../${TARGET_NAME}.tar.gz" "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.gz"
+mv "${PROJECT_DIR}/../${TARGET_NAME}.framework" "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.framework"
 
 
 # Step 6. Convenience step to open the project's directory in Finder
