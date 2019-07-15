@@ -1,6 +1,12 @@
 tag next
 --------------------------------
 
+tag f0.3.0
+--------------------------------
+- change prefix for fijkplayer release tag names `f`
+- ios: build static lib FIJKPlayer.framework
+- ios: fix FIJKPlayer.podspec error
+
 tag b0.2.0
 --------------------------------
 - ios: add support for flutter texture
