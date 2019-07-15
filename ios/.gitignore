@@ -1,3 +1,7 @@
 xcuserdata
 # xcshareddata
 *.xccheckout
+CocoaPodsPub/FIJKPlayer.framework
+CocoaPodsPub/FIJKPlayer.tar.gz
+CocoaPodsPub/FIJKPlayer.tar.xz
+CocoaPodsPub/LICENSE

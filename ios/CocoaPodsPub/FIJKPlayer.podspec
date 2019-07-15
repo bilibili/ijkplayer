@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "FIJKPlayer"
-  spec.version      = "0.2.0"
+  spec.version      = "0.3.0"
   spec.summary      = "ijkplayer iOS video player SDK"
 
   spec.author       = { "befovy" => "befovy@gmail.com" }
@@ -75,7 +75,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/b0.2.0/FIJKPlayer.tar.gz" }
+  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/f0.3.0/FIJKPlayer.tar.gz" }
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
   #  CocoaPods is smart about how it includes source code. For source files
@@ -87,7 +87,7 @@ Pod::Spec.new do |spec|
   # spec.source_files  = "Classes", "Classes/**/*.{h,m}"
   # spec.exclude_files = "Classes/Exclude"
   spec.vendored_frameworks = 'FIJKPlayer.framework'
-  spec.resource = 'FIJKPlayer.framework'
+  # spec.resource = 'FIJKPlayer.framework'
   
   # spec.public_header_files = "Classes/**/*.h"
 
@@ -114,6 +114,12 @@ Pod::Spec.new do |spec|
   spec.frameworks  = "AudioToolbox", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "MobileCoreServices", "OpenGLES", "QuartzCore", "VideoToolbox", "Foundation", "UIKit", "MediaPlayer"
   spec.libraries   = "bz2", "z", "stdc++"
 
+  spec.requires_arc = true
+
+  spec.prepare_command = <<-CMD
+    tar -xvf ./FIJKPlayer.tar.xz
+  CMD
+
   # spec.library   = "iconv"
   # spec.libraries = "iconv", "xml2"
 
@@ -124,7 +130,6 @@ Pod::Spec.new do |spec|
   #  where they will only apply to your library. If you depend on other Podspecs
   #  you can include multiple dependencies to ensure it works.
 
-  # spec.requires_arc = true
 
   # spec.xcconfig = { "HEADER_SEARCH_PATHS" => "$(SDKROOT)/usr/include/libxml2" }
   # spec.dependency "JSONKit", "~> 1.4"

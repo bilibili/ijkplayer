@@ -9,7 +9,7 @@ mkdir -p "${UNIVERSAL_OUTPUTFOLDER}"
 
 # Step 1. Build Device and Simulator versions
 xcodebuild -target "${TARGET_NAME}" ONLY_ACTIVE_ARCH=NO -configuration ${CONFIGURATION} -sdk iphoneos -arch armv7 -arch armv7s -arch arm64 -project ${PROJECT_DIR}/${PROJECT_NAME}.xcodeproj BUILD_DIR="${BUILD_DIR}" BUILD_ROOT="${BUILD_ROOT}" clean build
-xcodebuild -target "${TARGET_NAME}" -configuration ${CONFIGURATION} -sdk iphonesimulator -project ${PROJECT_DIR}/${PROJECT_NAME}.xcodeproj ONLY_ACTIVE_ARCH=NO BUILD_DIR="${BUILD_DIR}" BUILD_ROOT="${BUILD_ROOT}" clean build
+xcodebuild -target "${TARGET_NAME}" ONLY_ACTIVE_ARCH=NO -configuration ${CONFIGURATION} -sdk iphonesimulator -project ${PROJECT_DIR}/${PROJECT_NAME}.xcodeproj  BUILD_DIR="${BUILD_DIR}" BUILD_ROOT="${BUILD_ROOT}" clean build
 
 
 # Step 2. Copy the framework structure (from iphoneos build) to the universal folder
@@ -25,13 +25,23 @@ fi
 lipo -create -output "${UNIVERSAL_OUTPUTFOLDER}/${TARGET_NAME}.framework/${TARGET_NAME}" "${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/${TARGET_NAME}.framework/${TARGET_NAME}" "${BUILD_DIR}/${CONFIGURATION}-iphoneos/${TARGET_NAME}.framework/${TARGET_NAME}"
 
 # Step 5. Convenience step to copy the framework to the project's directory
-cp -R "${UNIVERSAL_OUTPUTFOLDER}/${TARGET_NAME}.framework" "${PROJECT_DIR}/../CocoaPodsPub"
+cp -R "${UNIVERSAL_OUTPUTFOLDER}/${TARGET_NAME}.framework" "${PROJECT_DIR}/../"
 
-rm "${PROJECT_DIR}/../CocoaPodsPub/FIJKPlayer.tar.gz" || true
+rm "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.xz" || true
+rm "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.gz" || true
+rm "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.framework" || true
+
+
 cp -v "${PROJECT_DIR}/../../COPYING.LGPLv3" "${PROJECT_DIR}/../CocoaPodsPub/LICENSE"
-cd "${PROJECT_DIR}/../CocoaPodsPub"
+cd "${PROJECT_DIR}/.."
+
+tar vcfJ "CocoaPodsPub/${TARGET_NAME}.tar.xz" "${TARGET_NAME}.framework"
+
+cd CocoaPodsPub
+
 tar -zcvf "${PROJECT_DIR}/../${TARGET_NAME}.tar.gz" ./
 mv "${PROJECT_DIR}/../${TARGET_NAME}.tar.gz" "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.gz"
+mv "${PROJECT_DIR}/../${TARGET_NAME}.framework" "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.framework"
 
 
 # Step 6. Convenience step to open the project's directory in Finder
