@@ -27,9 +27,9 @@ lipo -create -output "${UNIVERSAL_OUTPUTFOLDER}/${TARGET_NAME}.framework/${TARGE
 # Step 5. Convenience step to copy the framework to the project's directory
 cp -R "${UNIVERSAL_OUTPUTFOLDER}/${TARGET_NAME}.framework" "${PROJECT_DIR}/../"
 
-rm "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.xz" || true
-rm "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.gz" || true
-rm "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.framework" || true
+rm -v "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.xz"
+rm -v "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.gz"
+rm -v -rf "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.framework"
 
 
 cp -v "${PROJECT_DIR}/../../COPYING.LGPLv3" "${PROJECT_DIR}/../CocoaPodsPub/LICENSE"
@@ -39,6 +39,7 @@ tar vcfJ "CocoaPodsPub/${TARGET_NAME}.tar.xz" "${TARGET_NAME}.framework"
 
 cd CocoaPodsPub
 
+tree ./
 tar -zcvf "${PROJECT_DIR}/../${TARGET_NAME}.tar.gz" ./
 mv "${PROJECT_DIR}/../${TARGET_NAME}.tar.gz" "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.tar.gz"
 mv "${PROJECT_DIR}/../${TARGET_NAME}.framework" "${PROJECT_DIR}/../CocoaPodsPub/${TARGET_NAME}.framework"
