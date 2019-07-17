@@ -61,12 +61,12 @@ typedef NS_ENUM(NSInteger, IJKMPEventType) {
 
 - (IJKFFMediaPlayer *)init;
 
-- (void) setDataSource:(NSString *)url;
-- (void) prepareAsync;
-- (void) start;
-- (void) stop;
-- (void) pause;
-- (void) reset;
+- (int) setDataSource:(NSString *)url;
+- (int) prepareAsync;
+- (int) start;
+- (int) stop;
+- (int) pause;
+- (int) reset;
 - (BOOL) isPlaying;
 - (void) shutdown;
 

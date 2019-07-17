@@ -161,33 +161,31 @@ int ff_media_player_msg_loop(void* arg)
     
 }
 
-- (void) prepareAsync
+- (int) prepareAsync
 {
-    ijkmp_prepare_async(_nativeMediaPlayer);
+    return ijkmp_prepare_async(_nativeMediaPlayer);
 }
 
-- (void) setDataSource:(NSString *)url
+- (int) setDataSource:(NSString *)url
 {
     _dataSource = url;
-    ijkmp_set_data_source(_nativeMediaPlayer, [url UTF8String]);
+    return ijkmp_set_data_source(_nativeMediaPlayer, [url UTF8String]);
 }
 
-
-- (void) start
+- (int) start
 {
-    ijkmp_start(_nativeMediaPlayer);
+    return ijkmp_start(_nativeMediaPlayer);
 }
 
-- (void) stop
+- (int) stop
 {
-    ijkmp_stop(_nativeMediaPlayer);
+    return ijkmp_stop(_nativeMediaPlayer);
 }
 
-- (void) pause
+- (int) pause
 {
-    ijkmp_pause(_nativeMediaPlayer);
+    return ijkmp_pause(_nativeMediaPlayer);
 }
-
 
 - (BOOL) isPlaying
 {
@@ -224,10 +222,11 @@ int ff_media_player_msg_loop(void* arg)
     ijkmp_dec_ref_p(&_nativeMediaPlayer);
 }
 
-- (void) reset
+- (int) reset
 {
     [self shutdown];
     [self nativeSetup];
+    return 0;
 }
 
 
