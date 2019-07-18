@@ -79,7 +79,7 @@ static GLboolean rgb565_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_VoutOver
 
         glTexImage2D(GL_TEXTURE_2D,
                      0,
-                     GL_RGB,
+                     GL_RGB16F,
                      widths[plane],
                      heights[plane],
                      0,
@@ -145,7 +145,7 @@ static GLboolean rgb888_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_VoutOver
 
         glTexImage2D(GL_TEXTURE_2D,
                      0,
-                     GL_RGB,
+                     GL_RGB16F,
                      widths[plane],
                      heights[plane],
                      0,
@@ -211,7 +211,7 @@ static GLboolean rgbx8888_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_VoutOv
 
         glTexImage2D(GL_TEXTURE_2D,
                      0,
-                     GL_RGBA,
+                     GL_RGBA16F,
                      widths[plane],
                      heights[plane],
                      0,

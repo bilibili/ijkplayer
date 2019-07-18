@@ -80,22 +80,22 @@ static GLboolean yuv420sp_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_VoutOv
     glBindTexture(GL_TEXTURE_2D, renderer->plane_textures[0]);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_RED_EXT,
+                 GL_LUMINANCE,
                  widths[0],
                  heights[0],
                  0,
-                 GL_RED_EXT,
+                 GL_LUMINANCE,
                  GL_UNSIGNED_BYTE,
                  pixels[0]);
 
     glBindTexture(GL_TEXTURE_2D, renderer->plane_textures[1]);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_RG_EXT,
+                 GL_LUMINANCE_ALPHA,
                  widths[1],
                  heights[1],
                  0,
-                 GL_RG_EXT,
+                 GL_LUMINANCE_ALPHA,
                  GL_UNSIGNED_BYTE,
                  pixels[1]);
 
