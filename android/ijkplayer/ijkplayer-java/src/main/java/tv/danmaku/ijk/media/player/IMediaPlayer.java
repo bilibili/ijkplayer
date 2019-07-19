@@ -32,9 +32,10 @@ import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 
 public interface IMediaPlayer {
-    /*
+    /**
      * Do not change these values without updating their counterparts in native
-     */
+     * These constant values equal to valued defined in {@link android.media.MediaPlayer}
+     **/
     int MEDIA_INFO_UNKNOWN = 1;
     int MEDIA_INFO_STARTED_AS_NEXT = 2;
     int MEDIA_INFO_VIDEO_RENDERING_START = 3;
