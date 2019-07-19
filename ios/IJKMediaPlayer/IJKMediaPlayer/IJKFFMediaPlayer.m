@@ -202,9 +202,9 @@ int ff_media_player_msg_loop(void* arg)
     return ijkmp_get_duration(_nativeMediaPlayer);
 }
 
-- (void) seekTo:(long) msec
+- (int) seekTo:(long) msec
 {
-    ijkmp_seek_to(_nativeMediaPlayer, msec);
+    return ijkmp_seek_to(_nativeMediaPlayer, msec);
 }
 
 - (void) shutdown

@@ -70,13 +70,18 @@ typedef NS_ENUM(NSInteger, IJKMPEventType) {
 - (BOOL) isPlaying;
 - (void) shutdown;
 
+- (long) getCurrentPosition;
+- (long) getDuration;
+- (int) seekTo:(long) msec;
+
+
 - (void) setupCVPixelBufferView:(id<IJKCVPBViewProtocol>) view;
 
-- (void)setOptionValue:(NSString *)value
+- (void) setOptionValue:(NSString *)value
                 forKey:(NSString *)key
             ofCategory:(IJKFFOptionCategory)category;
 
-- (void)setOptionIntValue:(int64_t)value
+- (void) setOptionIntValue:(int64_t)value
                    forKey:(NSString *)key
                ofCategory:(IJKFFOptionCategory)category;
 
