@@ -39,16 +39,12 @@
 @implementation IJKFFMediaPlayer {
     IjkMediaPlayer* _nativeMediaPlayer;
     IJKFFMoviePlayerMessagePool *_msgPool;
-    
+
     NSMutableSet<id<IJKMPEventHandler>> *_eventHandlers;
     id<IJKCVPBViewProtocol> _cvPBView;
-    
+
     NSString *_dataSource;
-    int _videoWidth;
-    int _videoHeight;
-    int _videoSarNum;
-    int _videoSarDen;
-    
+
     CFDictionaryRef _optionsDictionary;
 }
 
@@ -161,33 +157,31 @@ int ff_media_player_msg_loop(void* arg)
     
 }
 
-- (void) prepareAsync
+- (int) prepareAsync
 {
-    ijkmp_prepare_async(_nativeMediaPlayer);
+    return ijkmp_prepare_async(_nativeMediaPlayer);
 }
 
-- (void) setDataSource:(NSString *)url
+- (int) setDataSource:(NSString *)url
 {
     _dataSource = url;
-    ijkmp_set_data_source(_nativeMediaPlayer, [url UTF8String]);
+    return ijkmp_set_data_source(_nativeMediaPlayer, [url UTF8String]);
 }
 
-
-- (void) start
+- (int) start
 {
-    ijkmp_start(_nativeMediaPlayer);
+    return ijkmp_start(_nativeMediaPlayer);
 }
 
-- (void) stop
+- (int) stop
 {
-    ijkmp_stop(_nativeMediaPlayer);
+    return ijkmp_stop(_nativeMediaPlayer);
 }
 
-- (void) pause
+- (int) pause
 {
-    ijkmp_pause(_nativeMediaPlayer);
+    return ijkmp_pause(_nativeMediaPlayer);
 }
-
 
 - (BOOL) isPlaying
 {
@@ -204,9 +198,23 @@ int ff_media_player_msg_loop(void* arg)
     return ijkmp_get_duration(_nativeMediaPlayer);
 }
 
-- (void) seekTo:(long) msec
+- (int) seekTo:(long) msec
 {
-    ijkmp_seek_to(_nativeMediaPlayer, msec);
+    return ijkmp_seek_to(_nativeMediaPlayer, msec);
+}
+
+- (void)setPlaybackVolume:(float)volume
+{
+    if (!_nativeMediaPlayer)
+        return;
+    ijkmp_set_playback_volume(_nativeMediaPlayer, volume);
+}
+
+- (float)playbackVolume
+{
+    if (!_nativeMediaPlayer)
+        return 0.0f;
+    return ijkmp_get_property_float(_nativeMediaPlayer, FFP_PROP_FLOAT_PLAYBACK_VOLUME, 1.0f);
 }
 
 - (void) shutdown
@@ -224,10 +232,11 @@ int ff_media_player_msg_loop(void* arg)
     ijkmp_dec_ref_p(&_nativeMediaPlayer);
 }
 
-- (void) reset
+- (int) reset
 {
     [self shutdown];
     [self nativeSetup];
+    return 0;
 }
 
 

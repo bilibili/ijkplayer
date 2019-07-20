@@ -54,29 +54,31 @@ typedef NS_ENUM(NSInteger, IJKMPEventType) {
 
 @interface IJKFFMediaPlayer : NSObject<IJKSDLGLViewProtocol>
 
-@property (readonly, nonatomic) int videoWidth;
-@property (readonly, nonatomic) int videoHeight;
-@property (readonly, nonatomic) int videoSarNum;
-@property (readonly, nonatomic) int videoSarDen;
-
 - (IJKFFMediaPlayer *)init;
 
-- (void) setDataSource:(NSString *)url;
-- (void) prepareAsync;
-- (void) start;
-- (void) stop;
-- (void) pause;
-- (void) reset;
+- (int) setDataSource:(NSString *)url;
+- (int) prepareAsync;
+- (int) start;
+- (int) stop;
+- (int) pause;
+- (int) reset;
 - (BOOL) isPlaying;
 - (void) shutdown;
 
+- (long) getCurrentPosition;
+- (long) getDuration;
+- (int) seekTo:(long) msec;
+
+- (void) setPlaybackVolume:(float)volume;
+- (float) playbackVolume;
+
 - (void) setupCVPixelBufferView:(id<IJKCVPBViewProtocol>) view;
 
-- (void)setOptionValue:(NSString *)value
+- (void) setOptionValue:(NSString *)value
                 forKey:(NSString *)key
             ofCategory:(IJKFFOptionCategory)category;
 
-- (void)setOptionIntValue:(int64_t)value
+- (void) setOptionIntValue:(int64_t)value
                    forKey:(NSString *)key
                ofCategory:(IJKFFOptionCategory)category;
 

@@ -450,14 +450,19 @@ static int ikjmp_chkst_start_l(int mp_state)
 static int ijkmp_start_l(IjkMediaPlayer *mp)
 {
     assert(mp);
-
-    MP_RET_IF_FAILED(ikjmp_chkst_start_l(mp->mp_state));
-
-    ffp_remove_msg(mp->ffplayer, FFP_REQ_START);
-    ffp_remove_msg(mp->ffplayer, FFP_REQ_PAUSE);
-    ffp_notify_msg1(mp->ffplayer, FFP_REQ_START);
-
-    return 0;
+    int retval = 0;
+    if (mp->mp_state == MP_STATE_ASYNC_PREPARING) {
+        mp->ffplayer->start_on_prepared = 1;
+        retval = 0;
+    } else {
+        retval = ikjmp_chkst_start_l(mp->mp_state);
+        if (retval == 0) {
+            ffp_remove_msg(mp->ffplayer, FFP_REQ_START);
+            ffp_remove_msg(mp->ffplayer, FFP_REQ_PAUSE);
+            ffp_notify_msg1(mp->ffplayer, FFP_REQ_START);
+        }
+    }
+    return retval;
 }
 
 int ijkmp_start(IjkMediaPlayer *mp)
@@ -708,6 +713,8 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             }
             if (!mp->ffplayer->start_on_prepared) {
                 ijkmp_change_state_l(mp, MP_STATE_PAUSED);
+            } else {
+                ijkmp_change_state_l(mp, MP_STATE_STARTED);
             }
             pthread_mutex_unlock(&mp->mutex);
             break;
