@@ -39,16 +39,12 @@
 @implementation IJKFFMediaPlayer {
     IjkMediaPlayer* _nativeMediaPlayer;
     IJKFFMoviePlayerMessagePool *_msgPool;
-    
+
     NSMutableSet<id<IJKMPEventHandler>> *_eventHandlers;
     id<IJKCVPBViewProtocol> _cvPBView;
-    
+
     NSString *_dataSource;
-    int _videoWidth;
-    int _videoHeight;
-    int _videoSarNum;
-    int _videoSarDen;
-    
+
     CFDictionaryRef _optionsDictionary;
 }
 
@@ -205,6 +201,20 @@ int ff_media_player_msg_loop(void* arg)
 - (int) seekTo:(long) msec
 {
     return ijkmp_seek_to(_nativeMediaPlayer, msec);
+}
+
+- (void)setPlaybackVolume:(float)volume
+{
+    if (!_nativeMediaPlayer)
+        return;
+    ijkmp_set_playback_volume(_nativeMediaPlayer, volume);
+}
+
+- (float)playbackVolume
+{
+    if (!_nativeMediaPlayer)
+        return 0.0f;
+    return ijkmp_get_property_float(_nativeMediaPlayer, FFP_PROP_FLOAT_PLAYBACK_VOLUME, 1.0f);
 }
 
 - (void) shutdown
