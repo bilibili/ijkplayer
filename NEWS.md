@@ -1,6 +1,12 @@
 tag next
 --------------------------------
 
+tag f0.3.1
+--------------------------------
+- ios: IJKFFMediaPlayer add volume and position api
+- android: update Mesage id
+- ijkplayer: make sure change to state started
+
 tag f0.3.0
 --------------------------------
 - change prefix for fijkplayer release tag names `f`
