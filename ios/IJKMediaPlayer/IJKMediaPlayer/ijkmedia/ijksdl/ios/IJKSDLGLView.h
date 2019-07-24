@@ -23,7 +23,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#if IJK_OSX
+#import <AppKit/AppKit.h>
+#else
 #import <UIKit/UIKit.h>
+#endif
+
 #import "IJKSDLGLViewProtocol.h"
 
 #include "ijksdl/ijksdl_vout.h"
@@ -34,12 +39,21 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     IJKSDLGLViewApplicationBackgroundState = 2
 };
 
+#if IJK_OSX
+@interface IJKSDLGLView : NSView <IJKSDLGLViewProtocol>
+#else
 @interface IJKSDLGLView : UIView <IJKSDLGLViewProtocol>
+#endif
 
 - (id) initWithFrame:(CGRect)frame;
 - (void) display: (SDL_VoutOverlay *) overlay;
 
+#if IJK_OSX
+- (NSImage*) snapshot;
+#else
 - (UIImage*) snapshot;
+#endif
+
 - (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhiteBeingMovedToWindow __attribute__((deprecated("unused")));
 
 @end

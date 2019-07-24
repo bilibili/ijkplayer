@@ -41,6 +41,7 @@
 
 - (void)setupAudioSession
 {
+#if IJK_IOS
     if (!_audioSessionInitialized) {
         [[NSNotificationCenter defaultCenter] addObserver: self
                                                  selector: @selector(handleInterruption:)
@@ -63,10 +64,12 @@
     }
 
     return ;
+#endif
 }
 
 - (BOOL)setActive:(BOOL)active
 {
+#if IJK_IOS
     if (active != NO) {
         [[AVAudioSession sharedInstance] setActive:YES error:nil];
     } else {
@@ -76,10 +79,14 @@
             NSLog(@"failed to inactive AVAudioSession\n");
         }
     }
+    return YES;
+#endif
+    return NO;
 }
 
 - (void)handleInterruption:(NSNotification *)notification
 {
+#if IJK_IOS
     int reason = [[[notification userInfo] valueForKey:AVAudioSessionInterruptionTypeKey] intValue];
     switch (reason) {
         case AVAudioSessionInterruptionTypeBegan: {
@@ -93,6 +100,7 @@
             break;
         }
     }
+#endif
 }
 
 @end

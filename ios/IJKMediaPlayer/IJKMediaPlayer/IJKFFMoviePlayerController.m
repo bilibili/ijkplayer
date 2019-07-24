@@ -23,8 +23,15 @@
 
 #import "IJKFFMoviePlayerController.h"
 
+#if IJK_OSX
+#import <AppKit/AppKit.h>
+#else
 #import <UIKit/UIKit.h>
-#import "IJKSDLHudViewController.h"
+#endif
+
+#if IJK_IOS
+#import "ijksdl/ios/IJKSDLHudViewController.h"
+#endif
 #import "IJKFFMoviePlayerDef.h"
 #import "IJKMediaPlayback.h"
 #import "IJKMediaModule.h"
@@ -32,7 +39,7 @@
 #import "IJKAudioKit.h"
 #import "IJKNotificationManager.h"
 #import "NSString+IJKMedia.h"
-#import "ijkioapplication.h"
+#import "ijkplayer/ijkavformat/ijkioapplication.h"
 #include "string.h"
 
 static const char *kIJKFFRequiredFFmpegVersion = "ff3.4--ijk0.8.7--20180103--001";
@@ -264,7 +271,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (id)initWithMoreContent:(NSURL *)aUrl
               withOptions:(IJKFFOptions *)options
-               withGLView:(UIView<IJKSDLGLViewProtocol> *)glView
+               withGLView:(id<IJKSDLGLViewProtocol>)glView
 {
     if (aUrl == nil)
         return nil;
@@ -279,7 +286,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (id)initWithMoreContentString:(NSString *)aUrlString
                  withOptions:(IJKFFOptions *)options
-                  withGLView:(UIView <IJKSDLGLViewProtocol> *)glView
+                  withGLView:(id<IJKSDLGLViewProtocol>)glView
 {
     if (aUrlString == nil || glView == nil)
         return nil;
