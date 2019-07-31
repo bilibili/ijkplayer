@@ -1,6 +1,11 @@
 tag next
 --------------------------------
 
+tag f0.3.2
+--------------------------------
+- android: add javadoc and source to bintray
+- expose all player event to fijkplayer
+
 tag f0.3.1
 --------------------------------
 - ios: IJKFFMediaPlayer add volume and position api
