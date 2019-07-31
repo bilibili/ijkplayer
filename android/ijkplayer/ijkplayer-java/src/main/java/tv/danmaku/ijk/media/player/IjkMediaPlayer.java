@@ -444,9 +444,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 if (!TextUtils.isEmpty(value))
                     sb.append(entry.getValue());
                 sb.append("\r\n");
-                setOption(OPT_CATEGORY_FORMAT, "headers", sb.toString());
-                setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "protocol_whitelist", "async,cache,crypto,file,http,https,ijkhttphook,ijkinject,ijklivehook,ijklongurl,ijksegment,ijktcphook,pipe,rtp,tcp,tls,udp,ijkurlhook,data");
             }
+            setOption(OPT_CATEGORY_FORMAT, "headers", sb.toString());
+            setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "protocol_whitelist", "async,cache,crypto,file,http,https,ijkhttphook,ijkinject,ijklivehook,ijklongurl,ijksegment,ijktcphook,pipe,rtp,tcp,tls,udp,ijkurlhook,data");
         }
         setDataSource(path);
     }
@@ -992,27 +992,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 return;
             }
 
-            switch (msg.what) {
-                case IjkEventListener.FLUSH:
-                case IjkEventListener.ERROR:
-                case IjkEventListener.PREPARED:
-                case IjkEventListener.COMPLETED:
-                case IjkEventListener.VIDEO_SIZE_CHANGED:
-                case IjkEventListener.SAR_CHANGED:
-                case IjkEventListener.VIDEO_RENDERING_START:
-                case IjkEventListener.AUDIO_RENDERING_START:
-                case IjkEventListener.VIDEO_ROTATION_CHANGED:
-                case IjkEventListener.BUFFERING_START:
-                case IjkEventListener.BUFFERING_END:
-                case IjkEventListener.BUFFERING_UPDATE:
-                case IjkEventListener.PLAYBACK_STATE_CHANGED:
-                    // DebugLog.dfmt("onEvent", "what %d arg1 %d arg2 %d", msg.what, msg.arg1, msg.arg2);
-                    for (IjkEventListener listener : player.mEventListeners) {
-                        listener.onEvent(player, msg.what, msg.arg1, msg.arg2, msg.obj);
-                    }
-                    break;
-                default:
-                        break;
+            // DebugLog.dfmt("onEvent", "what %d arg1 %d arg2 %d", msg.what, msg.arg1, msg.arg2);
+            for (IjkEventListener listener : player.mEventListeners) {
+                listener.onEvent(player, msg.what, msg.arg1, msg.arg2, msg.obj);
             }
 
             switch (msg.what) {
