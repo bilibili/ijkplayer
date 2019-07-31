@@ -126,35 +126,10 @@ int ff_media_player_msg_loop(void* arg)
         return;
     
     AVMessage *avmsg = &msg->_msg;
-    switch (avmsg->what) {
-        case IJKMPET_FLUSH:
-        case IJKMPET_ERROR:
-        case IJKMPET_PREPARED:
-        case IJKMPET_COMPLETED:
-        case IJKMPET_VIDEO_SIZE_CHANGED:
-        case IJKMPET_SAR_CHANGED:
-        case IJKMPET_VIDEO_RENDERING_START:
-        case IJKMPET_AUDIO_RENDERING_START:
-        case IJKMPET_VIDEO_ROTATION_CHANGED:
-        case IJKMPET_BUFFERING_START:
-        case IJKMPET_BUFFERING_END:
-        case IJKMPET_BUFFERING_UPDATE:
-        case IJKMPET_PLAYBACK_STATE_CHANGED:
-        
-            for (id<IJKMPEventHandler> handler in _eventHandlers) {
-                [handler onEvent4Player:self withType:avmsg->what andArg1:avmsg->arg1 andArg2:avmsg->arg2 andExtra:avmsg->obj];
-            }
-            break;
-        default:
-            break;
+    for (id<IJKMPEventHandler> handler in _eventHandlers) {
+        [handler onEvent4Player:self withType:avmsg->what andArg1:avmsg->arg1 andArg2:avmsg->arg2 andExtra:avmsg->obj];
     }
     [_msgPool recycle:msg];
-}
-
-
-- (void) setSurface
-{
-    
 }
 
 - (int) prepareAsync
