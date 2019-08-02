@@ -196,11 +196,9 @@
 
         _isStopped = YES;
     }
-    IJKMainThredExecute(^{
-        // do not lock AudioQueueStop, or may be run into deadlock
-        AudioQueueStop(_audioQueueRef, true);
-        AudioQueueDispose(_audioQueueRef, true);
-    });
+    // do not lock AudioQueueStop, or may be run into deadlock
+    AudioQueueStop(_audioQueueRef, true);
+    AudioQueueDispose(_audioQueueRef, true);
 }
 
 - (void)close {
