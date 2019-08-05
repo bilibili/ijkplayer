@@ -5077,7 +5077,7 @@ int ffp_start_record(FFPlayer *ffp, const char *file_name)
     }
 
     // 初始化一个用于输出的AVFormatContext结构体
-    avformat_alloc_output_context2(&ffp->m_ofmt_ctx, NULL, "mp4", file_name);
+    avformat_alloc_output_context2(&ffp->m_ofmt_ctx, NULL, NULL, file_name);
     if (!ffp->m_ofmt_ctx) {
         av_log(ffp, AV_LOG_ERROR, "Could not create output context filename is %s\n", file_name);
         goto end;
@@ -5086,24 +5086,28 @@ int ffp_start_record(FFPlayer *ffp, const char *file_name)
 
     for (int i = 0; i < is->ic->nb_streams; i++) {
         // 对照输入流创建输出流通道
+        AVStream *out_stream;
         AVStream *in_stream = is->ic->streams[i];
-        AVStream *out_stream = avformat_new_stream(ffp->m_ofmt_ctx, in_stream->codec->codec);
+	AVCodecParameters *in_codecpar = in_stream->codecpar;
+		
+	if (in_codecpar->codec_type != AVMEDIA_TYPE_AUDIO &&
+            in_codecpar->codec_type != AVMEDIA_TYPE_VIDEO &&       
+            in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE) {
+            continue;
+        }
+		
+	out_stream = avformat_new_stream(ffp->m_ofmt_ctx, NULL);
         if (!out_stream) {
             av_log(ffp, AV_LOG_ERROR, "Failed allocating output stream\n");
             goto end;
         }
 
         // 将输入视频/音频的参数拷贝至输出视频/音频的AVCodecContext结构体
-        av_log(ffp, AV_LOG_DEBUG, "in_stream->codec；%@\n", in_stream->codec);
-        if (avcodec_copy_context(out_stream->codec, in_stream->codec) < 0) {
-            av_log(ffp, AV_LOG_ERROR, "Failed to copy context from input to output stream codec context\n");
+	if (avcodec_parameters_copy(out_stream->codecpar, in_codecpar) < 0) {
+            av_log(ffp, AV_LOG_ERROR, "Failed to copy codec parameters\n");
             goto end;
         }
-
-        out_stream->codec->codec_tag = 0;
-        if (ffp->m_ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER) {
-            out_stream->codec->flags |= CODEC_FLAG_GLOBAL_HEADER;
-        }
+        out_stream->codecpar->codec_tag = 0;
     }
 
     av_dump_format(ffp->m_ofmt_ctx, 0, file_name, 1);
@@ -5236,4 +5240,3 @@ void ffp_get_current_frame_l(FFPlayer *ffp, uint8_t *frame_buf)
 
   ALOGD("=============>end snapshot\n");
 }
-
