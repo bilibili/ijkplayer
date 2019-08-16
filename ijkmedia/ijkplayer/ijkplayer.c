@@ -553,6 +553,18 @@ int ijkmp_stop(IjkMediaPlayer *mp)
     return retval;
 }
 
+int ijkmp_reset(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    MPTRACE("ijkmp_reset()\n");
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ffp_wait_stop_l(mp->ffplayer);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_reset()=%d\n", retval);
+    ijkmp_change_state_l(mp, MP_STATE_IDLE);
+    return retval;
+}
+
 bool ijkmp_is_playing(IjkMediaPlayer *mp)
 {
     assert(mp);

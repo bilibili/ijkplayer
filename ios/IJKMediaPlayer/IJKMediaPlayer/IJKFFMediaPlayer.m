@@ -241,8 +241,8 @@ int ff_media_player_msg_loop(void* arg)
 
 - (int) reset
 {
-    [self shutdown];
-    [self nativeSetup];
+    ijkmp_stop(_nativeMediaPlayer);
+    ijkmp_reset(_nativeMediaPlayer);
     return 0;
 }
 
