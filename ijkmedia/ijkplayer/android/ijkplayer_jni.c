@@ -390,10 +390,7 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
     if (!mp)
         return;
 
-    jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL );
-
-    IjkMediaPlayer_release(env, thiz);
-    IjkMediaPlayer_native_setup(env, thiz, weak_thiz);
+    ijkmp_reset(mp);
 
     ijkmp_dec_ref_p(&mp);
 }

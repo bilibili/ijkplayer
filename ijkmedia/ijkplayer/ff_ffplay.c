@@ -4363,7 +4363,6 @@ int ffp_stop_l(FFPlayer *ffp)
         toggle_pause(ffp, 1);
     }
 
-    msg_queue_abort(&ffp->msg_queue);
     if (ffp->enable_accurate_seek && is && is->accurate_seek_mutex
         && is->audio_accurate_seek_cond && is->video_accurate_seek_cond) {
         SDL_LockMutex(is->accurate_seek_mutex);
