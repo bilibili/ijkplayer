@@ -201,6 +201,7 @@ int             ijkmp_prepare_async(IjkMediaPlayer *mp);
 int             ijkmp_start(IjkMediaPlayer *mp);
 int             ijkmp_pause(IjkMediaPlayer *mp);
 int             ijkmp_stop(IjkMediaPlayer *mp);
+int             ijkmp_reset(IjkMediaPlayer *mp);
 int             ijkmp_seek_to(IjkMediaPlayer *mp, long msec);
 int             ijkmp_get_state(IjkMediaPlayer *mp);
 bool            ijkmp_is_playing(IjkMediaPlayer *mp);

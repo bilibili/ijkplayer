@@ -178,6 +178,38 @@ int ff_media_player_msg_loop(void* arg)
     return ijkmp_seek_to(_nativeMediaPlayer, msec);
 }
 
+
+- (void) setLoop:(int) loop
+{
+    ijkmp_set_loop(_nativeMediaPlayer, loop);
+}
+
+- (int) getLoop
+{
+    return ijkmp_get_loop(_nativeMediaPlayer);
+}
+
+- (void) setSpeed:(float) speed
+{
+    ijkmp_set_property_float(_nativeMediaPlayer, FFP_PROP_FLOAT_PLAYBACK_RATE, speed);
+}
+
+- (void) setStreamSelected:(int) stream selected:(BOOL) selected
+{
+    ijkmp_set_stream_selected(_nativeMediaPlayer, stream, selected);
+}
+
+- (float) getFloatProperty:(int) property defalut:(float) value
+{
+    return ijkmp_get_property_float(_nativeMediaPlayer, property, value);
+}
+
+- (int64_t) getLongProperty:(int) property default:(int64_t) value
+{
+    return ijkmp_get_property_int64(_nativeMediaPlayer, property, value);
+}
+
+
 - (void)setPlaybackVolume:(float)volume
 {
     if (!_nativeMediaPlayer)
@@ -209,8 +241,8 @@ int ff_media_player_msg_loop(void* arg)
 
 - (int) reset
 {
-    [self shutdown];
-    [self nativeSetup];
+    ijkmp_stop(_nativeMediaPlayer);
+    ijkmp_reset(_nativeMediaPlayer);
     return 0;
 }
 
@@ -247,6 +279,10 @@ int ff_media_player_msg_loop(void* arg)
         [_cvPBView display_pixelbuffer:overlay->pixel_buffer];
     } else if (_cvPBView != nil && overlay->format == SDL_FCC_BGRA){
         CVPixelBufferRef pixelBuffer;
+        
+        // CVPixelBufferCreateWithBytes lead to crash if reset player
+        // and then setDataSource and play again.
+        /*
         int retval = CVPixelBufferCreateWithBytes(
                                             kCFAllocatorDefault,
                                             (size_t) overlay->w,
@@ -256,7 +292,18 @@ int ff_media_player_msg_loop(void* arg)
                                             overlay->pitches[0],
                                             NULL, NULL, _optionsDictionary,
                                             &pixelBuffer);
+         */
+        int retval = CVPixelBufferCreate(kCFAllocatorDefault,
+                                         (size_t) overlay->w,
+                                         (size_t) overlay->h,
+                                         kCVPixelFormatType_32BGRA,
+                                         _optionsDictionary,
+                                         &pixelBuffer);
         if (retval == kCVReturnSuccess) {
+            CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+            uint8_t *dst = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+            memcpy(dst, overlay->pixels[0], overlay->pitches[0] * overlay->h);
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
             [_cvPBView display_pixelbuffer:pixelBuffer];
             CVPixelBufferRelease(pixelBuffer);
         }

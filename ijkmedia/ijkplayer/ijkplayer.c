@@ -305,6 +305,7 @@ void ijkmp_shutdown_l(IjkMediaPlayer *mp)
     if (mp->ffplayer) {
         ffp_stop_l(mp->ffplayer);
         ffp_wait_stop_l(mp->ffplayer);
+        msg_queue_abort(&mp->ffplayer->msg_queue);
     }
     MPTRACE("ijkmp_shutdown_l()=void\n");
 }
@@ -550,6 +551,18 @@ int ijkmp_stop(IjkMediaPlayer *mp)
     int retval = ijkmp_stop_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_stop()=%d\n", retval);
+    return retval;
+}
+
+int ijkmp_reset(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    MPTRACE("ijkmp_reset()\n");
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ffp_wait_stop_l(mp->ffplayer);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_reset()=%d\n", retval);
+    ijkmp_change_state_l(mp, MP_STATE_IDLE);
     return retval;
 }
 

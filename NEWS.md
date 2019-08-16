@@ -1,5 +1,12 @@
 tag next
+
 --------------------------------
+
+tag f0.3.3
+--------------------------------
+- ijkplayer: msg_queue_abort move to shutdown
+- ijkplayer: update ijkmp_reset, just wait_stop_l, no release
+- ios: IJKFFMediaPlayer copy overlay memory pixel to CVPixelBuffer
 
 tag f0.3.2
 --------------------------------

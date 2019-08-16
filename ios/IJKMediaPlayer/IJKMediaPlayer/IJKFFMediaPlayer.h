@@ -67,12 +67,22 @@ typedef NS_ENUM(NSInteger, IJKMPEventType) {
 
 - (long) getCurrentPosition;
 - (long) getDuration;
-- (int) seekTo:(long) msec;
+- (int)  seekTo:(long) msec;
+
+- (void) setLoop:(int) loop;
+- (int)  getLoop;
+
+- (void) setSpeed:(float) speed;
 
 - (void) setPlaybackVolume:(float)volume;
 - (float) playbackVolume;
 
 - (void) setupCVPixelBufferView:(id<IJKCVPBViewProtocol>) view;
+
+- (void) setStreamSelected:(int) stream selected:(BOOL) selected;
+
+- (float) getFloatProperty:(int) property defalut:(float) value;
+- (int64_t) getLongProperty:(int) property default:(int64_t) value;
 
 - (void) setOptionValue:(NSString *)value
                 forKey:(NSString *)key
