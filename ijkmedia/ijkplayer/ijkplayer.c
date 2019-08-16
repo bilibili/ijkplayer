@@ -305,6 +305,7 @@ void ijkmp_shutdown_l(IjkMediaPlayer *mp)
     if (mp->ffplayer) {
         ffp_stop_l(mp->ffplayer);
         ffp_wait_stop_l(mp->ffplayer);
+        msg_queue_abort(&mp->ffplayer->msg_queue);
     }
     MPTRACE("ijkmp_shutdown_l()=void\n");
 }
