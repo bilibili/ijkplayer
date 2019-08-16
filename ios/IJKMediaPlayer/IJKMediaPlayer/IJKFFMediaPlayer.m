@@ -279,6 +279,10 @@ int ff_media_player_msg_loop(void* arg)
         [_cvPBView display_pixelbuffer:overlay->pixel_buffer];
     } else if (_cvPBView != nil && overlay->format == SDL_FCC_BGRA){
         CVPixelBufferRef pixelBuffer;
+        
+        // CVPixelBufferCreateWithBytes lead to crash if reset player
+        // and then setDataSource and play again.
+        /*
         int retval = CVPixelBufferCreateWithBytes(
                                             kCFAllocatorDefault,
                                             (size_t) overlay->w,
@@ -288,7 +292,18 @@ int ff_media_player_msg_loop(void* arg)
                                             overlay->pitches[0],
                                             NULL, NULL, _optionsDictionary,
                                             &pixelBuffer);
+         */
+        int retval = CVPixelBufferCreate(kCFAllocatorDefault,
+                                         (size_t) overlay->w,
+                                         (size_t) overlay->h,
+                                         kCVPixelFormatType_32BGRA,
+                                         _optionsDictionary,
+                                         &pixelBuffer);
         if (retval == kCVReturnSuccess) {
+            CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+            uint8_t *dst = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+            memcpy(dst, overlay->pixels[0], overlay->pitches[0] * overlay->h);
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
             [_cvPBView display_pixelbuffer:pixelBuffer];
             CVPixelBufferRelease(pixelBuffer);
         }
