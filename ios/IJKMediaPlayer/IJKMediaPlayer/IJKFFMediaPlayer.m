@@ -178,6 +178,38 @@ int ff_media_player_msg_loop(void* arg)
     return ijkmp_seek_to(_nativeMediaPlayer, msec);
 }
 
+
+- (void) setLoop:(int) loop
+{
+    ijkmp_set_loop(_nativeMediaPlayer, loop);
+}
+
+- (int) getLoop
+{
+    return ijkmp_get_loop(_nativeMediaPlayer);
+}
+
+- (void) setSpeed:(float) speed
+{
+    ijkmp_set_property_float(_nativeMediaPlayer, FFP_PROP_FLOAT_PLAYBACK_RATE, speed);
+}
+
+- (void) setStreamSelected:(int) stream selected:(BOOL) selected
+{
+    ijkmp_set_stream_selected(_nativeMediaPlayer, stream, selected);
+}
+
+- (float) getFloatProperty:(int) property defalut:(float) value
+{
+    return ijkmp_get_property_float(_nativeMediaPlayer, property, value);
+}
+
+- (int64_t) getLongProperty:(int) property default:(int64_t) value
+{
+    return ijkmp_get_property_int64(_nativeMediaPlayer, property, value);
+}
+
+
 - (void)setPlaybackVolume:(float)volume
 {
     if (!_nativeMediaPlayer)
