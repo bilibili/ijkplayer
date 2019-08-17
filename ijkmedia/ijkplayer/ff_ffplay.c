@@ -2544,6 +2544,21 @@ reload:
         is->audio_src.fmt = af->frame->format;
     }
 
+#if NOMIT_AUDIO_DSP_CALLBACK_FN==1
+    /** Digital Signal Processing, multi-channel signal *********************************/
+    /*  Run DSP callback function. In-place processing on playback audio data buffer.   */
+    if( ffp->pAudioDSPCbFn )
+    {
+        unsigned int numSamples = af->frame->nb_samples;
+        unsigned int format = af->frame->format;
+        ffp->pAudioDSPCbFn( (void**) af->frame->extended_data, numSamples,
+                            (void**) af->frame->extended_data, &numSamples,
+                                     af->frame->sample_rate,   af->frame->channels,
+                                     format );
+
+    }
+#endif
+
     if (is->swr_ctx) {
         const uint8_t **in = (const uint8_t **)af->frame->extended_data;
         uint8_t **out = &is->audio_buf1;

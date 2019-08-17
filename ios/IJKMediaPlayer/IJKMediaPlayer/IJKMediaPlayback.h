@@ -53,6 +53,12 @@ typedef NS_ENUM(NSInteger, IJKMPMovieFinishReason) {
     IJKMPMovieFinishReasonUserExited
 };
 
+/* Callback function prototype */
+typedef int (*AUDIO_DSP_CBFN) ( void **inData,           unsigned int  numInSamples,
+                                void **outData,          unsigned int *numOutSamples,
+                                unsigned int sampleRate, unsigned int  numChans,
+                                unsigned int format );
+
 // -----------------------------------------------------------------------------
 // Thumbnails
 
@@ -74,6 +80,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 - (BOOL)isPlaying;
 - (void)shutdown;
 - (void)setPauseInBackground:(BOOL)pause;
+- (void)setAudioDSPCallbackFn:(AUDIO_DSP_CBFN)pAudioDSPCbFn;
 
 @property(nonatomic, readonly)  UIView *view;
 @property(nonatomic)            NSTimeInterval currentPlaybackTime;

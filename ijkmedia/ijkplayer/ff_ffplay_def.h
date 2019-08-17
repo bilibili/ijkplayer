@@ -65,6 +65,7 @@
 #include "ff_ffmsg_queue.h"
 #include "ff_ffpipenode.h"
 #include "ijkmeta.h"
+#include "ijkaudiocallback.h"
 
 #define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
 
@@ -630,6 +631,10 @@ typedef struct FFPlayer {
     int64_t audio_callback_time;
 #ifdef FFP_MERGE
     SDL_Surface *screen;
+#endif
+
+#if NOMIT_AUDIO_DSP_CALLBACK_FN==1
+    AUDIO_DSP_CBFN pAudioDSPCbFn;
 #endif
 
     /* extra fields */
