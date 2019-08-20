@@ -41,3 +41,6 @@ xcuserdata
 xcshareddata
 *.xccheckout
 
+# CTags
+.tags
+.tags_sorted_by_file
