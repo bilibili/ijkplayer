@@ -36,8 +36,8 @@ void      ffp_global_set_log_level(int log_level);
 void      ffp_global_set_inject_callback(ijk_inject_callback cb);
 void      ffp_io_stat_register(void (*cb)(const char *url, int type, int bytes));
 void      ffp_io_stat_complete_register(void (*cb)(const char *url,
-                                                   int64_t read_bytes, int64_t total_size,
-                                                   int64_t elpased_time, int64_t total_duration));
+                                        int64_t read_bytes, int64_t total_size,
+                                        int64_t elpased_time, int64_t total_duration));
 
 FFPlayer *ffp_create();
 void      ffp_destroy(FFPlayer *ffp);
@@ -121,6 +121,5 @@ struct IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp);
 int       ffp_start_record(FFPlayer *ffp, const char *file_name);
 int       ffp_stop_record(FFPlayer *ffp);
 int       ffp_record_file(FFPlayer *ffp, AVPacket *packet);
-void      ffp_get_current_frame_l(FFPlayer *ffp, uint8_t *frame_buf);
 
 #endif
