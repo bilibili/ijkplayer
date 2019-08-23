@@ -75,7 +75,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/f0.3.4/FIJKPlayer.tar.gz" }
+  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/f0.3.5/FIJKPlayer.tar.gz" }
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
   #  CocoaPods is smart about how it includes source code. For source files
