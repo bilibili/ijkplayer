@@ -806,7 +806,13 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             }
             pthread_mutex_unlock(&mp->mutex);
             break;
+        case FFP_MSG_ERROR:
+            pthread_mutex_lock(&mp->mutex);
+            ijkmp_change_state_l(mp, MP_STATE_ERROR);
+            pthread_mutex_unlock(&mp->mutex);
+            break;
         }
+        
         if (continue_wait_next_msg) {
             msg_free_res(msg);
             continue;

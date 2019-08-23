@@ -748,6 +748,16 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         _setLoopCount(loopCount);
     }
 
+    /**
+     * Sets the player's loop count
+     * @param loopCount 1 for noo-loop, 0 for infinity loop, or other positive loop count
+     *
+     */
+    public void setLoopCount(int loopCount) {
+        setOption(OPT_CATEGORY_PLAYER, "loop", loopCount);
+        _setLoopCount(loopCount);
+    }
+
     private native void _setLoopCount(int loopCount);
 
     /**
@@ -759,6 +769,14 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public boolean isLooping() {
         int loopCount = _getLoopCount();
         return loopCount != 1;
+    }
+
+    /**
+     * Get player's remaining loop count
+     * @return the player's remaining loop count
+     */
+    public int getLoopCount() {
+        return _getLoopCount();
     }
 
     private native int _getLoopCount();
@@ -1044,7 +1062,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 break;
 
             case IJK_MSG_ERROR:
-                DebugLog.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
+                DebugLog.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + "," + msg.obj + ")");
                 if (!player.notifyOnError(msg.arg1, msg.arg2)) {
                     player.notifyOnCompletion();
                 }
