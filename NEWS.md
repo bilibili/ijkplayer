@@ -1,6 +1,11 @@
 tag next
 --------------------------------
 
+tag f0.3.5
+--------------------------------
+- fijkplayer: change to state error when notify error
+- fijkplayer: add error msg when notify error
+- android: add set/get loopCount api
 
 tag f0.3.4
 --------------------------------

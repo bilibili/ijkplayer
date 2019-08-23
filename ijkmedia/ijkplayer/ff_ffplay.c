@@ -3120,6 +3120,7 @@ static int read_thread(void *arg)
     if (err < 0) {
         print_error(is->filename, err);
         ret = -1;
+        last_error = err;
         goto fail;
     }
     ffp_notify_msg1(ffp, FFP_MSG_OPEN_INPUT);
@@ -3175,6 +3176,7 @@ static int read_thread(void *arg)
             av_log(NULL, AV_LOG_WARNING,
                    "%s: could not find codec parameters\n", is->filename);
             ret = -1;
+            last_error = err;
             goto fail;
         }
     }
@@ -3305,6 +3307,7 @@ static int read_thread(void *arg)
         av_log(NULL, AV_LOG_FATAL, "Failed to open file '%s' or configure filtergraph\n",
                is->filename);
         ret = -1;
+        last_error = AVERROR_STREAM_NOT_FOUND;
         goto fail;
     }
     if (is->audio_stream >= 0) {
@@ -3503,7 +3506,9 @@ static int read_thread(void *arg)
                     toggle_pause(ffp, 1);
                     if (ffp->error) {
                         av_log(ffp, AV_LOG_INFO, "ffp_toggle_buffering: error: %d\n", ffp->error);
-                        ffp_notify_msg1(ffp, FFP_MSG_ERROR);
+                        char error_msg[AV_ERROR_MAX_STRING_SIZE];
+                        av_strerror(ffp->error, error_msg, AV_ERROR_MAX_STRING_SIZE);
+                        ffp_notify_msg4(ffp, FFP_MSG_ERROR, ffp->error, 0, error_msg, AV_ERROR_MAX_STRING_SIZE);
                     } else {
                         av_log(ffp, AV_LOG_INFO, "ffp_toggle_buffering: completed: OK\n");
                         ffp_notify_msg1(ffp, FFP_MSG_COMPLETED);
@@ -3629,7 +3634,9 @@ static int read_thread(void *arg)
 
     if (!ffp->prepared || !is->abort_request) {
         ffp->last_error = last_error;
-        ffp_notify_msg2(ffp, FFP_MSG_ERROR, last_error);
+        char error_msg[AV_ERROR_MAX_STRING_SIZE];
+        av_strerror(ffp->last_error, error_msg, AV_ERROR_MAX_STRING_SIZE);
+        ffp_notify_msg4(ffp, FFP_MSG_ERROR, ffp->last_error, 0, error_msg, AV_ERROR_MAX_STRING_SIZE);
     }
     SDL_DestroyMutex(wait_mutex);
     return 0;

@@ -912,7 +912,13 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             break;
         case FFP_MSG_ERROR:
             MPTRACE("FFP_MSG_ERROR: %d\n", msg.arg1);
-            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
+            if (msg.obj) {
+                jstring text = (*env)->NewStringUTF(env, (const char *)msg.obj);
+                post_event2(env, weak_thiz, msg.what, msg.arg1, msg.arg2, text);
+                J4A_DeleteLocalRef__p(env, &text);
+            } else {
+                post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
+            }
             break;
         case FFP_MSG_PREPARED:
             MPTRACE("FFP_MSG_PREPARED:\n");
@@ -963,7 +969,8 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
         case FFP_MSG_FIND_STREAM_INFO:
             MPTRACE("FFP_MSG_FIND_STREAM_INFO:\n");
             //post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_FIND_STREAM_INFO, 0);
-            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);break;
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
+            break;
         case FFP_MSG_COMPONENT_OPEN:
             MPTRACE("FFP_MSG_COMPONENT_OPEN:\n");
             //post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_COMPONENT_OPEN, 0);
