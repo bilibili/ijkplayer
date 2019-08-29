@@ -1,6 +1,10 @@
 tag next
 --------------------------------
 
+tag f0.3.6
+--------------------------------
+- ijkplayer: add ffp_reset, call ffp_reset in ijkmp_reset
+
 tag f0.3.5
 --------------------------------
 - fijkplayer: change to state error when notify error
