@@ -4004,6 +4004,38 @@ FFPlayer *ffp_create()
     return ffp;
 }
 
+void ffp_reset(FFPlayer *ffp)
+{
+    if (!ffp)
+        return;
+
+    ffp->start_time = AV_NOPTS_VALUE;
+    ffp->duration = AV_NOPTS_VALUE;
+    ffp->error = 0;
+    ffp->loop = 1;
+    ffp->first_audio_frame_rendered = 0;
+    ffp->first_video_frame_rendered = 0;
+    av_freep(&ffp->input_filename);
+
+    memset(ffp->wanted_stream_spec, 0, sizeof(ffp->wanted_stream_spec));
+
+
+    av_freep(&ffp->video_codec_info);
+    av_freep(&ffp->audio_codec_info);
+    av_freep(&ffp->subtitle_codec_info);
+
+    ijkmeta_reset(ffp->meta);
+
+    SDL_SpeedSamplerReset(&ffp->vfps_sampler);
+    SDL_SpeedSamplerReset(&ffp->vdps_sampler);
+
+    ffp_reset_statistic(&ffp->stat);
+    ffp_reset_demux_cache_control(&ffp->dcc);
+
+    //ffp_reset_internal(NULL);
+}
+
+
 void ffp_destroy(FFPlayer *ffp)
 {
     if (!ffp)
