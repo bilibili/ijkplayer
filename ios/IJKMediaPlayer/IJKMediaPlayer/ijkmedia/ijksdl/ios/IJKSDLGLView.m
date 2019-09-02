@@ -301,6 +301,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     NSLog(@"invalidateRenderBuffer\n");
     [self lockGLActive];
 
+    _isRenderBufferInvalidated = YES;
     if ([[NSThread currentThread] isMainThread]) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
             if (_isRenderBufferInvalidated)

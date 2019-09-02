@@ -214,6 +214,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         // init video sink
         _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        _glView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         _glView.isThirdGLView = NO;
         _view = _glView;
         _hudViewController = [[IJKSDLHudViewController alloc] init];
@@ -319,6 +320,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         self.shouldShowHudView = options.showHudView;
         glView.isThirdGLView = YES;
         _view = _glView = (IJKSDLGLView *)glView;
+        _glView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         _hudViewController = [[IJKSDLHudViewController alloc] init];
         [_hudViewController setRect:_glView.frame];
         _shouldShowHudView = NO;
