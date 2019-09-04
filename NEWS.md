@@ -3,6 +3,10 @@ tag next
 
 tag f0.3.6
 --------------------------------
+- ffmpeg: enable concat and crypto protocol
+
+tag f0.3.6
+--------------------------------
 - ijkplayer: add ffp_reset, call ffp_reset in ijkmp_reset
 
 tag f0.3.5
