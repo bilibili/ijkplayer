@@ -28,12 +28,6 @@
 #include "ijksdl/ios/ijksdl_ios.h"
 #include "ijksdl/ijksdl_gles2.h"
 
-typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
-    IJKSDLGLViewApplicationUnknownState = 0,
-    IJKSDLGLViewApplicationForegroundState = 1,
-    IJKSDLGLViewApplicationBackgroundState = 2
-};
-
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
 @property(atomic) BOOL glActivePaused;

@@ -1,8 +1,8 @@
 /*
- * IJKSDLGLView.h
+ * IJKSDLFboGLView.h
  *
  * Copyright (c) 2013 Bilibili
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2019 Befovy <befovy@gmail.com>
  *
  * based on https://github.com/kolyvan/kxmovie
  *
@@ -23,23 +23,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 #import "IJKSDLGLViewProtocol.h"
 
 #include "ijksdl/ijksdl_vout.h"
 
-typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
-    IJKSDLGLViewApplicationUnknownState = 0,
-    IJKSDLGLViewApplicationForegroundState = 1,
-    IJKSDLGLViewApplicationBackgroundState = 2
-};
+NS_ASSUME_NONNULL_BEGIN
 
-@interface IJKSDLGLView : UIView <IJKSDLGLViewProtocol>
+@interface IJKSDLFboGLView : NSObject<IJKSDLGLViewProtocol>
 
-- (id) initWithFrame:(CGRect)frame;
+- (instancetype)initWithIJKCVPBViewProtocol:(id<IJKCVPBViewProtocol>) cvPBView;
+
 - (void) display: (SDL_VoutOverlay *) overlay;
 
-- (UIImage*) snapshot;
-- (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhiteBeingMovedToWindow __attribute__((deprecated("unused")));
-
 @end
+
+NS_ASSUME_NONNULL_END

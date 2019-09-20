@@ -29,6 +29,7 @@
 #include "ijksdl/ffmpeg/ijksdl_vout_overlay_ffmpeg.h"
 #include "ijksdl_vout_overlay_videotoolbox.h"
 #import "IJKSDLGLView.h"
+#import "IJKSDLFboGLView.h"
 
 typedef struct SDL_VoutSurface_Opaque {
     SDL_Vout *vout;
@@ -37,6 +38,7 @@ typedef struct SDL_VoutSurface_Opaque {
 struct SDL_Vout_Opaque {
     id<IJKSDLGLViewProtocol> gl_viewp;
     IJKSDLGLView *gl_view;
+    IJKSDLFboGLView *fbo_viewl;
     BOOL response_display_pixels;
     BOOL third_part;
     int no_glview_warning;
@@ -122,6 +124,8 @@ static int vout_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         }
     } else if (opaque->gl_view){
         [opaque->gl_view display:overlay];
+    } else if (opaque->fbo_viewl) {
+        [opaque->fbo_viewl display:overlay];
     }
     return 0;
 }
@@ -176,6 +180,8 @@ static void SDL_VoutIos_SetGLView_l(SDL_Vout *vout, id<IJKSDLGLViewProtocol> vie
             opaque->response_display_pixels = YES;
         if ([opaque->gl_viewp isKindOfClass:[IJKSDLGLView class] ]){
             opaque->gl_view = (IJKSDLGLView *)opaque->gl_viewp;
+        } else if ([opaque->gl_viewp isKindOfClass:[IJKSDLFboGLView class] ]) {
+            opaque->fbo_viewl = (IJKSDLFboGLView *)opaque->gl_viewp;
         }
     }
 }

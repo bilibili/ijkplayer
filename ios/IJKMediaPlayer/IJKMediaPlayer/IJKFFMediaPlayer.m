@@ -27,6 +27,11 @@
 #import "IJKFFOptions.h"
 #import "ijkplayer/ijkplayer.h"
 
+typedef NS_ENUM(NSInteger, IJKSDLFFPlayrRenderType) {
+    IJKSDLFFPlayrRenderTypeGlView = 0,
+    IJKSDLFFPlayrRenderTypeFboView = 1,
+};
+
 
 @interface IJKFFWeakHolder : NSObject
 @property (nonatomic, weak) id object;
@@ -35,17 +40,16 @@
 @implementation IJKFFWeakHolder
 @end
 
-
 @implementation IJKFFMediaPlayer {
     IjkMediaPlayer* _nativeMediaPlayer;
     IJKFFMoviePlayerMessagePool *_msgPool;
 
     NSMutableSet<id<IJKMPEventHandler>> *_eventHandlers;
-    id<IJKCVPBViewProtocol> _cvPBView;
-
-    NSString *_dataSource;
-
+    
     CFDictionaryRef _optionsDictionary;
+    IJKSDLFboGLView* _fboView;
+    id<IJKCVPBViewProtocol> _cvPBView;
+    IJKSDLFFPlayrRenderType _renderType;
 }
 
 
@@ -92,24 +96,30 @@ int ff_media_player_msg_loop(void* arg)
 {
     self = [super init];
     if (self) {
-        ijkmp_global_init();
-        _msgPool = [[IJKFFMoviePlayerMessagePool alloc] init];
-        _eventHandlers = [[NSMutableSet alloc] init];
-        [self nativeSetup];
-        
-        ijkmp_set_option(_nativeMediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", "fcc-_es2");
-        
-        [[IJKAudioKit sharedInstance] setupAudioSession];
-        _optionsDictionary = nil;
-        _isThirdGLView = true;
-        _scaleFactor = 1.0f;
-        _fps = 1.0f;
+        _renderType = IJKSDLFFPlayrRenderTypeGlView;
+         [self nativeSetup];
     }
     return self;
 }
 
+- (instancetype)initWithFbo
+{
+    self = [super init];
+    if (self) {
+        _renderType = IJKSDLFFPlayrRenderTypeFboView;
+        [self nativeSetup];
+    }
+    return self;
+}
+
+
 - (void) nativeSetup
 {
+    ijkmp_global_init();
+    _msgPool = [[IJKFFMoviePlayerMessagePool alloc] init];
+    _eventHandlers = [[NSMutableSet alloc] init];
+    ijkmp_set_option(_nativeMediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "overlay-format", "fcc-_es2");
+    
     _nativeMediaPlayer = ijkmp_ios_create(ff_media_player_msg_loop);
     
     IJKFFWeakHolder *weakHolder = [[IJKFFWeakHolder alloc] init];
@@ -118,6 +128,13 @@ int ff_media_player_msg_loop(void* arg)
     ijkmp_set_weak_thiz(_nativeMediaPlayer, (__bridge_retained void *) self);
     ijkmp_set_inject_opaque(_nativeMediaPlayer, (__bridge_retained void *) weakHolder);
     ijkmp_set_ijkio_inject_opaque(_nativeMediaPlayer, (__bridge_retained void *) weakHolder);
+    
+    [[IJKAudioKit sharedInstance] setupAudioSession];
+    _optionsDictionary = nil;
+    _isThirdGLView = true;
+    _scaleFactor = 1.0f;
+    _fps = 1.0f;
+
 }
 
 - (void)postEvent: (IJKFFMoviePlayerMessage *)msg
@@ -139,7 +156,6 @@ int ff_media_player_msg_loop(void* arg)
 
 - (int) setDataSource:(NSString *)url
 {
-    _dataSource = url;
     return ijkmp_set_data_source(_nativeMediaPlayer, [url UTF8String]);
 }
 
@@ -237,6 +253,9 @@ int ff_media_player_msg_loop(void* arg)
 
     [_eventHandlers removeAllObjects];
     ijkmp_dec_ref_p(&_nativeMediaPlayer);
+    
+    _cvPBView = nil;
+    _fboView = nil;
 }
 
 - (int) reset
@@ -262,7 +281,6 @@ int ff_media_player_msg_loop(void* arg)
 }
 
 
-
 - (void) addIJKMPEventHandler:(id<IJKMPEventHandler>) handler
 {
     [_eventHandlers addObject:handler];
@@ -273,6 +291,36 @@ int ff_media_player_msg_loop(void* arg)
     [_eventHandlers removeObject:handler];
 }
 
+
+
+- (UIImage *)snapshot {
+    return nil;
+}
+
+- (void) setupCVPixelBufferView:(id<IJKCVPBViewProtocol>) cvPBView
+{
+    _cvPBView = cvPBView;
+    
+    if (_renderType == IJKSDLFFPlayrRenderTypeFboView) {
+        _fboView = [[IJKSDLFboGLView alloc] initWithIJKCVPBViewProtocol:self];
+        ijkmp_ios_set_glview(_nativeMediaPlayer, _fboView);
+    } else if (_renderType == IJKSDLFFPlayrRenderTypeGlView) {
+        const void *keys[] = {
+            kCVPixelBufferOpenGLESCompatibilityKey,
+            kCVPixelBufferIOSurfacePropertiesKey,
+        };
+        const void *values[] = {
+            (__bridge const void *) (@YES),
+            (__bridge const void *) ([NSDictionary dictionary]),
+        };
+        
+        _optionsDictionary = CFDictionaryCreate(kCFAllocatorDefault, keys, values, 2,
+                                                &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        ijkmp_ios_set_glview(_nativeMediaPlayer, self);
+    }
+}
+
+// IJKSDL GLview call this when display frame
 - (void) display_pixels:(IJKOverlay *)overlay
 {
     if (overlay->pixel_buffer != nil && _cvPBView != nil) {
@@ -283,15 +331,15 @@ int ff_media_player_msg_loop(void* arg)
         // CVPixelBufferCreateWithBytes lead to crash if reset player
         // and then setDataSource and play again.
         /*
-        int retval = CVPixelBufferCreateWithBytes(
-                                            kCFAllocatorDefault,
-                                            (size_t) overlay->w,
-                                            (size_t) overlay->h,
-                                            kCVPixelFormatType_32BGRA,
-                                            overlay->pixels[0],
-                                            overlay->pitches[0],
-                                            NULL, NULL, _optionsDictionary,
-                                            &pixelBuffer);
+         int retval = CVPixelBufferCreateWithBytes(
+         kCFAllocatorDefault,
+         (size_t) overlay->w,
+         (size_t) overlay->h,
+         kCVPixelFormatType_32BGRA,
+         overlay->pixels[0],
+         overlay->pitches[0],
+         NULL, NULL, _optionsDictionary,
+         &pixelBuffer);
          */
         int retval = CVPixelBufferCreate(kCFAllocatorDefault,
                                          (size_t) overlay->w,
@@ -310,27 +358,12 @@ int ff_media_player_msg_loop(void* arg)
     }
 }
 
-- (void) setupCVPixelBufferView:(id<IJKCVPBViewProtocol>) cvPBView
-{
-    _cvPBView = cvPBView;
-    
-    const void *keys[] = {
-        kCVPixelBufferOpenGLESCompatibilityKey,
-        kCVPixelBufferIOSurfacePropertiesKey,
-    };
-    const void *values[] = {
-        (__bridge const void *) (@YES),
-        (__bridge const void *) ([NSDictionary dictionary]),
-    };
-    
-    _optionsDictionary = CFDictionaryCreate(kCFAllocatorDefault, keys, values, 2,
-                                            &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    ijkmp_ios_set_glview(_nativeMediaPlayer, self);
-}
 
-- (UIImage *)snapshot
-{
-    return nil;
+// IJKSDL Fbo view call this delegate when display frame
+- (void)display_pixelbuffer:(CVPixelBufferRef)pixelbuffer {
+    if (_cvPBView) {
+        [_cvPBView display_pixelbuffer:pixelbuffer];
+    }
 }
 
 @end
