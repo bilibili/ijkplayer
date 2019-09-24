@@ -52,10 +52,10 @@ typedef NS_ENUM(NSInteger, IJKMPEventType) {
 
 @end
 
-@interface IJKFFMediaPlayer : NSObject<IJKSDLGLViewProtocol>
+@interface IJKFFMediaPlayer : NSObject<IJKCVPBViewProtocol, IJKSDLGLViewProtocol>
 
-- (IJKFFMediaPlayer *)init;
-
+- (instancetype)init;
+- (instancetype)initWithFbo;
 - (int) setDataSource:(NSString *)url;
 - (int) prepareAsync;
 - (int) start;

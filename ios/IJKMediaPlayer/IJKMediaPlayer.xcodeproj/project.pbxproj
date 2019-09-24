@@ -13,6 +13,12 @@
 		215FF44E22B7E83500FAAD0E /* IJKFFMediaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 215FF44A22B7E83500FAAD0E /* IJKFFMediaPlayer.m */; };
 		215FF44F22B7E83500FAAD0E /* IJKFFMediaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 215FF44A22B7E83500FAAD0E /* IJKFFMediaPlayer.m */; };
 		217D1C5122C4567C0046FB63 /* FIJKPlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 217D1C4F22C4567C0046FB63 /* FIJKPlayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		21B62DA12334C3FA005E1C40 /* IJKSDLFboGLView.h in Headers */ = {isa = PBXBuildFile; fileRef = 21B62D9F2334C3FA005E1C40 /* IJKSDLFboGLView.h */; };
+		21B62DA22334C3FA005E1C40 /* IJKSDLFboGLView.h in Headers */ = {isa = PBXBuildFile; fileRef = 21B62D9F2334C3FA005E1C40 /* IJKSDLFboGLView.h */; };
+		21B62DA32334C3FA005E1C40 /* IJKSDLFboGLView.h in Headers */ = {isa = PBXBuildFile; fileRef = 21B62D9F2334C3FA005E1C40 /* IJKSDLFboGLView.h */; };
+		21B62DA42334C3FA005E1C40 /* IJKSDLFboGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B62DA02334C3FA005E1C40 /* IJKSDLFboGLView.m */; };
+		21B62DA52334C3FA005E1C40 /* IJKSDLFboGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B62DA02334C3FA005E1C40 /* IJKSDLFboGLView.m */; };
+		21B62DA62334C3FA005E1C40 /* IJKSDLFboGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B62DA02334C3FA005E1C40 /* IJKSDLFboGLView.m */; };
 		21DAA1592298FEBB007B0784 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5450AF8B1E63E59300568494 /* libcrypto.a */; };
 		21DAA15A2298FEBE007B0784 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5450AF8C1E63E59300568494 /* libssl.a */; };
 		21DAA15B2298FEC7007B0784 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 5450AF8F1E63E59800568494 /* libz.tbd */; };
@@ -414,6 +420,8 @@
 		217D1C4F22C4567C0046FB63 /* FIJKPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FIJKPlayer.h; sourceTree = "<group>"; };
 		217D1C5022C4567C0046FB63 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		217D1C5322C457720046FB63 /* universal-framework.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "universal-framework.sh"; sourceTree = SOURCE_ROOT; };
+		21B62D9F2334C3FA005E1C40 /* IJKSDLFboGLView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IJKSDLFboGLView.h; sourceTree = "<group>"; };
+		21B62DA02334C3FA005E1C40 /* IJKSDLFboGLView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IJKSDLFboGLView.m; sourceTree = "<group>"; };
 		21DAA15C2298FED6007B0784 /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
 		21E6F50322C39D0500611D3D /* FIJKPlayer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FIJKPlayer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		454316201A66493700676070 /* ffpipeline_ios.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ffpipeline_ios.c; path = ijkmedia/ijkplayer/ios/pipeline/ffpipeline_ios.c; sourceTree = "<group>"; };
@@ -1096,6 +1104,8 @@
 				E6EE92C01878236A009EAB56 /* IJKSDLAudioQueueController.h */,
 				E6EE92C11878236A009EAB56 /* IJKSDLAudioQueueController.m */,
 				E6EE92AD1878230C009EAB56 /* IJKSDLAudioUnitController.h */,
+				21B62D9F2334C3FA005E1C40 /* IJKSDLFboGLView.h */,
+				21B62DA02334C3FA005E1C40 /* IJKSDLFboGLView.m */,
 				E6EE92AE1878230C009EAB56 /* IJKSDLAudioUnitController.m */,
 				E6EE92B61878230C009EAB56 /* IJKSDLGLView.h */,
 				E6EE92B71878230C009EAB56 /* IJKSDLGLView.m */,
@@ -1153,6 +1163,7 @@
 				21E6F4E722C39D0500611D3D /* IJKFFMediaPlayer.h in Headers */,
 				21E6F4E822C39D0500611D3D /* ff_ffplay_options.h in Headers */,
 				21E6F4EA22C39D0500611D3D /* IJKKVOController.h in Headers */,
+				21B62DA32334C3FA005E1C40 /* IJKSDLFboGLView.h in Headers */,
 				21E6F4EB22C39D0500611D3D /* IJKNotificationManager.h in Headers */,
 				21E6F4EC22C39D0500611D3D /* ijkthreadpool.h in Headers */,
 				21E6F4ED22C39D0500611D3D /* ijkiomanager.h in Headers */,
@@ -1194,6 +1205,7 @@
 				549385C41E640456001AE08D /* IJKMediaFrameworkWithSSL.h in Headers */,
 				5450B0291E63EA4300568494 /* ff_ffplay_options.h in Headers */,
 				5450B02B1E63EA4300568494 /* IJKKVOController.h in Headers */,
+				21B62DA22334C3FA005E1C40 /* IJKSDLFboGLView.h in Headers */,
 				5450B02C1E63EA4300568494 /* IJKNotificationManager.h in Headers */,
 				5450B02D1E63EA4300568494 /* ijkthreadpool.h in Headers */,
 				5450B02E1E63EA4300568494 /* ijkiomanager.h in Headers */,
@@ -1235,6 +1247,7 @@
 				E6C459BD1C7089AB004831EC /* ff_ffplay_options.h in Headers */,
 				E654EA8F1B6B27E600B0F2D0 /* IJKMediaFramework.h in Headers */,
 				E6C2E7BE1C92BD3600E59229 /* IJKKVOController.h in Headers */,
+				21B62DA12334C3FA005E1C40 /* IJKSDLFboGLView.h in Headers */,
 				E69808A01C7EB2040048A46C /* IJKNotificationManager.h in Headers */,
 				54CF8A501E15287D00309DD5 /* ijkthreadpool.h in Headers */,
 				54CF8A391E1526F800309DD5 /* ijkiomanager.h in Headers */,
@@ -1492,6 +1505,7 @@
 				21E6F49722C39D0500611D3D /* ijksegment.c in Sources */,
 				21E6F49822C39D0500611D3D /* IJKMediaUtils.m in Sources */,
 				21E6F49922C39D0500611D3D /* common.c in Sources */,
+				21B62DA62334C3FA005E1C40 /* IJKSDLFboGLView.m in Sources */,
 				21E6F49A22C39D0500611D3D /* ijksdl_aout_ios_audiounit.m in Sources */,
 				21E6F49B22C39D0500611D3D /* ijklivehook.c in Sources */,
 				21E6F49C22C39D0500611D3D /* ijkurlhook.c in Sources */,
@@ -1584,6 +1598,7 @@
 				5450AFDF1E63EA4300568494 /* ijksegment.c in Sources */,
 				5450AFE01E63EA4300568494 /* IJKMediaUtils.m in Sources */,
 				5450AFE11E63EA4300568494 /* common.c in Sources */,
+				21B62DA52334C3FA005E1C40 /* IJKSDLFboGLView.m in Sources */,
 				5450AFE21E63EA4300568494 /* ijksdl_aout_ios_audiounit.m in Sources */,
 				5450AFE31E63EA4300568494 /* ijklivehook.c in Sources */,
 				5450AFE41E63EA4300568494 /* ijkurlhook.c in Sources */,
@@ -1676,6 +1691,7 @@
 				54A029B91D4700E6001C61C1 /* ijksegment.c in Sources */,
 				E654EAA61B6B283700B0F2D0 /* IJKMediaUtils.m in Sources */,
 				E6C459931C7030B6004831EC /* common.c in Sources */,
+				21B62DA42334C3FA005E1C40 /* IJKSDLFboGLView.m in Sources */,
 				E654EAC81B6B288A00B0F2D0 /* ijksdl_aout_ios_audiounit.m in Sources */,
 				E69BE5721B946FF600AFBA3F /* ijklivehook.c in Sources */,
 				54A029BA1D4700E6001C61C1 /* ijkurlhook.c in Sources */,

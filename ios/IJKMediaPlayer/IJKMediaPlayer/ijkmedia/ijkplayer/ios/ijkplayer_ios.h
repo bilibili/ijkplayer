@@ -23,6 +23,7 @@
 
 #include "ijkplayer/ijkplayer.h"
 #import "IJKSDLGLView.h"
+#import "IJKSDLFboGLView.h"
 
 // ref_count is 1 after open
 IjkMediaPlayer *ijkmp_ios_create(int (*msg_loop)(void*));
