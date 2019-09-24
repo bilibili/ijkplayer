@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "FIJKPlayer"
-  spec.version      = "0.3.7"
+  spec.version      = "0.3.8"
   spec.summary      = "ijkplayer iOS video player SDK"
 
   spec.author       = { "befovy" => "befovy@gmail.com" }
@@ -75,7 +75,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/f0.3.7/FIJKPlayer.tar.gz" }
+  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/f0.3.8/FIJKPlayer.tar.gz" }
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
   #  CocoaPods is smart about how it includes source code. For source files
