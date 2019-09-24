@@ -3333,7 +3333,8 @@ static int read_thread(void *arg)
     ffp->prepared = true;
     ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
     if (!ffp->render_wait_start && !ffp->start_on_prepared) {
-        while (is->pause_req && !is->abort_request) {
+        while (is->pause_req && !is->abort_request &&
+            !ffp->render_wait_start && !ffp->start_on_prepared) {
             SDL_Delay(20);
         }
     }
