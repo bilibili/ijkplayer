@@ -1,5 +1,5 @@
 /*
- * FIJKPlayer.h
+ * IJKPlayer.h
  *
  * Copyright (c) 2019 Befovy <befovy@gmail.com>
  *
@@ -23,23 +23,23 @@
 #import <UIKit/UIKit.h>
 
 //! Project version number for FIJKPlayer.
-FOUNDATION_EXPORT double FIJKPlayerVersionNumber;
+FOUNDATION_EXPORT double IJKPlayerVersionNumber;
 
 //! Project version string for FIJKPlayer.
-FOUNDATION_EXPORT const unsigned char FIJKPlayerVersionString[];
+FOUNDATION_EXPORT const unsigned char IJKPlayerVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <FIJKPlayer/PublicHeader.h>
-#import <FIJKPlayer/IJKMediaPlayback.h>
-#import <FIJKPlayer/IJKMPMoviePlayerController.h>
-#import <FIJKPlayer/IJKFFOptions.h>
-#import <FIJKPlayer/IJKFFMediaPlayer.h>
-#import <FIJKPlayer/IJKFFMoviePlayerController.h>
-#import <FIJKPlayer/IJKAVMoviePlayerController.h>
-#import <FIJKPlayer/IJKMediaModule.h>
-#import <FIJKPlayer/IJKMediaPlayer.h>
-#import <FIJKPlayer/IJKNotificationManager.h>
-#import <FIJKPlayer/IJKKVOController.h>
-#import <FIJKPlayer/IJKSDLGLViewProtocol.h>
+#import <IJKPlayer/IJKMediaPlayback.h>
+#import <IJKPlayer/IJKMPMoviePlayerController.h>
+#import <IJKPlayer/IJKFFOptions.h>
+#import <IJKPlayer/IJKFFMediaPlayer.h>
+#import <IJKPlayer/IJKFFMoviePlayerController.h>
+#import <IJKPlayer/IJKAVMoviePlayerController.h>
+#import <IJKPlayer/IJKMediaModule.h>
+#import <IJKPlayer/IJKMediaPlayer.h>
+#import <IJKPlayer/IJKNotificationManager.h>
+#import <IJKPlayer/IJKKVOController.h>
+#import <IJKPlayer/IJKSDLGLViewProtocol.h>
 
 // backward compatible for old names
 #define IJKMediaPlaybackIsPreparedToPlayDidChangeNotification IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification
