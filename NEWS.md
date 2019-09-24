@@ -1,7 +1,11 @@
 tag next
 --------------------------------
+tag f0.3.8
+--------------------------------
+- ijkplayer: ios vout add render to pixelbuffer, off screen buffer
+- android: add FileMediaDataSource StreamDataSource
 
-tag f0.3.6
+tag f0.3.7
 --------------------------------
 - ffmpeg: enable concat and crypto protocol
 
