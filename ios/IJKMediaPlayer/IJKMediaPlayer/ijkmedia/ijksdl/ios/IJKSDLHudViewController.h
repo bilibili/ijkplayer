@@ -6,6 +6,7 @@
 //  Copyright © 2015年 bilibili. All rights reserved.
 //
 
+#ifndef IJK_OSX
 #import <UIKit/UIKit.h>
 
 @interface IJKSDLHudViewController : UITableViewController
@@ -16,3 +17,4 @@
 
 - (void)setRect:(CGRect) rect;
 @end
+#endif

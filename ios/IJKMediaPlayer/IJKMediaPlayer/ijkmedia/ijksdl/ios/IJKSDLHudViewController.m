@@ -6,6 +6,7 @@
 //  Copyright © 2015年 bilibili. All rights reserved.
 //
 
+#ifndef IJK_OSX
 #import "IJKSDLHudViewController.h"
 #import "IJKSDLHudViewCell.h"
 
@@ -111,3 +112,4 @@
 }
 
 @end
+#endif
