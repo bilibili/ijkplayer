@@ -75,7 +75,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/f0.3.8/FIJKPlayer.tar.gz" }
+  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/f0.3.8/IJKPlayer.tar.gz" }
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
   #  CocoaPods is smart about how it includes source code. For source files
@@ -84,12 +84,8 @@ Pod::Spec.new do |spec|
   #  Not including the public_header_files will make all headers public.
   #
 
-  # spec.source_files  = "Classes", "Classes/**/*.{h,m}"
-  # spec.exclude_files = "Classes/Exclude"
-  spec.vendored_frameworks = 'FIJKPlayer.framework'
-  # spec.resource = 'FIJKPlayer.framework'
-  
-  # spec.public_header_files = "Classes/**/*.h"
+  spec.vendored_frameworks = 'IJKPlayer.framework'
+  #spec.public_header_files = "IJKPlayer.framework/Headers/*.h"
 
 
   # ――― Resources ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -117,7 +113,7 @@ Pod::Spec.new do |spec|
   spec.requires_arc = true
 
   spec.prepare_command = <<-CMD
-    tar -xvf ./FIJKPlayer.tar.xz
+    tar -xvf ./IJKPlayer.tar.xz
   CMD
 
   # spec.library   = "iconv"
