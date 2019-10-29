@@ -820,6 +820,8 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     int64_t bps = ijkmp_read_total_bytes(_mediaPlayer) * 8;
     [_glView setHudValue:[NSString stringWithFormat:@"%lld", bps] forKey:@"bitrate"];
     
+    [_glView setHudValue:[NSString stringWithFormat:@"%d x %d", (int)(_naturalSize.width), (int)(_naturalSize.height)] forKey:@"resolution"];
+    
     int64_t vcacheb = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_VIDEO_CACHED_BYTES, 0);
     int64_t acacheb = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_AUDIO_CACHED_BYTES, 0);
     int64_t vcached = ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_VIDEO_CACHED_DURATION, 0);
