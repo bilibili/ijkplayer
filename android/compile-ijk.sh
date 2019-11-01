@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-if [ -z "$ANDROID_NDK" -o -z "$ANDROID_NDK" ]; then
+if [ -z "$ANDROID_SDK" -o -z "$ANDROID_NDK" ]; then
     echo "You must define ANDROID_NDK, ANDROID_SDK before starting."
     echo "They must point to your NDK and SDK directories.\n"
     exit 1
