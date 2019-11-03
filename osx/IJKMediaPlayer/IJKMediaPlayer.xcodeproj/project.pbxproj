@@ -117,6 +117,8 @@
 		21414F02236B35BA00F60AE3 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21414EFC236B35BA00F60AE3 /* libswscale.a */; };
 		21414F58236B3CCF00F60AE3 /* IJKFFMediaPlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 21414F56236B3CCF00F60AE3 /* IJKFFMediaPlayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		21414F59236B3CCF00F60AE3 /* IJKFFMediaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 21414F57236B3CCF00F60AE3 /* IJKFFMediaPlayer.m */; };
+		21414F60236BE0C400F60AE3 /* IJKFFCMediaPlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 21414F5E236BE0C400F60AE3 /* IJKFFCMediaPlayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		21414F61236BE0C400F60AE3 /* IJKFFCMediaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 21414F5F236BE0C400F60AE3 /* IJKFFCMediaPlayer.m */; };
 		21C8495F23619A810028AC95 /* ijksdl_mutex.h in Headers */ = {isa = PBXBuildFile; fileRef = 21C8493F23619A800028AC95 /* ijksdl_mutex.h */; };
 		21C8496023619A810028AC95 /* ijksdl_aout.c in Sources */ = {isa = PBXBuildFile; fileRef = 21C8494023619A800028AC95 /* ijksdl_aout.c */; };
 		21C8496123619A810028AC95 /* ijksdl_log.h in Headers */ = {isa = PBXBuildFile; fileRef = 21C8494123619A800028AC95 /* ijksdl_log.h */; };
@@ -299,6 +301,8 @@
 		21414EFC236B35BA00F60AE3 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = "../contrib/build/ffmpeg-x86_64/output/lib/libswscale.a"; sourceTree = "<group>"; };
 		21414F56236B3CCF00F60AE3 /* IJKFFMediaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IJKFFMediaPlayer.h; path = ../../../ios/IJKMediaPlayer/IJKMediaPlayer/IJKFFMediaPlayer.h; sourceTree = "<group>"; };
 		21414F57236B3CCF00F60AE3 /* IJKFFMediaPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IJKFFMediaPlayer.m; path = ../../../ios/IJKMediaPlayer/IJKMediaPlayer/IJKFFMediaPlayer.m; sourceTree = "<group>"; };
+		21414F5E236BE0C400F60AE3 /* IJKFFCMediaPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IJKFFCMediaPlayer.h; sourceTree = "<group>"; };
+		21414F5F236BE0C400F60AE3 /* IJKFFCMediaPlayer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IJKFFCMediaPlayer.m; sourceTree = "<group>"; };
 		21C8493F23619A800028AC95 /* ijksdl_mutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ijksdl_mutex.h; path = ../../ijkmedia/ijksdl/ijksdl_mutex.h; sourceTree = "<group>"; };
 		21C8494023619A800028AC95 /* ijksdl_aout.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ijksdl_aout.c; path = ../../ijkmedia/ijksdl/ijksdl_aout.c; sourceTree = "<group>"; };
 		21C8494123619A800028AC95 /* ijksdl_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ijksdl_log.h; path = ../../ijkmedia/ijksdl/ijksdl_log.h; sourceTree = "<group>"; };
@@ -411,6 +415,8 @@
 				21287EEE22E8A989008BF595 /* IJKDeviceModel.m */,
 				21287EF422E8A989008BF595 /* IJKFFMonitor.h */,
 				21287EEB22E8A988008BF595 /* IJKFFMonitor.m */,
+				21414F5E236BE0C400F60AE3 /* IJKFFCMediaPlayer.h */,
+				21414F5F236BE0C400F60AE3 /* IJKFFCMediaPlayer.m */,
 				21414F56236B3CCF00F60AE3 /* IJKFFMediaPlayer.h */,
 				21414F57236B3CCF00F60AE3 /* IJKFFMediaPlayer.m */,
 				21287EF222E8A989008BF595 /* IJKFFMoviePlayerController.h */,
@@ -708,6 +714,7 @@
 				21287F0622E8A989008BF595 /* IJKFFMoviePlayerController.h in Headers */,
 				21287F0822E8A989008BF595 /* IJKFFMonitor.h in Headers */,
 				21287F0322E8A989008BF595 /* IJKFFOptions.h in Headers */,
+				21414F60236BE0C400F60AE3 /* IJKFFCMediaPlayer.h in Headers */,
 				21287EE622E8A971008BF595 /* IJKMediaPlayback.h in Headers */,
 				21414E9E236B327200F60AE3 /* ijkiomanager.h in Headers */,
 				21414E88236B326600F60AE3 /* ijkplayer_internal.h in Headers */,
@@ -951,6 +958,7 @@
 				21C8496923619A810028AC95 /* ijksdl_mutex.c in Sources */,
 				21287EFF22E8A989008BF595 /* IJKFFMonitor.m in Sources */,
 				21287EFB22E8A989008BF595 /* IJKFFOptions.m in Sources */,
+				21414F61236BE0C400F60AE3 /* IJKFFCMediaPlayer.m in Sources */,
 				21287F0222E8A989008BF595 /* IJKDeviceModel.m in Sources */,
 				21414EAE236B327200F60AE3 /* ijkio.c in Sources */,
 				21414EC5236B327C00F60AE3 /* ijkdict.c in Sources */,

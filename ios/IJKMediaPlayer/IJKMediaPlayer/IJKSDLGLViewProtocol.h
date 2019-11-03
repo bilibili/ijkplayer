@@ -46,14 +46,18 @@ struct IJKOverlay {
 @protocol IJKSDLGLViewProtocol <NSObject>
 
 #if IJK_OSX
+@optional
 - (NSImage*) snapshot;
 #else
+@optional
 - (UIImage*) snapshot;
 #endif
 
 @property(nonatomic, readonly) CGFloat  fps;
 @property(nonatomic)        CGFloat  scaleFactor;
 @property(nonatomic)        BOOL  isThirdGLView;
+
+@required
 - (void) display_pixels: (IJKOverlay *) overlay;
 @end
 

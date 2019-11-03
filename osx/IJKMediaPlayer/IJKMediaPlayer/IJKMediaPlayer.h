@@ -2,7 +2,7 @@
 //  IJKMediaPlayer.h
 //  IJKMediaPlayer
 //
-//  Created by Bai Shuai on 2019/7/24.
+//  Created by befovy on 2019/7/24.
 //  Copyright © 2019 befovy. All rights reserved.
 //
 
