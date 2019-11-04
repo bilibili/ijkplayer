@@ -560,6 +560,10 @@ static VTDecompressionSessionRef vtbsession_create(Ijk_VideoToolBox_Opaque* cont
         CFDictionarySetSInt32(destinationPixelBufferAttributes,
                               kCVPixelBufferPixelFormatTypeKey, kCVPixelFormatType_32BGRA);
         context->required_format_type = kCVPixelFormatType_32BGRA;
+    } else if (ffp->overlay_format == SDL_FCC_RGBA) {
+        CFDictionarySetSInt32(destinationPixelBufferAttributes,
+                              kCVPixelBufferPixelFormatTypeKey, kCVPixelFormatType_32RGBA);
+        context->required_format_type = kCVPixelFormatType_32RGBA;
     } else {
         CFDictionarySetSInt32(destinationPixelBufferAttributes,
                               kCVPixelBufferPixelFormatTypeKey, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange);
