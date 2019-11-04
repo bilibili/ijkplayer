@@ -109,7 +109,7 @@ static int vout_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 
     if (opaque->third_part) {
         IJKOverlay ijk_overlay;
-
+        memset(&ijk_overlay, 0, sizeof(IJKOverlay));
         ijk_overlay.w = overlay->w;
         ijk_overlay.h = overlay->h;
         ijk_overlay.format = overlay->format;
