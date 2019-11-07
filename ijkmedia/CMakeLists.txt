@@ -24,6 +24,10 @@ if (NOT DEFINED FIJKROOT_PATH)
     set(FIJKROOT_PATH ${CMAKE_CURRENT_LIST_DIR}/../)
 endif ()
 
+if(IJK_DESKTOP_MWL)
+    add_subdirectory(portaudio)
+endif()
+
 add_subdirectory(ijksdl)
 add_subdirectory(ijkplayer)
 

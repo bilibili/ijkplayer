@@ -54,33 +54,33 @@ set(ANDROID_CONTRIB_PATH ${FIJKROOT_PATH}/android/contrib/build)
 message(STATUS "ANDROID_CONTRIB_PATH:${ANDROID_CONTRIB_PATH}")
 
 if (${ANDROID_ABI} STREQUAL "arm64-v8a")
-    set(FFMPAG_SHARED_DIR ${ANDROID_CONTRIB_PATH}/ffmpeg-arm64/output)
+    set(IJK_FFMPAG_BUILD_DIR ${ANDROID_CONTRIB_PATH}/ffmpeg-arm64/output)
 elseif (${ANDROID_ABI} STREQUAL "armeabi-v7a")
-    set(FFMPAG_SHARED_DIR ${ANDROID_CONTRIB_PATH}/ffmpeg-armv7a/output)
+    set(IJK_FFMPAG_BUILD_DIR ${ANDROID_CONTRIB_PATH}/ffmpeg-armv7a/output)
 elseif (${ANDROID_ABI} STREQUAL "armeabi")
-    set(FFMPAG_SHARED_DIR ${ANDROID_CONTRIB_PATH}/ffmpeg-armv5/output)
+    set(IJK_FFMPAG_BUILD_DIR ${ANDROID_CONTRIB_PATH}/ffmpeg-armv5/output)
 elseif (${ANDROID_ABI} STREQUAL "x86")
-    set(FFMPAG_SHARED_DIR ${ANDROID_CONTRIB_PATH}/ffmpeg-x86/output)
+    set(IJK_FFMPAG_BUILD_DIR ${ANDROID_CONTRIB_PATH}/ffmpeg-x86/output)
 elseif (${ANDROID_ABI} STREQUAL "x86_64")
-    set(FFMPAG_SHARED_DIR ${ANDROID_CONTRIB_PATH}/ffmpeg-x86_64/output)
+    set(IJK_FFMPAG_BUILD_DIR ${ANDROID_CONTRIB_PATH}/ffmpeg-x86_64/output)
 endif ()
 
-if (NOT DEFINED FFMPAG_SHARED_DIR)
-    message(FATAL_ERROR "Can not find ffmpeg build output: ${FFMPAG_SHARED_DIR}")
+if (NOT DEFINED IJK_FFMPAG_BUILD_DIR)
+    message(FATAL_ERROR "Can not find ffmpeg build output: ${IJK_FFMPAG_BUILD_DIR}")
 else ()
-    message(STATUS "FFMPAG_SHARED_DIR:${FFMPAG_SHARED_DIR}")
+    message(STATUS "IJK_FFMPAG_BUILD_DIR:${IJK_FFMPAG_BUILD_DIR}")
 endif ()
 
 add_library(ijkffmpeg SHARED IMPORTED)
 set_target_properties( # Specifies the target library.
     ijkffmpeg
     PROPERTIES
-    IMPORTED_LOCATION ${FFMPAG_SHARED_DIR}/libijkffmpeg.so
+    IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/libijkffmpeg.so
 )
 
 add_custom_target(cpffmpeg
     COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-    COMMAND cp ${FFMPAG_SHARED_DIR}/libijkffmpeg.so ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+    COMMAND cp ${IJK_FFMPAG_BUILD_DIR}/libijkffmpeg.so ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 
 add_dependencies(ijkffmpeg cpffmpeg)

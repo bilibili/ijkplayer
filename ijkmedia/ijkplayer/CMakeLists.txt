@@ -97,16 +97,24 @@ if (ANDROID)
 endif ()
 
 
-add_library(ijkplayer SHARED ${BUILD_SOURCES})
-
+if (IJK_DESKTOP_MWL)
+    add_library(ijkplayer STATIC ${BUILD_SOURCES})
+else ()
+    add_library(ijkplayer SHARED ${BUILD_SOURCES})
+endif ()
 
 target_include_directories(ijkplayer PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 target_include_directories(ijkplayer PRIVATE ${CMAKE_CURRENT_LIST_DIR}/..)
-target_include_directories(ijkplayer PRIVATE ${FFMPAG_SHARED_DIR}/include)
+target_include_directories(ijkplayer PRIVATE ${IJK_FFMPAG_BUILD_DIR}/include)
+
 target_include_directories(ijkplayer PRIVATE ijkavformat)
 target_include_directories(ijkplayer PRIVATE ijkavutil)
 target_include_directories(ijkplayer PRIVATE pipeline)
 target_include_directories(ijkplayer PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../ijkj4a)
+
+if (WIN32)
+    target_include_directories(ijkplayer PRIVATE "${IJK_DESKTOP_PTHREAD_BUILD_DIR}/../../include")
+endif()
 
 target_link_libraries(ijkplayer ijksdl)
 
@@ -118,8 +126,9 @@ if (ANDROID)
     target_link_libraries(ijkplayer android)
 endif ()
 
-
-add_custom_command(TARGET ijkplayer
-    PRE_BUILD
-    COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/version.sh ${CMAKE_CURRENT_LIST_DIR} ijkversion.h
-)
+if (NOT WIN32)
+    add_custom_command(TARGET ijkplayer
+        PRE_BUILD
+        COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/version.sh ${CMAKE_CURRENT_LIST_DIR} ijkversion.h
+    )
+endif()

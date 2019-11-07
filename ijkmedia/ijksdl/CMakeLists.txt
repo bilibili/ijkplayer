@@ -101,14 +101,21 @@ if (ANDROID)
     set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_ANDROID_EXTRA_SOURCES} ${GLES2_SOURCES})
 endif ()
 
-add_library(ijksdl SHARED ${IJK_SDL_SOURCES})
+if (IJK_DESKTOP_MWL)
+    add_library(ijksdl STATIC ${IJK_SDL_SOURCES})
+else ()
+    add_library(ijksdl SHARED ${IJK_SDL_SOURCES})
+endif ()
 
 target_include_directories(ijksdl PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 target_include_directories(ijksdl PRIVATE ${CMAKE_CURRENT_LIST_DIR}/..)
 
+if (WIN32)
+    target_include_directories(ijksdl PRIVATE "${IJK_DESKTOP_PTHREAD_BUILD_DIR}/../../include")
+endif()
 
 #include ffmpeg header files
-target_include_directories(ijksdl PRIVATE ${FFMPAG_SHARED_DIR}/include)
+target_include_directories(ijksdl PRIVATE ${IJK_FFMPAG_BUILD_DIR}/include)
 
 if (ANDROID)
     # build cpufeatures as a static lib

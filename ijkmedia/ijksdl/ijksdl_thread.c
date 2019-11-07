@@ -24,7 +24,9 @@
 
 #include <errno.h>
 #include <assert.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include "ijksdl_inc_internal.h"
 #include "ijksdl_thread.h"
 #ifdef __ANDROID__

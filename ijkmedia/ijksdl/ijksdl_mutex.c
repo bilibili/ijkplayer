@@ -25,7 +25,12 @@
 #include "ijksdl_mutex.h"
 #include <errno.h>
 #include <assert.h>
+#ifndef WIN32
 #include <sys/time.h>
+#else
+#include <winsock2.h>
+#endif // !WIN32
+
 #include "ijksdl_inc_internal.h"
 
 SDL_mutex *SDL_CreateMutex(void)

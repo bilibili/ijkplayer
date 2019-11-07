@@ -23,11 +23,15 @@
  */
 
 #include "ijksdl_timer.h"
-#include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#ifndef WIN32
+#include <unistd.h>
 #include <sys/time.h>
+#endif // !WIN32
+
+
 
 #if defined(__APPLE__)
 #include <mach/mach_time.h>
