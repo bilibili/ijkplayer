@@ -55,7 +55,7 @@ void SDL_AoutSetStereoVolume(SDL_Aout *aout, float left_volume, float right_volu
 void SDL_AoutCloseAudio(SDL_Aout *aout)
 {
     if (aout && aout->close_audio)
-        return aout->close_audio(aout);
+        aout->close_audio(aout);
 }
 
 void SDL_AoutFree(SDL_Aout *aout)

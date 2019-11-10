@@ -31,7 +31,11 @@
 #include "ijkplayer.h"
 
 struct IjkMediaPlayer {
+#ifdef WIN32
+    volatile long ref_count;
+#else
     volatile int ref_count;
+#endif // WIN32
     pthread_mutex_t mutex;
     FFPlayer *ffplayer;
 

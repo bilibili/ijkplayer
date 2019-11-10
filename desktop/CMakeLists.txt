@@ -1,4 +1,3 @@
-
 #
 # Copyright (c) 2019 befovy <befovy@gmail.com>
 #
@@ -40,7 +39,6 @@ elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     add_definitions(-DDEBUG)
 endif ()
 
-
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     # 64 bits
     message(STATUS "CMAKE SIZEOF POIONT 8")
@@ -53,14 +51,13 @@ elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
     set(IJK_X86 on)
 endif()
 
- 
 
-set(IJK_DESKTOP_CONTRIB_PATH ${IJKROOT_PATH}/mawili/contrib)
+set(IJK_DESKTOP_CONTRIB_PATH ${IJKROOT_PATH}/desktop/contrib)
 
 if(IJK_X64) 
-    set(IJK_FFMPAG_BUILD_DIR ${IJK_DESKTOP_CONTRIB_PATH}/ffmpeg/x86)
-elseif(IJK_X86)
     set(IJK_FFMPAG_BUILD_DIR ${IJK_DESKTOP_CONTRIB_PATH}/ffmpeg/x64)
+elseif(IJK_X86)
+    set(IJK_FFMPAG_BUILD_DIR ${IJK_DESKTOP_CONTRIB_PATH}/ffmpeg/x86)
 endif()
 
 if (WIN32)
@@ -79,14 +76,66 @@ else ()
     message(STATUS "IJK_FFMPAG_BUILD_DIR:${IJK_FFMPAG_BUILD_DIR}")
 endif ()
 
-# find prebuild static ffmepg library
-# add ffmpeg include path
-# add ffmpeg link path
-# link ffmpeg libs to target
 
-add_definitions(-DIJK_DESKTOP_MWL)
-set(IJK_DESKTOP_MWL ON)
-# add_library(ijkplayerall SHARED )
+add_definitions(-DIJK_DESKTOP_UNI)
+set(IJK_DESKTOP_UNI ON)
+
+set(FIJKPLAYER_SOURCE
+    ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.h
+    ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.c
+)
+
+add_library(IjkPlayer SHARED ${FIJKPLAYER_SOURCE})
 
 add_subdirectory(../ijkmedia ijkmedia)
+
+target_include_directories(IjkPlayer PRIVATE ${IJKROOT_PATH}/ijkmedia)
+target_include_directories(IjkPlayer PRIVATE ${IJK_FFMPAG_BUILD_DIR}/include)
+target_include_directories(IjkPlayer PRIVATE "${IJK_DESKTOP_PTHREAD_BUILD_DIR}/../../include")
+
+target_link_libraries(IjkPlayer ijksdl_static ijkplayer_static)
+
+
+target_compile_options(ijksdl_static PRIVATE /W3  /we4013)
+target_compile_options(ijkplayer_static PRIVATE /W3 /we4013)
+target_compile_options(IjkPlayer PRIVATE /W3 /we4013)
+
+
+add_library(avcodec STATIC IMPORTED)
+set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/lib/libavcodec.a)
+
+add_library(avformat STATIC IMPORTED)
+set_target_properties(avformat PROPERTIES IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/lib/libavformat.a)
+
+add_library(avutil STATIC IMPORTED)
+set_target_properties(avutil PROPERTIES IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/lib/libavutil.a)
+
+add_library(swresample STATIC IMPORTED)
+set_target_properties(swresample PROPERTIES IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/lib/libswresample.a)
+
+add_library(swscale STATIC IMPORTED)
+set_target_properties(swscale PROPERTIES IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/lib/libswscale.a)
+
+if (WIN32)
+    add_library(pthread STATIC IMPORTED)
+    set_target_properties(pthread PROPERTIES 
+        IMPORTED_LOCATION ${IJK_DESKTOP_PTHREAD_BUILD_DIR}/pthreadVC2.lib
+    )
+    target_link_libraries(IjkPlayer pthread)
+endif()
+
+
+target_link_libraries(IjkPlayer avcodec avformat avutil swresample swscale)
+target_link_libraries(IjkPlayer portaudio_static)
+target_compile_definitions(IjkPlayer PRIVATE -DBUILDING_IJK=1)
+
+if(WIN32)
+    target_link_libraries(IjkPlayer ws2_32 secur32 avrt shlwapi advapi32 shell32 kernel32 user32)
+endif()
+
+add_executable(IjkDemo 
+    ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_demo.c
+)
+
+target_link_libraries(IjkDemo IjkPlayer user32)
 

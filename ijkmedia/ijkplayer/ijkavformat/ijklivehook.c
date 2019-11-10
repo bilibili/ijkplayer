@@ -195,7 +195,7 @@ static int ijklivehook_read_header(AVFormatContext *avf, AVDictionary **options)
     av_strstart(avf->filename, "ijklivehook:", &inner_url);
 
     c->io_control.size = sizeof(c->io_control);
-    strlcpy(c->io_control.url, inner_url, sizeof(c->io_control.url));
+    av_strlcpy(c->io_control.url, inner_url, sizeof(c->io_control.url));
 
     if (av_stristart(c->io_control.url, "rtmp", NULL) ||
         av_stristart(c->io_control.url, "rtsp", NULL)) {

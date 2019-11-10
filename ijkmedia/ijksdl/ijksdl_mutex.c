@@ -25,11 +25,14 @@
 #include "ijksdl_mutex.h"
 #include <errno.h>
 #include <assert.h>
+#include <pthread.h>
 #ifndef WIN32
 #include <sys/time.h>
 #else
 #include <winsock2.h>
 #endif // !WIN32
+
+#include "libavutil/time.h"
 
 #include "ijksdl_inc_internal.h"
 
@@ -135,7 +138,6 @@ int SDL_CondBroadcast(SDL_cond *cond)
 int SDL_CondWaitTimeout(SDL_cond *cond, SDL_mutex *mutex, uint32_t ms)
 {
     int retval;
-    struct timeval delta;
     struct timespec abstime;
 
     assert(cond);
@@ -144,10 +146,16 @@ int SDL_CondWaitTimeout(SDL_cond *cond, SDL_mutex *mutex, uint32_t ms)
         return -1;
     }
 
+#ifdef WIN32
+    int64_t current_us = av_gettime();
+    abstime.tv_sec = (current_us / 1000000) + (ms / 1000);
+    abstime.tv_nsec = (long)(current_us % 1000000 + (ms % 1000) * 1000) * 1000;
+#else
+    struct timeval delta;
     gettimeofday(&delta, NULL);
-
     abstime.tv_sec = delta.tv_sec + (ms / 1000);
     abstime.tv_nsec = (delta.tv_usec + (ms % 1000) * 1000) * 1000;
+#endif
     if (abstime.tv_nsec > 1000000000) {
         abstime.tv_sec += 1;
         abstime.tv_nsec -= 1000000000;
