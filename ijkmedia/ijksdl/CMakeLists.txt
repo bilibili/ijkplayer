@@ -88,6 +88,11 @@ set(SDL_DESKTOP_UNI_SOURCES
     desktop/ijksdl_vout_uni_callback.h
 )
 
+set(SDL_MAC_OSX_SOURCES
+    ${IJKROOT_PATH}/ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/ios/ijksdl_thread_ios.h
+    ${IJKROOT_PATH}/ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/ios/ijksdl_thread_ios.m
+)
+
 set(GLES2_SOURCES
     ijksdl_egl.c
     gles2/color.c
@@ -112,6 +117,9 @@ endif ()
 
 if (IJK_DESKTOP_UNI)
     set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_DESKTOP_UNI_SOURCES})
+    if (APPLE AND IJK_DESKTOP_UNI)
+        set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_MAC_OSX_SOURCES})
+    endif ()
     add_library(ijksdl_static STATIC ${IJK_SDL_SOURCES})
     set(IJKSDL_LIB_NAME ijksdl_static)
 else ()

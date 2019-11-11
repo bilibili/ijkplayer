@@ -26,7 +26,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef WIN32
 #include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 
 void  demo_event_cb (void *userdata, int what, int arg1, int arg2, void *extra)
 {
@@ -42,7 +46,8 @@ void demo_overlay_cb (void *userdata, IjkFFOverlay* overlay)
 int main(int argc, char *argv[])
 {
     IjkFFMediaPlayer *fp = ijkff_create();
-    ijkff_set_data_source(fp, "D:\\demo.MKV");
+    // ijkff_set_data_source(fp, "D:\\demo.MKV");
+    ijkff_set_data_source(fp, "http://jiasu-33.ivneu.cn/20190702/%E5%88%9D%E6%81%8B%E6%9C%AA%E6%BB%A1/2000kb/hls/index.m3u8");
     ijkff_prepare_async(fp);
     ijkff_start(fp);
 
@@ -52,10 +57,16 @@ int main(int argc, char *argv[])
     int x = 0;
     while(x < 10) {
         x ++;
+#if WIN32
         Sleep(1000);
+#else
+        usleep(1000 * 1000);
+#endif
     }
     ijkff_stop(fp);
     ijkff_shutdown(fp);
-    system("pause");
+
+    printf("press any key to quit\n");
+    getchar();
     return 0;
 }

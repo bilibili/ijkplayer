@@ -120,7 +120,7 @@ static void aout_free_l(SDL_Aout *aout)
     ALOGI("aout_uni, aout_free_l, aout(%p)\n", aout);
 }
 
-static int aout_pause_audio_l(SDL_Aout *aout, int pause_on)
+static void aout_pause_audio_l(SDL_Aout *aout, int pause_on)
 {
     SDL_Aout_Opaque *opaque = aout->opaque;
     if (opaque->stream){
@@ -130,7 +130,6 @@ static int aout_pause_audio_l(SDL_Aout *aout, int pause_on)
             Pa_StartStream(opaque->stream);
     }
     ALOGI("aout_uni, aout_pause_audio, aout(%p) pause(%d)\n", aout, pause_on);
-    return 0;
 }
 
 static void aout_flush_audio_l(SDL_Aout *aout)
