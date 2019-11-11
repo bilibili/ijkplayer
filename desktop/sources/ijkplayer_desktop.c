@@ -156,7 +156,7 @@ void ijkff_set_loop(IjkFFMediaPlayer *fp, int loop)
 int  ijkff_get_loop(IjkFFMediaPlayer *fp)
 {
     assert(fp);
-    ijkmp_get_loop(fp->mp);
+    return ijkmp_get_loop(fp->mp);
 }
 
 
