@@ -29,8 +29,7 @@
 #include "ijkplayer/ff_ffmsg_queue.h"
 
 
-struct IjkFFMediaPlayer
-{
+struct IjkFFMediaPlayer {
     IjkMediaPlayer *mp;
     void *event_cb_data;
     ijkff_event_cb event_cb;
@@ -73,7 +72,7 @@ IjkFFMediaPlayer *ijkff_create()
 }
 
 
-int ijkff_set_data_source(IjkFFMediaPlayer *fp, const char * url)
+int ijkff_set_data_source(IjkFFMediaPlayer *fp, const char *url)
 {
     assert(fp);
     return ijkmp_set_data_source(fp->mp, url);
@@ -153,14 +152,14 @@ void ijkff_set_loop(IjkFFMediaPlayer *fp, int loop)
     ijkmp_set_loop(fp->mp, loop);
 }
 
-int  ijkff_get_loop(IjkFFMediaPlayer *fp)
+int ijkff_get_loop(IjkFFMediaPlayer *fp)
 {
     assert(fp);
     return ijkmp_get_loop(fp->mp);
 }
 
 
-void ijkff_set_speed(IjkFFMediaPlayer *fp, float speed)\
+void ijkff_set_speed(IjkFFMediaPlayer *fp, float speed)
 {
     assert(fp);
     ijkmp_set_playback_rate(fp->mp, speed);
@@ -246,4 +245,14 @@ void ijkff_set_overlay_cb(IjkFFMediaPlayer *fp, void *userdata, ijkff_overlay_cb
     fp->overlay_cb = cb;
     fp->overlay_cb_data = userdata;
     ijkmp_set_video_callback(fp->mp, fp, ijkplayer_overlay_draw);
+}
+
+void ijkff_log_level(int level)
+{
+    ijkmp_global_set_log_level(level);
+}
+
+const char *ijkff_version()
+{
+    return ijkmp_version();
 }

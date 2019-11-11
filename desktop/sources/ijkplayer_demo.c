@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 {
     IjkFFMediaPlayer *fp = ijkff_create();
     // ijkff_set_data_source(fp, "D:\\demo.MKV");
-    ijkff_set_data_source(fp, "http://jiasu-33.ivneu.cn/20190702/%E5%88%9D%E6%81%8B%E6%9C%AA%E6%BB%A1/2000kb/hls/index.m3u8");
+    ijkff_set_data_source(fp, "http://sample-videos.com/video123/mp4/480/big_buck_bunny_480p_10mb.mp4");
     ijkff_prepare_async(fp);
     ijkff_start(fp);
 
