@@ -34,19 +34,18 @@
 
 void  demo_event_cb (void *userdata, int what, int arg1, int arg2, void *extra)
 {
-    printf("demo event cb what %5d:(%5d %5d)\n", what, arg1, arg2);
+    // printf("demo event cb what %5d:(%5d %5d)\n", what, arg1, arg2);
 }
 
 void demo_overlay_cb (void *userdata, IjkFFOverlay* overlay)
 {
-    printf("demo overlay cb what %p:(%5d %5d)\n", overlay, overlay->h, overlay->w);
+    // printf("demo overlay cb what %p:(%5d %5d)\n", overlay, overlay->h, overlay->w);
 }
 
 
 int main(int argc, char *argv[])
 {
     IjkFFMediaPlayer *fp = ijkff_create();
-    // ijkff_set_data_source(fp, "D:\\demo.MKV");
     ijkff_set_data_source(fp, "http://sample-videos.com/video123/mp4/480/big_buck_bunny_480p_10mb.mp4");
     ijkff_prepare_async(fp);
     ijkff_start(fp);
@@ -55,7 +54,7 @@ int main(int argc, char *argv[])
     ijkff_set_overlay_cb(fp, NULL, demo_overlay_cb);
 
     int x = 0;
-    while(x < 10) {
+    while(x < 100) {
         x ++;
 #if WIN32
         Sleep(1000);

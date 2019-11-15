@@ -51,7 +51,7 @@ FF_TAGET_OS="darwin"
 
 # ffmpeg build params
 export COMMON_FF_CFG_FLAGS=
-source $FF_BUILD_ROOT/../../config/module.sh
+source $FF_BUILD_ROOT/../../config/module-mac.sh
 
 FFMPEG_CFG_FLAGS=
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $COMMON_FF_CFG_FLAGS"
