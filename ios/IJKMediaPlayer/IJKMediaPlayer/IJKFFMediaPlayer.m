@@ -47,7 +47,9 @@ typedef NS_ENUM(NSInteger, IJKSDLFFPlayrRenderType) {
     NSMutableSet<id<IJKMPEventHandler>> *_eventHandlers;
     
     CFDictionaryRef _optionsDictionary;
+#if IJK_IOS
     IJKSDLFboGLView* _fboView;
+#endif
     id<IJKCVPBViewProtocol> _cvPBView;
     IJKSDLFFPlayrRenderType _renderType;
 }
@@ -255,7 +257,9 @@ int ff_media_player_msg_loop(void* arg)
     ijkmp_dec_ref_p(&_nativeMediaPlayer);
     
     _cvPBView = nil;
+#if IJK_IOS
     _fboView = nil;
+#endif
 }
 
 - (int) reset
@@ -291,22 +295,32 @@ int ff_media_player_msg_loop(void* arg)
     [_eventHandlers removeObject:handler];
 }
 
-
-
+#if IJK_IOS
 - (UIImage *)snapshot {
     return nil;
 }
+#else
+- (NSImage *)snapshot {
+    return nil;
+}
+#endif
 
 - (void) setupCVPixelBufferView:(id<IJKCVPBViewProtocol>) cvPBView
 {
     _cvPBView = cvPBView;
     
     if (_renderType == IJKSDLFFPlayrRenderTypeFboView) {
+#if IJK_IOS
         _fboView = [[IJKSDLFboGLView alloc] initWithIJKCVPBViewProtocol:self];
         ijkmp_ios_set_glview(_nativeMediaPlayer, _fboView);
+#endif
     } else if (_renderType == IJKSDLFFPlayrRenderTypeGlView) {
         const void *keys[] = {
+#if IJK_IOS
             kCVPixelBufferOpenGLESCompatibilityKey,
+#else
+            kCVPixelBufferOpenGLCompatibilityKey,
+#endif
             kCVPixelBufferIOSurfacePropertiesKey,
         };
         const void *values[] = {

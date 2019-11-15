@@ -25,6 +25,10 @@
 #include "ijkplayer_internal.h"
 #include "ijkversion.h"
 
+#ifdef WIN32
+#include <Windows.h>
+#endif
+
 #define MP_RET_IF_FAILED(ret) \
     do { \
         int retval = ret; \
@@ -318,7 +322,11 @@ void ijkmp_shutdown(IjkMediaPlayer *mp)
 void ijkmp_inc_ref(IjkMediaPlayer *mp)
 {
     assert(mp);
+#ifdef WIN32
+    InterlockedIncrement(&mp->ref_count);
+#else
     __sync_fetch_and_add(&mp->ref_count, 1);
+#endif
 }
 
 void ijkmp_dec_ref(IjkMediaPlayer *mp)
@@ -326,7 +334,11 @@ void ijkmp_dec_ref(IjkMediaPlayer *mp)
     if (!mp)
         return;
 
+#ifdef WIN32
+    long ref_count = InterlockedDecrement(&mp->ref_count);
+#else
     int ref_count = __sync_sub_and_fetch(&mp->ref_count, 1);
+#endif // WIN32
     if (ref_count == 0) {
         MPTRACE("ijkmp_dec_ref(): ref=0\n");
         ijkmp_shutdown(mp);

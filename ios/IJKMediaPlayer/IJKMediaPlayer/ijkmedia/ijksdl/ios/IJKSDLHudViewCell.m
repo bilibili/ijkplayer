@@ -6,6 +6,7 @@
 //  Copyright © 2015年 bilibili. All rights reserved.
 //
 
+#ifndef IJK_OSX
 #import "IJKSDLHudViewCell.h"
 
 #define COLUMN_COUNT    2
@@ -65,3 +66,4 @@
 }
 
 @end
+#endif

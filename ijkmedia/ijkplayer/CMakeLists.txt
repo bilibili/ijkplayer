@@ -24,7 +24,6 @@ if (ANDROID)
     endif ()
 endif ()
 
-
 set(BUILD_SOURCES
     ff_fferror.h
     ff_ffinc.h
@@ -65,7 +64,6 @@ set(BUILD_SOURCES
     ijkavformat/ijkioprotocol.c
     ijkavformat/ijkioapplication.c
     ijkavformat/ijkiourlhook.c
-
     ijkavformat/ijkasync.c
     ijkavformat/ijkurlhook.c
     ijkavformat/ijklongurl.c
@@ -79,47 +77,73 @@ set(BUILD_SOURCES
     ijkavutil/ijkstl.cpp
 )
 
+if(WIN32)
+    #list(REMOVE_ITEM BUILD_SOURCES 
+        # ijkavformat/ijkiomanager.c
+    #)
+
+endif()
+
 set(ANDROID_IJKPLAYER_SOURCES
-
     ijkavformat/ijkioandroidio.c
-
     android/ffmpeg_api_jni.c
     android/ijkplayer_android.c
     android/ijkplayer_jni.c
-
     android/pipeline/ffpipeline_android.c
     android/pipeline/ffpipenode_android_mediacodec_vdec.c
 )
 
+set(DESKTOP_UNI_SOURCE
+    desktop/pipeline_underdesk.h    
+    desktop/pipeline_underdesk.c    
+    desktop/ijkplayer_underdesk.h
+    desktop/ijkplayer_underdesk.c
+)
 
 if (ANDROID)
     set(BUILD_SOURCES ${BUILD_SOURCES} ${ANDROID_IJKPLAYER_SOURCES})
 endif ()
 
 
-add_library(ijkplayer SHARED ${BUILD_SOURCES})
-
-
-target_include_directories(ijkplayer PRIVATE ${CMAKE_CURRENT_LIST_DIR})
-target_include_directories(ijkplayer PRIVATE ${CMAKE_CURRENT_LIST_DIR}/..)
-target_include_directories(ijkplayer PRIVATE ${FFMPAG_SHARED_DIR}/include)
-target_include_directories(ijkplayer PRIVATE ijkavformat)
-target_include_directories(ijkplayer PRIVATE ijkavutil)
-target_include_directories(ijkplayer PRIVATE pipeline)
-target_include_directories(ijkplayer PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../ijkj4a)
-
-target_link_libraries(ijkplayer ijksdl)
-
-if (ANDROID)
-    target_link_libraries(ijkplayer ijksoundtouch)
-    target_link_libraries(ijkplayer ijkffmpeg)
-    target_link_libraries(ijkplayer android-ndk-profiler)
-    target_link_libraries(ijkplayer log)
-    target_link_libraries(ijkplayer android)
+if (IJK_DESKTOP_UNI)
+    set(BUILD_SOURCES ${BUILD_SOURCES} ${DESKTOP_UNI_SOURCE})
+    add_library(ijkplayer_static STATIC ${BUILD_SOURCES})
+    set(IJKPLAYER_LIB_NAME ijkplayer_static)
+else ()
+    add_library(ijkplayer SHARED ${BUILD_SOURCES})
+    set(IJKPLAYER_LIB_NAME ijkplayer)
 endif ()
 
+target_include_directories(${IJKPLAYER_LIB_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${IJKPLAYER_LIB_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/..)
+target_include_directories(${IJKPLAYER_LIB_NAME} PRIVATE ${IJK_FFMPAG_BUILD_DIR}/include)
 
-add_custom_command(TARGET ijkplayer
-    PRE_BUILD
-    COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/version.sh ${CMAKE_CURRENT_LIST_DIR} ijkversion.h
-)
+# message(FATAL_ERROR ${IJK_FFMPAG_BUILD_DIR})
+
+target_include_directories(${IJKPLAYER_LIB_NAME} PRIVATE ijkavformat)
+target_include_directories(${IJKPLAYER_LIB_NAME} PRIVATE ijkavutil)
+target_include_directories(${IJKPLAYER_LIB_NAME} PRIVATE pipeline)
+target_include_directories(${IJKPLAYER_LIB_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../ijkj4a)
+
+if (WIN32)
+    target_include_directories(${IJKPLAYER_LIB_NAME} PRIVATE "${IJK_DESKTOP_PTHREAD_BUILD_DIR}/../../include")
+endif()
+
+if (NOT IJK_DESKTOP_UNI)
+    target_link_libraries(${IJKPLAYER_LIB_NAME} ijksdl)
+endif()
+
+if (ANDROID)
+    target_link_libraries(${IJKPLAYER_LIB_NAME} ijksoundtouch)
+    target_link_libraries(${IJKPLAYER_LIB_NAME} ijkffmpeg)
+    target_link_libraries(${IJKPLAYER_LIB_NAME} android-ndk-profiler)
+    target_link_libraries(${IJKPLAYER_LIB_NAME} log)
+    target_link_libraries(${IJKPLAYER_LIB_NAME} android)
+endif ()
+
+if (NOT WIN32)
+    add_custom_command(TARGET ${IJKPLAYER_LIB_NAME}
+        PRE_BUILD
+        COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/version.sh ${CMAKE_CURRENT_LIST_DIR} ijkversion.h
+    )
+endif()

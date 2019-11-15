@@ -28,7 +28,11 @@
 #include "ijkplayer/ff_ffplay.h"
 #include "ijksdl_mutex.h"
 #include "ijksdl_vout_ios_gles2.h"
+#if IJK_IOS
 #import <UIKit/UIKit.h>
+#else
+#import <AppKit/AppKit.h>
+#endif
 
 struct IJKFF_Pipenode_Opaque {
     IJKFF_Pipeline           *pipeline;
@@ -95,9 +99,11 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ios_videotoolbox(FFPlayer *
 {
     if (!ffp || !ffp->is)
         return NULL;
+#if IJK_IOS
     if ([[[UIDevice currentDevice] systemVersion] floatValue]  < 8.0){
         return NULL;
     }
+#endif
     IJKFF_Pipenode *node = ffpipenode_alloc(sizeof(IJKFF_Pipenode_Opaque));
     if (!node)
         return node;

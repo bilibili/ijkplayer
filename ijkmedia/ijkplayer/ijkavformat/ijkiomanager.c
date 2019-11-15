@@ -29,7 +29,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 #define CONFIG_MAX_LINE 1024
 

@@ -27,6 +27,8 @@
 #include <ctype.h>
 #include <inttypes.h>
 
+#include "libavutil/avstring.h"
+
 struct IjkAVDictionary {
     int count;
     IjkAVDictionaryEntry *elems;
@@ -117,9 +119,9 @@ int ijk_av_dict_set(IjkAVDictionary **pm, const char *key, const char *value,
             char *newval = (char *)calloc(1, len);
             if (!newval)
                 goto err_out;
-            strlcat(newval, oldval, len);
+            av_strlcat(newval, oldval, len);
             ijk_av_freep(&oldval);
-            strlcat(newval, copy_value, len);
+            av_strlcat(newval, copy_value, len);
             m->elems[m->count].value = newval;
             ijk_av_freep(&copy_value);
         }

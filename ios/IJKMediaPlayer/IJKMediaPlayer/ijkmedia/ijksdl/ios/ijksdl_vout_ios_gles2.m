@@ -37,8 +37,10 @@ typedef struct SDL_VoutSurface_Opaque {
 
 struct SDL_Vout_Opaque {
     id<IJKSDLGLViewProtocol> gl_viewp;
+#if IJK_IOS
     IJKSDLGLView *gl_view;
     IJKSDLFboGLView *fbo_viewl;
+#endif
     BOOL response_display_pixels;
     BOOL third_part;
     int no_glview_warning;
@@ -74,7 +76,9 @@ static void vout_free_l(SDL_Vout *vout)
             [opaque->gl_viewp release];
             opaque->gl_viewp = nil;
         }
+#if IJK_IOS
         opaque->gl_view = nil;
+#endif
     }
 
     SDL_Vout_FreeInternal(vout);
@@ -105,7 +109,7 @@ static int vout_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 
     if (opaque->third_part) {
         IJKOverlay ijk_overlay;
-
+        memset(&ijk_overlay, 0, sizeof(IJKOverlay));
         ijk_overlay.w = overlay->w;
         ijk_overlay.h = overlay->h;
         ijk_overlay.format = overlay->format;
@@ -122,11 +126,16 @@ static int vout_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         if (opaque->response_display_pixels) {
              [gl_viewp display_pixels:&ijk_overlay];
         }
-    } else if (opaque->gl_view){
-        [opaque->gl_view display:overlay];
-    } else if (opaque->fbo_viewl) {
-        [opaque->fbo_viewl display:overlay];
     }
+#if IJK_IOS
+    if (!opaque->third_part) {
+        if (opaque->gl_view){
+            [opaque->gl_view display:overlay];
+        } else if (opaque->fbo_viewl) {
+            [opaque->fbo_viewl display:overlay];
+        }
+    }
+#endif
     return 0;
 }
 
@@ -148,7 +157,6 @@ SDL_Vout *SDL_VoutIos_CreateForGLES2()
 
     SDL_Vout_Opaque *opaque = vout->opaque;
     opaque->gl_viewp = nil;
-    opaque->gl_view = nil;
     opaque->third_part = NO;
     opaque->response_display_pixels = NO;
     opaque->no_glview_warning = 0;
@@ -171,18 +179,19 @@ static void SDL_VoutIos_SetGLView_l(SDL_Vout *vout, id<IJKSDLGLViewProtocol> vie
         [opaque->gl_viewp release];
         opaque->gl_viewp = nil;
     }
-    opaque->gl_view = nil;
     opaque->no_glview_warning = 0;
     if (view) {
         opaque->gl_viewp = [view retain];
         opaque->third_part = view.isThirdGLView;
         if ([opaque->gl_viewp respondsToSelector:@selector(display_pixels:)])
             opaque->response_display_pixels = YES;
+#if IJK_IOS
         if ([opaque->gl_viewp isKindOfClass:[IJKSDLGLView class] ]){
             opaque->gl_view = (IJKSDLGLView *)opaque->gl_viewp;
         } else if ([opaque->gl_viewp isKindOfClass:[IJKSDLFboGLView class] ]) {
             opaque->fbo_viewl = (IJKSDLFboGLView *)opaque->gl_viewp;
         }
+#endif
     }
 }
 

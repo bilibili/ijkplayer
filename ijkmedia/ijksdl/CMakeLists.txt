@@ -80,6 +80,19 @@ set(SDL_ANDROID_EXTRA_SOURCES
     android/ijksdl_vout_overlay_android_mediacodec.c
 )
 
+set(SDL_DESKTOP_UNI_SOURCES
+    desktop/ijksdl_desktop.h
+    desktop/ijksdl_aout_port_audio.h    
+    desktop/ijksdl_aout_port_audio.c
+    desktop/ijksdl_vout_uni_callback.c
+    desktop/ijksdl_vout_uni_callback.h
+)
+
+set(SDL_MAC_OSX_SOURCES
+    ${IJKROOT_PATH}/ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/ios/ijksdl_thread_ios.h
+    ${IJKROOT_PATH}/ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/ios/ijksdl_thread_ios.m
+)
+
 set(GLES2_SOURCES
     ijksdl_egl.c
     gles2/color.c
@@ -95,20 +108,38 @@ set(GLES2_SOURCES
     gles2/vsh/mvp.vsh.c
 )
 
+
 set(IJK_SDL_SOURCES ${BASE_SOURCES})
 
 if (ANDROID)
     set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_ANDROID_EXTRA_SOURCES} ${GLES2_SOURCES})
 endif ()
 
-add_library(ijksdl SHARED ${IJK_SDL_SOURCES})
+if (IJK_DESKTOP_UNI)
+    set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_DESKTOP_UNI_SOURCES})
+    if (APPLE AND IJK_DESKTOP_UNI)
+        set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_MAC_OSX_SOURCES})
+    endif ()
+    add_library(ijksdl_static STATIC ${IJK_SDL_SOURCES})
+    set(IJKSDL_LIB_NAME ijksdl_static)
+else ()
+    add_library(ijksdl SHARED ${IJK_SDL_SOURCES})
+    set(IJKSDL_LIB_NAME ijksdl)
+endif ()
 
-target_include_directories(ijksdl PRIVATE ${CMAKE_CURRENT_LIST_DIR})
-target_include_directories(ijksdl PRIVATE ${CMAKE_CURRENT_LIST_DIR}/..)
+target_include_directories(${IJKSDL_LIB_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${IJKSDL_LIB_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/..)
 
+if(IJK_DESKTOP_UNI)
+    target_include_directories(${IJKSDL_LIB_NAME} PRIVATE "${IJKROOT_PATH}/ijkmedia/portaudio/include")
+endif()
+
+if (WIN32)
+    target_include_directories(${IJKSDL_LIB_NAME} PRIVATE "${IJK_DESKTOP_PTHREAD_BUILD_DIR}/../../include")
+endif()
 
 #include ffmpeg header files
-target_include_directories(ijksdl PRIVATE ${FFMPAG_SHARED_DIR}/include)
+target_include_directories(${IJKSDL_LIB_NAME} PRIVATE ${IJK_FFMPAG_BUILD_DIR}/include)
 
 if (ANDROID)
     # build cpufeatures as a static lib
@@ -117,15 +148,15 @@ if (ANDROID)
 
     # include(AndroidNdkModules)
     # android_ndk_import_module_cpufeatures()
-    target_include_directories(ijksdl PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../ijkyuv/include)
-    target_include_directories(ijksdl PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../ijkj4a)
+    target_include_directories(${IJKSDL_LIB_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../ijkyuv/include)
+    target_include_directories(${IJKSDL_LIB_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../ijkj4a)
 endif ()
 
 if (ANDROID)
-    target_link_libraries(ijksdl ijkffmpeg)
-    target_link_libraries(ijksdl ijkj4a)
+    target_link_libraries(${IJKSDL_LIB_NAME} ijkffmpeg)
+    target_link_libraries(${IJKSDL_LIB_NAME} ijkj4a)
     # target_link_libraries(ijksdl cpufeatures)
-    target_link_libraries(ijksdl yuv_static)
-    target_link_libraries(ijksdl log android OpenSLES EGL GLESv2)
+    target_link_libraries(${IJKSDL_LIB_NAME} yuv_static)
+    target_link_libraries(${IJKSDL_LIB_NAME} log android OpenSLES EGL GLESv2)
 endif ()
 

@@ -8,8 +8,10 @@ ios/openssl-*
 extra
 .DS_Store
 ijkmedia/ijkyuv/
-ijkmedia/ijksoundtouch
+ijkmedia/ijksoundtouch/
+ijkmedia/portaudio/
 ijkprof/android-ndk-profiler/
+
 
 # built application files
 *.apk
@@ -43,4 +45,4 @@ xcshareddata
 
 
 # osx
-osx/
+# osx/

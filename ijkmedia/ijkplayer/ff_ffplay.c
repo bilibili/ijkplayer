@@ -35,7 +35,13 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <sys/types.h>
+
+#ifdef WIN32
+#include <Windows.h>
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "libavutil/avstring.h"
 #include "libavutil/eval.h"
@@ -47,6 +53,7 @@
 #include "libavutil/samplefmt.h"
 #include "libavutil/avassert.h"
 #include "libavutil/time.h"
+#include "libavutil/attributes.h"
 #include "libavformat/avformat.h"
 #if CONFIG_AVDEVICE
 #include "libavdevice/avdevice.h"
@@ -73,7 +80,10 @@
 #include "ijkmeta.h"
 #include "ijkversion.h"
 #include "ijkplayer.h"
+
+#ifndef WIN32
 #include <stdatomic.h>
+#endif
 #if defined(__ANDROID__)
 #include "ijksoundtouch/ijksoundtouch_wrap.h"
 #endif
@@ -916,7 +926,11 @@ static void video_image_display2(FFPlayer *ffp)
         }
 
         if (is->latest_video_seek_load_serial == vp->serial) {
+#ifdef WIN32
+            int latest_video_seek_load_serial = InterlockedExchangeAcquire(&(is->latest_video_seek_load_serial), -1);
+#else
             int latest_video_seek_load_serial = __atomic_exchange_n(&(is->latest_video_seek_load_serial), -1, memory_order_seq_cst);
+#endif
             if (latest_video_seek_load_serial == vp->serial) {
                 ffp->stat.latest_seek_load_duration = (av_gettime() - is->latest_seek_load_start_at) / 1000;
                 if (ffp->av_sync_type == AV_SYNC_VIDEO_MASTER) {
@@ -1273,8 +1287,8 @@ static double compute_target_delay(FFPlayer *ffp, double delay, VideoState *is)
     }
 
     if (ffp) {
-        ffp->stat.avdelay = delay;
-        ffp->stat.avdiff  = diff;
+        ffp->stat.avdelay = (float)delay;
+        ffp->stat.avdiff  = (float)diff;
     }
 #ifdef FFP_SHOW_AUDIO_DELAY
     av_log(NULL, AV_LOG_TRACE, "video: delay=%0.3f A-V=%f\n",
@@ -1419,7 +1433,7 @@ display:
     if (ffp->show_status) {
         static int64_t last_time;
         int64_t cur_time;
-        int aqsize, vqsize, sqsize __unused;
+        int aqsize, vqsize, sqsize av_unused;
         double av_diff;
 
         cur_time = av_gettime_relative();
@@ -2703,7 +2717,11 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     }
 
     if (is->latest_audio_seek_load_serial == is->audio_clock_serial) {
+#ifdef WIN32
+        int latest_audio_seek_load_serial = InterlockedExchangeAcquire(&(is->latest_audio_seek_load_serial), -1);
+#else
         int latest_audio_seek_load_serial = __atomic_exchange_n(&(is->latest_audio_seek_load_serial), -1, memory_order_seq_cst);
+#endif
         if (latest_audio_seek_load_serial == is->audio_clock_serial) {
             if (ffp->av_sync_type == AV_SYNC_AUDIO_MASTER) {
                 ffp_notify_msg2(ffp, FFP_MSG_AUDIO_SEEK_RENDERING_START, 1);
@@ -3063,7 +3081,7 @@ static int read_thread(void *arg)
     FFPlayer *ffp = arg;
     VideoState *is = ffp->is;
     AVFormatContext *ic = NULL;
-    int err, i, ret __unused;
+    int err, i, ret av_unused;
     int st_index[AVMEDIA_TYPE_NB];
     AVPacket pkt1, *pkt = &pkt1;
     int64_t stream_start_time;
@@ -3846,7 +3864,7 @@ static void ffp_log_callback_brief(void *ptr, int level, const char *fmt, va_lis
     if (level > av_log_get_level())
         return;
 
-    int ffplv __unused = log_level_av_to_ijk(level);
+    int ffplv av_unused = log_level_av_to_ijk(level);
     VLOG(ffplv, IJK_LOG_TAG, fmt, vl);
 }
 
@@ -3855,7 +3873,7 @@ static void ffp_log_callback_report(void *ptr, int level, const char *fmt, va_li
     if (level > av_log_get_level())
         return;
 
-    int ffplv __unused = log_level_av_to_ijk(level);
+    int ffplv av_unused = log_level_av_to_ijk(level);
 
     va_list vl2;
     char line[1024];
@@ -4537,22 +4555,22 @@ int ffp_packet_queue_init(PacketQueue *q)
 
 void ffp_packet_queue_destroy(PacketQueue *q)
 {
-    return packet_queue_destroy(q);
+    packet_queue_destroy(q);
 }
 
 void ffp_packet_queue_abort(PacketQueue *q)
 {
-    return packet_queue_abort(q);
+    packet_queue_abort(q);
 }
 
 void ffp_packet_queue_start(PacketQueue *q)
 {
-    return packet_queue_start(q);
+    packet_queue_start(q);
 }
 
 void ffp_packet_queue_flush(PacketQueue *q)
 {
-    return packet_queue_flush(q);
+    packet_queue_flush(q);
 }
 
 int ffp_packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial)
@@ -4585,7 +4603,7 @@ Frame *ffp_frame_queue_peek_writable(FrameQueue *f)
 
 void ffp_frame_queue_push(FrameQueue *f)
 {
-    return frame_queue_push(f);
+    frame_queue_push(f);
 }
 
 int ffp_queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial)

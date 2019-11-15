@@ -34,7 +34,11 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 #include <assert.h>
 
 #define DEFAULT_CACHE_MAX_CAPACITY            (512 * 1024 * 1024)
