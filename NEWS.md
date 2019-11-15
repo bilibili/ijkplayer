@@ -1,5 +1,9 @@
 tag next
 --------------------------------
+tag f0.4.0
+--------------------------------
+- ijkplayer: add osx desktop support, use portaudio for audio output
+
 tag f0.3.8
 --------------------------------
 - ijkplayer: ios vout add render to pixelbuffer, off screen buffer
