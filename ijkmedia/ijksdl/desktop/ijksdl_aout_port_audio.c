@@ -71,21 +71,24 @@ static int aout_open_audio_l(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_A
     }
 
     PaError err;
-    opaque->outputParameters.channelCount = desired->channels;       /* stereo output */
     opaque->outputParameters.sampleFormat = paInt16; /* 32 bit floating point output */
     opaque->outputParameters.suggestedLatency = Pa_GetDeviceInfo(opaque->outputParameters.device )->defaultLowOutputLatency;
     opaque->outputParameters.hostApiSpecificStreamInfo = NULL;
-
 
     opaque->channels = desired->channels;
     opaque->userdata = desired->userdata;
     opaque->callback = desired->callback;
 
+    if (desired->channels > 2)
+        opaque->channels = 2;
+
+    opaque->outputParameters.channelCount = opaque->channels;
     if (obtained) {
         memcpy(obtained, desired, sizeof(SDL_AudioSpec));
         obtained->size = 1024;
         obtained->freq = desired->freq;
         obtained->format = AUDIO_S16SYS;
+        obtained->channels = (Uint8)opaque->channels;
     }
 
     err = Pa_OpenStream(
@@ -98,7 +101,11 @@ static int aout_open_audio_l(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_A
         portAudioStreamCallback, /* no callback, use blocking API */
         opaque);
 
-    return 0;
+    if (err != paNoError) {
+        ALOGE("audio open failed: %s", Pa_GetErrorText(err));
+    }
+
+    return err;
 }
 
 static void aout_close_audio_l(SDL_Aout *aout)
