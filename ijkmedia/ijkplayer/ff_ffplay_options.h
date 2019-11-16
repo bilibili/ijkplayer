@@ -24,7 +24,9 @@
 #ifndef FFPLAY__FF_FFPLAY_OPTIONS_H
 #define FFPLAY__FF_FFPLAY_OPTIONS_H
 
-#define OPTION_OFFSET(x) offsetof(FFPlayer, x)
+#include "ff_ffplay_def.h"
+
+#define OPTION_OFFSET(x) ((int)offsetof(FFPlayer, x))
 #define OPTION_INT(default__, min__, max__) \
     .type = AV_OPT_TYPE_INT, \
     { .i64 = default__ }, \
@@ -166,6 +168,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(async_init_decoder),   OPTION_INT(0, 0, 1) },
     { "video-mime-type",                    "default video mime type",
         OPTION_OFFSET(video_mime_type),     OPTION_STR(NULL) },
+    { "enable-position-notify",             "enable adjective current position notify",
+        OPTION_OFFSET(enable_position_notify), OPTION_INT(0, 0, 1) },
 
         // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",

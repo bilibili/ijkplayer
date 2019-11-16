@@ -82,6 +82,8 @@
 #define FAST_BUFFERING_CHECK_PER_MILLISECONDS   (50)
 #define MAX_RETRY_CONVERT_IMAGE                 (3)
 
+#define NOTIFY_KEY_MSG_PER_MILLISECONDS         (100)
+
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MAX_ACCURATE_SEEK_TIMEOUT (5000)
 #ifdef FFP_MERGE
@@ -590,6 +592,8 @@ typedef struct FFPlayer {
     int av_sync_type;
     int64_t start_time;
     int64_t duration;
+    int64_t clock_notify_time;
+    int enable_position_notify;
     int fast;
     int genpts;
     int lowres;
