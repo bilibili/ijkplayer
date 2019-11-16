@@ -77,6 +77,7 @@
 #include "ff_ffpipeline.h"
 #include "ff_ffpipenode.h"
 #include "ff_ffplay_debug.h"
+#include "ff_ffplay_options.h"
 #include "ijkmeta.h"
 #include "ijkversion.h"
 #include "ijkplayer.h"
@@ -879,6 +880,17 @@ static size_t parse_ass_subtitle(const char *ass, char *output)
     return 0;
 }
 
+static void ffp_clock_msg_notify_cycle(FFPlayer *ffp, int64_t time_ms)
+{
+    if (ffp->enable_position_notify &&
+        (time_ms < 0 || time_ms - ffp->clock_notify_time > NOTIFY_KEY_MSG_PER_MILLISECONDS)) {
+        ffp->clock_notify_time = time_ms;
+        int64_t position = ffp_get_current_position_l(ffp);
+        ffp_notify_msg2(ffp, FFP_MSG_CURRENT_POSITION_UPDATE, (int) position);
+    }
+}
+
+
 static void video_image_display2(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
@@ -1364,7 +1376,10 @@ retry:
             last_duration = vp_duration(is, lastvp, vp);
             delay = compute_target_delay(ffp, last_duration, is);
 
-            time= av_gettime_relative()/1000000.0;
+            int64_t time_us = av_gettime_relative();
+            if (!is->audio_st)
+                ffp_clock_msg_notify_cycle(ffp, time_us / 1000);
+            time = time_us / 1000000.0;
             if (isnan(is->frame_timer) || time < is->frame_timer)
                 is->frame_timer = time;
             if (time < is->frame_timer + delay) {
@@ -2653,6 +2668,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     }
 
     ffp->audio_callback_time = av_gettime_relative();
+    ffp_clock_msg_notify_cycle(ffp, ffp->audio_callback_time / 1000);
 
     if (ffp->pf_playback_rate_changed) {
         ffp->pf_playback_rate_changed = 0;
@@ -4803,6 +4819,8 @@ void ffp_check_buffering_l(FFPlayer *ffp)
         if (is->buffer_indicator_queue && is->buffer_indicator_queue->nb_packets > 0) {
             if (   (is->audioq.nb_packets >= MIN_MIN_FRAMES || is->audio_stream < 0 || is->audioq.abort_request)
                 && (is->videoq.nb_packets >= MIN_MIN_FRAMES || is->video_stream < 0 || is->videoq.abort_request)) {
+                if (buf_percent < 100)
+                    ffp_notify_msg3(ffp, FFP_MSG_BUFFERING_UPDATE, (int)buf_time_position, 100);
                 ffp_toggle_buffering(ffp, 0);
             }
         }
