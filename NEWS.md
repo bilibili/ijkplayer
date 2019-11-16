@@ -1,5 +1,10 @@
 tag next
 --------------------------------
+tag f0.4.1
+--------------------------------
+- desktop: fix invalid audio channel number for portaudio
+- ijkplayer: add current position msg option
+
 tag f0.4.0
 --------------------------------
 - ijkplayer: add osx desktop support, use portaudio for audio output
