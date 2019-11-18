@@ -1,0 +1,9 @@
+{
+    "search.exclude": {
+        "**/ijkplayer-arm64/**": true,
+        "**/ijkplayer-armv5/**": true,
+        "**/ijkplayer-armv7a/**": true,
+        "**/ijkplayer-x86/**": true,
+        "**/ijkplayer-x86_64/**": true,
+    }
+}

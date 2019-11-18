@@ -1,9 +1,10 @@
 tag next
 --------------------------------
-tag f0.4.1
+tag f0.4.2
 --------------------------------
 - desktop: fix invalid audio channel number for portaudio
 - ijkplayer: add current position msg option
+- ijkplayer: notify buffering update 100 percent
 
 tag f0.4.0
 --------------------------------

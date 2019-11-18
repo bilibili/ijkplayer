@@ -115,6 +115,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int IJK_MSG_BUFFERING_START = 500;
     public static final int IJK_MSG_BUFFERING_END = 501;
     public static final int IJK_MSG_BUFFERING_UPDATE = 502;
+    public static final int IJK_MSG_CURRENT_POSITION_UPDATE = 510;
     public static final int IJK_MSG_SEEK_COMPLETE = 600;
     public static final int IJK_MSG_TIMED_TEXT = 800;
     public static final int IJK_MSG_ACCURATE_SEEK_COMPLETE = 900;

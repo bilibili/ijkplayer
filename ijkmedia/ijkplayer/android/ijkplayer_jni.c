@@ -987,6 +987,7 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_BUFFERING_UPDATE:
+        case FFP_MSG_CURRENT_POSITION_UPDATE:
             // MPTRACE("FFP_MSG_BUFFERING_UPDATE: %d, %d", msg.arg1, msg.arg2);
             // post_event(env, weak_thiz, MEDIA_BUFFERING_UPDATE, msg.arg1, msg.arg2);
             post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
