@@ -24,6 +24,7 @@ public interface IjkEventListener {
     int BUFFERING_UPDATE            = 502;
     int BUFFERING_BYTES_UPDATE      = 503;
     int BUFFERING_TIME_UPDATE       = 504;
+    int CURRENT_POSITION_UPDATE     = 510;
     
     int SEEK_COMPLETE               = 600;
     int PLAYBACK_STATE_CHANGED      = 700;
