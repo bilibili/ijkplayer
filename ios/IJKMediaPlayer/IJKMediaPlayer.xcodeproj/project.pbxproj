@@ -1177,6 +1177,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = E6903EB017EAF6C500CFD954;
@@ -1509,6 +1510,7 @@
 					"\"$(SRCROOT)/../build/universal/lib\"",
 				);
 				MACH_O_TYPE = mh_dylib;
+				MARKETING_VERSION = 1.2.7;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
@@ -1560,6 +1562,7 @@
 					"\"$(SRCROOT)/../build/universal/lib\"",
 				);
 				MACH_O_TYPE = mh_dylib;
+				MARKETING_VERSION = 1.2.7;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
@@ -1633,6 +1636,7 @@
 					"\"$(SRCROOT)/../build/universal/lib\"",
 				);
 				MACH_O_TYPE = staticlib;
+				MARKETING_VERSION = 1.2.7;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "tv.danmaku.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1679,6 +1683,7 @@
 					"\"$(SRCROOT)/../build/universal/lib\"",
 				);
 				MACH_O_TYPE = staticlib;
+				MARKETING_VERSION = 1.2.7;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "tv.danmaku.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
