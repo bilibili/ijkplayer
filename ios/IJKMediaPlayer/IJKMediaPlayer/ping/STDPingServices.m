@@ -139,13 +139,17 @@
 }
 
 - (float)lossPercentage {
+    float total = 0;
     int receivedCount = 0;
     for (STDPingItem *item in _pingItems) {
         if (item.status == STDPingStatusDidReceivePacket) {
             receivedCount++;
         }
+        if (item.status != STDPingStatusFinished) {
+            total++;
+        }
     }
-    return receivedCount == _pingItems.count ? 100 : (float)(_pingItems.count - receivedCount) / _pingItems.count * 100;
+    return receivedCount == _pingItems.count ? 100 : (total - receivedCount) / total * 100;
 }
 
 - (NSString *)statistics {
