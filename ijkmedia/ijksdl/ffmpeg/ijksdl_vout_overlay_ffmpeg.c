@@ -202,10 +202,10 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
             dst_format = AV_PIX_FMT_RGB565;
             break;
         case SDL_FCC_BGRA:
-            dst_format = AV_PIX_FMT_BGRA;
+            dst_format = AV_PIX_FMT_BGR32_1;
             break;
         case SDL_FCC_RGBA:
-            dst_format = AV_PIX_FMT_RGBA;
+            dst_format = AV_PIX_FMT_RGB32_1;
             break;
         default:
             ALOGE("SDL_VoutFFmpeg_ConvertPicture: unexpected overlay format %s(%d)",

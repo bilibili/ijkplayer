@@ -132,6 +132,7 @@ target_include_directories(${IJKSDL_LIB_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/
 
 if(IJK_DESKTOP_UNI)
     target_include_directories(${IJKSDL_LIB_NAME} PRIVATE "${IJKROOT_PATH}/ijkmedia/portaudio/include")
+    target_include_directories(${IJKSDL_LIB_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../ijkyuv/include)
 endif()
 
 if (WIN32)
