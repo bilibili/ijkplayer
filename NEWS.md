@@ -1,5 +1,11 @@
 tag next
 --------------------------------
+tag f0.4.4
+--------------------------------
+- desktop: add libyuv for YUV2RGB
+- ijkplayer: iOS videotoolbox notify rotate msg
+- fix: call start after preparAsync may cause pause state
+
 tag f0.4.3
 --------------------------------
 - desktop: fix invalid audio channel number for portaudio
