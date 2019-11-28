@@ -3372,6 +3372,10 @@ static int read_thread(void *arg)
             SDL_Delay(20);
         }
     }
+    if (is->pause_req && ffp->start_on_prepared) {
+        ffp->auto_resume = true;
+    }
+
     if (ffp->auto_resume) {
         ffp_notify_msg1(ffp, FFP_REQ_START);
         ffp->auto_resume = 0;

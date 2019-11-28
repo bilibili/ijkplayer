@@ -26,6 +26,7 @@ endif ()
 
 if(IJK_DESKTOP_UNI)
     add_subdirectory(portaudio)
+    add_subdirectory(ijkyuv)
 endif()
 
 add_subdirectory(ijksdl)

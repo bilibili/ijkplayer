@@ -93,7 +93,7 @@ target_include_directories(IjkPlayer PRIVATE ${IJKROOT_PATH}/ijkmedia)
 target_include_directories(IjkPlayer PRIVATE ${IJK_FFMPAG_BUILD_DIR}/include)
 target_include_directories(IjkPlayer PRIVATE "${IJK_DESKTOP_PTHREAD_BUILD_DIR}/../../include")
 
-target_link_libraries(IjkPlayer ijksdl_static ijkplayer_static)
+target_link_libraries(IjkPlayer ijksdl_static ijkplayer_static yuv)
 
 
 if (WIN32)
