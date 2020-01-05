@@ -246,8 +246,30 @@ cd ios
 # 
 ```
 
+### Build for Mac OS
+
+Build ffmpeg for Max OS
+```
+./init-osx.sh
+cd osx && ./compile-ffmpeg.sh
+```
+
+Build ijkplayer for Max OS
+
+```
+cd desktop
+mkdir cmake-build-debug && cd cmake-build-debug
+cmake .. -DCMAKE_BUILD_TYPE="Debug"
+make IjkPlayer
+make tuidemo
+```
+
+tuidemo is a terminal UI demo for ijkplayer in progress, it can't display video yet.
+
+`libIjkPlayer.dylib` is the output dynamic library.
 
 ### Support (支持) ###
+
 - Please do not send e-mail to me. Public technical discussion on github is preferred.
 - 请尽量在 github 上公开讨论[技术问题](https://github.com/befovy/ijkplayer/issues)，不要以邮件方式私下询问，恕不一一回复。
 
