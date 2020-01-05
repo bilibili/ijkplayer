@@ -448,7 +448,7 @@ static int ikjmp_chkst_start_l(int mp_state)
 {
     MPST_RET_IF_EQ(mp_state, MP_STATE_IDLE);
     MPST_RET_IF_EQ(mp_state, MP_STATE_INITIALIZED);
-    MPST_RET_IF_EQ(mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_ASYNC_PREPARING);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_PREPARED);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_STARTED);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_PAUSED);
@@ -463,19 +463,11 @@ static int ikjmp_chkst_start_l(int mp_state)
 static int ijkmp_start_l(IjkMediaPlayer *mp)
 {
     assert(mp);
-    int retval = 0;
-    if (mp->mp_state == MP_STATE_ASYNC_PREPARING) {
-        mp->ffplayer->start_on_prepared = 1;
-        retval = 0;
-    } else {
-        retval = ikjmp_chkst_start_l(mp->mp_state);
-        if (retval == 0) {
-            ffp_remove_msg(mp->ffplayer, FFP_REQ_START);
-            ffp_remove_msg(mp->ffplayer, FFP_REQ_PAUSE);
-            ffp_notify_msg1(mp->ffplayer, FFP_REQ_START);
-        }
-    }
-    return retval;
+    MP_RET_IF_FAILED(ikjmp_chkst_start_l(mp->mp_state));
+    ffp_remove_msg(mp->ffplayer, FFP_REQ_START);
+    ffp_remove_msg(mp->ffplayer, FFP_REQ_PAUSE);
+    ffp_notify_msg1(mp->ffplayer, FFP_REQ_START);
+    return 0;
 }
 
 int ijkmp_start(IjkMediaPlayer *mp)
@@ -493,7 +485,7 @@ static int ikjmp_chkst_pause_l(int mp_state)
 {
     MPST_RET_IF_EQ(mp_state, MP_STATE_IDLE);
     MPST_RET_IF_EQ(mp_state, MP_STATE_INITIALIZED);
-    MPST_RET_IF_EQ(mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_ASYNC_PREPARING);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_PREPARED);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_STARTED);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_PAUSED);
@@ -737,7 +729,7 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
                 // FIXME: 1: onError() ?
                 av_log(mp->ffplayer, AV_LOG_DEBUG, "FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING\n");
             }
-            if (!mp->ffplayer->start_on_prepared) {
+            if (mp->ffplayer->is && mp->ffplayer->is->pause_req) {
                 ijkmp_change_state_l(mp, MP_STATE_PAUSED);
             } else {
                 ijkmp_change_state_l(mp, MP_STATE_STARTED);
@@ -784,6 +776,9 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
                     }
                     mp->restart = 0;
                     mp->restart_from_beginning = 0;
+                } else if(mp->mp_state == MP_STATE_ASYNC_PREPARING) {
+                    av_log(mp->ffplayer, AV_LOG_DEBUG, "ijkmp_get_msg: FFP_REQ_START: start from async preparing\n");
+                    ffp_start_l(mp->ffplayer);
                 } else {
                     av_log(mp->ffplayer, AV_LOG_DEBUG, "ijkmp_get_msg: FFP_REQ_START: start on fly\n");
                     retval = ffp_start_l(mp->ffplayer);
@@ -798,7 +793,9 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             MPTRACE("ijkmp_get_msg: FFP_REQ_PAUSE\n");
             continue_wait_next_msg = 1;
             pthread_mutex_lock(&mp->mutex);
-            if (0 == ikjmp_chkst_pause_l(mp->mp_state)) {
+            if (mp->mp_state == MP_STATE_ASYNC_PREPARING) {
+                ffp_pause_l(mp->ffplayer);
+            } else if (0 == ikjmp_chkst_pause_l(mp->mp_state)) {
                 int pause_ret = ffp_pause_l(mp->ffplayer);
                 if (pause_ret == 0)
                     ijkmp_change_state_l(mp, MP_STATE_PAUSED);
