@@ -16,24 +16,28 @@
 # limitations under the License.
 #
 
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BASEDIR=$(dirname "$DIR")
+
 IJK_EXO_UPSTREAM=https://github.com/google/ExoPlayer.git
 IJK_EXO_FORK=https://github.com/google/ExoPlayer.git
 IJK_EXO_COMMIT=r1.5.11
-IJK_EXO_LOCAL_REPO=extra/ExoPlayer
+IJK_EXO_LOCAL_REPO=$BASEDIR/extra/ExoPlayer
 
 set -e
-TOOLS=tools
+TOOLS=$BASEDIR/tools
 
 echo "== pull ExoPlayer base =="
 sh $TOOLS/pull-repo-base.sh $IJK_EXO_UPSTREAM $IJK_EXO_LOCAL_REPO
 
 echo "== pull ExoPlayer fork =="
-cd extra/ExoPlayer
+cd $BASEDIR/extra/ExoPlayer
 git checkout ${IJK_EXO_COMMIT} -B ijkplayer
 cd -
 
-SRC_EXO_DIR=extra/ExoPlayer/demo/src/main/java/com/google/android/exoplayer/demo
-DST_EXO_DIR=android/ijkplayer/ijkplayer-exo/src/main/java/tv/danmaku/ijk/media/exo/demo
+SRC_EXO_DIR=$BASEDIR/extra/ExoPlayer/demo/src/main/java/com/google/android/exoplayer/demo
+DST_EXO_DIR=$BASEDIR/android/ijkplayer/ijkplayer-exo/src/main/java/tv/danmaku/ijk/media/exo/demo
 
 mkdir -p $DST_EXO_DIR/player
 

@@ -92,3 +92,6 @@ esac
 
 # sync_ff_version
 
+./init-config.sh
+./init/init-libyuv.sh
+./init/init-portaudio.sh

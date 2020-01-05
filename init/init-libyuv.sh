@@ -16,20 +16,22 @@
 # limitations under the License.
 #
 
-IJK_LIB_NAME=android-ndk-profiler
-IJK_LIB_UPSTREAM=https://github.com/Bilibili/android-ndk-profiler.git
-IJK_LIB_FORK=https://github.com/Bilibili/android-ndk-profiler.git
-IJK_LIB_COMMIT=ijk-r0.3.0-dev
-IJK_LIB_LOCAL_REPO=extra/android-ndk-profiler
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BASEDIR=$(dirname "$DIR")
+
+IJK_LIBYUV_UPSTREAM=https://github.com/Bilibili/libyuv.git
+IJK_LIBYUV_FORK=https://github.com/Bilibili/libyuv.git
+IJK_LIBYUV_COMMIT=ijk-r0.2.1-dev
+IJK_LIBYUV_LOCAL_REPO=$BASEDIR/extra/libyuv
 
 set -e
-TOOLS=tools
+TOOLS=$BASEDIR/tools
 
-echo "== pull $IJK_LIB_NAME base =="
-sh $TOOLS/pull-repo-base.sh $IJK_LIB_UPSTREAM $IJK_LIB_LOCAL_REPO
+echo "== pull libyuv base =="
+sh $TOOLS/pull-repo-base.sh $IJK_LIBYUV_UPSTREAM $IJK_LIBYUV_LOCAL_REPO
 
-echo "== pull $IJK_LIB_NAME fork =="
-sh $TOOLS/pull-repo-ref.sh $IJK_LIB_FORK ijkprof/$IJK_LIB_NAME ${IJK_LIB_LOCAL_REPO}
-cd ijkprof/$IJK_LIB_NAME
-git checkout ${IJK_LIB_COMMIT}
+echo "== pull libyuv fork =="
+sh $TOOLS/pull-repo-ref.sh $IJK_LIBYUV_FORK $BASEDIR/ijkmedia/ijkyuv ${IJK_LIBYUV_LOCAL_REPO}
+cd $BASEDIR/ijkmedia/ijkyuv
+git checkout ${IJK_LIBYUV_COMMIT}
 cd -

@@ -16,14 +16,17 @@
 # limitations under the License.
 #
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BASEDIR=$(dirname "$DIR")
+
 #IJK_OPENSSL_UPSTREAM=https://github.com/openssl/openssl
 IJK_OPENSSL_UPSTREAM=https://github.com/Bilibili/openssl.git
 IJK_OPENSSL_FORK=https://github.com/Bilibili/openssl.git
 IJK_OPENSSL_COMMIT=b34cf4eb61  #tag: OpenSSL_1_0_2r
-IJK_OPENSSL_LOCAL_REPO=extra/openssl
+IJK_OPENSSL_LOCAL_REPO=$BASEDIR/extra/openssl
 
 set -e
-TOOLS=tools
+TOOLS=$BASEDIR/tools
 
 echo "== pull openssl base =="
 sh $TOOLS/pull-repo-base.sh $IJK_OPENSSL_UPSTREAM $IJK_OPENSSL_LOCAL_REPO
@@ -31,8 +34,8 @@ sh $TOOLS/pull-repo-base.sh $IJK_OPENSSL_UPSTREAM $IJK_OPENSSL_LOCAL_REPO
 function pull_fork()
 {
     echo "== pull openssl fork $1 =="
-    sh $TOOLS/pull-repo-ref.sh $IJK_OPENSSL_FORK android/contrib/openssl-$1 ${IJK_OPENSSL_LOCAL_REPO}
-    cd android/contrib/openssl-$1
+    sh $TOOLS/pull-repo-ref.sh $IJK_OPENSSL_FORK $BASEDIR/android/contrib/openssl-$1 ${IJK_OPENSSL_LOCAL_REPO}
+    cd $BASEDIR/android/contrib/openssl-$1
     git checkout ${IJK_OPENSSL_COMMIT} -B ijkplayer
     cd -
 }
