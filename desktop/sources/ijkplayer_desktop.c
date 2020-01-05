@@ -25,7 +25,7 @@
 #include <inttypes.h>
 
 #include "ijkplayer_desktop.h"
-#include "ijkplayer/desktop/ijkplayer_underdesk.h"
+#include "ijkplayer/desktop/pipeline_desktop.h"
 #include "ijkplayer/ff_ffmsg_queue.h"
 
 
@@ -175,7 +175,6 @@ float ijkff_get_playback_volume(IjkFFMediaPlayer *fp)
 {
     assert(fp);
     return ijkmp_get_property_float(fp->mp, FFP_PROP_FLOAT_PLAYBACK_VOLUME, 1.0f);
-
 }
 
 void ijkff_set_stream_selected(IjkFFMediaPlayer *fp, int strean, bool selected)

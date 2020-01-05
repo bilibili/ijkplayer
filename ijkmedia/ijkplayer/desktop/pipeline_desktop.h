@@ -1,5 +1,5 @@
-﻿/*****************************************************************************
-* ijkplayer_desktop.h
+/*****************************************************************************
+* pipeline_desktop.h
 *****************************************************************************
 *
 * copyright (c) 2019 befovy <befovy@gmail.com>
@@ -21,10 +21,12 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef IJKPLAYER_IJKMEDIA_IJKPLAYER_DESKUNDER_PLAYER_H
-#define IJKPLAYER_IJKMEDIA_IJKPLAYER_DESKUNDER_PLAYER_H
+#ifndef IJKMEDIA_PLAYER_IJKPLAYER_DESKTOP_PIPELINE_H
+#define IJKMEDIA_PLAYER_IJKPLAYER_DESKTOP_PIPELINE_H
 
 #include "../ijkplayer.h"
+#include "../ff_ffpipeline.h"
+
 
 IjkMediaPlayer *ijkmp_desktop_create(int(*msg_loop)(void *));
 
@@ -34,5 +36,7 @@ typedef int (*ijkmp_video_draw)(void *userdata,
 
 int ijkmp_set_video_callback(IjkMediaPlayer *mp, void *userdata, ijkmp_video_draw callback);
 
+IJKFF_Pipeline *ffpipeline_create_desktop(FFPlayer *ffp);
 
-#endif //IJKPLAYER_IJKMEDIA_IJKPLAYER_DESKUNDER_PLAYER_H
+
+#endif // IJKMEDIA_PLAYER_IJKPLAYER_DESKTOP_PIPELINE_H

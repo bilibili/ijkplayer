@@ -24,16 +24,32 @@
 #ifndef IJKPLAYER_DESKTOP_IJKPLAYER_DESKTOP_H
 #define IJKPLAYER_DESKTOP_IJKPLAYER_DESKTOP_H
 
-#ifdef WIN32// Visual Studio specific macro
-# ifdef BUILDING_IJK
-#  define IJK_API __declspec(dllexport)
-# else
-#  define IJK_API __declspec(dllimport)
-# endif
-#else
-# define IJK_API __attribute__ ((visibility("default")))
+#ifdef __cplusplus
+exter "C" {
 #endif
 
+#if defined _WIN32 || defined __CYGWIN__
+  #ifdef BUILDING_IJK
+    #ifdef __GNUC__
+      #define IJK_API __attribute__ ((dllexport))
+    #else
+      #define IJK_API __declspec(dllexport) // Note: actually gcc seems to also supports this syntax.
+    #endif
+  #else
+    #ifdef __GNUC__
+      #define IJK_API __attribute__ ((dllimport))
+    #else
+      #define IJK_API __declspec(dllimport) // Note: actually gcc seems to also supports this syntax.
+    #endif
+  #endif
+  #define DLL_LOCAL
+#else
+  #if __GNUC__ >= 4
+    #define IJK_API __attribute__ ((visibility ("default")))
+  #else
+    #define IJK_API
+  #endif
+#endif
 
 #define IJK_LOG_UNKNOWN     0
 #define IJK_LOG_DEFAULT     1
@@ -44,10 +60,6 @@
 #define IJK_LOG_ERROR       6
 #define IJK_LOG_FATAL       7
 #define IJK_LOG_SILENT      8
-
-#ifdef __cplusplus
-exter "C" {
-#endif
 
 #include <stddef.h>
 #include <stdint.h>

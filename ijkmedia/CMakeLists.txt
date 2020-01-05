@@ -27,6 +27,9 @@ endif ()
 if(IJK_DESKTOP_UNI)
     add_subdirectory(portaudio)
     add_subdirectory(ijkyuv)
+
+    target_compile_options(portaudio_static PRIVATE "-Wno-deprecated-declarations")
+    target_compile_options(portaudio PRIVATE "-Wno-deprecated-declarations")
 endif()
 
 add_subdirectory(ijksdl)

@@ -157,11 +157,11 @@ elseif (APPLE)
     add_framework(IjkPlayer Security)
 endif ()
 
-add_executable(IjkDemo ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_demo.c)
+add_executable(tuidemo ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_demo.c)
 
 if (WIN32)
-    target_link_libraries(IjkDemo IjkPlayer user32)
+    target_link_libraries(tuidemo IjkPlayer user32)
 else ()
-    target_link_libraries(IjkDemo IjkPlayer)
+    target_link_libraries(tuidemo IjkPlayer)
 endif ()
 

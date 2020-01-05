@@ -1,5 +1,5 @@
 /*****************************************************************************
-* ijkplayer_desktop.c
+* pipeline_desktop.c
 *****************************************************************************
 *
 * copyright (c) 2019 befovy <befovy@gmail.com>
@@ -21,8 +21,15 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "ijkplayer_underdesk.h"
-#include "pipeline_underdesk.h"
+#include "pipeline_desktop.h"
+
+#include "../pipeline/ffpipeline_ffplay.h"
+#include "ijksdl/desktop/ijksdl_aout_port_audio.h"
+
+
+
+#include "ijkplayer_internal.h"
+#include "pipeline_desktop.h"
 #include "../ijkplayer_internal.h"
 
 #include "ijksdl/desktop/ijksdl_desktop.h"
@@ -55,3 +62,20 @@ int ijkmp_set_video_callback(IjkMediaPlayer *mp, void *userdata, ijkmp_video_dra
     return 0;
 }
 
+
+
+static SDL_Aout *func_open_audio_output_l(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
+{
+    SDL_Aout *aout = SDL_Aout_Port_Audio_Create();
+    return aout;
+}
+
+
+IJKFF_Pipeline *ffpipeline_create_desktop(FFPlayer *ffp)
+{
+    IJKFF_Pipeline *pipeline = ffpipeline_create_from_ffplay(ffp);
+    if (pipeline) {
+        pipeline->func_open_audio_output = func_open_audio_output_l;
+    }
+    return pipeline;
+}

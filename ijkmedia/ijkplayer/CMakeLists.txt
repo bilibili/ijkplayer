@@ -94,10 +94,8 @@ set(ANDROID_IJKPLAYER_SOURCES
 )
 
 set(DESKTOP_UNI_SOURCE
-    desktop/pipeline_underdesk.h    
-    desktop/pipeline_underdesk.c    
-    desktop/ijkplayer_underdesk.h
-    desktop/ijkplayer_underdesk.c
+    desktop/pipeline_desktop.h
+    desktop/pipeline_desktop.c
 )
 
 if (ANDROID)
