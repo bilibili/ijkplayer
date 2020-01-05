@@ -16,19 +16,22 @@
 # limitations under the License.
 #
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BASEDIR=$(dirname "$DIR")
+
 IJK_J4A_UPSTREAM=https://github.com/Bilibili/jni4android.git
 IJK_J4A_FORK=https://github.com/Bilibili/jni4android.git
 IJK_J4A_COMMIT=v0.0.2
-IJK_J4A_LOCAL_REPO=extra/jni4android
+IJK_J4A_LOCAL_REPO=$BASEDIR/extra/jni4android
 
 set -e
-TOOLS=tools
+TOOLS=$BASEDIR/tools
 
 echo "== pull j4a base =="
 sh $TOOLS/pull-repo-base.sh $IJK_J4A_UPSTREAM $IJK_J4A_LOCAL_REPO
 
 echo "== pull j4a fork =="
-sh $TOOLS/pull-repo-ref.sh $IJK_J4A_FORK extra/jni4android-fork ${IJK_J4A_LOCAL_REPO}
-cd extra/jni4android-fork
-git checkout ${IJK_J4A_COMMIT}
+sh $TOOLS/pull-repo-ref.sh $IJK_J4A_FORK $BASEDIR/extra/jni4android-fork ${IJK_J4A_LOCAL_REPO}
+cd $BASEDIR/extra/jni4android-fork
+git checkout ${IJK_J4A_COMMIT} -B ijkplayer-j4a
 cd -

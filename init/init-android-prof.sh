@@ -16,20 +16,23 @@
 # limitations under the License.
 #
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BASEDIR=$(dirname "$DIR")
 
-IJK_SOUNDTOUCH_UPSTREAM=https://github.com/Bilibili/soundtouch.git
-IJK_SOUNDTOUCH_FORK=https://github.com/Bilibili/soundtouch.git
-IJK_SOUNDTOUCH_COMMIT=ijk-r0.1.2-dev
-IJK_SOUNDTOUCH_LOCAL_REPO=extra/soundtouch
+IJK_LIB_NAME=android-ndk-profiler
+IJK_LIB_UPSTREAM=https://github.com/Bilibili/android-ndk-profiler.git
+IJK_LIB_FORK=https://github.com/Bilibili/android-ndk-profiler.git
+IJK_LIB_COMMIT=ijk-r0.3.0-dev
+IJK_LIB_LOCAL_REPO=$BASEDIR/extra/android-ndk-profiler
 
 set -e
 TOOLS=tools
 
-echo "== pull soundtouch base =="
-sh $TOOLS/pull-repo-base.sh $IJK_SOUNDTOUCH_UPSTREAM $IJK_SOUNDTOUCH_LOCAL_REPO
+echo "== pull $IJK_LIB_NAME base =="
+sh $TOOLS/pull-repo-base.sh $IJK_LIB_UPSTREAM $IJK_LIB_LOCAL_REPO
 
-echo "== pull soundtouch fork =="
-sh $TOOLS/pull-repo-ref.sh $IJK_SOUNDTOUCH_FORK ijkmedia/ijksoundtouch ${IJK_SOUNDTOUCH_LOCAL_REPO}
-cd ijkmedia/ijksoundtouch
-git checkout ${IJK_SOUNDTOUCH_COMMIT}
+echo "== pull $IJK_LIB_NAME fork =="
+sh $TOOLS/pull-repo-ref.sh $IJK_LIB_FORK $BASEDIR/ijkprof/$IJK_LIB_NAME ${IJK_LIB_LOCAL_REPO}
+cd $BASEDIR/ijkprof/$IJK_LIB_NAME
+git checkout ${IJK_LIB_COMMIT}
 cd -

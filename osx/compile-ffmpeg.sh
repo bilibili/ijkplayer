@@ -38,7 +38,7 @@ echo_archs() {
     echo "FF_ALL_ARCHS = $FF_ALL_ARCHS"
 }
 
-FF_LIBS="lcompat ibavcodec libavfilter libavformat libavutil libswscale libswresample"
+FF_LIBS="libcompat libavcodec libavfilter libavformat libavutil libswscale libswresample"
 
 
 
@@ -46,7 +46,6 @@ FF_LIBS="lcompat ibavcodec libavfilter libavformat libavutil libswscale libswres
 if [ "$FF_TARGET" = "x86_64" ]; then
     echo_archs
     sh tools/do-compile-ffmpeg.sh $FF_TARGET $FF_TARGET_EXTRA
-    do_lipo_all
 elif [ "$FF_TARGET" = "all" ]; then
     echo_archs
     for ARCH in $FF_ALL_ARCHS
