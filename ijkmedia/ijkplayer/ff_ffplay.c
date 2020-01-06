@@ -921,20 +921,21 @@ static void video_image_display2(FFPlayer *ffp)
                 }
             }
         }
-        if (ffp->render_wait_start && !ffp->start_on_prepared && is->pause_req) {
-            if (!ffp->first_video_frame_rendered) {
-                ffp->first_video_frame_rendered = 1;
-                ffp_notify_msg1(ffp, FFP_MSG_VIDEO_RENDERING_START);
-            }
+        if (!ffp->first_video_frame_rendered && ffp->render_wait_start &&
+            !ffp->start_on_prepared && is->pause_req) {
+            ALOGI("render_wait_start wait first video render\n");
             while (is->pause_req && !is->abort_request) {
                 SDL_Delay(20);
             }
         }
-        SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
+        int ret = SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
         ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
         if (!ffp->first_video_frame_rendered) {
             ffp->first_video_frame_rendered = 1;
             ffp_notify_msg1(ffp, FFP_MSG_VIDEO_RENDERING_START);
+            ALOGI("first video frame rendered, ret %d\n", ret);
+            if (ffp->cover_after_prepared && is->pause_req)
+                ffp_pause_l(ffp);
         }
 
         if (is->latest_video_seek_load_serial == vp->serial) {
@@ -1369,7 +1370,7 @@ retry:
             if (lastvp->serial != vp->serial)
                 is->frame_timer = av_gettime_relative() / 1000000.0;
 
-            if (is->paused)
+            if (is->paused && (ffp->first_video_frame_rendered || !ffp->cover_after_prepared))
                 goto display;
 
             /* compute nominal last_duration */
@@ -2727,10 +2728,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
         set_clock_at(&is->audclk, is->audio_clock - (double)(is->audio_write_buf_size) / is->audio_tgt.bytes_per_sec - SDL_AoutGetLatencySeconds(ffp->aout), is->audio_clock_serial, ffp->audio_callback_time / 1000000.0);
         sync_clock_to_slave(&is->extclk, &is->audclk);
     }
-    if (!ffp->first_audio_frame_rendered) {
-        ffp->first_audio_frame_rendered = 1;
-        ffp_notify_msg1(ffp, FFP_MSG_AUDIO_RENDERING_START);
-    }
+
 
     if (is->latest_audio_seek_load_serial == is->audio_clock_serial) {
 #ifdef WIN32
@@ -2747,10 +2745,18 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
         }
     }
 
-    if (ffp->render_wait_start && !ffp->start_on_prepared && is->pause_req) {
+    if (!ffp->first_audio_frame_rendered && ffp->render_wait_start &&
+        !ffp->start_on_prepared && is->pause_req) {
+        ALOGI("render_wait_start wait first audio render\n");
         while (is->pause_req && !is->abort_request) {
             SDL_Delay(20);
         }
+    }
+
+    if (!ffp->first_audio_frame_rendered) {
+        ffp->first_audio_frame_rendered = 1;
+        ffp_notify_msg1(ffp, FFP_MSG_AUDIO_RENDERING_START);
+        ALOGI("first audio frame rendered\n");
     }
 }
 
@@ -2974,7 +2980,8 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         }
         if ((ret = decoder_start(&is->auddec, audio_thread, ffp, "ff_audio_dec")) < 0)
             goto out;
-        SDL_AoutPauseAudio(ffp->aout, 0);
+        if (!is->paused && !ffp->cover_after_prepared)
+            SDL_AoutPauseAudio(ffp->aout, 0);
         break;
     case AVMEDIA_TYPE_VIDEO:
         is->video_stream = stream_index;
@@ -3357,7 +3364,7 @@ static int read_thread(void *arg)
     if (ffp->infinite_buffer < 0 && is->realtime)
         ffp->infinite_buffer = 1;
 
-    if (!ffp->render_wait_start && !ffp->start_on_prepared)
+    if (is->pause_req && !ffp->render_wait_start && !ffp->cover_after_prepared)
         toggle_pause(ffp, 1);
     if (is->video_st && is->video_st->codecpar) {
         AVCodecParameters *codecpar = is->video_st->codecpar;
@@ -3366,14 +3373,10 @@ static int read_thread(void *arg)
     }
     ffp->prepared = true;
     ffp_notify_msg1(ffp, FFP_MSG_PREPARED);
-    if (!ffp->render_wait_start && !ffp->start_on_prepared) {
-        while (is->pause_req && !is->abort_request &&
-            !ffp->render_wait_start && !ffp->start_on_prepared) {
+    if (!ffp->render_wait_start && !ffp->cover_after_prepared) {
+        while (is->pause_req && !is->abort_request) {
             SDL_Delay(20);
         }
-    }
-    if (is->pause_req && ffp->start_on_prepared) {
-        ffp->auto_resume = true;
     }
 
     if (ffp->auto_resume) {
@@ -3811,6 +3814,9 @@ static int video_refresh_thread(void *arg)
         if (remaining_time > 0.0)
             av_usleep((int)(int64_t)(remaining_time * 1000000.0));
         remaining_time = REFRESH_RATE;
+        if (ffp->cover_after_prepared && !ffp->first_video_frame_rendered) {
+            is->force_refresh = true;
+        }
         if (is->show_mode != SHOW_MODE_NONE && (!is->paused || is->force_refresh))
             video_refresh(ffp, &remaining_time);
     }

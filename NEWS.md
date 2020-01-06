@@ -1,5 +1,11 @@
 tag next
 --------------------------------
+
+tag f0.5.0 (2020-01-06)
+--------------------------------
+- feat: add option cover_after_prepared, show the first video as cover ([c64d2ab](https://github.com/befovy/ijkplayer/commit/c64d2ab5918468753630cb4e1e5364c0df9aecb2))
+- feat: make start and pause available during async-preparing ([9e2ef17](https://github.com/befovy/ijkplayer/commit/9e2ef174096dfe0750a0030f4c2ec6a3f4fe847c))
+
 tag f0.4.4
 --------------------------------
 - desktop: add libyuv for YUV2RGB
