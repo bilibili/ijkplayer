@@ -2,6 +2,9 @@ xcuserdata
 # xcshareddata
 *.xccheckout
 CocoaPodsPub/FIJKPlayer.framework
+CocoaPodsPub/IJKPlayer.framework
 CocoaPodsPub/FIJKPlayer.tar.gz
+CocoaPodsPub/IJKPlayer.tar.gz
 CocoaPodsPub/FIJKPlayer.tar.xz
+CocoaPodsPub/IJKPlayer.tar.xz
 CocoaPodsPub/LICENSE

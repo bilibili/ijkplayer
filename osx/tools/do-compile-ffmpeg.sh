@@ -114,7 +114,6 @@ FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-demuxers"
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-encoder=mjpeg"
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-hwaccels"
 
-
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-videotoolbox"
 
 echo "build_root: $FF_BUILD_ROOT"
@@ -163,7 +162,7 @@ echo "[*] make osx toolchain $FF_BUILD_NAME"
 echo "===================="
 
 FF_BUILD_SOURCE="$FF_BUILD_ROOT/$FF_BUILD_NAME"
-FF_BUILD_PREFIX="$FF_BUILD_ROOT/build/$FF_BUILD_NAME/output"
+FF_BUILD_PREFIX="$FF_BUILD_ROOT/build/"
 
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --prefix=$FF_BUILD_PREFIX"
 
@@ -209,10 +208,29 @@ if [ -f "${FFMPEG_DEP_OPENSSL_LIB}/libssl.a" ]; then
 
     FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_OPENSSL_INC}"
     FFMPEG_DEP_LIBS="$FFMPEG_CFLAGS -L${FFMPEG_DEP_OPENSSL_LIB} -lssl -lcrypto"
+
 else
     echo "openssl not found"
     exit 1;
 fi
+
+
+FFMPEG_DEP_LIBSRT_INC=${FF_BUILD_ROOT}/build/libsrt-x86_64/output/include
+FFMPEG_DEP_LIBSRT_LIB=${FF_BUILD_ROOT}/build/libsrt-x86_64/output/lib
+
+if [ -f "${FF_BUILD_ROOT}/build/lib/libsrt.a" ]; then
+    echo "detect libsrt"
+
+    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-libsrt"
+
+    FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_LIBSRT_INC}"
+    FFMPEG_DEP_LIBS="$FFMPEG_CFLAGS -L${FFMPEG_DEP_LIBSRT_LIB} -lsrt"
+
+fi
+
+export PKG_CONFIG_PATH="${FF_BUILD_ROOT}/build/lib/pkgconfig"
+echo "PKG_CONFIG_PATH ${PKG_CONFIG_PATH}"
+
 
 #--------------------
 echo "\n--------------------"
