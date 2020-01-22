@@ -169,6 +169,7 @@ typedef NS_ENUM(NSInteger, IJKMediaEvent) {
     IJKMediaEvent_DidHttpOpen          = 2,       // attr: url, error, http_code
     IJKMediaEvent_WillHttpSeek         = 3,       // attr: url, offset
     IJKMediaEvent_DidHttpSeek          = 4,       // attr: url, offset, error, http_code
+    IJKMediaEvent_DebugInfo            = 5,       // attr: value
     // Control Message
     IJKMediaCtrl_WillTcpOpen           = 0x20001, // IJKMediaUrlOpenData: no args
     IJKMediaCtrl_DidTcpOpen            = 0x20002, // IJKMediaUrlOpenData: error, family, ip, port, fd
@@ -183,6 +184,9 @@ typedef NS_ENUM(NSInteger, IJKMediaEvent) {
 #define IJKMediaEventAttrKey_time_of_event  @"time_of_event"
 #define IJKMediaEventAttrKey_http_code      @"http_code"
 #define IJKMediaEventAttrKey_offset         @"offset"
+#define IJKMediaEventAttrKey_decode_fps     @"decode_fps"
+#define IJKMediaEventAttrKey_output_fps     @"output_fps"
+#define IJKMediaEventAttrKey_display_fps    @"display_fps"
 
 // event of IJKMediaUrlOpenEvent_xxx
 @interface IJKMediaUrlOpenData: NSObject
