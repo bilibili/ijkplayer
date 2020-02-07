@@ -38,6 +38,7 @@
 #import "RKStreamLog.h"
 
 static const char *kIJKFFRequiredFFmpegVersion = "ff3.3--ijk0.8.0--20170710--001";
+static const int kMaxShutdownRetryTimes = 5;
 
 // It means you didn't call shutdown if you found this object leaked.
 @interface IJKWeakHolder : NSObject
@@ -56,6 +57,7 @@ typedef void(^VideoSyncFinishCallback)(uint64_t timestamp);
 @property (copy, nonatomic) VideoSyncFinishCallback vSyncFinishCallback;
 
 @property (nonatomic) BOOL isShutdown;
+@property (nonatomic) int shutdownRetryTimes;
 
 @end
 
@@ -532,12 +534,26 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     if (_isShutdown)
         return;
     _isShutdown = YES;
-
+    
     [self stopHudTimer];
     [self stopDebugInfoTimer];
     [self unregisterApplicationObservers];
     [self setScreenOn:NO];
+    
+    [self shutdown_l];
+}
 
+- (void)shutdown_l {
+    int state = ijkmp_get_state(_mediaPlayer);
+    if (state == MP_STATE_ASYNC_PREPARING && self.shutdownRetryTimes < kMaxShutdownRetryTimes) {
+        self.shutdownRetryTimes++;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self shutdown_l];
+        });
+        return;
+    }
+    
+    self.shutdownRetryTimes = 0;
     [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
 }
 
