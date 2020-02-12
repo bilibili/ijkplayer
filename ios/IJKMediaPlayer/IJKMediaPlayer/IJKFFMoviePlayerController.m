@@ -384,7 +384,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return;
 
 //    [self stopHudTimer];
-    [self stopDebugInfoTimer];
+//    [self stopDebugInfoTimer];
     ijkmp_pause(_mediaPlayer);
 }
 
@@ -396,7 +396,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     [self setScreenOn:NO];
 
     [self stopHudTimer];
-    [self stopDebugInfoTimer];
+//    [self stopDebugInfoTimer];
     ijkmp_stop(_mediaPlayer);
     
     if (self.shouldLogStream) {
@@ -536,7 +536,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     _isShutdown = YES;
     
     [self stopHudTimer];
-    [self stopDebugInfoTimer];
+//    [self stopDebugInfoTimer];
     [self unregisterApplicationObservers];
     [self setScreenOn:NO];
     
@@ -1169,7 +1169,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             ijkmp_set_playback_volume(_mediaPlayer, [self playbackVolume]);
 
             [self startHudTimer];
-            [self startDebugInfoTimer];
+//            [self startDebugInfoTimer];
             _isPreparedToPlay = YES;
 
             [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
