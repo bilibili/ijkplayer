@@ -384,7 +384,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return;
 
 //    [self stopHudTimer];
-//    [self stopDebugInfoTimer];
+    [self stopDebugInfoTimer];
     ijkmp_pause(_mediaPlayer);
 }
 
@@ -396,7 +396,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     [self setScreenOn:NO];
 
     [self stopHudTimer];
-//    [self stopDebugInfoTimer];
+    [self stopDebugInfoTimer];
     ijkmp_stop(_mediaPlayer);
     
     if (self.shouldLogStream) {
@@ -536,7 +536,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     _isShutdown = YES;
     
     [self stopHudTimer];
-//    [self stopDebugInfoTimer];
+    [self stopDebugInfoTimer];
     [self unregisterApplicationObservers];
     [self setScreenOn:NO];
     
@@ -935,7 +935,10 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
 }
 
 - (void)startDebugInfoTimer {
-    if (_debugInfoTimer != NULL) return;
+    if (_debugInfoTimer || !_shouldLogStream) {
+        return;
+    }
+    
     __weak __typeof(self) weakSelf = self;
     dispatch_queue_t timerQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, timerQueue);
@@ -952,13 +955,17 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
 }
 
 - (void)stopDebugInfoTimer {
-    if (_debugInfoTimer != NULL && dispatch_source_testcancel(_debugInfoTimer) == 0) {
+    if (_debugInfoTimer) {
         dispatch_source_cancel(_debugInfoTimer);
+        _debugInfoTimer = nil;
     }
-    _debugInfoTimer = nil;
 }
 
 - (void)sendDebugInfo {
+    if (!_mediaPlayer) {
+        return;
+    }
+
     float vdps = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_VIDEO_DECODE_FRAMES_PER_SECOND, .0f);
     float vfps = ijkmp_get_property_float(_mediaPlayer, FFP_PROP_FLOAT_VIDEO_OUTPUT_FRAMES_PER_SECOND, .0f);
     
@@ -1169,7 +1176,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             ijkmp_set_playback_volume(_mediaPlayer, [self playbackVolume]);
 
             [self startHudTimer];
-//            [self startDebugInfoTimer];
+            [self startDebugInfoTimer];
             _isPreparedToPlay = YES;
 
             [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
