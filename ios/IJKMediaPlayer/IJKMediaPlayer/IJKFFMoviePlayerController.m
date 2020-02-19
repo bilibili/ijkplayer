@@ -553,6 +553,15 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
         return;
     }
     
+    if (state != MP_STATE_STOPPED && self.shouldLogStream) {
+        NSTimeInterval end = [NSDate date].timeIntervalSince1970;
+        [[RKStreamLog logger] logWithDict:@{@"lt": @"bft",
+                                            @"pst": @(_playerInitTime),
+                                            @"psd": @(end),
+                                            @"num": @(_bufferingTimes)
+                                            }];
+    }
+    
     self.shutdownRetryTimes = 0;
     [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
 }
