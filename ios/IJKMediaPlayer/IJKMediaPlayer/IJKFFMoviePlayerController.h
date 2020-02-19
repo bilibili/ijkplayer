@@ -138,6 +138,7 @@ typedef enum IJKLogLevel {
 @property (copy, nonatomic) NSString *streamIp;
 @property (copy, nonatomic) NSString *streamDevice;
 // 17 log
+@property (nonatomic) BOOL shouldDumpDebugInfo;
 @property (nonatomic) BOOL shouldLogStream;
 @property (nonatomic) NSString *userId;
 @property (nonatomic) NSString *region;

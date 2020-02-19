@@ -944,7 +944,7 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
 }
 
 - (void)startDebugInfoTimer {
-    if (_debugInfoTimer || !_shouldLogStream) {
+    if (_debugInfoTimer || !_shouldLogStream || !_shouldDumpDebugInfo) {
         return;
     }
     
