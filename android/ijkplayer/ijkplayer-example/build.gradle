@@ -20,14 +20,26 @@ android {
         ndk {
             // Specifies the ABI configurations of your native
             // libraries Gradle should build and package with your APK.
-            abiFilters 'armeabi-v7a'//, 'arm64-v8a', 'armeabi', 'x86', 'x86_64'
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'armeabi', 'x86', 'x86_64'
         }
     }
+
+    signingConfigs {
+        release {
+            keyAlias 'key0'
+            keyPassword 'befovy'
+            storeFile file('./test.key')
+            storePassword 'helloworld'
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
+
     }
     flavorDimensions "ndkabi"
 
