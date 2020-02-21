@@ -27,7 +27,7 @@ android {
                 targets "ijkplayer"
             }
         }
-
+        consumerProguardFiles 'proguard-rules.pro'
         ndk {
             // Specifies the ABI configurations of your native
             // libraries Gradle should build and package with your APK.
@@ -39,7 +39,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

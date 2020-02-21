@@ -2,3 +2,4 @@ build
 ffmpeg-*
 libsoxr-*
 openssl-*
+libsrt-*

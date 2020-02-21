@@ -56,7 +56,7 @@ set(IJK_DESKTOP_CONTRIB_PATH ${IJKROOT_PATH}/desktop/contrib)
 
 if (IJK_X64)
     if (APPLE) 
-        set(IJK_FFMPAG_BUILD_DIR ${IJKROOT_PATH}/osx/contrib/build/ffmpeg-x86_64/output)
+        set(IJK_FFMPAG_BUILD_DIR ${IJKROOT_PATH}/osx/contrib/build/)
     else()
         set(IJK_FFMPAG_BUILD_DIR ${IJK_DESKTOP_CONTRIB_PATH}/ffmpeg/x64)
     endif()
@@ -85,8 +85,8 @@ add_definitions(-DIJK_DESKTOP_UNI)
 set(IJK_DESKTOP_UNI ON)
 
 set(FIJKPLAYER_SOURCE
-        ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.h
-        ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.c
+    ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.h
+    ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.c
 )
 
 add_library(IjkPlayer SHARED ${FIJKPLAYER_SOURCE})
@@ -106,20 +106,16 @@ if (WIN32)
     target_compile_options(IjkPlayer PRIVATE /W3 /we4013)
 endif ()
 
-add_library(avcodec STATIC IMPORTED)
-set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/lib/libavcodec.a)
+find_package(PkgConfig REQUIRED)
 
-add_library(avformat STATIC IMPORTED)
-set_target_properties(avformat PROPERTIES IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/lib/libavformat.a)
-
-add_library(avutil STATIC IMPORTED)
-set_target_properties(avutil PROPERTIES IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/lib/libavutil.a)
-
-add_library(swresample STATIC IMPORTED)
-set_target_properties(swresample PROPERTIES IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/lib/libswresample.a)
-
-add_library(swscale STATIC IMPORTED)
-set_target_properties(swscale PROPERTIES IMPORTED_LOCATION ${IJK_FFMPAG_BUILD_DIR}/lib/libswscale.a)
+if (APPLE)
+    # set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${IJKROOT_PATH}/osx/contrib/build")
+    # set(ENV{PKG_CONFIG_PATH} "${IJKROOT_PATH}/osx/contrib/build")
+    set(CMAKE_PREFIX_PATH ${IJKROOT_PATH}/osx/contrib/build)
+    pkg_check_modules(OPENSSL_STATIC openssl)
+    pkg_check_modules(SRT_STATIC REQUIRED srt)
+    pkg_check_modules(FFMPEG_STATIC REQUIRED libavcodec libavformat libavutil libswresample libswscale)
+endif ()
 
 if (WIN32)
     add_library(pthread STATIC IMPORTED)
@@ -127,9 +123,21 @@ if (WIN32)
     target_link_libraries(IjkPlayer pthread)
 endif ()
 
+message(STATUS "ffmpeg libs:${FFMPEG_STATIC_LIBRARIES}")
 
-target_link_libraries(IjkPlayer avcodec avformat avutil swresample swscale)
+target_link_libraries(IjkPlayer ${FFMPEG_STATIC_LIBRARIES})
+target_link_directories(IjkPlayer PUBLIC ${FFMPEG_STATIC_LIBRARY_DIRS})
 target_link_libraries(IjkPlayer portaudio_static)
+if (SRT_FOUND)
+    message(STATUS "SRT ${SRT_STATIC_LIBRARIES}")
+    target_link_libraries(IjkPlayer ${SRT_STATIC_LIBRARIES})
+    target_link_directories(IjkPlayer PUBLIC ${SRT_STATIC_LIBRARY_DIRS})
+endif()
+
+if(APPLE AND SRT_STATIC_FOUND)
+    set_target_properties(IjkPlayer PROPERTIES LINK_FLAGS "-Wl,-no_compact_unwind")
+endif()
+
 target_compile_definitions(IjkPlayer PRIVATE -DBUILDING_IJK=1)
 
 if (WIN32)
