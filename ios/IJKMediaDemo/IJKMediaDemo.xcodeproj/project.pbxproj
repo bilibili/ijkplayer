@@ -314,7 +314,7 @@
 				E654EAD71B6B28B100B0F2D0 /* IJKMediaFramework.framework */,
 				21B5D5B022D8A5E500A1D26D /* IJKMediaFrameworkWithSSL.framework */,
 				E654EAD91B6B28B100B0F2D0 /* IJKMediaFrameworkTests.xctest */,
-				21B5D5B222D8A5E500A1D26D /* FIJKPlayer.framework */,
+				21B5D5B222D8A5E500A1D26D /* IJKPlayer.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -389,10 +389,10 @@
 			remoteRef = 21B5D5AF22D8A5E500A1D26D /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		21B5D5B222D8A5E500A1D26D /* FIJKPlayer.framework */ = {
+		21B5D5B222D8A5E500A1D26D /* IJKPlayer.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = FIJKPlayer.framework;
+			path = IJKPlayer.framework;
 			remoteRef = 21B5D5B122D8A5E500A1D26D /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -551,11 +551,16 @@
 				DEVELOPMENT_TEAM = 7SUQ9UM9P2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					"IJK_IOS=1",
+				);
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = tv.danmaku.IJKMediaDemo.demo;
+				PRODUCT_BUNDLE_IDENTIFIER = tv.danmaku.IJKMediaDemo.befovy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -573,11 +578,12 @@
 				DEVELOPMENT_TEAM = 7SUQ9UM9P2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "IJKMediaDemo/IJKMediaDemo-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = "IJK_IOS=1";
 				INFOPLIST_FILE = "IJKMediaDemo/IJKMediaDemo-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = tv.danmaku.IJKMediaDemo.demo;
+				PRODUCT_BUNDLE_IDENTIFIER = tv.danmaku.IJKMediaDemo.befovy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
