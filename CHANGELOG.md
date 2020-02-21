@@ -1,5 +1,13 @@
-tag next
---------------------------------
+---
+### 0.5.1 (2020-02-21)
+
+### Features
+
+* add libsrt compile support for Android and mac ([#14](https://github.com/befovy/ijkplayer/issues/14)) ([f7764b6](https://github.com/befovy/ijkplayer/commit/f7764b6cd8b4da84910e57b94c0cd5614feb08e7))
+* add consumerProguardFiles fix minify crash, add test sign ([48859d7](https://github.com/befovy/ijkplayer/commit/48859d71f567067218d287ed439d448b2946bbdb))
+* add missing constant ([30b8baa](https://github.com/befovy/ijkplayer/commit/30b8baa52f5de50cb997189be472ee7fe513c1c1))
+
+---
 
 tag f0.5.0 (2020-01-06)
 --------------------------------
