@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0830"
+   LastUpgradeVersion = "1130"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "5450AFC11E63EA4300568494"
-               BuildableName = "IJKMediaFrameworkWithSSL.framework"
-               BlueprintName = "IJKMediaFrameworkWithSSL"
+               BlueprintIdentifier = "21E6F47922C39D0500611D3D"
+               BuildableName = "IJKPlayer.framework"
+               BlueprintName = "IJKPlayer"
                ReferencedContainer = "container:IJKMediaPlayer.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -40,15 +40,6 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5450AFC11E63EA4300568494"
-            BuildableName = "IJKMediaFrameworkWithSSL.framework"
-            BlueprintName = "IJKMediaFrameworkWithSSL"
-            ReferencedContainer = "container:IJKMediaPlayer.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -59,9 +50,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5450AFC11E63EA4300568494"
-            BuildableName = "IJKMediaFrameworkWithSSL.framework"
-            BlueprintName = "IJKMediaFrameworkWithSSL"
+            BlueprintIdentifier = "21E6F47922C39D0500611D3D"
+            BuildableName = "IJKPlayer.framework"
+            BlueprintName = "IJKPlayer"
             ReferencedContainer = "container:IJKMediaPlayer.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
