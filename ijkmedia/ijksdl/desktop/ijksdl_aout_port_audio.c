@@ -58,6 +58,7 @@ int portAudioStreamCallback(const void *input, void *output, unsigned long frame
   
     return paContinue;
 }
+
 static int aout_open_audio_l(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
     assert(aout);
@@ -138,18 +139,6 @@ static void aout_pause_audio_l(SDL_Aout *aout, int pause_on)
     }
     ALOGI("aout_uni, aout_pause_audio, aout(%p) pause(%d)\n", aout, pause_on);
 }
-
-static void aout_flush_audio_l(SDL_Aout *aout)
-{
-    SDL_Aout_Opaque *opaque = aout->opaque;
-}
-
-static double aout_get_latency_seconds_l(SDL_Aout *aout)
-{
-    // SDL_Aout_Opaque *opaque = aout->opaque;
-    return 0.0;
-}
-
 
 SDL_Aout *SDL_Aout_Port_Audio_Create()
 {

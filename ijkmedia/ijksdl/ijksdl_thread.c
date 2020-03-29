@@ -64,6 +64,7 @@ SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data
 }
 #endif
 
+#if !USE_SDL2
 int SDL_SetThreadPriority(SDL_ThreadPriority priority)
 {
 #ifndef WIN32
@@ -114,3 +115,5 @@ void SDL_DetachThread(SDL_Thread *thread)
     pthread_detach(thread->id);
 }
 #endif
+
+#endif // USE_SDL2

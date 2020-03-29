@@ -25,7 +25,9 @@
 #include "ijksdl_error.h"
 #include "ijksdl_stdinc.h"
 
+#if !USE_SDL2
 const char *SDL_GetError(void)
 {
     return NULL;
 }
+#endif

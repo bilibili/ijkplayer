@@ -22,6 +22,7 @@
 #ifndef IJKSDL__IJKSDL_CONTAINER_H
 #define IJKSDL__IJKSDL_CONTAINER_H
 
+#include <assert.h>
 #include <stdlib.h>
 
 typedef int isdl_error;

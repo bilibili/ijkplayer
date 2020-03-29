@@ -24,6 +24,7 @@
 #import "ijksdl_thread_ios.h"
 #include "ijksdl/ijksdl_thread.h"
 
+#if !USE_SDL2
 static void *SDL_RunThread(void *data)
 {
     @autoreleasepool {
@@ -45,3 +46,4 @@ SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data
 
     return thread;
 }
+#endif

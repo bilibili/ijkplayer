@@ -49,6 +49,7 @@ int nanosleep(const struct timespec *, struct timespec *) __DARWIN_ALIAS_C(nanos
 
 #include "ijksdl_log.h"
 
+#if !USE_SDL2
 void SDL_Delay(Uint32 ms)
 {
 #ifdef WIN32
@@ -67,6 +68,7 @@ void SDL_Delay(Uint32 ms)
     } while (was_error);
 #endif
 }
+#endif
 
 Uint64 SDL_GetTickHR(void)
 {

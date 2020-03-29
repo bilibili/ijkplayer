@@ -36,6 +36,7 @@
 
 #include "ijksdl_inc_internal.h"
 
+#if !USE_SDL2
 SDL_mutex *SDL_CreateMutex(void)
 {
     SDL_mutex *mutex;
@@ -56,14 +57,6 @@ void SDL_DestroyMutex(SDL_mutex *mutex)
     if (mutex) {
         pthread_mutex_destroy(&mutex->id);
         free(mutex);
-    }
-}
-
-void SDL_DestroyMutexP(SDL_mutex **mutex)
-{
-    if (mutex) {
-        SDL_DestroyMutex(*mutex);
-        *mutex = NULL;
     }
 }
 
@@ -105,15 +98,6 @@ void SDL_DestroyCond(SDL_cond *cond)
     if (cond) {
         pthread_cond_destroy(&cond->id);
         free(cond);
-    }
-}
-
-void SDL_DestroyCondP(SDL_cond **cond)
-{
-
-    if (cond) {
-        SDL_DestroyCond(*cond);
-        *cond = NULL;
     }
 }
 
@@ -184,4 +168,23 @@ int SDL_CondWait(SDL_cond *cond, SDL_mutex *mutex)
         return -1;
 
     return pthread_cond_wait(&cond->id, &mutex->id);
+}
+#endif // USE_SDL2
+
+
+void SDL_DestroyMutexP(SDL_mutex **mutex)
+{
+    if (mutex) {
+        SDL_DestroyMutex(*mutex);
+        *mutex = NULL;
+    }
+}
+
+void SDL_DestroyCondP(SDL_cond **cond)
+{
+
+    if (cond) {
+        SDL_DestroyCond(*cond);
+        *cond = NULL;
+    }
 }

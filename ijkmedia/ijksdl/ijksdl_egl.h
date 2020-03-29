@@ -22,6 +22,7 @@
 #ifndef IJKSDL__IJKSDL_EGL_H
 #define IJKSDL__IJKSDL_EGL_H
 
+#if !IJK_DESKTOP_UNI
 #ifdef __APPLE__
 #include "ijksdl/ios/EGL/egl.h"
 #include "ijksdl/ios/EGL/eglplatform.h"
@@ -67,5 +68,7 @@ void        IJK_EGL_freep(IJK_EGL **egl);
 
 EGLBoolean  IJK_EGL_display(IJK_EGL* egl, EGLNativeWindowType window, SDL_VoutOverlay *overlay);
 void        IJK_EGL_terminate(IJK_EGL* egl);
+
+#endif //IJK_DESKTOP_UNI
 
 #endif

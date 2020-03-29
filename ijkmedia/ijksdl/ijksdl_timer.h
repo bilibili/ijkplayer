@@ -27,8 +27,11 @@
 
 #include "ijksdl_stdinc.h"
 
+#if USE_SDL2
+#include <SDL_timer.h>
+#else
 void SDL_Delay(Uint32 ms);
-
+#endif
 Uint64 SDL_GetTickHR(void);
 
 

@@ -28,6 +28,9 @@
 #include "ijksdl_stdinc.h"
 #include "ijksdl_endian.h"
 
+#if USE_SDL2
+#include <SDL_stdinc.h>
+#else
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
 #   define SDL_FOURCC(a, b, c, d) \
         (((uint32_t)a) | (((uint32_t)b) << 8) | (((uint32_t)c) << 16) | (((uint32_t)d) << 24))
@@ -39,6 +42,8 @@
 #   define SDL_TWOCC( a, b ) \
         ((uint16_t)(b) | ((uint16_t)(a) << 8))
 #endif
+
+#endif // USE_SDL2
 
 /*-
  *  http://www.webartz.com/fourcc/indexyuv.htm

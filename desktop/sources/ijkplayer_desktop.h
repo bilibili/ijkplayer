@@ -25,7 +25,7 @@
 #define IJKPLAYER_DESKTOP_IJKPLAYER_DESKTOP_H
 
 #ifdef __cplusplus
-exter "C" {
+extern "C" {
 #endif
 
 #if defined _WIN32 || defined __CYGWIN__
@@ -60,6 +60,12 @@ exter "C" {
 #define IJK_LOG_ERROR       6
 #define IJK_LOG_FATAL       7
 #define IJK_LOG_SILENT      8
+
+#define IJK_OPT_CATEGORY_FORMAT 1
+#define IJK_OPT_CATEGORY_CODEC  2
+#define IJK_OPT_CATEGORY_SWS    3
+#define IJK_OPT_CATEGORY_PLAYER 4
+#define IJK_OPT_CATEGORY_SWR    5
 
 #include <stddef.h>
 #include <stdint.h>
@@ -128,6 +134,7 @@ IJK_API void ijkff_set_option(IjkFFMediaPlayer *fp, const char *value, const cha
 
 IJK_API void ijkff_set_int_option(IjkFFMediaPlayer *fp, int64_t value, const char *key, int category);
 
+IJK_API void ijkff_set_window(IjkFFMediaPlayer *fp, void *window);
 
 IJK_API void ijkff_set_event_cb(IjkFFMediaPlayer *fp, void *userdata, ijkff_event_cb cb);
 

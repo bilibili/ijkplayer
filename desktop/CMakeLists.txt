@@ -34,9 +34,9 @@ message(STATUS "IJKROOT_PATH ${IJKROOT_PATH}")
 
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
-    add_definitions(-DNDEBUG)
+    add_definitions(-DNDEBUG=1)
 elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    add_definitions(-DDEBUG)
+    add_definitions(-DDEBUG=1)
 endif ()
 
 if (CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -64,6 +64,9 @@ elseif (IJK_X86)
     set(IJK_FFMPAG_BUILD_DIR ${IJK_DESKTOP_CONTRIB_PATH}/ffmpeg/x86)
 endif ()
 
+include(CMakePrintHelpers)
+cmake_print_variables(IJK_FFMPAG_BUILD_DIR)
+
 if (WIN32)
     if (IJK_X64)
         set(IJK_DESKTOP_PTHREAD_BUILD_DIR ${IJK_DESKTOP_CONTRIB_PATH}/pthreads-w32-2-9-1-release/Pre-built.2/lib/x64)
@@ -81,12 +84,19 @@ else ()
 endif ()
 
 
-add_definitions(-DIJK_DESKTOP_UNI)
+find_package(SDL2 REQUIRED)
+
+add_definitions(-DUSE_SDL2=1)
+include_directories(${SDL2_INCLUDE_DIRS})
+
+add_definitions(-DIJK_DESKTOP_UNI=1)
 set(IJK_DESKTOP_UNI ON)
 
 set(FIJKPLAYER_SOURCE
     ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.h
     ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.c
+    #${CMAKE_CURRENT_LIST_DIR}/glad/include/glad/glad.h
+    ${CMAKE_CURRENT_LIST_DIR}/glfw/deps/glad_gl.c
 )
 
 add_library(IjkPlayer SHARED ${FIJKPLAYER_SOURCE})
@@ -96,6 +106,8 @@ add_subdirectory(../ijkmedia ijkmedia)
 target_include_directories(IjkPlayer PRIVATE ${IJKROOT_PATH}/ijkmedia)
 target_include_directories(IjkPlayer PRIVATE ${IJK_FFMPAG_BUILD_DIR}/include)
 target_include_directories(IjkPlayer PRIVATE "${IJK_DESKTOP_PTHREAD_BUILD_DIR}/../../include")
+#target_include_directories(IjkPlayer PRIVATE glad/include)
+target_include_directories(IjkPlayer PRIVATE glfw/deps)
 
 target_link_libraries(IjkPlayer ijksdl_static ijkplayer_static yuv)
 
@@ -106,15 +118,17 @@ if (WIN32)
     target_compile_options(IjkPlayer PRIVATE /W3 /we4013)
 endif ()
 
-find_package(PkgConfig REQUIRED)
-
 if (APPLE)
-    # set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${IJKROOT_PATH}/osx/contrib/build")
-    # set(ENV{PKG_CONFIG_PATH} "${IJKROOT_PATH}/osx/contrib/build")
-    set(CMAKE_PREFIX_PATH ${IJKROOT_PATH}/osx/contrib/build)
-    pkg_check_modules(OPENSSL_STATIC openssl)
-    pkg_check_modules(SRT_STATIC REQUIRED srt)
+    find_package(PkgConfig REQUIRED QUIET)
+    set(ENV{PKG_CONFIG_PATH} "${IJKROOT_PATH}/osx/contrib/build/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
     pkg_check_modules(FFMPEG_STATIC REQUIRED libavcodec libavformat libavutil libswresample libswscale)
+
+    cmake_print_variables(FFMPEG_STATIC_INCLUDE_DIRS)
+    cmake_print_variables(FFMPEG_STATIC_LIBRARIES)
+
+
+    target_link_libraries(IjkPlayer ${SDL2_LIBRARIES})
+
 endif ()
 
 if (WIN32)
@@ -125,9 +139,11 @@ endif ()
 
 message(STATUS "ffmpeg libs:${FFMPEG_STATIC_LIBRARIES}")
 
+cmake_print_variables(FFMPEG_STATIC_LIBRARIES)
+
 target_link_libraries(IjkPlayer ${FFMPEG_STATIC_LIBRARIES})
 target_link_directories(IjkPlayer PUBLIC ${FFMPEG_STATIC_LIBRARY_DIRS})
-target_link_libraries(IjkPlayer portaudio_static)
+target_link_libraries(IjkPlayer portaudio_static )
 if (SRT_FOUND)
     message(STATUS "SRT ${SRT_STATIC_LIBRARIES}")
     target_link_libraries(IjkPlayer ${SRT_STATIC_LIBRARIES})
@@ -170,7 +186,27 @@ elseif (APPLE)
     add_framework(IjkPlayer Security)
 endif ()
 
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(GLFW_INSTALL OFF)
+set(GLFW_BUILD_DOCS OFF)
+add_subdirectory(glfw)
+
+#target_link_libraries(IjkPlayer glfw)
+
 add_executable(tuidemo ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_demo.c)
+# target_include_directories(tuidemo PRIVATE glad/include)
+target_include_directories(tuidemo PRIVATE glfw/include)
+target_include_directories(tuidemo PRIVATE glfw/deps)
+
+#target_include_directories(tuidemo PRIVATE spdlog/include)
+#target_link_libraries(tuidemo glfw)
+
+if (APPLE)
+    # set_target_properties(tuidemo PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "tuidemo")
+    add_compile_definitions(APPLE=1)
+endif()
+
 
 if (WIN32)
     target_link_libraries(tuidemo IjkPlayer user32)
