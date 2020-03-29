@@ -32,7 +32,9 @@ set(IJKROOT_PATH "${PROJECT_SOURCE_DIR}/..")
 get_filename_component(IJKROOT_PATH ${IJKROOT_PATH} ABSOLUTE)
 message(STATUS "IJKROOT_PATH ${IJKROOT_PATH}")
 
-
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug")
+endif()
 if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     add_definitions(-DNDEBUG=1)
 elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
@@ -194,7 +196,7 @@ add_subdirectory(glfw)
 
 #target_link_libraries(IjkPlayer glfw)
 
-add_executable(tuidemo ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_demo.c)
+add_executable(tuidemo WIN32 MACOSX_BUNDLE ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_demo.c)
 # target_include_directories(tuidemo PRIVATE glad/include)
 target_include_directories(tuidemo PRIVATE glfw/include)
 target_include_directories(tuidemo PRIVATE glfw/deps)
@@ -203,7 +205,7 @@ target_include_directories(tuidemo PRIVATE glfw/deps)
 #target_link_libraries(tuidemo glfw)
 
 if (APPLE)
-    # set_target_properties(tuidemo PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "tuidemo")
+    set_target_properties(tuidemo PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "tuidemo")
     add_compile_definitions(APPLE=1)
 endif()
 
