@@ -35,8 +35,10 @@ static void *SDL_RunThread(void *data)
     }
 }
 
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data, const char *name)
+SDL_Thread *SDL_CreateThread(int (*fn)(void *), const char *name, void *data)
 {
+    SDL_Thread *thread = malloc(sizeof(SDL_Thread));
+    memset(thread, 0, sizeof(SDL_Thread));
     thread->func = fn;
     thread->data = data;
     strlcpy(thread->name, name, sizeof(thread->name) - 1);
