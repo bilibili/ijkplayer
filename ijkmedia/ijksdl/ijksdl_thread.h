@@ -51,7 +51,7 @@ void        SDL_WaitThread(SDL_Thread *thread, int *status);
 int         SDL_SetThreadPriority(SDL_ThreadPriority priority);
 void        SDL_DetachThread(SDL_Thread *thread);
 
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data, const char *name);
+SDL_Thread *SDL_CreateThread(int (*fn)(void *), const char *name, void *data);
 
 #endif // USE_SDL2
 

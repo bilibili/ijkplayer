@@ -53,7 +53,7 @@ typedef struct SDL_Aout_Opaque {
     SDL_mutex  *wakeup_mutex;
 
     SDL_Thread *audio_tid;
-    SDL_Thread _audio_tid;
+    // SDL_Thread _audio_tid;
 
     SDL_AudioSpec    spec;
     SLDataFormat_PCM format_pcm;
@@ -419,7 +419,8 @@ static int aout_open_audio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_Aud
 
     opaque->pause_on = 1;
     opaque->abort_request = 0;
-    opaque->audio_tid = SDL_CreateThreadEx(&opaque->_audio_tid, aout_thread, aout, "ff_aout_opensles");
+    // opaque->audio_tid = SDL_CreateThreadEx(&opaque->_audio_tid, aout_thread, aout, "ff_aout_opensles");
+    opaque->audio_tid = SDL_CreateThread(aout_thread, "ff_aout_opensles", aout);
     CHECK_COND_ERROR(opaque->audio_tid, "%s: failed to SDL_CreateThreadEx", __func__);
 
     if (obtained) {

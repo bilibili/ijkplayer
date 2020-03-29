@@ -88,7 +88,7 @@ typedef struct IJKFF_Pipenode_Opaque {
     size_t                    nal_size;
 #endif
 
-    SDL_Thread               _enqueue_thread;
+    // SDL_Thread               _enqueue_thread;
     SDL_Thread               *enqueue_thread;
 
     SDL_mutex                *acodec_mutex;
@@ -1589,7 +1589,8 @@ static int func_run_sync(IJKFF_Pipenode *node)
     if (!frame)
         goto fail;
 
-    opaque->enqueue_thread = SDL_CreateThreadEx(&opaque->_enqueue_thread, enqueue_thread_func, node, "amediacodec_input_thread");
+    // opaque->enqueue_thread = SDL_CreateThreadEx(&opaque->_enqueue_thread, enqueue_thread_func, node, "amediacodec_input_thread");
+    opaque->enqueue_thread = SDL_CreateThread(enqueue_thread_func, "amediacodec_input_thread", node);
     if (!opaque->enqueue_thread) {
         ALOGE("%s: SDL_CreateThreadEx failed\n", __func__);
         ret = -1;
