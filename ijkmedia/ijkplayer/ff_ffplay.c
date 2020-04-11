@@ -2194,7 +2194,8 @@ static int audio_thread(void *arg)
 static int decoder_start(Decoder *d, int (*fn)(void *), void *arg, const char *name)
 {
     packet_queue_start(d->queue);
-    d->decoder_tid = SDL_CreateThreadEx(&d->_decoder_tid, fn, arg, name);
+    // d->decoder_tid = SDL_CreateThreadEx(&d->_decoder_tid, fn, arg, name);
+    d->decoder_tid = SDL_CreateThread(fn, name, arg);
     if (!d->decoder_tid) {
         av_log(NULL, AV_LOG_ERROR, "SDL_CreateThread(): %s\n", SDL_GetError());
         return AVERROR(ENOMEM);
@@ -3753,14 +3754,16 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     ffp->is = is;
     is->pause_req = !ffp->start_on_prepared;
 
-    is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp, "ff_vout");
+    // is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp, "ff_vout");
+    is->video_refresh_tid = SDL_CreateThread(video_refresh_thread, "ff_vout", ffp);
     if (!is->video_refresh_tid) {
         av_freep(&ffp->is);
         return NULL;
     }
 
     is->initialized_decoder = 0;
-    is->read_tid = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp, "ff_read");
+    // is->read_tid = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp, "ff_read");
+    is->read_tid = SDL_CreateThread(read_thread, "ff_read", ffp);
     if (!is->read_tid) {
         av_log(NULL, AV_LOG_FATAL, "SDL_CreateThread(): %s\n", SDL_GetError());
         goto fail;

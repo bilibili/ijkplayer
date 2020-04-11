@@ -24,15 +24,9 @@
 #include "pipeline_desktop.h"
 
 #include "../pipeline/ffpipeline_ffplay.h"
-#include "ijksdl/desktop/ijksdl_aout_port_audio.h"
-
-
-
-#include "ijkplayer_internal.h"
-#include "pipeline_desktop.h"
-#include "../ijkplayer_internal.h"
-
 #include "ijksdl/desktop/ijksdl_desktop.h"
+#include "ijksdl/dummy/ijksdl_dummy.h"
+#include "../ijkplayer_internal.h"
 
 IjkMediaPlayer *ijkmp_desktop_create(int(*msg_loop)(void *))
 {
@@ -40,14 +34,17 @@ IjkMediaPlayer *ijkmp_desktop_create(int(*msg_loop)(void *))
     if (!mp)
         goto fail;
 
-    mp->ffplayer->vout = SDL_Vout_Callback_Create();
+    // mp->ffplayer->vout = SDL_VoutDummy_Create();
+    // mp->ffplayer->vout = SDL_Vout_Callback_Create();
+    // mp->ffplayer->vout = SDL_Vout_glfw_Create();
+    mp->ffplayer->vout = SDL_Vout_sdl2_Create();
     if (!mp->ffplayer->vout)
         goto fail;
 
     mp->ffplayer->pipeline = ffpipeline_create_desktop(mp->ffplayer);
 
     return mp;
-fail:
+    fail:
     ijkmp_dec_ref_p(&mp);
     return NULL;
 }
@@ -62,11 +59,23 @@ int ijkmp_set_video_callback(IjkMediaPlayer *mp, void *userdata, ijkmp_video_dra
     return 0;
 }
 
+int ijkmp_set_window(IjkMediaPlayer *mp, void *window)
+{
+    if (!mp || !mp->ffplayer || !mp->ffplayer->vout)
+        return -1;
+    SDL_Vout *vout = mp->ffplayer->vout;
 
+    SDL_VoutSetWindow(vout, window);
+    return 0;
+}
 
 static SDL_Aout *func_open_audio_output_l(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
 {
-    SDL_Aout *aout = SDL_Aout_Port_Audio_Create();
+    SDL_Aout *aout = NULL;
+    if (ffp->aout_type == 0)
+        aout = SDL_Aout_SDL2_Audio_Create();
+    else if (ffp->aout_type == 1)
+        aout = SDL_Aout_Port_Audio_Create();
     return aout;
 }
 

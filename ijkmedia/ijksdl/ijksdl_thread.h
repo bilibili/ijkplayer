@@ -25,6 +25,10 @@
 #ifndef IJKSDL__IJKSDL_THREAD_H
 #define IJKSDL__IJKSDL_THREAD_H
 
+#if USE_SDL2
+#include <SDL_thread.h>
+#else
+
 #include <stdint.h>
 #include <pthread.h>
 
@@ -43,9 +47,12 @@ typedef struct SDL_Thread
     int retval;
 } SDL_Thread;
 
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data, const char *name);
-int         SDL_SetThreadPriority(SDL_ThreadPriority priority);
 void        SDL_WaitThread(SDL_Thread *thread, int *status);
+int         SDL_SetThreadPriority(SDL_ThreadPriority priority);
 void        SDL_DetachThread(SDL_Thread *thread);
+
+SDL_Thread *SDL_CreateThread(int (*fn)(void *), const char *name, void *data);
+
+#endif // USE_SDL2
 
 #endif

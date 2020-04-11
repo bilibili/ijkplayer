@@ -84,8 +84,16 @@ set(SDL_DESKTOP_UNI_SOURCES
     desktop/ijksdl_desktop.h
     desktop/ijksdl_aout_port_audio.h    
     desktop/ijksdl_aout_port_audio.c
+    desktop/ijksdl_aout_sdl2_audio.c
+    desktop/ijksdl_aout_sdl2_audio.h
     desktop/ijksdl_vout_uni_callback.c
     desktop/ijksdl_vout_uni_callback.h
+    desktop/ijksdl_desktop_vout_glfw.c
+    desktop/ijksdl_desktop_vout_glfw.h
+    desktop/ijksdl_desktop_gl.c
+    desktop/ijksdl_desktop_gl.h
+    desktop/ijksdl_vout_sdl2_video.c
+    desktop/ijksdl_vout_sdl2_video.h
 )
 
 set(SDL_MAC_OSX_SOURCES
@@ -116,12 +124,24 @@ if (ANDROID)
 endif ()
 
 if (IJK_DESKTOP_UNI)
-    set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_DESKTOP_UNI_SOURCES})
+    find_package(SDL2 REQUIRED)
+
+    set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_DESKTOP_UNI_SOURCES} ${GLES2_SOURCES})
     if (APPLE AND IJK_DESKTOP_UNI)
         set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_MAC_OSX_SOURCES})
+        # list(APPEND IJK_SDL_SOURCES gles2/renderer_yuv420sp.c)
+        # list(APPEND IJK_SDL_SOURCES gles2/fsh/yuv420sp.fsh.c)
+
     endif ()
     add_library(ijksdl_static STATIC ${IJK_SDL_SOURCES})
     set(IJKSDL_LIB_NAME ijksdl_static)
+
+    target_include_directories(ijksdl_static PRIVATE ${SDL2_INCLUDE_DIRS})
+    cmake_print_variables(SDL2_INCLUDE_DIRS)
+
+    target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glfw/include)
+    # target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glad/include)
+    target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glfw/deps)
 else ()
     add_library(ijksdl SHARED ${IJK_SDL_SOURCES})
     set(IJKSDL_LIB_NAME ijksdl)

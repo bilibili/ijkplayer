@@ -28,6 +28,9 @@
 #include "ijksdl_stdinc.h"
 #include "ijksdl_endian.h"
 
+#if USE_SDL2
+#include <SDL_audio.h>
+#else
 typedef uint16_t SDL_AudioFormat;
 
 #define SDL_AUDIO_MASK_BITSIZE       (0xFF)
@@ -96,5 +99,7 @@ void SDL_MixAudio(Uint8*       dst,
                   const Uint8* src,
                   Uint32       len,
                   int          volume);
+
+#endif //USE_SDL2
 
 #endif

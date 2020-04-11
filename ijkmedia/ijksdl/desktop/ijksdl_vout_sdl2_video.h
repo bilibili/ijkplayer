@@ -1,8 +1,8 @@
 /*****************************************************************************
-* pipeline_desktop.h
+* ijksdl_vout_callback.c
 *****************************************************************************
 *
-* copyright (c) 2019 befovy <befovy@gmail.com>
+* copyright (c) 2020 befovy <befovy@gmail.com>
 *
 * This file is part of ijkPlayer.
 *
@@ -21,24 +21,13 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef IJKMEDIA_PLAYER_IJKPLAYER_DESKTOP_PIPELINE_H
-#define IJKMEDIA_PLAYER_IJKPLAYER_DESKTOP_PIPELINE_H
+#ifndef IJKPLAYER_IJKSDL_VOUT_SDL2_VIDEO_H
+#define IJKPLAYER_IJKSDL_VOUT_SDL2_VIDEO_H
 
-#include "../ijkplayer.h"
-#include "../ff_ffpipeline.h"
+#include "../ijksdl_vout.h"
 
+SDL_Vout *SDL_Vout_sdl2_Create();
 
-IjkMediaPlayer *ijkmp_desktop_create(int(*msg_loop)(void *));
+int SDL_Vout_SDL2_Set_Window(SDL_Vout *vout, void *window);
 
-typedef int (*ijkmp_video_draw)(void *userdata, 
-    int w, int h, int sar_num, int sar_den, 
-    int planes, uint16_t *linesize, uint8_t **pixels);
-
-int ijkmp_set_video_callback(IjkMediaPlayer *mp, void *userdata, ijkmp_video_draw callback);
-
-IJKFF_Pipeline *ffpipeline_create_desktop(FFPlayer *ffp);
-
-
-int ijkmp_set_window(IjkMediaPlayer *mp, void* window);
-
-#endif // IJKMEDIA_PLAYER_IJKPLAYER_DESKTOP_PIPELINE_H
+#endif //IJKPLAYER_IJKSDL_VOUT_SDL2_VIDEO_H

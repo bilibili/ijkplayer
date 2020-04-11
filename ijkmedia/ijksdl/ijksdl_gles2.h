@@ -22,6 +22,11 @@
 #ifndef IJKSDL__IJKSDL_GLES2_H
 #define IJKSDL__IJKSDL_GLES2_H
 
+#if IJK_DESKTOP_UNI
+#include <glad/gl.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#else
 #ifdef __APPLE__
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
@@ -29,6 +34,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES2/gl2platform.h>
+#endif
 #endif
 
 typedef struct SDL_VoutOverlay SDL_VoutOverlay;

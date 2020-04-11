@@ -167,7 +167,7 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create(SDL_VoutOverlay *overlay)
         case SDL_FCC_RV16:      renderer = IJK_GLES2_Renderer_create_rgb565(); break;
         case SDL_FCC_RV24:      renderer = IJK_GLES2_Renderer_create_rgb888(); break;
         case SDL_FCC_RV32:      renderer = IJK_GLES2_Renderer_create_rgbx8888(); break;
-#ifdef __APPLE__
+#if defined(__APPLE__) && !IJK_DESKTOP_UNI
         case SDL_FCC_NV12:      renderer = IJK_GLES2_Renderer_create_yuv420sp(); break;
         case SDL_FCC__VTB:      renderer = IJK_GLES2_Renderer_create_yuv420sp_vtb(overlay); break;
 #endif

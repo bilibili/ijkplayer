@@ -25,7 +25,7 @@
 #define IJKPLAYER_DESKTOP_IJKPLAYER_DESKTOP_H
 
 #ifdef __cplusplus
-exter "C" {
+extern "C" {
 #endif
 
 #if defined _WIN32 || defined __CYGWIN__
@@ -60,6 +60,54 @@ exter "C" {
 #define IJK_LOG_ERROR       6
 #define IJK_LOG_FATAL       7
 #define IJK_LOG_SILENT      8
+
+#define IJK_OPT_CATEGORY_FORMAT 1
+#define IJK_OPT_CATEGORY_CODEC  2
+#define IJK_OPT_CATEGORY_SWS    3
+#define IJK_OPT_CATEGORY_PLAYER 4
+#define IJK_OPT_CATEGORY_SWR    5
+
+#define IJK_STATE_IDLE               0
+#define IJK_STATE_INITIALIZED        1
+#define IJK_STATE_ASYNC_PREPARING    2
+#define IJK_STATE_PREPARED           3
+#define IJK_STATE_STARTED            4
+#define IJK_STATE_PAUSED             5
+#define IJK_STATE_COMPLETED          6
+#define IJK_STATE_STOPPED            7
+#define IJK_STATE_ERROR              8
+#define IJK_STATE_END                9
+
+
+#define IJK_MSG_FLUSH                       0
+#define IJK_MSG_ERROR                       100     /* arg1 = error */
+#define IJK_MSG_PREPARED                    200
+#define IJK_MSG_COMPLETED                   300
+#define IJK_MSG_VIDEO_SIZE_CHANGED          400     /* arg1 = width, arg2 = height */
+#define IJK_MSG_SAR_CHANGED                 401     /* arg1 = sar.num, arg2 = sar.den */
+#define IJK_MSG_VIDEO_RENDERING_START       402
+#define IJK_MSG_AUDIO_RENDERING_START       403
+#define IJK_MSG_VIDEO_ROTATION_CHANGED      404     /* arg1 = degree */
+#define IJK_MSG_AUDIO_DECODED_START         405
+#define IJK_MSG_VIDEO_DECODED_START         406
+#define IJK_MSG_OPEN_INPUT                  407
+#define IJK_MSG_FIND_STREAM_INFO            408
+#define IJK_MSG_COMPONENT_OPEN              409
+#define IJK_MSG_VIDEO_SEEK_RENDERING_START  410
+#define IJK_MSG_AUDIO_SEEK_RENDERING_START  411
+
+#define IJK_MSG_BUFFERING_START             500
+#define IJK_MSG_BUFFERING_END               501
+#define IJK_MSG_BUFFERING_UPDATE            502     /* arg1 = buffering head position in time, arg2 = minimum percent in time or bytes */
+#define IJK_MSG_BUFFERING_BYTES_UPDATE      503     /* arg1 = cached data in bytes,            arg2 = high water mark */
+#define IJK_MSG_BUFFERING_TIME_UPDATE       504     /* arg1 = cached duration in milliseconds, arg2 = high water mark */
+#define IJK_MSG_CURRENT_POSITION_UPDATE     510     /* arg1 = current position in milliseconds */
+#define IJK_MSG_SEEK_COMPLETE               600     /* arg1 = seek position,                   arg2 = error */
+#define IJK_MSG_PLAYBACK_STATE_CHANGED      700
+#define IJK_MSG_TIMED_TEXT                  800
+#define IJK_MSG_ACCURATE_SEEK_COMPLETE      900     /* arg1 = current position*/
+#define IJK_MSG_GET_IMG_STATE               1000    /* arg1 = timestamp, arg2 = result code, obj = file name*/
+
 
 #include <stddef.h>
 #include <stdint.h>
@@ -128,6 +176,7 @@ IJK_API void ijkff_set_option(IjkFFMediaPlayer *fp, const char *value, const cha
 
 IJK_API void ijkff_set_int_option(IjkFFMediaPlayer *fp, int64_t value, const char *key, int category);
 
+IJK_API void ijkff_set_window(IjkFFMediaPlayer *fp, void *window);
 
 IJK_API void ijkff_set_event_cb(IjkFFMediaPlayer *fp, void *userdata, ijkff_event_cb cb);
 

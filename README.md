@@ -263,6 +263,8 @@ make IjkPlayer
 make tuidemo
 ```
 
+**Or you can open ijkplayer as a CMakeLists.txt project using Clion.**
+
 tuidemo is a terminal UI demo for ijkplayer in progress, it can't display video yet.
 
 `libIjkPlayer.dylib` is the output dynamic library.

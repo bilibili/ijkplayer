@@ -24,8 +24,10 @@
 
 #include "ijksdl_stdinc.h"
 
+#if !USE_SDL2
 char *SDL_getenv(const char *name)
 {
     return NULL;
 }
+#endif
 
