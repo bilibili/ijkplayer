@@ -208,6 +208,11 @@ void ijkff_set_int_option(IjkFFMediaPlayer *fp, int64_t value, const char *key, 
     ijkmp_set_option_int(fp->mp, category, key, value);
 }
 
+void ijkff_set_window(IjkFFMediaPlayer *fp, void *window)
+{
+    assert(fp);
+    ijkmp_set_window(fp->mp, window);
+}
 
 void ijkff_set_event_cb(IjkFFMediaPlayer *fp, void *userdata, ijkff_event_cb cb)
 {

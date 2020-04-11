@@ -1,8 +1,8 @@
 /*****************************************************************************
-* pipeline_desktop.h
+* ijksdl_vout_callback.c
 *****************************************************************************
 *
-* copyright (c) 2019 befovy <befovy@gmail.com>
+* copyright (c) 2020 befovy <befovy@gmail.com>
 *
 * This file is part of ijkPlayer.
 *
@@ -21,24 +21,36 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef IJKMEDIA_PLAYER_IJKPLAYER_DESKTOP_PIPELINE_H
-#define IJKMEDIA_PLAYER_IJKPLAYER_DESKTOP_PIPELINE_H
 
-#include "../ijkplayer.h"
-#include "../ff_ffpipeline.h"
+#ifndef IJKPLAYER_IJKSDL_DESKTOP_GL_H
+#define IJKPLAYER_IJKSDL_DESKTOP_GL_H
+
+#include "ijksdl_class.h"
+#include "../ijksdl_gles2.h"
+
+typedef struct SDL_VoutOverlay SDL_VoutOverlay;
+typedef struct IJK_GL_Opaque  IJK_GL_Opaque;
+
+typedef struct IJK_GL
+{
+    SDL_Class      *opaque_class;
+    IJK_GL_Opaque *opaque;
+
+    GLFWwindow *window;
+    GLboolean  attached;
+
+    GLint width;
+    GLint height;
+
+} IJK_GL;
 
 
-IjkMediaPlayer *ijkmp_desktop_create(int(*msg_loop)(void *));
-
-typedef int (*ijkmp_video_draw)(void *userdata, 
-    int w, int h, int sar_num, int sar_den, 
-    int planes, uint16_t *linesize, uint8_t **pixels);
-
-int ijkmp_set_video_callback(IjkMediaPlayer *mp, void *userdata, ijkmp_video_draw callback);
-
-IJKFF_Pipeline *ffpipeline_create_desktop(FFPlayer *ffp);
+IJK_GL    *IJK_GL_create();
+void       IJK_GL_free(IJK_GL *gl);
+void       IJK_GL_freep(IJK_GL **gl);
 
 
-int ijkmp_set_window(IjkMediaPlayer *mp, void* window);
+GLboolean  IJK_GL_display(IJK_GL* egl, GLFWwindow *window, SDL_VoutOverlay *overlay);
+void       IJK_GL_terminate(IJK_GL* egl);
 
-#endif // IJKMEDIA_PLAYER_IJKPLAYER_DESKTOP_PIPELINE_H
+#endif //IJKPLAYER_IJKSDL_DESKTOP_GL_H

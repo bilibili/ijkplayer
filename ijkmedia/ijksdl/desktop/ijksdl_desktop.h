@@ -27,6 +27,9 @@
 #include "../ijksdl.h"
 
 #include "ijksdl_aout_port_audio.h"
+#include "ijksdl_aout_sdl2_audio.h"
 #include "ijksdl_vout_uni_callback.h"
+#include "ijksdl_desktop_vout_glfw.h"
+#include "ijksdl_vout_sdl2_video.h"
 
 #endif // IJKPLAYER_IJKMEDIA_IJKSDL_DESKTOP_H

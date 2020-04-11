@@ -36,7 +36,6 @@ local.properties
 # Android Studio
 .idea
 .gradle
-build/
 
 # Xcode
 xcuserdata
@@ -46,3 +45,5 @@ xcshareddata
 
 # osx
 # osx/
+cmake-build-debug/
+cmake-build-release/

@@ -51,19 +51,21 @@ static void *SDL_RunThread(void *data)
     return NULL;
 }
 
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data, const char *name)
+SDL_Thread *SDL_CreateThread(int (*fn)(void *), const char *name, void *data)
 {
+    SDL_Thread *thread = mallocz(sizeof(SDL_Thread));
     thread->func = fn;
     thread->data = data;
-    av_strlcpy(thread->name, name, sizeof(thread->name) - 1);
+    av_strlcpy(thread->name, name, sizeof(thread->name)-1);
     int retval = pthread_create(&thread->id, NULL, SDL_RunThread, thread);
     if (retval)
         return NULL;
-
     return thread;
 }
+
 #endif
 
+#if !USE_SDL2
 int SDL_SetThreadPriority(SDL_ThreadPriority priority)
 {
 #ifndef WIN32
@@ -102,6 +104,8 @@ void SDL_WaitThread(SDL_Thread *thread, int *status)
 
     if (status)
         *status = thread->retval;
+
+    free(thread);
 }
 
 #ifndef WIN32
@@ -114,3 +118,5 @@ void SDL_DetachThread(SDL_Thread *thread)
     pthread_detach(thread->id);
 }
 #endif
+
+#endif // USE_SDL2

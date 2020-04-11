@@ -195,23 +195,22 @@ FFMPEG_CFLAGS="$FFMPEG_CFLAGS $FF_XCODE_BITCODE"
 FFMPEG_LDFLAGS="$FFMPEG_CFLAGS"
 
 
-#--------------------
-echo "\n--------------------"
+# --------------------
+echo "----------------------"
 echo "[*] check OpenSSL"
 echo "----------------------"
 FFMPEG_DEP_OPENSSL_INC=/usr/local/opt/openssl/include
 FFMPEG_DEP_OPENSSL_LIB=/usr/local/opt/openssl/lib
 #--------------------
 # with openssl
-if [ -f "${FFMPEG_DEP_OPENSSL_LIB}/libssl.a" ]; then
-    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-openssl"
+# brew install openssl
 
+if [ -f "${FFMPEG_DEP_OPENSSL_LIB}/libssl.dylib" ]; then
+    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-openssl"
     FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_OPENSSL_INC}"
     FFMPEG_DEP_LIBS="$FFMPEG_CFLAGS -L${FFMPEG_DEP_OPENSSL_LIB} -lssl -lcrypto"
-
 else
-    echo "openssl not found"
-    exit 1;
+   echo "openssl not found"
 fi
 
 

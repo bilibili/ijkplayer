@@ -267,7 +267,6 @@ typedef struct Decoder {
     int64_t next_pts;
     AVRational next_pts_tb;
     SDL_Thread *decoder_tid;
-    SDL_Thread _decoder_tid;
 
     SDL_Profiler decode_profiler;
     Uint64 first_frame_decoded_time;
@@ -276,7 +275,6 @@ typedef struct Decoder {
 
 typedef struct VideoState {
     SDL_Thread *read_tid;
-    SDL_Thread _read_tid;
     AVInputFormat *iformat;
     int abort_request;
     int force_refresh;
@@ -393,7 +391,6 @@ typedef struct VideoState {
     /* extra fields */
     SDL_mutex  *play_mutex; // only guard state, do not block any long operation
     SDL_Thread *video_refresh_tid;
-    SDL_Thread _video_refresh_tid;
 
     int buffering_on;
     int pause_req;
@@ -725,6 +722,8 @@ typedef struct FFPlayer {
     int ijkmeta_delay_init;
     int render_wait_start;
     int cover_after_prepared;
+    int vout_type;
+    int aout_type;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))

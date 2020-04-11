@@ -41,7 +41,6 @@ struct IjkMediaPlayer {
 
     int (*msg_loop)(void*);
     SDL_Thread *msg_thread;
-    SDL_Thread _msg_thread;
 
     int mp_state;
     char *data_source;
