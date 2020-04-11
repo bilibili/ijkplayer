@@ -31,19 +31,51 @@
 #ifdef WIN32
 #include <Windows.h>
 #else
+
 #include <unistd.h>
+
 #endif
 
 #include <glad/gl.h>
+
 #define GLFW_INCLUDE_NONE
+
 #include <GLFW/glfw3.h>
 #include <SDL.h>
 
 #define SCR_WIDTH   800
 #define SCR_HEIGHT  600
 
+
+typedef struct IjkDemoInfo {
+    IjkFFMediaPlayer *fp;
+    int state;
+    int w, h;
+    int isSeeking;
+    int64_t duration;
+} IjkDemoInfo;
+
 void demo_event_cb(void *userdata, int what, int arg1, int arg2, void *extra) {
-     printf("demo event cb what %5d:(%5d %5d)\n", what, arg1, arg2);
+    printf("demo event cb what %5d:(%5d %5d)\n", what, arg1, arg2);
+
+    IjkDemoInfo *info = userdata;
+    switch (what) {
+        case IJK_MSG_PLAYBACK_STATE_CHANGED:
+            info->state = arg1;
+            break;
+        case IJK_MSG_PREPARED:
+            info->duration = ijkff_get_duration(info->fp);
+            break;
+        case IJK_MSG_VIDEO_SIZE_CHANGED:
+            info->w = arg1;
+            info->h = arg2;
+            break;
+        case IJK_MSG_SEEK_COMPLETE:
+            info->isSeeking = 0;
+            break;
+        default:
+            break;
+    }
 }
 
 static void error_callback(int error, const char *description) {
@@ -60,6 +92,58 @@ static void error_callback(int error, const char *description) {
 //    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 //        glfwSetWindowShouldClose(window, GLFW_TRUE);
 //}
+
+int processEvent(IjkFFMediaPlayer *fp, IjkDemoInfo *info, const SDL_Event *event) {
+    if (!fp || !event)
+        return SDL_QUIT;
+
+    int ret = 0;
+    switch (event->type) {
+        case SDL_QUIT:
+            ret = SDL_QUIT;
+            break;
+        case SDL_KEYDOWN: {
+            switch (event->key.keysym.sym) {
+                case SDLK_SPACE: {
+                    if (info->state == IJK_STATE_STARTED)
+                        ijkff_pause(fp);
+                    else if (info->state == IJK_STATE_PAUSED)
+                        ijkff_start(fp);
+                    break;
+                }
+                case SDLK_UP:
+                case SDLK_DOWN: {
+                    float volume = ijkff_get_playback_volume(fp);
+                    volume += event->key.keysym.sym == SDLK_DOWN ? -0.1f : 0.1f;
+                    if (volume < 0.0f) volume = 0.0f;
+                    if (volume > 1.0f) volume = 1.0f;
+                    ijkff_set_playback_volume(fp, volume);
+                    break;
+                }
+                case SDLK_LEFT:
+                case SDLK_RIGHT: {
+                    if (ijkff_is_playing(fp)) {
+                        int64_t position = ijkff_get_current_position(fp);
+                        int64_t delta = info->duration / 40;
+                        int64_t target = position + (event->key.keysym.sym == SDLK_LEFT ? -delta : delta);
+                        if (target < 0) target = 0;
+                        if (target > info->duration) target = info->duration;
+                        ijkff_seek_to(fp, target);
+                    }
+                    break;
+                }
+                case SDLK_ESCAPE:
+                    ret = SDL_QUIT;
+                    break;
+                default:
+                    break;
+            }
+            default:
+                break;
+        }
+    }
+    return ret;
+}
 
 int main(int argc, char *argv[]) {
 #if GLFW
@@ -94,11 +178,17 @@ int main(int argc, char *argv[]) {
 #endif
 
     IjkFFMediaPlayer *fp = ijkff_create();
+
+    IjkDemoInfo info;
+    memset(&info, 0, sizeof(info));
+    info.fp = fp;
+    ijkff_set_event_cb(fp, &info, demo_event_cb);
+
     ijkff_set_option(fp, "fcc-i420", "overlay-format", IJK_OPT_CATEGORY_PLAYER);
-    ijkff_set_data_source(fp, "http://player.alicdn.com/video/aliyunmedia.mp4");
-    // ijkff_set_data_source(fp, "/Users/bytedance/Downloads/aliyunmedia.mp4");
+    ijkff_set_data_source(fp, "https://player.alicdn.com/video/aliyunmedia.mp4");
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO);
+
 
     SDL_Window *window = SDL_CreateWindow("Video",
                                           SDL_WINDOWPOS_CENTERED,
@@ -109,7 +199,6 @@ int main(int argc, char *argv[]) {
     ijkff_prepare_async(fp);
     ijkff_start(fp);
 
-    ijkff_set_event_cb(fp, NULL, demo_event_cb);
 
 #if GLFW
     while (!glfwWindowShouldClose(window)) {
@@ -121,16 +210,13 @@ int main(int argc, char *argv[]) {
     SDL_Event event;
     while (1) {
         SDL_WaitEvent(&event);
-
-        if (event.type == SDL_QUIT)
+        if (processEvent(fp, &info, &event) == SDL_QUIT)
             break;
     }
     SDL_Quit();
 
-
     ijkff_stop(fp);
     ijkff_shutdown(fp);
 
-//    glfwTerminate();
     return 0;
 }

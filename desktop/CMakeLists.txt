@@ -128,9 +128,7 @@ if (APPLE)
     cmake_print_variables(FFMPEG_STATIC_INCLUDE_DIRS)
     cmake_print_variables(FFMPEG_STATIC_LIBRARIES)
 
-
     target_link_libraries(IjkPlayer ${SDL2_LIBRARIES})
-
 endif ()
 
 if (WIN32)
@@ -140,6 +138,9 @@ if (WIN32)
 endif ()
 
 message(STATUS "ffmpeg libs:${FFMPEG_STATIC_LIBRARIES}")
+
+list(REMOVE_ITEM FFMPEG_STATIC_LIBRARIES "ssl")
+list(REMOVE_ITEM FFMPEG_STATIC_LIBRARIES "crypto")
 
 cmake_print_variables(FFMPEG_STATIC_LIBRARIES)
 
