@@ -1,5 +1,17 @@
+
 ---
-### 0.5.1 (2020-02-21)
+## 0.6.0 (2020-04-11)
+
+* add input process for tui demo ([e479d4e](https://github.com/befovy/ijkplayer/commit/e479d4e75fd05ed3f5e0e64a6722d8a900bd9774))
+* add SDL2 audio and video render, add glfw video render. ([9e3da67](https://github.com/befovy/ijkplayer/commit/9e3da67ef7a1c0f71b93157a82f8bbb41331e5bc))
+* C style API for Mac OS ([cef0b89](https://github.com/befovy/ijkplayer/commit/cef0b897827fdb81e3cd40e3d14d74e0e47ee5e1))
+* ijkplayer desktop works on Mac OS ([8da29be](https://github.com/befovy/ijkplayer/commit/8da29bec7b53579ba7cb4d8e8176b1be219227d0))
+* notify current position option ([1629f87](https://github.com/befovy/ijkplayer/commit/1629f874bee484b2999afdf9976a8cd26eedd0df))
+
+
+---
+
+## 0.5.1 (2020-02-21)
 
 ### Features
 

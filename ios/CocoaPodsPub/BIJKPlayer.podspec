@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "BIJKPlayer"
-  spec.version      = "0.5.1"
+  spec.version      = "0.6.0"
   spec.summary      = "ijkplayer iOS video player SDK"
 
   spec.author       = { "befovy" => "befovy@gmail.com" }

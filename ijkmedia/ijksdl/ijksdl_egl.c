@@ -30,6 +30,10 @@
 #include "ijksdl/ijksdl_vout.h"
 #include "ijksdl/gles2/internal.h"
 
+#if ANDROID
+#include <android/native_window.h>
+#endif
+
 #define IJK_EGL_RENDER_BUFFER 0
 
 typedef struct IJK_EGL_Opaque {
