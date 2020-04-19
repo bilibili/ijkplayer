@@ -27,6 +27,11 @@
 
 #include <stdio.h>
 
+void ijk_log_set_level(int level);
+void ijk_log_print(int level, const char *tag, const char *fmt, ...);
+void ijk_log_vprint(int level, const char *tag, const char *fmt, va_list ap);
+
+
 #ifdef __ANDROID__
 
 #include <android/log.h>
@@ -46,9 +51,6 @@
 #ifdef EXTRA_LOG_PRINT
 #define VLOG(level, TAG, ...)    ffp_log_extra_vprint(level, TAG, __VA_ARGS__)
 #define ALOG(level, TAG, ...)    ffp_log_extra_print(level, TAG, __VA_ARGS__)
-#else
-#define VLOG(level, TAG, ...)    ((void)__android_log_vprint(level, TAG, __VA_ARGS__))
-#define ALOG(level, TAG, ...)    ((void)__android_log_print(level, TAG, __VA_ARGS__))
 #endif
 
 #else
@@ -64,9 +66,14 @@
 #define IJK_LOG_FATAL       7
 #define IJK_LOG_SILENT      8
 
-#define VLOG(level, TAG, ...)    ((void)vprintf(__VA_ARGS__))
-#define ALOG(level, TAG, ...)    ((void)printf(__VA_ARGS__))
 
+#endif
+
+#ifndef VLOG
+#define VLOG(level, TAG, ...)    ((void)ijk_log_vprint(level, TAG, __VA_ARGS__))
+#endif
+#ifndef ALOG
+#define ALOG(level, TAG, ...)    ((void)ijk_log_print(level, TAG, __VA_ARGS__))
 #endif
 
 #define IJK_LOG_TAG "IJKMEDIA"
