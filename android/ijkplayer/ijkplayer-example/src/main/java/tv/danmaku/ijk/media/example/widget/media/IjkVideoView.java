@@ -1058,7 +1058,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 IjkMediaPlayer ijkMediaPlayer = null;
                 if (mUri != null) {
                     ijkMediaPlayer = new IjkMediaPlayer();
-                    ijkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
+                    IjkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_INFO);
 
                     if (mSettings.getRenderAMCBufferUsingEGL())
                         ijkMediaPlayer.setAmcGlesRender();

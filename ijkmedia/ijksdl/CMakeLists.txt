@@ -30,6 +30,8 @@ set(BASE_SOURCES
     ijksdl_misc.h
     ijksdl_stdinc.h
     ijksdl_inc_internal.h
+    ijksdl_log.c
+    ijksdl_log.h
     ijksdl_aout.c
     ijksdl_aout.h
     ijksdl_aout_internal.h
