@@ -26,6 +26,8 @@
 
 #include <assert.h>
 #include <android/native_window.h>
+#include "ijkj4a/j4a/j4a_base.h"
+#include "ijkj4a/j4a/j4a_allclasses.h"
 #include "ijksdl/ijksdl_vout.h"
 #include "ijksdl/ijksdl_vout_internal.h"
 #include "ijksdl/ijksdl_container.h"
@@ -164,33 +166,40 @@ static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         return -1;
     }
 
-    switch(overlay->format) {
-    case SDL_FCC__AMC: {
-        // only ANativeWindow support
-        IJK_EGL_terminate(opaque->egl);
-        return SDL_VoutOverlayAMediaCodec_releaseFrame_l(overlay, NULL, true);
+    switch (overlay->format) {
+        case SDL_FCC__AMC: {
+            if (vout->vout_type & SDL_VOUT_AMC_OES_EGL) {
+                if (opaque->egl)
+                    return IJK_EGL_display(opaque->egl, native_window, overlay);
+            } else {
+                IJK_EGL_terminate(opaque->egl);
+                return SDL_VoutOverlayAMediaCodec_releaseFrame_l(overlay, NULL, true);
+            }
+            break;
+        }
+        case SDL_FCC_RV24:
+        case SDL_FCC_I420:
+        case SDL_FCC_I444P10LE: {
+            // only GLES support
+            if (opaque->egl)
+                return IJK_EGL_display(opaque->egl, native_window, overlay);
+            break;
+        }
+        case SDL_FCC_YV12:
+        case SDL_FCC_RV16:
+        case SDL_FCC_RV32: {
+            // both GLES & ANativeWindow support
+            if (vout->overlay_format == SDL_FCC__GLES2 && opaque->egl)
+                return IJK_EGL_display(opaque->egl, native_window, overlay);
+            break;
+        }
+        default:
+            break;
     }
-    case SDL_FCC_RV24:
-    case SDL_FCC_I420:
-    case SDL_FCC_I444P10LE: {
-        // only GLES support
-        if (opaque->egl)
-            return IJK_EGL_display(opaque->egl, native_window, overlay);
-        break;
-    }
-    case SDL_FCC_YV12:
-    case SDL_FCC_RV16:
-    case SDL_FCC_RV32: {
-        // both GLES & ANativeWindow support
-        if (vout->overlay_format == SDL_FCC__GLES2 && opaque->egl)
-            return IJK_EGL_display(opaque->egl, native_window, overlay);
-        break;
-    }
-    }
-
     // fallback to ANativeWindow
     IJK_EGL_terminate(opaque->egl);
-    return SDL_Android_NativeWindow_display_l(native_window, overlay); 
+    return SDL_Android_NativeWindow_display_l(native_window, overlay);
+
 }
 
 static int func_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
@@ -199,6 +208,14 @@ static int func_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     int retval = func_display_overlay_l(vout, overlay);
     SDL_UnlockMutex(vout->mutex);
     return retval;
+}
+
+static IJK_GLES2_Renderer *func_get_renderer(SDL_Vout *vout)
+{
+    if (!vout || !vout->opaque)
+        return NULL;
+    SDL_Vout_Opaque *opaque = vout->opaque;
+    return IJK_EGL_get_renderer(opaque->egl);
 }
 
 static SDL_Class g_nativewindow_class = {
@@ -226,6 +243,7 @@ SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
     vout->create_overlay  = func_create_overlay;
     vout->free_l          = func_free_l;
     vout->display_overlay = func_display_overlay;
+    vout->get_renderer    = func_get_renderer;
 
     return vout;
 fail:
@@ -282,6 +300,25 @@ void SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_windo
 {
     SDL_LockMutex(vout->mutex);
     SDL_VoutAndroid_SetNativeWindow_l(vout, native_window);
+    SDL_UnlockMutex(vout->mutex);
+}
+
+void SDL_VoutAndroid_SetSurfaceTexture(SDL_Vout *vout, JNIEnv *env, jobject amc_surface)
+{
+    SDL_LockMutex(vout->mutex);
+    SDL_Vout_Opaque *opaque = vout->opaque;
+
+    if ((*env)->IsSameObject(env, amc_surface, opaque->egl->amc_surface)) {
+        SDL_UnlockMutex(vout->mutex);
+        return;
+    }
+    if (opaque->egl->amc_surface) {
+        J4AC_MediaCodecSurface__release(env, opaque->egl->amc_surface);
+        J4A_DeleteGlobalRef(env, opaque->egl->amc_surface);
+        opaque->egl->amc_surface = NULL;
+    }
+    if (amc_surface)
+        opaque->egl->amc_surface = J4A_NewGlobalRef__catchAll(env, amc_surface);
     SDL_UnlockMutex(vout->mutex);
 }
 
@@ -394,7 +431,7 @@ static int SDL_VoutAndroid_releaseBufferProxy_l(SDL_Vout *vout, SDL_AMediaCodecB
         return 0;
     }
 
-    sdl_amedia_status_t amc_ret = SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, proxy->buffer_index, render);    
+    sdl_amedia_status_t amc_ret = SDL_AMediaCodec_releaseOutputBuffer(opaque->acodec, (size_t)proxy->buffer_index, render);
     if (amc_ret != SDL_AMEDIA_OK) {
         ALOGW("%s: [%d] !!!!!!!! proxy %d: vout: %d idx: %d render: %s, fake: %s",
             __func__,

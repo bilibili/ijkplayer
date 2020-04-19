@@ -23,6 +23,8 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.graphics.Rect;
 import android.media.MediaCodecInfo;
@@ -41,12 +43,15 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+import android.widget.Button;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,6 +65,7 @@ import tv.danmaku.ijk.media.player.misc.IAndroidIO;
 import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.player.misc.IjkTrackInfo;
+import tv.danmaku.ijk.media.player.misc.MediaCodecSurface;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 /**
@@ -111,7 +117,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int IJK_MSG_COMPONENT_OPEN = 409;
     public static final int IJK_MSG_VIDEO_SEEK_RENDERING_START = 410;
     public static final int IJK_MSG_AUDIO_SEEK_RENDERING_START = 411;
-
+    public static final int IJK_MSG_VIDEO_SNAP_SHOT = 480;
     public static final int IJK_MSG_BUFFERING_START = 500;
     public static final int IJK_MSG_BUFFERING_END = 501;
     public static final int IJK_MSG_BUFFERING_UPDATE = 502;
@@ -158,6 +164,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static final int FFP_PROP_INT64_TCP_SPEED                        = 20200;
     public static final int FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION        = 20300;
     public static final int FFP_PROP_INT64_IMMEDIATE_RECONNECT              = 20211;
+    public static final int FFP_PROP_INT64_AMC_GLES_OES_VOUT                = 59600;
     //----------------------------------------
 
     @AccessedByNative
@@ -174,6 +181,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     @AccessedByNative
     private int mListenerContext;
 
+    private MediaCodecSurface mMediaCodecSurface;
     private SurfaceHolder mSurfaceHolder;
     private EventHandler mEventHandler;
     private PowerManager.WakeLock mWakeLock = null;
@@ -274,6 +282,17 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      */
     private native void _setVideoSurface(Surface surface);
 
+    /*
+     * Set MediaCodec for MediaCodec OES renderer
+     */
+    private native void _setMediaCodecSurface(MediaCodecSurface mediaCodecSurface);
+
+    /*
+     * take a snapshot for the current frame.
+     */
+    private native void _snapShot();
+
+
     /**
      * Sets the {@link SurfaceHolder} to use for displaying the video portion of
      * the media.
@@ -295,6 +314,10 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             surface = sh.getSurface();
         } else {
             surface = null;
+        }
+        if (mMediaCodecSurface == null && isAmcUsingGlesRender()) {
+            mMediaCodecSurface = new MediaCodecSurface();
+            _setMediaCodecSurface(mMediaCodecSurface);
         }
         _setVideoSurface(surface);
         updateSurfaceScreenOn();
@@ -325,11 +348,19 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             DebugLog.w(TAG,
                     "setScreenOnWhilePlaying(true) is ineffective for Surface");
         }
+        if (mMediaCodecSurface == null && isAmcUsingGlesRender()) {
+            mMediaCodecSurface = new MediaCodecSurface();
+            _setMediaCodecSurface(mMediaCodecSurface);
+        }
         mSurfaceHolder = null;
         _setVideoSurface(surface);
         updateSurfaceScreenOn();
     }
 
+    @Override
+    public void snapShot(){
+        _snapShot();
+    }
     /**
      * Sets the data source as a content Uri.
      *
@@ -533,7 +564,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         _prepareAsync();
     }
 
-    public native void _prepareAsync() throws IllegalStateException;
+    private native void _prepareAsync() throws IllegalStateException;
 
     @Override
     public void start() throws IllegalStateException {
@@ -994,6 +1025,14 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         _setPropertyLong(FFP_PROP_INT64_SHARE_CACHE_DATA, (long)share);
     }
 
+    public void setAmcGlesRender() {
+        _setPropertyLong(FFP_PROP_INT64_AMC_GLES_OES_VOUT, 1);
+    }
+    private boolean isAmcUsingGlesRender() {
+        return _getPropertyLong(FFP_PROP_INT64_AMC_GLES_OES_VOUT, 0) > 0;
+    }
+
+
     private static class EventHandler extends Handler {
         private final WeakReference<IjkMediaPlayer> mWeakPlayer;
 
@@ -1069,7 +1108,11 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 }
                 player.stayAwake(false);
                 break;
-
+            case IJK_MSG_VIDEO_SNAP_SHOT:
+                DebugLog.i(TAG, "OnSnapShot:" + msg.arg1 + ":" + msg.arg2);
+                if (msg.obj instanceof Bitmap)
+                    player.notifySnapShot((Bitmap) msg.obj, msg.arg1, msg.arg2);
+                break;
             case IJK_MSG_VIDEO_RENDERING_START:
                 player.notifyOnInfo(MEDIA_INFO_VIDEO_RENDERING_START, 0);
                 DebugLog.i(TAG, "Info: MEDIA_INFO_VIDEO_RENDERING_START\n");
@@ -1146,6 +1189,15 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             return;
         }
 
+        if (what == IJK_MSG_VIDEO_SNAP_SHOT) {
+            ByteBuffer byteBuffer = (ByteBuffer) obj;
+            Matrix matrix = new Matrix();
+            matrix.postScale(1, -1, arg1/2f, arg2/2f);
+            Bitmap bitmap = Bitmap.createBitmap(arg1, arg2, Bitmap.Config.ARGB_8888);
+            bitmap.copyPixelsFromBuffer(byteBuffer);
+            bitmap =  Bitmap.createBitmap(bitmap, 0, 0, arg1, arg2, matrix, true);
+            obj = bitmap;
+        }
         // native ijkplayer never post this message
         // if (what == MEDIA_INFO && arg1 == MEDIA_INFO_STARTED_AS_NEXT) {
         //     // this acquires the wakelock if needed, and sets the client side

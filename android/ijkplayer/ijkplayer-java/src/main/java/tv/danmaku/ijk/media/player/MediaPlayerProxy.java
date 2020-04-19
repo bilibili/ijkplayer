@@ -19,6 +19,7 @@ package tv.danmaku.ijk.media.player;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.view.Surface;
@@ -51,6 +52,11 @@ public class MediaPlayerProxy implements IMediaPlayer {
     @Override
     public void setSurface(Surface surface) {
         mBackEndMediaPlayer.setSurface(surface);
+    }
+
+    @Override
+    public void snapShot(){
+        mBackEndMediaPlayer.snapShot();
     }
 
     @Override
@@ -249,6 +255,21 @@ public class MediaPlayerProxy implements IMediaPlayer {
             });
         } else {
             mBackEndMediaPlayer.setOnVideoSizeChangedListener(null);
+        }
+    }
+
+    @Override
+    public void setOnSnapShotListener(OnSnapShotListener listener) {
+        if (listener != null) {
+            final OnSnapShotListener finalListener = listener;
+            mBackEndMediaPlayer.setOnSnapShotListener(new OnSnapShotListener() {
+                @Override
+                public void onSnapShot(IMediaPlayer mp, Bitmap bm, int width, int height) {
+                    finalListener.onSnapShot(MediaPlayerProxy.this, bm, width, height);
+                }
+            });
+        } else {
+            mBackEndMediaPlayer.setOnSnapShotListener(null);
         }
     }
 

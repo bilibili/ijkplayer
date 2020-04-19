@@ -255,6 +255,30 @@ LABEL_RETURN:
 }
 
 static void
+IjkMediaPlayer_setMediaCodecSurface(JNIEnv *env, jobject thiz,
+                                    jobject amc_surface) {
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setMediaCodecSurface: null mp", LABEL_RETURN);
+    ijkmp_android_set_mediacodec_texture(env, mp, amc_surface);
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return;
+}
+
+static void
+IjkMediaPlayer_snapShot(JNIEnv *env, jobject thiz)
+{
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setMediaCodecSurface: null mp", LABEL_RETURN);
+    ijkmp_take_snapshot(mp);
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return;
+}
+
+static void
 IjkMediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
 {
     MPTRACE("%s\n", __func__);
@@ -1029,6 +1053,12 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
                 post_event2(env, weak_thiz, FFP_MSG_GET_IMG_STATE, msg.arg1, msg.arg2, NULL);
             }
             break;
+        case FFP_MSG_VIDEO_SNAP_SHOT:
+            if (msg.obj) {
+                jobject byte_buffer = (*env)->NewDirectByteBuffer(env, msg.obj, msg.len);
+                post_event2(env, weak_thiz, FFP_MSG_VIDEO_SNAP_SHOT, msg.arg1, msg.arg2, byte_buffer);
+            }
+            break;
         case FFP_MSG_VIDEO_SEEK_RENDERING_START:
             MPTRACE("FFP_MSG_VIDEO_SEEK_RENDERING_START:\n");
             // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_SEEK_RENDERING_START, msg.arg1);
@@ -1159,11 +1189,30 @@ static JNINativeMethod g_methods[] = {
         "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
         (void *) IjkMediaPlayer_setDataSourceAndHeaders
     },
-    { "_setDataSourceFd",       "(I)V",     (void *) IjkMediaPlayer_setDataSourceFd },
-    { "_setDataSource",         "(Ltv/danmaku/ijk/media/player/misc/IMediaDataSource;)V", (void *)IjkMediaPlayer_setDataSourceCallback },
-    { "_setAndroidIOCallback",  "(Ltv/danmaku/ijk/media/player/misc/IAndroidIO;)V", (void *)IjkMediaPlayer_setAndroidIOCallback },
-
-    { "_setVideoSurface",       "(Landroid/view/Surface;)V", (void *) IjkMediaPlayer_setVideoSurface },
+    {
+        "_setDataSourceFd",
+        "(I)V",
+        (void *) IjkMediaPlayer_setDataSourceFd },
+    {
+        "_setDataSource",
+        "(Ltv/danmaku/ijk/media/player/misc/IMediaDataSource;)V",
+        (void *)IjkMediaPlayer_setDataSourceCallback },
+    {
+        "_setAndroidIOCallback",
+        "(Ltv/danmaku/ijk/media/player/misc/IAndroidIO;)V",
+        (void *)IjkMediaPlayer_setAndroidIOCallback
+    },
+    {
+        "_setVideoSurface",
+        "(Landroid/view/Surface;)V",
+        (void *) IjkMediaPlayer_setVideoSurface
+    },
+    {
+        "_setMediaCodecSurface",
+        "(Ltv/danmaku/ijk/media/player/misc/MediaCodecSurface;)V",
+        (void *) IjkMediaPlayer_setMediaCodecSurface
+    },
+    { "_snapShot",              "()V",      (void *) IjkMediaPlayer_snapShot },
     { "_prepareAsync",          "()V",      (void *) IjkMediaPlayer_prepareAsync },
     { "_start",                 "()V",      (void *) IjkMediaPlayer_start },
     { "_stop",                  "()V",      (void *) IjkMediaPlayer_stop },

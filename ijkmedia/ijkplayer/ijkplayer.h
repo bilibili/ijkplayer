@@ -214,6 +214,8 @@ int             ijkmp_get_loop(IjkMediaPlayer *mp);
 void           *ijkmp_get_weak_thiz(IjkMediaPlayer *mp);
 void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 
+void            ijkmp_take_snapshot(IjkMediaPlayer *mp);
+
 /* return < 0 if aborted, 0 if no packet and > 0 if packet.  */
 /* need to call msg_free_res for freeing the resouce obtained in msg */
 int             ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block);

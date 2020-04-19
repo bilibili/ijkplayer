@@ -109,13 +109,18 @@ void IJK_GLES2_Renderer_freeP(IJK_GLES2_Renderer **renderer)
 
 IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_base(const char *fragment_shader_source)
 {
+    return IJK_GLES2_Renderer_create_base_with_vertex(IJK_GLES2_getVertexShader_default(), fragment_shader_source);
+}
+
+IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_base_with_vertex(const char *vertex_shader_source, const char *fragment_shader_source)
+{
     assert(fragment_shader_source);
 
     IJK_GLES2_Renderer *renderer = (IJK_GLES2_Renderer *)calloc(1, sizeof(IJK_GLES2_Renderer));
     if (!renderer)
         goto fail;
 
-    renderer->vertex_shader = IJK_GLES2_loadShader(GL_VERTEX_SHADER, IJK_GLES2_getVertexShader_default());
+    renderer->vertex_shader = IJK_GLES2_loadShader(GL_VERTEX_SHADER, vertex_shader_source);
     if (!renderer->vertex_shader)
         goto fail;
 
@@ -136,9 +141,9 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_base(const char *fragment_shader_s
         goto fail;
 
 
-    renderer->av4_position = glGetAttribLocation(renderer->program, "av4_Position");                IJK_GLES2_checkError_TRACE("glGetAttribLocation(av4_Position)");
-    renderer->av2_texcoord = glGetAttribLocation(renderer->program, "av2_Texcoord");                IJK_GLES2_checkError_TRACE("glGetAttribLocation(av2_Texcoord)");
-    renderer->um4_mvp      = glGetUniformLocation(renderer->program, "um4_ModelViewProjection");    IJK_GLES2_checkError_TRACE("glGetUniformLocation(um4_ModelViewProjection)");
+    renderer->av4_position = (GLuint)glGetAttribLocation(renderer->program, "av4_Position");                IJK_GLES2_checkError_TRACE("glGetAttribLocation(av4_Position)");
+    renderer->av2_texcoord = (GLuint)glGetAttribLocation(renderer->program, "av2_Texcoord");                IJK_GLES2_checkError_TRACE("glGetAttribLocation(av2_Texcoord)");
+    renderer->um4_mvp      = (GLuint)glGetUniformLocation(renderer->program, "um4_ModelViewProjection");    IJK_GLES2_checkError_TRACE("glGetUniformLocation(um4_ModelViewProjection)");
 
     return renderer;
 
@@ -167,7 +172,9 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create(SDL_VoutOverlay *overlay)
         case SDL_FCC_RV16:      renderer = IJK_GLES2_Renderer_create_rgb565(); break;
         case SDL_FCC_RV24:      renderer = IJK_GLES2_Renderer_create_rgb888(); break;
         case SDL_FCC_RV32:      renderer = IJK_GLES2_Renderer_create_rgbx8888(); break;
-#if defined(__APPLE__) && !IJK_DESKTOP_UNI
+#if ANDROID
+        case SDL_FCC__AMC:      renderer = IJK_GLES2_Renderer_create_amc(); break;
+#elif defined(__APPLE__) && !IJK_DESKTOP_UNI
         case SDL_FCC_NV12:      renderer = IJK_GLES2_Renderer_create_yuv420sp(); break;
         case SDL_FCC__VTB:      renderer = IJK_GLES2_Renderer_create_yuv420sp_vtb(overlay); break;
 #endif
@@ -185,7 +192,7 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create(SDL_VoutOverlay *overlay)
 
 GLboolean IJK_GLES2_Renderer_isValid(IJK_GLES2_Renderer *renderer)
 {
-    return renderer && renderer->program ? GL_TRUE : GL_FALSE;
+    return (GLboolean) (renderer && renderer->program ? GL_TRUE : GL_FALSE);
 }
 
 GLboolean IJK_GLES2_Renderer_isFormat(IJK_GLES2_Renderer *renderer, int format)
@@ -193,7 +200,7 @@ GLboolean IJK_GLES2_Renderer_isFormat(IJK_GLES2_Renderer *renderer, int format)
     if (!IJK_GLES2_Renderer_isValid(renderer))
         return GL_FALSE;
 
-    return renderer->format == format ? GL_TRUE : GL_FALSE;
+    return (GLboolean) (renderer->format == format ? GL_TRUE : GL_FALSE);
 }
 
 /*
@@ -263,6 +270,7 @@ static void IJK_GLES2_Renderer_Vertices_apply(IJK_GLES2_Renderer *renderer)
     switch (renderer->gravity) {
         case IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL:  dd = FFMAX(dW, dH); break;
         case IJK_GLES2_GRAVITY_RESIZE_ASPECT:       dd = FFMIN(dW, dH); break;
+        default: break;
     }
 
     nW = (width  * dd / (float)renderer->layer_width);
@@ -321,7 +329,7 @@ static void IJK_GLES2_Renderer_TexCoords_reset(IJK_GLES2_Renderer *renderer)
 
 static void IJK_GLES2_Renderer_TexCoords_cropRight(IJK_GLES2_Renderer *renderer, GLfloat cropRight)
 {
-    ALOGE("IJK_GLES2_Renderer_TexCoords_cropRight\n");
+    ALOGI("IJK_GLES2_Renderer_TexCoords_cropRight\n");
     renderer->texcoords[0] = 0.0f;
     renderer->texcoords[1] = 1.0f;
     renderer->texcoords[2] = 1.0f - cropRight;
@@ -337,6 +345,75 @@ static void IJK_GLES2_Renderer_TexCoords_reloadVertex(IJK_GLES2_Renderer *render
     glVertexAttribPointer(renderer->av2_texcoord, 2, GL_FLOAT, GL_FALSE, 0, renderer->texcoords);   IJK_GLES2_checkError_TRACE("glVertexAttribPointer(av2_texcoord)");
     glEnableVertexAttribArray(renderer->av2_texcoord);                                              IJK_GLES2_checkError_TRACE("glEnableVertexAttribArray(av2_texcoord)");
 }
+
+void IJK_GLES2_Renderer_TexCoords_updateFlip(IJK_GLES2_Renderer *renderer)
+{
+    if (!renderer)
+        return;
+    if (renderer->func_flip)
+        renderer->func_flip(renderer->flip, renderer->texcoords);
+    else {
+
+        GLfloat *texcoords = renderer->texcoords;
+        GLfloat tmp;
+        switch (renderer->flip) {
+            case IJK_SDL_GLES2_flip_vertical:
+                tmp = texcoords[0];
+                texcoords[0] = texcoords[4];
+                texcoords[4] = tmp;
+
+                tmp = texcoords[1];
+                texcoords[1] = texcoords[5];
+                texcoords[5] = tmp;
+
+                tmp = texcoords[2];
+                texcoords[2] = texcoords[6];
+                texcoords[6] = tmp;
+
+                tmp = texcoords[3];
+                texcoords[3] = texcoords[7];
+                texcoords[7] = tmp;
+                break;
+            case IJK_SDL_GLES2_flip_horizontal:
+                tmp = texcoords[0];
+                texcoords[0] = texcoords[2];
+                texcoords[4] = tmp;
+
+                tmp = texcoords[1];
+                texcoords[1] = texcoords[3];
+                texcoords[3] = tmp;
+
+                tmp = texcoords[4];
+                texcoords[4] = texcoords[6];
+                texcoords[6] = tmp;
+
+                tmp = texcoords[5];
+                texcoords[5] = texcoords[7];
+                texcoords[7] = tmp;
+                break;
+            case IJK_SDL_GLES2_flip_both:
+                tmp = texcoords[0];
+                texcoords[0] = texcoords[6];
+                texcoords[6] = tmp;
+
+                tmp = texcoords[1];
+                texcoords[1] = texcoords[7];
+                texcoords[7] = tmp;
+
+                tmp = texcoords[4];
+                texcoords[4] = texcoords[2];
+                texcoords[2] = tmp;
+
+                tmp = texcoords[5];
+                texcoords[5] = texcoords[3];
+                texcoords[3] = tmp;
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 
 /*
  * Per-Renderer routine
@@ -355,12 +432,36 @@ GLboolean IJK_GLES2_Renderer_use(IJK_GLES2_Renderer *renderer)
     glUniformMatrix4fv(renderer->um4_mvp, 1, GL_FALSE, modelViewProj.m);                    IJK_GLES2_checkError_TRACE("glUniformMatrix4fv(um4_mvp)");
 
     IJK_GLES2_Renderer_TexCoords_reset(renderer);
+    IJK_GLES2_Renderer_TexCoords_updateFlip(renderer);
     IJK_GLES2_Renderer_TexCoords_reloadVertex(renderer);
 
     IJK_GLES2_Renderer_Vertices_reset(renderer);
     IJK_GLES2_Renderer_Vertices_reloadVertex(renderer);
 
     return GL_TRUE;
+}
+
+GLboolean IJK_GLES2_Renderer_snapShot(IJK_GLES2_Renderer *renderer, void *opaque, IJK_GLES2_Renderer_funcGetSnapShot get_snap_shot)
+{
+    if (!renderer)
+        return GL_FALSE;
+    renderer->take_snap_shot = 1;
+    renderer->snap_shot_opaque = opaque;
+    renderer->func_on_snap_shot = get_snap_shot;
+    return GL_TRUE;
+}
+
+void IJK_GLES2_Renderer_captureScreen(IJK_GLES2_Renderer *renderer)
+{
+    GLint pView[4];
+    glGetIntegerv(GL_VIEWPORT, pView);
+    int width = pView[2];
+    int height = pView[3];
+    size_t buffer_size = width * height * sizeof(GLubyte) * 4; // RGBA
+    GLubyte *buffer_date = av_mallocz(buffer_size);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glReadPixels(pView[0], pView[1], pView[2], pView[3], GL_RGBA, GL_UNSIGNED_BYTE, buffer_date);
+    renderer->func_on_snap_shot(renderer->snap_shot_opaque, buffer_date, width, height);
 }
 
 /*
@@ -420,10 +521,16 @@ GLboolean IJK_GLES2_Renderer_renderOverlay(IJK_GLES2_Renderer *renderer, SDL_Vou
 
         IJK_GLES2_Renderer_TexCoords_reset(renderer);
         IJK_GLES2_Renderer_TexCoords_cropRight(renderer, padding_normalized);
+        IJK_GLES2_Renderer_TexCoords_updateFlip(renderer);
         IJK_GLES2_Renderer_TexCoords_reloadVertex(renderer);
     }
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);      IJK_GLES2_checkError_TRACE("glDrawArrays");
+
+    if (renderer->take_snap_shot) {
+        IJK_GLES2_Renderer_captureScreen(renderer);
+        renderer->take_snap_shot = 0;
+    }
 
     return GL_TRUE;
 }

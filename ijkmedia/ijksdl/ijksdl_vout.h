@@ -25,6 +25,7 @@
 #ifndef IJKSDL__IJKSDL_VOUT_H
 #define IJKSDL__IJKSDL_VOUT_H
 
+#include "gles2/internal.h"
 #include "ijksdl_stdinc.h"
 #include "ijksdl_class.h"
 #include "ijksdl_mutex.h"
@@ -57,11 +58,15 @@ struct SDL_VoutOverlay {
     int     (*func_fill_frame)(SDL_VoutOverlay *overlay, const AVFrame *frame);
 };
 
+typedef enum {
+    SDL_VOUT_AMC_OES_EGL = (1<<10),
+} SDL_Vout_type_flag;
+
 typedef struct SDL_Vout_Opaque SDL_Vout_Opaque;
 typedef struct SDL_Vout SDL_Vout;
 struct SDL_Vout {
     SDL_mutex *mutex;
-
+    int             vout_type;
     SDL_Class       *opaque_class;
     SDL_Vout_Opaque *opaque;
     SDL_VoutOverlay *(*create_overlay)(int width, int height, int frame_format, SDL_Vout *vout);
@@ -69,15 +74,17 @@ struct SDL_Vout {
     int (*display_overlay)(SDL_Vout *vout, SDL_VoutOverlay *overlay);
 
     int (*set_window)(SDL_Vout *vout, void *window);
+    IJK_GLES2_Renderer * (*get_renderer)(SDL_Vout *vout);
     Uint32 overlay_format;
 };
 
 void SDL_VoutFree(SDL_Vout *vout);
 void SDL_VoutFreeP(SDL_Vout **pvout);
 int  SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay);
-int  SDL_VoutSetOverlayFormat(SDL_Vout *vout, Uint32 overlay_format);
+int  SDL_VoutSetOverlayFormat(SDL_Vout *vout, Uint32 overlay_format, int vout_type);
 
 int  SDL_VoutSetWindow(SDL_Vout *vout, void *window);
+int  SDL_Vout_TakeSnapShot(SDL_Vout *vout, void *opaque, IJK_GLES2_Renderer_funcGetSnapShot get_snap_shot);
 
 SDL_VoutOverlay *SDL_Vout_CreateOverlay(int width, int height, int frame_format, SDL_Vout *vout);
 int     SDL_VoutLockYUVOverlay(SDL_VoutOverlay *overlay);

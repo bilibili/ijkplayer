@@ -17,6 +17,8 @@
 
 package tv.danmaku.ijk.media.player;
 
+import android.graphics.Bitmap;
+
 import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 
 @SuppressWarnings("WeakerAccess")
@@ -26,40 +28,55 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
     private OnBufferingUpdateListener mOnBufferingUpdateListener;
     private OnSeekCompleteListener mOnSeekCompleteListener;
     private OnVideoSizeChangedListener mOnVideoSizeChangedListener;
+    private OnSnapShotListener mOnSnapShotListener;
     private OnErrorListener mOnErrorListener;
     private OnInfoListener mOnInfoListener;
     private OnTimedTextListener mOnTimedTextListener;
 
+    @Override
     public final void setOnPreparedListener(OnPreparedListener listener) {
         mOnPreparedListener = listener;
     }
 
+    @Override
     public final void setOnCompletionListener(OnCompletionListener listener) {
         mOnCompletionListener = listener;
     }
 
+    @Override
     public final void setOnBufferingUpdateListener(
             OnBufferingUpdateListener listener) {
         mOnBufferingUpdateListener = listener;
     }
 
+    @Override
     public final void setOnSeekCompleteListener(OnSeekCompleteListener listener) {
         mOnSeekCompleteListener = listener;
     }
 
+    @Override
     public final void setOnVideoSizeChangedListener(
             OnVideoSizeChangedListener listener) {
         mOnVideoSizeChangedListener = listener;
     }
 
+    @Override
+    public final void setOnSnapShotListener(
+            OnSnapShotListener listener) {
+        mOnSnapShotListener = listener;
+    }
+
+    @Override
     public final void setOnErrorListener(OnErrorListener listener) {
         mOnErrorListener = listener;
     }
 
+    @Override
     public final void setOnInfoListener(OnInfoListener listener) {
         mOnInfoListener = listener;
     }
 
+    @Override
     public final void setOnTimedTextListener(OnTimedTextListener listener) {
         mOnTimedTextListener = listener;
     }
@@ -70,6 +87,7 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
         mOnCompletionListener = null;
         mOnSeekCompleteListener = null;
         mOnVideoSizeChangedListener = null;
+        mOnSnapShotListener = null;
         mOnErrorListener = null;
         mOnInfoListener = null;
         mOnTimedTextListener = null;
@@ -100,6 +118,11 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
         if (mOnVideoSizeChangedListener != null)
             mOnVideoSizeChangedListener.onVideoSizeChanged(this, width, height,
                     sarNum, sarDen);
+    }
+
+    protected final void notifySnapShot(Bitmap bm, int width, int height) {
+        if (mOnSnapShotListener != null)
+            mOnSnapShotListener.onSnapShot(this, bm, width, height);
     }
 
     protected final boolean notifyOnError(int what, int extra) {

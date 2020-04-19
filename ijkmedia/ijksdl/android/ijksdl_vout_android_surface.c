@@ -25,7 +25,8 @@
 #include "ijksdl_vout_android_surface.h"
 
 #include <android/native_window_jni.h>
-#include "../ijksdl_inc_internal.h"
+#include "ijkj4a/j4a/j4a_allclasses.h"
+#include "ijksdl/ijksdl_inc_internal.h"
 #include "ijksdl_android_jni.h"
 #include "ijksdl_vout_android_nativewindow.h"
 

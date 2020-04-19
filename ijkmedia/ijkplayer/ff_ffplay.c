@@ -1038,8 +1038,10 @@ static void stream_close(FFPlayer *ffp)
     /* close each stream */
     if (is->audio_stream >= 0)
         stream_component_close(ffp, is->audio_stream);
+    ALOGD("ffp(%p) audio stream_component_close\n", ffp);
     if (is->video_stream >= 0)
         stream_component_close(ffp, is->video_stream);
+    ALOGD("ffp(%p) video stream_component_close\n", ffp);
     if (is->subtitle_stream >= 0)
         stream_component_close(ffp, is->subtitle_stream);
 
@@ -1047,6 +1049,7 @@ static void stream_close(FFPlayer *ffp)
 
     av_log(NULL, AV_LOG_DEBUG, "wait for video_refresh_tid\n");
     SDL_WaitThread(is->video_refresh_tid, NULL);
+    ALOGD("ffp(%p) wait video_refresh_tid done\n", ffp);
 
     packet_queue_destroy(&is->videoq);
     packet_queue_destroy(&is->audioq);
@@ -1514,7 +1517,7 @@ static void alloc_picture(FFPlayer *ffp, int frame_format)
     video_open(is, vp);
 #endif
 
-    SDL_VoutSetOverlayFormat(ffp->vout, ffp->overlay_format);
+    SDL_VoutSetOverlayFormat(ffp->vout, ffp->overlay_format, ffp->vout_type);
     vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height,
                                    frame_format,
                                    ffp->vout);
@@ -4254,6 +4257,7 @@ void ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const cha
 
     AVDictionary **dict = ffp_get_opt_dict(ffp, opt_category);
     av_dict_set(dict, name, value, 0);
+    // av_opt_set(ffp, name, value, 0);
 }
 
 void ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64_t value)
@@ -4263,6 +4267,7 @@ void ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64
 
     AVDictionary **dict = ffp_get_opt_dict(ffp, opt_category);
     av_dict_set_int(dict, name, value, 0);
+    // av_opt_set_int(ffp, name, value, 0);
 }
 
 void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
@@ -4478,6 +4483,26 @@ int ffp_wait_stop_l(FFPlayer *ffp)
         ffp->is = NULL;
     }
     return 0;
+}
+
+/*
+ * pixels must be alloced using av_alloc
+ */
+static void ffp_get_snap_shot(void *opaque, uint8_t* pixels, int width, int height)
+{
+    FFPlayer *ffp = opaque;
+    ffp_notify_msg5(ffp, FFP_MSG_VIDEO_SNAP_SHOT, width, height, pixels,
+            (size_t)width * height * 4, msg_obj_free_l);
+}
+
+void ffp_take_snapshot(FFPlayer *ffp)
+{
+    assert(ffp);
+    int ret = SDL_Vout_TakeSnapShot(ffp->vout, ffp, ffp_get_snap_shot);
+    if (ret < 0) {
+        ffp_notify_msg2(ffp, FFP_MSG_ERROR, -FFP_MSG_VIDEO_SNAP_SHOT);
+        ALOGE("ffp take snap_shot error: %d", ret);
+    }
 }
 
 int ffp_seek_to_l(FFPlayer *ffp, long msec)
@@ -5096,6 +5121,10 @@ int64_t ffp_get_property_int64(FFPlayer *ffp, int id, int64_t default_value)
             if (!ffp)
                 return default_value;
             return ffp->stat.logical_file_size;
+        case FFP_PROP_INT64_AMC_GLES_OES_VOUT:
+            if (!ffp)
+                return default_value;
+            return ffp->vout_type & SDL_VOUT_AMC_OES_EGL;
         default:
             return default_value;
     }
@@ -5119,6 +5148,12 @@ void ffp_set_property_int64(FFPlayer *ffp, int id, int64_t value)
             if (ffp) {
                 ijkio_manager_immediate_reconnect(ffp->ijkio_manager_ctx);
             }
+            break;
+        case FFP_PROP_INT64_AMC_GLES_OES_VOUT:
+            if (ffp && value) {
+                ffp->vout_type |= SDL_VOUT_AMC_OES_EGL;
+            }
+            break;
         default:
             break;
     }
