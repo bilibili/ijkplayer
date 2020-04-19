@@ -37,6 +37,7 @@ set(J4A_SOURCES
     j4a/class/java/util/ArrayList.c
     j4a/class/tv/danmaku/ijk/media/player/misc/IMediaDataSource.c
     j4a/class/tv/danmaku/ijk/media/player/misc/IAndroidIO.c
+    j4a/class/tv/danmaku/ijk/media/player/misc/MediaCodecSurface.c
     j4a/class/tv/danmaku/ijk/media/player/IjkMediaPlayer.c
     j4au/class/android/media/AudioTrack.util.c
     j4au/class/java/nio/ByteBuffer.util.c

@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016 Bilibili
- * copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2020 Befovy <befovy@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -19,25 +18,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "internal.h"
+#include "ijksdl/gles2/internal.h"
 
-// BT.709, which is the standard for HDTV.
-static const GLfloat g_bt709[] = {
-    1.164f,  1.164f,  1.164f,
-    0.0f,   -0.213f,  2.112f,
-    1.793f, -0.533f,  0.0f,
-};
-const GLfloat *IJK_GLES2_getColorMatrix_bt709()
-{
-    return g_bt709;
-}
+static const char g_shader[] = R"(
+    #extension GL_OES_EGL_image_external : require
+    precision highp float;
+    varying   highp vec2 vv2_Texcoord;
+    uniform   lowp  samplerExternalOES us2_SamplerX;
 
-static const GLfloat g_bt601[] = {
-    1.164f,  1.164f, 1.164f,
-    0.0f,   -0.392f, 2.017f,
-    1.596f, -0.813f, 0.0f,
-};
-const GLfloat *IJK_GLES2_getColorMatrix_bt601()
+    void main()
+    {
+        gl_FragColor = vec4(texture2D(us2_SamplerX, vv2_Texcoord).rgb, 1);
+    }
+)";
+
+const char *IJK_GLES2_getFragmentShader_amc()
 {
-    return g_bt601;
+    return g_shader;
 }

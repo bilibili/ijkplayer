@@ -120,6 +120,9 @@ set(GLES2_SOURCES
 set(IJK_SDL_SOURCES ${BASE_SOURCES})
 
 if (ANDROID)
+    list(APPEND GLES2_SOURCES gles2/renderer_amc.c)
+    list(APPEND GLES2_SOURCES gles2/fsh/amc.fsh.c)
+    list(APPEND GLES2_SOURCES gles2/vsh/amc.vsh.c)
     set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_ANDROID_EXTRA_SOURCES} ${GLES2_SOURCES})
 endif ()
 

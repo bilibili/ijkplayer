@@ -875,6 +875,11 @@ inline static void ffp_notify_msg4(FFPlayer *ffp, int what, int arg1, int arg2, 
     msg_queue_put_simple4(&ffp->msg_queue, what, arg1, arg2, obj, obj_len);
 }
 
+inline static void ffp_notify_msg5(FFPlayer *ffp, int what, int arg1, int arg2, void *obj,
+        size_t len, void (*free_l)(void *obj)) {
+    msg_queue_put_simple5(&ffp->msg_queue, what, arg1, arg2, obj, len, free_l);
+}
+
 inline static void ffp_remove_msg(FFPlayer *ffp, int what) {
     msg_queue_remove(&ffp->msg_queue, what);
 }

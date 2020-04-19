@@ -79,4 +79,9 @@ GLboolean IJK_GLES2_Renderer_renderOverlay(IJK_GLES2_Renderer *renderer, SDL_Vou
 #define IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL    (2) // Preserve aspect ratio; fill view bounds.
 GLboolean IJK_GLES2_Renderer_setGravity(IJK_GLES2_Renderer *renderer, int gravity, GLsizei view_width, GLsizei view_height);
 
+
+typedef void (*IJK_GLES2_Renderer_funcGetSnapShot)(void *opaque, uint8_t* pixels, int width, int height);
+
+GLboolean IJK_GLES2_Renderer_snapShot(IJK_GLES2_Renderer *renderer, void *opaque, IJK_GLES2_Renderer_funcGetSnapShot get_snap_shot);
+
 #endif

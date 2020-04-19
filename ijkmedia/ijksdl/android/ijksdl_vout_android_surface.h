@@ -31,5 +31,4 @@
 
 SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface();
 void SDL_VoutAndroid_SetAndroidSurface(JNIEnv*env, SDL_Vout *vout, jobject android_surface);
-
 #endif

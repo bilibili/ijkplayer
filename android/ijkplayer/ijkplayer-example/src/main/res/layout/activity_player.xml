@@ -17,7 +17,7 @@
             android:id="@+id/video_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"></tv.danmaku.ijk.media.example.widget.media.IjkVideoView>
+            android:layout_gravity="center"/>
 
         <TextView
             android:id="@+id/toast_text_view"
@@ -46,6 +46,20 @@
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             tools:context=".toolbar_widget" />
+
+        <Button
+            android:id="@+id/btn_snap_shot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:text="@string/snap_shot" />
+
+        <ImageView
+            android:id="@+id/iv_snapshot"
+            android:layout_width="150dp"
+            android:layout_height="120dp"
+            android:layout_gravity="start|bottom"/>
+
     </FrameLayout>
 
     <!-- The navigation drawer -->

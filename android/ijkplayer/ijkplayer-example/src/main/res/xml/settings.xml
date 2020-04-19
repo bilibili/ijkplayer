@@ -36,6 +36,12 @@
             android:persistent="true"
             android:summary="@string/pref_summary_media_codec_handle_resolution_change"
             android:title="@string/pref_title_media_codec_handle_resolution_change" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_amc_oes_render"
+            android:persistent="true"
+            android:summary="@string/pref_summary_amc_oes_render"
+            android:title="@string/pref_title_amc_oes_render"/>
         <tv.danmaku.ijk.media.example.widget.preference.IjkListPreference
             android:defaultValue=""
             android:entries="@array/pref_entries_pixel_format"

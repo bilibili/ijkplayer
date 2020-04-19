@@ -32,6 +32,7 @@
 
 #if ANDROID
 #include <android/native_window.h>
+#include "ijksdl/android/ijksdl_android_jni.h"
 #endif
 
 #define IJK_EGL_RENDER_BUFFER 0
@@ -288,6 +289,10 @@ static EGLBoolean IJK_EGL_prepareRenderer(IJK_EGL* egl, SDL_VoutOverlay *overlay
             return EGL_FALSE;
         }
 
+        if (overlay->format == SDL_FCC__AMC) {
+            IJK_GLES2_Renderer_AMC_set_texture(opaque->renderer, egl->amc_surface);
+        }
+
         if (!IJK_GLES2_Renderer_use(opaque->renderer)) {
             ALOGE("[EGL] Could not use render.");
             IJK_GLES2_Renderer_freeP(&opaque->renderer);
@@ -350,12 +355,29 @@ void IJK_EGL_releaseWindow(IJK_EGL* egl)
     IJK_EGL_terminate(egl);
 }
 
+IJK_GLES2_Renderer *IJK_EGL_get_renderer(IJK_EGL *egl)
+{
+    if (!egl || !egl->opaque)
+        return NULL;
+    return egl->opaque->renderer;
+}
+
 void IJK_EGL_free(IJK_EGL *egl)
 {
     if (!egl)
         return;
 
     IJK_EGL_terminate(egl);
+#if ANDROID
+    if (egl->amc_surface != NULL) {
+        JNIEnv *env = NULL;
+        if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+            ALOGE("SDL_Android_GetApiLevel: SetupThreadEnv failed");
+            return;
+        }
+        J4A_DeleteGlobalRef(env, egl->amc_surface);
+    }
+#endif
 
     memset(egl, 0, sizeof(IJK_EGL));
     free(egl);
