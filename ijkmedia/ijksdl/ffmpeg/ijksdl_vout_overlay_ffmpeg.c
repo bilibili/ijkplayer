@@ -199,7 +199,7 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
             dst_format = AV_PIX_FMT_RGB24;
             break;
         case SDL_FCC_RV16:
-            dst_format = AV_PIX_FMT_RGB565; 
+            dst_format = AV_PIX_FMT_RGB565;
             break;
         case SDL_FCC_BGRA:
             dst_format = AV_PIX_FMT_BGRA;
