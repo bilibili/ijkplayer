@@ -145,7 +145,7 @@ if (IJK_DESKTOP_UNI)
     cmake_print_variables(SDL2_INCLUDE_DIRS)
 
     target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glfw/include)
-    # target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glad/include)
+    target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glad/include)
     target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glfw/deps)
 else ()
     add_library(ijksdl SHARED ${IJK_SDL_SOURCES})
