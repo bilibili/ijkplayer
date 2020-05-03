@@ -696,6 +696,15 @@ int ijkmp_get_loop(IjkMediaPlayer *mp)
     return loop;
 }
 
+void ijkmp_take_snapshot(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_take_snapshot(mp->ffplayer);
+    pthread_mutex_unlock(&mp->mutex);
+}
+
+
 void *ijkmp_get_weak_thiz(IjkMediaPlayer *mp)
 {
     return mp->weak_thiz;

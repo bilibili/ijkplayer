@@ -1,5 +1,15 @@
 
 ---
+## 0.7.0 (2020-05-03)
+
+* add audioSessionInterrupt handler in IJKFFMediaPlayer ([273f36a](https://github.com/befovy/ijkplayer/commit/273f36a435f187944be7fd96ca181c9b0a420868))
+* add gles ose render for android mediacodec buffers ([b1f924f](https://github.com/befovy/ijkplayer/commit/b1f924fd0aa4310e9383f6cafbd21375e0c9f37c))
+* add ijkplayer ios error code ([a79c754](https://github.com/befovy/ijkplayer/commit/a79c7546e590d3b5746396d7729509240723beba))
+* add log level filter for ijklog ([16bb3ed](https://github.com/befovy/ijkplayer/commit/16bb3edb99c1d3391f4d4d168a4c7158b411e9f9))
+* add snapshot support ([7c64747](https://github.com/befovy/ijkplayer/commit/7c647475719617941f031e3bf8678bdd3f2889a2))
+* error color pixel format bgra and rgba, rv32 ([501aa9a](https://github.com/befovy/ijkplayer/commit/501aa9a29a881af92b7fac34686b77afada4a5e8))
+
+---
 ## 0.6.0 (2020-04-11)
 
 * add input process for tui demo ([e479d4e](https://github.com/befovy/ijkplayer/commit/e479d4e75fd05ed3f5e0e64a6722d8a900bd9774))
@@ -13,7 +23,6 @@
 
 ## 0.5.1 (2020-02-21)
 
-### Features
 
 * add libsrt compile support for Android and mac ([#14](https://github.com/befovy/ijkplayer/issues/14)) ([f7764b6](https://github.com/befovy/ijkplayer/commit/f7764b6cd8b4da84910e57b94c0cd5614feb08e7))
 * add consumerProguardFiles fix minify crash, add test sign ([48859d7](https://github.com/befovy/ijkplayer/commit/48859d71f567067218d287ed439d448b2946bbdb))

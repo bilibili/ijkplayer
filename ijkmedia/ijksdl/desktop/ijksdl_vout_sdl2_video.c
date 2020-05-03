@@ -65,7 +65,33 @@ static int sdl2_display(SDL_Vout_Opaque *opaque, SDL_VoutOverlay *overlay) {
 
     SDL_Renderer *renderer = opaque->renderer;
 
-    assert(overlay->format == SDL_FCC_I420);
+    int dest_sdl2_format = SDL_PIXELFORMAT_UNKNOWN;
+    bool is_yuv = false;
+    switch (overlay->format) {
+        case SDL_FCC_I420:
+        case SDL_FCC_IYUV:
+            dest_sdl2_format = SDL_PIXELFORMAT_IYUV;
+            is_yuv = true;
+            break;
+        case SDL_FCC_RV16:
+            dest_sdl2_format = SDL_PIXELFORMAT_RGB565;
+            break;
+        case SDL_FCC_RV24:
+            dest_sdl2_format = SDL_PIXELFORMAT_RGB888;
+            break;
+        case SDL_FCC_RV32:
+            dest_sdl2_format = SDL_PIXELFORMAT_BGRX8888;
+            break;
+        case SDL_FCC_BGRA:
+            dest_sdl2_format = SDL_PIXELFORMAT_BGRA32;
+            break;
+        case SDL_FCC_RGBA:
+            dest_sdl2_format = SDL_PIXELFORMAT_RGBA32;
+            break;
+        default:
+            break;
+    }
+    assert(dest_sdl2_format != SDL_PIXELFORMAT_UNKNOWN);
 
     Uint32 format = 0;
     int access = 0, w = 0, h = 0, ret = 0;
@@ -74,18 +100,22 @@ static int sdl2_display(SDL_Vout_Opaque *opaque, SDL_VoutOverlay *overlay) {
     if (ret < 0 || format != opaque->format || w != overlay->w || h != overlay->h) {
         if (opaque->texture)
             SDL_DestroyTexture(opaque->texture);
-        opaque->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_IYUV, SDL_TEXTUREACCESS_STREAMING, overlay->w,
+        opaque->texture = SDL_CreateTexture(renderer, dest_sdl2_format, SDL_TEXTUREACCESS_STREAMING, overlay->w,
                                             overlay->h);
-        opaque->format = SDL_PIXELFORMAT_IYUV;
+        opaque->format = dest_sdl2_format;
     }
     if (opaque->texture == NULL) {
         return -1;
     }
     SDL_Texture *texture = opaque->texture;
-    SDL_UpdateYUVTexture(texture, NULL,
-                         overlay->pixels[0], overlay->pitches[0],
-                         overlay->pixels[1], overlay->pitches[1],
-                         overlay->pixels[2], overlay->pitches[2]);
+    if (is_yuv) {
+        SDL_UpdateYUVTexture(texture, NULL,
+                             overlay->pixels[0], overlay->pitches[0],
+                             overlay->pixels[1], overlay->pitches[1],
+                             overlay->pixels[2], overlay->pitches[2]);
+    } else {
+        SDL_UpdateTexture(texture, NULL, overlay->pixels[0], overlay->pitches[0]);
+    }
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_RenderPresent(renderer);
     return 0;

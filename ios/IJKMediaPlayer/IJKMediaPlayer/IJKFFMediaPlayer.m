@@ -25,6 +25,7 @@
 #import "IJKFFMoviePlayerDef.h"
 #import "IJKAudioKit.h"
 #import "IJKFFOptions.h"
+#import "IJKNotificationManager.h"
 #import "ijkplayer/ijkplayer.h"
 
 typedef NS_ENUM(NSInteger, IJKSDLFFPlayrRenderType) {
@@ -44,14 +45,18 @@ typedef NS_ENUM(NSInteger, IJKSDLFFPlayrRenderType) {
     IjkMediaPlayer* _nativeMediaPlayer;
     IJKFFMoviePlayerMessagePool *_msgPool;
 
+    IJKNotificationManager *_notificationManager;
     NSMutableSet<id<IJKMPEventHandler>> *_eventHandlers;
     
     CFDictionaryRef _optionsDictionary;
+
+    OnSnapshotBlock _onSnapshot;
 #if IJK_IOS
     IJKSDLFboGLView* _fboView;
 #endif
     id<IJKCVPBViewProtocol> _cvPBView;
     IJKSDLFFPlayrRenderType _renderType;
+    BOOL _playingBeforeInterruption;
 }
 
 
@@ -131,11 +136,15 @@ int ff_media_player_msg_loop(void* arg)
     ijkmp_set_inject_opaque(_nativeMediaPlayer, (__bridge_retained void *) weakHolder);
     ijkmp_set_ijkio_inject_opaque(_nativeMediaPlayer, (__bridge_retained void *) weakHolder);
     
-    [[IJKAudioKit sharedInstance] setupAudioSession];
+    _notificationManager = [[IJKNotificationManager alloc] init];
+
+    [[IJKAudioKit sharedInstance] setupAudioSessionWithoutInterruptHandler];
     _optionsDictionary = nil;
     _isThirdGLView = true;
     _scaleFactor = 1.0f;
     _fps = 1.0f;
+
+    [self registerApplicationObservers];
 
 }
 
@@ -227,7 +236,6 @@ int ff_media_player_msg_loop(void* arg)
     return ijkmp_get_property_int64(_nativeMediaPlayer, property, value);
 }
 
-
 - (void)setPlaybackVolume:(float)volume
 {
     if (!_nativeMediaPlayer)
@@ -244,7 +252,9 @@ int ff_media_player_msg_loop(void* arg)
 
 - (void) shutdown
 {
+    _ignoreAudioInterrupt = YES;
     ijkmp_shutdown(_nativeMediaPlayer);
+    [self unregisterApplicationObservers];
     
     __unused id weakPlayer = (__bridge_transfer IJKFFMediaPlayer*)ijkmp_set_weak_thiz(_nativeMediaPlayer, NULL);
     __unused id weakHolder = (__bridge_transfer IJKFFWeakHolder*)ijkmp_set_inject_opaque(_nativeMediaPlayer, NULL);
@@ -255,7 +265,7 @@ int ff_media_player_msg_loop(void* arg)
 
     [_eventHandlers removeAllObjects];
     ijkmp_dec_ref_p(&_nativeMediaPlayer);
-    
+
     _cvPBView = nil;
 #if IJK_IOS
     _fboView = nil;
@@ -334,10 +344,31 @@ int ff_media_player_msg_loop(void* arg)
     }
 }
 
+
+- (void) onSnapshot:(CVPixelBufferRef) pixelbuffer
+{
+    if (_onSnapshot != nil) {
+        CIImage *ciImage = [CIImage imageWithCVPixelBuffer:pixelbuffer];
+
+        CIContext *context = [CIContext contextWithOptions:nil];
+        CGImageRef imageRef = [context createCGImage:ciImage
+                 fromRect:CGRectMake(0, 0,
+                                     CVPixelBufferGetWidth(pixelbuffer),
+                                     CVPixelBufferGetHeight(pixelbuffer))];
+
+        UIImage *uiImage = [UIImage imageWithCGImage:imageRef];
+        CGImageRelease(imageRef);
+
+        _onSnapshot(uiImage, nil);
+        _onSnapshot = nil;
+    }
+}
+
 // IJKSDL GLview call this when display frame
 - (void) display_pixels:(IJKOverlay *)overlay
 {
     if (overlay->pixel_buffer != nil && _cvPBView != nil) {
+        [self onSnapshot: overlay->pixel_buffer];
         [_cvPBView display_pixelbuffer:overlay->pixel_buffer];
     } else if (_cvPBView != nil && overlay->format == SDL_FCC_BGRA){
         CVPixelBufferRef pixelBuffer;
@@ -366,6 +397,7 @@ int ff_media_player_msg_loop(void* arg)
             uint8_t *dst = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
             memcpy(dst, overlay->pixels[0], overlay->pitches[0] * overlay->h);
             CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+            [self onSnapshot: pixelBuffer];
             [_cvPBView display_pixelbuffer:pixelBuffer];
             CVPixelBufferRelease(pixelBuffer);
         }
@@ -378,6 +410,55 @@ int ff_media_player_msg_loop(void* arg)
     if (_cvPBView) {
         [_cvPBView display_pixelbuffer:pixelbuffer];
     }
+    [self onSnapshot: pixelbuffer];
 }
 
+
+- (void) takeSnapshot:(OnSnapshotBlock) block
+{
+    _onSnapshot = block;
+}
+
+- (void)registerApplicationObservers
+{
+    [_notificationManager addObserver:self
+                             selector:@selector(audioSessionInterrupt:)
+                                 name:AVAudioSessionInterruptionNotification
+                               object:nil];
+}
+
+- (void)unregisterApplicationObservers
+{
+    [_notificationManager removeAllObservers:self];
+}
+
+
+- (void)audioSessionInterrupt:(NSNotification *)notification
+{
+    if (_ignoreAudioInterrupt) {
+        return;
+    }
+    int reason = [[[notification userInfo] valueForKey:AVAudioSessionInterruptionTypeKey] intValue];
+    switch (reason) {
+        case AVAudioSessionInterruptionTypeBegan: {
+            if (_nativeMediaPlayer && ijkmp_get_state(_nativeMediaPlayer) == MP_STATE_STARTED) {
+                _playingBeforeInterruption = YES;
+            } else{
+                _playingBeforeInterruption = NO;
+            }
+            NSLog(@"IJKFFMediaPlayer:audioSessionInterrupt: begin, %d\n", _playingBeforeInterruption);
+            [self pause];
+            [[IJKAudioKit sharedInstance] setActive:NO];
+            break;
+        }
+        case AVAudioSessionInterruptionTypeEnded: {
+            NSLog(@"IJKFFMediaPlayer:audioSessionInterrupt: end\n");
+            [[IJKAudioKit sharedInstance] setActive:YES];
+            if (_playingBeforeInterruption) {
+                [self start];
+            }
+            break;
+        }
+    }
+}
 @end

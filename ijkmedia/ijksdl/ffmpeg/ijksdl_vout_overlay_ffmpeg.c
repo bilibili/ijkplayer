@@ -193,7 +193,7 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
             }
             break;
         case SDL_FCC_RV32:
-            dst_format = AV_PIX_FMT_0BGR32;
+            dst_format = AV_PIX_FMT_0RGB;
             break;
         case SDL_FCC_RV24:
             dst_format = AV_PIX_FMT_RGB24;
@@ -202,10 +202,10 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
             dst_format = AV_PIX_FMT_RGB565;
             break;
         case SDL_FCC_BGRA:
-            dst_format = AV_PIX_FMT_BGR32_1;
+            dst_format = AV_PIX_FMT_BGRA;
             break;
         case SDL_FCC_RGBA:
-            dst_format = AV_PIX_FMT_RGB32_1;
+            dst_format = AV_PIX_FMT_RGBA;
             break;
         default:
             ALOGE("SDL_VoutFFmpeg_ConvertPicture: unexpected overlay format %s(%d)",
@@ -393,7 +393,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, int frame_f
         break;
     }
     case SDL_FCC_RV32: {
-        ff_format = AV_PIX_FMT_0BGR32;
+        ff_format = AV_PIX_FMT_0RGB;
         buf_width = IJKALIGN(width, 4); // 4 bytes per pixel
         opaque->planes = 1;
         break;

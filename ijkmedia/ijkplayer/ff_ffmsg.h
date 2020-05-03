@@ -41,6 +41,7 @@
 #define FFP_MSG_COMPONENT_OPEN              409
 #define FFP_MSG_VIDEO_SEEK_RENDERING_START  410
 #define FFP_MSG_AUDIO_SEEK_RENDERING_START  411
+#define FFP_MSG_VIDEO_SNAP_SHOT             480
 
 #define FFP_MSG_BUFFERING_START             500
 #define FFP_MSG_BUFFERING_END               501
@@ -107,4 +108,5 @@
 #define FFP_PROP_INT64_SHARE_CACHE_DATA                 20210
 #define FFP_PROP_INT64_IMMEDIATE_RECONNECT              20211
 
+#define FFP_PROP_INT64_AMC_GLES_OES_VOUT                59600
 #endif

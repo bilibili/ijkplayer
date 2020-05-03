@@ -23,6 +23,7 @@
     <string name="seek_load_cost">seek_load_cost</string>
     <string name="tcp_speed">tcp_speed</string>
     <string name="bit_rate">bit_rate</string>
+    <string name="snap_shot">Snapshot</string>
 
     <string name="media_information">Media Information</string>
     <string name="mi_player">Player</string>

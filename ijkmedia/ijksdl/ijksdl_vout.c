@@ -23,6 +23,7 @@
  */
 
 #include "ijksdl_vout.h"
+#include "ijksdl_gles2.h"
 #include <stdlib.h>
 
 #include <assert.h>
@@ -51,6 +52,17 @@ void SDL_VoutFreeP(SDL_Vout **pvout)
     *pvout = NULL;
 }
 
+void SDL_VoutFreeContext(SDL_Vout *vout)
+{
+    if (!vout)
+        return;
+    if (vout->free_context_l) {
+        SDL_LockMutex(vout->mutex);
+        vout->free_context_l(vout);
+        SDL_UnlockMutex(vout->mutex);
+    }
+}
+
 int SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     if (vout && overlay && vout->display_overlay)
@@ -59,12 +71,13 @@ int SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     return -1;
 }
 
-int SDL_VoutSetOverlayFormat(SDL_Vout *vout, Uint32 overlay_format)
+int SDL_VoutSetOverlayFormat(SDL_Vout *vout, Uint32 overlay_format, int vout_type)
 {
     if (!vout)
         return -1;
 
     vout->overlay_format = overlay_format;
+    vout->vout_type = vout_type;
     return 0;
 }
 
@@ -74,6 +87,19 @@ int SDL_VoutSetWindow(SDL_Vout *vout, void *window)
         return vout->set_window(vout, window);
     return -1;
 }
+
+int SDL_Vout_TakeSnapShot(SDL_Vout *vout, void *opaque, IJK_GLES2_Renderer_funcGetSnapShot get_snap_shot)
+{
+    if (!vout || !vout->get_renderer)
+        return -1;
+
+    IJK_GLES2_Renderer *renderer = vout->get_renderer(vout);
+    if (!renderer)
+        return -1;
+
+    return IJK_GLES2_Renderer_snapShot(renderer, opaque, get_snap_shot) ? 0 : -1;
+}
+
 
 SDL_VoutOverlay *SDL_Vout_CreateOverlay(int width, int height, int frame_format, SDL_Vout *vout)
 {

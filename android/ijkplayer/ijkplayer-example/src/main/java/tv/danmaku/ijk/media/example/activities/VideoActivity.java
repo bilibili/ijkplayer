@@ -20,7 +20,9 @@ package tv.danmaku.ijk.media.example.activities;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,10 +36,14 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 import tv.danmaku.ijk.media.example.R;
@@ -60,6 +66,9 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     private TableLayout mHudView;
     private DrawerLayout mDrawerLayout;
     private ViewGroup mRightDrawer;
+    private Button mBtnSnapShot;
+
+    private ImageView mImageView;
 
     private Settings mSettings;
     private boolean mBackPressed;
@@ -133,6 +142,16 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 
         mDrawerLayout.setScrimColor(Color.TRANSPARENT);
 
+        mBtnSnapShot = findViewById(R.id.btn_snap_shot);
+        mBtnSnapShot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mVideoView.snapshot();
+            }
+        });
+
+        mImageView = findViewById(R.id.iv_snapshot);
+
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
         IjkMediaPlayer.native_profileBegin("libijkplayer.so");
@@ -150,6 +169,14 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             finish();
             return;
         }
+
+        mVideoView.setOnSnapShotListener(new IMediaPlayer.OnSnapShotListener() {
+            @Override
+            public void onSnapShot(IMediaPlayer mp, Bitmap bm, int width, int height) {
+                mImageView.setImageBitmap(bm);
+            }
+        });
+
         mVideoView.start();
     }
 

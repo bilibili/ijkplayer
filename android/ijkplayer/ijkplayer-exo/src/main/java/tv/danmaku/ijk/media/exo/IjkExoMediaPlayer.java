@@ -82,6 +82,11 @@ public class IjkExoMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
+    public void snapShot(){
+        notifyOnError(MEDIA_ERROR_SNAP_SHOT, MEDIA_ERROR_UNSUPPORTED);
+    }
+
+    @Override
     public void setDataSource(Context context, Uri uri, Map<String, String> headers) {
         // TODO: handle headers
         setDataSource(context, uri);

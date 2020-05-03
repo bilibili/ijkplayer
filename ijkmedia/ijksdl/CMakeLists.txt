@@ -30,6 +30,8 @@ set(BASE_SOURCES
     ijksdl_misc.h
     ijksdl_stdinc.h
     ijksdl_inc_internal.h
+    ijksdl_log.c
+    ijksdl_log.h
     ijksdl_aout.c
     ijksdl_aout.h
     ijksdl_aout_internal.h
@@ -120,6 +122,9 @@ set(GLES2_SOURCES
 set(IJK_SDL_SOURCES ${BASE_SOURCES})
 
 if (ANDROID)
+    list(APPEND GLES2_SOURCES gles2/renderer_amc.c)
+    list(APPEND GLES2_SOURCES gles2/fsh/amc.fsh.c)
+    list(APPEND GLES2_SOURCES gles2/vsh/amc.vsh.c)
     set(IJK_SDL_SOURCES ${IJK_SDL_SOURCES} ${SDL_ANDROID_EXTRA_SOURCES} ${GLES2_SOURCES})
 endif ()
 
@@ -140,7 +145,7 @@ if (IJK_DESKTOP_UNI)
     cmake_print_variables(SDL2_INCLUDE_DIRS)
 
     target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glfw/include)
-    # target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glad/include)
+    target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glad/include)
     target_include_directories(ijksdl_static PRIVATE ${IJKROOT_PATH}/desktop/glfw/deps)
 else ()
     add_library(ijksdl SHARED ${IJK_SDL_SOURCES})

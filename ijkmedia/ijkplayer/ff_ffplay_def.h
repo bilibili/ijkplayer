@@ -273,6 +273,11 @@ typedef struct Decoder {
     int    first_frame_decoded;
 } Decoder;
 
+
+typedef enum ShowMode {
+    SHOW_MODE_NONE = -1, SHOW_MODE_VIDEO = 0, SHOW_MODE_WAVES, SHOW_MODE_RDFT, SHOW_MODE_NB
+} ShowMode;
+
 typedef struct VideoState {
     SDL_Thread *read_tid;
     AVInputFormat *iformat;
@@ -336,9 +341,7 @@ typedef struct VideoState {
     int frame_drops_late;
     int continuous_frame_drops_early;
 
-    enum ShowMode {
-        SHOW_MODE_NONE = -1, SHOW_MODE_VIDEO = 0, SHOW_MODE_WAVES, SHOW_MODE_RDFT, SHOW_MODE_NB
-    } show_mode;
+    ShowMode show_mode;
     int16_t sample_array[SAMPLE_ARRAY_SIZE];
     int sample_array_index;
     int last_i_start;
@@ -873,6 +876,11 @@ inline static void ffp_notify_msg3(FFPlayer *ffp, int what, int arg1, int arg2) 
 
 inline static void ffp_notify_msg4(FFPlayer *ffp, int what, int arg1, int arg2, void *obj, int obj_len) {
     msg_queue_put_simple4(&ffp->msg_queue, what, arg1, arg2, obj, obj_len);
+}
+
+inline static void ffp_notify_msg5(FFPlayer *ffp, int what, int arg1, int arg2, void *obj,
+        size_t len, void (*free_l)(void *obj)) {
+    msg_queue_put_simple5(&ffp->msg_queue, what, arg1, arg2, obj, len, free_l);
 }
 
 inline static void ffp_remove_msg(FFPlayer *ffp, int what) {

@@ -19,6 +19,7 @@ package tv.danmaku.ijk.media.player;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.view.Surface;
@@ -68,6 +69,8 @@ public interface IMediaPlayer {
     int MEDIA_ERROR_MALFORMED = -1007;
     int MEDIA_ERROR_UNSUPPORTED = -1010;
     int MEDIA_ERROR_TIMED_OUT = -110;
+
+    int MEDIA_ERROR_SNAP_SHOT = -480;
 
     void setDisplay(SurfaceHolder sh);
 
@@ -138,6 +141,9 @@ public interface IMediaPlayer {
     void setOnVideoSizeChangedListener(
             OnVideoSizeChangedListener listener);
 
+    void setOnSnapShotListener(
+            OnSnapShotListener listener);
+
     void setOnErrorListener(OnErrorListener listener);
 
     void setOnInfoListener(OnInfoListener listener);
@@ -168,6 +174,10 @@ public interface IMediaPlayer {
                                 int sar_num, int sar_den);
     }
 
+    interface OnSnapShotListener {
+        void onSnapShot(IMediaPlayer mp, Bitmap bm, int width, int height);
+    }
+
     interface OnErrorListener {
         boolean onError(IMediaPlayer mp, int what, int extra);
     }
@@ -180,7 +190,7 @@ public interface IMediaPlayer {
         void onTimedText(IMediaPlayer mp, IjkTimedText text);
     }
 
-    /*--------------------
+    /**--------------------
      * Optional
      */
     void setAudioStreamType(int streamtype);
@@ -199,17 +209,23 @@ public interface IMediaPlayer {
 
     boolean isLooping();
 
-    /*--------------------
+    /**--------------------
      * AndroidMediaPlayer: JELLY_BEAN
      */
     ITrackInfo[] getTrackInfo();
 
-    /*--------------------
+    /**--------------------
      * AndroidMediaPlayer: ICE_CREAM_SANDWICH:
      */
     void setSurface(Surface surface);
 
-    /*--------------------
+    /**--------------------
+     * Create a snapshot for the current frame.
+     * You can get the snapshot creation result using {@link OnSnapShotListener}
+     */
+    void snapShot();
+
+    /**--------------------
      * AndroidMediaPlayer: M:
      */
     void setDataSource(IMediaDataSource mediaDataSource);

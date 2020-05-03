@@ -222,6 +222,7 @@ int ffpipeline_set_surface(JNIEnv *env, IJKFF_Pipeline* pipeline, jobject surfac
         if ((surface == prev_surface) ||
             (surface && prev_surface && (*env)->IsSameObject(env, surface, prev_surface))) {
             // same object, no need to reconfigure
+            ALOGI("%s(), same object, no need to reconfigure\n", __func__);
         } else {
             SDL_VoutAndroid_setAMediaCodec(opaque->weak_vout, NULL);
             if (surface) {

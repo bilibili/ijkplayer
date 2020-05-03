@@ -1,9 +1,8 @@
 /*****************************************************************************
- * ijksdl_vout_android_surface.h
+ * ijksdl_log.c
  *****************************************************************************
  *
- * Copyright (c) 2013 Bilibili
- * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2020 Befovy
  *
  * This file is part of ijkPlayer.
  *
@@ -22,13 +21,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKSDL_ANDROID__IJKSDL_VOUT_ANDROID_SURFACE_H
-#define IJKSDL_ANDROID__IJKSDL_VOUT_ANDROID_SURFACE_H
+#include "ijksdl_log.h"
 
-#include <jni.h>
-#include "../ijksdl_stdinc.h"
-#include "../ijksdl_vout.h"
-
-SDL_Vout *SDL_VoutAndroid_CreateForAndroidSurface();
-void SDL_VoutAndroid_SetAndroidSurface(JNIEnv*env, SDL_Vout *vout, jobject android_surface);
+#include <stdarg.h>
+#if ANDROID
+#include <android/log.h>
 #endif
+
+
+#define LOG_BUF_SIZE	1024
+
+static int g_ijksdl_log_level = 0;
+
+void ijk_log_set_level(int level)
+{
+    g_ijksdl_log_level = level;
+}
+
+void ijk_log_print(int level, const char *tag, const char *fmt, ...)
+{
+    if (level < g_ijksdl_log_level)
+        return;
+
+    va_list ap;
+    va_start(ap, fmt);
+    ijk_log_vprint(level, tag, fmt, ap);
+    va_end(ap);
+}
+
+void ijk_log_vprint(int level, const char *tag, const char *fmt, va_list ap)
+{
+    if (level < g_ijksdl_log_level)
+        return;
+
+#if ANDROID
+    __android_log_vprint(level, tag, fmt, ap);
+#else
+    vprintf(fmt, ap);
+#endif
+}
