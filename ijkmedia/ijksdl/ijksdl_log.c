@@ -23,6 +23,7 @@
 
 #include "ijksdl_log.h"
 
+#include <stdarg.h>
 #if ANDROID
 #include <android/log.h>
 #endif

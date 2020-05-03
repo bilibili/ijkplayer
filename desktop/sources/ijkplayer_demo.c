@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
     info.fp = fp;
     ijkff_set_event_cb(fp, &info, demo_event_cb);
 
-    ijkff_set_option(fp, "fcc-i420", "overlay-format", IJK_OPT_CATEGORY_PLAYER);
+    ijkff_set_option(fp, "fcc-bgra", "overlay-format", IJK_OPT_CATEGORY_PLAYER);
     ijkff_set_data_source(fp, "https://player.alicdn.com/video/aliyunmedia.mp4");
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO);

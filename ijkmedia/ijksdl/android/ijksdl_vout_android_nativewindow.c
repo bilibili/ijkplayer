@@ -84,6 +84,7 @@ static void SDL_AMediaCodecBufferProxy_invalidate(SDL_AMediaCodecBufferProxy *pr
 }
 
 typedef struct SDL_Vout_Opaque {
+    ANativeWindow   *new_window;
     ANativeWindow   *native_window;
     SDL_AMediaCodec *acodec;
     int              null_native_window_warned; // reduce log for null window
@@ -113,6 +114,22 @@ static SDL_VoutOverlay *func_create_overlay(int width, int height, int frame_for
     return overlay;
 }
 
+static void func_free_context_l(SDL_Vout *vout)
+{
+    if (!vout)
+        return;
+
+    SDL_Vout_Opaque *opaque = vout->opaque;
+    if (opaque) {
+        IJK_EGL_freep(&opaque->egl);
+
+        if (opaque->native_window) {
+            ANativeWindow_release(opaque->native_window);
+            opaque->native_window = NULL;
+        }
+    }
+}
+
 static void func_free_l(SDL_Vout *vout)
 {
     if (!vout)
@@ -128,13 +145,6 @@ static void func_free_l(SDL_Vout *vout)
         ISDL_Array__clear(&opaque->overlay_pool);
         ISDL_Array__clear(&opaque->overlay_manager);
 
-        if (opaque->native_window) {
-            ANativeWindow_release(opaque->native_window);
-            opaque->native_window = NULL;
-        }
-
-        IJK_EGL_freep(&opaque->egl);
-
         SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
     }
 
@@ -144,6 +154,16 @@ static void func_free_l(SDL_Vout *vout)
 static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
+
+    if (opaque->new_window != NULL) {
+        if (opaque->native_window) {
+            ANativeWindow_release(opaque->native_window);
+        }
+        opaque->native_window = opaque->new_window;
+        opaque->new_window = NULL;
+        IJK_EGL_terminate(opaque->egl);
+    }
+
     ANativeWindow *native_window = opaque->native_window;
 
     if (!native_window) {
@@ -244,7 +264,7 @@ SDL_Vout *SDL_VoutAndroid_CreateForANativeWindow()
     vout->free_l          = func_free_l;
     vout->display_overlay = func_display_overlay;
     vout->get_renderer    = func_get_renderer;
-
+    vout->free_context_l  = func_free_context_l;
     return vout;
 fail:
     func_free_l(vout);
@@ -283,8 +303,19 @@ static void SDL_VoutAndroid_SetNativeWindow_l(SDL_Vout *vout, ANativeWindow *nat
         return;
     }
 
+    if (vout->vout_type & SDL_VOUT_AMC_OES_EGL)
+        SDL_VoutAndroid_invalidateAllBuffers_l(vout);
+
+    if (opaque->new_window)
+        ANativeWindow_release(opaque->new_window);
+    if (native_window)
+        ANativeWindow_acquire(native_window);
+
+    opaque->new_window = native_window;
+    opaque->null_native_window_warned = 0;
+    /*
     IJK_EGL_terminate(opaque->egl);
-    SDL_VoutAndroid_invalidateAllBuffers_l(vout);
+
 
     if (opaque->native_window)
         ANativeWindow_release(opaque->native_window);
@@ -294,6 +325,8 @@ static void SDL_VoutAndroid_SetNativeWindow_l(SDL_Vout *vout, ANativeWindow *nat
 
     opaque->native_window = native_window;
     opaque->null_native_window_warned = 0;
+
+     */
 }
 
 void SDL_VoutAndroid_SetNativeWindow(SDL_Vout *vout, ANativeWindow *native_window)
@@ -319,6 +352,7 @@ void SDL_VoutAndroid_SetSurfaceTexture(SDL_Vout *vout, JNIEnv *env, jobject amc_
     }
     if (amc_surface)
         opaque->egl->amc_surface = J4A_NewGlobalRef__catchAll(env, amc_surface);
+    opaque->egl->amc_surface_changed = 1;
     SDL_UnlockMutex(vout->mutex);
 }
 

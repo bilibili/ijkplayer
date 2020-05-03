@@ -52,6 +52,17 @@ void SDL_VoutFreeP(SDL_Vout **pvout)
     *pvout = NULL;
 }
 
+void SDL_VoutFreeContext(SDL_Vout *vout)
+{
+    if (!vout)
+        return;
+    if (vout->free_context_l) {
+        SDL_LockMutex(vout->mutex);
+        vout->free_context_l(vout);
+        SDL_UnlockMutex(vout->mutex);
+    }
+}
+
 int SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     if (vout && overlay && vout->display_overlay)

@@ -47,6 +47,8 @@ typedef NS_ENUM(NSInteger, IJKSDLFFPlayrRenderType) {
     NSMutableSet<id<IJKMPEventHandler>> *_eventHandlers;
     
     CFDictionaryRef _optionsDictionary;
+
+    OnSnapshotBlock _onSnapshot;
 #if IJK_IOS
     IJKSDLFboGLView* _fboView;
 #endif
@@ -334,10 +336,31 @@ int ff_media_player_msg_loop(void* arg)
     }
 }
 
+
+- (void) onSnapshot:(CVPixelBufferRef) pixelbuffer
+{
+    if (_onSnapshot != nil) {
+        CIImage *ciImage = [CIImage imageWithCVPixelBuffer:pixelbuffer];
+
+        CIContext *context = [CIContext contextWithOptions:nil];
+        CGImageRef imageRef = [context createCGImage:ciImage
+                 fromRect:CGRectMake(0, 0,
+                                     CVPixelBufferGetWidth(pixelbuffer),
+                                     CVPixelBufferGetHeight(pixelbuffer))];
+
+        UIImage *uiImage = [UIImage imageWithCGImage:imageRef];
+        CGImageRelease(imageRef);
+
+        _onSnapshot(uiImage, nil);
+        _onSnapshot = nil;
+    }
+}
+
 // IJKSDL GLview call this when display frame
 - (void) display_pixels:(IJKOverlay *)overlay
 {
     if (overlay->pixel_buffer != nil && _cvPBView != nil) {
+        [self onSnapshot: overlay->pixel_buffer];
         [_cvPBView display_pixelbuffer:overlay->pixel_buffer];
     } else if (_cvPBView != nil && overlay->format == SDL_FCC_BGRA){
         CVPixelBufferRef pixelBuffer;
@@ -366,6 +389,7 @@ int ff_media_player_msg_loop(void* arg)
             uint8_t *dst = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
             memcpy(dst, overlay->pixels[0], overlay->pitches[0] * overlay->h);
             CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+            [self onSnapshot: pixelBuffer];
             [_cvPBView display_pixelbuffer:pixelBuffer];
             CVPixelBufferRelease(pixelBuffer);
         }
@@ -378,6 +402,14 @@ int ff_media_player_msg_loop(void* arg)
     if (_cvPBView) {
         [_cvPBView display_pixelbuffer:pixelbuffer];
     }
+    [self onSnapshot: pixelbuffer];
 }
+
+
+- (void) takeSnapshot:(OnSnapshotBlock) block
+{
+    _onSnapshot = block;
+}
+
 
 @end

@@ -43,6 +43,12 @@ typedef NS_ENUM(NSInteger, IJKMPEventType) {
     IJKMPET_PLAYBACK_STATE_CHANGED  = 700,
 };
 
+typedef NS_ENUM(NSInteger, IJKMPErrorCode){
+    IJKMPEC_SNAPSHOT                = -480,
+};
+
+
+typedef void(^OnSnapshotBlock) (UIImage* __nullable image , NSError* __nullable error );
 
 @class IJKFFMediaPlayer;
 
@@ -66,6 +72,7 @@ typedef NS_ENUM(NSInteger, IJKMPEventType) {
 - (BOOL) isPlaying;
 - (void) shutdown;
 
+- (void) takeSnapshot:(OnSnapshotBlock) block;
 - (long) getCurrentPosition;
 - (long) getDuration;
 - (int)  seekTo:(long) msec;

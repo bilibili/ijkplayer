@@ -101,7 +101,7 @@ typedef struct IJK_GLES_Matrix
 } IJK_GLES_Matrix;
 void IJK_GLES2_loadOrtho(IJK_GLES_Matrix *matrix, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far);
 
-void IJK_GLES2_Renderer_TexCoords_updateFlip(IJK_GLES2_Renderer *renderer);
+void IJK_GLES2_Renderer_setFlip(IJK_GLES2_Renderer *renderer, IJK_SDL_GLES2_flip flip);
 
 const char *IJK_GLES2_getVertexShader_default();
 const char *IJK_GLES2_getVertexShader_amc();

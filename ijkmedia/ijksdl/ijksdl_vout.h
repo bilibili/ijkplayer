@@ -71,6 +71,7 @@ struct SDL_Vout {
     SDL_Vout_Opaque *opaque;
     SDL_VoutOverlay *(*create_overlay)(int width, int height, int frame_format, SDL_Vout *vout);
     void (*free_l)(SDL_Vout *vout);
+    void (*free_context_l)(SDL_Vout *vout);
     int (*display_overlay)(SDL_Vout *vout, SDL_VoutOverlay *overlay);
 
     int (*set_window)(SDL_Vout *vout, void *window);
@@ -80,6 +81,7 @@ struct SDL_Vout {
 
 void SDL_VoutFree(SDL_Vout *vout);
 void SDL_VoutFreeP(SDL_Vout **pvout);
+void SDL_VoutFreeContext(SDL_Vout *vout);
 int  SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay);
 int  SDL_VoutSetOverlayFormat(SDL_Vout *vout, Uint32 overlay_format, int vout_type);
 

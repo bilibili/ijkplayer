@@ -97,7 +97,7 @@ set(IJK_DESKTOP_UNI ON)
 set(FIJKPLAYER_SOURCE
     ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.h
     ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.c
-    #${CMAKE_CURRENT_LIST_DIR}/glad/include/glad/glad.h
+    # ${CMAKE_CURRENT_LIST_DIR}/glad/include/glad/glad.h
     ${CMAKE_CURRENT_LIST_DIR}/glfw/deps/glad_gl.c
 )
 
@@ -108,8 +108,8 @@ add_subdirectory(../ijkmedia ijkmedia)
 target_include_directories(IjkPlayer PRIVATE ${IJKROOT_PATH}/ijkmedia)
 target_include_directories(IjkPlayer PRIVATE ${IJK_FFMPAG_BUILD_DIR}/include)
 target_include_directories(IjkPlayer PRIVATE "${IJK_DESKTOP_PTHREAD_BUILD_DIR}/../../include")
-#target_include_directories(IjkPlayer PRIVATE glad/include)
 target_include_directories(IjkPlayer PRIVATE glfw/deps)
+target_include_directories(IjkPlayer PRIVATE glfw/include)
 
 target_link_libraries(IjkPlayer ijksdl_static ijkplayer_static yuv)
 
@@ -198,7 +198,7 @@ add_subdirectory(glfw)
 #target_link_libraries(IjkPlayer glfw)
 
 add_executable(tuidemo WIN32 MACOSX_BUNDLE ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_demo.c)
-# target_include_directories(tuidemo PRIVATE glad/include)
+target_include_directories(tuidemo PRIVATE glad/include)
 target_include_directories(tuidemo PRIVATE glfw/include)
 target_include_directories(tuidemo PRIVATE glfw/deps)
 

@@ -277,6 +277,10 @@ static EGLBoolean IJK_EGL_prepareRenderer(IJK_EGL* egl, SDL_VoutOverlay *overlay
 
     IJK_EGL_Opaque *opaque = egl->opaque;
 
+    if (egl->amc_surface_changed) {
+        IJK_GLES2_Renderer_AMC_set_texture(opaque->renderer, egl->amc_surface);
+        egl->amc_surface_changed = 0;
+    }
     if (!IJK_GLES2_Renderer_isValid(opaque->renderer) ||
         !IJK_GLES2_Renderer_isFormat(opaque->renderer, overlay->format)) {
 

@@ -61,6 +61,7 @@ typedef struct IJK_EGL
 
 #if ANDROID
     jobject amc_surface;
+    int     amc_surface_changed;
 #endif
 #if 0
     uint8_t gles2_extensions[IJK_GLES2__MAX_EXT];
