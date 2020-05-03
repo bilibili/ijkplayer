@@ -49,16 +49,20 @@
                                                    object: [AVAudioSession sharedInstance]];
         _audioSessionInitialized = YES;
     }
+    [self setupAudioSessionWithoutInterruptHandler];
+#endif
+}
 
+- (void)setupAudioSessionWithoutInterruptHandler
+{
+#if IJK_IOS
     /* Set audio session to mediaplayback */
     NSError *error = nil;
     if (NO == [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error]) {
         NSLog(@"IJKAudioKit: AVAudioSession.setCategory() failed: %@\n", error ? [error localizedDescription] : @"nil");
         return;
     }
-
     [self setActive:YES];
-    return;
 #endif
 }
 
