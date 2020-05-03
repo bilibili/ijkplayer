@@ -133,7 +133,7 @@ int ff_media_player_msg_loop(void* arg)
     ijkmp_set_inject_opaque(_nativeMediaPlayer, (__bridge_retained void *) weakHolder);
     ijkmp_set_ijkio_inject_opaque(_nativeMediaPlayer, (__bridge_retained void *) weakHolder);
     
-    [[IJKAudioKit sharedInstance] setupAudioSession];
+    [[IJKAudioKit sharedInstance] setupAudioSessionWithoutInterruptHandler];
     _optionsDictionary = nil;
     _isThirdGLView = true;
     _scaleFactor = 1.0f;

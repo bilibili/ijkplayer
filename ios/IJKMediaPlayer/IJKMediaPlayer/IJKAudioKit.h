@@ -30,6 +30,7 @@
 
 + (IJKAudioKit *)sharedInstance;
 - (void)setupAudioSession;
+- (void)setupAudioSessionWithoutInterruptHandler;
 - (BOOL)setActive:(BOOL)active;
 
 @end
