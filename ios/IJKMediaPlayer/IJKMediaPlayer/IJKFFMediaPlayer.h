@@ -61,6 +61,9 @@ typedef void(^OnSnapshotBlock) (UIImage* __nullable image , NSError* __nullable 
 
 @interface IJKFFMediaPlayer : NSObject<IJKCVPBViewProtocol, IJKSDLGLViewProtocol>
 
+
+@property (nonatomic) BOOL ignoreAudioInterrupt;
+
 - (instancetype)init;
 - (instancetype)initWithFbo;
 - (int) setDataSource:(NSString *)url;
