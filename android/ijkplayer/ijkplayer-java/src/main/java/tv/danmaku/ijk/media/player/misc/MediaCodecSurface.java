@@ -77,10 +77,14 @@ public class MediaCodecSurface {
     public void release() {
         DebugLog.d("MediaCodecSurface", "release()," + mReleased);
         mReleased = true;
-        mSurfaceTexture.detachFromGLContext();
-        mSurfaceTexture.release();
-        mSurfaceTexture = null;
-        mSurface.release();
-        mSurface = null;
+        //mSurfaceTexture.detachFromGLContext();
+        if (mSurfaceTexture != null) {
+            mSurfaceTexture.release();
+            mSurfaceTexture = null;
+        }
+        if (mSurface != null) {
+            mSurface.release();
+            mSurface = null;
+        }
     }
 }

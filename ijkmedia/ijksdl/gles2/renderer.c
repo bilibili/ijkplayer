@@ -415,6 +415,14 @@ void IJK_GLES2_Renderer_TexCoords_updateFlip(IJK_GLES2_Renderer *renderer)
 }
 
 
+void IJK_GLES2_Renderer_setFlip(IJK_GLES2_Renderer *renderer, IJK_SDL_GLES2_flip flip)
+{
+    if(!renderer)
+        return;
+    renderer->flip = flip;
+    renderer->vertices_changed = 1;
+}
+
 /*
  * Per-Renderer routine
  */

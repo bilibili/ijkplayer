@@ -3823,15 +3823,20 @@ static int video_refresh_thread(void *arg)
     double remaining_time = 0.0;
     while (!is->abort_request) {
         if (remaining_time > 0.0)
-            av_usleep((int)(int64_t)(remaining_time * 1000000.0));
+            av_usleep((uint)(uint64_t)(remaining_time * 1000000.0));
         remaining_time = REFRESH_RATE;
         if (ffp->cover_after_prepared && !ffp->first_video_frame_rendered) {
+            is->force_refresh = true;
+        }
+        if (is->paused) {
+            SDL_Delay(1000/24);
             is->force_refresh = true;
         }
         if (is->show_mode != SHOW_MODE_NONE && (!is->paused || is->force_refresh))
             video_refresh(ffp, &remaining_time);
     }
-
+    if (ffp->vout)
+        SDL_VoutFreeContext(ffp->vout);
     return 0;
 }
 

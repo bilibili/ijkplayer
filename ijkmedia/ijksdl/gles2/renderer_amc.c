@@ -55,9 +55,9 @@ static GLboolean amc_use(IJK_GLES2_Renderer *renderer)
         return 0;
     }
 
-    ALOGI("SurfaceTexture: detachFromGLContext");
-    J4AC_MediaCodecSurface__detachFromGLContext(env, opaque->amc_surface);
-    ALOGI("SurfaceTexture: detachFromGLContext=void");
+    // ALOGI("SurfaceTexture: detachFromGLContext");
+    // J4AC_MediaCodecSurface__detachFromGLContext(env, opaque->amc_surface);
+    // ALOGI("SurfaceTexture: detachFromGLContext=void");
 
     if (opaque->mtx == NULL) {
         jfloatArray mtx = (*env)->NewFloatArray(env, 16);
@@ -187,6 +187,8 @@ static void amc_flip(int flip, GLfloat *texcoords)
 
 void IJK_GLES2_Renderer_AMC_set_texture(IJK_GLES2_Renderer *renderer, jobject  amc_surface)
 {
+    if (!renderer)
+        return;
     IJK_GLES2_Renderer_Opaque* opaque = renderer->opaque;
     if (opaque->class == &g_class) {
         opaque->amc_surface = amc_surface;
@@ -201,6 +203,8 @@ static  void amc_destroy(IJK_GLES2_Renderer *renderer)
         ALOGE("SDL_Android_GetApiLevel: SetupThreadEnv failed");
         return;
     }
+    //if (opaque->amc_surface)
+    //    J4AC_MediaCodecSurface__detachFromGLContext(env, opaque->amc_surface);
 
     J4A_DeleteGlobalRef(env, opaque->mtx);
     // J4AC_MediaCodecSurface__release(env, opaque->amc_surface);

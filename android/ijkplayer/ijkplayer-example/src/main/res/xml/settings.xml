@@ -43,7 +43,6 @@
             android:summary="@string/pref_summary_amc_oes_render"
             android:title="@string/pref_title_amc_oes_render"/>
         <tv.danmaku.ijk.media.example.widget.preference.IjkListPreference
-            android:defaultValue=""
             android:entries="@array/pref_entries_pixel_format"
             android:entryValues="@array/pref_entry_values_pixel_format"
             android:key="@string/pref_key_pixel_format"

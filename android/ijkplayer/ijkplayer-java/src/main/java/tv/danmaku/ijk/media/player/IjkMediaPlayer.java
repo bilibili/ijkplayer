@@ -315,7 +315,12 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         } else {
             surface = null;
         }
-        if (mMediaCodecSurface == null && isAmcUsingGlesRender()) {
+        if (surface == null) {
+            if (mMediaCodecSurface != null) {
+                // mMediaCodecSurface.release();
+                mMediaCodecSurface = null;
+            }
+        } else if (mMediaCodecSurface == null && isAmcUsingGlesRender()) {
             mMediaCodecSurface = new MediaCodecSurface();
             _setMediaCodecSurface(mMediaCodecSurface);
         }
@@ -348,7 +353,12 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             DebugLog.w(TAG,
                     "setScreenOnWhilePlaying(true) is ineffective for Surface");
         }
-        if (mMediaCodecSurface == null && isAmcUsingGlesRender()) {
+        if (surface == null) {
+            if (mMediaCodecSurface != null) {
+                // mMediaCodecSurface.release();
+                mMediaCodecSurface = null;
+            }
+        } else if (mMediaCodecSurface == null && isAmcUsingGlesRender()) {
             mMediaCodecSurface = new MediaCodecSurface();
             _setMediaCodecSurface(mMediaCodecSurface);
         }
@@ -1028,17 +1038,17 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public void setAmcGlesRender() {
         _setPropertyLong(FFP_PROP_INT64_AMC_GLES_OES_VOUT, 1);
     }
+
     private boolean isAmcUsingGlesRender() {
         return _getPropertyLong(FFP_PROP_INT64_AMC_GLES_OES_VOUT, 0) > 0;
     }
-
 
     private static class EventHandler extends Handler {
         private final WeakReference<IjkMediaPlayer> mWeakPlayer;
 
         public EventHandler(IjkMediaPlayer mp, Looper looper) {
             super(looper);
-            mWeakPlayer = new WeakReference<IjkMediaPlayer>(mp);
+            mWeakPlayer = new WeakReference<>(mp);
         }
 
         @Override
