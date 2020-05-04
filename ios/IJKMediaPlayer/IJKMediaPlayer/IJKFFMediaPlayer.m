@@ -28,6 +28,8 @@
 #import "IJKNotificationManager.h"
 #import "ijkplayer/ijkplayer.h"
 
+#import <libkern/OSAtomic.h>
+
 typedef NS_ENUM(NSInteger, IJKSDLFFPlayrRenderType) {
     IJKSDLFFPlayrRenderTypeGlView = 0,
     IJKSDLFFPlayrRenderTypeFboView = 1,
@@ -49,8 +51,8 @@ typedef NS_ENUM(NSInteger, IJKSDLFFPlayrRenderType) {
     NSMutableSet<id<IJKMPEventHandler>> *_eventHandlers;
     
     CFDictionaryRef _optionsDictionary;
+    CVPixelBufferRef _pixelBuffer;
 
-    OnSnapshotBlock _onSnapshot;
 #if IJK_IOS
     IJKSDLFboGLView* _fboView;
 #endif
@@ -253,8 +255,8 @@ int ff_media_player_msg_loop(void* arg)
 - (void) shutdown
 {
     _ignoreAudioInterrupt = YES;
-    ijkmp_shutdown(_nativeMediaPlayer);
     [self unregisterApplicationObservers];
+    ijkmp_shutdown(_nativeMediaPlayer);
     
     __unused id weakPlayer = (__bridge_transfer IJKFFMediaPlayer*)ijkmp_set_weak_thiz(_nativeMediaPlayer, NULL);
     __unused id weakHolder = (__bridge_transfer IJKFFWeakHolder*)ijkmp_set_inject_opaque(_nativeMediaPlayer, NULL);
@@ -266,6 +268,15 @@ int ff_media_player_msg_loop(void* arg)
     [_eventHandlers removeAllObjects];
     ijkmp_dec_ref_p(&_nativeMediaPlayer);
 
+    CVPixelBufferRef buffer = _pixelBuffer;
+    while (!OSAtomicCompareAndSwapPtrBarrier(buffer, nil,
+                                              (void **)&_pixelBuffer)) {
+         buffer = _pixelBuffer;
+    }
+    if (buffer != nil) {
+        CVPixelBufferRelease(buffer);
+        buffer = nil;
+    }
     _cvPBView = nil;
 #if IJK_IOS
     _fboView = nil;
@@ -344,23 +355,18 @@ int ff_media_player_msg_loop(void* arg)
     }
 }
 
-
 - (void) onSnapshot:(CVPixelBufferRef) pixelbuffer
 {
-    if (_onSnapshot != nil) {
-        CIImage *ciImage = [CIImage imageWithCVPixelBuffer:pixelbuffer];
-
-        CIContext *context = [CIContext contextWithOptions:nil];
-        CGImageRef imageRef = [context createCGImage:ciImage
-                 fromRect:CGRectMake(0, 0,
-                                     CVPixelBufferGetWidth(pixelbuffer),
-                                     CVPixelBufferGetHeight(pixelbuffer))];
-
-        UIImage *uiImage = [UIImage imageWithCGImage:imageRef];
-        CGImageRelease(imageRef);
-
-        _onSnapshot(uiImage, nil);
-        _onSnapshot = nil;
+    if (_cacheSnapshot) {
+        CVPixelBufferRef newBuffer = CVPixelBufferRetain(pixelbuffer);
+        CVPixelBufferRef oldBuffer = _pixelBuffer;
+        while (!OSAtomicCompareAndSwapPtrBarrier(oldBuffer, newBuffer,
+                                                 (void **)&_pixelBuffer)) {
+            oldBuffer = _pixelBuffer;
+        }
+        if (oldBuffer != nil) {
+            CVPixelBufferRelease(oldBuffer);
+        }
     }
 }
 
@@ -413,10 +419,41 @@ int ff_media_player_msg_loop(void* arg)
     [self onSnapshot: pixelbuffer];
 }
 
-
 - (void) takeSnapshot:(OnSnapshotBlock) block
 {
-    _onSnapshot = block;
+    CVPixelBufferRef snapshot = _pixelBuffer;
+    while (!OSAtomicCompareAndSwapPtrBarrier(snapshot, nil,
+                                              (void **)&_pixelBuffer)) {
+         snapshot = _pixelBuffer;
+    }
+    if (snapshot != nil) {
+        CVPixelBufferRetain(snapshot);
+    }
+    if (!OSAtomicCompareAndSwapPtrBarrier(nil, snapshot, (void **)&_pixelBuffer)) {
+        CVPixelBufferRelease(snapshot);
+    }
+    
+    if (block != nil) {
+        if (snapshot != nil) {
+            CIImage *ciImage = [CIImage imageWithCVPixelBuffer:snapshot];
+
+               CIContext *context = [CIContext contextWithOptions:nil];
+               CGImageRef imageRef = [context createCGImage:ciImage
+                        fromRect:CGRectMake(0, 0,
+                                            CVPixelBufferGetWidth(snapshot),
+                                            CVPixelBufferGetHeight(snapshot))];
+
+               UIImage *uiImage = [UIImage imageWithCGImage:imageRef];
+               CGImageRelease(imageRef);
+
+               block(uiImage, nil);
+        } else {
+            block(nil, [[NSError alloc] initWithDomain:@"no snapshot" code:IJKMPEC_SNAPSHOT userInfo:nil]);
+        }
+    }
+    if (snapshot != nil) {
+        CVPixelBufferRelease(snapshot);
+    }
 }
 
 - (void)registerApplicationObservers

@@ -1038,10 +1038,8 @@ static void stream_close(FFPlayer *ffp)
     /* close each stream */
     if (is->audio_stream >= 0)
         stream_component_close(ffp, is->audio_stream);
-    ALOGD("ffp(%p) audio stream_component_close\n", ffp);
     if (is->video_stream >= 0)
         stream_component_close(ffp, is->video_stream);
-    ALOGD("ffp(%p) video stream_component_close\n", ffp);
     if (is->subtitle_stream >= 0)
         stream_component_close(ffp, is->subtitle_stream);
 
@@ -1049,7 +1047,6 @@ static void stream_close(FFPlayer *ffp)
 
     av_log(NULL, AV_LOG_DEBUG, "wait for video_refresh_tid\n");
     SDL_WaitThread(is->video_refresh_tid, NULL);
-    ALOGD("ffp(%p) wait video_refresh_tid done\n", ffp);
 
     packet_queue_destroy(&is->videoq);
     packet_queue_destroy(&is->audioq);
@@ -3828,10 +3825,12 @@ static int video_refresh_thread(void *arg)
         if (ffp->cover_after_prepared && !ffp->first_video_frame_rendered) {
             is->force_refresh = true;
         }
+#if ANDROID
         if (is->paused) {
             SDL_Delay(1000/24);
             is->force_refresh = true;
         }
+#endif
         if (is->show_mode != SHOW_MODE_NONE && (!is->paused || is->force_refresh))
             video_refresh(ffp, &remaining_time);
     }

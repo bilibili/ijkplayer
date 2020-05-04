@@ -125,9 +125,11 @@ static GLboolean amc_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_VoutOverlay
     return GL_TRUE;
 }
 
-static void amc_flip(int flip, GLfloat *texcoords)
+static void amc_flip(IJK_GLES2_Renderer *renderer)
 {
     GLfloat tmp;
+    int flip = renderer->flip;
+    GLfloat *texcoords = renderer->texcoords;
     switch (flip) {
         case IJK_SDL_GLES2_flip_none:
             tmp = texcoords[0];
@@ -185,7 +187,7 @@ static void amc_flip(int flip, GLfloat *texcoords)
     }
 }
 
-void IJK_GLES2_Renderer_AMC_set_texture(IJK_GLES2_Renderer *renderer, jobject  amc_surface)
+void IJK_GLES2_Renderer_AMC_set_texture(IJK_GLES2_Renderer *renderer, void *amc_surface)
 {
     if (!renderer)
         return;
@@ -195,7 +197,7 @@ void IJK_GLES2_Renderer_AMC_set_texture(IJK_GLES2_Renderer *renderer, jobject  a
     }
 }
 
-static  void amc_destroy(IJK_GLES2_Renderer *renderer)
+static void amc_destroy(IJK_GLES2_Renderer *renderer)
 {
     IJK_GLES2_Renderer_Opaque* opaque = renderer->opaque;
     JNIEnv *env = NULL;

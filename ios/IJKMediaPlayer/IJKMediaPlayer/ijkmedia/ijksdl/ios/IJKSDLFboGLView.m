@@ -321,7 +321,6 @@
             return NO;
         
         IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _renderSize.width, _renderSize.height);
-        IJK_GLES2_Renderer_setFlip(_renderer, IJK_SDL_GLES2_flip_vertical);
     }
     
     return YES;
