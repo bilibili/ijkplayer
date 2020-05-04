@@ -351,9 +351,8 @@ void IJK_GLES2_Renderer_TexCoords_updateFlip(IJK_GLES2_Renderer *renderer)
     if (!renderer)
         return;
     if (renderer->func_flip)
-        renderer->func_flip(renderer->flip, renderer->texcoords);
+        renderer->func_flip(renderer);
     else {
-
         GLfloat *texcoords = renderer->texcoords;
         GLfloat tmp;
         switch (renderer->flip) {
@@ -449,7 +448,7 @@ GLboolean IJK_GLES2_Renderer_use(IJK_GLES2_Renderer *renderer)
     return GL_TRUE;
 }
 
-GLboolean IJK_GLES2_Renderer_snapShot(IJK_GLES2_Renderer *renderer, void *opaque, IJK_GLES2_Renderer_funcGetSnapShot get_snap_shot)
+GLboolean IJK_GLES2_Renderer_takeSnapShot(IJK_GLES2_Renderer *renderer, void *opaque, IJK_GLES2_Renderer_funcGetSnapShot get_snap_shot)
 {
     if (!renderer)
         return GL_FALSE;

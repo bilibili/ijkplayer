@@ -63,6 +63,7 @@ typedef void(^OnSnapshotBlock) (UIImage* __nullable image , NSError* __nullable 
 
 
 @property (nonatomic) BOOL ignoreAudioInterrupt;
+@property (nonatomic) BOOL cacheSnapshot;
 
 - (instancetype)init;
 - (instancetype)initWithFbo;

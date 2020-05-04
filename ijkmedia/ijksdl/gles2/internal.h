@@ -29,20 +29,11 @@
 #include "ijksdl/ijksdl_gles2.h"
 #include "ijksdl/ijksdl_vout.h"
 
-#if ANDROID
-#include <jni.h>
-#endif
-
 #define IJK_GLES_STRINGIZE(x)   #x
 #define IJK_GLES_STRINGIZE2(x)  IJK_GLES_STRINGIZE(x)
 #define IJK_GLES_STRING(x)      IJK_GLES_STRINGIZE2(x)
 
-typedef enum IJK_SDL_GLES2_flip {
-    IJK_SDL_GLES2_flip_none = 0,
-    IJK_SDL_GLES2_flip_horizontal = 1,
-    IJK_SDL_GLES2_flip_vertical = 2,
-    IJK_SDL_GLES2_flip_both = 3,
-} IJK_SDL_GLES2_flip;
+
 
 typedef struct IJK_GLES2_Renderer_Opaque IJK_GLES2_Renderer_Opaque;
 
@@ -68,7 +59,8 @@ typedef struct IJK_GLES2_Renderer
     GLsizei   (*func_getBufferWidth)(IJK_GLES2_Renderer *renderer, SDL_VoutOverlay *overlay);
     GLboolean (*func_uploadTexture)(IJK_GLES2_Renderer *renderer, SDL_VoutOverlay *overlay);
     GLvoid    (*func_destroy)(IJK_GLES2_Renderer *renderer);
-    void      (*func_flip)(int flip, GLfloat *texcoords);
+    GLvoid    (*func_flip)(IJK_GLES2_Renderer *renderer);
+
     GLsizei buffer_width;
     GLsizei visible_width;
 
@@ -89,10 +81,9 @@ typedef struct IJK_GLES2_Renderer
     int     take_snap_shot;
 
     void   *snap_shot_opaque;
-    void  (*func_on_snap_shot)(void *opaque, uint8_t* pixels, int width, int height);
+    IJK_GLES2_Renderer_funcGetSnapShot func_on_snap_shot;
 
     GLsizei last_buffer_width;
-
 } IJK_GLES2_Renderer;
 
 typedef struct IJK_GLES_Matrix
@@ -100,8 +91,6 @@ typedef struct IJK_GLES_Matrix
     GLfloat m[16];
 } IJK_GLES_Matrix;
 void IJK_GLES2_loadOrtho(IJK_GLES_Matrix *matrix, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far);
-
-void IJK_GLES2_Renderer_setFlip(IJK_GLES2_Renderer *renderer, IJK_SDL_GLES2_flip flip);
 
 const char *IJK_GLES2_getVertexShader_default();
 const char *IJK_GLES2_getVertexShader_amc();
@@ -126,7 +115,7 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_rgbx8888();
 IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_amc();
 
 #if ANDROID
-void IJK_GLES2_Renderer_AMC_set_texture(IJK_GLES2_Renderer *renderer, jobject amc_surface);
+void IJK_GLES2_Renderer_AMC_set_texture(IJK_GLES2_Renderer *renderer, void* amc_surface);
 #endif
 
 #endif

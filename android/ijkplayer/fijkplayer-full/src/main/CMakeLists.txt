@@ -46,9 +46,8 @@ elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     add_definitions(-DDEBUG)
 endif ()
 
-
+add_compile_options("-Wno-deprecated-declarations")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 
 set(ANDROID_CONTRIB_PATH ${FIJKROOT_PATH}/android/contrib/build)
 message(STATUS "ANDROID_CONTRIB_PATH:${ANDROID_CONTRIB_PATH}")

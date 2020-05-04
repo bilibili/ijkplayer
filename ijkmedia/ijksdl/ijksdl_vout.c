@@ -23,7 +23,6 @@
  */
 
 #include "ijksdl_vout.h"
-#include "ijksdl_gles2.h"
 #include <stdlib.h>
 
 #include <assert.h>
@@ -88,7 +87,7 @@ int SDL_VoutSetWindow(SDL_Vout *vout, void *window)
     return -1;
 }
 
-int SDL_Vout_TakeSnapShot(SDL_Vout *vout, void *opaque, IJK_GLES2_Renderer_funcGetSnapShot get_snap_shot)
+int SDL_Vout_TakeSnapShot(SDL_Vout *vout, void *opaque, SDL_Vout_funcGetSnapShot get_snap_shot)
 {
     if (!vout || !vout->get_renderer)
         return -1;
@@ -97,7 +96,7 @@ int SDL_Vout_TakeSnapShot(SDL_Vout *vout, void *opaque, IJK_GLES2_Renderer_funcG
     if (!renderer)
         return -1;
 
-    return IJK_GLES2_Renderer_snapShot(renderer, opaque, get_snap_shot) ? 0 : -1;
+    return IJK_GLES2_Renderer_takeSnapShot(renderer, opaque, get_snap_shot) ? 0 : -1;
 }
 
 

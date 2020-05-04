@@ -296,7 +296,6 @@ static EGLBoolean IJK_EGL_prepareRenderer(IJK_EGL* egl, SDL_VoutOverlay *overlay
         if (overlay->format == SDL_FCC__AMC) {
             IJK_GLES2_Renderer_AMC_set_texture(opaque->renderer, egl->amc_surface);
         }
-
         if (!IJK_GLES2_Renderer_use(opaque->renderer)) {
             ALOGE("[EGL] Could not use render.");
             IJK_GLES2_Renderer_freeP(&opaque->renderer);
