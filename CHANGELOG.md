@@ -1,4 +1,15 @@
 
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+
+
+---
+## 0.7.1 (2020-05-04)
+
+* fix ios crash, use cache pixelbuffer ([48e46ce](https://github.com/befovy/ijkplayer/commit/48e46ced57560f5b749e348f716b3ad42dfc8e05))
+
 ---
 ## 0.7.0 (2020-05-03)
 
