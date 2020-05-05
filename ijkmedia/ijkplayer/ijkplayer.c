@@ -72,6 +72,7 @@ inline static void ijkmp_destroy_p(IjkMediaPlayer **pmp)
 
 void ijkmp_global_init()
 {
+    ijksdl_global_init();
     ffp_global_init();
 }
 

@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
     glfwMakeContextCurrent(NULL);
 #endif
 
-    IjkFFMediaPlayer *fp = ijkff_create();
+    IjkFFMediaPlayer *fp = ijkff_create(IJK_VOUT_SDL2);
 
     IjkDemoInfo info;
     memset(&info, 0, sizeof(info));
@@ -185,6 +185,7 @@ int main(int argc, char *argv[]) {
     ijkff_set_event_cb(fp, &info, demo_event_cb);
 
     ijkff_set_option(fp, "fcc-bgra", "overlay-format", IJK_OPT_CATEGORY_PLAYER);
+    ijkff_set_int_option(fp, 1, "start-on-prepared", IJK_OPT_CATEGORY_PLAYER);
     ijkff_set_data_source(fp, "https://player.alicdn.com/video/aliyunmedia.mp4");
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO);
@@ -197,7 +198,7 @@ int main(int argc, char *argv[]) {
                                           SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
     ijkff_set_window(fp, window);
     ijkff_prepare_async(fp);
-    ijkff_start(fp);
+    //ijkff_start(fp);
 
 
 #if GLFW

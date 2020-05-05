@@ -28,7 +28,7 @@
 #include "../ff_ffpipeline.h"
 
 
-IjkMediaPlayer *ijkmp_desktop_create(int(*msg_loop)(void *));
+IjkMediaPlayer *ijkmp_desktop_create(int(*msg_loop)(void *), int vout_type);
 
 typedef int (*ijkmp_video_draw)(void *userdata, 
     int w, int h, int sar_num, int sar_den, 

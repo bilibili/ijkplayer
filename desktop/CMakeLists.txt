@@ -32,6 +32,9 @@ set(IJKROOT_PATH "${PROJECT_SOURCE_DIR}/..")
 get_filename_component(IJKROOT_PATH ${IJKROOT_PATH} ABSOLUTE)
 message(STATUS "IJKROOT_PATH ${IJKROOT_PATH}")
 
+
+option(IJK_GLFW "use glfw render" OFF)
+
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
@@ -85,7 +88,6 @@ else ()
     message(STATUS "IJK_FFMPAG_BUILD_DIR:${IJK_FFMPAG_BUILD_DIR}")
 endif ()
 
-
 find_package(SDL2 REQUIRED)
 
 add_definitions(-DUSE_SDL2=1)
@@ -97,9 +99,12 @@ set(IJK_DESKTOP_UNI ON)
 set(FIJKPLAYER_SOURCE
     ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.h
     ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_desktop.c
-    # ${CMAKE_CURRENT_LIST_DIR}/glad/include/glad/glad.h
     ${CMAKE_CURRENT_LIST_DIR}/glfw/deps/glad_gl.c
 )
+
+if (IJK_GLFW)
+    add_definitions(-DIJK_GLFW=1)
+endif ()
 
 add_library(IjkPlayer SHARED ${FIJKPLAYER_SOURCE})
 
@@ -108,6 +113,7 @@ add_subdirectory(../ijkmedia ijkmedia)
 target_include_directories(IjkPlayer PRIVATE ${IJKROOT_PATH}/ijkmedia)
 target_include_directories(IjkPlayer PRIVATE ${IJK_FFMPAG_BUILD_DIR}/include)
 target_include_directories(IjkPlayer PRIVATE "${IJK_DESKTOP_PTHREAD_BUILD_DIR}/../../include")
+
 target_include_directories(IjkPlayer PRIVATE glfw/deps)
 target_include_directories(IjkPlayer PRIVATE glfw/include)
 
@@ -189,21 +195,22 @@ elseif (APPLE)
     add_framework(IjkPlayer Security)
 endif ()
 
-set(GLFW_BUILD_EXAMPLES OFF)
-set(GLFW_BUILD_TESTS OFF)
-set(GLFW_INSTALL OFF)
-set(GLFW_BUILD_DOCS OFF)
-add_subdirectory(glfw)
-
-#target_link_libraries(IjkPlayer glfw)
+if (IJK_GLFW)
+    set(GLFW_BUILD_EXAMPLES OFF)
+    set(GLFW_BUILD_TESTS OFF)
+    set(GLFW_INSTALL OFF)
+    set(GLFW_BUILD_DOCS OFF)
+    add_subdirectory(glfw)
+endif ()
 
 add_executable(tuidemo WIN32 MACOSX_BUNDLE ${CMAKE_CURRENT_LIST_DIR}/sources/ijkplayer_demo.c)
 target_include_directories(tuidemo PRIVATE glad/include)
 target_include_directories(tuidemo PRIVATE glfw/include)
 target_include_directories(tuidemo PRIVATE glfw/deps)
 
-#target_include_directories(tuidemo PRIVATE spdlog/include)
-#target_link_libraries(tuidemo glfw)
+if (IJK_GLFW)
+    target_link_libraries(tuidemo glfw)
+endif()
 
 if (APPLE)
     set_target_properties(tuidemo PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "tuidemo")

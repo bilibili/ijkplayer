@@ -67,6 +67,11 @@ extern "C" {
 #define IJK_OPT_CATEGORY_PLAYER 4
 #define IJK_OPT_CATEGORY_SWR    5
 
+#define IJK_VOUT_SDL2           0
+#define IJK_VOUT_GLFW           1
+#define IJK_VOUT_CALLBACK       2
+#define IJK_VOUT_DUMMY          3
+
 #define IJK_STATE_IDLE               0
 #define IJK_STATE_INITIALIZED        1
 #define IJK_STATE_ASYNC_PREPARING    2
@@ -130,7 +135,15 @@ typedef void(*ijkff_overlay_cb)(void *userdata, IjkFFOverlay *overlay);
 
 typedef void(*ijkff_event_cb)(void *userdata, int what, int arg1, int arg2, void *extra);
 
-IJK_API IjkFFMediaPlayer *ijkff_create();
+/**
+ * Create player with different vout
+ * @param vout_type 0 @IJK_VOUT_SDL2 SDL vout
+ *                  1 @IJK_VOUT_GLFW  glfw render
+ *                  2 @IJK_VOUT_CALLBACK  callback vout
+ *                  3 @IJK_VOUT_DUMMY dummy vout, do nothing
+ * @return
+ */
+IJK_API IjkFFMediaPlayer *ijkff_create(int vout_type);
 
 IJK_API int ijkff_set_data_source(IjkFFMediaPlayer *fp, const char *url);
 
@@ -184,6 +197,8 @@ IJK_API void ijkff_set_overlay_cb(IjkFFMediaPlayer *fp, void *userdata, ijkff_ov
 
 
 IJK_API void ijkff_log_level(int level);
+
+IJK_API void ijkff_global_init();
 
 IJK_API const char *ijkff_version();
 
