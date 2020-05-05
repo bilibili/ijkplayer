@@ -42,6 +42,13 @@ int ijk_image_convert(int width, int height,
                     src_data[2], src_linesize[2],
                     dst_data[0], dst_linesize[0],
                     width, height);
+            case AV_PIX_FMT_0BGR32:
+                return I420ToABGR(
+                        src_data[0], src_linesize[0],
+                        src_data[1], src_linesize[1],
+                        src_data[2], src_linesize[2],
+                        dst_data[0], dst_linesize[0],
+                        width, height);
             case AV_PIX_FMT_RGB32:
                 return I420ToARGB(
                         src_data[0], src_linesize[0],

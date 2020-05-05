@@ -79,9 +79,6 @@ static int sdl2_display(SDL_Vout_Opaque *opaque, SDL_VoutOverlay *overlay) {
         case SDL_FCC_RV24:
             dest_sdl2_format = SDL_PIXELFORMAT_RGB888;
             break;
-        case SDL_FCC_RV32:
-            dest_sdl2_format = SDL_PIXELFORMAT_BGRX8888;
-            break;
         case SDL_FCC_BGRA:
             dest_sdl2_format = SDL_PIXELFORMAT_BGRA32;
             break;
