@@ -84,19 +84,25 @@ set(SDL_ANDROID_EXTRA_SOURCES
 
 set(SDL_DESKTOP_UNI_SOURCES
     desktop/ijksdl_desktop.h
-    desktop/ijksdl_aout_port_audio.h    
+    desktop/ijksdl_aout_port_audio.h
     desktop/ijksdl_aout_port_audio.c
     desktop/ijksdl_aout_sdl2_audio.c
     desktop/ijksdl_aout_sdl2_audio.h
     desktop/ijksdl_vout_uni_callback.c
     desktop/ijksdl_vout_uni_callback.h
-    desktop/ijksdl_desktop_vout_glfw.c
-    desktop/ijksdl_desktop_vout_glfw.h
-    desktop/ijksdl_desktop_gl.c
-    desktop/ijksdl_desktop_gl.h
+
     desktop/ijksdl_vout_sdl2_video.c
     desktop/ijksdl_vout_sdl2_video.h
 )
+
+if (IJK_GLFW)
+    list(APPEND SDL_DESKTOP_UNI_SOURCES
+            desktop/ijksdl_desktop_vout_glfw.c
+            desktop/ijksdl_desktop_vout_glfw.h
+            desktop/ijksdl_desktop_gl.c
+            desktop/ijksdl_desktop_gl.h
+            )
+endif ()
 
 set(SDL_MAC_OSX_SOURCES
     ${IJKROOT_PATH}/ios/IJKMediaPlayer/IJKMediaPlayer/ijkmedia/ijksdl/ios/ijksdl_thread_ios.h
@@ -159,6 +165,10 @@ if(IJK_DESKTOP_UNI)
     target_include_directories(${IJKSDL_LIB_NAME} PRIVATE "${IJKROOT_PATH}/ijkmedia/portaudio/include")
     target_include_directories(${IJKSDL_LIB_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../ijkyuv/include)
 endif()
+
+if (IJK_GLFW)
+    target_link_libraries(${IJKSDL_LIB_NAME} glfw)
+endif ()
 
 if (WIN32)
     target_include_directories(${IJKSDL_LIB_NAME} PRIVATE "${IJK_DESKTOP_PTHREAD_BUILD_DIR}/../../include")

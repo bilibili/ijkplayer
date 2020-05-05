@@ -80,6 +80,7 @@ static void aout_free_l(SDL_Aout *aout) {
 }
 
 SDL_Aout *SDL_Aout_SDL2_Audio_Create() {
+    ALOGI("Aout SDL_Aout_SDL2_Audio_Create");
 
     SDL_Aout *aout = SDL_Aout_CreateInternal(sizeof(SDL_Aout_Opaque));
     if (!aout)

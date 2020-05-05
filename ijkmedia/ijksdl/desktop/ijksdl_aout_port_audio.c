@@ -142,6 +142,7 @@ static void aout_pause_audio_l(SDL_Aout *aout, int pause_on)
 
 SDL_Aout *SDL_Aout_Port_Audio_Create()
 {
+    ALOGI("Aout SDL_Aout_Port_Audio_Create");
     PaError err = Pa_Initialize();
     if (err != paNoError)
         return NULL;

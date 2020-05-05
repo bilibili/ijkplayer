@@ -24,6 +24,11 @@
 #ifndef IJKPLAYER_IJKMEDIA_IJKSDL_DESKTOP_H
 #define IJKPLAYER_IJKMEDIA_IJKSDL_DESKTOP_H
 
+#define IJKFF_VOUT_SDL2           0
+#define IJKFF_VOUT_GLFW           1
+#define IJKFF_VOUT_CALLBACK       2
+#define IJKFF_VOUT_DUMMY          3
+
 #include "../ijksdl.h"
 
 #include "ijksdl_aout_port_audio.h"

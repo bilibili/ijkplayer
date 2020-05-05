@@ -215,9 +215,9 @@ static const AVOption ffp_context_options[] = {
     { "cover-after-prepared",          "display the first video frame as cover, then toggle pause",
       OPTION_OFFSET(cover_after_prepared),      OPTION_INT(0, 0, 1) },
     { "vout-type",                  "video out type, SDL2(0) and glfw(1), amc(gles)",
-      OPTION_OFFSET(vout_type),                 OPTION_INT(0, 0, 0)},
+      OPTION_OFFSET(vout_type),                 OPTION_INT(0, 0, 2)},
     { "aout-type",                  "audio out type, SDL2(0) and port audio(1)",
-      OPTION_OFFSET(aout_type),                 OPTION_INT(0, 0, 0)} ,
+      OPTION_OFFSET(aout_type),                 OPTION_INT(0, 0, 1)} ,
     { NULL }
 };
 

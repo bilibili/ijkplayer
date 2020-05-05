@@ -28,16 +28,30 @@
 #include "ijksdl/dummy/ijksdl_dummy.h"
 #include "../ijkplayer_internal.h"
 
-IjkMediaPlayer *ijkmp_desktop_create(int(*msg_loop)(void *))
+IjkMediaPlayer *ijkmp_desktop_create(int(*msg_loop)(void *), int vout_type)
 {
     IjkMediaPlayer *mp = ijkmp_create(msg_loop);
     if (!mp)
         goto fail;
 
-    // mp->ffplayer->vout = SDL_VoutDummy_Create();
-    // mp->ffplayer->vout = SDL_Vout_Callback_Create();
-    // mp->ffplayer->vout = SDL_Vout_glfw_Create();
-    mp->ffplayer->vout = SDL_Vout_sdl2_Create();
+    switch (vout_type) {
+        case IJKFF_VOUT_SDL2:
+            mp->ffplayer->vout = SDL_Vout_sdl2_Create();
+            break;
+        case IJKFF_VOUT_CALLBACK:
+            mp->ffplayer->vout = SDL_Vout_Callback_Create();
+            break;
+        case IJKFF_VOUT_DUMMY:
+            mp->ffplayer->vout = SDL_VoutDummy_Create();
+            break;
+#if IJK_GLFW
+        case IJKFF_VOUT_GLFW:
+            mp->ffplayer->vout = SDL_Vout_glfw_Create();
+            break;
+#endif
+        default:
+            break;
+    }
     if (!mp->ffplayer->vout)
         goto fail;
 

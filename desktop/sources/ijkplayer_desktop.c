@@ -22,8 +22,6 @@
 */
 
 
-#include <inttypes.h>
-
 #include "ijkplayer_desktop.h"
 #include "ijkplayer/desktop/pipeline_desktop.h"
 #include "ijkplayer/ff_ffmsg_queue.h"
@@ -60,11 +58,11 @@ static int ijkff_msg_loop(void *arg)
     return 0;
 }
 
-IjkFFMediaPlayer *ijkff_create()
+IjkFFMediaPlayer *ijkff_create(int vout_type)
 {
     ijkmp_global_init();
     IjkFFMediaPlayer *fp = mallocz(sizeof(IjkFFMediaPlayer));
-    fp->mp = ijkmp_desktop_create(ijkff_msg_loop);
+    fp->mp = ijkmp_desktop_create(ijkff_msg_loop, vout_type);
 
     ijkmp_set_weak_thiz(fp->mp, fp);
     ijkmp_set_inject_opaque(fp->mp, fp);
@@ -249,12 +247,19 @@ void ijkff_set_overlay_cb(IjkFFMediaPlayer *fp, void *userdata, ijkff_overlay_cb
     fp->overlay_cb = cb;
     fp->overlay_cb_data = userdata;
     ijkmp_set_video_callback(fp->mp, fp, ijkplayer_overlay_draw);
+    ALOGI("fp(%p) ijkff_set_overlay_cb\n", fp);
 }
 
 void ijkff_log_level(int level)
 {
     ijkmp_global_set_log_level(level);
 }
+
+IJK_API void ijkff_global_init()
+{
+    ijkmp_global_init();
+}
+
 
 const char *ijkff_version()
 {
