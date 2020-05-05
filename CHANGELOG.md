@@ -3,7 +3,10 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+---
+## 0.7.2 (2020-05-05)
 
+* fix rv32 colorspace convert error ([3d50112](https://github.com/befovy/ijkplayer/commit/3d50112568df078e3015569810f8b11cf85a31f1))
 
 ---
 ## 0.7.1 (2020-05-04)
