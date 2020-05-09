@@ -888,7 +888,7 @@ static size_t parse_ass_subtitle(const char *ass, char *output)
 static void ffp_clock_msg_notify_cycle(FFPlayer *ffp, int64_t time_ms)
 {
     if (ffp->enable_position_notify &&
-        (time_ms < 0 || time_ms - ffp->clock_notify_time > NOTIFY_KEY_MSG_PER_MILLISECONDS)) {
+        (time_ms < 0 || time_ms - ffp->clock_notify_time > ffp->pos_update_interval)) {
         ffp->clock_notify_time = time_ms;
         int64_t position = ffp_get_current_position_l(ffp);
         ffp_notify_msg2(ffp, FFP_MSG_CURRENT_POSITION_UPDATE, (int) position);
