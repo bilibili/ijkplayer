@@ -594,6 +594,7 @@ typedef struct FFPlayer {
     int64_t duration;
     int64_t clock_notify_time;
     int enable_position_notify;
+    int pos_update_interval;
     int fast;
     int genpts;
     int lowres;
