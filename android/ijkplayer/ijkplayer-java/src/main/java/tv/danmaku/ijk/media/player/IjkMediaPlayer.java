@@ -438,7 +438,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             }
         }
 
-        Log.d(TAG, "Couldn't open file on client side, trying server side");
+        DebugLog.d(TAG, "Couldn't open file on client side, trying server side");
 
         setDataSource(uri.toString(), headers);
     }
@@ -774,6 +774,11 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
         mVideoWidth = 0;
         mVideoHeight = 0;
+
+        if (isAmcUsingGlesRender()){
+            mMediaCodecSurface = new MediaCodecSurface();
+            _setMediaCodecSurface(mMediaCodecSurface);
+        }
     }
 
     private native void _reset();
@@ -1371,12 +1376,12 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             if (TextUtils.isEmpty(mimeType))
                 return null;
 
-            Log.i(TAG, String.format(Locale.US, "onSelectCodec: mime=%s, profile=%d, level=%d", mimeType, profile, level));
+            DebugLog.i(TAG, String.format(Locale.US, "onSelectCodec: mime=%s, profile=%d, level=%d", mimeType, profile, level));
             ArrayList<IjkMediaCodecInfo> candidateCodecList = new ArrayList<IjkMediaCodecInfo>();
             int numCodecs = MediaCodecList.getCodecCount();
             for (int i = 0; i < numCodecs; i++) {
                 MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
-                Log.d(TAG, String.format(Locale.US, "  found codec: %s", codecInfo.getName()));
+                DebugLog.d(TAG, String.format(Locale.US, "  found codec: %s", codecInfo.getName()));
                 if (codecInfo.isEncoder())
                     continue;
 
@@ -1388,7 +1393,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                     if (TextUtils.isEmpty(type))
                         continue;
 
-                    Log.d(TAG, String.format(Locale.US, "    mime: %s", type));
+                    DebugLog.d(TAG, String.format(Locale.US, "    mime: %s", type));
                     if (!type.equalsIgnoreCase(mimeType))
                         continue;
 
@@ -1397,7 +1402,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                         continue;
 
                     candidateCodecList.add(candidate);
-                    Log.i(TAG, String.format(Locale.US, "candidate codec: %s rank=%d", codecInfo.getName(), candidate.mRank));
+                    DebugLog.i(TAG, String.format(Locale.US, "candidate codec: %s rank=%d", codecInfo.getName(), candidate.mRank));
                     candidate.dumpProfileLevels(mimeType);
                 }
             }
@@ -1415,16 +1420,22 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             }
 
             if (bestCodec.mRank < IjkMediaCodecInfo.RANK_LAST_CHANCE) {
-                Log.w(TAG, String.format(Locale.US, "unaccetable codec: %s", bestCodec.mCodecInfo.getName()));
+                DebugLog.w(TAG, String.format(Locale.US, "unaccetable codec: %s", bestCodec.mCodecInfo.getName()));
                 return null;
             }
 
-            Log.i(TAG, String.format(Locale.US, "selected codec: %s rank=%d", bestCodec.mCodecInfo.getName(), bestCodec.mRank));
+            DebugLog.i(TAG, String.format(Locale.US, "selected codec: %s rank=%d", bestCodec.mCodecInfo.getName(), bestCodec.mRank));
             return bestCodec.mCodecInfo.getName();
         }
     }
 
     public static native void native_profileBegin(String libName);
     public static native void native_profileEnd();
-    public static native void native_setLogLevel(int level);
+
+    public static void setLogLevel(int level) {
+        DebugLog.setLogLevel(level);
+        native_setLogLevel(level);
+    }
+
+    private static native void native_setLogLevel(int level);
 }

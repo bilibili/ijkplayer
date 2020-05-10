@@ -121,12 +121,7 @@ static void func_free_context_l(SDL_Vout *vout)
 
     SDL_Vout_Opaque *opaque = vout->opaque;
     if (opaque) {
-        IJK_EGL_freep(&opaque->egl);
-
-        if (opaque->native_window) {
-            ANativeWindow_release(opaque->native_window);
-            opaque->native_window = NULL;
-        }
+        IJK_EGL_terminate(opaque->egl);
     }
 }
 
