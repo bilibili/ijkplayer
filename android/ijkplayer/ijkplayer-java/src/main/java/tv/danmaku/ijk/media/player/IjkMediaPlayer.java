@@ -774,6 +774,11 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
         mVideoWidth = 0;
         mVideoHeight = 0;
+
+        if (isAmcUsingGlesRender()){
+            mMediaCodecSurface = new MediaCodecSurface();
+            _setMediaCodecSurface(mMediaCodecSurface);
+        }
     }
 
     private native void _reset();
