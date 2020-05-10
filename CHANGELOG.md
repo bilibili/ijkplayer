@@ -4,6 +4,12 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 ---
+## 0.7.4 (2020-05-10)
+
+* fix **android:** video render failed after call reset ([ef323bb](https://github.com/befovy/ijkplayer/commit/ef323bb5f3e661a11125a0a4cc9c4c2ced6d04c0))
+* add loglevel for java code ([fb1e278](https://github.com/befovy/ijkplayer/commit/fb1e2781a273327c2b32b741d100279335f7bf1a))
+
+---
 ## 0.7.3 (2020-05-09)
 
 * support custom "pos-update-interval", min 10 ms, max 1000 ms ([ed97462](https://github.com/befovy/ijkplayer/commit/ed97462deece795f956f1c5feae0db815df2938d))
