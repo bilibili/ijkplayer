@@ -26,6 +26,7 @@
 #define IJKSDL__IJKSDL_LOG_H
 
 #include <stdio.h>
+#include <stdarg.h>
 
 void ijk_log_set_level(int level);
 void ijk_log_print(int level, const char *tag, const char *fmt, ...);
