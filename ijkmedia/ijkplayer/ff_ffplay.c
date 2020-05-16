@@ -3558,7 +3558,11 @@ static int read_thread(void *arg)
                         av_strerror(ffp->error, error_msg, AV_ERROR_MAX_STRING_SIZE);
                         ffp_notify_msg4(ffp, FFP_MSG_ERROR, ffp->error, 0, error_msg, AV_ERROR_MAX_STRING_SIZE);
                     } else {
-                        ffp_clock_msg_notify_cycle(ffp, -1);
+                        if (ffp->enable_position_notify) {
+                            int64_t position = ffp_get_duration_l(ffp);
+                            ffp_notify_msg2(ffp, FFP_MSG_CURRENT_POSITION_UPDATE, (int) position);
+                        }
+                        ALOGW("msg complete, duration %ld. position %ld", ffp_get_duration_l(ffp), ffp_get_current_position_l(ffp));
                         av_log(ffp, AV_LOG_INFO, "ffp_toggle_buffering: completed: OK\n");
                         ffp_notify_msg1(ffp, FFP_MSG_COMPLETED);
                     }
