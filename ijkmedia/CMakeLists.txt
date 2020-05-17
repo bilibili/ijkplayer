@@ -24,16 +24,26 @@ if (NOT DEFINED FIJKROOT_PATH)
     set(FIJKROOT_PATH ${CMAKE_CURRENT_LIST_DIR}/../)
 endif ()
 
-if(IJK_DESKTOP_UNI)
+if (IJK_DESKTOP_UNI)
     add_subdirectory(portaudio)
     add_subdirectory(ijkyuv)
 
     target_compile_options(portaudio_static PRIVATE "-Wno-deprecated-declarations")
     target_compile_options(portaudio PRIVATE "-Wno-deprecated-declarations")
-endif()
+endif ()
 
 add_subdirectory(ijksdl)
 add_subdirectory(ijkplayer)
+
+set(GIT_DESCRIBE "unknown, dose not found git")
+execute_process(
+        COMMAND git describe --dirty
+        OUTPUT_VARIABLE GIT_DESCRIBE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        # ERROR_QUIET
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
+configure_file(ijkplayer/ijkversion.h.in ${CMAKE_CURRENT_LIST_DIR}/ijkplayer/ijkversion.h @ONLY)
 
 if (ANDROID)
     add_subdirectory(ijksoundtouch)

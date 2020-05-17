@@ -143,9 +143,3 @@ if (ANDROID)
     target_link_libraries(${IJKPLAYER_LIB_NAME} android)
 endif ()
 
-if (NOT WIN32)
-    add_custom_command(TARGET ${IJKPLAYER_LIB_NAME}
-        PRE_BUILD
-        COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/version.sh ${CMAKE_CURRENT_LIST_DIR} ijkversion.h
-    )
-endif()
