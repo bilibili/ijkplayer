@@ -140,6 +140,17 @@ static void func_free_l(SDL_Vout *vout)
         ISDL_Array__clear(&opaque->overlay_pool);
         ISDL_Array__clear(&opaque->overlay_manager);
 
+        if (opaque->native_window) {
+            ANativeWindow_release(opaque->native_window);
+            opaque->native_window = NULL;
+        }
+        if (opaque->new_window) {
+            ANativeWindow_release(opaque->new_window);
+            opaque->native_window = NULL;
+        }
+
+        IJK_EGL_freep(&opaque->egl);
+        
         SDL_AMediaCodec_decreaseReferenceP(&opaque->acodec);
     }
 
