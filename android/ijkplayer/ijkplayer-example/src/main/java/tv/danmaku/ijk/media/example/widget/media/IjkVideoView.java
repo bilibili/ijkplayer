@@ -20,12 +20,14 @@ package tv.danmaku.ijk.media.example.widget.media;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.RawRes;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -40,6 +42,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -284,6 +287,27 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         invalidate();
     }
 
+    public void setDataSource(FileDescriptor fd) {
+        openVideo();
+        requestLayout();
+        invalidate();
+    }
+
+    protected IMediaDataSource mDataSource;
+
+    public void setDataSource(@RawRes int rawId) {
+        AssetFileDescriptor fd = getResources().openRawResourceFd(rawId);
+        RawDataSourceProvider sp = new RawDataSourceProvider(fd);
+        setDataSource(sp);
+    }
+
+    public void setDataSource(IMediaDataSource ds) {
+        this.mDataSource = ds;
+        openVideo();
+        requestLayout();
+        invalidate();
+    }
+
     // REMOVED: addSubtitleSource
     // REMOVED: mPendingSubtitleTracks
 
@@ -296,14 +320,28 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 mHudViewHolder.setMediaPlayer(null);
             mCurrentState = STATE_IDLE;
             mTargetState = STATE_IDLE;
-            AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
-            am.abandonAudioFocus(null);
+
+            abandonAudioFocus();
         }
+    }
+
+    private void requestAudioFocus() {
+        AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
+        if (am == null) return;
+        am.requestAudioFocus(null,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+    }
+
+    private void abandonAudioFocus() {
+        AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
+        if (am == null) return;
+        am.abandonAudioFocus(null);
     }
 
     @TargetApi(Build.VERSION_CODES.M)
     private void openVideo() {
-        if (mUri == null || mSurfaceHolder == null) {
+        if (mSurfaceHolder == null) {
             // not ready for playback just yet, will try again later
             return;
         }
@@ -311,8 +349,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         // called start() previously
         release(false);
 
-        AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
-        am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+//        AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
+//        am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        requestAudioFocus();
 
         try {
             mMediaPlayer = createPlayer(mSettings.getPlayer());
@@ -332,16 +371,24 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mMediaPlayer.setOnSeekCompleteListener(mSeekCompleteListener);
             mMediaPlayer.setOnTimedTextListener(mOnTimedTextListener);
             mCurrentBufferPercentage = 0;
-            String scheme = mUri.getScheme();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                    mSettings.getUsingMediaDataSource() &&
-                    (TextUtils.isEmpty(scheme) || scheme.equalsIgnoreCase("file"))) {
-                IMediaDataSource dataSource = new FileMediaDataSource(new File(mUri.toString()));
-                mMediaPlayer.setDataSource(dataSource);
-            }  else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                mMediaPlayer.setDataSource(mAppContext, mUri, mHeaders);
+            if (mUri == null) {
+                if (mDataSource == null) {
+                    Log.e("ijkPlayer", "data source is null");
+                    return;
+                }
+                mMediaPlayer.setDataSource(mDataSource);
             } else {
-                mMediaPlayer.setDataSource(mUri.toString());
+                String scheme = mUri.getScheme();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                        mSettings.getUsingMediaDataSource() &&
+                        (TextUtils.isEmpty(scheme) || scheme.equalsIgnoreCase("file"))) {
+                    IMediaDataSource dataSource = new FileMediaDataSource(new File(mUri.toString()));
+                    mMediaPlayer.setDataSource(dataSource);
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                    mMediaPlayer.setDataSource(mAppContext, mUri, mHeaders);
+                } else {
+                    mMediaPlayer.setDataSource(mUri.toString());
+                }
             }
             bindSurfaceHolder(mMediaPlayer, mSurfaceHolder);
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -411,7 +458,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
         public void onPrepared(IMediaPlayer mp) {
             mPrepareEndTime = System.currentTimeMillis();
-            mHudViewHolder.updateLoadCost(mPrepareEndTime - mPrepareStartTime);
+            if (mHudViewHolder != null) {
+                mHudViewHolder.updateLoadCost(mPrepareEndTime - mPrepareStartTime);
+            }
             mCurrentState = STATE_PREPARED;
 
             // Get the capabilities of the player for this stream
@@ -566,9 +615,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                                 .setPositiveButton(R.string.VideoView_error_button,
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int whichButton) {
-                                            /* If we get here, there is no onError listener, so
-                                             * at least inform them that the video is over.
-                                             */
+                                                /* If we get here, there is no onError listener, so
+                                                 * at least inform them that the video is over.
+                                                 */
                                                 if (mOnCompletionListener != null) {
                                                     mOnCompletionListener.onCompletion(mMediaPlayer);
                                                 }
@@ -593,7 +642,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         @Override
         public void onSeekComplete(IMediaPlayer mp) {
             mSeekEndTime = System.currentTimeMillis();
-            mHudViewHolder.updateSeekCost(mSeekEndTime - mSeekStartTime);
+            if (mHudViewHolder != null)
+                mHudViewHolder.updateSeekCost(mSeekEndTime - mSeekStartTime);
         }
     };
 
@@ -728,8 +778,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             if (cleartargetstate) {
                 mTargetState = STATE_IDLE;
             }
-            AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
-            am.abandonAudioFocus(null);
+            abandonAudioFocus();
         }
     }
 
@@ -816,6 +865,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             }
         }
         mTargetState = STATE_PAUSED;
+
+        abandonAudioFocus();
     }
 
     public void suspend() {
@@ -823,7 +874,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     }
 
     public void resume() {
-        openVideo();
+        if (isInPlaybackState()) {
+            mMediaPlayer.start();
+        }
+
+        requestAudioFocus();
+//        openVideo();
     }
 
     @Override
@@ -1016,6 +1072,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         return text;
     }
 
+    public IMediaPlayer getMediaPlayer() {
+        return mMediaPlayer;
+    }
+
     public IMediaPlayer createPlayer(int playerType) {
         IMediaPlayer mediaPlayer = null;
 
@@ -1033,45 +1093,45 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             case Settings.PV_PLAYER__IjkMediaPlayer:
             default: {
                 IjkMediaPlayer ijkMediaPlayer = null;
-                if (mUri != null) {
-                    ijkMediaPlayer = new IjkMediaPlayer();
-                    ijkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
+//                if (mUri != null) {
+                ijkMediaPlayer = new IjkMediaPlayer();
+                ijkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
 
-                    if (mSettings.getUsingMediaCodec()) {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
-                        if (mSettings.getUsingMediaCodecAutoRotate()) {
-                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1);
-                        } else {
-                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 0);
-                        }
-                        if (mSettings.getMediaCodecHandleResolutionChange()) {
-                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 1);
-                        } else {
-                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 0);
-                        }
+                if (mSettings.getUsingMediaCodec()) {
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
+                    if (mSettings.getUsingMediaCodecAutoRotate()) {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1);
                     } else {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 0);
                     }
-
-                    if (mSettings.getUsingOpenSLES()) {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
+                    if (mSettings.getMediaCodecHandleResolutionChange()) {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 1);
                     } else {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 0);
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 0);
                     }
-
-                    String pixelFormat = mSettings.getPixelFormat();
-                    if (TextUtils.isEmpty(pixelFormat)) {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_RV32);
-                    } else {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", pixelFormat);
-                    }
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
-
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
-
-                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
+                } else {
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
                 }
+
+                if (mSettings.getUsingOpenSLES()) {
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
+                } else {
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 0);
+                }
+
+                String pixelFormat = mSettings.getPixelFormat();
+                if (TextUtils.isEmpty(pixelFormat)) {
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_RV32);
+                } else {
+                    ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", pixelFormat);
+                }
+                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
+                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
+
+                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
+
+                ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
+//                }
                 mediaPlayer = ijkMediaPlayer;
             }
             break;
