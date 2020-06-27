@@ -18,9 +18,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+extern "C" {
 #include "ijksdl/gles2/internal.h"
+}
 
-static const char g_shader[] = R"(
+static const char g_shader[] =  R"(
     #extension GL_OES_EGL_image_external : require
     precision highp float;
     varying   highp vec2 vv2_Texcoord;

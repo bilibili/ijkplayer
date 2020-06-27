@@ -12,7 +12,9 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
-    lintOptions {
+    ndkVersion rootProject.ext.ndkVersion
+
+    lintOptions {ndkVersion rootProject.ext.ndkVersion
         abortOnError false
     }
 
@@ -22,8 +24,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                // use ndk 15c
-                arguments '-DANDROID_STL=c++_static', "-DANDROID_TOOLCHAIN=gcc"
+                arguments '-DANDROID_STL=c++_static', "-DANDROID_TOOLCHAIN=clang"
                 targets "ijkplayer"
             }
         }
@@ -31,7 +32,7 @@ android {
         ndk {
             // Specifies the ABI configurations of your native
             // libraries Gradle should build and package with your APK.
-            abiFilters 'arm64-v8a', 'armeabi-v7a', 'armeabi', 'x86', 'x86_64'
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
 
         }
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

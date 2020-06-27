@@ -20,7 +20,7 @@
 
 #include "ijksdl/gles2/internal.h"
 
-static const char g_shader[] = R"(
+static const char g_shader[] = IJK_GLES_STRING(
     precision highp float;
     varying   highp vec2 vv2_Texcoord;
     attribute highp vec4 av4_Position;
@@ -33,7 +33,7 @@ static const char g_shader[] = R"(
         gl_Position  = um4_ModelViewProjection * av4_Position;
         vv2_Texcoord = (um4_Matrix * vec4(av2_Texcoord, 1, 1)).xy;
     }
-)";
+);
 
 const char *IJK_GLES2_getVertexShader_amc()
 {

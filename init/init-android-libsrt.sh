@@ -20,7 +20,7 @@ BASEDIR=$(dirname "$DIR")
 
 IJK_LIBSRT_UPSTREAM=https://github.com/Haivision/srt.git
 IJK_LIBSRT_FORK=https://github.com/Haivision/srt.git
-IJK_LIBSRT_COMMIT=3209fe90e15cb699f2ee8672c25a4974b2f4abfb
+IJK_LIBSRT_COMMIT=7bf96c716d1ab8e75422b9cb7118fc82f497a5b3
 IJK_LIBSRT_LOCAL_REPO=$BASEDIR/extra/libsrt
 
 set -e
@@ -38,7 +38,7 @@ function pull_fork()
     cd -
 }
 
-pull_fork "armv5"
+# pull_fork "armv5"
 pull_fork "armv7a"
 pull_fork "arm64"
 pull_fork "x86"

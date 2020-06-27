@@ -106,7 +106,7 @@ static IJKFF_Pipenode *func_init_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
 static int func_config_video_decoder(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
 {
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
-    int                       ret = NULL;
+    int                       ret = 0;
 
     if (ffp->node_vdec) {
         ret = ffpipenode_config_from_android_mediacodec(ffp, pipeline, opaque->weak_vout, ffp->node_vdec);
