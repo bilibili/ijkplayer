@@ -89,7 +89,7 @@ do_build_boringssl() {
         -DANDROID_ABI=${FF_ARCH} \
         -DANDROID_NDK=${ANDROID_NDK} \
         -DANDROID_NATIVE_API_LEVEL=${API_LEVEL} \
-        -DCMAKE_MAKE_PROGRAM=ninja \
+        -DCMAKE_MAKE_PROGRAM=${ANDROID_HOME}/cmake/3.10.2.4988404/bin/ninja \
         -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DANDROID_STL=c++_static \
