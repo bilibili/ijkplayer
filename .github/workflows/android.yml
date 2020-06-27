@@ -61,4 +61,10 @@ jobs:
     - name: Build with Gradle
       run: |
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
-        cd android/ijkplayer && ./gradlew build
+        cd android/ijkplayer && ./gradlew build && ./gradlew assembleRelease
+
+    - name: Upload apk
+      uses: actions/upload-artifact@v2
+      with:
+        name: ijkdemo-release.apk
+        path: android/ijkplayer/ijkplayer-example/build/outputs/apk/release/ijkplayer-example-release.apk
