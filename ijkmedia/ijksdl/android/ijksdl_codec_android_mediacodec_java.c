@@ -204,7 +204,7 @@ static ssize_t SDL_AMediaCodecJava_writeInputData(SDL_AMediaCodec* acodec, size_
         return -1;
 
     int buffer_count = (*env)->GetArrayLength(env, input_buffer_array);
-    if (J4A_ExceptionCheck__catchAll(env) || idx < 0 || idx >= buffer_count) {
+    if (J4A_ExceptionCheck__catchAll(env) || idx >= buffer_count) {
         ALOGE("%s: idx(%d) < count(%d)\n", __func__, (int)idx, (int)buffer_count);
         goto fail;
     }

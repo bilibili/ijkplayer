@@ -607,7 +607,7 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
             } else {
                 if (ijk_map_size(c->cache_info_map) > 0) {
                     av_log(NULL, AV_LOG_INFO, "ijkio cache will use the data that already exists\n");
-                    c->fd = open(c->cache_file_path, O_RDWR | O_BINARY, 0600);
+                    c->fd = open(c->cache_file_path, O_RDWR | O_BINARY | O_CREAT, 0600);
                     c->async_open = 1;
                     cur_exist_file_size = lseek(c->fd, 0, SEEK_END);
                     if (cur_exist_file_size < *c->last_physical_pos) {

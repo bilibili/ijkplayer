@@ -20,28 +20,24 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASEDIR=$(dirname "$DIR")
 
 #IJK_OPENSSL_UPSTREAM=https://github.com/openssl/openssl
-IJK_OPENSSL_UPSTREAM=https://github.com/Bilibili/openssl.git
-IJK_OPENSSL_FORK=https://github.com/Bilibili/openssl.git
-IJK_OPENSSL_COMMIT=b34cf4eb61  #tag: OpenSSL_1_0_2r
-IJK_OPENSSL_LOCAL_REPO=$BASEDIR/extra/openssl
+IJK_OPENSSL_UPSTREAM=https://boringssl.googlesource.com/boringssl
+IJK_OPENSSL_FORK=https://boringssl.googlesource.com/boringssl
+IJK_OPENSSL_COMMIT=7f02881e9 #fips-android-20191020  #tag: OpenSSL_1_0_2r
+IJK_OPENSSL_LOCAL_REPO=$BASEDIR/extra/boringssl
 
 set -e
 TOOLS=$BASEDIR/tools
 
-echo "== pull openssl base =="
+echo "== pull boringssl base =="
 sh $TOOLS/pull-repo-base.sh $IJK_OPENSSL_UPSTREAM $IJK_OPENSSL_LOCAL_REPO
 
 function pull_fork()
 {
-    echo "== pull openssl fork $1 =="
-    sh $TOOLS/pull-repo-ref.sh $IJK_OPENSSL_FORK $BASEDIR/android/contrib/openssl-$1 ${IJK_OPENSSL_LOCAL_REPO}
-    cd $BASEDIR/android/contrib/openssl-$1
+    echo "== pull boringssl fork =="
+    sh $TOOLS/pull-repo-ref.sh $IJK_OPENSSL_FORK $BASEDIR/android/contrib/boringssl ${IJK_OPENSSL_LOCAL_REPO}
+    cd $BASEDIR/android/contrib/boringssl
     git checkout ${IJK_OPENSSL_COMMIT} -B ijkplayer
     cd -
 }
 
-# pull_fork "armv5"
-pull_fork "armv7a"
-pull_fork "arm64"
-pull_fork "x86"
-pull_fork "x86_64"
+pull_fork
