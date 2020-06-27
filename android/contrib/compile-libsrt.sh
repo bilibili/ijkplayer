@@ -118,8 +118,8 @@ do_build_libsrt() {
     cd -
     cmake --build build/libsrt-${ARCH}
     cmake --build build/libsrt-${ARCH} --target install
-    sed -i '' 's|-lsrt   |-lsrt -lc -lm -ldl -lcrypto -lssl -lstdc++|g' ${FF_PREFIX}/lib/pkgconfig/srt.pc
-    sed -i '' '12d;' ${FF_PREFIX}/lib/pkgconfig/srt.pc
+    sed -i 's|-lsrt   |-lsrt -lc -lm -ldl -lcrypto -lssl -lstdc++|g' ${FF_PREFIX}/lib/pkgconfig/srt.pc
+    sed -i '12d;' ${FF_PREFIX}/lib/pkgconfig/srt.pc
 }
 
 #----------
