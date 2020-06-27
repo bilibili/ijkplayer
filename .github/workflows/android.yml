@@ -46,12 +46,14 @@ jobs:
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
         bash init-android.sh
         bash init/init-android-boringssl.sh
+        bash init/init-android-libsrt.sh
 
     - name: Build ssl and ffmpeg
       run: |
         cd android/contrib
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
         bash compile-boringssl.sh all
+        bash compile-libsrt.sh all
         wget --no-check-certificate https://raw.githubusercontent.com/FFmpeg/gas-preprocessor/master/gas-preprocessor.pl
         chmod +x gas-preprocessor.pl && sudo mv gas-preprocessor.pl /usr/local/bin/
         bash compile-ffmpeg.sh all

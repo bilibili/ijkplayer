@@ -1,5 +1,6 @@
 build
 boringssl/
+libsrt/
 ffmpeg-*
 libsoxr-*
 openssl-*
