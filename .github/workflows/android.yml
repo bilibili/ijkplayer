@@ -31,14 +31,12 @@ jobs:
 
     - name: Setup ndk
       run: |
-        env
         yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --update
         yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --licenses > /dev/null
         yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --install "ndk;16.1.4479499"
         yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --install "cmake;3.10.2.4988404"
         yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --licenses > /dev/null
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
-        env
 
 
     - name: Init extra for android
@@ -46,12 +44,14 @@ jobs:
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
         bash init-android.sh
         bash init/init-android-boringssl.sh
+        bash init/init-android-libsrt.sh
 
     - name: Build ssl and ffmpeg
       run: |
         cd android/contrib
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
         bash compile-boringssl.sh all
+        bash compile-libsrt.sh all
         wget --no-check-certificate https://raw.githubusercontent.com/FFmpeg/gas-preprocessor/master/gas-preprocessor.pl
         chmod +x gas-preprocessor.pl && sudo mv gas-preprocessor.pl /usr/local/bin/
         bash compile-ffmpeg.sh all
@@ -59,4 +59,10 @@ jobs:
     - name: Build with Gradle
       run: |
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
-        cd android/ijkplayer && ./gradlew build
+        cd android/ijkplayer && ./gradlew build && ./gradlew assembleRelease
+
+    - name: Upload apk
+      uses: actions/upload-artifact@v2
+      with:
+        name: ijkdemo-release.apk
+        path: android/ijkplayer/ijkplayer-example/build/outputs/apk/release/ijkplayer-example-release.apk

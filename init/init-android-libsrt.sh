@@ -31,15 +31,16 @@ sh $TOOLS/pull-repo-base.sh $IJK_LIBSRT_UPSTREAM $IJK_LIBSRT_LOCAL_REPO
 
 function pull_fork()
 {
-    echo "== pull libsrt fork $1 =="
-    sh $TOOLS/pull-repo-ref.sh $IJK_LIBSRT_FORK $BASEDIR/android/contrib/libsrt-$1 ${IJK_LIBSRT_LOCAL_REPO}
-    cd $BASEDIR/android/contrib/libsrt-$1
+    echo "== pull libsrt fork =="
+    sh $TOOLS/pull-repo-ref.sh $IJK_LIBSRT_FORK $BASEDIR/android/contrib/libsrt ${IJK_LIBSRT_LOCAL_REPO}
+    cd $BASEDIR/android/contrib/libsrt
     git checkout ${IJK_LIBSRT_COMMIT} -B ijkplayer
     cd -
 }
 
 # pull_fork "armv5"
-pull_fork "armv7a"
-pull_fork "arm64"
-pull_fork "x86"
-pull_fork "x86_64"
+# pull_fork "armv7a"
+# pull_fork "arm64"
+# pull_fork "x86"
+# pull_fork "x86_64"
+pull_fork

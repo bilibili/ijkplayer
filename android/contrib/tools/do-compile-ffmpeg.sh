@@ -217,7 +217,6 @@ esac
 
 
 mkdir -p $FF_PREFIX
-# mkdir -p $FF_SYSROOT
 
 
 FF_TOOLCHAIN_TOUCH="$FF_TOOLCHAIN_PATH/touch"
@@ -229,7 +228,8 @@ if [ ! -f "$FF_TOOLCHAIN_TOUCH" ]; then
     #     --toolchain=$FF_TOOLCHAIN_NAME
     python $ANDROID_NDK/build/tools/make_standalone_toolchain.py \
         --arch ${FF_TOOLCHAIN_ARCH} \
-        --api  ${FF_ANDROID_PLATFORM} \
+        --api ${FF_ANDROID_PLATFORM} \
+        --stl libc++ \
         --install-dir ${FF_TOOLCHAIN_PATH}
     touch $FF_TOOLCHAIN_TOUCH;
 fi
