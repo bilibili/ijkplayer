@@ -18,26 +18,26 @@ jobs:
       with:
         java-version: 1.8
 
-    - name: Cache android ndk and extra
+    - name: Cache android ndk
       uses: actions/cache@v2
       with:
-        path: |
-          $ANDROID_HOME/ndk/16.1.4479499/
-          extra/boringssl/
-          extra/soundtouch/
-          extra/ffmpeg/
-          extra/libyuv/
-        key: ${{ runner.os }}-ndk16-extra
+        path: $ANDROID_HOME/ndk/16.1.4479499
+        key: ${{ runner.os }}-ndk16.1.4479499
 
     - name: Setup ndk
       run: |
-        yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --update
-        yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --licenses > /dev/null
-        yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --install "ndk;16.1.4479499"
-        yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --install "cmake;3.10.2.4988404"
-        yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --licenses > /dev/null
-        export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
+        yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --install "ndk;16.1.4479499" "cmake;3.10.2.4988404"
 
+
+    - name: Cache android extra
+      uses: actions/cache@v2
+      with:
+        path: |
+          extra/ffmpeg
+          extra/boringssl
+          extra/libyuv
+          extra/soundtouch
+        key: ${{ runner.os }}-android-extra
 
     - name: Init extra for android
       run: |
@@ -46,7 +46,30 @@ jobs:
         bash init/init-android-boringssl.sh
         bash init/init-android-libsrt.sh
 
+    - name: Get build cache key
+      id: build-key
+      run: |
+        shasum config/* > checklist.chk
+        shasum init/* >> checklist.chk
+        shasum init-android.sh >> checklist.chk
+        shasum android/contrib/*.sh >> checklist.chk
+        shasum android/contrib/tools/* >> checklist.chk
+        BUILD_KEY=`shasum checklist.chk | awk '{print $1}'`
+        echo "::set-output name=key::${BUILD_KEY}"
+
+    - name: Cache ffmpeg build cache
+      id: cache-ffmpeg-build
+      uses: actions/cache@v2
+      with:
+        path: |
+          android/contrib/build/output-armv7a
+          android/contrib/build/output-arm64
+          android/contrib/build/output-x86
+          android/contrib/build/output-x86_64
+        key: ${{ steps.build-key.outputs.key }}
+
     - name: Build ssl and ffmpeg
+      if: steps.cache-ffmpeg-build.outputs.cache-hit != 'true'
       run: |
         cd android/contrib
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
@@ -64,5 +87,5 @@ jobs:
     - name: Upload apk
       uses: actions/upload-artifact@v2
       with:
-        name: ijkdemo-release.apk
+        name: ijkdemo-release
         path: android/ijkplayer/ijkplayer-example/build/outputs/apk/release/ijkplayer-example-release.apk

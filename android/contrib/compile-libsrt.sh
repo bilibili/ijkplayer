@@ -103,7 +103,7 @@ do_build_libsrt() {
         -DCMAKE_INSTALL_PREFIX=${FF_PREFIX} \
         -DCMAKE_PREFIX_PATH=${FF_PREFIX} \
         -DANDROID_STL=c++_static \
-        -DANDROID_TOOLCHAIN=gcc \
+        -DANDROID_TOOLCHAIN=clang \
         -DUSE_OPENSSL_PC=OFF \
         -DOPENSSL_CRYPTO_LIBRARY=${FF_PREFIX}/lib/libcrypto.a \
         -DOPENSSL_SSL_LIBRARY=${FF_PREFIX}/lib/libssl.a \
@@ -118,8 +118,9 @@ do_build_libsrt() {
     cd -
     cmake --build build/libsrt-${ARCH}
     cmake --build build/libsrt-${ARCH} --target install
-    sed -i 's|-lsrt   |-lsrt -lc -lm -ldl -lcrypto -lssl -lstdc++|g' ${FF_PREFIX}/lib/pkgconfig/srt.pc
-    sed -i '12d;' ${FF_PREFIX}/lib/pkgconfig/srt.pc
+    sed -i.bak 's|-lsrt   |-lsrt -lc -lm -ldl -lcrypto -lssl -lstdc++|g' ${FF_PREFIX}/lib/pkgconfig/srt.pc
+    sed -i.bak '12d;' ${FF_PREFIX}/lib/pkgconfig/srt.pc
+    rm ${FF_PREFIX}/lib/pkgconfig/srt.pc.bak
 }
 
 #----------
