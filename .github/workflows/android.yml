@@ -80,9 +80,11 @@ jobs:
         bash compile-ffmpeg.sh all
 
     - name: Build with Gradle
+      working-directory: android/ijkplayer
       run: |
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
-        cd android/ijkplayer && ./gradlew build && ./gradlew assembleRelease
+        ./gradlew build -PIJK_CXX_STL=c++_shared
+        ./gradlew assembleRelease -PIJK_CXX_STL=c++_shared
 
     - name: Upload apk
       uses: actions/upload-artifact@v2

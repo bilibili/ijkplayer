@@ -8,6 +8,10 @@ apply plugin: 'com.android.library'
 // include ':ijkplayer-x86'
 // include ':ijkplayer-java'
 
+def safePropGet = { prop, fallback ->
+    return project.hasProperty(prop) ? getProperty(prop) : fallback
+}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -23,8 +27,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
 
         externalNativeBuild {
+            def stl = safePropGet("IJK_CXX_STL", "c++_static")
             cmake {
-                arguments '-DANDROID_STL=c++_static', "-DANDROID_TOOLCHAIN=clang"
+                arguments "-DANDROID_STL=${stl}", "-DANDROID_TOOLCHAIN=clang"
                 targets "ijkplayer"
             }
         }
