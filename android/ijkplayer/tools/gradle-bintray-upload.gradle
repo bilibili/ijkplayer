@@ -22,9 +22,11 @@ version = VERSION_NAME
 
 
 Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-def bintray_user = properties.getProperty('BINTRAY_USER')
-def bintray_apikey = properties.getProperty('BINTRAY_APIKEY')
+if (project.rootProject.file('local.properties').exists()) {
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+}
+def bintray_user = properties.getProperty('BINTRAY_USER', null)
+def bintray_apikey = properties.getProperty('BINTRAY_APIKEY', null)
 
 bintray {
     user = bintray_user ? bintray_user : project.hasProperty('BINTRAY_USER') ? BINTRAY_USER : System.getenv('BINTRAY_USER')

@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "BIJKPlayer"
-  spec.version      = "0.7.3"
+  spec.version      = "0.7.6"
   spec.summary      = "ijkplayer iOS video player SDK"
 
   spec.author       = { "befovy" => "befovy@gmail.com" }
@@ -74,8 +74,9 @@ Pod::Spec.new do |spec|
   #  Specify the location from where the source should be retrieved.
   #  Supports git, hg, bzr, svn and HTTP.
   #
-
-  spec.source = { :http => "https://dl.bintray.com/befovytray/bijkplayer/f0.7.5/IJKMediaPlayer.tar.gz" }
+  
+  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/f0.7.6/IJKMediaPlayer.tar.gz" }
+  
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
   #  CocoaPods is smart about how it includes source code. For source files
