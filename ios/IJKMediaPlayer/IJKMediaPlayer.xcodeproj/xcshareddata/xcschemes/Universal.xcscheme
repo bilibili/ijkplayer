@@ -16,8 +16,8 @@
                   <BuildableReference
                      BuildableIdentifier = "primary"
                      BlueprintIdentifier = "21E6F47922C39D0500611D3D"
-                     BuildableName = "IJKPlayer.framework"
-                     BlueprintName = "IJKPlayer"
+                     BuildableName = "IJKMediaPlayer.framework"
+                     BlueprintName = "IJKMediaPlayer"
                      ReferencedContainer = "container:IJKMediaPlayer.xcodeproj">
                   </BuildableReference>
                </EnvironmentBuildable>
@@ -34,8 +34,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "21E6F47922C39D0500611D3D"
-               BuildableName = "IJKPlayer.framework"
-               BlueprintName = "IJKPlayer"
+               BuildableName = "IJKMediaPlayer.framework"
+               BlueprintName = "IJKMediaPlayer"
                ReferencedContainer = "container:IJKMediaPlayer.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -70,8 +70,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "21E6F47922C39D0500611D3D"
-            BuildableName = "IJKPlayer.framework"
-            BlueprintName = "IJKPlayer"
+            BuildableName = "IJKMediaPlayer.framework"
+            BlueprintName = "IJKMediaPlayer"
             ReferencedContainer = "container:IJKMediaPlayer.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
