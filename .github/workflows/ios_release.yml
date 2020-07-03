@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Init extra for android
+    - name: Init extra for iOS
       run: |
         bash init-ios-openssl.sh
         bash init-ios.sh
