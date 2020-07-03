@@ -1,0 +1,31 @@
+name: iOS Release
+
+on:
+  push:
+    tags:
+      - 'f*'
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Init extra for android
+      run: |
+        bash init-ios-openssl.sh
+        bash init-ios.sh
+
+    - name: Build ssl and ffmpeg
+      working-directory: ios
+      run: |
+        bash compile-openssl.sh all
+        bash compile-ffmpeg.sh all
+
+    - name: XCode build ijkplayer
+      working-directory: ios/IJKMediaPlayer
+      run: xcodebuild -project IJKMediaPlayer.xcodeproj -configuration Release -scheme Universal
