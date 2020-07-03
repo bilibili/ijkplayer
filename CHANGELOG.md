@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ---
 
-## 0.7.5 (2020-07-03)
+## 0.7.6 (2020-07-03)
 
 * fix: update position with duration value when playback complete ([f3d27d8](https://github.com/befovy/ijkplayer/commit/f3d27d832ba0a3472bb59c129c2c65591f8855d4))
 * fix: use cmake configure generate ijkversion.h ([d252733](https://github.com/befovy/ijkplayer/commit/d252733c36cc05a2fc22ea23c99c04b4872b9f72))

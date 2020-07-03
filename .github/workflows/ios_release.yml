@@ -4,9 +4,6 @@ on:
   push:
     tags:
       - 'f*'
-    branches: [ master, main ]
-  pull_request:
-    branches: [ master, main ]
 
 jobs:
   build:
@@ -29,3 +26,24 @@ jobs:
     - name: XCode build ijkplayer
       working-directory: ios/IJKMediaPlayer
       run: xcodebuild -project IJKMediaPlayer.xcodeproj -configuration Release -scheme Universal
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload iOS Framework
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./ios/CocoaPodsPub/IJKMediaPlayer.tar.gz
+        asset_name: IJKMediaPlayer.tar.gz
+        asset_content_type: application/gzip
