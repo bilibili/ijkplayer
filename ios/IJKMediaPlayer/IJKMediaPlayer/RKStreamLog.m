@@ -29,7 +29,7 @@
 
 - (NSMutableDictionary *)basicLog {
     NSMutableDictionary *dic = [NSMutableDictionary new];
-    dic[@"tm"] = @((NSUInteger)[NSDate date].timeIntervalSince1970);
+    dic[@"tm"] = @((NSUInteger)([NSDate date].timeIntervalSince1970 * 1000));
     if (self.uid) dic[@"uid"] = self.uid;
     if (self.pd) dic[@"pd"] = self.pd;
     if (self.os) dic[@"os"] = self.os;

@@ -400,9 +400,9 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     ijkmp_stop(_mediaPlayer);
     
     if (self.shouldLogStream) {
-        NSTimeInterval end = [NSDate date].timeIntervalSince1970;
+        NSUInteger end = [NSDate date].timeIntervalSince1970 * 1000;
         [[RKStreamLog logger] logWithDict:@{@"lt": @"bft",
-                                            @"pst": @(_playerInitTime),
+                                            @"pst": @((NSUInteger)(_playerInitTime * 1000)),
                                             @"psd": @(end),
                                             @"num": @(_bufferingTimes)
                                             }];
@@ -554,9 +554,9 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     }
     
     if (state != MP_STATE_STOPPED && self.shouldLogStream) {
-        NSTimeInterval end = [NSDate date].timeIntervalSince1970;
+        NSUInteger end = [NSDate date].timeIntervalSince1970 * 1000;
         [[RKStreamLog logger] logWithDict:@{@"lt": @"bft",
-                                            @"pst": @(_playerInitTime),
+                                            @"pst": @((NSUInteger)(_playerInitTime * 1000)),
                                             @"psd": @(end),
                                             @"num": @(_bufferingTimes)
                                             }];
