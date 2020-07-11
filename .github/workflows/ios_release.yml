@@ -28,13 +28,21 @@ jobs:
       run: xcodebuild -project IJKMediaPlayer.xcodeproj -configuration Release -scheme Universal
 
 
+    - name: Extract tag name
+      id: tag
+      uses: actions/github-script@0.2.0
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          return context.payload.ref.replace('refs/tags/', '');
+
     - name: Upload to Bintray
       working-directory: ios/CocoaPodsPub
       run: |
         curl --progress-bar --verbose -T IJKMediaPlayer.tar.gz -ubefovy:${{ secrets.BINTRAY_APIKEY }} \
           -H "X-Bintray-Package:bijkplayer" \
-          -H "X-Bintray-Version:${{ github.ref }}" \
-          https://api.bintray.com/content/befovytray/bijkplayer/${{ github.ref }}/IJKMediaPlayer.tar.gz\;publish\=1  | tee /dev/null
+          -H "X-Bintray-Version:${{ steps.tag.outputs.result }}" \
+          https://api.bintray.com/content/befovytray/bijkplayer/${{ steps.tag.outputs.result }}/IJKMediaPlayer.tar.gz\;publish\=1  | tee /dev/null
 
     - name: Create Release
       id: create_release
