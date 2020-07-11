@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		21B5D5B322D8A6CC00A1D26D /* IJKMediaFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E654EAD71B6B28B100B0F2D0 /* IJKMediaFramework.framework */; };
-		21B5D5B822D8A6EA00A1D26D /* IJKMediaFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E654EAD71B6B28B100B0F2D0 /* IJKMediaFramework.framework */; };
-		21B5D5B922D8A6EA00A1D26D /* IJKMediaFramework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E654EAD71B6B28B100B0F2D0 /* IJKMediaFramework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		45D57D611A53233200BDD389 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45D57D601A53233200BDD389 /* CoreVideo.framework */; };
 		45D57D631A53233800BDD389 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45D57D621A53233800BDD389 /* VideoToolbox.framework */; };
 		546736C41E2371AE00FEE0DF /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 546736C31E2371AE00FEE0DF /* libstdc++.tbd */; };
@@ -49,6 +46,8 @@
 		E6F1D4C01D38F29D00E8665B /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E6F1D4BF1D38F29D00E8665B /* libbz2.tbd */; };
 		E6F524EB1B183A0700B69DC7 /* IJKDemoSampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F524E91B183A0700B69DC7 /* IJKDemoSampleViewController.m */; };
 		E6F524EC1B183A0700B69DC7 /* IJKDemoSampleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E6F524EA1B183A0700B69DC7 /* IJKDemoSampleViewController.xib */; };
+		F3E8249224B0C80100F2B1C5 /* IJKMediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B5D5B222D8A5E500A1D26D /* IJKMediaPlayer.framework */; };
+		F3E8249324B0C86700F2B1C5 /* IJKMediaPlayer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 21B5D5B222D8A5E500A1D26D /* IJKMediaPlayer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,20 +65,6 @@
 			remoteGlobalIDString = 21E6F50322C39D0500611D3D;
 			remoteInfo = FIJKPlayer;
 		};
-		21B5D5B522D8A6CC00A1D26D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = E654EA891B6B27E600B0F2D0;
-			remoteInfo = IJKMediaFramework;
-		};
-		21B5D5BA22D8A6EA00A1D26D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = E654EA891B6B27E600B0F2D0;
-			remoteInfo = IJKMediaFramework;
-		};
 		E654EAD61B6B28B100B0F2D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */;
@@ -94,6 +79,13 @@
 			remoteGlobalIDString = E654EA941B6B27E600B0F2D0;
 			remoteInfo = IJKMediaFrameworkTests;
 		};
+		F3E8248D24B0C7F300F2B1C5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E6D74F2918A5F94B00165BFD /* IJKMediaPlayer.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 21E6F47922C39D0500611D3D;
+			remoteInfo = IJKMediaPlayer;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -103,7 +95,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				21B5D5B922D8A6EA00A1D26D /* IJKMediaFramework.framework in Embed Frameworks */,
+				F3E8249324B0C86700F2B1C5 /* IJKMediaPlayer.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -171,11 +163,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F3E8249224B0C80100F2B1C5 /* IJKMediaPlayer.framework in Frameworks */,
 				546736C41E2371AE00FEE0DF /* libstdc++.tbd in Frameworks */,
 				E63FC29117F04C83003551EB /* AudioToolbox.framework in Frameworks */,
 				E61B45AE19EF7021002792EC /* AVFoundation.framework in Frameworks */,
-				21B5D5B822D8A6EA00A1D26D /* IJKMediaFramework.framework in Frameworks */,
-				21B5D5B322D8A6CC00A1D26D /* IJKMediaFramework.framework in Frameworks */,
 				E64D4F4E1938CCCC00F1C75D /* CoreGraphics.framework in Frameworks */,
 				E60E8C2A19EF70BB005B5B6E /* CoreMedia.framework in Frameworks */,
 				45D57D611A53233200BDD389 /* CoreVideo.framework in Frameworks */,
@@ -314,7 +305,7 @@
 				E654EAD71B6B28B100B0F2D0 /* IJKMediaFramework.framework */,
 				21B5D5B022D8A5E500A1D26D /* IJKMediaFrameworkWithSSL.framework */,
 				E654EAD91B6B28B100B0F2D0 /* IJKMediaFrameworkTests.xctest */,
-				21B5D5B222D8A5E500A1D26D /* IJKPlayer.framework */,
+				21B5D5B222D8A5E500A1D26D /* IJKMediaPlayer.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -334,8 +325,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				21B5D5B622D8A6CC00A1D26D /* PBXTargetDependency */,
-				21B5D5BB22D8A6EA00A1D26D /* PBXTargetDependency */,
+				F3E8248E24B0C7F300F2B1C5 /* PBXTargetDependency */,
 			);
 			name = IJKMediaDemo;
 			productName = IJKMediaDemo;
@@ -389,10 +379,10 @@
 			remoteRef = 21B5D5AF22D8A5E500A1D26D /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		21B5D5B222D8A5E500A1D26D /* IJKPlayer.framework */ = {
+		21B5D5B222D8A5E500A1D26D /* IJKMediaPlayer.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = IJKPlayer.framework;
+			path = IJKMediaPlayer.framework;
 			remoteRef = 21B5D5B122D8A5E500A1D26D /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -458,15 +448,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		21B5D5B622D8A6CC00A1D26D /* PBXTargetDependency */ = {
+		F3E8248E24B0C7F300F2B1C5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = IJKMediaFramework;
-			targetProxy = 21B5D5B522D8A6CC00A1D26D /* PBXContainerItemProxy */;
-		};
-		21B5D5BB22D8A6EA00A1D26D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = IJKMediaFramework;
-			targetProxy = 21B5D5BA22D8A6EA00A1D26D /* PBXContainerItemProxy */;
+			name = IJKMediaPlayer;
+			targetProxy = F3E8248D24B0C7F300F2B1C5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

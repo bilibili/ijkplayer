@@ -3551,6 +3551,7 @@ static int read_thread(void *arg)
 
                     // TODO: 0 it's a bit early to notify complete here
                     ffp_toggle_buffering(ffp, 0);
+                    SDL_AoutFlushAudio(ffp->aout);
                     toggle_pause(ffp, 1);
                     if (ffp->error) {
                         av_log(ffp, AV_LOG_INFO, "ffp_toggle_buffering: error: %d\n", ffp->error);
