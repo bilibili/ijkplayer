@@ -98,6 +98,8 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property (nonatomic) float playbackRate;
 @property (nonatomic) float playbackVolume;
 
+@property (copy, nonatomic, readonly) NSDictionary *basicLog;
+
 - (UIImage *)thumbnailImageAtCurrentTime;
 
 #pragma mark Notifications

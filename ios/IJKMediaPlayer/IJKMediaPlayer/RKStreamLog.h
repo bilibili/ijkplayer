@@ -52,6 +52,8 @@
 
 - (void)fetchHostStatus;
 
+- (NSMutableDictionary *)basicLog;
+
 @end
 
 

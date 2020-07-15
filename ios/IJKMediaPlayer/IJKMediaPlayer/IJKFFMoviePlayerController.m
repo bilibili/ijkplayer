@@ -314,6 +314,10 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     return _streamURL;
 }
 
+- (NSDictionary *)basicLog {
+    return [[[RKStreamLog logger] basicLog] copy];
+}
+
 - (void)dealloc
 {
     IJKLog(@"%s", __FUNCTION__);
