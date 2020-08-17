@@ -22,6 +22,11 @@
 #ifndef IJKSDL__IJKSDL_GLES2_H
 #define IJKSDL__IJKSDL_GLES2_H
 
+#if IJK_DESKTOP_UNI
+#include <glad/gl.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#else
 #ifdef __APPLE__
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
@@ -29,6 +34,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES2/gl2platform.h>
+#endif
 #endif
 
 typedef struct SDL_VoutOverlay SDL_VoutOverlay;
@@ -51,6 +57,13 @@ void IJK_GLES2_checkError(const char *op);
 GLuint IJK_GLES2_loadShader(GLenum shader_type, const char *shader_source);
 
 
+typedef enum IJK_SDL_GLES2_flip {
+    IJK_SDL_GLES2_flip_none = 0,
+    IJK_SDL_GLES2_flip_horizontal = 1,
+    IJK_SDL_GLES2_flip_vertical = 2,
+    IJK_SDL_GLES2_flip_both = 3,
+} IJK_SDL_GLES2_flip;
+
 /*
  * Renderer
  */
@@ -61,6 +74,7 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create(SDL_VoutOverlay *overlay);
 void      IJK_GLES2_Renderer_reset(IJK_GLES2_Renderer *renderer);
 void      IJK_GLES2_Renderer_free(IJK_GLES2_Renderer *renderer);
 void      IJK_GLES2_Renderer_freeP(IJK_GLES2_Renderer **renderer);
+void      IJK_GLES2_Renderer_setFlip(IJK_GLES2_Renderer *renderer, IJK_SDL_GLES2_flip flip);
 
 GLboolean IJK_GLES2_Renderer_setupGLES();
 GLboolean IJK_GLES2_Renderer_isValid(IJK_GLES2_Renderer *renderer);
@@ -72,5 +86,9 @@ GLboolean IJK_GLES2_Renderer_renderOverlay(IJK_GLES2_Renderer *renderer, SDL_Vou
 #define IJK_GLES2_GRAVITY_RESIZE_ASPECT         (1) // Preserve aspect ratio; fit within view bounds.
 #define IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL    (2) // Preserve aspect ratio; fill view bounds.
 GLboolean IJK_GLES2_Renderer_setGravity(IJK_GLES2_Renderer *renderer, int gravity, GLsizei view_width, GLsizei view_height);
+
+typedef void (*IJK_GLES2_Renderer_funcGetSnapShot)(void *opaque, uint8_t* pixels, int width, int height);
+
+GLboolean IJK_GLES2_Renderer_takeSnapShot(IJK_GLES2_Renderer *renderer, void *opaque, IJK_GLES2_Renderer_funcGetSnapShot get_snap_shot);
 
 #endif

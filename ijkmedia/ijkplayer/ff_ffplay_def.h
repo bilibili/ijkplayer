@@ -82,6 +82,8 @@
 #define FAST_BUFFERING_CHECK_PER_MILLISECONDS   (50)
 #define MAX_RETRY_CONVERT_IMAGE                 (3)
 
+#define NOTIFY_KEY_MSG_PER_MILLISECONDS         (100)
+
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MAX_ACCURATE_SEEK_TIMEOUT (5000)
 #ifdef FFP_MERGE
@@ -265,16 +267,19 @@ typedef struct Decoder {
     int64_t next_pts;
     AVRational next_pts_tb;
     SDL_Thread *decoder_tid;
-    SDL_Thread _decoder_tid;
 
     SDL_Profiler decode_profiler;
     Uint64 first_frame_decoded_time;
     int    first_frame_decoded;
 } Decoder;
 
+
+typedef enum ShowMode {
+    SHOW_MODE_NONE = -1, SHOW_MODE_VIDEO = 0, SHOW_MODE_WAVES, SHOW_MODE_RDFT, SHOW_MODE_NB
+} ShowMode;
+
 typedef struct VideoState {
     SDL_Thread *read_tid;
-    SDL_Thread _read_tid;
     AVInputFormat *iformat;
     int abort_request;
     int force_refresh;
@@ -336,9 +341,7 @@ typedef struct VideoState {
     int frame_drops_late;
     int continuous_frame_drops_early;
 
-    enum ShowMode {
-        SHOW_MODE_NONE = -1, SHOW_MODE_VIDEO = 0, SHOW_MODE_WAVES, SHOW_MODE_RDFT, SHOW_MODE_NB
-    } show_mode;
+    ShowMode show_mode;
     int16_t sample_array[SAMPLE_ARRAY_SIZE];
     int sample_array_index;
     int last_i_start;
@@ -391,7 +394,6 @@ typedef struct VideoState {
     /* extra fields */
     SDL_mutex  *play_mutex; // only guard state, do not block any long operation
     SDL_Thread *video_refresh_tid;
-    SDL_Thread _video_refresh_tid;
 
     int buffering_on;
     int pause_req;
@@ -583,13 +585,16 @@ typedef struct FFPlayer {
     int audio_disable;
     int video_disable;
     int subtitle_disable;
-    const char* wanted_stream_spec[AVMEDIA_TYPE_NB];
+    char* wanted_stream_spec[AVMEDIA_TYPE_NB];
     int seek_by_bytes;
     int display_disable;
     int show_status;
     int av_sync_type;
     int64_t start_time;
     int64_t duration;
+    int64_t clock_notify_time;
+    int enable_position_notify;
+    int pos_update_interval;
     int fast;
     int genpts;
     int lowres;
@@ -720,6 +725,9 @@ typedef struct FFPlayer {
     char *mediacodec_default_name;
     int ijkmeta_delay_init;
     int render_wait_start;
+    int cover_after_prepared;
+    int vout_type;
+    int aout_type;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
@@ -869,6 +877,11 @@ inline static void ffp_notify_msg3(FFPlayer *ffp, int what, int arg1, int arg2) 
 
 inline static void ffp_notify_msg4(FFPlayer *ffp, int what, int arg1, int arg2, void *obj, int obj_len) {
     msg_queue_put_simple4(&ffp->msg_queue, what, arg1, arg2, obj, obj_len);
+}
+
+inline static void ffp_notify_msg5(FFPlayer *ffp, int what, int arg1, int arg2, void *obj,
+        size_t len, void (*free_l)(void *obj)) {
+    msg_queue_put_simple5(&ffp->msg_queue, what, arg1, arg2, obj, len, free_l);
 }
 
 inline static void ffp_remove_msg(FFPlayer *ffp, int what) {

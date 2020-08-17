@@ -322,7 +322,7 @@ static bool ff_avpacket_is_key(const AVPacket* pkt) {
 
 static bool ff_avpacket_i_or_idr(const AVPacket* pkt,bool isIdr) {
     if (isIdr == true) {
-        return ff_avpacket_is_idr(pkt);
+        return ff_avpacket_is_idr(pkt) || ff_avpacket_is_key(pkt);
     } else {
         return ff_avpacket_is_key(pkt);
     }

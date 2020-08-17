@@ -153,10 +153,12 @@
         return;
 
     _isPaused = NO;
+#if IJK_IOS
     NSError *error = nil;
     if (NO == [[AVAudioSession sharedInstance] setActive:YES error:&error]) {
         NSLog(@"AudioUnit: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
     }
+#endif
 
     OSStatus status = AudioOutputUnitStart(_auUnit);
     if (status != noErr)

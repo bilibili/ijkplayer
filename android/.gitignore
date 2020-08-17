@@ -49,7 +49,8 @@ gradle-app.setting
 #--------------------
 # Built application files
 /*/build/
- 
+.externalNativeBuild/
+
 # Crashlytics configuations
 com_crashlytics_export_strings.xml
  

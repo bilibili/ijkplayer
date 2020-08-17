@@ -22,7 +22,7 @@
  *****************************************************************************/
 
 #include "../ijksdl_image_convert.h"
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(IJK_DESKTOP_UNI)
 #include "libyuv.h"
 #endif
 
@@ -30,7 +30,7 @@ int ijk_image_convert(int width, int height,
     enum AVPixelFormat dst_format, uint8_t **dst_data, int *dst_linesize,
     enum AVPixelFormat src_format, const uint8_t **src_data, const int *src_linesize)
 {
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(IJK_DESKTOP_UNI)
     switch (src_format) {
         case AV_PIX_FMT_YUV420P:
         case AV_PIX_FMT_YUVJ420P: // FIXME: 9 not equal to AV_PIX_FMT_YUV420P, but a workaround
@@ -43,6 +43,20 @@ int ijk_image_convert(int width, int height,
                     dst_data[0], dst_linesize[0],
                     width, height);
             case AV_PIX_FMT_0BGR32:
+                return I420ToABGR(
+                        src_data[0], src_linesize[0],
+                        src_data[1], src_linesize[1],
+                        src_data[2], src_linesize[2],
+                        dst_data[0], dst_linesize[0],
+                        width, height);
+            case AV_PIX_FMT_RGB32:
+                return I420ToARGB(
+                        src_data[0], src_linesize[0],
+                        src_data[1], src_linesize[1],
+                        src_data[2], src_linesize[2],
+                        dst_data[0], dst_linesize[0],
+                        width, height);
+            case AV_PIX_FMT_BGR32:
                 return I420ToABGR(
                     src_data[0], src_linesize[0],
                     src_data[1], src_linesize[1],

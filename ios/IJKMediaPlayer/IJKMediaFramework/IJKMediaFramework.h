@@ -33,10 +33,10 @@ FOUNDATION_EXPORT const unsigned char IJKMediaFrameworkVersionString[];
 #import <IJKMediaFramework/IJKMediaPlayback.h>
 #import <IJKMediaFramework/IJKMPMoviePlayerController.h>
 #import <IJKMediaFramework/IJKFFOptions.h>
+#import <IJKMediaFramework/IJKFFMediaPlayer.h>
 #import <IJKMediaFramework/IJKFFMoviePlayerController.h>
 #import <IJKMediaFramework/IJKAVMoviePlayerController.h>
 #import <IJKMediaFramework/IJKMediaModule.h>
-#import <IJKMediaFramework/IJKMediaPlayer.h>
 #import <IJKMediaFramework/IJKNotificationManager.h>
 #import <IJKMediaFramework/IJKKVOController.h>
 #import <IJKMediaFramework/IJKSDLGLViewProtocol.h>

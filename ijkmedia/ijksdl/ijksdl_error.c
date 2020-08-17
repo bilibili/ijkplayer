@@ -24,8 +24,20 @@
 
 #include "ijksdl_error.h"
 #include "ijksdl_stdinc.h"
+#if USE_SDL2
+#include <SDL.h>
+#endif
 
+#if !USE_SDL2
 const char *SDL_GetError(void)
 {
     return NULL;
+}
+#endif
+
+void ijksdl_global_init()
+{
+#if USE_SDL2
+    SDL_Init(SDL_INIT_AUDIO);
+#endif
 }

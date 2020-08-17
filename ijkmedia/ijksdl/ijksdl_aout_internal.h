@@ -27,6 +27,7 @@
 
 #include "ijksdl_mutex.h"
 #include "ijksdl_aout.h"
+#include "ijksdl_misc.h"
 
 inline static SDL_Aout *SDL_Aout_CreateInternal(size_t opaque_size)
 {

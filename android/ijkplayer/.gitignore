@@ -6,3 +6,7 @@
 /build
 /captures
 android-ndk-prof
+
+.project
+.classpath
+.settings/

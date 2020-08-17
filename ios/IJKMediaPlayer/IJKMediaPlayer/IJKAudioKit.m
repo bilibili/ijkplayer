@@ -41,6 +41,7 @@
 
 - (void)setupAudioSession
 {
+#if IJK_IOS
     if (!_audioSessionInitialized) {
         [[NSNotificationCenter defaultCenter] addObserver: self
                                                  selector: @selector(handleInterruption:)
@@ -48,38 +49,47 @@
                                                    object: [AVAudioSession sharedInstance]];
         _audioSessionInitialized = YES;
     }
+    [self setupAudioSessionWithoutInterruptHandler];
+#endif
+}
 
+- (void)setupAudioSessionWithoutInterruptHandler
+{
+#if IJK_IOS
     /* Set audio session to mediaplayback */
     NSError *error = nil;
     if (NO == [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error]) {
         NSLog(@"IJKAudioKit: AVAudioSession.setCategory() failed: %@\n", error ? [error localizedDescription] : @"nil");
         return;
     }
-
-    error = nil;
-    if (NO == [[AVAudioSession sharedInstance] setActive:YES error:&error]) {
-        NSLog(@"IJKAudioKit: AVAudioSession.setActive(YES) failed: %@\n", error ? [error localizedDescription] : @"nil");
-        return;
-    }
-
-    return ;
+    [self setActive:YES];
+#endif
 }
 
 - (BOOL)setActive:(BOOL)active
 {
-    if (active != NO) {
-        [[AVAudioSession sharedInstance] setActive:YES error:nil];
-    } else {
-        @try {
-            [[AVAudioSession sharedInstance] setActive:NO error:nil];
-        } @catch (NSException *exception) {
-            NSLog(@"failed to inactive AVAudioSession\n");
-        }
+#if IJK_IOS
+    NSError *error = nil;
+    BOOL succeed = NO;
+    @try {
+        succeed = [[AVAudioSession sharedInstance] setActive:active error:&error];
+    } @catch (NSException *exception) {
+        NSLog(@"failed to inactive/active AVAudioSession\n");
+        succeed = NO;
     }
+    if (succeed == NO) {
+        NSLog(@"IJKAudioKit: AVAudioSession.setActive(%@) failed: %@\n",
+            active ? @"YES" : @"NO",
+            error ? [error localizedDescription] : @"nil");
+    }
+    return succeed;
+#endif
+    return YES;
 }
 
 - (void)handleInterruption:(NSNotification *)notification
 {
+#if IJK_IOS
     int reason = [[[notification userInfo] valueForKey:AVAudioSessionInterruptionTypeKey] intValue];
     switch (reason) {
         case AVAudioSessionInterruptionTypeBegan: {
@@ -93,6 +103,7 @@
             break;
         }
     }
+#endif
 }
 
 @end

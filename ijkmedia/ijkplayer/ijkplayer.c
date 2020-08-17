@@ -25,6 +25,10 @@
 #include "ijkplayer_internal.h"
 #include "ijkversion.h"
 
+#ifdef WIN32
+#include <Windows.h>
+#endif
+
 #define MP_RET_IF_FAILED(ret) \
     do { \
         int retval = ret; \
@@ -68,6 +72,7 @@ inline static void ijkmp_destroy_p(IjkMediaPlayer **pmp)
 
 void ijkmp_global_init()
 {
+    ijksdl_global_init();
     ffp_global_init();
 }
 
@@ -110,8 +115,9 @@ void ijkmp_io_stat_complete_register(void (*cb)(const char *url,
 
 void ijkmp_change_state_l(IjkMediaPlayer *mp, int new_state)
 {
+    int old_state = mp->mp_state;
     mp->mp_state = new_state;
-    ffp_notify_msg1(mp->ffplayer, FFP_MSG_PLAYBACK_STATE_CHANGED);
+    ffp_notify_msg3(mp->ffplayer, FFP_MSG_PLAYBACK_STATE_CHANGED, new_state, old_state);
 }
 
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
@@ -128,6 +134,8 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
 
     ijkmp_inc_ref(mp);
     pthread_mutex_init(&mp->mutex, NULL);
+
+    msg_queue_start(&mp->ffplayer->msg_queue);
 
     return mp;
 
@@ -302,6 +310,7 @@ void ijkmp_shutdown_l(IjkMediaPlayer *mp)
     if (mp->ffplayer) {
         ffp_stop_l(mp->ffplayer);
         ffp_wait_stop_l(mp->ffplayer);
+        msg_queue_abort(&mp->ffplayer->msg_queue);
     }
     MPTRACE("ijkmp_shutdown_l()=void\n");
 }
@@ -314,7 +323,11 @@ void ijkmp_shutdown(IjkMediaPlayer *mp)
 void ijkmp_inc_ref(IjkMediaPlayer *mp)
 {
     assert(mp);
+#ifdef WIN32
+    InterlockedIncrement(&mp->ref_count);
+#else
     __sync_fetch_and_add(&mp->ref_count, 1);
+#endif
 }
 
 void ijkmp_dec_ref(IjkMediaPlayer *mp)
@@ -322,7 +335,11 @@ void ijkmp_dec_ref(IjkMediaPlayer *mp)
     if (!mp)
         return;
 
+#ifdef WIN32
+    long ref_count = InterlockedDecrement(&mp->ref_count);
+#else
     int ref_count = __sync_sub_and_fetch(&mp->ref_count, 1);
+#endif // WIN32
     if (ref_count == 0) {
         MPTRACE("ijkmp_dec_ref(): ref=0\n");
         ijkmp_shutdown(mp);
@@ -402,11 +419,10 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
 
     ijkmp_change_state_l(mp, MP_STATE_ASYNC_PREPARING);
 
-    msg_queue_start(&mp->ffplayer->msg_queue);
-
     // released in msg_loop
     ijkmp_inc_ref(mp);
-    mp->msg_thread = SDL_CreateThreadEx(&mp->_msg_thread, ijkmp_msg_loop, mp, "ff_msg_loop");
+    // mp->msg_thread = SDL_CreateThreadEx(&mp->_msg_thread, ijkmp_msg_loop, mp, "ff_msg_loop");
+    mp->msg_thread = SDL_CreateThread(ijkmp_msg_loop, "ff_msg_loop", mp);
     // msg_thread is detached inside msg_loop
     // TODO: 9 release weak_thiz if pthread_create() failed;
 
@@ -434,7 +450,7 @@ static int ikjmp_chkst_start_l(int mp_state)
 {
     MPST_RET_IF_EQ(mp_state, MP_STATE_IDLE);
     MPST_RET_IF_EQ(mp_state, MP_STATE_INITIALIZED);
-    MPST_RET_IF_EQ(mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_ASYNC_PREPARING);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_PREPARED);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_STARTED);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_PAUSED);
@@ -449,13 +465,10 @@ static int ikjmp_chkst_start_l(int mp_state)
 static int ijkmp_start_l(IjkMediaPlayer *mp)
 {
     assert(mp);
-
     MP_RET_IF_FAILED(ikjmp_chkst_start_l(mp->mp_state));
-
     ffp_remove_msg(mp->ffplayer, FFP_REQ_START);
     ffp_remove_msg(mp->ffplayer, FFP_REQ_PAUSE);
     ffp_notify_msg1(mp->ffplayer, FFP_REQ_START);
-
     return 0;
 }
 
@@ -474,7 +487,7 @@ static int ikjmp_chkst_pause_l(int mp_state)
 {
     MPST_RET_IF_EQ(mp_state, MP_STATE_IDLE);
     MPST_RET_IF_EQ(mp_state, MP_STATE_INITIALIZED);
-    MPST_RET_IF_EQ(mp_state, MP_STATE_ASYNC_PREPARING);
+    // MPST_RET_IF_EQ(mp_state, MP_STATE_ASYNC_PREPARING);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_PREPARED);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_STARTED);
     // MPST_RET_IF_EQ(mp_state, MP_STATE_PAUSED);
@@ -544,6 +557,19 @@ int ijkmp_stop(IjkMediaPlayer *mp)
     int retval = ijkmp_stop_l(mp);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_stop()=%d\n", retval);
+    return retval;
+}
+
+int ijkmp_reset(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    MPTRACE("ijkmp_reset()\n");
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ffp_wait_stop_l(mp->ffplayer);
+    ffp_reset(mp->ffplayer);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_reset()=%d\n", retval);
+    ijkmp_change_state_l(mp, MP_STATE_IDLE);
     return retval;
 }
 
@@ -671,6 +697,15 @@ int ijkmp_get_loop(IjkMediaPlayer *mp)
     return loop;
 }
 
+void ijkmp_take_snapshot(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_take_snapshot(mp->ffplayer);
+    pthread_mutex_unlock(&mp->mutex);
+}
+
+
 void *ijkmp_get_weak_thiz(IjkMediaPlayer *mp)
 {
     return mp->weak_thiz;
@@ -705,8 +740,10 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
                 // FIXME: 1: onError() ?
                 av_log(mp->ffplayer, AV_LOG_DEBUG, "FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING\n");
             }
-            if (!mp->ffplayer->start_on_prepared) {
+            if (mp->ffplayer->is && mp->ffplayer->is->pause_req) {
                 ijkmp_change_state_l(mp, MP_STATE_PAUSED);
+            } else {
+                ijkmp_change_state_l(mp, MP_STATE_STARTED);
             }
             pthread_mutex_unlock(&mp->mutex);
             break;
@@ -750,6 +787,9 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
                     }
                     mp->restart = 0;
                     mp->restart_from_beginning = 0;
+                } else if(mp->mp_state == MP_STATE_ASYNC_PREPARING) {
+                    av_log(mp->ffplayer, AV_LOG_DEBUG, "ijkmp_get_msg: FFP_REQ_START: start from async preparing\n");
+                    ffp_start_l(mp->ffplayer);
                 } else {
                     av_log(mp->ffplayer, AV_LOG_DEBUG, "ijkmp_get_msg: FFP_REQ_START: start on fly\n");
                     retval = ffp_start_l(mp->ffplayer);
@@ -764,7 +804,9 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             MPTRACE("ijkmp_get_msg: FFP_REQ_PAUSE\n");
             continue_wait_next_msg = 1;
             pthread_mutex_lock(&mp->mutex);
-            if (0 == ikjmp_chkst_pause_l(mp->mp_state)) {
+            if (mp->mp_state == MP_STATE_ASYNC_PREPARING) {
+                ffp_pause_l(mp->ffplayer);
+            } else if (0 == ikjmp_chkst_pause_l(mp->mp_state)) {
                 int pause_ret = ffp_pause_l(mp->ffplayer);
                 if (pause_ret == 0)
                     ijkmp_change_state_l(mp, MP_STATE_PAUSED);
@@ -785,7 +827,13 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             }
             pthread_mutex_unlock(&mp->mutex);
             break;
+        case FFP_MSG_ERROR:
+            pthread_mutex_lock(&mp->mutex);
+            ijkmp_change_state_l(mp, MP_STATE_ERROR);
+            pthread_mutex_unlock(&mp->mutex);
+            break;
         }
+        
         if (continue_wait_next_msg) {
             msg_free_res(msg);
             continue;

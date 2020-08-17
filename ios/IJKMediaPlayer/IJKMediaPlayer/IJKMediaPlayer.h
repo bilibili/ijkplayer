@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2020 Befovy
  *
  * This file is part of ijkPlayer.
  *
@@ -21,12 +22,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import "IJKMediaPlayback.h"
-#import "IJKMPMoviePlayerController.h"
+#import <UIKit/UIKit.h>
 
-#import "IJKFFOptions.h"
-#import "IJKFFMoviePlayerController.h"
+//! Project version number for FIJKPlayer.
+FOUNDATION_EXPORT double IJKMediaPlayerVersionNumber;
 
-#import "IJKAVMoviePlayerController.h"
+//! Project version string for FIJKPlayer.
+FOUNDATION_EXPORT const unsigned char IJKMediaPlayerVersionString[];
 
-#import "IJKMediaModule.h"
+// In this header, you should import all the public headers of your framework using statements like #import <FIJKPlayer/PublicHeader.h>
+#import <IJKMediaPlayer/IJKMediaPlayback.h>
+#import <IJKMediaPlayer/IJKMPMoviePlayerController.h>
+#import <IJKMediaPlayer/IJKFFOptions.h>
+#import <IJKMediaPlayer/IJKFFMediaPlayer.h>
+#import <IJKMediaPlayer/IJKFFMoviePlayerController.h>
+#import <IJKMediaPlayer/IJKAVMoviePlayerController.h>
+#import <IJKMediaPlayer/IJKMediaModule.h>
+#import <IJKMediaPlayer/IJKNotificationManager.h>
+#import <IJKMediaPlayer/IJKKVOController.h>
+#import <IJKMediaPlayer/IJKSDLGLViewProtocol.h>
+

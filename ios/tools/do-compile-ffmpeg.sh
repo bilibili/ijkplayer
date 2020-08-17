@@ -139,6 +139,7 @@ elif [ "$FF_ARCH" = "armv7" ]; then
     FF_BUILD_NAME_OPENSSL=openssl-armv7
     FF_XCRUN_OSVERSION="-miphoneos-version-min=6.0"
     FF_XCODE_BITCODE="-fembed-bitcode"
+    FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --disable-asm"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
 #    FFMPEG_CFG_CPU="--cpu=cortex-a8"
 elif [ "$FF_ARCH" = "armv7s" ]; then
@@ -186,6 +187,13 @@ echo "--------------------"
 FF_XCRUN_SDK=`echo $FF_XCRUN_PLATFORM | tr '[:upper:]' '[:lower:]'`
 FF_XCRUN_CC="xcrun -sdk $FF_XCRUN_SDK clang"
 
+if [ "$FF_ARCH" = "arm64" ]
+then
+    FF_AS="gas-preprocessor.pl -arch aarch64 -- $FF_XCRUN_CC"
+else
+    FF_AS="gas-preprocessor.pl -- $FF_XCRUN_CC"
+fi
+
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_CPU"
 
 FFMPEG_CFLAGS=
@@ -207,6 +215,7 @@ FFMPEG_DEP_OPENSSL_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/lib
 if [ -f "${FFMPEG_DEP_OPENSSL_LIB}/libssl.a" ]; then
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-openssl"
 
+    echo "OpenSSL Include" $FFMPEG_DEP_OPENSSL_INC
     FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_OPENSSL_INC}"
     FFMPEG_DEP_LIBS="$FFMPEG_CFLAGS -L${FFMPEG_DEP_OPENSSL_LIB} -lssl -lcrypto"
 fi
@@ -236,6 +245,7 @@ else
     ./configure \
         $FFMPEG_CFG_FLAGS \
         --cc="$FF_XCRUN_CC" \
+        --as="$FF_AS" \
         $FFMPEG_CFG_CPU \
         --extra-cflags="$FFMPEG_CFLAGS" \
         --extra-cxxflags="$FFMPEG_CFLAGS" \

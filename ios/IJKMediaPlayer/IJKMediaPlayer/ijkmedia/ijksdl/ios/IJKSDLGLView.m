@@ -23,16 +23,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#if IJK_IOS
+
 #import "IJKSDLGLView.h"
 #include "ijksdl/ijksdl_timer.h"
 #include "ijksdl/ios/ijksdl_ios.h"
 #include "ijksdl/ijksdl_gles2.h"
-
-typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
-    IJKSDLGLViewApplicationUnknownState = 0,
-    IJKSDLGLViewApplicationForegroundState = 1,
-    IJKSDLGLViewApplicationBackgroundState = 2
-};
 
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
@@ -61,6 +57,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     BOOL            _didLockedDueToMovedToWindow;
     BOOL            _shouldLockWhileBeingMovedToWindow;
     NSMutableArray *_registeredNotifications;
+    CAEAGLLayer    *_eaglLayer;
 
     IJKSDLGLViewApplicationState _applicationState;
 }
@@ -140,17 +137,12 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     return YES;
 }
 
-- (CAEAGLLayer *)eaglLayer
-{
-    return (CAEAGLLayer*) self.layer;
-}
-
 - (BOOL)setupGL
 {
     if (_didSetupGL)
         return YES;
 
-    CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
+    CAEAGLLayer *eaglLayer = _eaglLayer;
     eaglLayer.opaque = YES;
     eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
                                     [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
@@ -190,6 +182,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     if (![self tryLockGLActive])
         return NO;
 
+    _eaglLayer = (CAEAGLLayer*) self.layer;
     BOOL didSetupGL = [self setupGL];
     [self unlockGLActive];
     return didSetupGL;
@@ -206,10 +199,12 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
             UIApplicationState appState = [UIApplication sharedApplication].applicationState;
             switch (appState) {
                 case UIApplicationStateActive:
+                    _applicationState = IJKSDLGLViewApplicationForegroundState;
                     return YES;
                 case UIApplicationStateInactive:
                 case UIApplicationStateBackground:
                 default:
+                    _applicationState = IJKSDLGLViewApplicationBackgroundState;
                     return NO;
             }
         }
@@ -371,14 +366,14 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         return;
     }
 
-    [[self eaglLayer] setContentsScale:_scaleFactor];
+    [_eaglLayer setContentsScale:_scaleFactor];
 
     if (_isRenderBufferInvalidated) {
         NSLog(@"IJKSDLGLView: renderbufferStorage fromDrawable\n");
         _isRenderBufferInvalidated = NO;
 
         glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-        [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
+        [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:_eaglLayer];
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
         IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
@@ -636,3 +631,6 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     _shouldLockWhileBeingMovedToWindow = shouldLockWhileBeingMovedToWindow;
 }
 @end
+
+
+#endif

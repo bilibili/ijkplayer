@@ -1,11 +1,9 @@
 # ijkplayer
 
- Platform | Build Status
- -------- | ------------
- Android | [![Build Status](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-android.svg?branch=master)](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-android)
- iOS | [![Build Status](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-ios.svg?branch=master)](https://travis-ci.org/Bilibili/ci-ijk-ffmpeg-ios)
-
 Video player based on [ffplay](http://ffmpeg.org)
+
+![](https://github.com/befovy/ijkplayer/workflows/Android%20CI/badge.svg?branch=master)
+
 
 ### Download
 
@@ -37,21 +35,8 @@ dependencies {
 - iOS
  - in coming...
 
-### My Build Environment
-- Common
- - Mac OS X 10.11.5
-- Android
- - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
- - Android Studio 2.1.3
- - Gradle 2.14.1
-- iOS
- - Xcode 7.3 (7D175)
-- [HomeBrew](http://brew.sh)
- - ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
- - brew install git
-
 ### Latest Changes
-- [NEWS.md](NEWS.md)
+- [CHANGELOG.md](CHANGELOG.md)
 
 ### Features
 - Common
@@ -135,9 +120,8 @@ sudo dpkg-reconfigure dash
 
 ### Build Android
 ```
-git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-android
+git clone https://github.com/befovy/ijkplayer.git ijkplayer-android
 cd ijkplayer-android
-git checkout -B latest k0.8.8
 
 ./init-android.sh
 
@@ -145,51 +129,17 @@ cd android/contrib
 ./compile-ffmpeg.sh clean
 ./compile-ffmpeg.sh all
 
-cd ..
-./compile-ijk.sh all
+Open Android peoject in android/ijkplayer using Android Studio
+run/debug ijkplayer-example in Android Studio
 
-# Android Studio:
-#     Open an existing Android Studio project
-#     Select android/ijkplayer/ and import
-#
-#     define ext block in your root build.gradle
-#     ext {
-#       compileSdkVersion = 23       // depending on your sdk version
-#       buildToolsVersion = "23.0.0" // depending on your build tools version
-#
-#       targetSdkVersion = 23        // depending on your sdk version
-#     }
-#
-# If you want to enable debugging ijkplayer(native modules) on Android Studio 2.2+: (experimental)
-#     sh android/patch-debugging-with-lldb.sh armv7a
-#     Install Android Studio 2.2(+)
-#     Preference -> Android SDK -> SDK Tools
-#     Select (LLDB, NDK, Android SDK Build-tools,Cmake) and install
-#     Open an existing Android Studio project
-#     Select android/ijkplayer
-#     Sync Project with Gradle Files
-#     Run -> Edit Configurations -> Debugger -> Symbol Directories
-#     Add "ijkplayer-armv7a/.externalNativeBuild/ndkBuild/release/obj/local/armeabi-v7a" to Symbol Directories
-#     Run -> Debug 'ijkplayer-example'
-#     if you want to reverse patches:
-#     sh patch-debugging-with-lldb.sh reverse armv7a
-#
-# Eclipse: (obselete)
-#     File -> New -> Project -> Android Project from Existing Code
-#     Select android/ and import all project
-#     Import appcompat-v7
-#     Import preference-v7
-#
-# Gradle
-#     cd ijkplayer
-#     gradle
+To get a released aar
+run `./gradlew :fijkplayer-full:assembleRelease`
 
 ```
-
 
 ### Build iOS
 ```
-git clone https://github.com/Bilibili/ijkplayer.git ijkplayer-ios
+git clone https://github.com/befovy/ijkplayer.git ijkplayer-ios
 cd ijkplayer-ios
 git checkout -B latest k0.8.8
 
@@ -228,10 +178,34 @@ cd ios
 # 
 ```
 
+### Build for Mac OS
+
+Build ffmpeg for Max OS
+```
+./init-osx.sh
+cd osx && ./compile-ffmpeg.sh
+```
+
+Build ijkplayer for Max OS
+
+```
+cd desktop
+mkdir cmake-build-debug && cd cmake-build-debug
+cmake .. -DCMAKE_BUILD_TYPE="Debug"
+make IjkPlayer
+make tuidemo
+```
+
+**Or you can open ijkplayer as a CMakeLists.txt project using Clion.**
+
+tuidemo is a terminal UI demo for ijkplayer in progress, it can't display video yet.
+
+`libIjkPlayer.dylib` is the output dynamic library.
 
 ### Support (支持) ###
+
 - Please do not send e-mail to me. Public technical discussion on github is preferred.
-- 请尽量在 github 上公开讨论[技术问题](https://github.com/bilibili/ijkplayer/issues)，不要以邮件方式私下询问，恕不一一回复。
+- 请尽量在 github 上公开讨论[技术问题](https://github.com/befovy/ijkplayer/issues)，不要以邮件方式私下询问，恕不一一回复。
 
 
 ### License

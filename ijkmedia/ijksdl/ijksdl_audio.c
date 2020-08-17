@@ -24,6 +24,7 @@
 
 #include "ijksdl_audio.h"
 
+#if !USE_SDL2
 void SDL_CalculateAudioSpec(SDL_AudioSpec * spec)
 {
     switch (spec->format) {
@@ -46,3 +47,5 @@ void SDL_MixAudio(Uint8*       dst,
 {
     // do nothing;
 }
+
+#endif

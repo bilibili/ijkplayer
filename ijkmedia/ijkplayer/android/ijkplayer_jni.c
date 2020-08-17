@@ -255,6 +255,30 @@ LABEL_RETURN:
 }
 
 static void
+IjkMediaPlayer_setMediaCodecSurface(JNIEnv *env, jobject thiz,
+                                    jobject amc_surface) {
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setMediaCodecSurface: null mp", LABEL_RETURN);
+    ijkmp_android_set_mediacodec_texture(env, mp, amc_surface);
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return;
+}
+
+static void
+IjkMediaPlayer_snapShot(JNIEnv *env, jobject thiz)
+{
+    MPTRACE("%s\n", __func__);
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setMediaCodecSurface: null mp", LABEL_RETURN);
+    ijkmp_take_snapshot(mp);
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return;
+}
+
+static void
 IjkMediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
 {
     MPTRACE("%s\n", __func__);
@@ -390,10 +414,7 @@ IjkMediaPlayer_reset(JNIEnv *env, jobject thiz)
     if (!mp)
         return;
 
-    jobject weak_thiz = (jobject) ijkmp_set_weak_thiz(mp, NULL );
-
-    IjkMediaPlayer_release(env, thiz);
-    IjkMediaPlayer_native_setup(env, thiz, weak_thiz);
+    ijkmp_reset(mp);
 
     ijkmp_dec_ref_p(&mp);
 }
@@ -911,71 +932,89 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
         switch (msg.what) {
         case FFP_MSG_FLUSH:
             MPTRACE("FFP_MSG_FLUSH:\n");
-            post_event(env, weak_thiz, MEDIA_NOP, 0, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_ERROR:
             MPTRACE("FFP_MSG_ERROR: %d\n", msg.arg1);
-            post_event(env, weak_thiz, MEDIA_ERROR, MEDIA_ERROR_IJK_PLAYER, msg.arg1);
+            if (msg.obj) {
+                jstring text = (*env)->NewStringUTF(env, (const char *)msg.obj);
+                post_event2(env, weak_thiz, msg.what, msg.arg1, msg.arg2, text);
+                J4A_DeleteLocalRef__p(env, &text);
+            } else {
+                post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
+            }
             break;
         case FFP_MSG_PREPARED:
             MPTRACE("FFP_MSG_PREPARED:\n");
-            post_event(env, weak_thiz, MEDIA_PREPARED, 0, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_COMPLETED:
             MPTRACE("FFP_MSG_COMPLETED:\n");
-            post_event(env, weak_thiz, MEDIA_PLAYBACK_COMPLETE, 0, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_VIDEO_SIZE_CHANGED:
             MPTRACE("FFP_MSG_VIDEO_SIZE_CHANGED: %d, %d\n", msg.arg1, msg.arg2);
-            post_event(env, weak_thiz, MEDIA_SET_VIDEO_SIZE, msg.arg1, msg.arg2);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_SAR_CHANGED:
             MPTRACE("FFP_MSG_SAR_CHANGED: %d, %d\n", msg.arg1, msg.arg2);
-            post_event(env, weak_thiz, MEDIA_SET_VIDEO_SAR, msg.arg1, msg.arg2);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_VIDEO_RENDERING_START:
             MPTRACE("FFP_MSG_VIDEO_RENDERING_START:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_RENDERING_START, 0);
+            // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_RENDERING_START, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_AUDIO_RENDERING_START:
             MPTRACE("FFP_MSG_AUDIO_RENDERING_START:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_RENDERING_START, 0);
+            // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_RENDERING_START, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_VIDEO_ROTATION_CHANGED:
             MPTRACE("FFP_MSG_VIDEO_ROTATION_CHANGED: %d\n", msg.arg1);
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_ROTATION_CHANGED, msg.arg1);
+            // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_ROTATION_CHANGED, msg.arg1);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_AUDIO_DECODED_START:
             MPTRACE("FFP_MSG_AUDIO_DECODED_START:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_DECODED_START, 0);
+            // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_DECODED_START, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_VIDEO_DECODED_START:
             MPTRACE("FFP_MSG_VIDEO_DECODED_START:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_DECODED_START, 0);
+            // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_DECODED_START, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_OPEN_INPUT:
             MPTRACE("FFP_MSG_OPEN_INPUT:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_OPEN_INPUT, 0);
+            //post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_OPEN_INPUT, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_FIND_STREAM_INFO:
             MPTRACE("FFP_MSG_FIND_STREAM_INFO:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_FIND_STREAM_INFO, 0);
+            //post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_FIND_STREAM_INFO, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_COMPONENT_OPEN:
             MPTRACE("FFP_MSG_COMPONENT_OPEN:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_COMPONENT_OPEN, 0);
+            //post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_COMPONENT_OPEN, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_BUFFERING_START:
             MPTRACE("FFP_MSG_BUFFERING_START:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, msg.arg1);
+            // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_START, msg.arg1);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_BUFFERING_END:
             MPTRACE("FFP_MSG_BUFFERING_END:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, msg.arg1);
+            // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_BUFFERING_END, msg.arg1);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_BUFFERING_UPDATE:
+        case FFP_MSG_CURRENT_POSITION_UPDATE:
             // MPTRACE("FFP_MSG_BUFFERING_UPDATE: %d, %d", msg.arg1, msg.arg2);
-            post_event(env, weak_thiz, MEDIA_BUFFERING_UPDATE, msg.arg1, msg.arg2);
+            // post_event(env, weak_thiz, MEDIA_BUFFERING_UPDATE, msg.arg1, msg.arg2);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_BUFFERING_BYTES_UPDATE:
             break;
@@ -983,41 +1022,52 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             break;
         case FFP_MSG_SEEK_COMPLETE:
             MPTRACE("FFP_MSG_SEEK_COMPLETE:\n");
-            post_event(env, weak_thiz, MEDIA_SEEK_COMPLETE, 0, 0);
+            // post_event(env, weak_thiz, MEDIA_SEEK_COMPLETE, 0, 0);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_ACCURATE_SEEK_COMPLETE:
             MPTRACE("FFP_MSG_ACCURATE_SEEK_COMPLETE:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_MEDIA_ACCURATE_SEEK_COMPLETE, msg.arg1);
+            // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_MEDIA_ACCURATE_SEEK_COMPLETE, msg.arg1);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_PLAYBACK_STATE_CHANGED:
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_TIMED_TEXT:
             if (msg.obj) {
-                jstring text = (*env)->NewStringUTF(env, (char *)msg.obj);
-                post_event2(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, text);
+                jstring text = (*env)->NewStringUTF(env, (const char *)msg.obj);
+                post_event2(env, weak_thiz, FFP_MSG_TIMED_TEXT, 0, 0, text);
                 J4A_DeleteLocalRef__p(env, &text);
             }
             else {
-                post_event2(env, weak_thiz, MEDIA_TIMED_TEXT, 0, 0, NULL);
+                post_event2(env, weak_thiz, FFP_MSG_TIMED_TEXT, 0, 0, NULL);
             }
             break;
         case FFP_MSG_GET_IMG_STATE:
             if (msg.obj) {
                 jstring file_name = (*env)->NewStringUTF(env, (char *)msg.obj);
-                post_event2(env, weak_thiz, MEDIA_GET_IMG_STATE, msg.arg1, msg.arg2, file_name);
+                post_event2(env, weak_thiz, FFP_MSG_GET_IMG_STATE, msg.arg1, msg.arg2, file_name);
                 J4A_DeleteLocalRef__p(env, &file_name);
             }
             else {
-                post_event2(env, weak_thiz, MEDIA_GET_IMG_STATE, msg.arg1, msg.arg2, NULL);
+                post_event2(env, weak_thiz, FFP_MSG_GET_IMG_STATE, msg.arg1, msg.arg2, NULL);
+            }
+            break;
+        case FFP_MSG_VIDEO_SNAP_SHOT:
+            if (msg.obj) {
+                jobject byte_buffer = (*env)->NewDirectByteBuffer(env, msg.obj, msg.len);
+                post_event2(env, weak_thiz, FFP_MSG_VIDEO_SNAP_SHOT, msg.arg1, msg.arg2, byte_buffer);
             }
             break;
         case FFP_MSG_VIDEO_SEEK_RENDERING_START:
             MPTRACE("FFP_MSG_VIDEO_SEEK_RENDERING_START:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_SEEK_RENDERING_START, msg.arg1);
+            // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_VIDEO_SEEK_RENDERING_START, msg.arg1);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         case FFP_MSG_AUDIO_SEEK_RENDERING_START:
             MPTRACE("FFP_MSG_AUDIO_SEEK_RENDERING_START:\n");
-            post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_SEEK_RENDERING_START, msg.arg1);
+            // post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_SEEK_RENDERING_START, msg.arg1);
+            post_event(env, weak_thiz, msg.what, msg.arg1, msg.arg2);
             break;
         default:
             ALOGE("unknown FFP_MSG_xxx(%d)\n", msg.what);
@@ -1139,11 +1189,30 @@ static JNINativeMethod g_methods[] = {
         "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
         (void *) IjkMediaPlayer_setDataSourceAndHeaders
     },
-    { "_setDataSourceFd",       "(I)V",     (void *) IjkMediaPlayer_setDataSourceFd },
-    { "_setDataSource",         "(Ltv/danmaku/ijk/media/player/misc/IMediaDataSource;)V", (void *)IjkMediaPlayer_setDataSourceCallback },
-    { "_setAndroidIOCallback",  "(Ltv/danmaku/ijk/media/player/misc/IAndroidIO;)V", (void *)IjkMediaPlayer_setAndroidIOCallback },
-
-    { "_setVideoSurface",       "(Landroid/view/Surface;)V", (void *) IjkMediaPlayer_setVideoSurface },
+    {
+        "_setDataSourceFd",
+        "(I)V",
+        (void *) IjkMediaPlayer_setDataSourceFd },
+    {
+        "_setDataSource",
+        "(Ltv/danmaku/ijk/media/player/misc/IMediaDataSource;)V",
+        (void *)IjkMediaPlayer_setDataSourceCallback },
+    {
+        "_setAndroidIOCallback",
+        "(Ltv/danmaku/ijk/media/player/misc/IAndroidIO;)V",
+        (void *)IjkMediaPlayer_setAndroidIOCallback
+    },
+    {
+        "_setVideoSurface",
+        "(Landroid/view/Surface;)V",
+        (void *) IjkMediaPlayer_setVideoSurface
+    },
+    {
+        "_setMediaCodecSurface",
+        "(Ltv/danmaku/ijk/media/player/misc/MediaCodecSurface;)V",
+        (void *) IjkMediaPlayer_setMediaCodecSurface
+    },
+    { "_snapShot",              "()V",      (void *) IjkMediaPlayer_snapShot },
     { "_prepareAsync",          "()V",      (void *) IjkMediaPlayer_prepareAsync },
     { "_start",                 "()V",      (void *) IjkMediaPlayer_start },
     { "_stop",                  "()V",      (void *) IjkMediaPlayer_stop },

@@ -29,6 +29,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#if USE_SDL2
+
+#include <SDL_stdinc.h>
+#else
 typedef int8_t      Sint8;
 typedef uint8_t     Uint8;
 typedef int16_t     Sint16;
@@ -39,5 +43,5 @@ typedef int64_t     Sint64;
 typedef uint64_t    Uint64;
 
 char *SDL_getenv(const char *name);
-
+#endif // USE_SDL2
 #endif

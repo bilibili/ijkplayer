@@ -24,20 +24,26 @@
 
 #include <errno.h>
 #include <assert.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include "ijksdl_inc_internal.h"
 #include "ijksdl_thread.h"
 #ifdef __ANDROID__
 #include "ijksdl/android/ijksdl_android_jni.h"
 #endif
 
+#include "libavutil/avstring.h"
+
 #if !defined(__APPLE__)
 // using ios implement for autorelease
 static void *SDL_RunThread(void *data)
 {
     SDL_Thread *thread = data;
+#ifndef WIN32
     ALOGI("SDL_RunThread: [%d] %s\n", (int)gettid(), thread->name);
     pthread_setname_np(pthread_self(), thread->name);
+#endif
     thread->retval = thread->func(thread->data);
 #ifdef __ANDROID__
     SDL_JNI_DetachThreadEnv();
@@ -45,21 +51,24 @@ static void *SDL_RunThread(void *data)
     return NULL;
 }
 
-SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data, const char *name)
+SDL_Thread *SDL_CreateThread(int (*fn)(void *), const char *name, void *data)
 {
+    SDL_Thread *thread = mallocz(sizeof(SDL_Thread));
     thread->func = fn;
     thread->data = data;
-    strlcpy(thread->name, name, sizeof(thread->name) - 1);
+    av_strlcpy(thread->name, name, sizeof(thread->name)-1);
     int retval = pthread_create(&thread->id, NULL, SDL_RunThread, thread);
     if (retval)
         return NULL;
-
     return thread;
 }
+
 #endif
 
+#if !USE_SDL2
 int SDL_SetThreadPriority(SDL_ThreadPriority priority)
 {
+#ifndef WIN32
     struct sched_param sched;
     int policy;
     pthread_t thread = pthread_self();
@@ -81,12 +90,13 @@ int SDL_SetThreadPriority(SDL_ThreadPriority priority)
         ALOGE("pthread_setschedparam() failed");
         return -1;
     }
+#endif
     return 0;
 }
 
 void SDL_WaitThread(SDL_Thread *thread, int *status)
 {
-    assert(thread);
+    // assert(thread);
     if (!thread)
         return;
 
@@ -94,8 +104,11 @@ void SDL_WaitThread(SDL_Thread *thread, int *status)
 
     if (status)
         *status = thread->retval;
+
+    free(thread);
 }
 
+#ifndef WIN32
 void SDL_DetachThread(SDL_Thread *thread)
 {
     assert(thread);
@@ -104,3 +117,6 @@ void SDL_DetachThread(SDL_Thread *thread)
 
     pthread_detach(thread->id);
 }
+#endif
+
+#endif // USE_SDL2

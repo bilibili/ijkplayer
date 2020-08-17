@@ -29,7 +29,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 #define CONFIG_MAX_LINE 1024
 
@@ -81,15 +85,15 @@ static int enu_save(void *opaque, void *elem) {
 
     if (entry && fp) {
         memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "entry_logical_pos:%lld\n", entry->logical_pos);
+        snprintf(string, CONFIG_MAX_LINE, "entry_logical_pos:%"PRId64"\n", entry->logical_pos);
         fwrite(string, strlen(string), 1, fp);
 
         memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "entry_physical_pos:%lld\n", entry->physical_pos);
+        snprintf(string, CONFIG_MAX_LINE, "entry_physical_pos:%"PRId64"\n", entry->physical_pos);
         fwrite(string, strlen(string), 1, fp);
 
         memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "entry_size:%lld\n", entry->size);
+        snprintf(string, CONFIG_MAX_LINE, "entry_size:%"PRId64"\n", entry->size);
         fwrite(string, strlen(string), 1, fp);
 
         memset(string, 0, CONFIG_MAX_LINE);
@@ -106,19 +110,19 @@ static int ijkio_manager_save_tree_to_file(void *parm, int64_t key, void *elem)
     char string[CONFIG_MAX_LINE] = {0};
     if (key >= 0 && info) {
         memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "tree_index:%lld\n", key);
+        snprintf(string, CONFIG_MAX_LINE, "tree_index:%"PRId64"\n", key);
         fwrite(string, strlen(string), 1, fp);
 
         memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "tree_physical_init_pos:%lld\n", info->physical_init_pos);
+        snprintf(string, CONFIG_MAX_LINE, "tree_physical_init_pos:%"PRId64"\n", info->physical_init_pos);
         fwrite(string, strlen(string), 1, fp);
 
         memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "tree_physical_size:%lld\n", info->physical_size);
+        snprintf(string, CONFIG_MAX_LINE, "tree_physical_size:%"PRId64"\n", info->physical_size);
         fwrite(string, strlen(string), 1, fp);
 
         memset(string, 0, CONFIG_MAX_LINE);
-        snprintf(string, CONFIG_MAX_LINE, "tree_file_size:%lld\n", info->file_size);
+        snprintf(string, CONFIG_MAX_LINE, "tree_file_size:%"PRId64"\n", info->file_size);
         fwrite(string, strlen(string), 1, fp);
 
         memset(string, 0, CONFIG_MAX_LINE);

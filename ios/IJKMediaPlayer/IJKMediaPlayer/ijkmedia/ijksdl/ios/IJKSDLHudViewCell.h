@@ -6,6 +6,7 @@
 //  Copyright © 2015年 bilibili. All rights reserved.
 //
 
+#ifndef IJK_OSX
 #import <UIKit/UIKit.h>
 
 @interface IJKSDLHudViewCell : UITableViewCell
@@ -15,3 +16,5 @@
 - (void)setHudValue:(NSString *)value forKey:(NSString *)key;
 
 @end
+
+#endif

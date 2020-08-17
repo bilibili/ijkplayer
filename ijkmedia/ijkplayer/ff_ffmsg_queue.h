@@ -35,6 +35,7 @@ typedef struct AVMessage {
     int arg1;
     int arg2;
     void *obj;
+    size_t len;
     void (*free_l)(void *obj);
     struct AVMessage *next;
 } AVMessage;
@@ -76,7 +77,7 @@ inline static int msg_queue_put_private(MessageQueue *q, AVMessage *msg)
         q->recycle_count++;
     } else {
         q->alloc_count++;
-        msg1 = av_malloc(sizeof(AVMessage));
+        msg1 = (AVMessage *)av_malloc(sizeof(AVMessage));
     }
 #ifdef FFP_SHOW_MSG_RECYCLE
     int total_count = q->recycle_count + q->alloc_count;
@@ -156,9 +157,23 @@ inline static void msg_queue_put_simple4(MessageQueue *q, int what, int arg1, in
     msg.what = what;
     msg.arg1 = arg1;
     msg.arg2 = arg2;
-    msg.obj = av_malloc(obj_len);
-    memcpy(msg.obj, obj, obj_len);
+    msg.len = (size_t)obj_len;
+    msg.obj = av_malloc(msg.len);
+    memcpy(msg.obj, obj, msg.len);
     msg.free_l = msg_obj_free_l;
+    msg_queue_put(q, &msg);
+}
+
+inline static void msg_queue_put_simple5(MessageQueue *q, int what, int arg1, int arg2, void *obj, size_t len, void (*free_l)(void *obj))
+{
+    AVMessage msg;
+    msg_init_msg(&msg);
+    msg.what = what;
+    msg.arg1 = arg1;
+    msg.arg2 = arg2;
+    msg.obj = obj;
+    msg.len = len;
+    msg.free_l = free_l;
     msg_queue_put(q, &msg);
 }
 

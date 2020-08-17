@@ -24,7 +24,7 @@
 
 #ifndef IJKSDL__IJKSDL_ERROR_H
 #define IJKSDL__IJKSDL_ERROR_H
-
+#if !USE_SDL2
 const char *SDL_GetError(void);
-
+#endif
 #endif

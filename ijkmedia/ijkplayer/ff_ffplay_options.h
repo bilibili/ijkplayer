@@ -24,7 +24,9 @@
 #ifndef FFPLAY__FF_FFPLAY_OPTIONS_H
 #define FFPLAY__FF_FFPLAY_OPTIONS_H
 
-#define OPTION_OFFSET(x) offsetof(FFPlayer, x)
+#include "ff_ffplay_def.h"
+
+#define OPTION_OFFSET(x) ((int)offsetof(FFPlayer, x))
 #define OPTION_INT(default__, min__, max__) \
     .type = AV_OPT_TYPE_INT, \
     { .i64 = default__ }, \
@@ -112,6 +114,8 @@ static const AVOption ffp_context_options[] = {
     { "fcc-rv16",                       "", 0, OPTION_CONST(SDL_FCC_RV16), .unit = "overlay-format" },
     { "fcc-rv24",                       "", 0, OPTION_CONST(SDL_FCC_RV24), .unit = "overlay-format" },
     { "fcc-rv32",                       "", 0, OPTION_CONST(SDL_FCC_RV32), .unit = "overlay-format" },
+    { "fcc-bgra",                       "", 0, OPTION_CONST(SDL_FCC_BGRA), .unit = "overlay-format" },
+    { "fcc-rgba",                       "", 0, OPTION_CONST(SDL_FCC_RGBA), .unit = "overlay-format" },
 
     { "start-on-prepared",                  "automatically start playing on prepared",
         OPTION_OFFSET(start_on_prepared),   OPTION_INT(1, 0, 1) },
@@ -164,6 +168,10 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(async_init_decoder),   OPTION_INT(0, 0, 1) },
     { "video-mime-type",                    "default video mime type",
         OPTION_OFFSET(video_mime_type),     OPTION_STR(NULL) },
+    { "enable-position-notify",             "enable adjective current position notify",
+        OPTION_OFFSET(enable_position_notify), OPTION_INT(0, 0, 1) },
+    { "pos-update-interval",             "pos update interval in milliseconds, max 1000, min 10",
+        OPTION_OFFSET(pos_update_interval), OPTION_INT(NOTIFY_KEY_MSG_PER_MILLISECONDS, 10, 1000) },
 
         // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
@@ -206,7 +214,12 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(ijkmeta_delay_init),      OPTION_INT(0, 0, 1) },
     { "render-wait-start",          "render wait start",
         OPTION_OFFSET(render_wait_start),      OPTION_INT(0, 0, 1) },
-
+    { "cover-after-prepared",          "display the first video frame as cover, then toggle pause",
+      OPTION_OFFSET(cover_after_prepared),      OPTION_INT(0, 0, 1) },
+    { "vout-type",                  "video out type, SDL2(0) and glfw(1), amc(gles)",
+      OPTION_OFFSET(vout_type),                 OPTION_INT(0, 0, 2)},
+    { "aout-type",                  "audio out type, SDL2(0) and port audio(1)",
+      OPTION_OFFSET(aout_type),                 OPTION_INT(0, 0, 1)} ,
     { NULL }
 };
 

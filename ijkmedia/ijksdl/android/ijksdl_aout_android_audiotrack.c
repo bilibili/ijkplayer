@@ -61,7 +61,7 @@ typedef struct SDL_Aout_Opaque {
     volatile float right_volume;
 
     SDL_Thread *audio_tid;
-    SDL_Thread _audio_tid;
+    // SDL_Thread _audio_tid;
 
     int audio_session_id;
 
@@ -190,7 +190,8 @@ static int aout_open_audio_n(JNIEnv *env, SDL_Aout *aout, const SDL_AudioSpec *d
 
     opaque->pause_on = 1;
     opaque->abort_request = 0;
-    opaque->audio_tid = SDL_CreateThreadEx(&opaque->_audio_tid, aout_thread, aout, "ff_aout_android");
+    // opaque->audio_tid = SDL_CreateThreadEx(&opaque->_audio_tid, aout_thread, aout, "ff_aout_android");
+    opaque->audio_tid = SDL_CreateThread(aout_thread, "ff_aout_android", aout);
     if (!opaque->audio_tid) {
         ALOGE("aout_open_audio_n: failed to create audio thread");
         SDL_Android_AudioTrack_free(env, opaque->atrack);

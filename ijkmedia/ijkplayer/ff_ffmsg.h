@@ -41,12 +41,14 @@
 #define FFP_MSG_COMPONENT_OPEN              409
 #define FFP_MSG_VIDEO_SEEK_RENDERING_START  410
 #define FFP_MSG_AUDIO_SEEK_RENDERING_START  411
+#define FFP_MSG_VIDEO_SNAP_SHOT             480
 
 #define FFP_MSG_BUFFERING_START             500
 #define FFP_MSG_BUFFERING_END               501
 #define FFP_MSG_BUFFERING_UPDATE            502     /* arg1 = buffering head position in time, arg2 = minimum percent in time or bytes */
 #define FFP_MSG_BUFFERING_BYTES_UPDATE      503     /* arg1 = cached data in bytes,            arg2 = high water mark */
 #define FFP_MSG_BUFFERING_TIME_UPDATE       504     /* arg1 = cached duration in milliseconds, arg2 = high water mark */
+#define FFP_MSG_CURRENT_POSITION_UPDATE     510     /* arg1 = current position in milliseconds */
 #define FFP_MSG_SEEK_COMPLETE               600     /* arg1 = seek position,                   arg2 = error */
 #define FFP_MSG_PLAYBACK_STATE_CHANGED      700
 #define FFP_MSG_TIMED_TEXT                  800
@@ -106,4 +108,5 @@
 #define FFP_PROP_INT64_SHARE_CACHE_DATA                 20210
 #define FFP_PROP_INT64_IMMEDIATE_RECONNECT              20211
 
+#define FFP_PROP_INT64_AMC_GLES_OES_VOUT                59600
 #endif

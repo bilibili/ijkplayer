@@ -23,8 +23,9 @@
 #include "libavutil/log.h"
 
 #include <stdlib.h>
+#ifndef WIN32
 #include <unistd.h>
-
+#endif
 /**
  * @function void *threadpool_thread(void *threadpool)
  * @brief the worker thread

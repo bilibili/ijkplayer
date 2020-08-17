@@ -25,9 +25,18 @@
 #include "ijksdl_mutex.h"
 #include <errno.h>
 #include <assert.h>
+#include <pthread.h>
+#ifndef WIN32
 #include <sys/time.h>
+#else
+#include <winsock2.h>
+#endif // !WIN32
+
+#include "libavutil/time.h"
+
 #include "ijksdl_inc_internal.h"
 
+#if !USE_SDL2
 SDL_mutex *SDL_CreateMutex(void)
 {
     SDL_mutex *mutex;
@@ -48,14 +57,6 @@ void SDL_DestroyMutex(SDL_mutex *mutex)
     if (mutex) {
         pthread_mutex_destroy(&mutex->id);
         free(mutex);
-    }
-}
-
-void SDL_DestroyMutexP(SDL_mutex **mutex)
-{
-    if (mutex) {
-        SDL_DestroyMutex(*mutex);
-        *mutex = NULL;
     }
 }
 
@@ -100,15 +101,6 @@ void SDL_DestroyCond(SDL_cond *cond)
     }
 }
 
-void SDL_DestroyCondP(SDL_cond **cond)
-{
-
-    if (cond) {
-        SDL_DestroyCond(*cond);
-        *cond = NULL;
-    }
-}
-
 int SDL_CondSignal(SDL_cond *cond)
 {
     assert(cond);
@@ -130,7 +122,6 @@ int SDL_CondBroadcast(SDL_cond *cond)
 int SDL_CondWaitTimeout(SDL_cond *cond, SDL_mutex *mutex, uint32_t ms)
 {
     int retval;
-    struct timeval delta;
     struct timespec abstime;
 
     assert(cond);
@@ -139,10 +130,16 @@ int SDL_CondWaitTimeout(SDL_cond *cond, SDL_mutex *mutex, uint32_t ms)
         return -1;
     }
 
+#ifdef WIN32
+    int64_t current_us = av_gettime();
+    abstime.tv_sec = (current_us / 1000000) + (ms / 1000);
+    abstime.tv_nsec = (long)(current_us % 1000000 + (ms % 1000) * 1000) * 1000;
+#else
+    struct timeval delta;
     gettimeofday(&delta, NULL);
-
     abstime.tv_sec = delta.tv_sec + (ms / 1000);
     abstime.tv_nsec = (delta.tv_usec + (ms % 1000) * 1000) * 1000;
+#endif
     if (abstime.tv_nsec > 1000000000) {
         abstime.tv_sec += 1;
         abstime.tv_nsec -= 1000000000;
@@ -171,4 +168,23 @@ int SDL_CondWait(SDL_cond *cond, SDL_mutex *mutex)
         return -1;
 
     return pthread_cond_wait(&cond->id, &mutex->id);
+}
+#endif // USE_SDL2
+
+
+void SDL_DestroyMutexP(SDL_mutex **mutex)
+{
+    if (mutex) {
+        SDL_DestroyMutex(*mutex);
+        *mutex = NULL;
+    }
+}
+
+void SDL_DestroyCondP(SDL_cond **cond)
+{
+
+    if (cond) {
+        SDL_DestroyCond(*cond);
+        *cond = NULL;
+    }
 }

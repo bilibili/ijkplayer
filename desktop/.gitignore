@@ -1,0 +1,8 @@
+.vs/
+contrib/
+contrib/ffmpeg/
+cmake-build-debug/
+cmake-build-release/
+glad/
+spdlog/
+glfw/

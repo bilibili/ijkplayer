@@ -22,15 +22,18 @@
 #ifndef IJKSDL__IJKSDL_EGL_H
 #define IJKSDL__IJKSDL_EGL_H
 
+#if !IJK_DESKTOP_UNI
 #ifdef __APPLE__
 #include "ijksdl/ios/EGL/egl.h"
 #include "ijksdl/ios/EGL/eglplatform.h"
 #else
+#include <jni.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <EGL/eglplatform.h>
 #endif
 #include "ijksdl_class.h"
+#include "ijksdl_gles2.h"
 
 typedef struct SDL_VoutOverlay SDL_VoutOverlay;
 typedef struct IJK_EGL_Opaque  IJK_EGL_Opaque;
@@ -56,6 +59,10 @@ typedef struct IJK_EGL
     EGLint width;
     EGLint height;
 
+#if ANDROID
+    jobject amc_surface;
+    int     amc_surface_changed;
+#endif
 #if 0
     uint8_t gles2_extensions[IJK_GLES2__MAX_EXT];
 #endif
@@ -67,5 +74,9 @@ void        IJK_EGL_freep(IJK_EGL **egl);
 
 EGLBoolean  IJK_EGL_display(IJK_EGL* egl, EGLNativeWindowType window, SDL_VoutOverlay *overlay);
 void        IJK_EGL_terminate(IJK_EGL* egl);
+
+IJK_GLES2_Renderer *IJK_EGL_get_renderer(IJK_EGL *egl);
+
+#endif //IJK_DESKTOP_UNI
 
 #endif

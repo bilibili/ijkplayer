@@ -69,7 +69,7 @@ void ijkmeta_destroy(IjkMediaMeta *meta)
     }
 
     if (meta->children) {
-        for(int i = 0; i < meta->children_count; ++i) {
+        for(size_t i = 0; i < meta->children_count; ++i) {
             IjkMediaMeta *child = meta->children[i];
             if (child) {
                 ijkmeta_destroy(child);
@@ -192,7 +192,7 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
         ijkmeta_set_int64_l(meta, IJKM_KEY_BITRATE, ic->bit_rate);
 
     IjkMediaMeta *stream_meta = NULL;
-    for (int i = 0; i < ic->nb_streams; i++) {
+    for (unsigned int i = 0; i < ic->nb_streams; i++) {
         if (!stream_meta)
             ijkmeta_destroy_p(&stream_meta);
 

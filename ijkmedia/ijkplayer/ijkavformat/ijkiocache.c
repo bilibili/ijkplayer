@@ -34,7 +34,11 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 #include <assert.h>
 
 #define DEFAULT_CACHE_MAX_CAPACITY            (512 * 1024 * 1024)
@@ -603,11 +607,11 @@ static int ijkio_cache_open(IjkURLContext *h, const char *url, int flags, IjkAVD
             } else {
                 if (ijk_map_size(c->cache_info_map) > 0) {
                     av_log(NULL, AV_LOG_INFO, "ijkio cache will use the data that already exists\n");
-                    c->fd = open(c->cache_file_path, O_RDWR | O_BINARY, 0600);
+                    c->fd = open(c->cache_file_path, O_RDWR | O_BINARY | O_CREAT, 0600);
                     c->async_open = 1;
                     cur_exist_file_size = lseek(c->fd, 0, SEEK_END);
                     if (cur_exist_file_size < *c->last_physical_pos) {
-                        av_log(NULL, AV_LOG_WARNING, "ijkio cache exist is error, will delete last_physical_pos = %lld, cur_exist_file_size = %lld\n", *c->last_physical_pos, cur_exist_file_size);
+                        av_log(NULL, AV_LOG_WARNING, "ijkio cache exist is error, will delete last_physical_pos = %"PRId64", cur_exist_file_size = %"PRId64"\n", *c->last_physical_pos, cur_exist_file_size);
                         ijk_map_traversal_handle(c->cache_info_map, NULL, tree_destroy);
                         ijk_map_clear(c->cache_info_map);
                         *c->last_physical_pos    = 0;

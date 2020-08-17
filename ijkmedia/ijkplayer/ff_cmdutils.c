@@ -25,6 +25,7 @@
 
 #include "ff_cmdutils.h"
 
+
 #include "libavutil/display.h"
 #include "libavutil/eval.h"
 
@@ -186,7 +187,7 @@ AVDictionary *filter_codec_opts(AVDictionary *opts, enum AVCodecID codec_id,
 AVDictionary **setup_find_stream_info_opts(AVFormatContext *s,
                                            AVDictionary *codec_opts)
 {
-    int i;
+    unsigned int i;
     AVDictionary **opts;
 
     if (!s->nb_streams)

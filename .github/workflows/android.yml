@@ -1,0 +1,93 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: Cache android ndk
+      uses: actions/cache@v2
+      with:
+        path: $ANDROID_HOME/ndk/16.1.4479499
+        key: ${{ runner.os }}-ndk16.1.4479499
+
+    - name: Setup ndk
+      run: |
+        yes 2>/dev/null | sudo $ANDROID_HOME/tools/bin/sdkmanager --install "ndk;16.1.4479499" "cmake;3.10.2.4988404"
+
+
+    - name: Cache android extra
+      uses: actions/cache@v2
+      with:
+        path: |
+          extra/ffmpeg
+          extra/boringssl
+          extra/libyuv
+          extra/soundtouch
+        key: ${{ runner.os }}-android-extra
+
+    - name: Init extra for android
+      run: |
+        export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
+        bash init-android.sh
+        bash init/init-android-boringssl.sh
+        bash init/init-android-libsrt.sh
+
+    - name: Get build cache key
+      id: build-key
+      run: |
+        shasum config/* > checklist.chk
+        shasum init/* >> checklist.chk
+        shasum init-android.sh >> checklist.chk
+        shasum android/contrib/*.sh >> checklist.chk
+        shasum android/contrib/tools/* >> checklist.chk
+        BUILD_KEY=`shasum checklist.chk | awk '{print $1}'`
+        echo "::set-output name=key::${BUILD_KEY}"
+
+    - name: Cache ffmpeg build cache
+      id: cache-ffmpeg-build
+      uses: actions/cache@v2
+      with:
+        path: |
+          android/contrib/build/output-armv7a
+          android/contrib/build/output-arm64
+          android/contrib/build/output-x86
+          android/contrib/build/output-x86_64
+        key: ${{ steps.build-key.outputs.key }}
+
+    - name: Build ssl and ffmpeg
+      if: steps.cache-ffmpeg-build.outputs.cache-hit != 'true'
+      run: |
+        cd android/contrib
+        export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
+        bash compile-boringssl.sh all
+        bash compile-libsrt.sh all
+        wget --no-check-certificate https://raw.githubusercontent.com/FFmpeg/gas-preprocessor/master/gas-preprocessor.pl
+        chmod +x gas-preprocessor.pl && sudo mv gas-preprocessor.pl /usr/local/bin/
+        bash compile-ffmpeg.sh all
+
+    - name: Build with Gradle
+      working-directory: android/ijkplayer
+      run: |
+        export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
+        ./gradlew build -PIJK_CXX_STL=c++_shared
+        ./gradlew assembleRelease -PIJK_CXX_STL=c++_shared
+
+    - name: Upload apk
+      uses: actions/upload-artifact@v2
+      with:
+        name: ijkdemo-release
+        path: android/ijkplayer/ijkplayer-example/build/outputs/apk/release/ijkplayer-example-release.apk

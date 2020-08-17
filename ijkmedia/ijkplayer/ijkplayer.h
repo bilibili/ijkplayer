@@ -201,6 +201,7 @@ int             ijkmp_prepare_async(IjkMediaPlayer *mp);
 int             ijkmp_start(IjkMediaPlayer *mp);
 int             ijkmp_pause(IjkMediaPlayer *mp);
 int             ijkmp_stop(IjkMediaPlayer *mp);
+int             ijkmp_reset(IjkMediaPlayer *mp);
 int             ijkmp_seek_to(IjkMediaPlayer *mp, long msec);
 int             ijkmp_get_state(IjkMediaPlayer *mp);
 bool            ijkmp_is_playing(IjkMediaPlayer *mp);
@@ -212,6 +213,8 @@ int             ijkmp_get_loop(IjkMediaPlayer *mp);
 
 void           *ijkmp_get_weak_thiz(IjkMediaPlayer *mp);
 void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
+
+void            ijkmp_take_snapshot(IjkMediaPlayer *mp);
 
 /* return < 0 if aborted, 0 if no packet and > 0 if packet.  */
 /* need to call msg_free_res for freeing the resouce obtained in msg */

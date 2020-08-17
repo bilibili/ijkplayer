@@ -23,9 +23,9 @@
 
 // BT.709, which is the standard for HDTV.
 static const GLfloat g_bt709[] = {
-    1.164,  1.164,  1.164,
-    0.0,   -0.213,  2.112,
-    1.793, -0.533,  0.0,
+    1.164f,  1.164f,  1.164f,
+    0.0f,   -0.213f,  2.112f,
+    1.793f, -0.533f,  0.0f,
 };
 const GLfloat *IJK_GLES2_getColorMatrix_bt709()
 {
@@ -33,9 +33,9 @@ const GLfloat *IJK_GLES2_getColorMatrix_bt709()
 }
 
 static const GLfloat g_bt601[] = {
-    1.164,  1.164, 1.164,
-    0.0,   -0.392, 2.017,
-    1.596, -0.813, 0.0,
+    1.164f,  1.164f, 1.164f,
+    0.0f,   -0.392f, 2.017f,
+    1.596f, -0.813f, 0.0f,
 };
 const GLfloat *IJK_GLES2_getColorMatrix_bt601()
 {

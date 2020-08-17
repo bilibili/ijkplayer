@@ -8,8 +8,10 @@ ios/openssl-*
 extra
 .DS_Store
 ijkmedia/ijkyuv/
-ijkmedia/ijksoundtouch
+ijkmedia/ijksoundtouch/
+ijkmedia/portaudio/
 ijkprof/android-ndk-profiler/
+
 
 # built application files
 *.apk
@@ -34,10 +36,14 @@ local.properties
 # Android Studio
 .idea
 .gradle
-build/
 
 # Xcode
 xcuserdata
 xcshareddata
 *.xccheckout
 
+
+# osx
+# osx/
+cmake-build-debug/
+cmake-build-release/

@@ -29,13 +29,21 @@
 #include "ijksdl/ffmpeg/ijksdl_vout_overlay_ffmpeg.h"
 #include "ijksdl_vout_overlay_videotoolbox.h"
 #import "IJKSDLGLView.h"
+#import "IJKSDLFboGLView.h"
 
 typedef struct SDL_VoutSurface_Opaque {
     SDL_Vout *vout;
 } SDL_VoutSurface_Opaque;
 
 struct SDL_Vout_Opaque {
+    id<IJKSDLGLViewProtocol> gl_viewp;
+#if IJK_IOS
     IJKSDLGLView *gl_view;
+    IJKSDLFboGLView *fbo_viewl;
+#endif
+    BOOL response_display_pixels;
+    BOOL third_part;
+    int no_glview_warning;
 };
 
 static SDL_VoutOverlay *vout_create_overlay_l(int width, int height, int frame_format, SDL_Vout *vout)
@@ -63,11 +71,14 @@ static void vout_free_l(SDL_Vout *vout)
 
     SDL_Vout_Opaque *opaque = vout->opaque;
     if (opaque) {
-        if (opaque->gl_view) {
+        if (opaque->gl_viewp) {
             // TODO: post to MainThread?
-            [opaque->gl_view release];
-            opaque->gl_view = nil;
+            [opaque->gl_viewp release];
+            opaque->gl_viewp = nil;
         }
+#if IJK_IOS
+        opaque->gl_view = nil;
+#endif
     }
 
     SDL_Vout_FreeInternal(vout);
@@ -76,10 +87,13 @@ static void vout_free_l(SDL_Vout *vout)
 static int vout_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
-    IJKSDLGLView *gl_view = opaque->gl_view;
+    id<IJKSDLGLViewProtocol> gl_viewp = opaque->gl_viewp;
 
-    if (!gl_view) {
-        ALOGE("vout_display_overlay_l: NULL gl_view\n");
+    if (!gl_viewp) {
+        if (opaque->no_glview_warning < 10) {
+            opaque->no_glview_warning ++;
+            ALOGE("vout_display_overlay_l: NULL gl_view\n");
+        }
         return -1;
     }
 
@@ -93,9 +107,9 @@ static int vout_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         return -1;
     }
 
-    if (gl_view.isThirdGLView) {
+    if (opaque->third_part) {
         IJKOverlay ijk_overlay;
-
+        memset(&ijk_overlay, 0, sizeof(IJKOverlay));
         ijk_overlay.w = overlay->w;
         ijk_overlay.h = overlay->h;
         ijk_overlay.format = overlay->format;
@@ -109,12 +123,19 @@ static int vout_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
             ijk_overlay.pixel_buffer = SDL_VoutOverlayVideoToolBox_GetCVPixelBufferRef(overlay);
         }
 #endif
-        if ([gl_view respondsToSelector:@selector(display_pixels:)]) {
-             [gl_view display_pixels:&ijk_overlay];
+        if (opaque->response_display_pixels) {
+             [gl_viewp display_pixels:&ijk_overlay];
         }
-    } else {
-        [gl_view display:overlay];
     }
+#if IJK_IOS
+    if (!opaque->third_part) {
+        if (opaque->gl_view){
+            [opaque->gl_view display:overlay];
+        } else if (opaque->fbo_viewl) {
+            [opaque->fbo_viewl display:overlay];
+        }
+    }
+#endif
     return 0;
 }
 
@@ -135,7 +156,11 @@ SDL_Vout *SDL_VoutIos_CreateForGLES2()
         return NULL;
 
     SDL_Vout_Opaque *opaque = vout->opaque;
-    opaque->gl_view = nil;
+    opaque->gl_viewp = nil;
+    opaque->third_part = NO;
+    opaque->response_display_pixels = NO;
+    opaque->no_glview_warning = 0;
+
     vout->create_overlay = vout_create_overlay;
     vout->free_l = vout_free_l;
     vout->display_overlay = vout_display_overlay;
@@ -143,23 +168,34 @@ SDL_Vout *SDL_VoutIos_CreateForGLES2()
     return vout;
 }
 
-static void SDL_VoutIos_SetGLView_l(SDL_Vout *vout, IJKSDLGLView *view)
+static void SDL_VoutIos_SetGLView_l(SDL_Vout *vout, id<IJKSDLGLViewProtocol> view)
 {
     SDL_Vout_Opaque *opaque = vout->opaque;
 
-    if (opaque->gl_view == view)
+    if (opaque->gl_viewp == view)
         return;
 
-    if (opaque->gl_view) {
-        [opaque->gl_view release];
-        opaque->gl_view = nil;
+    if (opaque->gl_viewp) {
+        [opaque->gl_viewp release];
+        opaque->gl_viewp = nil;
     }
-
-    if (view)
-        opaque->gl_view = [view retain];
+    opaque->no_glview_warning = 0;
+    if (view) {
+        opaque->gl_viewp = [view retain];
+        opaque->third_part = view.isThirdGLView;
+        if ([opaque->gl_viewp respondsToSelector:@selector(display_pixels:)])
+            opaque->response_display_pixels = YES;
+#if IJK_IOS
+        if ([opaque->gl_viewp isKindOfClass:[IJKSDLGLView class] ]){
+            opaque->gl_view = (IJKSDLGLView *)opaque->gl_viewp;
+        } else if ([opaque->gl_viewp isKindOfClass:[IJKSDLFboGLView class] ]) {
+            opaque->fbo_viewl = (IJKSDLFboGLView *)opaque->gl_viewp;
+        }
+#endif
+    }
 }
 
-void SDL_VoutIos_SetGLView(SDL_Vout *vout, IJKSDLGLView *view)
+void SDL_VoutIos_SetGLView(SDL_Vout *vout, id<IJKSDLGLViewProtocol> view)
 {
     SDL_LockMutex(vout->mutex);
     SDL_VoutIos_SetGLView_l(vout, view);

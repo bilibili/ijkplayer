@@ -23,18 +23,26 @@
 
 #import "IJKFFMoviePlayerController.h"
 
+#if IJK_OSX
+#import <AppKit/AppKit.h>
+#else
 #import <UIKit/UIKit.h>
-#import "IJKSDLHudViewController.h"
+#endif
+
+#if IJK_IOS
+#import "ijksdl/ios/IJKSDLHudViewController.h"
+#endif
 #import "IJKFFMoviePlayerDef.h"
 #import "IJKMediaPlayback.h"
 #import "IJKMediaModule.h"
+#import "IJKSDLGLViewProtocol.h"
 #import "IJKAudioKit.h"
 #import "IJKNotificationManager.h"
 #import "NSString+IJKMedia.h"
-#import "ijkioapplication.h"
+#import "ijkplayer/ijkavformat/ijkioapplication.h"
 #include "string.h"
 
-static const char *kIJKFFRequiredFFmpegVersion = "ff3.4--ijk0.8.7--20180103--001";
+static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.25--20191031--001";
 
 // It means you didn't call shutdown if you found this object leaked.
 @interface IJKWeakHolder : NSObject
@@ -50,7 +58,7 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff3.4--ijk0.8.7--20180103--001
 
 @implementation IJKFFMoviePlayerController {
     IjkMediaPlayer *_mediaPlayer;
-    IJKSDLGLView *_glView;
+    id<IJKSDLGLViewProtocol> _glView;
     IJKFFMoviePlayerMessagePool *_msgPool;
     NSString *_urlString;
 
@@ -213,11 +221,12 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", _shouldAutoplay ? 1 : 0);
 
         // init video sink
-        _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-        _glView.isThirdGLView = NO;
-        _view = _glView;
+        IJKSDLGLView *glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        glView.isThirdGLView = NO;
+        _glView = glView;
+        _view = glView;
         _hudViewController = [[IJKSDLHudViewController alloc] init];
-        [_hudViewController setRect:_glView.frame];
+        [_hudViewController setRect:glView.frame];
         _shouldShowHudView = NO;
         _hudViewController.tableView.hidden = YES;
         [_view addSubview:_hudViewController.tableView];
@@ -262,7 +271,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (id)initWithMoreContent:(NSURL *)aUrl
               withOptions:(IJKFFOptions *)options
-               withGLView:(UIView<IJKSDLGLViewProtocol> *)glView
+               withGLView:(id<IJKSDLGLViewProtocol>)glView
 {
     if (aUrl == nil)
         return nil;
@@ -277,7 +286,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
 - (id)initWithMoreContentString:(NSString *)aUrlString
                  withOptions:(IJKFFOptions *)options
-                  withGLView:(UIView <IJKSDLGLViewProtocol> *)glView
+                  withGLView:(id<IJKSDLGLViewProtocol>)glView
 {
     if (aUrlString == nil || glView == nil)
         return nil;
@@ -318,26 +327,30 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         self.shouldShowHudView = options.showHudView;
         glView.isThirdGLView = YES;
-        _view = _glView = (IJKSDLGLView *)glView;
-        _hudViewController = [[IJKSDLHudViewController alloc] init];
-        [_hudViewController setRect:_glView.frame];
-        _shouldShowHudView = NO;
-        _hudViewController.tableView.hidden = YES;
-        [_view addSubview:_hudViewController.tableView];
+        _glView = glView;
+        
+        if ([glView isMemberOfClass:[UIView class]]) {
+            _view = (UIView *)glView;
+            _hudViewController = [[IJKSDLHudViewController alloc] init];
+            [_hudViewController setRect:_view.frame];
+            _shouldShowHudView = NO;
+            _hudViewController.tableView.hidden = YES;
+            [_view addSubview:_hudViewController.tableView];
 
-        [self setHudValue:nil forKey:@"scheme"];
-        [self setHudValue:nil forKey:@"host"];
-        [self setHudValue:nil forKey:@"path"];
-        [self setHudValue:nil forKey:@"ip"];
-        [self setHudValue:nil forKey:@"tcp-info"];
-        [self setHudValue:nil forKey:@"http"];
-        [self setHudValue:nil forKey:@"tcp-spd"];
-        [self setHudValue:nil forKey:@"t-prepared"];
-        [self setHudValue:nil forKey:@"t-render"];
-        [self setHudValue:nil forKey:@"t-preroll"];
-        [self setHudValue:nil forKey:@"t-http-open"];
-        [self setHudValue:nil forKey:@"t-http-seek"];
-        self.shouldShowHudView = options.showHudView;
+            [self setHudValue:nil forKey:@"scheme"];
+            [self setHudValue:nil forKey:@"host"];
+            [self setHudValue:nil forKey:@"path"];
+            [self setHudValue:nil forKey:@"ip"];
+            [self setHudValue:nil forKey:@"tcp-info"];
+            [self setHudValue:nil forKey:@"http"];
+            [self setHudValue:nil forKey:@"tcp-spd"];
+            [self setHudValue:nil forKey:@"t-prepared"];
+            [self setHudValue:nil forKey:@"t-render"];
+            [self setHudValue:nil forKey:@"t-preroll"];
+            [self setHudValue:nil forKey:@"t-http-open"];
+            [self setHudValue:nil forKey:@"t-http-seek"];
+            self.shouldShowHudView = options.showHudView;
+        }
 
         ijkmp_ios_set_glview(_mediaPlayer, _glView);
 

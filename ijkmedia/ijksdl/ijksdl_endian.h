@@ -25,6 +25,9 @@
 #ifndef IJKSDL__IJKSDL_ENDIAN_H
 #define IJKSDL__IJKSDL_ENDIAN_H
 
+#if USE_SDL2
+#include <SDL_endian.h>
+#else
 #define SDL_LIL_ENDIAN  1234
 #define SDL_BIG_ENDIAN  4321
 
@@ -44,5 +47,7 @@
 #endif
 #endif /* __linux __ */
 #endif /* !SDL_BYTEORDER */
+
+#endif // USE_SDL2
 
 #endif

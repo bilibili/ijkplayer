@@ -19,10 +19,10 @@ FOUNDATION_EXPORT const unsigned char IJKMediaFrameworkWithSSLVersionString[];
 #import <IJKMediaFrameworkWithSSL/IJKMediaPlayback.h>
 #import <IJKMediaFrameworkWithSSL/IJKMPMoviePlayerController.h>
 #import <IJKMediaFrameworkWithSSL/IJKFFOptions.h>
+#import <IJKMediaFrameworkWithSSL/IJKFFMediaPlayer.h>
 #import <IJKMediaFrameworkWithSSL/IJKFFMoviePlayerController.h>
 #import <IJKMediaFrameworkWithSSL/IJKAVMoviePlayerController.h>
 #import <IJKMediaFrameworkWithSSL/IJKMediaModule.h>
-#import <IJKMediaFrameworkWithSSL/IJKMediaPlayer.h>
 #import <IJKMediaFrameworkWithSSL/IJKNotificationManager.h>
 #import <IJKMediaFrameworkWithSSL/IJKKVOController.h>
 

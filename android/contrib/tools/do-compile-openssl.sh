@@ -35,7 +35,7 @@ fi
 
 
 FF_BUILD_ROOT=`pwd`
-FF_ANDROID_PLATFORM=android-9
+FF_ANDROID_PLATFORM=android-14
 
 
 FF_BUILD_NAME=
@@ -119,10 +119,10 @@ else
     exit 1
 fi
 
-FF_TOOLCHAIN_PATH=$FF_BUILD_ROOT/build/$FF_BUILD_NAME/toolchain
+FF_TOOLCHAIN_PATH=$FF_BUILD_ROOT/build/toolchain-$FF_ARCH
 
 FF_SYSROOT=$FF_TOOLCHAIN_PATH/sysroot
-FF_PREFIX=$FF_BUILD_ROOT/build/$FF_BUILD_NAME/output
+FF_PREFIX=$FF_BUILD_ROOT/build/output-$FF_ARCH
 
 mkdir -p $FF_PREFIX
 # mkdir -p $FF_SYSROOT
@@ -167,6 +167,8 @@ FF_CFG_FLAGS="$FF_CFG_FLAGS no-shared"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --openssldir=$FF_PREFIX"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --cross-compile-prefix=${FF_CROSS_PREFIX}-"
 FF_CFG_FLAGS="$FF_CFG_FLAGS $FF_PLATFORM_CFG_FLAGS"
+
+export LDFLAGS="-pie"
 
 #--------------------
 echo ""

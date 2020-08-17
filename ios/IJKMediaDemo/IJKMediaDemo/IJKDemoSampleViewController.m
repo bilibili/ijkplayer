@@ -36,6 +36,8 @@
 
     NSMutableArray *sampleList = [[NSMutableArray alloc] init];
 
+    [sampleList addObject:@[@"aliyunplayer",
+                            @"http://player.alicdn.com/video/aliyunmedia.mp4"]];
     [sampleList addObject:@[@"bipbop basic master playlist",
                             @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8"]];
     [sampleList addObject:@[@"bipbop basic 400x300 @ 232 kbps",
