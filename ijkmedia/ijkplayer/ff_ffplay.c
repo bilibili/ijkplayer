@@ -48,6 +48,7 @@
 #include "libavutil/avassert.h"
 #include "libavutil/time.h"
 #include "libavformat/avformat.h"
+#include "ijkavformat/ijklas.h"
 #if CONFIG_AVDEVICE
 #include "libavdevice/avdevice.h"
 #endif
@@ -360,6 +361,15 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
     }
 
     return 1;
+}
+
+static void ffp_show_dict(FFPlayer *ffp, const char *tag, AVDictionary *dict)
+{
+    AVDictionaryEntry *t = NULL;
+
+    while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
+        av_log(ffp, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 28, t->key, t->value);
+    }
 }
 
 static void decoder_init(Decoder *d, AVCodecContext *avctx, PacketQueue *queue, SDL_cond *empty_queue_cond) {
@@ -3113,15 +3123,22 @@ static int read_thread(void *arg)
         av_dict_set_int(&ic->metadata, "skip-calc-frame-rate", ffp->skip_calc_frame_rate, 0);
         av_dict_set_int(&ffp->format_opts, "skip-calc-frame-rate", ffp->skip_calc_frame_rate, 0);
     }
-
+   
     if (ffp->iformat_name)
         is->iformat = av_find_input_format(ffp->iformat_name);
+    
+    if (ffp->is_manifest) {
+        extern AVInputFormat ijkff_las_demuxer;
+        is->iformat = &ijkff_las_demuxer;
+        av_dict_set_int(&ffp->format_opts, "las_player_statistic", (intptr_t) (&ffp->las_player_statistic), 0);
+    }
     err = avformat_open_input(&ic, is->filename, is->iformat, &ffp->format_opts);
     if (err < 0) {
         print_error(is->filename, err);
         ret = -1;
         goto fail;
     }
+    
     ffp_notify_msg1(ffp, FFP_MSG_OPEN_INPUT);
 
     if (scan_all_pmts_set)
@@ -3140,44 +3157,48 @@ static int read_thread(void *arg)
         ic->flags |= AVFMT_FLAG_GENPTS;
 
     av_format_inject_global_side_data(ic);
+    
     //
-    //AVDictionary **opts;
-    //int orig_nb_streams;
-    //opts = setup_find_stream_info_opts(ic, ffp->codec_opts);
-    //orig_nb_streams = ic->nb_streams;
+    if (!ffp->is_manifest) {
+        AVDictionary **opts;
+        int orig_nb_streams;
+        opts = setup_find_stream_info_opts(ic, ffp->codec_opts);
+        orig_nb_streams = ic->nb_streams;
 
 
-    if (ffp->find_stream_info) {
-        AVDictionary **opts = setup_find_stream_info_opts(ic, ffp->codec_opts);
-        int orig_nb_streams = ic->nb_streams;
+        if (ffp->find_stream_info) {
+            AVDictionary **opts = setup_find_stream_info_opts(ic, ffp->codec_opts);
+            int orig_nb_streams = ic->nb_streams;
 
-        do {
-            if (av_stristart(is->filename, "data:", NULL) && orig_nb_streams > 0) {
-                for (i = 0; i < orig_nb_streams; i++) {
-                    if (!ic->streams[i] || !ic->streams[i]->codecpar || ic->streams[i]->codecpar->profile == FF_PROFILE_UNKNOWN) {
+            do {
+                if (av_stristart(is->filename, "data:", NULL) && orig_nb_streams > 0) {
+                    for (i = 0; i < orig_nb_streams; i++) {
+                        if (!ic->streams[i] || !ic->streams[i]->codecpar || ic->streams[i]->codecpar->profile == FF_PROFILE_UNKNOWN) {
+                            break;
+                        }
+                    }
+
+                    if (i == orig_nb_streams) {
                         break;
                     }
                 }
+                err = avformat_find_stream_info(ic, opts);
+            } while(0);
+            ffp_notify_msg1(ffp, FFP_MSG_FIND_STREAM_INFO);
 
-                if (i == orig_nb_streams) {
-                    break;
-                }
+            for (i = 0; i < orig_nb_streams; i++)
+                av_dict_free(&opts[i]);
+            av_freep(&opts);
+
+            if (err < 0) {
+                av_log(NULL, AV_LOG_WARNING,
+                       "%s: could not find codec parameters\n", is->filename);
+                ret = -1;
+                goto fail;
             }
-            err = avformat_find_stream_info(ic, opts);
-        } while(0);
-        ffp_notify_msg1(ffp, FFP_MSG_FIND_STREAM_INFO);
-
-        for (i = 0; i < orig_nb_streams; i++)
-            av_dict_free(&opts[i]);
-        av_freep(&opts);
-
-        if (err < 0) {
-            av_log(NULL, AV_LOG_WARNING,
-                   "%s: could not find codec parameters\n", is->filename);
-            ret = -1;
-            goto fail;
         }
     }
+    
     if (ic->pb)
         ic->pb->eof_reached = 0; // FIXME hack, ffplay maybe should not use avio_feof() to test for the end
 
@@ -3994,6 +4015,9 @@ FFPlayer *ffp_create()
 
     av_opt_set_defaults(ffp);
 
+    //ffp->player_statistic = ac_player_statistic_create();
+    las_stat_init(&ffp->las_player_statistic);
+
     return ffp;
 }
 
@@ -4222,14 +4246,6 @@ int ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info)
     return 0;
 }
 
-static void ffp_show_dict(FFPlayer *ffp, const char *tag, AVDictionary *dict)
-{
-    AVDictionaryEntry *t = NULL;
-
-    while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
-        av_log(ffp, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 28, t->key, t->value);
-    }
-}
 
 #define FFP_VERSION_MODULE_NAME_LENGTH 13
 static void ffp_show_version_str(FFPlayer *ffp, const char *module, const char *version)
@@ -4617,12 +4633,18 @@ void ffp_track_statistic_l(FFPlayer *ffp, AVStream *st, PacketQueue *q, FFTrackC
 void ffp_audio_statistic_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
+    if (ffp->is_manifest) {
+        las_set_audio_cached_duration_ms(&ffp->las_player_statistic, ffp->stat.audio_cache.duration);
+    }
     ffp_track_statistic_l(ffp, is->audio_st, &is->audioq, &ffp->stat.audio_cache);
 }
 
 void ffp_video_statistic_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
+    if (ffp->is_manifest) {
+        las_set_video_cached_duration_ms(&ffp->las_player_statistic, ffp->stat.video_cache.duration);
+    }
     ffp_track_statistic_l(ffp, is->video_st, &is->videoq, &ffp->stat.video_cache);
 }
 
