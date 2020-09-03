@@ -22,8 +22,11 @@
 @interface IJKVideoViewController : UIViewController
 
 @property(atomic,strong) NSURL *url;
+@property(strong,nonatomic) NSDictionary* headers;
+@property(strong,nonatomic) NSString* manifest;
 @property(atomic, retain) id<IJKMediaPlayback> player;
 
+- (id)initWithURL:(NSURL *)url headers:(NSDictionary*) headers;
 - (id)initWithURL:(NSURL *)url;
 
 + (void)presentFromViewController:(UIViewController *)viewController withTitle:(NSString *)title URL:(NSURL *)url completion:(void(^)())completion;

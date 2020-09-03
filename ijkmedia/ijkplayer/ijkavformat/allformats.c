@@ -24,13 +24,15 @@
 #include "libavformat/avformat.h"
 #include "libavformat/url.h"
 #include "libavformat/version.h"
+#include "ijklas.h"
 
 #define IJK_REGISTER_DEMUXER(x)                                         \
     {                                                                   \
+        av_log(NULL, AV_LOG_INFO, "===== regiseter =====\n");   \
         extern AVInputFormat ijkff_##x##_demuxer;                       \
         ijkav_register_input_format(&ijkff_##x##_demuxer);              \
     }
-
+    
 #define IJK_REGISTER_PROTOCOL(x)                                        \
     {                                                                   \
         extern URLProtocol ijkimp_ff_##x##_protocol;                        \
@@ -86,5 +88,6 @@ void ijkav_register_all(void)
     IJK_REGISTER_PROTOCOL(ijksegment);
     /* demuxers */
     IJK_REGISTER_DEMUXER(ijklivehook);
+    IJK_REGISTER_DEMUXER(las);
     av_log(NULL, AV_LOG_INFO, "===== custom modules end =====\n");
 }

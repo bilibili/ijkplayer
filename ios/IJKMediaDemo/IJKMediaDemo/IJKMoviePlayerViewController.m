@@ -35,12 +35,21 @@
     
     [viewController presentViewController:[[IJKVideoViewController alloc] initWithURL:url] animated:YES completion:completion];
 }
+- (instancetype)initWithURL:(NSURL *)url headers:(NSDictionary*)headers {
+    self = [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
+    if (self) {
+        self.url = url;
+    }
+    self.headers = headers;
+    return self;
+}
 
 - (instancetype)initWithURL:(NSURL *)url {
     self = [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
     if (self) {
         self.url = url;
     }
+    self.headers = nil;
     return self;
 }
 
@@ -75,6 +84,11 @@
 
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
 
+    NSString *manifest = [self.headers objectForKey:@"manifest_string"];
+    if (manifest != nil){
+        [options setFormatOptionValue:manifest          forKey:@"manifest_string"];
+        [options setPlayerOptionIntValue:1              forKey:@"is-manifest"];
+    }
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;

@@ -29,6 +29,16 @@
 
 @implementation IJKDemoSampleViewController
 
+NSDictionary *_nameAddrMap;
+NSDictionary *_nameHostMap;
+
+typedef NS_ENUM(NSInteger, KwaiplayerInputType) {
+    KwaiplayerInputType_Default = 0,
+    KwaiplayerInputType_AVPlayer,           //普通单url
+    KwaiplayerInputType_AVPlayer_Manifest,  //私有json
+};
+
+
 - (void)viewDidLoad {
     [super viewDidLoad];
 
@@ -61,9 +71,10 @@
                             @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear4/prog_index.m3u8"]];
     [sampleList addObject:@[@"bipbop advanced 1920x1080 @ 2 Mbps",
                             @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear5/prog_index.m3u8"]];
-    [sampleList addObject:@[@"bipbop advanced 22.050Hz stereo @ 40 kbps",
-                            @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear0/prog_index.m3u8"]];
 
+    [sampleList addObject:@[@"test url",
+                            @"{\"version\":\"2.0\",\"type\":\"dynamic\",\"isFreeTrafficCdn\":false,\"adaptationSet\":{\"representation\":[{\"url\":\"http://ali.pull.yximgs.com/gifkwai/cTs3n8cdhbs.flv?auth_key=1599206921-0-0-938e37085917b316cfe8f712b29b98bd\",\"id\":0,\"bitrate\":500},{\"url\":\"http://ali.pull.yximgs.com/gifkwai/cTs3n8cdhbs.flv?auth_key=1599206921-0-0-938e37085917b316cfe8f712b29b98bd\",\"id\":1,\"bitrate\":1000}]}}"]];
+    
     self.sampleList = sampleList;
 }
 
@@ -105,9 +116,25 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
     NSArray *item = self.sampleList[indexPath.row];
-    NSURL   *url  = [NSURL URLWithString:item[1]];
-
-    [self.navigationController presentViewController:[[IJKVideoViewController alloc] initWithURL:url] animated:YES completion:^{}];
+    NSString *url_str = item[1];
+    NSString *host = [_nameHostMap objectForKey:url_str];
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+    
+    if (host != nil) {
+        [dict setObject:host forKey:@"Host"];
+    }
+    
+    if ([url_str containsString:@"adaptationSet"]) {
+        NSString *manifest_url = @"http://100.100.100.100/manifest";
+        NSURL   *url  = [NSURL URLWithString:manifest_url];
+        [dict setObject:url_str forKey:@"manifest_string"];
+        [self.navigationController presentViewController:[[IJKVideoViewController alloc] initWithURL:url headers:dict] animated:YES completion:^{}];
+    } else{
+        NSURL   *url  = [NSURL URLWithString:item[1]];
+        [self.navigationController presentViewController:[[IJKVideoViewController alloc] initWithURL:url] animated:YES completion:^{}];
+    }
+    
+    
 }
 
 @end
