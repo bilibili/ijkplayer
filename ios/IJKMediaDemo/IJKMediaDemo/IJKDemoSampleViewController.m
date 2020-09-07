@@ -73,7 +73,7 @@ typedef NS_ENUM(NSInteger, KwaiplayerInputType) {
                             @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear5/prog_index.m3u8"]];
 
     [sampleList addObject:@[@"test url",
-                            @"{\"version\":\"2.0\",\"type\":\"dynamic\",\"isFreeTrafficCdn\":false,\"adaptationSet\":{\"representation\":[{\"url\":\"http://ali.pull.yximgs.com/gifkwai/cTs3n8cdhbs.flv?auth_key=1599206921-0-0-938e37085917b316cfe8f712b29b98bd\",\"id\":0,\"bitrate\":500},{\"url\":\"http://ali.pull.yximgs.com/gifkwai/cTs3n8cdhbs.flv?auth_key=1599206921-0-0-938e37085917b316cfe8f712b29b98bd\",\"id\":1,\"bitrate\":1000}]}}"]];
+                            @"{\"version\":\"2.0\",\"type\":\"dynamic\",\"isFreeTrafficCdn\":false,\"adaptationSet\":{\"representation\":[{\"url\":\"http://las-tech.org.cn/kwai/las-test_ld500d.flv\",\"id\":0,\"bitrate\":500},{\"url\":\"http://las-tech.org.cn/kwai/las-test_sd1000d.flv\",\"id\":1,\"bitrate\":1000}]}}"]];
     
     self.sampleList = sampleList;
 }
@@ -125,8 +125,8 @@ typedef NS_ENUM(NSInteger, KwaiplayerInputType) {
     }
     
     if ([url_str containsString:@"adaptationSet"]) {
-        NSString *manifest_url = @"http://100.100.100.100/manifest";
-        NSURL   *url  = [NSURL URLWithString:manifest_url];
+        NSString *mainfest_url = @"http://100.100.100.100/manifest";
+        NSURL   *url  = [NSURL URLWithString:mainfest_url];
         [dict setObject:url_str forKey:@"manifest_string"];
         [self.navigationController presentViewController:[[IJKVideoViewController alloc] initWithURL:url headers:dict] animated:YES completion:^{}];
     } else{

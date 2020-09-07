@@ -57,7 +57,7 @@
 #define MAX_STATE_CNT 30
 
 typedef struct RateAdaptionState {
-    int32_t downloading_video_bitrate; //kbps
+    int32_t bitrate; //kbps
     int32_t q_c;     //ms
     int32_t q_e;     //ms
     int32_t bw_c;    //kbps
@@ -769,7 +769,7 @@ void LasStatistic_on_bandwidth_update(PlayList* playlist, MultiRateAdaption* ada
         stat->current_buffer_ms = get_buffer_current(adaption);
         stat->estimate_buffer_ms = get_buffer_estimate(adaption);
     }
-    log_info("current_buffer=%lld bandwidth=%lld", stat->current_buffer_ms, stat->bandwidth_current);
+    log_info("current_buffer=%lld, bandwidth=%lld", stat->current_buffer_ms, stat->bandwidth_current);
 }
 
 void LasStatistic_on_rep_switch_count(LasStatistic* stat, PlayList* playlist) {
@@ -781,23 +781,6 @@ void LasStatistic_on_rep_switch_count(LasStatistic* stat, PlayList* playlist) {
 }
 
 #pragma mark MultiRateAdaption
-int32_t Rate2Index(MultiRateAdaption* thiz, int32_t bitrate) {
-    int32_t index = 0;
-    if (bitrate < thiz->bitrate_table[0]) {
-        index = 0;
-    } else if (bitrate >= thiz->bitrate_table[thiz->n_bitrates - 1]) {
-        index = thiz->n_bitrates - 1;
-    } else {
-        for (int32_t i = 1; i < thiz->n_bitrates; i++) {
-            if (bitrate >= thiz->bitrate_table[i - 1] && bitrate < thiz->bitrate_table[i]) {
-                index = i - 1;
-                break;
-            }
-        }
-    }
-    return index;
-}
-
 int32_t LocalIndex2RepIndex(MultiRateAdaption* thiz, int32_t local_index) {
     int32_t rep_index = 0;
     for (int i = 0; i < thiz->n_bitrates; i++) {
@@ -821,12 +804,17 @@ int32_t RepIndex2LocalIndex(MultiRateAdaption* thiz, int32_t rep_index) {
 
 }
 
-int Compare(const void* a, const void* b) {
-    return (*(int32_t*)a - * (int32_t*)b);
+int getLocalIndexFromBitrate(MultiRateAdaption* thiz, int64_t bitrate) {
+    for (int32_t i = thiz->n_bitrates - 1; i > 0; --i) {
+        if (thiz->bitrate_table[i] <= bitrate) {
+            return i;
+        }
+    }
+    return 0;
 }
 
-void SetInitialDownloadBitrate(MultiRateAdaption* thiz) {
-    LasStatistic_on_adaption_adapted(thiz->playlist, thiz);
+int Compare(const void* a, const void* b) {
+    return (*(int32_t*)a - * (int32_t*)b);
 }
 
 void RateAdaptConfig_default_init(RateAdaptConfig* rate_config, PlayList* playlist) {
@@ -856,15 +844,6 @@ static bool isBitrateAllowedByHisState(HisState his_state, int32_t bitrate) {
     return true;
 }
 
-int getLocalIndexFromBitrate(MultiRateAdaption* thiz, int64_t bitrate) {
-    for (int32_t i = thiz->n_bitrates - 1; i > 0; --i) {
-        if (thiz->bitrate_table[i] <= bitrate) {
-            return i;
-        }
-    }
-    return 0;
-}
-
 // return index of optimized Representation
 void MultiRateAdaption_init(MultiRateAdaption* thiz, RateAdaptConfig rate_config, HisState his_state,
                                 struct PlayList* playlist) {
@@ -878,12 +857,13 @@ void MultiRateAdaption_init(MultiRateAdaption* thiz, RateAdaptConfig rate_config
     thiz->session_id = playlist->session_id;
     int64_t default_select_bitrate = -1;
     for (int i = 0; i < playlist->adaptationSet.n_representation; i++) {
-        thiz->bitrate_table_origin_order[i] = playlist->adaptationSet.representations[i]->tbandwidth;
-        thiz->bitrate_table[i] = playlist->adaptationSet.representations[i]->tbandwidth;
-        if (playlist->adaptationSet.representations[i]->defaultSelect) {
-            default_select_bitrate = playlist->adaptationSet.representations[i]->tbandwidth;
+        Representation* rep = playlist->adaptationSet.representations[i];
+        thiz->bitrate_table_origin_order[i] = rep->tbandwidth;
+        thiz->bitrate_table[i] = rep->tbandwidth;
+        if (rep->defaultSelect) {
+            default_select_bitrate = rep->tbandwidth;
         }
-        thiz->enable_adaptive_table[i] = playlist->adaptationSet.representations[i]->enableAdaptive;
+        thiz->enable_adaptive_table[i] = rep->enableAdaptive;
         thiz->n_bitrates++;
     }
     qsort(thiz->bitrate_table, thiz->n_bitrates, sizeof(int32_t), Compare);
@@ -922,7 +902,7 @@ void MultiRateAdaption_init(MultiRateAdaption* thiz, RateAdaptConfig rate_config
         thiz->last_fragment_index = thiz->current_fragment_index;
         thiz->last_requested_bitrate = thiz->init_bitrate_kbps;
     }
-    SetInitialDownloadBitrate(thiz);
+    LasStatistic_on_adaption_adapted(thiz->playlist, thiz);
     thiz->next_expected_rep_index = LocalIndex2RepIndex(thiz, thiz->current_fragment_index);
     thiz->max_fragment_index = 0;
     thiz->stable_buffer_cnt = 0;
@@ -942,18 +922,24 @@ void OnStatisticInfo(MultiRateAdaption* thiz,
     }
     thiz->is_statistic_updated = true;
     algo_info("buffer_time: %u, time_duration: %u, bytes_read: %u", buffer_time, time_duration, bytes_read);
-    thiz->state[thiz->state_cycle % MAX_STATE_CNT].q_c = buffer_time;
+
+    RateAdaptionState* state = &thiz->state[thiz->state_cycle % MAX_STATE_CNT];
+    RateAdaptionState* last_state = state;
+    if (thiz->state_cycle > 0) {
+        last_state = &thiz->state[(thiz->state_cycle - 1) % MAX_STATE_CNT];
+    }
+
+    state->q_c = buffer_time;
     if (time_duration > 0) {
-        thiz->state[thiz->state_cycle % MAX_STATE_CNT].bw_c = bytes_read * 8 / time_duration;   //kbps
+        state->bw_c = bytes_read * 8 / time_duration;   //kbps
     } else if (thiz->state_cycle > 0) {
-        thiz->state[thiz->state_cycle % MAX_STATE_CNT].bw_c = thiz->state[(thiz->state_cycle - 1) % MAX_STATE_CNT].bw_c;
+        state->bw_c = last_state->bw_c;
     } else {
-        thiz->state[thiz->state_cycle % MAX_STATE_CNT].bw_c = 0;
+        state->bw_c = 0;
     }
 
     if (thiz->state_cycle > 0) {
-        RateAdaptionState last_state = thiz->state[(thiz->state_cycle - 1) % MAX_STATE_CNT];
-        int64_t diff = buffer_time > last_state.q_c ? buffer_time - last_state.q_c : last_state.q_c - buffer_time;
+        int64_t diff = FFABS(buffer_time - last_state->q_c);
         if (diff < thiz->rate_adaption_config.stable_buffer_diff) {
             thiz->stable_buffer_cnt += 1;
         } else {
@@ -962,40 +948,17 @@ void OnStatisticInfo(MultiRateAdaption* thiz,
         }
     }
 
-    thiz->state[thiz->state_cycle % MAX_STATE_CNT].downloading_video_bitrate = thiz->last_requested_bitrate;
+    state->bitrate = thiz->last_requested_bitrate;
     int32_t sum_bw_c = 0;
-    if (thiz->state_cycle >= (thiz->rate_adaption_config.frag_bw_window - 1)) {
-        for (int i = thiz->state_cycle - (thiz->rate_adaption_config.frag_bw_window - 1); i <= thiz->state_cycle; i++) {
-            sum_bw_c += thiz->state[i % MAX_STATE_CNT].bw_c;
-        }
-        thiz->state[thiz->state_cycle % MAX_STATE_CNT].bw_frag = sum_bw_c / thiz->rate_adaption_config.frag_bw_window;
-    } else {
-        for (int i = 0; i <= thiz->state_cycle; i++) {
-            sum_bw_c += thiz->state[i % MAX_STATE_CNT].bw_c;
-        }
-        thiz->state[thiz->state_cycle % MAX_STATE_CNT].bw_frag = sum_bw_c / (thiz->state_cycle + 1);
+    int i = 0;
+    for (; i < thiz->rate_adaption_config.frag_bw_window && i <= thiz->state_cycle; i++) {
+        sum_bw_c += thiz->state[(thiz->state_cycle - i) % MAX_STATE_CNT].bw_c;
     }
-
-    if (thiz->state_cycle >= 1) {
-        int32_t total_buffer_time = 0;
-        for (int i = thiz->state_cycle - 1; i <= thiz->state_cycle; i++) {
-            total_buffer_time += thiz->state[i % MAX_STATE_CNT].q_c;
-        }
-        thiz->state[thiz->state_cycle % MAX_STATE_CNT].q_e = total_buffer_time / 2;
-    } else {
-        int32_t total_buffer_time = 0;
-        for (int i = 0; i <= thiz->state_cycle; i++) {
-            total_buffer_time += thiz->state[i % MAX_STATE_CNT].q_c;
-        }
-        thiz->state[thiz->state_cycle % MAX_STATE_CNT].q_e = total_buffer_time / (thiz->state_cycle + 1);
-    }
-
+    state->bw_frag = sum_bw_c / i;
+    state->q_e = (state->q_c + last_state->q_c) / 2;
+    algo_info("video_rate: %u, q_c: %u, q_e: %u, bw_c: %u, bw_frag: %u",
+              state->bitrate, state->q_c, state->q_e, state->bw_c, state->bw_frag);
     thiz->state_cycle++;
-    algo_info("video_rate: %u, q_c: %u, q_e: %u, bw_c: %u, bw_frag: %u", \
-              thiz->state[(thiz->state_cycle - 1) % MAX_STATE_CNT].downloading_video_bitrate, \
-              thiz->state[(thiz->state_cycle - 1) % MAX_STATE_CNT].q_c, thiz->state[(thiz->state_cycle - 1) % MAX_STATE_CNT].q_e, \
-              thiz->state[(thiz->state_cycle - 1) % MAX_STATE_CNT].bw_c, \
-              thiz->state[(thiz->state_cycle - 1) % MAX_STATE_CNT].bw_frag);
 }
 
 bool IsBufferStable(MultiRateAdaption* thiz) {
@@ -1016,7 +979,7 @@ bool CanSwitchUpForNormal(MultiRateAdaption* thiz) {
     RateAdaptionState state = thiz->state[(thiz->state_cycle - 1) % MAX_STATE_CNT];
 
     if (state.q_c >= switch_up_q && state.q_e >= switch_up_q) {
-        if (state.bw_frag >= state.downloading_video_bitrate * switch_up_bw_frag1 / 100) {
+        if (state.bw_frag >= state.bitrate * switch_up_bw_frag1 / 100) {
             algo_info("CanSwitchUpForNormal = True, Reason = switch_up_bw_frag1");
             return true;
         }
@@ -1040,8 +1003,6 @@ int64_t get_past_buffer(MultiRateAdaption* thiz) {
 }
 
 int32_t NextLocalRateIndex(MultiRateAdaption* thiz) {
-    int32_t target_bitrate = 0;
-    int32_t target_index = 0;
     int32_t switch_down_q = thiz->rate_adaption_config.switch_down_q;
     RateAdaptionState state = thiz->state[(thiz->state_cycle - 1) % MAX_STATE_CNT];
 
@@ -1056,47 +1017,28 @@ int32_t NextLocalRateIndex(MultiRateAdaption* thiz) {
     }
     if (state.q_c < switch_down_q || state.q_e < switch_down_q) {
         int32_t min_temp_buffer = switch_down_q * 2 / 3;
-        target_bitrate = state.bw_frag * (3000 + state.q_c - min_temp_buffer) / 3000 * thiz->rate_adaption_config.switch_down_bw_frag / 100;
+        int32_t target_bitrate = state.bw_frag * (3000 + state.q_c - min_temp_buffer) / 3000 * thiz->rate_adaption_config.switch_down_bw_frag / 100;
         // ignore current buffer during starting period
         if (!thiz->is_stable_state) {
             target_bitrate = state.bw_frag;
         }
         algo_info("Down target_bitrate = %u", target_bitrate);
-        for (int i = thiz->n_bitrates; i > 0; i--) {
-            if (thiz->bitrate_table[i - 1] <= target_bitrate) {
-                target_index = i - 1;
-                break;
-            }
-            target_index = 0;
+        int32_t target_index = getLocalIndexFromBitrate(thiz, target_bitrate);
+        if (target_index < thiz->last_fragment_index) {
+            thiz->last_fragment_index = target_index;
         }
-        if (target_index >= thiz->last_fragment_index) {
-            target_index = thiz->last_fragment_index;
-        }
-        thiz->last_fragment_index = target_index;
-        thiz->last_requested_bitrate = thiz->bitrate_table[thiz->last_fragment_index];
     } else if (CanSwitchUpForNormal(thiz)) {
-        target_bitrate = state.bw_frag * (3000 + state.q_c - thiz->rate_adaption_config.switch_down_q) / 3000 * thiz->rate_adaption_config.switch_up_bw_frag / 100;
+        int32_t target_bitrate = state.bw_frag * (3000 + state.q_c - thiz->rate_adaption_config.switch_down_q) / 3000 * thiz->rate_adaption_config.switch_up_bw_frag / 100;
         algo_info("Up target_bitrate = %u", target_bitrate);
-        for (int i = thiz->n_bitrates; i > 0; i--) {
-            if (thiz->bitrate_table[i - 1] <= target_bitrate) {
-                target_index = i - 1;
-                break;
-            }
-            target_index = 0;
+        int32_t target_index = getLocalIndexFromBitrate(thiz, target_bitrate);
+        if (target_index > thiz->last_fragment_index) {
+            thiz->last_fragment_index += 1;
         }
-        if (target_index <= thiz->last_fragment_index) {
-            target_index = thiz->last_fragment_index;;
-        } else {
-            target_index = thiz->last_fragment_index == thiz->n_bitrates - 1 ? thiz->last_fragment_index : thiz->last_fragment_index + 1;
-        }
-        thiz->last_fragment_index = target_index;
-        thiz->last_requested_bitrate = thiz->bitrate_table[thiz->last_fragment_index];
     } else {
         algo_info("Maintain");
-        target_index = thiz->last_fragment_index;
     }
-    algo_info("target_index = %u", target_index);
-    return target_index;
+    algo_info("target_index = %u", thiz->last_fragment_index);
+    return thiz->last_fragment_index;
 }
 
 bool IsRepIgnored(PlayList* playlist, Representation* rep) {
@@ -1158,6 +1100,7 @@ int32_t NextRepresentationId(MultiRateAdaption* thiz, int switch_mode) {
         thiz->max_fragment_index = thiz->current_fragment_index;
     }
     thiz->last_fragment_index = thiz->current_fragment_index;
+    thiz->last_requested_bitrate = thiz->bitrate_table[thiz->last_fragment_index];
     return rep_index;
 }
 
@@ -1278,11 +1221,11 @@ void GopReader_init(GopReader* reader, Representation* rep, AVFormatContext* s, 
     }
     // Tag based
     char str_starttime[256] = "\0";
-    sprintf(str_starttime, "kabr_spts=%" PRId64, reader->last_gop_start_ts);
+    sprintf(str_starttime, "startPts=%" PRId64, reader->last_gop_start_ts);
     strcat(reader->realtimeUrl, str_starttime);
 
     if (reader->is_audio_only) {
-        strcat(reader->realtimeUrl, "&onlyaudio=yes");
+        strcat(reader->realtimeUrl, "&audioOnly=true");
     }
     reader->rep_index = rep->index;
     reader->parent = s;

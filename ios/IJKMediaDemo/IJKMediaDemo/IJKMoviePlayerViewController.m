@@ -84,9 +84,9 @@
 
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
 
-    NSString *manifest = [self.headers objectForKey:@"manifest_string"];
-    if (manifest != nil){
-        [options setFormatOptionValue:manifest          forKey:@"manifest_string"];
+    NSString *mainfest = [self.headers objectForKey:@"manifest_string"];
+    if (mainfest != nil){
+        [options setFormatOptionValue:mainfest          forKey:@"manifest_string"];
         [options setPlayerOptionIntValue:1              forKey:@"is-manifest"];
     }
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];

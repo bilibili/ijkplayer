@@ -30,7 +30,7 @@ typedef struct LasStatistic {
     int cur_decoding_flv_index;
     int64_t switch_point_a_buffer_ms;
     int64_t switch_point_v_buffer_ms;
-    char cur_playing_url[MAX_URL_SIZE];   // playurl with kabr_spts
+    char cur_playing_url[MAX_URL_SIZE];
 
     // rep switch speed
     int64_t cur_rep_read_start_time;

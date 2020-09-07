@@ -42,7 +42,6 @@ import android.widget.TextView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -261,7 +260,6 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         } else {
             setVideoURI(Uri.parse(path));
         }
-
     }
 
     /**

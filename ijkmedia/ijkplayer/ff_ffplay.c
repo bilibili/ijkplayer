@@ -363,15 +363,6 @@ static int packet_queue_get_or_buffering(FFPlayer *ffp, PacketQueue *q, AVPacket
     return 1;
 }
 
-static void ffp_show_dict(FFPlayer *ffp, const char *tag, AVDictionary *dict)
-{
-    AVDictionaryEntry *t = NULL;
-
-    while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
-        av_log(ffp, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 28, t->key, t->value);
-    }
-}
-
 static void decoder_init(Decoder *d, AVCodecContext *avctx, PacketQueue *queue, SDL_cond *empty_queue_cond) {
     memset(d, 0, sizeof(Decoder));
     d->avctx = avctx;
@@ -4246,6 +4237,14 @@ int ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info)
     return 0;
 }
 
+static void ffp_show_dict(FFPlayer *ffp, const char *tag, AVDictionary *dict)
+{
+    AVDictionaryEntry *t = NULL;
+
+    while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
+        av_log(ffp, AV_LOG_INFO, "%-*s: %-*s = %s\n", 12, tag, 28, t->key, t->value);
+    }
+}
 
 #define FFP_VERSION_MODULE_NAME_LENGTH 13
 static void ffp_show_version_str(FFPlayer *ffp, const char *module, const char *version)
