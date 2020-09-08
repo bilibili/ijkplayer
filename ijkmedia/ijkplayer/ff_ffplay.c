@@ -3124,6 +3124,7 @@ static int read_thread(void *arg)
         av_dict_set_int(&ffp->format_opts, "las_player_statistic", (intptr_t) (&ffp->las_player_statistic), 0);
     }
     err = avformat_open_input(&ic, is->filename, is->iformat, &ffp->format_opts);
+    
     if (err < 0) {
         print_error(is->filename, err);
         ret = -1;
@@ -4632,19 +4633,19 @@ void ffp_track_statistic_l(FFPlayer *ffp, AVStream *st, PacketQueue *q, FFTrackC
 void ffp_audio_statistic_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
-    if (ffp->is_manifest) {
-        las_set_audio_cached_duration_ms(&ffp->las_player_statistic, ffp->stat.audio_cache.duration);
-    }
     ffp_track_statistic_l(ffp, is->audio_st, &is->audioq, &ffp->stat.audio_cache);
+    if (ffp->is_manifest) {
+          las_set_audio_cached_duration_ms(&ffp->las_player_statistic, ffp->stat.audio_cache.duration);
+      }
 }
 
 void ffp_video_statistic_l(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
+    ffp_track_statistic_l(ffp, is->video_st, &is->videoq, &ffp->stat.video_cache);
     if (ffp->is_manifest) {
         las_set_video_cached_duration_ms(&ffp->las_player_statistic, ffp->stat.video_cache.duration);
     }
-    ffp_track_statistic_l(ffp, is->video_st, &is->videoq, &ffp->stat.video_cache);
 }
 
 void ffp_statistic_l(FFPlayer *ffp)

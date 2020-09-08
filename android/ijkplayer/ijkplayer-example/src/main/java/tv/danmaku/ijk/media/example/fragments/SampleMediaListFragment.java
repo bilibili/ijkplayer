@@ -68,31 +68,65 @@ public class SampleMediaListFragment extends Fragment {
             }
         });
 
-        String manifest_string = "{\n" +
-                "      \"version\": \"2.0\",\n" +
-                "      \"type\": \"dynamic\",\n" +
-                "      \"isFreeTrafficCdn\": false,\n" +
-                "      \"adaptationSet\":" +
-                "      {\n" +
-                "          \"representation\":" +
-                "              [\n" +
-                "                  {\n" +
-                "                      \"url\" : \"http://las-tech.org.cn/kwai/las-test_ld500d.flv\",\n" +
-                "                      \"id\" : 0,\n " +
-                "                      \"bitrate\" : 500\n" +
-                "                  },\n " +
-                "                  {\n" + "" +
-                "                      \"url\" : \"http://las-tech.org.cn/kwai/las-test_sd1000d.flv\",\n" +
-                "                      \"id\" : 1,\n " +
-                "                      \"bitrate\" : 1000\n" +
-                "                  },\n " +
-                "                  {\n" +
-                "                      \"url\" : \"http://las-tech.org.cn/kwai/las-test.flv?audioOnly=true\",\n" +
-                "                      \"id\" : 2,\n" +
-                "                      \"bitrate\" : 2000\n" +
-                "                  }\n" +
-                "              ]\n" +
-                "      }\n" +
+        String manifest_string =
+                "{\n" +
+                "    \"version\": \"1.0.0\",\n" +
+                "    \"adaptationSet\": [\n" +
+                "        {\n" +
+                "            \"duration\": 1000,\n" +
+                "            \"id\": 1,\n" +
+                "            \"representation\": [\n" +
+                "                {\n" +
+                "                    \"id\": 1,\n" +
+                "                    \"codec\": \"avc1.64001e,mp4a.40.5\",\n" +
+                "                    \"url\": \"http://las-tech.org.cn/kwai/las-test_ld500d.flv\",\n" +
+                "                    \"backupUrl\": [],\n" +
+                "                    \"host\": \"las-tech.org.cn\",\n" +
+                "                    \"maxBitrate\": 700,\n" +
+                "                    \"width\": 640,\n" +
+                "                    \"height\": 360,\n" +
+                "                    \"frameRate\": 25,\n" +
+                "                    \"qualityType\": \"SMOOTH\",\n" +
+                "                    \"qualityTypeName\": \"流畅\",\n" +
+                "                    \"hidden\": false,\n" +
+                "                    \"disabledFromAdaptive\": false,\n" +
+                "                    \"defaultSelected\": false\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"id\": 2,\n" +
+                "                    \"codec\": \"avc1.64001f,mp4a.40.5\",\n" +
+                "                    \"url\": \"http://las-tech.org.cn/kwai/las-test_sd1000d.flv\",\n" +
+                "                    \"backupUrl\": [],\n" +
+                "                    \"host\": \"las-tech.org.cn\",\n" +
+                "                    \"maxBitrate\": 1300,\n" +
+                "                    \"width\": 960,\n" +
+                "                    \"height\": 540,\n" +
+                "                    \"frameRate\": 25,\n" +
+                "                    \"qualityType\": \"STANDARD\",\n" +
+                "                    \"qualityTypeName\": \"标清\",\n" +
+                "                    \"hidden\": false,\n" +
+                "                    \"disabledFromAdaptive\": false,\n" +
+                "                    \"defaultSelected\": true\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"id\": 3,\n" +
+                "                    \"codec\": \"avc1.64001f,mp4a.40.5\",\n" +
+                "                    \"url\": \"http://las-tech.org.cn/kwai/las-test.flv\",\n" +
+                "                    \"backupUrl\": [],\n" +
+                "                    \"host\": \"las-tech.org.cn\",\n" +
+                "                    \"maxBitrate\": 2300,\n" +
+                "                    \"width\": 1280,\n" +
+                "                    \"height\": 720,\n" +
+                "                    \"frameRate\": 30,\n" +
+                "                    \"qualityType\": \"HIGH\",\n" +
+                "                    \"qualityTypeName\": \"高清\",\n" +
+                "                    \"hidden\": false,\n" +
+                "                    \"disabledFromAdaptive\": false,\n" +
+                "                    \"defaultSelected\": false\n" +
+                "                }\n" +
+                "            ]\n" +
+                "        }\n" +
+                "    ]\n" +
                 "}";
 
         mAdapter.addItem(manifest_string, "las test");

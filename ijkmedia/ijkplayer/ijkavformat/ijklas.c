@@ -89,13 +89,10 @@ typedef struct MultiRateAdaption {
     int32_t n_bitrates;
     int32_t bitrate_table_origin_order[MAX_STREAM_NUM];
     int32_t bitrate_table[MAX_STREAM_NUM];
-    int32_t enable_adaptive_table[MAX_STREAM_NUM];
-    int32_t init_bitrate_kbps;
+    int32_t disable_adaptive_table[MAX_STREAM_NUM];
     int32_t next_expected_rep_index;
-
     int32_t last_fragment_index;
     int32_t last_requested_bitrate;
-    int32_t current_fragment_index;
     int32_t max_fragment_index;
     int64_t stable_buffer_cnt;
     RateAdaptionState state[MAX_STATE_CNT];
@@ -104,9 +101,6 @@ typedef struct MultiRateAdaption {
     RateAdaptConfig rate_adaption_config;
 
     int32_t buffer_init;
-    bool is_statistic_updated;
-    bool is_stable_state;
-
     struct PlayList* playlist;
     unsigned session_id;
 } MultiRateAdaption;
@@ -126,15 +120,15 @@ typedef struct FlvTag {
 typedef struct Representation {
     char url[MAX_URL_SIZE];
     int id;
-    int tbandwidth;
-    int enableAdaptive; // if can be used on automode
-    int defaultSelect;
+    int bitrate;
+    int disabledFromAdaptive;
+    int defaultSelected;
     int index;
     int retry_cnt;
 } Representation;
 
 typedef struct AdaptationSet {
-    int segduration;
+    int duration;
     Representation* representations[MAX_STREAM_NUM];
     int n_representation;
 } AdaptationSet;
@@ -364,14 +358,6 @@ void las_set_stream_reopened(LasPlayerStatistic* stat, bool stream_reopened) {
 }
 
 #pragma mark PlayerStat
-int32_t LasPlayerStatistic_get_playing_bitrate(LasPlayerStatistic* stat) {
-    if (stat->las_stat.cur_decoding_flv_index >= 0 &&
-        stat->las_stat.cur_decoding_flv_index < stat->las_stat.flv_nb) {
-        return stat->las_stat.flvs[stat->las_stat.cur_decoding_flv_index].total_bandwidth_kbps;
-    }
-    return 0;
-}
-
 int32_t LasPlayerStatistic_get_downloading_bitrate(LasPlayerStatistic* stat) {
     if (stat->las_stat.bitrate_downloading > 0) {
         return stat->las_stat.bitrate_downloading;
@@ -379,7 +365,7 @@ int32_t LasPlayerStatistic_get_downloading_bitrate(LasPlayerStatistic* stat) {
     return 0;
 }
 
-char* LasPlayerStatistic_get_playing_url(LasPlayerStatistic* stat) {
+char* LasPlayerStatistic_get_downloading_url(LasPlayerStatistic* stat) {
     return stat->las_stat.cur_playing_url;
 }
 
@@ -682,7 +668,7 @@ void LasStatistic_init(LasStatistic* stat, PlayList* playlist) {
 
     stat->flv_nb = playlist->adaptationSet.n_representation;
     for (int i = 0; i < playlist->adaptationSet.n_representation; i++) {
-        stat->flvs[i].total_bandwidth_kbps = playlist->adaptationSet.representations[i]->tbandwidth;
+        stat->flvs[i].total_bandwidth_kbps = playlist->adaptationSet.representations[i]->bitrate;
         strncpy(stat->flvs[i].url, playlist->adaptationSet.representations[i]->url, MAX_URL_SIZE - 1);
     }
 }
@@ -820,15 +806,15 @@ int Compare(const void* a, const void* b) {
 void RateAdaptConfig_default_init(RateAdaptConfig* rate_config, PlayList* playlist) {
     playlist->max_retry_cnt = 0;
 
-    rate_config->buffer_init = 5000;
-    rate_config->switch_down_q = 3000;
+    rate_config->buffer_init = 2000;
+    rate_config->switch_down_q = 800;
     rate_config->switch_down_bw_frag = 100;
-    rate_config->switch_up_bw_frag = 60;
-    rate_config->switch_up_q = 3000;
-    rate_config->switch_up_bw_frag1 = 300;
-    rate_config->stable_buffer_diff = 200;
-    rate_config->stable_buffer_cnt = 5;
-    rate_config->stable_buffer_switch_up_cnt = 5;
+    rate_config->switch_up_bw_frag = 100;
+    rate_config->switch_up_q = 800;
+    rate_config->switch_up_bw_frag1 = 250;
+    rate_config->stable_buffer_diff = 250;
+    rate_config->stable_buffer_cnt = 12;
+    rate_config->stable_buffer_switch_up_cnt = 3;
     rate_config->init_bitrate = -1;
     rate_config->init_index = -1;
     rate_config->frag_bw_window = 10;
@@ -858,12 +844,12 @@ void MultiRateAdaption_init(MultiRateAdaption* thiz, RateAdaptConfig rate_config
     int64_t default_select_bitrate = -1;
     for (int i = 0; i < playlist->adaptationSet.n_representation; i++) {
         Representation* rep = playlist->adaptationSet.representations[i];
-        thiz->bitrate_table_origin_order[i] = rep->tbandwidth;
-        thiz->bitrate_table[i] = rep->tbandwidth;
-        if (rep->defaultSelect) {
-            default_select_bitrate = rep->tbandwidth;
+        thiz->bitrate_table_origin_order[i] = rep->bitrate;
+        thiz->bitrate_table[i] = rep->bitrate;
+        if (rep->defaultSelected) {
+            default_select_bitrate = rep->bitrate;
         }
-        thiz->enable_adaptive_table[i] = rep->enableAdaptive;
+        thiz->disable_adaptive_table[i] = rep->disabledFromAdaptive;
         thiz->n_bitrates++;
     }
     qsort(thiz->bitrate_table, thiz->n_bitrates, sizeof(int32_t), Compare);
@@ -874,36 +860,32 @@ void MultiRateAdaption_init(MultiRateAdaption* thiz, RateAdaptConfig rate_config
     }
 
     if (default_select_bitrate >= 0) {
-        thiz->current_fragment_index = getLocalIndexFromBitrate(thiz, default_select_bitrate);
+        thiz->last_fragment_index = getLocalIndexFromBitrate(thiz, default_select_bitrate);
     } else if (thiz->rate_adaption_config.init_bitrate >= 0) {
-        thiz->current_fragment_index = getLocalIndexFromBitrate(thiz, thiz->rate_adaption_config.init_bitrate);
+        thiz->last_fragment_index = getLocalIndexFromBitrate(thiz, thiz->rate_adaption_config.init_bitrate);
     } else if (thiz->rate_adaption_config.init_index >= 0) {
-        thiz->current_fragment_index = thiz->rate_adaption_config.init_index;
+        thiz->last_fragment_index = thiz->rate_adaption_config.init_index;
     } else {
-        thiz->current_fragment_index = (thiz->n_bitrates - 1) / 2;
+        thiz->last_fragment_index = (thiz->n_bitrates - 1) / 2;
     }
-    while (thiz->current_fragment_index >= thiz->n_bitrates) {
-        thiz->current_fragment_index -= 1;
+    while (thiz->last_fragment_index >= thiz->n_bitrates) {
+        thiz->last_fragment_index -= 1;
     }
 
     // limited by his_state
-    while (thiz->current_fragment_index > 0
-           && !isBitrateAllowedByHisState(his_state, thiz->bitrate_table[thiz->current_fragment_index])) {
-        thiz->current_fragment_index -= 1;
+    while (thiz->last_fragment_index > 0
+           && !isBitrateAllowedByHisState(his_state, thiz->bitrate_table[thiz->last_fragment_index])) {
+        thiz->last_fragment_index -= 1;
     }
-    thiz->init_bitrate_kbps = thiz->bitrate_table[thiz->current_fragment_index];
-    thiz->last_fragment_index = thiz->current_fragment_index;
-    thiz->last_requested_bitrate = thiz->init_bitrate_kbps;
 
     int switch_mode = las_get_switch_mode(playlist->las_player_statistic);
     if (switch_mode >= 0 && switch_mode < thiz->n_bitrates) {
-        thiz->current_fragment_index = RepIndex2LocalIndex(thiz, switch_mode);
-        thiz->init_bitrate_kbps = thiz->bitrate_table[thiz->current_fragment_index];
-        thiz->last_fragment_index = thiz->current_fragment_index;
-        thiz->last_requested_bitrate = thiz->init_bitrate_kbps;
+        thiz->last_fragment_index = RepIndex2LocalIndex(thiz, switch_mode);
     }
+
+    thiz->last_requested_bitrate = thiz->bitrate_table[thiz->last_fragment_index];
     LasStatistic_on_adaption_adapted(thiz->playlist, thiz);
-    thiz->next_expected_rep_index = LocalIndex2RepIndex(thiz, thiz->current_fragment_index);
+    thiz->next_expected_rep_index = LocalIndex2RepIndex(thiz, thiz->last_fragment_index);
     thiz->max_fragment_index = 0;
     thiz->stable_buffer_cnt = 0;
     thiz->is_first_gop = true;
@@ -915,12 +897,11 @@ void OnStatisticInfo(MultiRateAdaption* thiz,
                      int32_t a_buffer_time /*ms*/,
                      int32_t time_duration /*ms*/,
                      int32_t bytes_read /*byte*/) {
+    if (bytes_read <= 0 || time_duration <= 100) {
+        return;
+    }
     int32_t buffer_time = a_buffer_time;
     buffer_time = buffer_time >= MAX_BUFFER_TIME ? MAX_BUFFER_TIME : buffer_time;
-    if (!thiz->is_stable_state && buffer_time > thiz->rate_adaption_config.switch_down_q) {
-        thiz->is_stable_state = true;
-    }
-    thiz->is_statistic_updated = true;
     algo_info("buffer_time: %u, time_duration: %u, bytes_read: %u", buffer_time, time_duration, bytes_read);
 
     RateAdaptionState* state = &thiz->state[thiz->state_cycle % MAX_STATE_CNT];
@@ -930,13 +911,7 @@ void OnStatisticInfo(MultiRateAdaption* thiz,
     }
 
     state->q_c = buffer_time;
-    if (time_duration > 0) {
-        state->bw_c = bytes_read * 8 / time_duration;   //kbps
-    } else if (thiz->state_cycle > 0) {
-        state->bw_c = last_state->bw_c;
-    } else {
-        state->bw_c = 0;
-    }
+    state->bw_c = bytes_read * 8 / time_duration; //kbps
 
     if (thiz->state_cycle > 0) {
         int64_t diff = FFABS(buffer_time - last_state->q_c);
@@ -962,7 +937,7 @@ void OnStatisticInfo(MultiRateAdaption* thiz,
 }
 
 bool IsBufferStable(MultiRateAdaption* thiz) {
-    if (thiz->current_fragment_index < thiz->max_fragment_index
+    if (thiz->last_fragment_index < thiz->max_fragment_index
         && thiz->rate_adaption_config.stable_buffer_switch_up_cnt > 0) {
         if (thiz->stable_buffer_cnt > thiz->rate_adaption_config.stable_buffer_cnt) {
             thiz->rate_adaption_config.stable_buffer_switch_up_cnt -= 1;
@@ -1016,22 +991,14 @@ int32_t NextLocalRateIndex(MultiRateAdaption* thiz) {
         }
     }
     if (state.q_c < switch_down_q || state.q_e < switch_down_q) {
-        int32_t min_temp_buffer = switch_down_q * 2 / 3;
-        int32_t target_bitrate = state.bw_frag * (3000 + state.q_c - min_temp_buffer) / 3000 * thiz->rate_adaption_config.switch_down_bw_frag / 100;
-        // ignore current buffer during starting period
-        if (!thiz->is_stable_state) {
-            target_bitrate = state.bw_frag;
-        }
+        int32_t target_bitrate = state.bw_frag * thiz->rate_adaption_config.switch_down_bw_frag / 100;
         algo_info("Down target_bitrate = %u", target_bitrate);
         int32_t target_index = getLocalIndexFromBitrate(thiz, target_bitrate);
         if (target_index < thiz->last_fragment_index) {
             thiz->last_fragment_index = target_index;
         }
     } else if (CanSwitchUpForNormal(thiz)) {
-        int32_t target_bitrate = state.bw_frag * (3000 + state.q_c - thiz->rate_adaption_config.switch_down_q) / 3000 * thiz->rate_adaption_config.switch_up_bw_frag / 100;
-        algo_info("Up target_bitrate = %u", target_bitrate);
-        int32_t target_index = getLocalIndexFromBitrate(thiz, target_bitrate);
-        if (target_index > thiz->last_fragment_index) {
+        if (thiz->last_fragment_index < thiz->n_bitrates - 1) {
             thiz->last_fragment_index += 1;
         }
     } else {
@@ -1077,30 +1044,28 @@ int32_t NextRepresentationId(MultiRateAdaption* thiz, int switch_mode) {
     if (switch_mode >= 0 && switch_mode < thiz->n_bitrates) {
         thiz->last_fragment_index = RepIndex2LocalIndex(thiz, switch_mode);
         thiz->last_requested_bitrate = thiz->bitrate_table[thiz->last_fragment_index];
-        thiz->current_fragment_index = thiz->last_fragment_index;
         return switch_mode;
     }
 
-    if (thiz->is_statistic_updated == false) {
+    if (thiz->state_cycle == 0) {
         return LocalIndex2RepIndex(thiz, thiz->last_fragment_index);
     }
 
-    thiz->current_fragment_index = NextLocalRateIndex(thiz);
-    int rep_index = LocalIndex2RepIndex(thiz, thiz->current_fragment_index);
-    while (thiz->current_fragment_index > 0 && thiz->enable_adaptive_table[rep_index] == 0) {
-        thiz->current_fragment_index -= 1;
-        rep_index = LocalIndex2RepIndex(thiz, thiz->current_fragment_index);
+    int local_index = NextLocalRateIndex(thiz);
+    int rep_index = LocalIndex2RepIndex(thiz, local_index);
+    while (local_index > 0 && thiz->disable_adaptive_table[rep_index]) {
+        local_index -= 1;
+        rep_index = LocalIndex2RepIndex(thiz, local_index);
     }
-    if (IsLocalIgnored(thiz->playlist, thiz->current_fragment_index)) {
-        thiz->current_fragment_index = thiz->last_fragment_index;
-        thiz->last_requested_bitrate = thiz->bitrate_table[thiz->last_fragment_index];
+    if (IsLocalIgnored(thiz->playlist, local_index)) {
         rep_index = thiz->next_expected_rep_index;
+    } else {
+        if (local_index > thiz->max_fragment_index) {
+            thiz->max_fragment_index = local_index;
+        }
+        thiz->last_fragment_index = local_index;
+        thiz->last_requested_bitrate = thiz->bitrate_table[local_index];
     }
-    if (thiz->current_fragment_index > thiz->max_fragment_index) {
-        thiz->max_fragment_index = thiz->current_fragment_index;
-    }
-    thiz->last_fragment_index = thiz->current_fragment_index;
-    thiz->last_requested_bitrate = thiz->bitrate_table[thiz->last_fragment_index];
     return rep_index;
 }
 
@@ -1302,7 +1267,7 @@ int64_t GopReader_download_gop(GopReader* reader, MultiRateAdaption* adaption, P
 
     //las 2.0 Tag based reading
     uint8_t av_tag_header[AV_TAG_HEADER_LEN];
-    int gop_duration = playlist->adaptationSet.segduration;
+    int gop_duration = playlist->adaptationSet.duration;
 
     while (1) {
         if (playlist->read_abort_request || playlist->tag_queue.abort_request) {
@@ -1319,7 +1284,7 @@ int64_t GopReader_download_gop(GopReader* reader, MultiRateAdaption* adaption, P
             reader->is_audio_only = request;
             int64_t current_playing_audio_ts = las_get_first_audio_packet_pts(playlist->las_player_statistic);
             log_info("current_playing_audio_ts: %lld", current_playing_audio_ts);
-            int64_t request_ts = current_playing_audio_ts - playlist->adaptationSet.segduration / 2;
+            int64_t request_ts = current_playing_audio_ts - playlist->adaptationSet.duration / 2;
             reader->last_gop_start_ts = request_ts > 0 ? request_ts : 0;
             return 0;
         }
@@ -1796,7 +1761,7 @@ static void dump_multi_rate_flv_context(PlayList* c) {
         Representation* representationItem = adaptationSetItem->representations[j];
         av_log(NULL, AV_LOG_DEBUG, "{\n");
         av_log(NULL, AV_LOG_DEBUG, "    id: %d \n", representationItem->id);
-        av_log(NULL, AV_LOG_DEBUG, "    bitrate: %d \n", representationItem->tbandwidth);
+        av_log(NULL, AV_LOG_DEBUG, "    bitrate: %d \n", representationItem->bitrate);
         av_log(NULL, AV_LOG_DEBUG, "    url: \"%s\" \n", representationItem->url);
         av_log(NULL, AV_LOG_DEBUG, "}\n");
     }
@@ -1807,16 +1772,11 @@ static int parse_representation_set(Representation* c, cJSON* root) {
     for (int i = 0; i < len; i++) {
         cJSON* child_json = cJSON_GetArrayItem(root, i);
         switch (child_json->type) {
-            case cJSON_False:
-                if (!strcmp(child_json->string, "enableAdaptive")) {
-                    c->enableAdaptive = 0;
-                }
-                break;
             case cJSON_Number:
                 if (!strcmp(child_json->string, "id")) {
                     c->id = (int)child_json->valuedouble;
-                } else if (!strcmp(child_json->string, "bitrate")) {
-                    c->tbandwidth = (int)child_json->valuedouble;
+                } else if (!strcmp(child_json->string, "maxBitrate")) {
+                    c->bitrate = (int)child_json->valuedouble;
                 }
                 break;
             case cJSON_String:
@@ -1826,12 +1786,15 @@ static int parse_representation_set(Representation* c, cJSON* root) {
                 break;
             case cJSON_NULL:
             case cJSON_True:
-                if (!strcmp(child_json->string, "defaultSelect")) {
-                    c->defaultSelect = 1;
+                if (!strcmp(child_json->string, "defaultSelected")) {
+                    c->defaultSelected = 1;
+                } else if (!strcmp(child_json->string, "disabledFromAdaptive")) {
+                    c->disabledFromAdaptive = 1;
                 }
                 break;
             case cJSON_Array:
             case cJSON_Object:
+            case cJSON_False:
                 break;
         }
     }
@@ -1844,8 +1807,8 @@ static int parse_adaptation_set(AdaptationSet* c, cJSON* root) {
         cJSON* child_json = cJSON_GetArrayItem(root, i);
         switch (child_json->type) {
             case cJSON_Number:
-                if (!strcmp(child_json->string, "gopDuration")) {
-                    c->segduration = (int)child_json->valuedouble;
+                if (!strcmp(child_json->string, "duration")) {
+                    c->duration = (int)child_json->valuedouble;
                 }
                 break;
             case cJSON_Array:
@@ -1859,8 +1822,8 @@ static int parse_adaptation_set(AdaptationSet* c, cJSON* root) {
                         }
                         c->representations[c->n_representation] = representationItem;
                         representationItem->index = c->n_representation;
-                        representationItem->enableAdaptive = 1;
-                        representationItem->defaultSelect = 0;
+                        representationItem->disabledFromAdaptive = 0;
+                        representationItem->defaultSelected = 0;
                         representationItem->retry_cnt = 0;
                         c->n_representation++;
 
@@ -1889,10 +1852,12 @@ int parse_root(char* file_name, PlayList* c) {
         for (int i = 0; i < len; i++) {
             cJSON* child_json = cJSON_GetArrayItem(root, i);
             switch (child_json->type) {
-                case cJSON_Object:
+                case cJSON_Array:
                     if (child_json->string && !strcmp(child_json->string, "adaptationSet")) {
-                        // 只有一个adaptationSet，也只解析一个
-                        parse_adaptation_set(&c->adaptationSet, child_json);
+                        cJSON* adaptationSet = cJSON_GetArrayItem(child_json, 0);
+                        if (adaptationSet) {
+                            parse_adaptation_set(&c->adaptationSet, adaptationSet);
+                        }
                     }
                     break;
                 case cJSON_Number:
@@ -1900,7 +1865,7 @@ int parse_root(char* file_name, PlayList* c) {
                 case cJSON_NULL:
                 case cJSON_False:
                 case cJSON_True:
-                case cJSON_Array:
+                case cJSON_Object:
                     break;
             }
             printf("\n");

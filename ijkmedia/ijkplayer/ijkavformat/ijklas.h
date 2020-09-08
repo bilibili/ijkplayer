@@ -87,9 +87,8 @@ void las_set_video_cached_duration_ms(LasPlayerStatistic* stat, int64_t video_ca
 bool las_get_stream_reopened(LasPlayerStatistic* stat);
 void las_set_stream_reopened(LasPlayerStatistic* stat, bool stream_reopened);
 
-int32_t LasPlayerStatistic_get_playing_bitrate(LasPlayerStatistic* stat);
 int32_t LasPlayerStatistic_get_downloading_bitrate(LasPlayerStatistic* stat);
-char* LasPlayerStatistic_get_playing_url(LasPlayerStatistic* stat);
+char* LasPlayerStatistic_get_downloading_url(LasPlayerStatistic* stat);
 int LasPlayerStatistic_get_http_reading_error(LasPlayerStatistic* stat);
 
 #endif
