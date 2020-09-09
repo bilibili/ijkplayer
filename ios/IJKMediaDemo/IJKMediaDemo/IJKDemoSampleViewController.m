@@ -29,16 +29,6 @@
 
 @implementation IJKDemoSampleViewController
 
-NSDictionary *_nameAddrMap;
-NSDictionary *_nameHostMap;
-
-typedef NS_ENUM(NSInteger, KwaiplayerInputType) {
-    KwaiplayerInputType_Default = 0,
-    KwaiplayerInputType_AVPlayer,           //普通单url
-    KwaiplayerInputType_AVPlayer_Manifest,  //私有json
-};
-
-
 - (void)viewDidLoad {
     [super viewDidLoad];
 
@@ -47,8 +37,7 @@ typedef NS_ENUM(NSInteger, KwaiplayerInputType) {
     NSMutableArray *sampleList = [[NSMutableArray alloc] init];
 
     [sampleList addObject:@[@"las url",
-    @"{\"version\":\"1.0.0\",\"adaptationSet\":[{\"duration\":1000,\"id\":1,\"representation\":[{\"id\":1,\"codec\":\"avc1.64001e,mp4a.40.5\",\"url\":\"http://las-tech.org.cn/kwai/las-test_ld500d.flv\",\"backupUrl\":[],\"host\":\"las-tech.org.cn\",\"maxBitrate\":700,\"width\":640,\"height\":360,\"frameRate\":25,\"qualityType\":\"SMOOTH\",\"qualityTypeName\":\"流畅\",\"hidden\":false,\"disabledFromAdaptive\":false,\"defaultSelected\":false},{\"id\":2,\"codec\":\"avc1.64001f,mp4a.40.5\",\"url\":\"http://las-tech.org.cn/kwai/las-test_sd1000d.flv\",\"backupUrl\":[],\"host\":\"las-tech.org.cn\",\"maxBitrate\":1300,\"width\":960,\"height\":540,\"frameRate\":25,\"qualityType\":\"STANDARD\",\"qualityTypeName\":\"标清\",\"hidden\":false,\"disabledFromAdaptive\":false,\"defaultSelected\":false},{\"id\":3,\"codec\":\"avc1.64001f,mp4a.40.5\",\"url\":\"http://las-tech.org.cn/kwai/las-test.flv\",\"backupUrl\":[],\"host\":\"las-tech.org.cn\",\"maxBitrate\":2300,\"width\":1280,\"height\":720,\"frameRate\":30,\"qualityType\":\"HIGH\",\"qualityTypeName\":\"高清\",\"hidden\":false,\"disabledFromAdaptive\":false,\"defaultSelected\":true}]}]}"]];
-    
+    @"{\"version\":\"1.0.0\",\"adaptationSet\":[{\"duration\":1000,\"id\":1,\"representation\":[{\"id\":1,\"codec\":\"avc1.64001e,mp4a.40.5\",\"url\":\"http://las-tech.org.cn/kwai/las-test_ld500d.flv\",\"backupUrl\":[],\"host\":\"las-tech.org.cn\",\"maxBitrate\":700,\"width\":640,\"height\":360,\"frameRate\":25,\"qualityType\":\"SMOOTH\",\"qualityTypeName\":\"流畅\",\"hidden\":false,\"disabledFromAdaptive\":false,\"defaultSelected\":false},{\"id\":2,\"codec\":\"avc1.64001f,mp4a.40.5\",\"url\":\"http://las-tech.org.cn/kwai/las-test_sd1000d.flv\",\"backupUrl\":[],\"host\":\"las-tech.org.cn\",\"maxBitrate\":1300,\"width\":960,\"height\":540,\"frameRate\":25,\"qualityType\":\"STANDARD\",\"qualityTypeName\":\"标清\",\"hidden\":false,\"disabledFromAdaptive\":false,\"defaultSelected\":false},{\"id\":3,\"codec\":\"avc1.64001f,mp4a.40.5\",\"url\":\"http://las-tech.org.cn/kwai/las-test.flv\",\"backupUrl\":[],\"host\":\"las-tech.org.cn\",\"maxBitrate\":2300,\"width\":1280,\"height\":720,\"frameRate\":30,\"qualityType\":\"HIGH\",\"qualityTypeName\":\"高清\",\"hidden\":false,\"disabledFromAdaptive\":false,\"defaultSelected\":true}]}]}"]]; 
     [sampleList addObject:@[@"bipbop basic master playlist",
                             @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8"]];
     [sampleList addObject:@[@"bipbop basic 400x300 @ 232 kbps",
@@ -74,7 +63,9 @@ typedef NS_ENUM(NSInteger, KwaiplayerInputType) {
                             @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear4/prog_index.m3u8"]];
     [sampleList addObject:@[@"bipbop advanced 1920x1080 @ 2 Mbps",
                             @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear5/prog_index.m3u8"]];
-    
+    [sampleList addObject:@[@"bipbop advanced 22.050Hz stereo @ 40 kbps",
+                            @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear0/prog_index.m3u8"]];
+
     self.sampleList = sampleList;
 }
 
@@ -117,24 +108,15 @@ typedef NS_ENUM(NSInteger, KwaiplayerInputType) {
 
     NSArray *item = self.sampleList[indexPath.row];
     NSString *url_str = item[1];
-    NSString *host = [_nameHostMap objectForKey:url_str];
-    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-    
-    if (host != nil) {
-        [dict setObject:host forKey:@"Host"];
-    }
     
     if ([url_str containsString:@"adaptationSet"]) {
-        NSString *mainfest_url = @"http://100.100.100.100/manifest";
-        NSURL   *url  = [NSURL URLWithString:mainfest_url];
-        [dict setObject:url_str forKey:@"manifest_string"];
-        [self.navigationController presentViewController:[[IJKVideoViewController alloc] initWithURL:url headers:dict] animated:YES completion:^{}];
+        NSString *fake_url = @"http://100.100.100.100/manifest";
+        NSURL   *url  = [NSURL URLWithString:fake_url];
+        [self.navigationController presentViewController:[[IJKVideoViewController alloc] initWithURL:url manifest_string:url_str] animated:YES completion:^{}];
     } else{
         NSURL   *url  = [NSURL URLWithString:item[1]];
         [self.navigationController presentViewController:[[IJKVideoViewController alloc] initWithURL:url] animated:YES completion:^{}];
     }
-    
-    
 }
 
 @end

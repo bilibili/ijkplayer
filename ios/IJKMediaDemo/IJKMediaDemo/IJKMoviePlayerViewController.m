@@ -35,11 +35,15 @@
     
     [viewController presentViewController:[[IJKVideoViewController alloc] initWithURL:url] animated:YES completion:completion];
 }
-- (instancetype)initWithURL:(NSURL *)url headers:(NSDictionary*)headers {
+
+- (instancetype)initWithURL:(NSURL *)url manifest_string:(NSString*)manifest_string {
     self = [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
     if (self) {
         self.url = url;
     }
+    NSMutableDictionary *headers = [[NSMutableDictionary alloc] init];
+    [headers setObject:manifest_string forKey:@"manifest_string"];
+
     self.headers = headers;
     return self;
 }
