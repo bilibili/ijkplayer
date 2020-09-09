@@ -23,7 +23,6 @@
 
 @property(atomic,strong) NSURL *url;
 @property(strong,nonatomic) NSDictionary* headers;
-@property(strong,nonatomic) NSString* manifest;
 @property(atomic, retain) id<IJKMediaPlayback> player;
 
 - (id)initWithURL:(NSURL *)url manifest_string:(NSString*)manifest_string;
