@@ -4629,7 +4629,7 @@ void ffp_audio_statistic_l(FFPlayer *ffp)
     ffp_track_statistic_l(ffp, is->audio_st, &is->audioq, &ffp->stat.audio_cache);
     if (ffp->is_manifest) {
           las_set_audio_cached_duration_ms(&ffp->las_player_statistic, ffp->stat.audio_cache.duration);
-      }
+    }
 }
 
 void ffp_video_statistic_l(FFPlayer *ffp)
