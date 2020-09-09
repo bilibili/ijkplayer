@@ -41,10 +41,7 @@
     if (self) {
         self.url = url;
     }
-    NSMutableDictionary *headers = [[NSMutableDictionary alloc] init];
-    [headers setObject:manifest_string forKey:@"manifest_string"];
-
-    self.headers = headers;
+    self.manifest = manifest_string;
     return self;
 }
 
@@ -87,9 +84,8 @@
 
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
 
-    NSString *mainfest = [self.headers objectForKey:@"manifest_string"];
-    if (mainfest != nil){
-        [options setFormatOptionValue:mainfest          forKey:@"manifest_string"];
+    if (self.manifest != nil){
+        [options setFormatOptionValue:self.manifest          forKey:@"manifest_string"];
         [options setPlayerOptionIntValue:1              forKey:@"is-manifest"];
     }
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];
