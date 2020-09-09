@@ -49,7 +49,6 @@
     if (self) {
         self.url = url;
     }
-    self.headers = nil;
     return self;
 }
 
