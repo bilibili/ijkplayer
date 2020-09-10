@@ -36,9 +36,11 @@
     [viewController presentViewController:[[IJKVideoViewController alloc] initWithURL:url] animated:YES completion:completion];
 }
 
-- (instancetype)initWithURL:(NSURL *)url manifest_string:(NSString*)manifest_string {
+- (instancetype)initWithManifest: (NSString*)manifest_string {
     self = [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
     if (self) {
+        NSString *fake_url = @"http://fakeurl_for_manifest";
+        NSURL   *url  = [NSURL URLWithString:fake_url];
         self.url = url;
     }
     self.manifest = manifest_string;

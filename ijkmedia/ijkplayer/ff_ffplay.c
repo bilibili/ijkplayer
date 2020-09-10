@@ -74,6 +74,7 @@
 #include "ijkmeta.h"
 #include "ijkversion.h"
 #include "ijkplayer.h"
+#include "ijklas.h"
 #include <stdatomic.h>
 #if defined(__ANDROID__)
 #include "ijksoundtouch/ijksoundtouch_wrap.h"
@@ -4022,6 +4023,9 @@ void ffp_destroy(FFPlayer *ffp)
     ffpipenode_free_p(&ffp->node_vdec);
     ffpipeline_free_p(&ffp->pipeline);
     ijkmeta_destroy_p(&ffp->meta);
+    if (ffp->is_manifest) {
+        las_stat_destroy(&ffp->las_player_statistic);
+    }
     ffp_reset_internal(ffp);
 
     SDL_DestroyMutexP(&ffp->af_mutex);

@@ -110,9 +110,7 @@
     NSString *url_str = item[1];
     
     if ([url_str containsString:@"adaptationSet"]) {
-        NSString *fake_url = @"http://100.100.100.100/manifest";
-        NSURL   *url  = [NSURL URLWithString:fake_url];
-        [self.navigationController presentViewController:[[IJKVideoViewController alloc] initWithURL:url manifest_string:url_str] animated:YES completion:^{}];
+        [self.navigationController presentViewController:[[IJKVideoViewController alloc] initWithManifest:url_str] animated:YES completion:^{}];
     } else{
         NSURL   *url  = [NSURL URLWithString:item[1]];
         [self.navigationController presentViewController:[[IJKVideoViewController alloc] initWithURL:url] animated:YES completion:^{}];
