@@ -66,6 +66,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private String TAG = "IjkVideoView";
     // settable by the client
     private Uri mUri;
+    private String mManifestString;
     private Map<String, String> mHeaders;
 
     // all possible internal states
@@ -253,7 +254,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
      * @param path the path of the video.
      */
     public void setVideoPath(String path) {
-        setVideoURI(Uri.parse(path));
+        if (path.contains("adaptationSet")){
+            mManifestString = path;
+            setVideoURI(Uri.EMPTY);
+        } else {
+            setVideoURI(Uri.parse(path));
+        }
     }
 
     /**
@@ -1037,6 +1043,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     ijkMediaPlayer = new IjkMediaPlayer();
                     ijkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
 
+                    if (mManifestString != null) {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "is-manifest", 1);
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "manifest_string", mManifestString);
+                    }
                     if (mSettings.getUsingMediaCodec()) {
                         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
                         if (mSettings.getUsingMediaCodecAutoRotate()) {
