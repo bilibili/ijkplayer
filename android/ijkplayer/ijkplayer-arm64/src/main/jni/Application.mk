@@ -23,10 +23,10 @@ APP_ABI := arm64-v8a
 NDK_TOOLCHAIN_VERSION=4.9
 APP_PIE := false
 
-APP_STL := stlport_static
+APP_STL := c++_static
 
 APP_CFLAGS := -O3 -Wall -pipe \
     -ffast-math \
     -fstrict-aliasing -Werror=strict-aliasing \
-    -Wno-psabi -Wa,--noexecstack \
+    -Wa,--noexecstack \
     -DANDROID -DNDEBUG
