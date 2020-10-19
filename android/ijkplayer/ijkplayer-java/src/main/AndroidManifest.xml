@@ -1,7 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tv.danmaku.ijk.media.player" >
 
-    <uses-sdk
-        android:minSdkVersion="9" />
-
 </manifest>
