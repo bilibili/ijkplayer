@@ -29,8 +29,9 @@
 
 @interface IJKSDLGLView : UIView
 
-- (id) initWithFrame:(CGRect)frame;
-- (void) display: (SDL_VoutOverlay *) overlay;
+- (id)initWithFrame:(CGRect)frame;
+- (id)initWithFrame:(CGRect)frame weakLayerEnabled:(BOOL)weakLayerEnabled;
+- (void)display:(SDL_VoutOverlay *)overlay;
 
 - (UIImage*) snapshot;
 - (void)setHudValue:(NSString *)value forKey:(NSString *)key;

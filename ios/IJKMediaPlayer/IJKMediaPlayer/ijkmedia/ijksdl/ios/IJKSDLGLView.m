@@ -39,9 +39,15 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 };
 
 @interface IJKSDLGLView()
+
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
 @property(atomic) BOOL glActivePaused;
+@property(nonatomic) BOOL shouldUseWeakLayer;
+@property(nonatomic, weak) CALayer *weakLayer;
+@property(nonatomic, strong, readonly) CALayer *selfLayer;
+
 @end
+
 
 @implementation IJKSDLGLView {
     EAGLContext     *_context;
@@ -70,15 +76,18 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     IJKSDLGLViewApplicationState _applicationState;
 }
 
-+ (Class) layerClass
-{
++ (Class)layerClass {
 	return [CAEAGLLayer class];
 }
 
-- (id) initWithFrame:(CGRect)frame
-{
+- (id)initWithFrame:(CGRect)frame {
+    return [self initWithFrame:frame weakLayerEnabled:NO];
+}
+
+- (id)initWithFrame:(CGRect)frame weakLayerEnabled:(BOOL)weakLayerEnabled {
     self = [super initWithFrame:frame];
     if (self) {
+        _shouldUseWeakLayer = weakLayerEnabled;
         _tryLockErrorCount = 0;
         _shouldLockWhileBeingMovedToWindow = YES;
         self.glActiveLock = [[NSRecursiveLock alloc] init];
@@ -86,6 +95,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         [self registerApplicationObservers];
 
         _didSetupGL = NO;
+        self.weakLayer = self.layer;
         [self setupGLOnce];
 
         _hudViewController = [[IJKSDLHudViewController alloc] init];
@@ -123,7 +133,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     glGenRenderbuffers(1, &_renderbuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-    [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
+    [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.selfLayer];
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _renderbuffer);
@@ -145,7 +155,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 
 - (CAEAGLLayer *)eaglLayer
 {
-    return (CAEAGLLayer*) self.layer;
+    return (CAEAGLLayer*) self.selfLayer;
 }
 
 - (BOOL)setupGL
@@ -156,7 +166,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     if ([self isApplicationActive] == NO)
         return NO;
 
-    CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
+    CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.selfLayer;
     eaglLayer.opaque = YES;
     eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
                                     [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
@@ -380,14 +390,6 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         return;
     }
     
-    if ([self isUITest] && _isRenderBufferInvalidated && ![[NSThread currentThread] isMainThread]) {
-        __weak typeof(self) wSelf = self;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [wSelf display:overlay];
-        });
-        return;
-    }
-    
     if (![self tryLockGLActive]) {
         if (0 == (_tryLockErrorCount % 100)) {
             IJKLog(@"IJKSDLGLView:display: unable to tryLock GL active: %d\n", _tryLockErrorCount);
@@ -418,16 +420,14 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         return;
     }
 
-    if (![self isUITest]) {
-        [[self eaglLayer] setContentsScale:_scaleFactor];
-    }
+    [[self eaglLayer] setContentsScale:_scaleFactor];
     
     if (_isRenderBufferInvalidated) {
         IJKLog(@"IJKSDLGLView: renderbufferStorage fromDrawable\n");
         _isRenderBufferInvalidated = NO;
 
         glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-        [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
+        [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.selfLayer];
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
         [self setupRendererGravityAndRotation];
@@ -453,6 +453,14 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     } else {
         _frameCount++;
     }
+}
+
+- (CALayer *)selfLayer {
+    if ([self isUITest]) {
+        return self.weakLayer;
+    }
+    
+    return (self.shouldUseWeakLayer ? self.weakLayer : self.layer);
 }
 
 #pragma mark AppDelegate
