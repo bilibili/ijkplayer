@@ -20,11 +20,9 @@ typedef struct LasStatistic {
     int flv_nb;
 
     // algo specific
-    int64_t bandwidth_current;
     int64_t bandwidth_fragment;
     int64_t bitrate_downloading;
     int64_t current_buffer_ms;
-    int64_t estimate_buffer_ms;
 
     // status
     int cur_decoding_flv_index;
