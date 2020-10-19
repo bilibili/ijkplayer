@@ -85,7 +85,7 @@ if [ "$FF_ARCH" = "armv7a" ]; then
     FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_VER}
 
     FF_CFG_FLAGS="$FF_CFG_FLAGS --arch=arm --cpu=cortex-a8"
-    FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-neon"
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-neon"
     FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-thumb"
 
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS -march=armv7-a -mcpu=cortex-a8 -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb"
@@ -275,7 +275,7 @@ if [ "$FF_ARCH" = "x86" ]; then
     FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-asm"
 else
     # Optimization options (experts only):
-    FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-asm"
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --disable-asm"
     FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-inline-asm"
 fi
 
