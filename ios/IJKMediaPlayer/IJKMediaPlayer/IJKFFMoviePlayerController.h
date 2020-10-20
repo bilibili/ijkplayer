@@ -74,7 +74,15 @@ typedef enum IJKLogLevel {
 - (id)initWithContentURL:(NSURL *)aUrl
              withOptions:(IJKFFOptions *)options;
 
+- (id)initWithContentURL:(NSURL *)aUrl
+        weakLayerEnabled:(BOOL)weakLayerEnabled
+             withOptions:(IJKFFOptions *)options;
+
 - (id)initWithContentURLString:(NSString *)aUrlString
+                   withOptions:(IJKFFOptions *)options;
+
+- (id)initWithContentURLString:(NSString *)aUrlString
+              weakLayerEnabled:(BOOL)weakLayerEnabled
                    withOptions:(IJKFFOptions *)options;
 
 - (void)prepareToPlay;
