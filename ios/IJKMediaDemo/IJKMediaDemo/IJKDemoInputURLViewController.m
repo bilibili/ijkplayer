@@ -40,6 +40,7 @@
 }
 
 - (void)onClickPlayButton {
+    self.textView.text = @"http://5815.liveplay.myqcloud.com/live/5815_89aad37e06ff11e892905cb9018cf0d4.flv";
     NSURL *url = [NSURL URLWithString:self.textView.text];
     NSString *scheme = [[url scheme] lowercaseString];
     

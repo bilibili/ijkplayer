@@ -45,3 +45,4 @@ SDL_Thread *SDL_CreateThreadEx(SDL_Thread *thread, int (*fn)(void *), void *data
 
     return thread;
 }
+

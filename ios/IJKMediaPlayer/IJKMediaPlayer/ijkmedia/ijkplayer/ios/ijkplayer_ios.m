@@ -63,7 +63,7 @@ void ijkmp_ios_set_glview_l(IjkMediaPlayer *mp, IJKSDLGLView *glView)
     SDL_VoutIos_SetGLView(mp->ffplayer->vout, glView);
 }
 
-void ijkmp_ios_set_glview(IjkMediaPlayer *mp, IJKSDLGLView *glView)
+void    ijkmp_ios_set_glview(IjkMediaPlayer *mp, IJKSDLGLView *glView)
 {
     assert(mp);
     MPTRACE("ijkmp_ios_set_view(glView=%p)\n", (void*)glView);
