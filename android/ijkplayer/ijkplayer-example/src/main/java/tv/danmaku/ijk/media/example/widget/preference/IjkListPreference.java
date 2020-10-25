@@ -19,7 +19,7 @@ package tv.danmaku.ijk.media.example.widget.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.support.v7.preference.ListPreference;
+import androidx.preference.ListPreference;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 
