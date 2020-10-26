@@ -19,7 +19,6 @@
 # IJK_FFMPEG_UPSTREAM=git://git.videolan.org/ffmpeg.git
 IJK_FFMPEG_UPSTREAM=https://github.com/priamm/ffmpeg-4.3.1.git
 IJK_FFMPEG_FORK=https://github.com/priamm/ffmpeg-4.3.1.git
-IJK_FFMPEG_COMMIT=ff3.4--git--ijk0.8.7--20200911--001
 IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
 set -e
@@ -35,7 +34,6 @@ function pull_fork()
     echo "== pull ffmpeg fork $1 =="
     sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK android/contrib/ffmpeg-$1 ${IJK_FFMPEG_LOCAL_REPO}
     cd android/contrib/ffmpeg-$1
-    git checkout ${IJK_FFMPEG_COMMIT} -B ijkplayer
     cd -
 }
 
