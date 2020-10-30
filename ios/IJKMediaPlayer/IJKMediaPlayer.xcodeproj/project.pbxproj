@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		33BA6FBF254BC4D7004EB9F2 /* ijklas.c in Sources */ = {isa = PBXBuildFile; fileRef = B4449BD5250095700074CEDC /* ijklas.c */; };
+		33BA6FC0254BC4D9004EB9F2 /* ijklas.h in Headers */ = {isa = PBXBuildFile; fileRef = B4449BD4250095700074CEDC /* ijklas.h */; };
+		33BA6FC1254BC4DC004EB9F2 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = B417F8E124F7C56C00D159BB /* cJSON.c */; };
+		33BA6FC2254BC4DE004EB9F2 /* cJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = B417F8DB24F7C3B400D159BB /* cJSON.h */; };
 		4D32BC811F906E3A00CE9F03 /* IJKSDLGLViewProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D32BC801F906E3600CE9F03 /* IJKSDLGLViewProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4D32BC821F906E3B00CE9F03 /* IJKSDLGLViewProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D32BC801F906E3600CE9F03 /* IJKSDLGLViewProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4DA7F6891F2B1E270032A499 /* ijkiourlhook.c in Sources */ = {isa = PBXBuildFile; fileRef = 4DA7F6881F2B1E270032A499 /* ijkiourlhook.c */; };
@@ -986,6 +990,7 @@
 				5450B02C1E63EA4300568494 /* IJKNotificationManager.h in Headers */,
 				5450B02D1E63EA4300568494 /* ijkthreadpool.h in Headers */,
 				5450B02E1E63EA4300568494 /* ijkiomanager.h in Headers */,
+				33BA6FC0254BC4D9004EB9F2 /* ijklas.h in Headers */,
 				5450B02F1E63EA4300568494 /* ijkstl.h in Headers */,
 				4D32BC821F906E3B00CE9F03 /* IJKSDLGLViewProtocol.h in Headers */,
 				5450B0301E63EA4300568494 /* IJKMediaModule.h in Headers */,
@@ -1002,6 +1007,7 @@
 				5450B03B1E63EA4300568494 /* ijkavformat.h in Headers */,
 				5450B03C1E63EA4300568494 /* IJKSDLHudViewCell.h in Headers */,
 				5450B03D1E63EA4300568494 /* IJKVideoToolBox.h in Headers */,
+				33BA6FC2254BC4DE004EB9F2 /* cJSON.h in Headers */,
 				5450B03E1E63EA4300568494 /* NSString+IJKMedia.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1129,6 +1135,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = E6903EB017EAF6C500CFD954;
@@ -1246,6 +1253,7 @@
 				5450AFEB1E63EA4300568494 /* NSString+IJKMedia.m in Sources */,
 				5450AFEC1E63EA4300568494 /* ijksdl_vout_overlay_ffmpeg.c in Sources */,
 				5450AFED1E63EA4300568494 /* ijksdl_mutex.c in Sources */,
+				33BA6FC1254BC4DC004EB9F2 /* cJSON.c in Sources */,
 				5450AFEE1E63EA4300568494 /* ijktree.c in Sources */,
 				5450AFEF1E63EA4300568494 /* IJKSDLAudioQueueController.m in Sources */,
 				5450AFF01E63EA4300568494 /* ijksdl_thread.c in Sources */,
@@ -1260,6 +1268,7 @@
 				5450AFF91E63EA4300568494 /* renderer_yuv420sp_vtb.m in Sources */,
 				5450AFFA1E63EA4300568494 /* ijkutils.c in Sources */,
 				5450AFFB1E63EA4300568494 /* IJKSDLGLView.m in Sources */,
+				33BA6FBF254BC4D7004EB9F2 /* ijklas.c in Sources */,
 				5450AFFC1E63EA4300568494 /* ijksdl_timer.c in Sources */,
 				5450AFFD1E63EA4300568494 /* ijkfifo.c in Sources */,
 				5450AFFE1E63EA4300568494 /* shader.c in Sources */,
