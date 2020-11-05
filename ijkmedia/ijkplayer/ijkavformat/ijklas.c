@@ -1931,15 +1931,22 @@ static int las_read_packet(AVFormatContext* s, AVPacket* pkt) {
         } else {
             // go packet
             *pkt = playlist->pkt;
+            if (pkt->stream_index >= 0 && pkt->stream_index < MAX_STREAM_NUM) {
+                pkt->stream_index = playlist->stream_index_map[pkt->stream_index];
+            }
+            AVCodecParameters* codec = playlist->ctx->streams[pkt->stream_index]->codecpar;
+            if (codec->extradata) {
+                uint8_t *side = av_packet_new_side_data(pkt, AV_PKT_DATA_NEW_EXTRADATA, codec->extradata_size);
+                if (side) {
+                    memcpy(side, codec->extradata, codec->extradata_size);
+                    av_freep(&codec->extradata);
+                    codec->extradata_size = 0;
+                }
+            }
             break;
         }
     }
     reset_packet(&playlist->pkt);
-
-    if (pkt->stream_index >= 0 && pkt->stream_index < MAX_STREAM_NUM) {
-        pkt->stream_index = playlist->stream_index_map[pkt->stream_index];
-    }
-
     LasStatistic_on_read_packet(playlist->las_statistic, playlist);
 
 fail:
