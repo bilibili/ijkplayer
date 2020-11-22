@@ -25,7 +25,7 @@ Travis-ci
 -----------------------
 * Modify ijk version in `.travis.yaml` in iOS and Android ci repo.
 * Ensure compile task has been started on travis-ci.
-* Ensure Andoird release has been released in bintray.
+* Ensure Android release has been released in bintray.
 
 Take off
 -----------------------
