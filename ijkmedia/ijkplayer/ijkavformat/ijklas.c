@@ -1405,16 +1405,17 @@ static int PlayList_read_thread(void* data) {
         GopReader_close(gop_reader, playlist);
         Representation* rep = playlist->adaptation_set.representations[new_index];
         if (ff_check_interrupt(&s->interrupt_callback)) {
-            TagQueue_abort(&playlist->tag_queue);
             break;
         }
         GopReader_init(gop_reader, rep, s, playlist);
         ret = GopReader_download_gop(gop_reader, &playlist->multi_rate_adaption, playlist);
         if (ret < 0) {
             LasStatistic_on_rep_read_error(playlist->las_statistic, ret);
+            break;
         }
     }
 
+    TagQueue_abort(&playlist->tag_queue);
     if (playlist->algo_thread) {
         log_info("Signals algo_thread");
         algo_cond_signal(playlist);
@@ -1891,7 +1892,7 @@ static int las_read_header(AVFormatContext* s) {
 
 fail:
     las_close(s);
-    return ret == 0 ? 0 : AVERROR_EOF;
+    return ret == 0 ? 0 : AVERROR_EXIT;
 }
 
 /*
@@ -2056,10 +2057,7 @@ static int las_read_packet(AVFormatContext* s, AVPacket* pkt) {
     LasStatistic_on_read_packet(playlist->las_statistic, playlist);
 
 fail:
-    if (ret != 0) {
-        log_error("ret:%s(0x%x), will return AVERROR_EOF", av_err2str(ret), ret);
-    }
-    return ret == 0 ? 0 : AVERROR_EOF;
+    return ret == 0 ? 0 : AVERROR_EXIT;
 }
 
 static int las_read_seek(AVFormatContext* s, int stream_index,
