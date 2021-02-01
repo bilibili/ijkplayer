@@ -418,15 +418,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     [self stopHudTimer];
     [self stopDebugInfoTimer];
     ijkmp_stop(_mediaPlayer);
-    
-    if (self.shouldLogStream) {
-        NSUInteger end = [NSDate date].timeIntervalSince1970 * 1000;
-        [[RKStreamLog logger] logWithDict:@{@"lt": @"bft",
-                                            @"pst": @((NSUInteger)(_playerInitTime * 1000)),
-                                            @"psd": @(end),
-                                            @"num": @(_bufferingTimes)
-                                            }];
-    }
 }
 
 - (BOOL)isPlaying
@@ -571,15 +562,6 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
             [self shutdown_l];
         });
         return;
-    }
-    
-    if (state != MP_STATE_STOPPED && self.shouldLogStream) {
-        NSUInteger end = [NSDate date].timeIntervalSince1970 * 1000;
-        [[RKStreamLog logger] logWithDict:@{@"lt": @"bft",
-                                            @"pst": @((NSUInteger)(_playerInitTime * 1000)),
-                                            @"psd": @(end),
-                                            @"num": @(_bufferingTimes)
-                                            }];
     }
     
     self.shutdownRetryTimes = 0;
@@ -1270,15 +1252,6 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         }
         case FFP_MSG_BUFFERING_END: {
             IJKLog(@"FFP_MSG_BUFFERING_END:\n");
-
-            if (self.shouldLogStream) {
-                NSTimeInterval end = [NSDate date].timeIntervalSince1970;
-                [[RKStreamLog logger] logWithDict:@{@"lt": @"dt",
-                                                    @"bt": @((NSUInteger)(_bufferingStart * 1000)),
-                                                    @"bd": @((NSUInteger)(end * 1000)),
-                                                    @"bi": @((NSUInteger)((end - _bufferingStart) * 1000))
-                                                    }];
-            }
             
             _monitor.lastPrerollDuration = (int64_t)SDL_GetTickHR() - _monitor.lastPrerollStartTick;
 
