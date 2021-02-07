@@ -4144,7 +4144,7 @@ void *ffp_set_ijkio_inject_opaque(FFPlayer *ffp, void *opaque)
     ijkio_manager_destroyp(&ffp->ijkio_manager_ctx);
     ijkio_manager_create(&ffp->ijkio_manager_ctx, ffp);
     ijkio_manager_set_callback(ffp->ijkio_manager_ctx, ijkio_app_func_event);
-    ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkiomanager", (int64_t)(intptr_t)ffp->ijkio_manager_ctx);
+    ffp_set_option_intptr(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkiomanager", (uintptr_t)ffp->ijkio_manager_ctx);
 
     return prev_weak_thiz;
 }
@@ -4158,7 +4158,7 @@ void *ffp_set_inject_opaque(FFPlayer *ffp, void *opaque)
 
     av_application_closep(&ffp->app_ctx);
     av_application_open(&ffp->app_ctx, ffp);
-    ffp_set_option_int(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkapplication", (int64_t)(intptr_t)ffp->app_ctx);
+    ffp_set_option_intptr(ffp, FFP_OPT_CATEGORY_FORMAT, "ijkapplication", (uint64_t)(intptr_t)ffp->app_ctx);
 
     ffp->app_ctx->func_on_app_event = app_func_event;
     return prev_weak_thiz;
@@ -4180,6 +4180,15 @@ void ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64
 
     AVDictionary **dict = ffp_get_opt_dict(ffp, opt_category);
     av_dict_set_int(dict, name, value, 0);
+}
+
+void ffp_set_option_intptr(FFPlayer *ffp, int opt_category, const char *name, uintptr_t value)
+{
+    if (!ffp)
+        return;
+
+    AVDictionary **dict = ffp_get_opt_dict(ffp, opt_category);
+    av_dict_set_intptr(dict, name, value, 0);
 }
 
 void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)

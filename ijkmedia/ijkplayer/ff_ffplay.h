@@ -51,6 +51,7 @@ void     *ffp_set_inject_opaque(FFPlayer *ffp, void *opaque);
 void     *ffp_set_ijkio_inject_opaque(FFPlayer *ffp, void *opaque);
 void      ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const char *value);
 void      ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64_t value);
+void      ffp_set_option_intptr(FFPlayer *ffp, int opt_category, const char *name, uintptr_t value);
 
 int       ffp_get_video_codec_info(FFPlayer *ffp, char **codec_info);
 int       ffp_get_audio_codec_info(FFPlayer *ffp, char **codec_info);
