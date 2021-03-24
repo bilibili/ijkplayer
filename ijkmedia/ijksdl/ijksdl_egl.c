@@ -194,7 +194,7 @@ static EGLBoolean IJK_EGL_makeCurrent(IJK_EGL* egl, EGLNativeWindowType window)
         }
 
         int32_t width  = ANativeWindow_getWidth(window);
-        int32_t height = ANativeWindow_getWidth(window);
+        int32_t height = ANativeWindow_getHeight(window);
         ALOGI("[EGL] ANativeWindow_setBuffersGeometry(f=%d);", native_visual_id);
         int ret = ANativeWindow_setBuffersGeometry(window, width, height, native_visual_id);
         if (ret) {
