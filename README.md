@@ -178,7 +178,7 @@ But ijkplayer is also based on other different projects under various licenses, 
 
 ## Android编译IjkPlayer流程 ##
 
-	参考: https://blog.csdn.net/casemate/article/details/114766740
+	Copy From: https://blog.csdn.net/casemate/article/details/114766740
 
 ### 配置环境 ###
 
@@ -352,7 +352,7 @@ But ijkplayer is also based on other different projects under various licenses, 
 
 	更改ijkplayer项目中的build.gradle
 	
-	参考
+	Copy From
 	https://blog.csdn.net/casemate/article/details/114767343
 
 
