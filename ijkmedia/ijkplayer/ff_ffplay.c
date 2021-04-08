@@ -3695,6 +3695,19 @@ void ffp_global_set_inject_callback(ijk_inject_callback cb)
 {
     s_inject_callback = cb;
 }
+            
+static ijk_decode_error_callback s_decode_error_callback;
+void ffp_decode_error_callback(void *opaque, int error_code)
+{
+    if (s_decode_error_callback)
+        s_decode_error_callback(opaque, error_code);
+    return;
+}
+
+void ffp_global_set_decode_error_callback(ijk_decode_error_callback cb)
+{
+    s_decode_error_callback = cb;
+}
 
 void ffp_io_stat_register(void (*cb)(const char *url, int type, int bytes))
 {

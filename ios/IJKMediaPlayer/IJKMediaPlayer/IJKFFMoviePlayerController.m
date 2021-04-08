@@ -32,6 +32,7 @@
 #import "NSString+IJKMedia.h"
 #import "ijkioapplication.h"
 #include "string.h"
+#import "IJKVideoToolBoxSync.h"
 
 // 17media
 #import "IJKLog.h"
@@ -209,6 +210,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         if (self) {
             ijkmp_global_init();
             ijkmp_global_set_inject_callback(ijkff_inject_callback);
+            ijkmp_global_set_decode_error_callback(ijkff_decode_error_callback);
 
             [IJKFFMoviePlayerController checkIfFFmpegVersionMatch:NO];
 
@@ -1617,6 +1619,19 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
         default: {
             return 0;
         }
+    }
+}
+
+static void ijkff_decode_error_callback(void *opaque, int error_code)
+{
+    IJKWeakHolder *weakHolder = (__bridge IJKWeakHolder*)opaque;
+    IJKFFMoviePlayerController *mpc = weakHolder.object;
+    
+    if (!mpc)
+        return;
+    
+    if ([mpc.decodeErrorDelegate respondsToSelector:@selector(handleDecodeError:)]) {
+        [mpc.decodeErrorDelegate handleDecodeError:error_code];
     }
 }
 
