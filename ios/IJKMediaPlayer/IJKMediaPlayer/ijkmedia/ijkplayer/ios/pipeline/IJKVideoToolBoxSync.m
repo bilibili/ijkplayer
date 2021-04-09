@@ -290,8 +290,12 @@ static void VTDecoderCallback(void *decompressionOutputRefCon,
 
         if (status != 0) {
             ALOGE("decode callback %d %s\n", (int)status, vtb_get_error_string(status));
-            ffp_decode_error_callback(ffp->inject_opaque, (int)status);
-            ffp->did_call_handle_decode_error = true;
+            if (!ffp->is_handling_error) {
+                ffp_decode_error_callback(ffp->inject_opaque, (int)status);
+                ffp->is_handling_error = true;
+            } else {
+                ALOGI("resetting player... \n");
+            }
             goto failed;
         }
 
@@ -724,11 +728,6 @@ static int handle_17_sei(FFPlayer *ffp, uint8_t *data)
 
 static int decode_video(Ijk_VideoToolBox_Opaque* context, AVCodecContext *avctx, AVPacket *avpkt, int* got_picture_ptr)
 {
-    if (context->ffp->did_call_handle_decode_error) {
-        ALOGI("resetting player... \n");
-        return AVERROR(EILSEQ);
-    }
-    
     int      ret            = 0;
     uint8_t *size_data      = NULL;
     int      size_data_size = 0;

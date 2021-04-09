@@ -737,7 +737,7 @@ typedef struct FFPlayer {
     int log_duration;
     int log_bytes_size;
     
-    bool did_call_handle_decode_error;
+    bool is_handling_error;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))
@@ -865,7 +865,7 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
     ffp_reset_statistic(&ffp->stat);
     ffp_reset_demux_cache_control(&ffp->dcc);
     
-    ffp->did_call_handle_decode_error = false;
+    ffp->is_handling_error = false;
 }
 
 inline static void ffp_notify_msg1(FFPlayer *ffp, int what) {
