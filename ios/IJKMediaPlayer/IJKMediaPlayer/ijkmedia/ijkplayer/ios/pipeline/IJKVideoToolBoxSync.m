@@ -40,6 +40,7 @@
 #include "ff_fferror.h"
 #include "ff_ffmsg.h"
 #include "ijksdl/ios/ijksdl_vout_overlay_videotoolbox.h"
+#import "IJKMediaPlayback.h"
 
 #define IJK_VTB_FCC_AVCC   SDL_FOURCC('C', 'c', 'v', 'a')
 
@@ -289,6 +290,12 @@ static void VTDecoderCallback(void *decompressionOutputRefCon,
 
         if (status != 0) {
             ALOGE("decode callback %d %s\n", (int)status, vtb_get_error_string(status));
+            if (!ffp->is_handling_error) {
+                ffp_decode_error_callback(ffp->inject_opaque, (int)status);
+                ffp->is_handling_error = true;
+            } else {
+                ALOGI("resetting player... \n");
+            }
             goto failed;
         }
 

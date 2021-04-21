@@ -133,6 +133,7 @@ typedef enum IJKLogLevel {
 @property (nonatomic, retain) id<IJKMediaUrlOpenDelegate> liveOpenDelegate;
 
 @property (nonatomic, retain) id<IJKMediaNativeInvokeDelegate> nativeInvokeDelegate;
+@property (nonatomic, retain) id<IJKDecodeErrorHandleDelegate> decodeErrorDelegate;
 
 - (void)didShutdown;
 
