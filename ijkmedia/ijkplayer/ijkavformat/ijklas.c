@@ -1839,7 +1839,7 @@ static int las_close(AVFormatContext* s) {
 }
 
 static int las_probe(AVProbeData* p) {
-    if (p->filename && strstr(p->filename, ".las"))
+    if (p->filename && strstr(p->filename, "manifest.las"))
         return AVPROBE_SCORE_MAX;
 
     return 0;
@@ -2108,17 +2108,17 @@ static const AVOption las_options[] = {
     {NULL}
 };
 
-static const AVClass las_class = {
-    .class_name = "las",
+static const AVClass ijklas_class = {
+    .class_name = "las demuxer",
     .item_name  = av_default_item_name,
     .option     = las_options,
     .version    = LIBAVUTIL_VERSION_INT,
 };
 
-AVInputFormat ijkff_las_demuxer = {
-    .name           = "las",
+AVInputFormat ijkff_ijklas_demuxer = {
+    .name           = "ijklas",
     .long_name      = "Live Adaptive Streaming",
-    .priv_class     = &las_class,
+    .priv_class     = &ijklas_class,
     .priv_data_size = sizeof(LasContext),
     .read_probe     = las_probe,
     .read_header    = las_read_header,
