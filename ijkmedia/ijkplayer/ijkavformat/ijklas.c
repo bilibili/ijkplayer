@@ -919,12 +919,16 @@ bool is_speed_enough(MultiRateAdaption* thiz, double speed) {
 }
 
 int32_t next_local_rate_index(MultiRateAdaption* thiz, double speed, double buffered) {
+    if (thiz->buffer_index <= 1 && buffered <= 0.1) {
+        algo_info("empty past buffer");
+        return thiz->current;
+    }
     double buffer_speed = get_buffer_speed(thiz, buffered);
     double smoothed_speed = get_smoothed_speed(thiz, speed);
     algo_info("gop_speed: %.0f, smoothed_speed: %.0f", speed, smoothed_speed);
 
     double predicted_buffered = get_predicted_buffer(thiz, buffered);
-    algo_info("s: %.0f, predicted_buffered: %.1f", buffer_speed, predicted_buffered);
+    algo_info("buffer_speed: %.0f, buffered: %.1f, predicted_buffered: %.1f", buffer_speed, buffered, predicted_buffered);
 
     int32_t next_index = thiz->current;
     if (predicted_buffered < thiz->conf.buffer_lower_limit_second
