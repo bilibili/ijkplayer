@@ -28,6 +28,7 @@
 #include "ijksdl/ijksdl_thread.h"
 #include "ijksdl/ijksdl_mutex.h"
 #include "cJSON.h"
+#include "ff_ffplay_def.h"
 
 #include "ijklas.h"
 
@@ -184,10 +185,11 @@ typedef struct PlayList {
 
     // cur playlist Qos
     LasStatistic* las_statistic;
-    LasPlayerStatistic* las_player_statistic;
     bool is_stream_ever_opened;
     int64_t bytes_read;
     unsigned session_id;
+    FFTrackCacheStatistic* video_cache;
+    FFTrackCacheStatistic* audio_cache;
 } PlayList;
 
 typedef struct LasContext {
@@ -204,13 +206,21 @@ typedef struct LasContext {
     char* manifest_string;
     int64_t network;
     char* abr_history_data;
-    int64_t las_player_statistic;
     char* live_adapt_config;
     AVDictionary* avio_opts;
 
     // all info of las is in it
     PlayList playlist;
+    LasStatistic las_statistic;
     unsigned session_id;
+    int64_t video_cache_ptr;
+    int64_t audio_cache_ptr;
+    int las_switch_mode;
+    int64_t first_audio_packet_pts;
+    int block_duration;
+    int audio_only_request;
+    int audio_only_response;
+    bool stream_reopened;
 } LasContext;
 
 #pragma mark common util
@@ -242,127 +252,37 @@ static inline void _log(unsigned session_id, const char* func_name, int av_log_l
 #define algo_error(...) log_debug_tag(thiz->session_id, AV_LOG_ERROR, __VA_ARGS__)
 
 #pragma mark PlayerControl
-int las_stat_init(LasPlayerStatistic* stat) {
-    memset(stat, 0, sizeof(LasPlayerStatistic));
-    stat->las_switch_mode = LAS_AUTO_MODE;
-    return pthread_mutex_init(&stat->control_mutex, NULL);
+int get_switch_mode(AVFormatContext* format) {
+    LasContext* c = format->priv_data;
+    return c->las_switch_mode;
 }
 
-void las_stat_destroy(LasPlayerStatistic* stat) {
-    pthread_mutex_destroy(&stat->control_mutex);
+int64_t get_first_audio_packet_pts(AVFormatContext* format) {
+    LasContext* c = format->priv_data;
+    return c->first_audio_packet_pts;
 }
 
-int las_get_switch_mode(LasPlayerStatistic* stat) {
-    pthread_mutex_lock(&stat->control_mutex);
-    int switch_mode = stat->las_switch_mode;
-    pthread_mutex_unlock(&stat->control_mutex);
-    return switch_mode;
+int get_audio_only_request(AVFormatContext* format) {
+    LasContext* c = format->priv_data;
+    return c->audio_only_request;
 }
 
-void las_set_switch_mode(LasPlayerStatistic* stat, int switch_mode) {
-    pthread_mutex_lock(&stat->control_mutex);
-    stat->las_switch_mode = switch_mode;
-    pthread_mutex_unlock(&stat->control_mutex);
+void set_audio_only_response(AVFormatContext* format, int audio_only) {
+    LasContext* c = format->priv_data;
+    c->audio_only_response = audio_only;
 }
 
-int64_t las_get_first_audio_packet_pts(LasPlayerStatistic* stat) {
-    pthread_mutex_lock(&stat->control_mutex);
-    int64_t ret = stat->first_audio_packet_pts;
-    pthread_mutex_unlock(&stat->control_mutex);
-    return ret;
+void set_stream_reopened(AVFormatContext* format, bool stream_reopened) {
+    LasContext* c = format->priv_data;
+    c->stream_reopened = stream_reopened;
 }
 
-void las_set_first_audio_packet_pts(LasPlayerStatistic* stat, int64_t first_audio_packet_pts) {
-    pthread_mutex_lock(&stat->control_mutex);
-    stat->first_audio_packet_pts = first_audio_packet_pts;
-    pthread_mutex_unlock(&stat->control_mutex);
-}
-
-int las_get_audio_only_request(LasPlayerStatistic* stat) {
-    pthread_mutex_lock(&stat->control_mutex);
-    int ret = stat->audio_only_request;
-    pthread_mutex_unlock(&stat->control_mutex);
-    return ret;
-}
-
-void las_set_audio_only_request(LasPlayerStatistic* stat, int audio_only) {
-    pthread_mutex_lock(&stat->control_mutex);
-    stat->audio_only_request = audio_only;
-    pthread_mutex_unlock(&stat->control_mutex);
-}
-
-int las_get_audio_only_response(LasPlayerStatistic* stat) {
-    pthread_mutex_lock(&stat->control_mutex);
-    int ret = stat->audio_only_response;
-    pthread_mutex_unlock(&stat->control_mutex);
-    return ret;
-}
-
-void las_set_audio_only_response(LasPlayerStatistic* stat, int audio_only) {
-    pthread_mutex_lock(&stat->control_mutex);
-    stat->audio_only_response = audio_only;
-    pthread_mutex_unlock(&stat->control_mutex);
-}
-
-int64_t las_get_audio_cached_duration_ms(LasPlayerStatistic* stat) {
-    pthread_mutex_lock(&stat->control_mutex);
-    int64_t ret = stat->audio_cached_duration_ms;
-    pthread_mutex_unlock(&stat->control_mutex);
-    return ret;
-}
-
-void las_set_audio_cached_duration_ms(LasPlayerStatistic* stat, int64_t audio_cached_duration_ms) {
-    pthread_mutex_lock(&stat->control_mutex);
-    stat->audio_cached_duration_ms = audio_cached_duration_ms;
-    pthread_mutex_unlock(&stat->control_mutex);
-}
-
-int64_t las_get_video_cached_duration_ms(LasPlayerStatistic* stat) {
-    pthread_mutex_lock(&stat->control_mutex);
-    int64_t ret = stat->video_cached_duration_ms;
-    pthread_mutex_unlock(&stat->control_mutex);
-    return ret;
-}
-
-void las_set_video_cached_duration_ms(LasPlayerStatistic* stat, int64_t video_cached_duration_ms) {
-    pthread_mutex_lock(&stat->control_mutex);
-    stat->video_cached_duration_ms = video_cached_duration_ms;
-    pthread_mutex_unlock(&stat->control_mutex);
-}
-
-bool las_get_stream_reopened(LasPlayerStatistic* stat) {
-    pthread_mutex_lock(&stat->control_mutex);
-    bool ret = stat->stream_reopened;
-    pthread_mutex_unlock(&stat->control_mutex);
-    return ret;
-}
-
-void las_set_stream_reopened(LasPlayerStatistic* stat, bool stream_reopened) {
-    pthread_mutex_lock(&stat->control_mutex);
-    stat->stream_reopened = stream_reopened;
-    pthread_mutex_unlock(&stat->control_mutex);
-}
-
-#pragma mark PlayerStat
-int32_t LasPlayerStatistic_get_downloading_bitrate(LasPlayerStatistic* stat) {
-    if (stat->las_stat.bitrate_downloading > 0) {
-        return stat->las_stat.bitrate_downloading;
+int64_t get_cache_duration_ms(FFTrackCacheStatistic* cache) {
+    if (cache) {
+        return cache->duration;
     }
     return 0;
 }
-
-char* LasPlayerStatistic_get_downloading_url(LasPlayerStatistic* stat) {
-    return stat->las_stat.cur_playing_url;
-}
-
-int LasPlayerStatistic_get_http_reading_error(LasPlayerStatistic* stat) {
-    if (stat->las_stat.cur_rep_http_reading_error != 0) {
-        return stat->las_stat.cur_rep_http_reading_error;
-    } else {
-        return 0;
-    }
-}
-
 
 #pragma mark PlayListLock
 static int64_t get_bytes_read(PlayList* p) {
@@ -692,8 +612,8 @@ void LasStatistic_on_read_packet(LasStatistic* stat, PlayList* playlist) {
 
 void LasStatistic_on_buffer_time(LasStatistic* stat, PlayList* playlist) {
     if (stat && playlist) {
-        stat->cached_a_dur_ms = las_get_audio_cached_duration_ms(playlist->las_player_statistic);
-        stat->cached_v_dur_ms = las_get_video_cached_duration_ms(playlist->las_player_statistic);
+        stat->cached_a_dur_ms = get_cache_duration_ms(playlist->audio_cache);
+        stat->cached_v_dur_ms = get_cache_duration_ms(playlist->video_cache);;
         stat->cached_tag_dur_ms = TagQueue_get_duration_ms(&playlist->tag_queue);
         log_info("a_buffer_time_ms=%lld, v_buffer_time_ms=%lld, CachedTagQueue_ms=%lld",
                  stat->cached_a_dur_ms, stat->cached_v_dur_ms, stat->cached_tag_dur_ms);
@@ -724,8 +644,8 @@ void LasStatistic_on_bandwidth_update(PlayList* playlist, MultiRateAdaption* ada
 void LasStatistic_on_rep_switch_count(LasStatistic* stat, PlayList* playlist) {
     if (stat) {
         stat->rep_switch_cnt++;
-        stat->switch_point_a_buffer_ms = las_get_audio_cached_duration_ms(playlist->las_player_statistic);
-        stat->switch_point_v_buffer_ms = las_get_video_cached_duration_ms(playlist->las_player_statistic);
+        stat->switch_point_a_buffer_ms = get_cache_duration_ms(playlist->audio_cache);
+        stat->switch_point_v_buffer_ms = get_cache_duration_ms(playlist->video_cache);
     }
 }
 
@@ -819,7 +739,7 @@ void MultiRateAdaption_init(MultiRateAdaption* thiz, AdaptiveConfig config,
         thiz->current -= 1;
     }
 
-    int switch_mode = las_get_switch_mode(playlist->las_player_statistic);
+    int switch_mode = get_switch_mode(playlist->outermost_ctx);
     if (switch_mode >= 0 && switch_mode < thiz->n_bitrates) {
         thiz->current = rep_index_2_local_index(thiz, switch_mode);
     }
@@ -858,7 +778,7 @@ bool update_stable_buffer(MultiRateAdaption* thiz, double buffered) {
  * check buffer periodically
  */
 void check_buffer(MultiRateAdaption* thiz, PlayList* playlist) {
-    double buffered = las_get_audio_cached_duration_ms(playlist->las_player_statistic) / 1000.0;
+    double buffered = get_cache_duration_ms(playlist->audio_cache) / 1000.0;
     bool is_buffer_stable = update_stable_buffer(thiz, buffered);
     if (is_buffer_stable && thiz->current + 1 < thiz->n_bitrates) {
         thiz->generated_speed = thiz->levels[thiz->current + 1];
@@ -1193,10 +1113,10 @@ int64_t GopReader_download_gop(GopReader* reader, MultiRateAdaption* adaption, P
             return ret;
         }
 
-        int request = las_get_audio_only_request(playlist->las_player_statistic);
+        int request = get_audio_only_request(playlist->outermost_ctx);
         if (reader->is_audio_only != request) {
             reader->is_audio_only = request;
-            int64_t current_playing_audio_ts = las_get_first_audio_packet_pts(playlist->las_player_statistic);
+            int64_t current_playing_audio_ts = get_first_audio_packet_pts(playlist->outermost_ctx);
             log_info("current_playing_audio_ts: %lld", current_playing_audio_ts);
             int64_t request_ts = current_playing_audio_ts - playlist->adaptation_set.duration / 2;
             reader->last_gop_start_ts = request_ts > 0 ? request_ts : 0;
@@ -1229,9 +1149,9 @@ int64_t GopReader_download_gop(GopReader* reader, MultiRateAdaption* adaption, P
 
                 adaption->next_expected_rep_index = next_representation_id(
                         adaption,
-                        las_get_switch_mode(playlist->las_player_statistic),
+                        get_switch_mode(playlist->outermost_ctx),
                         speed,
-                        las_get_audio_cached_duration_ms(playlist->las_player_statistic) / 1000.0);
+                        get_cache_duration_ms(playlist->audio_cache) / 1000.0);
                 if (reader->rep_index != adaption->next_expected_rep_index) {
                     LasStatistic_on_adaption_adapted(playlist, adaption);
                     LasStatistic_on_rep_switch_count(playlist->las_statistic, playlist);
@@ -1509,7 +1429,7 @@ int PlayList_open_rep(PlayList* playlist, FlvTag* tag, AVFormatContext* s) {
         }
         playlist->is_stream_ever_opened = true;
     } else {
-        las_set_stream_reopened(playlist->las_player_statistic, true);
+        set_stream_reopened(playlist->outermost_ctx, true);
     }
 
     for (int j = 0; j < playlist->ctx->nb_streams && j < MAX_STREAM_NUM; j++) {
@@ -1524,7 +1444,7 @@ int PlayList_open_rep(PlayList* playlist, FlvTag* tag, AVFormatContext* s) {
     }
 
     playlist->cur_rep_index = tag->rep_index;
-    las_set_audio_only_response(playlist->las_player_statistic, tag->audio_only);
+    set_audio_only_response(playlist->outermost_ctx, tag->audio_only);
     log_info("open_index:%d, audio_only:%d finished", tag->rep_index, tag->audio_only);
     return 0;
 
@@ -1767,7 +1687,6 @@ int parse_root(char* file_name, PlayList* c) {
 }
 
 int parse_adapt_config(char* config_string, AdaptiveConfig* config, PlayList* playlist) {
-    LasPlayerStatistic* player_stat = playlist->las_player_statistic;
     cJSON* root = cJSON_Parse(config_string);
     if (!root)
         return LAS_ERROR_ADAPT_CONFIG_JSON;
@@ -1865,20 +1784,19 @@ static int las_read_header(AVFormatContext* s) {
     playlist->session_id = c->session_id;
 
     av_dict_set(&c->avio_opts, "timeout", "10000000", 0);
-    
     if ((ret = parse_root(c->manifest_string, playlist)) < 0) {
         log_error("Illegal manifest Json String");
         goto fail;
     }
-    log_info("Finish parsing las manifest (player)");
-    playlist->las_player_statistic = (LasPlayerStatistic*)c->las_player_statistic;
-    if (playlist->las_player_statistic) {
-        playlist->las_statistic = &playlist->las_player_statistic->las_stat;
-        log_info("playlist->stat: %p, las_statistic: %p", playlist->las_player_statistic, playlist->las_statistic);
+    log_info("Finish parsing las manifest, switch_mode:%d", c->las_switch_mode);
+    if (c->audio_cache_ptr && c->video_cache_ptr) {
+        playlist->video_cache = (FFTrackCacheStatistic*)c->video_cache_ptr;
+        playlist->audio_cache = (FFTrackCacheStatistic*)c->audio_cache_ptr;
     } else {
-        log_error("las_player_statistic is null");
+        log_error("FFTrackCacheStatistic is null");
         goto fail;
     }
+    playlist->las_statistic = &c->las_statistic;
     LasStatistic_init(playlist->las_statistic, playlist);
 
     RateAdaptConfig_default_init(&config, playlist);
@@ -2094,16 +2012,44 @@ static const AVOption las_options[] = {
         OFFSET(network), AV_OPT_TYPE_INT64, {.i64 = 0}, 0, INT64_MAX, FLAGS
     },
     {
-        "las_player_statistic", "las_player_statistic",
-        OFFSET(las_player_statistic), AV_OPT_TYPE_INT64, {.i64 = 0}, INT64_MIN, INT64_MAX, FLAGS
-    },
-    {
         "liveAdaptConfig", "liveAdaptConfig",
         OFFSET(live_adapt_config), AV_OPT_TYPE_STRING, { .str = NULL }, CHAR_MIN, CHAR_MAX, FLAGS
     },
     {
         "session_id", "session_id",
         OFFSET(session_id), AV_OPT_TYPE_INT, {.i64 = 0}, INT32_MIN, INT32_MAX, FLAGS
+    },
+    {
+        "video_cache_ptr", "video_cache_ptr",
+        OFFSET(video_cache_ptr), AV_OPT_TYPE_INT64, {.i64 = 0}, INT64_MIN, INT64_MAX, FLAGS
+    },
+    {
+        "audio_cache_ptr", "audio_cache_ptr",
+        OFFSET(audio_cache_ptr), AV_OPT_TYPE_INT64, {.i64 = 0}, INT64_MIN, INT64_MAX, FLAGS
+    },
+    {
+        "las_switch_mode", "las_switch_mode",
+        OFFSET(las_switch_mode), AV_OPT_TYPE_INT, {.i64 = LAS_AUTO_MODE}, INT_MIN, INT_MAX, FLAGS
+    },
+    {
+        "first_audio_packet_pts", "first_audio_packet_pts",
+        OFFSET(first_audio_packet_pts), AV_OPT_TYPE_INT64, {.i64 = 0}, INT64_MIN, INT64_MAX, FLAGS
+    },
+    {
+        "block_duration", "block_duration",
+        OFFSET(block_duration), AV_OPT_TYPE_INT, {.i64 = 0}, INT64_MIN, INT64_MAX, FLAGS
+    },
+    {
+        "audio_only_request", "audio_only_request",
+        OFFSET(audio_only_request), AV_OPT_TYPE_INT, {.i64 = 0}, INT64_MIN, INT64_MAX, FLAGS
+    },
+    {
+        "audio_only_response", "audio_only_response",
+        OFFSET(audio_only_response), AV_OPT_TYPE_INT, {.i64 = 0}, INT64_MIN, INT64_MAX, FLAGS
+    },
+    {
+        "stream_reopened", "stream_reopened",
+        OFFSET(stream_reopened), AV_OPT_TYPE_INT, {.i64 = 0}, INT64_MIN, INT64_MAX, FLAGS
     },
     {NULL}
 };
