@@ -28,7 +28,8 @@
 #define IJK_REGISTER_DEMUXER(x)                                         \
     {                                                                   \
         extern AVInputFormat ijkff_##x##_demuxer;                       \
-        ijkav_register_input_format(&ijkff_##x##_demuxer);              \
+        int ijkav_register_##x##_demuxer(AVInputFormat *demuxer, int demuxer_size);   \
+        ijkav_register_##x##_demuxer(&ijkff_##x##_demuxer, sizeof(AVInputFormat));    \
     }
 
 #define IJK_REGISTER_PROTOCOL(x)                                        \
