@@ -256,7 +256,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     public void setVideoPath(String path) {
         if (path.contains("adaptationSet")){
             mManifestString = path;
-            setVideoURI(Uri.parse("manifest.las"));
+            setVideoURI(Uri.parse("ijklas:"));
         } else {
             setVideoURI(Uri.parse(path));
         }

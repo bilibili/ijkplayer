@@ -1758,7 +1758,7 @@ static int las_close(AVFormatContext* s) {
 }
 
 static int las_probe(AVProbeData* p) {
-    if (p->filename && strstr(p->filename, "manifest.las"))
+    if (p->filename && av_strstart(p->filename, "ijklas:", NULL))
         return AVPROBE_SCORE_MAX;
 
     return 0;

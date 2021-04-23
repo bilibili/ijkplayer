@@ -39,7 +39,7 @@
 - (instancetype)initWithManifest: (NSString*)manifest_string {
     self = [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
     if (self) {
-        self.url = [NSURL URLWithString:@"manifest.las"];
+        self.url = [NSURL URLWithString:@"ijklas:"];
         self.manifest = manifest_string;
     }
     return self;
