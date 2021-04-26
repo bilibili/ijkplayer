@@ -455,6 +455,14 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     _pauseInBackground = pause;
 }
 
+- (void)setAudioDSPCallbackFn:(AUDIO_DSP_CBFN)pAudioDSPCbFn
+{
+    if (!_mediaPlayer)
+        return;
+
+    ijkmp_setAudioDSPCallbackFn( _mediaPlayer, pAudioDSPCbFn );
+}
+
 - (BOOL)isVideoToolboxOpen
 {
     if (!_mediaPlayer)

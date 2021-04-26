@@ -383,6 +383,14 @@ static int ijkmp_msg_loop(void *arg)
     return ret;
 }
 
+void ijkmp_setAudioDSPCallbackFn( IjkMediaPlayer *mp, AUDIO_DSP_CBFN audioCbFn )
+{
+#if NOMIT_AUDIO_DSP_CALLBACK_FN==1
+    mp->pAudioDSPCbFn = audioCbFn;
+    mp->ffplayer->pAudioDSPCbFn = audioCbFn;
+#endif
+}
+
 static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
 {
     assert(mp);

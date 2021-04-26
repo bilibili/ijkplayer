@@ -1,8 +1,5 @@
 /*
- * ijkplayer_internal.h
- *
- * Copyright (c) 2013 Bilibili
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * ijkaudiocallback.h
  *
  * This file is part of ijkPlayer.
  *
@@ -21,36 +18,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef IJKPLAYER_ANDROID__IJKPLAYER_INTERNAL_H
-#define IJKPLAYER_ANDROID__IJKPLAYER_INTERNAL_H
+#ifndef IJKPLAYER__IJKAUDIOCALLBACK_H
+#define IJKPLAYER__IJKAUDIOCALLBACK_H
 
-#include <assert.h>
-#include "ijksdl/ijksdl.h"
-#include "ff_fferror.h"
-#include "ff_ffplay.h"
-#include "ijkplayer.h"
+/* Include support for DSP callback function in library build */
+#define NOMIT_AUDIO_DSP_CALLBACK_FN (0)
 
-struct IjkMediaPlayer {
-    volatile int ref_count;
-    pthread_mutex_t mutex;
-    FFPlayer *ffplayer;
+/* Callback function prototype */
+typedef int (*AUDIO_DSP_CBFN) ( void **inData,           unsigned int  numInSamples,
+                                void **outData,          unsigned int *numOutSamples,
+                                unsigned int sampleRate, unsigned int  numChans,
+                                unsigned int format);
 
-    int (*msg_loop)(void*);
-    SDL_Thread *msg_thread;
-    SDL_Thread _msg_thread;
-
-    int mp_state;
-    char *data_source;
-    void *weak_thiz;
-
-    int restart;
-    int restart_from_beginning;
-    int seek_req;
-    long seek_msec;
-
-#if NOMIT_AUDIO_DSP_CALLBACK_FN==1
-    AUDIO_DSP_CBFN pAudioDSPCbFn;
-#endif
-};
-
-#endif
+#endif//IJKPLAYER__IJKAUDIOCALLBACK_H

@@ -279,6 +279,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3CA61AE3230E25EF003CCA37 /* ijkaudiocallback.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ijkaudiocallback.h; sourceTree = "<group>"; };
 		454316201A66493700676070 /* ffpipeline_ios.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ffpipeline_ios.c; path = ijkmedia/ijkplayer/ios/pipeline/ffpipeline_ios.c; sourceTree = "<group>"; };
 		454316211A66493700676070 /* ffpipeline_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ffpipeline_ios.h; path = ijkmedia/ijkplayer/ios/pipeline/ffpipeline_ios.h; sourceTree = "<group>"; };
 		454316221A66493700676070 /* ffpipenode_ios_videotoolbox_vdec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ffpipenode_ios_videotoolbox_vdec.h; path = ijkmedia/ijkplayer/ios/pipeline/ffpipenode_ios_videotoolbox_vdec.h; sourceTree = "<group>"; };
@@ -756,6 +757,7 @@
 				E6903FDC17EAFC6100CFD954 /* ff_ffplay.h */,
 				E69BE5491B93FED300AFBA3F /* ijkavformat */,
 				E69BE54E1B93FED300AFBA3F /* ijkavutil */,
+				3CA61AE3230E25EF003CCA37 /* ijkaudiocallback.h */,
 				E6FAD9551A515CE300725002 /* ijkmeta.c */,
 				E6FAD9561A515CE300725002 /* ijkmeta.h */,
 				E66F8DEE17EFEA9400354D80 /* ijkplayer_internal.h */,

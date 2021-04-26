@@ -28,6 +28,7 @@
 #include "ff_ffmsg_queue.h"
 
 #include "ijkmeta.h"
+#include "ijkaudiocallback.h"
 
 #ifndef MPTRACE
 #define MPTRACE ALOGD
@@ -197,6 +198,7 @@ void            ijkmp_dec_ref(IjkMediaPlayer *mp);
 void            ijkmp_dec_ref_p(IjkMediaPlayer **pmp);
 
 int             ijkmp_set_data_source(IjkMediaPlayer *mp, const char *url);
+void            ijkmp_setAudioDSPCallbackFn( IjkMediaPlayer *mp, AUDIO_DSP_CBFN audioCbFn );
 int             ijkmp_prepare_async(IjkMediaPlayer *mp);
 int             ijkmp_start(IjkMediaPlayer *mp);
 int             ijkmp_pause(IjkMediaPlayer *mp);
