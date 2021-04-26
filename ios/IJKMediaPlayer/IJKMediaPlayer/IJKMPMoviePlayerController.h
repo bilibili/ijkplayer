@@ -24,7 +24,10 @@
 #import "IJKMediaPlayback.h"
 #import <MediaPlayer/MediaPlayer.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 @interface IJKMPMoviePlayerController : MPMoviePlayerController <IJKMediaPlayback>
+#pragma clang diagnostic pop
 
 - (id)initWithContentURL:(NSURL *)aUrl;
 - (id)initWithContentURLString:(NSString *)aUrl;

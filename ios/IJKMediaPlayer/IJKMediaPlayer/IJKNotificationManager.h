@@ -25,7 +25,7 @@
 
 @interface IJKNotificationManager : NSObject
 
-- (nullable instancetype)init;
+- (nonnull instancetype)init;
 
 - (void)addObserver:(nonnull id)observer
            selector:(nonnull SEL)aSelector
