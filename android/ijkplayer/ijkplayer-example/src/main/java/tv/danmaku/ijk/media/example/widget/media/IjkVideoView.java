@@ -342,7 +342,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                     mSettings.getUsingMediaDataSource() &&
                     (TextUtils.isEmpty(scheme) || scheme.equalsIgnoreCase("file"))) {
-                IMediaDataSource dataSource = new FileMediaDataSource(new File(mUri.toString()));
+                IMediaDataSource dataSource = new FileMediaDataSource(new File(mUri.getPath()));
                 mMediaPlayer.setDataSource(dataSource);
             }  else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 mMediaPlayer.setDataSource(mAppContext, mUri, mHeaders);
