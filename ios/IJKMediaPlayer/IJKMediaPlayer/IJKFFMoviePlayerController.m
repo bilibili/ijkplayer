@@ -1005,7 +1005,13 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
     NSString *key = [NSString stringWithUTF8String:name];
     const char *value = ijkmeta_get_string_l(rawMeta, name);
     if (value) {
-        [meta setObject:[NSString stringWithUTF8String:value] forKey:key];
+        @try {
+            [meta setObject:[NSString stringWithUTF8String:value] forKey:key];
+        } @catch (NSException *exception) {
+            [meta removeObjectForKey:key];
+        } @finally {
+        }
+
     } else if (defaultValue) {
         [meta setObject:defaultValue forKey:key];
     } else {
