@@ -125,6 +125,8 @@ static void func_free_l(SDL_Vout *vout)
         }
         ISDL_Array__clear(&opaque->overlay_pool);
         ISDL_Array__clear(&opaque->overlay_manager);
+        ISDL_Array__uninit(&opaque->overlay_pool);
+        ISDL_Array__uninit(&opaque->overlay_manager);
 
         if (opaque->native_window) {
             ANativeWindow_release(opaque->native_window);
