@@ -2986,9 +2986,9 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
                 double tbr = av_q2d(is->video_st->r_frame_rate);
                 if (tbr > ffp->max_fps && tbr < 130.0) {
                     is->is_video_high_fps = 1;
-                    av_log(ffp, AV_LOG_WARNING, "fps: %lf (too high)\n", tbr);
+                    av_log(ffp, AV_LOG_WARNING, "tbr: %lf (too high)\n", tbr);
                 } else {
-                    av_log(ffp, AV_LOG_WARNING, "fps: %lf (normal)\n", tbr);
+                    av_log(ffp, AV_LOG_WARNING, "tbr: %lf (normal)\n", tbr);
                 }
             }
         }
