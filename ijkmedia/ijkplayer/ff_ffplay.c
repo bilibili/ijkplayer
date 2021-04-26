@@ -1327,6 +1327,7 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
 retry:
         if (frame_queue_nb_remaining(&is->pictq) == 0) {
             // nothing to do, no picture to display in the queue
+            ffp_toggle_buffering(ffp, 1);
         } else {
             double last_duration, duration, delay;
             Frame *vp, *lastvp;
