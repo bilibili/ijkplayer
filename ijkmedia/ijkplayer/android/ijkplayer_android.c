@@ -54,13 +54,13 @@ fail:
     return NULL;
 }
 
-void ijkmp_android_set_surface_l(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
+int ijkmp_android_set_surface_l(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
 {
     if (!mp || !mp->ffplayer || !mp->ffplayer->vout)
         return;
 
     SDL_VoutAndroid_SetAndroidSurface(env, mp->ffplayer->vout, android_surface);
-    ffpipeline_set_surface(env, mp->ffplayer->pipeline, android_surface);
+    return ffpipeline_set_surface(env, mp->ffplayer->pipeline, android_surface);
 }
 
 void ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_surface)
@@ -70,8 +70,15 @@ void ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_
 
     MPTRACE("ijkmp_set_android_surface(surface=%p)", (void*)android_surface);
     pthread_mutex_lock(&mp->mutex);
-    ijkmp_android_set_surface_l(env, mp, android_surface);
+    int result = ijkmp_android_set_surface_l(env, mp, android_surface);
     pthread_mutex_unlock(&mp->mutex);
+    if(result == RE_INIT_MEDIA_CODEC && (mp->ffplayer->mediacodec_all_videos || mp->ffplayer->mediacodec_avc || mp->ffplayer->mediacodec_hevc || mp->ffplayer->mediacodec_mpeg2){
+        long currPos = ffp_get_current_position_l(mp->ffplayer);
+        if(currPos > 0){
+            ijkmp_seek_to(mp,currPos);
+        }
+    }
+
     MPTRACE("ijkmp_set_android_surface(surface=%p)=void", (void*)android_surface);
 }
 
