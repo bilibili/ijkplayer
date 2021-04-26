@@ -361,6 +361,34 @@ LABEL_RETURN:
     return retval;
 }
 
+static jint
+IjkMediaPlayer_startRecord(JNIEnv *env, jobject thiz, jstring file)
+{
+    jint retval = 0;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: startRecord: null mp", LABEL_RETURN);
+    const char *nativeString = (*env)->GetStringUTFChars(env, file, 0);
+    retval = ijkmp_start_record(mp, nativeString);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return retval;
+}
+
+static jint
+IjkMediaPlayer_stopRecord(JNIEnv *env, jobject thiz)
+{
+    jint retval = 0;
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: stopRecord: null mp", LABEL_RETURN);
+
+    retval = ijkmp_stop_record(mp);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return retval;
+}
+
 static void
 IjkMediaPlayer_release(JNIEnv *env, jobject thiz)
 {
@@ -783,75 +811,75 @@ inject_callback(void *opaque, int what, void *data, size_t data_size)
     if (weak_thiz == NULL )
         goto fail;
     switch (what) {
-        case AVAPP_CTRL_WILL_HTTP_OPEN:
-        case AVAPP_CTRL_WILL_LIVE_OPEN:
-        case AVAPP_CTRL_WILL_CONCAT_SEGMENT_OPEN: {
-            AVAppIOControl *real_data = (AVAppIOControl *)data;
-            real_data->is_handled = 0;
+    case AVAPP_CTRL_WILL_HTTP_OPEN:
+    case AVAPP_CTRL_WILL_LIVE_OPEN:
+    case AVAPP_CTRL_WILL_CONCAT_SEGMENT_OPEN: {
+        AVAppIOControl *real_data = (AVAppIOControl *)data;
+        real_data->is_handled = 0;
 
-            jbundle = J4AC_Bundle__Bundle__catchAll(env);
-            if (!jbundle) {
-                ALOGE("%s: J4AC_Bundle__Bundle__catchAll failed for case %d\n", __func__, what);
-                goto fail;
-            }
-            J4AC_Bundle__putString__withCString__catchAll(env, jbundle, "url", real_data->url);
-            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "segment_index", real_data->segment_index);
-            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "retry_counter", real_data->retry_counter);
-            real_data->is_handled = J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
-            if (J4A_ExceptionCheck__catchAll(env)) {
-                goto fail;
-            }
+        jbundle = J4AC_Bundle__Bundle__catchAll(env);
+        if (!jbundle) {
+            ALOGE("%s: J4AC_Bundle__Bundle__catchAll failed for case %d\n", __func__, what);
+            goto fail;
+        }
+        J4AC_Bundle__putString__withCString__catchAll(env, jbundle, "url", real_data->url);
+        J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "segment_index", real_data->segment_index);
+        J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "retry_counter", real_data->retry_counter);
+        real_data->is_handled = J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
+        if (J4A_ExceptionCheck__catchAll(env)) {
+            goto fail;
+        }
 
-            J4AC_Bundle__getString__withCString__asCBuffer(env, jbundle, "url", real_data->url, sizeof(real_data->url));
-            if (J4A_ExceptionCheck__catchAll(env)) {
-                goto fail;
-            }
-            ret = 0;
-            break;
+        J4AC_Bundle__getString__withCString__asCBuffer(env, jbundle, "url", real_data->url, sizeof(real_data->url));
+        if (J4A_ExceptionCheck__catchAll(env)) {
+            goto fail;
         }
-        case AVAPP_EVENT_WILL_HTTP_OPEN:
-        case AVAPP_EVENT_DID_HTTP_OPEN:
-        case AVAPP_EVENT_WILL_HTTP_SEEK:
-        case AVAPP_EVENT_DID_HTTP_SEEK: {
-            AVAppHttpEvent *real_data = (AVAppHttpEvent *) data;
-            jbundle = J4AC_Bundle__Bundle__catchAll(env);
-            if (!jbundle) {
-                ALOGE("%s: J4AC_Bundle__Bundle__catchAll failed for case %d\n", __func__, what);
-                goto fail;
-            }
-            J4AC_Bundle__putString__withCString__catchAll(env, jbundle, "url", real_data->url);
-            J4AC_Bundle__putLong__withCString__catchAll(env, jbundle, "offset", real_data->offset);
-            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "error", real_data->error);
-            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "http_code", real_data->http_code);
-            J4AC_Bundle__putLong__withCString__catchAll(env, jbundle, "file_size", real_data->filesize);
-            J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
-            if (J4A_ExceptionCheck__catchAll(env))
-                goto fail;
-            ret = 0;
-            break;
+        ret = 0;
+        break;
+    }
+    case AVAPP_EVENT_WILL_HTTP_OPEN:
+    case AVAPP_EVENT_DID_HTTP_OPEN:
+    case AVAPP_EVENT_WILL_HTTP_SEEK:
+    case AVAPP_EVENT_DID_HTTP_SEEK: {
+        AVAppHttpEvent *real_data = (AVAppHttpEvent *) data;
+        jbundle = J4AC_Bundle__Bundle__catchAll(env);
+        if (!jbundle) {
+            ALOGE("%s: J4AC_Bundle__Bundle__catchAll failed for case %d\n", __func__, what);
+            goto fail;
         }
-        case AVAPP_CTRL_DID_TCP_OPEN:
-        case AVAPP_CTRL_WILL_TCP_OPEN: {
-            AVAppTcpIOControl *real_data = (AVAppTcpIOControl *)data;
-            jbundle = J4AC_Bundle__Bundle__catchAll(env);
-            if (!jbundle) {
-                ALOGE("%s: J4AC_Bundle__Bundle__catchAll failed for case %d\n", __func__, what);
-                goto fail;
-            }
-            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "error", real_data->error);
-            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "family", real_data->family);
-            J4AC_Bundle__putString__withCString__catchAll(env, jbundle, "ip", real_data->ip);
-            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "port", real_data->port);
-            J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "fd", real_data->fd);
-            J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
-            if (J4A_ExceptionCheck__catchAll(env))
-                goto fail;
-            ret = 0;
-            break;
+        J4AC_Bundle__putString__withCString__catchAll(env, jbundle, "url", real_data->url);
+        J4AC_Bundle__putLong__withCString__catchAll(env, jbundle, "offset", real_data->offset);
+        J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "error", real_data->error);
+        J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "http_code", real_data->http_code);
+        J4AC_Bundle__putLong__withCString__catchAll(env, jbundle, "file_size", real_data->filesize);
+        J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
+        if (J4A_ExceptionCheck__catchAll(env))
+            goto fail;
+        ret = 0;
+        break;
+    }
+    case AVAPP_CTRL_DID_TCP_OPEN:
+    case AVAPP_CTRL_WILL_TCP_OPEN: {
+        AVAppTcpIOControl *real_data = (AVAppTcpIOControl *)data;
+        jbundle = J4AC_Bundle__Bundle__catchAll(env);
+        if (!jbundle) {
+            ALOGE("%s: J4AC_Bundle__Bundle__catchAll failed for case %d\n", __func__, what);
+            goto fail;
         }
-        default: {
-            ret = 0;
-        }
+        J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "error", real_data->error);
+        J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "family", real_data->family);
+        J4AC_Bundle__putString__withCString__catchAll(env, jbundle, "ip", real_data->ip);
+        J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "port", real_data->port);
+        J4AC_Bundle__putInt__withCString__catchAll(env, jbundle, "fd", real_data->fd);
+        J4AC_IjkMediaPlayer__onNativeInvoke(env, weak_thiz, what, jbundle);
+        if (J4A_ExceptionCheck__catchAll(env))
+            goto fail;
+        ret = 0;
+        break;
+    }
+    default: {
+        ret = 0;
+    }
     }
 fail:
     SDL_JNI_DeleteLocalRefP(env, &jbundle);
@@ -1152,6 +1180,10 @@ static JNINativeMethod g_methods[] = {
     { "isPlaying",              "()Z",      (void *) IjkMediaPlayer_isPlaying },
     { "getCurrentPosition",     "()J",      (void *) IjkMediaPlayer_getCurrentPosition },
     { "getDuration",            "()J",      (void *) IjkMediaPlayer_getDuration },
+
+    { "startRecord",            "(Ljava/lang/String;)I",      (void *) IjkMediaPlayer_startRecord },
+    { "stopRecord",             "()I",      (void *) IjkMediaPlayer_stopRecord },
+
     { "_release",               "()V",      (void *) IjkMediaPlayer_release },
     { "_reset",                 "()V",      (void *) IjkMediaPlayer_reset },
     { "setVolume",              "(FF)V",    (void *) IjkMediaPlayer_setVolume },

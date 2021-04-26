@@ -720,6 +720,17 @@ typedef struct FFPlayer {
     char *mediacodec_default_name;
     int ijkmeta_delay_init;
     int render_wait_start;
+
+    //录制属性
+    AVFormatContext *m_ofmt_ctx;        // 用于输出的AVFormatContext结构体
+    AVOutputFormat *m_ofmt;
+    pthread_mutex_t record_mutex;       // 锁
+    int is_record;                      // 是否在录制
+    int record_error;
+
+    int is_first;                       // 第一帧数据
+    int64_t start_pts;                  // 开始录制时pts
+    int64_t start_dts;                  // 开始录制时dts
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))

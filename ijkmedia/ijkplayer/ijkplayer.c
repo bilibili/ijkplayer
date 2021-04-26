@@ -102,8 +102,8 @@ void ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes))
 }
 
 void ijkmp_io_stat_complete_register(void (*cb)(const char *url,
-                                                int64_t read_bytes, int64_t total_size,
-                                                int64_t elpased_time, int64_t total_duration))
+                                     int64_t read_bytes, int64_t total_size,
+                                     int64_t elpased_time, int64_t total_duration))
 {
     ffp_io_stat_complete_register(cb);
 }
@@ -131,7 +131,7 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
 
     return mp;
 
-    fail:
+fail:
     ijkmp_destroy_p(&mp);
     return NULL;
 }
@@ -551,7 +551,7 @@ bool ijkmp_is_playing(IjkMediaPlayer *mp)
 {
     assert(mp);
     if (mp->mp_state == MP_STATE_PREPARED ||
-        mp->mp_state == MP_STATE_STARTED) {
+            mp->mp_state == MP_STATE_STARTED) {
         return true;
     }
 
@@ -795,4 +795,26 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
     }
 
     return -1;
+}
+
+int ijkmp_start_record(IjkMediaPlayer *mp, const char *file_name)
+{
+    assert(mp);
+    MPTRACE("ijkmp_startRecord()\n");
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ffp_start_record(mp->ffplayer, file_name);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_startRecord()=%d\n", retval);
+    return retval;
+}
+
+int ijkmp_stop_record(IjkMediaPlayer *mp)
+{
+    assert(mp);
+    MPTRACE("ijkmp_stopRecord()\n");
+    pthread_mutex_lock(&mp->mutex);
+    int retval = ffp_stop_record(mp->ffplayer);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_stopRecord()=%d\n", retval);
+    return retval;
 }
