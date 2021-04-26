@@ -80,6 +80,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     if (self) {
         _tryLockErrorCount = 0;
         _shouldLockWhileBeingMovedToWindow = YES;
+        _applicationState = IJKSDLGLViewApplicationForegroundState;
         self.glActiveLock = [[NSRecursiveLock alloc] init];
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
