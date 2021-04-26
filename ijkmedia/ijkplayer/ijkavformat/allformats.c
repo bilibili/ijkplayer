@@ -87,5 +87,6 @@ void ijkav_register_all(void)
     IJK_REGISTER_PROTOCOL(ijksegment);
     /* demuxers */
     IJK_REGISTER_DEMUXER(ijklivehook);
+    IJK_REGISTER_DEMUXER(ijklas);
     av_log(NULL, AV_LOG_INFO, "===== custom modules end =====\n");
 }

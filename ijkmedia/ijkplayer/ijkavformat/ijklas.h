@@ -7,7 +7,7 @@
 
 #define MAX_URL_SIZE 4096
 #define MAX_STREAM_NUM 10
-#define LAS_AUTO_MODE -1
+#define LAS_AUTO_MODE (-1)
 
 typedef struct FlvInfo {
     int total_bandwidth_kbps;
@@ -45,48 +45,5 @@ typedef struct LasStatistic {
     int64_t cached_v_dur_ms;
     int64_t total_bytes_read;
 } LasStatistic;
-
-typedef struct LasPlayerStatistic {
-    pthread_mutex_t control_mutex;
-
-    int las_switch_mode;
-    int64_t first_audio_packet_pts;
-    int block_duration;
-    int audio_only_request;
-    int audio_only_response;
-    int64_t audio_cached_duration_ms;
-    int64_t video_cached_duration_ms;
-
-    LasStatistic las_stat;
-    bool stream_reopened;
-} LasPlayerStatistic;
-
-int las_stat_init(LasPlayerStatistic* stat);
-void las_stat_destroy(LasPlayerStatistic* stat);
-
-int las_get_switch_mode(LasPlayerStatistic* stat);
-void las_set_switch_mode(LasPlayerStatistic* stat, int switch_mode);
-
-int64_t las_get_first_audio_packet_pts(LasPlayerStatistic* stat);
-void las_set_first_audio_packet_pts(LasPlayerStatistic* stat, int64_t first_audio_packet_pts);
-
-int las_get_audio_only_request(LasPlayerStatistic* stat);
-void las_set_audio_only_request(LasPlayerStatistic* stat, int audio_only);
-
-int las_get_audio_only_response(LasPlayerStatistic* stat);
-void las_set_audio_only_response(LasPlayerStatistic* stat, int audio_only);
-
-int64_t las_get_audio_cached_duration_ms(LasPlayerStatistic* stat);
-void las_set_audio_cached_duration_ms(LasPlayerStatistic* stat, int64_t audio_cached_duration_ms);
-
-int64_t las_get_video_cached_duration_ms(LasPlayerStatistic* stat);
-void las_set_video_cached_duration_ms(LasPlayerStatistic* stat, int64_t video_cached_duration_ms);
-
-bool las_get_stream_reopened(LasPlayerStatistic* stat);
-void las_set_stream_reopened(LasPlayerStatistic* stat, bool stream_reopened);
-
-int32_t LasPlayerStatistic_get_downloading_bitrate(LasPlayerStatistic* stat);
-char* LasPlayerStatistic_get_downloading_url(LasPlayerStatistic* stat);
-int LasPlayerStatistic_get_http_reading_error(LasPlayerStatistic* stat);
 
 #endif

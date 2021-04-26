@@ -39,11 +39,9 @@
 - (instancetype)initWithManifest: (NSString*)manifest_string {
     self = [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
     if (self) {
-        NSString *fake_url = @"http://fakeurl_for_manifest";
-        NSURL   *url  = [NSURL URLWithString:fake_url];
-        self.url = url;
+        self.url = [NSURL URLWithString:@"ijklas:"];
+        self.manifest = manifest_string;
     }
-    self.manifest = manifest_string;
     return self;
 }
 
@@ -87,8 +85,9 @@
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
 
     if (self.manifest != nil){
-        [options setFormatOptionValue:self.manifest          forKey:@"manifest_string"];
-        [options setPlayerOptionIntValue:1              forKey:@"is-manifest"];
+        [options setPlayerOptionValue:@"ijklas"         forKey:@"iformat"];
+        [options setPlayerOptionIntValue:0              forKey:@"find_stream_info"];
+        [options setFormatOptionValue:self.manifest     forKey:@"manifest_string"];
     }
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;

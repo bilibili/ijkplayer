@@ -256,7 +256,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     public void setVideoPath(String path) {
         if (path.contains("adaptationSet")){
             mManifestString = path;
-            setVideoURI(Uri.EMPTY);
+            setVideoURI(Uri.parse("ijklas:"));
         } else {
             setVideoURI(Uri.parse(path));
         }
@@ -1044,7 +1044,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     ijkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
 
                     if (mManifestString != null) {
-                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "is-manifest", 1);
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "iformat", "ijklas");
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "find_stream_info", 0);
                         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "manifest_string", mManifestString);
                     }
                     if (mSettings.getUsingMediaCodec()) {
