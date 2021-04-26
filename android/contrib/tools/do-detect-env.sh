@@ -90,6 +90,11 @@ case "$UNAME_S" in
     Darwin)
         export IJK_MAKE_FLAG=-j`sysctl -n machdep.cpu.thread_count`
     ;;
+    Linux)
+        if which nproc >/dev/null; then
+            export IJK_MAKE_FLAG=-j`nproc`
+        fi
+    ;;
     CYGWIN_NT-*)
         IJK_WIN_TEMP="$(cygpath -am /tmp)"
         export TEMPDIR=$IJK_WIN_TEMP/
