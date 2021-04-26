@@ -245,9 +245,48 @@ static int recreate_format_l(JNIEnv *env, IJKFF_Pipenode *node)
             SDL_AMediaFormat_setBuffer(opaque->input_aformat, "csd-0", convert_buffer, esds_size);
             free(convert_buffer);
         } else {
-            // Codec specific data
-            // SDL_AMediaFormat_setBuffer(opaque->aformat, "csd-0", opaque->codecpar->extradata, opaque->codecpar->extradata_size);
-            ALOGE("csd-0: naked\n");
+           if(opaque->codecpar->codec_id == AV_CODEC_ID_H264  && opaque->codecpar->extradata_size > 6){
+                // https://blog.csdn.net/chinabinlang/article/details/78181110
+                // https://blog.csdn.net/dxpqxb/article/details/7631644
+                // AUD+SPS+PPS的情况
+                // 103 代表sps
+                // 104 代表pps
+                int spsIndex = -1;
+                int ppsIndex = -1;
+                if(opaque->codecpar->extradata[0] == 0 && opaque->codecpar->extradata[1] == 0 && opaque->codecpar->extradata[2] == 0
+                   && opaque->codecpar->extradata[3] == 1 && opaque->codecpar->extradata[4] == 9 && opaque->codecpar->extradata[5] == 240){
+                    for(int i=6;i<opaque->avctx->extradata_size-4;i++){
+                        if(opaque->codecpar->extradata[i] == 0 && opaque->codecpar->extradata[i+1] == 0 && opaque->codecpar->extradata[i+2] == 0
+                           && opaque->codecpar->extradata[i+3] == 1){
+                            if(opaque->codecpar->extradata[i+4] == 103){
+                                spsIndex = i;
+                                ALOGE("AMediaFormat find sps = %d",spsIndex);
+                            }else if(opaque->codecpar->extradata[i+4] == 104){
+                                ppsIndex = i;
+                                ALOGE("AMediaFormat find pps = %d",ppsIndex);
+                            }
+                        }
+                    }
+                }
+
+                if(spsIndex > 0){
+                    int length = 0;
+                    if(ppsIndex > 0 && spsIndex < ppsIndex){
+                        length = ppsIndex-spsIndex;
+                    }else{
+                        length = opaque->codecpar->extradata_size-spsIndex;
+                    }
+
+                    uint8_t *convert_buffer = (uint8_t *)calloc(1, length);
+                    memcpy( convert_buffer, opaque->codecpar->extradata+spsIndex, length);
+
+                    SDL_AMediaFormat_setBuffer(opaque->input_aformat, "csd-0", convert_buffer, length);
+                    free(convert_buffer);
+                    ALOGE("AMediaFormat csd-0: length = %d",length);
+                }
+            }else{
+                ALOGE("AMediaFormat csd-0: naked\n");
+            }
         }
     } else {
         ALOGE("no buffer(%d)\n", opaque->codecpar->extradata_size);
