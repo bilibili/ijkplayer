@@ -59,6 +59,9 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20201130--001
     NSInteger _sampleAspectRatioNumerator;
     NSInteger _sampleAspectRatioDenominator;
 
+    int _degrees;
+    BOOL _isRotated;
+    
     BOOL      _seeking;
     NSInteger _bufferingTime;
     NSInteger _bufferingPosition;
@@ -89,6 +92,7 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20201130--001
 @synthesize loadState = _loadState;
 
 @synthesize naturalSize = _naturalSize;
+@synthesize rotateDegrees = _rotateDegrees;
 @synthesize scalingMode = _scalingMode;
 @synthesize shouldAutoplay = _shouldAutoplay;
 
@@ -707,6 +711,13 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 
 - (void)changeNaturalSize
 {
+    if (_isRotated && (_degrees==90 || _degrees==270)) {
+        NSInteger newWidth = _videoHeight;
+        _videoHeight = _videoWidth;
+        _videoWidth = newWidth;
+        NSLog(@"video rotated, new size: %d,%d",(int)_videoWidth,(int)_videoHeight);
+    }
+    
     [self willChangeValueForKey:@"naturalSize"];
     if (_sampleAspectRatioNumerator > 0 && _sampleAspectRatioDenominator > 0) {
         self->_naturalSize = CGSizeMake(1.0f * _videoWidth * _sampleAspectRatioNumerator / _sampleAspectRatioDenominator, _videoHeight);
@@ -720,6 +731,40 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
          postNotificationName:IJKMPMovieNaturalSizeAvailableNotification
          object:self];
     }
+}
+
+- (void)changeRotateInfo {
+    switch (_degrees) {
+        case 90: {
+            _rotateDegrees = IJKMPMovieRotateDegrees_90;
+            CGRect originFrame = self.view.frame;
+            CGAffineTransform transform = CGAffineTransformMakeRotation(M_PI_2);
+            [_view setTransform:transform];
+            [_view setFrame:originFrame];
+            [self changeNaturalSize];
+        } break;
+        case 180: {
+            _rotateDegrees = IJKMPMovieRotateDegrees_180;
+            CGAffineTransform transform = CGAffineTransformMakeRotation(M_PI);
+            [self.view setTransform:transform];
+        } break;
+        case 270: {
+            _rotateDegrees = IJKMPMovieRotateDegrees_270;
+            CGRect originFrame = self.view.frame;
+            CGAffineTransform transform = CGAffineTransformMakeRotation(M_PI_2*3);
+            [self.view setTransform:transform];
+            [self.view setFrame:originFrame];
+            [self changeNaturalSize];
+        } break;
+        default:
+            _rotateDegrees = IJKMPMovieRotateDegrees_0;
+            break;
+    }
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:IJKMPMovieRotateAvailableNotification
+     object:self
+     userInfo:@{IJKMPMovieRotateAvailableNotificationDegreesUserInfoKey:
+                    @(_rotateDegrees)}];
 }
 
 - (void)setScalingMode: (IJKMPMovieScalingMode) aScalingMode
@@ -1176,6 +1221,14 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             if (avmsg->arg2 > 0)
                 _sampleAspectRatioDenominator = avmsg->arg2;
             [self changeNaturalSize];
+            break;
+        case FFP_MSG_VIDEO_ROTATION_CHANGED:
+            _degrees = avmsg->arg1;
+            if (_degrees != 0) {
+                NSLog(@"FFP_MSG_VIDEO_ROTATION_CHANGED: %d\n", _degrees);
+                _isRotated = YES;
+                [self changeRotateInfo];
+            }
             break;
         case FFP_MSG_BUFFERING_START: {
             NSLog(@"FFP_MSG_BUFFERING_START:\n");

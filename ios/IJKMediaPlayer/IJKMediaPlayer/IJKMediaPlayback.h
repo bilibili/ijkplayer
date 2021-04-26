@@ -31,6 +31,13 @@ typedef NS_ENUM(NSInteger, IJKMPMovieScalingMode) {
     IJKMPMovieScalingModeFill        // Non-uniform scale. Both render dimensions will exactly match the visible bounds
 };
 
+typedef NS_ENUM(NSInteger, IJKMPMovieRotateDegrees) {
+    IJKMPMovieRotateDegrees_0,      // 0 degree, no rotation
+    IJKMPMovieRotateDegrees_90,     // rotate 90 degrees
+    IJKMPMovieRotateDegrees_180,    // rotate 180 degrees
+    IJKMPMovieRotateDegrees_270     // rotate 270 degrees
+};
+
 typedef NS_ENUM(NSInteger, IJKMPMoviePlaybackState) {
     IJKMPMoviePlaybackStateStopped,
     IJKMPMoviePlaybackStatePlaying,
@@ -91,6 +98,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property(nonatomic, readonly) int64_t numberOfBytesTransferred;
 
 @property(nonatomic, readonly) CGSize naturalSize;
+@property(nonatomic, readonly) IJKMPMovieRotateDegrees rotateDegrees;
 @property(nonatomic) IJKMPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;
 
@@ -144,6 +152,10 @@ IJK_EXTERN NSString* const IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotifica
 // Calling -prepareToPlay on the movie player will begin determining movie properties asynchronously.
 // These notifications are posted when the associated movie property becomes available.
 IJK_EXTERN NSString* const IJKMPMovieNaturalSizeAvailableNotification;
+
+// Posted when video rotation property available.
+IJK_EXTERN NSString* const IJKMPMovieRotateAvailableNotification;
+IJK_EXTERN NSString* const IJKMPMovieRotateAvailableNotificationDegreesUserInfoKey; // NSNumber (IJKMPMovieRotateDegrees)
 
 // -----------------------------------------------------------------------------
 //  Extend Notifications
