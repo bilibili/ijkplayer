@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ---
 
-## 0.7.9 (2021-05-15)
+## 0.7.10 (2021-05-15)
 
 * fix the lost bintray files (iOS)
 
