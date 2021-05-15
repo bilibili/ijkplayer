@@ -3,6 +3,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+
+---
+
+## 0.7.9 (2021-05-15)
+
+* fix the lost bintray files (iOS)
+
 ---
 
 ## 0.7.8 (2020-07-11)
