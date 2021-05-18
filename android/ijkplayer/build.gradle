@@ -2,10 +2,12 @@
 
 buildscript {
     repositories {
+        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.3'
+        classpath 'com.android.tools.build:gradle:4.2.0'
 
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
@@ -16,6 +18,8 @@ buildscript {
 
 allprojects {
     repositories {
+       maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        google()
         jcenter()
     }
 }
@@ -28,8 +32,10 @@ ext {
 
     versionCode = 800800
     versionName = "0.8.8"
+
+
 }
 
 wrapper {
-    gradleVersion = '2.14.1'
+    gradleVersion = '6.9.0'
 }
