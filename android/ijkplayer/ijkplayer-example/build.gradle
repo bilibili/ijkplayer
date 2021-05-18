@@ -12,26 +12,50 @@ android {
     }
     defaultConfig {
         applicationId "tv.danmaku.ijk.media.example"
-        minSdkVersion 9
+        minSdkVersion 19
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
+        flavorDimensions "versionCode"
+        ndk {
+            //armeabiv-v7a: 第7代及以上的 ARM 处理器。2011年15月以后的生产的大部分Android设备都使用它
+            //arm64-v8a: 第8代、64位ARM处理器
+            //armeabi: 第5代、第6代的ARM处理器，早期的手机用的比较多,此工程中默认不处理
+            //x86: 平板、模拟器用得比较多
+            //x86_64: 64位的平板
+            abiFilters  "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
     }
+
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+
     productFlavors {
-        all32 { minSdkVersion 9 }
+        all32 { minSdkVersion 19 }
         all64 { minSdkVersion 21 }
         // armv5 {}
         // armv7a {}
         // arm64 { minSdkVersion 21 }
         // x86 {}
+
     }
+
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs  = ['src/main/jniLibs']
+        }
+    }
+
+
 }
+
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
