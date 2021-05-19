@@ -314,7 +314,11 @@ echo "--------------------"
 echo "[*] compile ffmpeg"
 echo "--------------------"
 cp config.* $FF_PREFIX
-make $FF_MAKE_FLAGS > /dev/null
+CPU_COUNTS=`cat /proc/cpuinfo | grep "processor" | wc | awk '{print int($1)}'`
+echo "host cpu counts is $CPU_COUNTS"
+echo "make -j${CPU_COUNTS} $FF_MAKE_FLAGS"
+make -j${CPU_COUNTS} $FF_MAKE_FLAGS
+#make $FF_MAKE_FLAGS > /dev/null
 make install
 mkdir -p $FF_PREFIX/include/libffmpeg
 cp -f config.h $FF_PREFIX/include/libffmpeg/config.h

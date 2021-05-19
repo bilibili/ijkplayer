@@ -189,7 +189,10 @@ echo "--------------------"
 echo "[*] compile openssl"
 echo "--------------------"
 make depend
-make $FF_MAKE_FLAGS
+CPU_COUNTS=`cat /proc/cpuinfo | grep "processor" | wc | awk '{print int($1)}'`
+echo "host cpu counts is $CPU_COUNTS"
+echo "make -j${CPU_COUNTS} $FF_MAKE_FLAGS"
+make -j${CPU_COUNTS} $FF_MAKE_FLAGS
 make install_sw
 
 #--------------------
