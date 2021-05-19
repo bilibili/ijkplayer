@@ -302,6 +302,11 @@ if [ -f "./config.h" ]; then
     echo 'reuse configure'
 else
     which $CC
+    if [ -f /usr/bin/pkg-config ]; then
+        /bin/cp -fv /usr/bin/pkg-config  $FF_TOOLCHAIN_PATH/bin/$FF_CROSS_PREFIX-pkg-config
+    else
+        echo -e "${TEXT_RED}/usr/bin/pkg-config not exist, pls check${TEXT_RESET}"
+    fi
     ./configure $FF_CFG_FLAGS \
         --extra-cflags="$FF_CFLAGS $FF_EXTRA_CFLAGS" \
         --extra-ldflags="$FF_DEP_LIBS $FF_EXTRA_LDFLAGS"

@@ -1,5 +1,9 @@
-tag next
+branch dev-baseon-latest-k0.8.8
 --------------------------------
+- ffmpeg   : plan to upgrade to 4.4
+- openssl  : upgrading to OpenSSL_1_1_1-stable
+- ijkplayer: rtsp
+- ijkplayer: bugfix
 
 tag k0.8.8
 --------------------------------

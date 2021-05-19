@@ -41,3 +41,5 @@ xcuserdata
 xcshareddata
 *.xccheckout
 
+android/ijkplayer/ijkplayer-example/gradle
+android/ijkplayer/ijkplayer-example/src/main/jniLibs

@@ -35,7 +35,7 @@ fi
 
 
 FF_BUILD_ROOT=`pwd`
-FF_ANDROID_PLATFORM=android-9
+FF_ANDROID_PLATFORM=android-19
 
 
 FF_BUILD_NAME=
@@ -64,48 +64,59 @@ FF_GCC_64_VER=$IJK_GCC_64_VER
 
 #----- armv7a begin -----
 if [ "$FF_ARCH" = "armv7a" ]; then
+    FF_ANDROID_PLATFORM=android-16
     FF_BUILD_NAME=openssl-armv7a
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 	
     FF_CROSS_PREFIX=arm-linux-androideabi
 	FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_VER}
 
-    FF_PLATFORM_CFG_FLAGS="android-armv7"
+    FF_PLATFORM_CFG_FLAGS="android-arm"
+    FF_EXTRA_CFLAGS="-D__ANDROID_API__=16"
 
 elif [ "$FF_ARCH" = "armv5" ]; then
+    FF_ANDROID_PLATFORM=android-16
     FF_BUILD_NAME=openssl-armv5
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 	
     FF_CROSS_PREFIX=arm-linux-androideabi
 	FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_VER}
 
-    FF_PLATFORM_CFG_FLAGS="android"
+    FF_PLATFORM_CFG_FLAGS="android-arm"
+    FF_EXTRA_CFLAGS="-D__ANDROID_API__=16"
 
 elif [ "$FF_ARCH" = "x86" ]; then
+    FF_ANDROID_PLATFORM=android-16
     FF_BUILD_NAME=openssl-x86
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 	
     FF_CROSS_PREFIX=i686-linux-android
 	FF_TOOLCHAIN_NAME=x86-${FF_GCC_VER}
 
-    FF_PLATFORM_CFG_FLAGS="android-x86"
+    #can't work
+    #FF_PLATFORM_CFG_FLAGS="android-x86"
+
+    FF_PLATFORM_CFG_FLAGS="linux-x86"
 
     FF_CFG_FLAGS="$FF_CFG_FLAGS no-asm"
+    FF_EXTRA_CFLAGS="-D__ANDROID_API__=16"
 
 elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_ANDROID_PLATFORM=android-21
-
     FF_BUILD_NAME=openssl-x86_64
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=x86_64-linux-android
     FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_64_VER}
 
+    #can't work
+    FF_PLATFORM_CFG_FLAGS="android-x86_64"
+
     FF_PLATFORM_CFG_FLAGS="linux-x86_64"
+    FF_EXTRA_CFLAGS="-D__ANDROID_API__=21"
 
 elif [ "$FF_ARCH" = "arm64" ]; then
     FF_ANDROID_PLATFORM=android-21
-
     FF_BUILD_NAME=openssl-arm64
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
@@ -113,6 +124,7 @@ elif [ "$FF_ARCH" = "arm64" ]; then
     FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_64_VER}
 
     FF_PLATFORM_CFG_FLAGS="linux-aarch64"
+    FF_EXTRA_CFLAGS="-D__ANDROID_API__=21"
 
 else
     echo "unknown architecture $FF_ARCH";
@@ -154,7 +166,19 @@ echo ""
 echo "--------------------"
 echo "[*] check openssl env"
 echo "--------------------"
-export PATH=$FF_TOOLCHAIN_PATH/bin:$PATH
+
+
+if [ "$FF_ARCH" = "armv7a" ] || [ "$FF_ARCH" = "armv5" ];then
+    #workaround for openssl armv7a
+    # https://github.com/openssl/openssl/issues/7398
+    # https://github.com/openssl/openssl/issues/8100
+    #openssl build script need to known ANDROID_NDK_HOME exactly for armv7a
+    export ANDROID_NDK_HOME=$ANDROID_NDK
+    #don't use standalone toolchain for armv7a but use NDK toolchain directly
+    export PATH=$ANDROID_NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
+else
+    export PATH=$FF_TOOLCHAIN_PATH/bin:$PATH
+fi
 
 export COMMON_FF_CFG_FLAGS=
 
@@ -164,6 +188,7 @@ FF_CFG_FLAGS="$FF_CFG_FLAGS $COMMON_FF_CFG_FLAGS"
 # Standard options:
 FF_CFG_FLAGS="$FF_CFG_FLAGS zlib-dynamic"
 FF_CFG_FLAGS="$FF_CFG_FLAGS no-shared"
+FF_CFG_FLAGS="$FF_CFG_FLAGS --prefix=$FF_PREFIX"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --openssldir=$FF_PREFIX"
 FF_CFG_FLAGS="$FF_CFG_FLAGS --cross-compile-prefix=${FF_CROSS_PREFIX}-"
 FF_CFG_FLAGS="$FF_CFG_FLAGS $FF_PLATFORM_CFG_FLAGS"
@@ -177,8 +202,8 @@ cd $FF_SOURCE
 #if [ -f "./Makefile" ]; then
 #    echo 'reuse configure'
 #else
-    echo "./Configure $FF_CFG_FLAGS"
-    ./Configure $FF_CFG_FLAGS
+    echo "./Configure $FF_CFG_FLAGS $FF_EXTRA_CFLAGS"
+    ./Configure $FF_CFG_FLAGS $FF_EXTRA_CFLAGS
 #        --extra-cflags="$FF_CFLAGS $FF_EXTRA_CFLAGS" \
 #        --extra-ldflags="$FF_EXTRA_LDFLAGS"
 #fi
@@ -190,7 +215,6 @@ echo "[*] compile openssl"
 echo "--------------------"
 make depend
 CPU_COUNTS=`cat /proc/cpuinfo | grep "processor" | wc | awk '{print int($1)}'`
-echo "host cpu counts is $CPU_COUNTS"
 echo "make -j${CPU_COUNTS} $FF_MAKE_FLAGS"
 make -j${CPU_COUNTS} $FF_MAKE_FLAGS
 make install_sw
