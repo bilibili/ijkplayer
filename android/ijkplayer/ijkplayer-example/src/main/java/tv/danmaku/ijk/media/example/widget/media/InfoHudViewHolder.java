@@ -119,6 +119,30 @@ public class InfoHudViewHolder {
                     if (mp == null)
                         break;
 
+                    String url = mp.getDataSource();
+                    if (url == null)
+                        break;
+
+                    String tmpUrl = "";
+                    int  lineLength  = 35;
+                    int  endPos      = 0;
+                    int  beginPos    = 0;
+                    int  otherLength = url.length();
+                    for (int i = 0; i < url.length() % lineLength; i++) {
+                        beginPos    = i * lineLength;
+                        if (otherLength <= lineLength) {
+                            endPos =  url.length();
+                            tmpUrl =  tmpUrl + url.substring(beginPos, endPos);
+                            break;
+                        } else {
+                            endPos =  beginPos + lineLength;
+                            tmpUrl =  tmpUrl + url.substring(beginPos, endPos) + "\r\n";
+                        }
+                        otherLength = otherLength - lineLength;
+                    }
+                    setRowValue(R.string.url, tmpUrl);
+
+
                     int vdec = mp.getVideoDecoder();
                     switch (vdec) {
                         case IjkMediaPlayer.FFP_PROPV_DECODER_AVCODEC:
