@@ -205,10 +205,15 @@ FFMPEG_DEP_OPENSSL_LIB=/usr/local/opt/openssl/lib
 # with openssl
 # brew install openssl
 
+export PKG_CONFIG_PATH="${FF_BUILD_ROOT}/build/lib/pkgconfig"
+echo "PKG_CONFIG_PATH ${PKG_CONFIG_PATH}"
+mkdir -p ${PKG_CONFIG_PATH}
+
 if [ -f "${FFMPEG_DEP_OPENSSL_LIB}/libssl.dylib" ]; then
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-openssl"
     FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_OPENSSL_INC}"
     FFMPEG_DEP_LIBS="$FFMPEG_CFLAGS -L${FFMPEG_DEP_OPENSSL_LIB} -lssl -lcrypto"
+    cp -f /usr/local/opt/openssl/lib/pkgconfig/* ${PKG_CONFIG_PATH}
 else
    echo "openssl not found"
 fi
@@ -227,8 +232,6 @@ if [ -f "${FF_BUILD_ROOT}/build/lib/libsrt.a" ]; then
 
 fi
 
-export PKG_CONFIG_PATH="${FF_BUILD_ROOT}/build/lib/pkgconfig"
-echo "PKG_CONFIG_PATH ${PKG_CONFIG_PATH}"
 
 
 #--------------------

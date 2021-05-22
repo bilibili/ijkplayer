@@ -33,5 +33,5 @@ sh $TOOLS/pull-repo-base.sh $GLFW_UPSTREAM $GLFW_LOCAL_REPO
 echo "== pull GLFW fork =="
 sh $TOOLS/pull-repo-ref.sh $GLFW_FORK $BASEDIR/desktop/glfw ${GLFW_LOCAL_REPO}
 cd $BASEDIR/desktop/glfw
-git checkout ${GLFW_COMMIT} -b ijkplayer
+git checkout ${GLFW_COMMIT} -B ijkplayer
 cd -

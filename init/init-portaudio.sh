@@ -33,5 +33,5 @@ sh $TOOLS/pull-repo-base.sh $PORTAUDIO_UPSTREAM $PORTAUDIO_LOCAL_REPO
 echo "== pull portaudio fork =="
 sh $TOOLS/pull-repo-ref.sh $PORTAUDIO_FORK $BASEDIR/ijkmedia/portaudio ${PORTAUDIO_LOCAL_REPO}
 cd $BASEDIR/ijkmedia/portaudio
-git checkout ${PORTAUDIO_COMMIT} -b ijkplayer
+git checkout ${PORTAUDIO_COMMIT} -B ijkplayer
 cd -
