@@ -3,11 +3,14 @@ package tv.danmaku.ijk.media.example.widget.media;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.TableLayout;
 
+import java.util.Date;
 import java.util.Locale;
+import java.text.SimpleDateFormat;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -20,6 +23,7 @@ public class InfoHudViewHolder {
     private IMediaPlayer mMediaPlayer;
     private long mLoadCost = 0;
     private long mSeekCost = 0;
+    private final static String TAG = InfoHudViewHolder.class.getName();
 
     public InfoHudViewHolder(Context context, TableLayout tableLayout) {
         mTableLayoutBinder = new TableLayoutBinder(context, tableLayout);
@@ -119,6 +123,29 @@ public class InfoHudViewHolder {
                     if (mp == null)
                         break;
 
+                    String url = mp.getDataSource();
+                    if (url == null)
+                        break;
+                    String tmpUrl = "";
+                    int  lineLength  = 30;
+                    int  endPos      = 0;
+                    int  beginPos    = 0;
+                    int  otherLength = url.length();
+                    for (int i = 0; i < (url.length() / lineLength + 1); i++) {
+                        beginPos    = i * lineLength;
+                        if (otherLength <= lineLength) {
+                            endPos =  url.length();
+                            tmpUrl =  tmpUrl + url.substring(beginPos, endPos);
+                            break;
+                        } else {
+                            endPos =  beginPos + lineLength;
+                            tmpUrl =  tmpUrl + url.substring(beginPos, endPos) + "\r\n";
+                        }
+                        otherLength = otherLength - lineLength;
+                    }
+                    setRowValue(R.string.url, tmpUrl);
+
+
                     int vdec = mp.getVideoDecoder();
                     switch (vdec) {
                         case IjkMediaPlayer.FFP_PROPV_DECODER_AVCODEC:
@@ -151,6 +178,20 @@ public class InfoHudViewHolder {
                     setRowValue(R.string.seek_load_cost, String.format(Locale.US, "%d ms", seekLoadDuration));
                     setRowValue(R.string.tcp_speed, String.format(Locale.US, "%s", formatedSpeed(tcpSpeed, 1000)));
                     setRowValue(R.string.bit_rate, String.format(Locale.US, "%.2f kbs", bitRate/1000f));
+
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+                    long startTime = mp.getBeginTime();
+                    setRowValue(R.string.start_time, formatter.format(new Date(startTime)));
+
+                    Date curTime =  new Date(System.currentTimeMillis());
+                    setRowValue(R.string.current_time, formatter.format(curTime));
+
+                    long playTime = mp.getPlayTime();
+                    setRowValue(R.string.play_time, String.valueOf(playTime) + "  secs");
+
+                    long pauseTime = mp.getPauseTime();
+                    setRowValue(R.string.pause_time, String.valueOf(pauseTime) + "  secs");
 
                     mHandler.removeMessages(MSG_UPDATE_HUD);
                     mHandler.sendEmptyMessageDelayed(MSG_UPDATE_HUD, 500);

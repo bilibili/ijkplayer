@@ -14,6 +14,7 @@
     <string name="toggle_render">Render</string>
     <string name="toggle_ratio">Scale</string>
     <string name="show_info">Info</string>
+    <string name="url">URL</string>
     <string name="vdec">vdec</string>
     <string name="fps">fps</string>
     <string name="v_cache">v-cache</string>
@@ -23,6 +24,10 @@
     <string name="seek_load_cost">seek_load_cost</string>
     <string name="tcp_speed">tcp_speed</string>
     <string name="bit_rate">bit_rate</string>
+    <string name="start_time">start_time</string>
+    <string name="current_time">current_time</string>
+    <string name="play_time">play_time</string>
+    <string name="pause_time">pause_time</string>
 
     <string name="media_information">Media Information</string>
     <string name="mi_player">Player</string>
