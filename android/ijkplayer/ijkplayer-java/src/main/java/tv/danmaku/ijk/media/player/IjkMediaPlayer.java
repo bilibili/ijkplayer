@@ -48,9 +48,11 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.security.InvalidParameterException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import tv.danmaku.ijk.media.player.annotations.AccessedByNative;
 import tv.danmaku.ijk.media.player.annotations.CalledByNative;
@@ -169,6 +171,14 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private String mDataSource;
 
+    //statistic info for pressure test & troubleshooting purpose
+    private long mBeginTime; //beginning time of current playback
+    private long mTotalPlayTime;
+    private long mLastPauseTime;
+    private long mTotalPauseTime;
+    private boolean bIsPaused;
+
+
     /**
      * Default library loader
      * Load them by yourself, if your libraries are not installed at default place.
@@ -187,7 +197,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                 if (libLoader == null)
                     libLoader = sLocalLibLoader;
 
-                libLoader.loadLibrary("ijkffmpeg");
+                //libLoader.loadLibrary("ijkffmpeg");
                 libLoader.loadLibrary("ijksdl");
                 libLoader.loadLibrary("ijkplayer");
                 mIsLibLoaded = true;
@@ -230,6 +240,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     private void initPlayer(IjkLibLoader libLoader) {
         loadLibrariesOnce(libLoader);
         initNativeOnce();
+
+        //should I put it in another better place?
+        mBeginTime = System.currentTimeMillis();
 
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
@@ -519,14 +532,21 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public void start() throws IllegalStateException {
+        Log.i(TAG, "start playing...");
         stayAwake(true);
+        if (bIsPaused) {
+            mTotalPauseTime += System.currentTimeMillis() - mLastPauseTime;
+            Log.i(TAG, "mTotalPauseTime " + (mTotalPauseTime / 1000) );
+        }
         _start();
+        bIsPaused = false;
     }
 
     private native void _start() throws IllegalStateException;
 
     @Override
     public void stop() throws IllegalStateException {
+        Log.i(TAG, "stop playing...");
         stayAwake(false);
         _stop();
     }
@@ -536,10 +556,47 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     @Override
     public void pause() throws IllegalStateException {
         stayAwake(false);
+        assert(bIsPaused == false);
+
+        if (!bIsPaused) {
+            mLastPauseTime = System.currentTimeMillis();
+        }
+        Log.i(TAG, "pause playing...");
         _pause();
+        bIsPaused = !bIsPaused;
     }
 
     private native void _pause() throws IllegalStateException;
+
+
+    public long getBeginTime() {
+        return mBeginTime;
+    }
+
+
+    public long getPauseTime() {
+        long mCurrentPauseTime = 0;
+        if (bIsPaused) {
+            mCurrentPauseTime = System.currentTimeMillis() - mLastPauseTime;
+        }
+        return (mTotalPauseTime + mCurrentPauseTime) / 1000;
+    }
+
+
+    public long getPlayTime() {
+        DateFormat dateFormatterChina = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+        TimeZone timeZoneChina = TimeZone.getTimeZone("Asia/Shanghai");
+        dateFormatterChina.setTimeZone(timeZoneChina);
+
+        if (isPlaying()) {
+            long curTime = System.currentTimeMillis();
+            mTotalPlayTime = ((curTime - mBeginTime - mTotalPauseTime) / 1000) ;
+
+            return mTotalPlayTime;
+        }
+        return mTotalPlayTime;
+    }
+
 
     @SuppressLint("Wakelock")
     @Override
@@ -698,6 +755,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      */
     @Override
     public void release() {
+        Log.i(TAG, "release");
         stayAwake(false);
         updateSurfaceScreenOn();
         resetListeners();
@@ -708,6 +766,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public void reset() {
+        Log.i(TAG, "reset");
         stayAwake(false);
         _reset();
         // make sure none of the listeners get called anymore
@@ -837,6 +896,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public long getSeekLoadDuration() {
         return _getPropertyLong(FFP_PROP_INT64_LATEST_SEEK_LOAD_DURATION, 0);
     }
+
 
     private native float _getPropertyFloat(int property, float defaultValue);
     private native void  _setPropertyFloat(int property, float value);
