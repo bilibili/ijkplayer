@@ -299,10 +299,12 @@ void ijkmp_shutdown_l(IjkMediaPlayer *mp)
     assert(mp);
 
     MPTRACE("ijkmp_shutdown_l()\n");
+    pthread_mutex_lock(&mp->mutex);
     if (mp->ffplayer) {
         ffp_stop_l(mp->ffplayer);
         ffp_wait_stop_l(mp->ffplayer);
     }
+    pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_shutdown_l()=void\n");
 }
 
