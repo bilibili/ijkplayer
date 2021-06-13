@@ -497,7 +497,7 @@ static cJSON_bool print_number(const cJSON * const item, printbuffer * const out
         }
     }
 
-    /* sprintf failed or buffer overrun occured */
+    /* sprintf failed or buffer overrun occurred */
     if ((length < 0) || (length > (int)(sizeof(number_buffer) - 1)))
     {
         return false;
