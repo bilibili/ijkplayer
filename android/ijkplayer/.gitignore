@@ -10,3 +10,5 @@ android-ndk-prof
 .project
 .classpath
 .settings/
+
+Symbols.zip

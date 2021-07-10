@@ -42,10 +42,22 @@ jobs:
       env:
         NEXUS_USERNAME: befovy
         NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        ORG_GRADLE_PROJECT_signingKeyId:
-        ORG_GRADLE_PROJECT_signingKey:
-        ORG_GRADLE_PROJECT_signingPassword:
+        ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.SIGN_KEYID }}
+        ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGN_KEY }}
+        ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGN_PASSWORD }}
       run: |
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
         ./gradlew build
         ./gradlew -PNEXUS_PASSWORD=${NEXUS_PASSWORD} :fijkplayer-full:uploadArchives
+        zip -r Symbols.zip fijkplayer-full/build/intermediates/cmake/release/obj
+
+    - name: Create Release
+      id: create_release
+      uses: ncipollo/release-action@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref }}
+        name: Release ${{ github.ref }}
+        draft: false
+        artifacts: "./android/ijkplayer/Symbols.zip"
+        allowUpdates: true

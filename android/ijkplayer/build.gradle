@@ -41,10 +41,8 @@ ext {
     targetSdkVersion = 30
 
     ndkVersion = "16.1.4479499"
-    versionCode = 800800
-    versionName = "0.8.8"
+
+    versionCode = property("VERSION_CODE").toInteger()
+    versionName = property("VERSION_NAME")
 }
 
-wrapper {
-    gradleVersion = '2.14.1'
-}

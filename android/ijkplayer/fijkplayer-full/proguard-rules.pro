@@ -20,6 +20,23 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class tv.danmaku.ijk.media.player.** {
-    *;
+-keepclasseswithmembers class tv.danmaku.ijk.media.player.** {
+    native <methods>;
 }
+
+-keepclasseswithmembers class tv.danmaku.ijk.media.player.** {
+    @tv.danmaku.ijk.media.player.annotations.CalledByNative <methods>;
+}
+
+-keepclasseswithmembers class tv.danmaku.ijk.media.player.** {
+    @tv.danmaku.ijk.media.player.annotations.AccessedByNative <fields>;
+}
+
+-keep class tv.danmaku.ijk.media.player.misc.IMediaDataSource {
+    <methods>;
+}
+
+-keep class tv.danmaku.ijk.media.player.misc.IAndroidIO {
+    <methods>;
+}
+
