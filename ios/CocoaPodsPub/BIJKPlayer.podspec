@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "BIJKPlayer"
-  spec.version      = "0.7.12"
+  spec.version      = "0.7.15"
   spec.summary      = "ijkplayer iOS video player SDK"
 
   spec.author       = { "befovy" => "befovy@gmail.com" }
@@ -78,7 +78,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
   
-  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/f0.7.12/IJKMediaPlayer.tar.gz" }
+  spec.source = { :http => "https://github.com/befovy/ijkplayer/releases/download/f0.7.15/IJKMediaPlayer.tar.gz" }
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #

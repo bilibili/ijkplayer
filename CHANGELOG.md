@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file. See [standa
 
 ---
 
+## 0.7.15 (2021-07-10)
+
+* add concrete rules for consumer proguard (Android)
+
+---
+
 ## 0.7.12 (2021-07-10)
 
 * publish android aar to mavenCenter (Android)
