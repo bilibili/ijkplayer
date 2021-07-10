@@ -40,9 +40,12 @@ jobs:
     - name: Gradle build and publish
       working-directory: android/ijkplayer
       env:
-        BINTRAY_USER: befovy
-        BINTRAY_APIKEY: ${{ secrets.BINTRAY_APIKEY }}
+        NEXUS_USERNAME: befovy
+        NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        ORG_GRADLE_PROJECT_signingKeyId:
+        ORG_GRADLE_PROJECT_signingKey:
+        ORG_GRADLE_PROJECT_signingPassword:
       run: |
         export ANDROID_NDK=$ANDROID_HOME/ndk/16.1.4479499/
         ./gradlew build
-        ./gradlew bintrayUpload
+        ./gradlew -PNEXUS_PASSWORD=${NEXUS_PASSWORD} :fijkplayer-full:uploadArchives

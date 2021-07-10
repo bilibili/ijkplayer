@@ -18,7 +18,7 @@ android {
 
     ndkVersion rootProject.ext.ndkVersion
 
-    lintOptions {ndkVersion rootProject.ext.ndkVersion
+    lintOptions {
         abortOnError false
     }
 
@@ -38,7 +38,6 @@ android {
             // Specifies the ABI configurations of your native
             // libraries Gradle should build and package with your APK.
             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
-
         }
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -60,32 +59,6 @@ android {
             path 'src/main/CMakeLists.txt'
         }
     }
-
-
-    /*
-    flavorDimensions "ndkabi"
-
-    productFlavors {
-        armv5 {
-            dimension "ndkabi"
-
-        }
-        armv7a {
-            dimension "ndkabi"
-
-        }
-        arm64 {
-            dimension "ndkabi"
-            // minSdkVersion 21
-        }
-        x86 {
-            dimension "ndkabi"
-        }
-        x86_64 {
-            dimension "ndkabi"
-        }
-    }
-    */
 }
 
 dependencies {

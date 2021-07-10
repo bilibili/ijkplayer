@@ -22,8 +22,8 @@ set -e
 set +x
 
 FF_ACT_ARCHS_32="armv7a x86"
-FF_ACT_ARCHS_64="armv7a arm64 x86 x86_64"
-FF_ACT_ARCHS_ALL=$FF_ACT_ARCHS_64
+FF_ACT_ARCHS_64="arm64 x86_64"
+FF_ACT_ARCHS_ALL="$FF_ACT_ARCHS_64 $FF_ACT_ARCHS_32"
 
 . ./tools/do-detect-env.sh
 
@@ -64,7 +64,10 @@ do_build_boringssl() {
     ARCH=$1
     API_LEVEL=
     FF_ARCH=
-    if [ "$ARCH" = "armv7a" ]; then
+    if [ "$ARCH" = "armv5" ]; then
+        API_LEVEL=16
+        FF_ARCH="armeabi"
+    elif [ "$ARCH" = "armv7a" ]; then
         API_LEVEL=16
         FF_ARCH="armeabi-v7a"
     elif [ "$ARCH" = "x86" ]; then
@@ -125,7 +128,7 @@ case "$FF_TARGET" in
         done
         echo_nextstep_help
     ;;
-    all|all64)
+    all64)
         echo_archs $FF_ACT_ARCHS_64
         for ARCH in $FF_ACT_ARCHS_64
         do
@@ -133,8 +136,16 @@ case "$FF_TARGET" in
         done
         echo_nextstep_help
     ;;
+    all)
+        echo_archs $FF_ACT_ARCHS_ALL
+        for ARCH in $FF_ACT_ARCHS_ALL
+        do
+            do_build_boringssl $ARCH
+        done
+        echo_nextstep_help
+    ;;
     clean)
-        echo_archs FF_ACT_ARCHS_64
+        echo_archs FF_ACT_ARCHS_ALL
         for ARCH in $FF_ACT_ARCHS_ALL
         do
             if [ -d boringssl ]; then
