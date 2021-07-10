@@ -51,13 +51,20 @@ jobs:
         ./gradlew -PNEXUS_PASSWORD=${NEXUS_PASSWORD} :fijkplayer-full:uploadArchives
         zip -r Symbols.zip fijkplayer-full/build/intermediates/cmake/release/obj
 
+    - name: Extract tag name
+      id: tag
+      uses: actions/github-script@0.2.0
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          return context.payload.ref.replace('refs/tags/', '');
+
     - name: Create Release
       id: create_release
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ github.ref }}
-        name: Release ${{ github.ref }}
+        name: Release ${{ steps.tag.outputs.result }}
         draft: false
         artifacts: "./android/ijkplayer/Symbols.zip"
         allowUpdates: true
