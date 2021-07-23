@@ -90,4 +90,6 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ijkdemo-release
-        path: android/ijkplayer/ijkplayer-example/build/outputs/apk/release/ijkplayer-example-release.apk
+        path: |
+          android/ijkplayer/ijkplayer-example/build/outputs/apk/release/ijkplayer-example-release.apk
+          android/ijkplayer/fijkplayer-full/build/outputs/aar/fijkplayer-full-release.aar
