@@ -178,8 +178,9 @@ IJK_GLES2_Renderer *IJK_GLES2_Renderer_create(SDL_VoutOverlay *overlay)
             ALOGE("[GLES2] unknown format %4s(%d)\n", (char *)&overlay->format, overlay->format);
             return NULL;
     }
-
-    renderer->format = overlay->format;
+    if (renderer != NULL) {
+        renderer->format = overlay->format;
+    }
     return renderer;
 }
 
