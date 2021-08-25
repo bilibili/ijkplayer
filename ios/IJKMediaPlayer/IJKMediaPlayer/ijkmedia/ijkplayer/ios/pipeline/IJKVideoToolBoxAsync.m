@@ -830,6 +830,8 @@ static int decode_video(Ijk_VideoToolBox_Opaque* context, AVCodecContext *avctx,
     
     if (ff_avpacket_is_idr(avpkt) == true) {
         context->idr_based_identified = true;
+    } else {
+        context->idr_based_identified = false;
     }
     if (ff_avpacket_i_or_idr(avpkt, context->idr_based_identified) == true) {
         ResetPktBuffer(context);
