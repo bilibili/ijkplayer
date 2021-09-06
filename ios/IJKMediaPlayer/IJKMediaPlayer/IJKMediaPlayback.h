@@ -159,6 +159,9 @@ IJK_EXTERN NSString *const IJKMPMoviePlayerAccurateSeekCompleteNotification;
 
 IJK_EXTERN NSString *const IJKMPMoviePlayerStreamLogNotification;
 
+IJK_EXTERN NSString *const IJKSDLAudioQueueAllocFailedNotification;
+IJK_EXTERN NSString *const IJKSDLAudioQueueAllocErrorKey;
+
 @end
 
 #pragma mark IJKMediaUrlOpenDelegate

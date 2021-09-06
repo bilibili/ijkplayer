@@ -49,6 +49,9 @@ NSString *const IJKMPMoviePlayerDidAccurateSeekCompleteCurPos = @"IJKMPMoviePlay
 
 NSString *const IJKMPMoviePlayerStreamLogNotification = @"IJKMPMoviePlayerStreamLogNotification";
 
+NSString *const IJKSDLAudioQueueAllocFailedNotification = @"IJKSDLAudioQueueAllocFailedNotification";
+NSString *const IJKSDLAudioQueueAllocErrorKey = @"IJKSDLAudioQueueAllocFailedErrorKey";
+
 @implementation IJKMediaUrlOpenData {
     NSString *_url;
     BOOL _handled;

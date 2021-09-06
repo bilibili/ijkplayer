@@ -27,6 +27,7 @@
 #import "IJKSDLAudioKit.h"
 #import "ijksdl_log.h"
 #import "IJKLog.h"
+#import "IJKMediaPlayer.h"
 
 #import <AVFoundation/AVFoundation.h>
 
@@ -106,7 +107,14 @@
 
         for (int i = 0;i < kIJKAudioQueueNumberBuffers; i++)
         {
-            AudioQueueAllocateBuffer(audioQueueRef, _spec.size, &_audioQueueBufferRefArray[i]);
+            status = AudioQueueAllocateBuffer(audioQueueRef, _spec.size, &_audioQueueBufferRefArray[i]);
+            if (status != noErr) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:IJKSDLAudioQueueAllocFailedNotification
+                                                                    object:self
+                                                                  userInfo:@{IJKSDLAudioQueueAllocErrorKey:@(status)}];
+                self = nil;
+                return nil;
+            }
             _audioQueueBufferRefArray[i]->mAudioDataByteSize = _spec.size;
             memset(_audioQueueBufferRefArray[i]->mAudioData, 0, _spec.size);
             AudioQueueEnqueueBuffer(audioQueueRef, _audioQueueBufferRefArray[i], 0, NULL);
