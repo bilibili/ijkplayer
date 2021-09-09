@@ -96,7 +96,7 @@ if [ "$FF_ARCH" = "i386" ]; then
 elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_BUILD_NAME="openssl-x86_64"
     FF_XCRUN_PLATFORM="iPhoneSimulator"
-    FF_XCRUN_OSVERSION="-mios-simulator-version-min=7.0"
+    FF_XCRUN_OSVERSION="-mios-simulator-version-min=8.0"
     OPENSSL_CFG_FLAGS="darwin64-x86_64-cc $OPENSSL_CFG_FLAGS"
 elif [ "$FF_ARCH" = "armv7" ]; then
     FF_BUILD_NAME="openssl-armv7"
@@ -112,7 +112,7 @@ elif [ "$FF_ARCH" = "armv7s" ]; then
     OPENSSL_CFG_FLAGS="$OPENSSL_CFG_FLAGS_ARM $OPENSSL_CFG_FLAGS"
 elif [ "$FF_ARCH" = "arm64" ]; then
     FF_BUILD_NAME="openssl-arm64"
-    FF_XCRUN_OSVERSION="-miphoneos-version-min=7.0"
+    FF_XCRUN_OSVERSION="-miphoneos-version-min=8.0"
     FF_XCODE_BITCODE="-fembed-bitcode"
     OPENSSL_CFG_FLAGS="$OPENSSL_CFG_FLAGS_ARM $OPENSSL_CFG_FLAGS"
     FF_GASPP_EXPORT="GASPP_FIX_XCODE5=1"
