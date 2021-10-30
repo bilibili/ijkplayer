@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 
 ---
+## 0.7.16 (2021-10-30)
+
+* fix mov seek null pointer crash
+
+---
 
 ## 0.7.15 (2021-07-10)
 
