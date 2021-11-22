@@ -422,6 +422,9 @@ static VTDecompressionSessionRef vtbsession_create(Ijk_VideoToolBox_Opaque* cont
     OSStatus status;
 
     ret = vtbformat_init(&context->fmt_desc, context->codecpar);
+    if (ret) {
+        return NULL;
+    }
 
     if (ffp->vtb_max_frame_width > 0 && width > ffp->vtb_max_frame_width) {
         double w_scaler = (float)ffp->vtb_max_frame_width / width;
@@ -965,42 +968,42 @@ static int vtbformat_init(VTBFormatDesc *fmt_desc, AVCodecParameters *codecpar)
         if (level == 0 && sps_level > 0)
             level = sps_level;
 
-                if (profile == 0 && sps_profile > 0)
-                    profile = sps_profile;
-                if (profile == FF_PROFILE_H264_MAIN && level == 32 && fmt_desc->max_ref_frames > 4) {
-                    ALOGE("%s - Main@L3.2 detected, VTB cannot decode with %d ref frames", __FUNCTION__, fmt_desc->max_ref_frames);
-                    goto fail;
-                }
+        if (profile == 0 && sps_profile > 0)
+            profile = sps_profile;
+        if (profile == FF_PROFILE_H264_MAIN && level == 32 && fmt_desc->max_ref_frames > 4) {
+            ALOGE("%s - Main@L3.2 detected, VTB cannot decode with %d ref frames", __FUNCTION__, fmt_desc->max_ref_frames);
+            goto fail;
+        }
 
-                if (extradata[4] == 0xFE) {
-                    extradata[4] = 0xFF;
-                    fmt_desc->convert_3byteTo4byteNALSize = true;
-                }
+        if (extradata[4] == 0xFE) {
+            extradata[4] = 0xFF;
+            fmt_desc->convert_3byteTo4byteNALSize = true;
+        }
 
         fmt_desc->fmt_desc = CreateFormatDescriptionFromCodecData(format_id, width, height, extradata, extrasize,  IJK_VTB_FCC_AVCC);
         if (fmt_desc->fmt_desc == NULL) {
             goto fail;
         }
 
-                ALOGI("%s - using avcC atom of size(%d), ref_frames(%d)", __FUNCTION__, extrasize, fmt_desc->max_ref_frames);
-            } else {
-                if ((extradata[0] == 0 && extradata[1] == 0 && extradata[2] == 0 && extradata[3] == 1) ||
-                    (extradata[0] == 0 && extradata[1] == 0 && extradata[2] == 1)) {
-                    AVIOContext *pb;
-                    if (avio_open_dyn_buf(&pb) < 0) {
-                        goto fail;
-                    }
+        ALOGI("%s - using avcC atom of size(%d), ref_frames(%d)", __FUNCTION__, extrasize, fmt_desc->max_ref_frames);
+    } else {
+        if ((extradata[0] == 0 && extradata[1] == 0 && extradata[2] == 0 && extradata[3] == 1) ||
+            (extradata[0] == 0 && extradata[1] == 0 && extradata[2] == 1)) {
+            AVIOContext *pb;
+            if (avio_open_dyn_buf(&pb) < 0) {
+                goto fail;
+            }
 
-                    fmt_desc->convert_bytestream = true;
-                    ff_isom_write_avcc(pb, extradata, extrasize);
-                    extradata = NULL;
+            fmt_desc->convert_bytestream = true;
+            ff_isom_write_avcc(pb, extradata, extrasize);
+            extradata = NULL;
 
-                    extrasize = avio_close_dyn_buf(pb, &extradata);
+            extrasize = avio_close_dyn_buf(pb, &extradata);
 
-                    if (!validate_avcC_spc(extradata, extrasize, &fmt_desc->max_ref_frames, &sps_level, &sps_profile)) {
-                        av_free(extradata);
-                        goto fail;
-                    }
+            if (!validate_avcC_spc(extradata, extrasize, &fmt_desc->max_ref_frames, &sps_level, &sps_profile)) {
+                av_free(extradata);
+                goto fail;
+            }
 
             fmt_desc->fmt_desc = CreateFormatDescriptionFromCodecData(format_id, width, height, extradata, extrasize, IJK_VTB_FCC_AVCC);
             if (fmt_desc->fmt_desc == NULL) {
@@ -1050,12 +1053,6 @@ Ijk_VideoToolBox_Opaque* videotoolbox_sync_create(FFPlayer* ffp, AVCodecContext*
 
     context_vtb->ffp = ffp;
     context_vtb->idr_based_identified = true;
-
-    ret = vtbformat_init(&context_vtb->fmt_desc, context_vtb->codecpar);
-    if (ret)
-        goto fail;
-    assert(context_vtb->fmt_desc.fmt_desc);
-    vtbformat_destroy(&context_vtb->fmt_desc);
 
     context_vtb->vt_session = vtbsession_create(context_vtb);
     if (context_vtb->vt_session == NULL)
