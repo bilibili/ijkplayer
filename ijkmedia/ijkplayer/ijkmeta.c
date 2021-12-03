@@ -227,6 +227,7 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
         if (bitrate > 0) {
             ijkmeta_set_int64_l(stream_meta, IJKM_KEY_BITRATE, bitrate);
         }
+        ijkmeta_set_int64_l(stream_meta, IJKM_KEY_STREAM_INDEX, st->index);
 
         switch (codecpar->codec_type) {
             case AVMEDIA_TYPE_VIDEO: {
