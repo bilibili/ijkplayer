@@ -4837,7 +4837,6 @@ int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
     VideoState        *is = ffp->is;
     AVFormatContext   *ic = NULL;
     AVCodecParameters *codecpar = NULL;
-    int change_stream = 0;
     if (!is || !is->ic)
         return -1;
 
@@ -4851,36 +4850,30 @@ int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
     long current_pos = ffp_get_current_position_l(ffp);
 
     if (selected) {
+        if (stream == is->video_stream || stream == is->audio_stream || stream == is->subtitle_stream) {
+            av_log(ffp, AV_LOG_ERROR, "stream has been selected\n");
+            return 0;
+        }
         switch (codecpar->codec_type) {
             case AVMEDIA_TYPE_VIDEO:
-                if (stream != is->video_stream && is->video_stream >= 0) {
+                if (stream != is->video_stream && is->video_stream >= 0)
                     stream_component_close(ffp, is->video_stream);
-                    change_stream = 1;
-                }
                 break;
             case AVMEDIA_TYPE_AUDIO:
-                if (stream != is->audio_stream && is->audio_stream >= 0) {
+                if (stream != is->audio_stream && is->audio_stream >= 0)
                     stream_component_close(ffp, is->audio_stream);
-                    change_stream = 1;
-                }
                 break;
             case AVMEDIA_TYPE_SUBTITLE:
-                if (stream != is->subtitle_stream && is->subtitle_stream >= 0) {
+                if (stream != is->subtitle_stream && is->subtitle_stream >= 0)
                     stream_component_close(ffp, is->subtitle_stream);
-                    change_stream = 1;
-                }
                 break;
             default:
                 av_log(ffp, AV_LOG_ERROR, "select invalid stream %d of video type %d\n", stream, codecpar->codec_type);
                 return -1;
         }
-        if (change_stream) {
-            int ret = stream_component_open(ffp, stream);
-            ffp_seek_to_l(ffp, current_pos);
-            return ret;
-        } else {
-            return 0;
-        }
+        int ret = stream_component_open(ffp, stream);
+        ffp_seek_to_l(ffp, current_pos);
+        return ret;
     } else {
         switch (codecpar->codec_type) {
             case AVMEDIA_TYPE_VIDEO:
@@ -4896,7 +4889,7 @@ int ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected)
                     stream_component_close(ffp, is->subtitle_stream);
                 break;
             default:
-                av_log(ffp, AV_LOG_ERROR, "select invalid stream %d of audio type %d\n", stream, codecpar->codec_type);
+                av_log(ffp, AV_LOG_ERROR, "unselect invalid stream %d of audio type %d\n", stream, codecpar->codec_type);
                 return -1;
         }
         return 0;
