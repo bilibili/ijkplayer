@@ -43,6 +43,7 @@
 #define IJKM_VAL_TYPE__TIMEDTEXT "timedtext"
 #define IJKM_VAL_TYPE__UNKNOWN  "unknown"
 #define IJKM_KEY_LANGUAGE       "language"
+#define IJKM_KEY_STREAM_INDEX   "index"
 
 #define IJKM_KEY_CODEC_NAME         "codec_name"
 #define IJKM_KEY_CODEC_PROFILE      "codec_profile"
