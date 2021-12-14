@@ -41,6 +41,8 @@
 #define k_IJKM_KEY_CODEC_NAME      @"codec_name"
 #define k_IJKM_KEY_CODEC_PROFILE   @"codec_profile"
 #define k_IJKM_KEY_CODEC_LONG_NAME @"codec_long_name"
+#define k_IJKM_KEY_LANGUAGE        @"language"
+#define k_IJKM_KEY_STREAM_INDEX    @"index"
 
 // stream: video
 #define k_IJKM_KEY_WIDTH          @"width"
