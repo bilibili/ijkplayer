@@ -224,6 +224,10 @@ void *grow_array(void *array, int elem_size, int *size, int new_size)
 
 double get_rotation(AVStream *st)
 {
+    if (!st || !st->metadata) { // no video stream
+        return 0;
+    }
+    
     AVDictionaryEntry *rotate_tag = av_dict_get(st->metadata, "rotate", NULL, 0);
     uint8_t* displaymatrix = av_stream_get_side_data(st,
                                                      AV_PKT_DATA_DISPLAYMATRIX, NULL);
