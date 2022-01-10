@@ -1325,6 +1325,14 @@ static void video_refresh(FFPlayer *opaque, double *remaining_time)
 
     if (is->video_st) {
 retry:
+        if (!is->audio_st && get_master_sync_type(is) == AV_SYNC_EXTERNAL_CLOCK) {
+            if (ffp->pf_playback_rate != 1.0f) {
+                float speed = ffp->pf_playback_rate + EXTERNAL_CLOCK_SPEED_STEP
+                    * (1.0 - ffp->pf_playback_rate) / fabs(1.0 - ffp->pf_playback_rate);
+                set_clock_speed(&is->extclk, speed);
+            }
+        }
+
         if (frame_queue_nb_remaining(&is->pictq) == 0) {
             // nothing to do, no picture to display in the queue
         } else {
@@ -3276,7 +3284,7 @@ static int read_thread(void *arg)
     if (st_index[AVMEDIA_TYPE_AUDIO] >= 0) {
         stream_component_open(ffp, st_index[AVMEDIA_TYPE_AUDIO]);
     } else {
-        ffp->av_sync_type = AV_SYNC_VIDEO_MASTER;
+        ffp->av_sync_type = AV_SYNC_EXTERNAL_CLOCK;
         is->av_sync_type  = ffp->av_sync_type;
     }
 
