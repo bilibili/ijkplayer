@@ -552,9 +552,15 @@ static int feed_input_buffer2(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs,
                     avcodec_free_context(&new_avctx);
                     return change_ret;
                 } else {
-                    if (opaque->codecpar->width  != new_avctx->width &&
-                        opaque->codecpar->height != new_avctx->height) {
+                    AVCodecContext *ic = opaque->decoder->avctx;
+                    // resolution change or extradata change(eg.same resolution video. extradata change contain extradata size change and extradata content change)
+                    if ((opaque->codecpar->width  != new_avctx->width && opaque->codecpar->height != new_avctx->height)
+                         || size_data_size != ic->extradata_size
+                         || memcmp(ic->extradata, new_avctx->extradata, size_data_size) != 0) {
                         ALOGW("AV_PKT_DATA_NEW_EXTRADATA: %d x %d\n", new_avctx->width, new_avctx->height);
+                        //update extradata and extradata_size for next extradata change
+                        ic->extradata_size = size_data_size;
+                        ic->extradata = new_avctx->extradata;
                         avcodec_parameters_from_context(opaque->codecpar, new_avctx);
                         opaque->aformat_need_recreate = true;
                         ffpipeline_set_surface_need_reconfigure_l(pipeline, true);
@@ -799,9 +805,15 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, 
                     avcodec_free_context(&new_avctx);
                     return change_ret;
                 } else {
-                    if (opaque->codecpar->width  != new_avctx->width &&
-                        opaque->codecpar->height != new_avctx->height) {
+                    AVCodecContext *ic = opaque->decoder->avctx;
+                    // resolution change or extradata change(eg.same resolution video. extradata change contain extradata size change and extradata content change)
+                    if ((opaque->codecpar->width  != new_avctx->width && opaque->codecpar->height != new_avctx->height)
+                         || size_data_size != ic->extradata_size
+                         || memcmp(ic->extradata, new_avctx->extradata, size_data_size) != 0) {
                         ALOGW("AV_PKT_DATA_NEW_EXTRADATA: %d x %d\n", new_avctx->width, new_avctx->height);
+                        //update extradata and extradata_size for next extradata change
+                        ic->extradata_size = size_data_size;
+                        ic->extradata = new_avctx->extradata;
                         avcodec_parameters_from_context(opaque->codecpar, new_avctx);
                         opaque->aformat_need_recreate = true;
                         ffpipeline_set_surface_need_reconfigure_l(pipeline, true);
@@ -1126,6 +1138,12 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
             // ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, width, height);
             // opaque->frame_width  = width;
             // opaque->frame_height = height;
+            
+            // update frame width and height for send FFP_MSG_VIDEO_SIZE_CHANGED msg on queue_picture method.
+            if(opaque->ffp->mediacodec_handle_resolution_change && opaque->codecpar->codec_id == AV_CODEC_ID_H264){
+               opaque->frame_width  = width;
+               opaque->frame_height = height;
+            }
             ALOGI(
                 "AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n"
                 "    width-height: (%d x %d)\n"
