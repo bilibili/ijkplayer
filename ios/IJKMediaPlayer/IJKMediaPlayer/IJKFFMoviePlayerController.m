@@ -245,7 +245,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_SILENT];
 #endif
         // init audio sink
-        [[IJKAudioKit sharedInstance] setupAudioSession];
+//        [[IJKAudioKit sharedInstance] setupAudioSession];
 
         [options applyTo:_mediaPlayer];
         _pauseInBackground = NO;
