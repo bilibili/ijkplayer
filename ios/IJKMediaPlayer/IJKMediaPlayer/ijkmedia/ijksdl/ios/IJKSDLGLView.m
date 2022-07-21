@@ -78,6 +78,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 - (id) initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
+//        _frameSize = CGSizeMake(UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height - 80);
         _frameSize = CGSizeZero;
         self.glActiveLock = [[NSRecursiveLock alloc] init];
         _registeredNotifications = [[NSMutableArray alloc] init];
@@ -145,27 +146,25 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
     }
 }
 
-- (void)setContentMode:(UIViewContentMode)contentMode {
+- (void)setContentMode:(UIViewContentMode)contentMode
+{
     [super setContentMode:contentMode];
-    
-    int newRendererGravity = _rendererGravity;
+
     switch (contentMode) {
         case UIViewContentModeScaleToFill:
-            newRendererGravity = IJK_GLES2_GRAVITY_RESIZE;
+            _rendererGravity = IJK_GLES2_GRAVITY_RESIZE;
             break;
         case UIViewContentModeScaleAspectFit:
-            newRendererGravity = IJK_GLES2_GRAVITY_RESIZE_ASPECT;
+            _rendererGravity = IJK_GLES2_GRAVITY_RESIZE_ASPECT;
             break;
         case UIViewContentModeScaleAspectFill:
-            newRendererGravity = IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL;
+            _rendererGravity = IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL;
             break;
         default:
-            newRendererGravity = IJK_GLES2_GRAVITY_RESIZE_ASPECT;
+            _rendererGravity = IJK_GLES2_GRAVITY_RESIZE_ASPECT;
             break;
     }
-    if (newRendererGravity != _rendererGravity) {
-        [self setIsRenderBufferInvalidated:YES];
-    }
+    [self setIsRenderBufferInvalidated:YES];
 }
 
 - (void) display_pixels:(IJKOverlay *)overlay {

@@ -196,7 +196,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // IJKFFIOStatCompleteRegister(IJKFFIOStatCompleteDebugCallback);
 
         // init fields
-        _scalingMode = IJKMPMovieScalingModeAspectFit;
+        _scalingMode = IJKMPMovieScalingModeAspectFill;
         _shouldAutoplay = YES;
         memset(&_asyncStat, 0, sizeof(_asyncStat));
         memset(&_cacheStat, 0, sizeof(_cacheStat));
@@ -217,6 +217,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", _shouldAutoplay ? 1 : 0);
 
         // init video sink
+//        _videoFrame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height - 80);
         _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
         _glView.isThirdGLView = NO;
         _view = _glView;
@@ -300,7 +301,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // IJKFFIOStatCompleteRegister(IJKFFIOStatCompleteDebugCallback);
 
         // init fields
-        _scalingMode = IJKMPMovieScalingModeAspectFit;
+        _scalingMode = IJKMPMovieScalingModeAspectFill;
         _shouldAutoplay = YES;
         memset(&_asyncStat, 0, sizeof(_asyncStat));
         memset(&_cacheStat, 0, sizeof(_cacheStat));
@@ -793,7 +794,7 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
         default:
             newScalingMode = _scalingMode;
     }
-
+        
     _scalingMode = newScalingMode;
 }
 
