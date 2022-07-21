@@ -36,4 +36,6 @@
 - (UIImage*) snapshot;
 - (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhiteBeingMovedToWindow __attribute__((deprecated("unused")));
 
+@property(atomic) BOOL videoPaused;
+
 @end
