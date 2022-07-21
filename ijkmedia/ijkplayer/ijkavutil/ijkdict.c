@@ -153,6 +153,35 @@ int ijk_av_dict_set_int(IjkAVDictionary **pm, const char *key, int64_t value,
     return ijk_av_dict_set(pm, key, valuestr, flags);
 }
 
+int ijk_av_dict_set_intptr(IjkAVDictionary **pm, const char *key, uintptr_t value, int flags) {
+    char valuestr[22];
+    snprintf(valuestr, sizeof(valuestr), "%p", value);
+    flags &= ~IJK_AV_DICT_DONT_STRDUP_VAL;
+    return ijk_av_dict_set(pm, key, valuestr, flags);
+}
+
+uintptr_t ijk_av_dict_strtoptr(char * value) {
+    uintptr_t ptr = NULL;
+    char *next = NULL;
+    if(value[0] !='0' || (value[1]|0x20)!='x') {
+        return NULL;
+    }
+    ptr = strtoll(value, &next, 16);
+    if (next == value) {
+        return NULL;
+    }
+    return ptr;
+}
+
+uintptr_t ijk_av_dict_get_intptr(const IjkAVDictionary *m, const char* key) {
+    uintptr_t ptr = NULL;
+    IjkAVDictionaryEntry *t = NULL;
+    if ((t = av_dict_get(m, key, NULL, 0))) {
+        return ijk_av_dict_strtoptr(t->value);
+    }
+    return NULL;
+}
+
 void ijk_av_dict_free(IjkAVDictionary **pm)
 {
     IjkAVDictionary *m = *pm;

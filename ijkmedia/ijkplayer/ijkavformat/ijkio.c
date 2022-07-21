@@ -31,7 +31,7 @@
 
 typedef struct Context {
     AVClass *class;
-    int64_t *io_manager_ctx;
+    char *io_manager_ctx_intptr;
 } Context;
 
 static int ijkio_copy_options(IjkAVDictionary **dst, AVDictionary *src) {
@@ -51,10 +51,10 @@ static int ijkio_open(URLContext *h, const char *arg, int flags, AVDictionary **
     Context *c = h->priv_data;
     int ret = -1;
 
-    if (!c || !c->io_manager_ctx)
+    if (!c || !c->io_manager_ctx_intptr)
         return -1;
 
-    IjkIOManagerContext *manager_ctx = (IjkIOManagerContext *)(c->io_manager_ctx);
+    IjkIOManagerContext *manager_ctx = (IjkIOManagerContext *)av_dict_strtoptr(c->io_manager_ctx_intptr);
     manager_ctx->ijkio_interrupt_callback = (IjkAVIOInterruptCB *)&(h->interrupt_callback);
 
     av_strstart(arg, "ijkio:", &arg);
@@ -77,40 +77,41 @@ static int ijkio_read(URLContext *h, unsigned char *buf, int size)
 {
     Context *c = h->priv_data;
 
-    if (!c || !c->io_manager_ctx)
+    if (!c || !c->io_manager_ctx_intptr)
         return -1;
 
-    ((IjkIOManagerContext *)(c->io_manager_ctx))->cur_ffmpeg_ctx  = c;
-    return ijkio_manager_io_read((IjkIOManagerContext *)(c->io_manager_ctx), buf, size);
+    ((IjkIOManagerContext *)(av_dict_strtoptr(c->io_manager_ctx_intptr)))->cur_ffmpeg_ctx  = c;
+    return ijkio_manager_io_read((IjkIOManagerContext *)(av_dict_strtoptr(c->io_manager_ctx_intptr)), buf, size);
 }
 
 static int64_t ijkio_seek(URLContext *h, int64_t offset, int whence)
 {
     Context *c = h->priv_data;
 
-    if (!c || !c->io_manager_ctx)
+    if (!c || !c->io_manager_ctx_intptr)
         return -1;
 
-    ((IjkIOManagerContext *)(c->io_manager_ctx))->cur_ffmpeg_ctx  = c;
-    return ijkio_manager_io_seek((IjkIOManagerContext *)(c->io_manager_ctx), offset, whence);
+    ((IjkIOManagerContext *)(av_dict_strtoptr(c->io_manager_ctx_intptr)))->cur_ffmpeg_ctx  = c;
+    return ijkio_manager_io_seek((IjkIOManagerContext *)(av_dict_strtoptr(c->io_manager_ctx_intptr)), offset, whence);
 }
 
 static int ijkio_close(URLContext *h)
 {
     Context *c = h->priv_data;
 
-    if (!c || !c->io_manager_ctx)
+    if (!c || !c->io_manager_ctx_intptr)
         return -1;
 
-    ((IjkIOManagerContext *)(c->io_manager_ctx))->cur_ffmpeg_ctx  = c;
-    return ijkio_manager_io_close((IjkIOManagerContext *)(c->io_manager_ctx));
+    ((IjkIOManagerContext *)(av_dict_strtoptr(c->io_manager_ctx_intptr)))->cur_ffmpeg_ctx  = c;
+    return ijkio_manager_io_close((IjkIOManagerContext *)(av_dict_strtoptr(c->io_manager_ctx_intptr)));
 }
 
 #define OFFSET(x) offsetof(Context, x)
 #define D AV_OPT_FLAG_DECODING_PARAM
 
 static const AVOption options[] = {
-    { "ijkiomanager", "IjkIOManagerContext", OFFSET(io_manager_ctx), AV_OPT_TYPE_INT64, { .i64 = 0 }, INT64_MIN, INT64_MAX, .flags = D },
+    { "ijkiomanager", "IjkIOManagerContext", OFFSET(io_manager_ctx_intptr), AV_OPT_TYPE_STRING, { .i64 = 0 }, 0, 0, .flags = D },
+    { NULL }
 };
 
 #undef D

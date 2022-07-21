@@ -34,14 +34,14 @@ typedef struct Context {
 
     /* options */
     char           *http_hook;
-    int64_t         app_ctx_intptr;
+    char *         app_ctx_intptr;
 } Context;
 
 static int ijksegment_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
 {
     Context *c = h->priv_data;
     AVAppIOControl io_control = {0};
-    AVApplicationContext *app_ctx = (AVApplicationContext *)(intptr_t)c->app_ctx_intptr;
+    AVApplicationContext *app_ctx = (AVApplicationContext *)av_dict_strtoptr(c->app_ctx_intptr);
     int ret = -1;
     int segment_index = -1;
 
@@ -65,7 +65,7 @@ static int ijksegment_open(URLContext *h, const char *arg, int flags, AVDictiona
         goto fail;
     }
 
-    av_dict_set_int(options, "ijkapplication", c->app_ctx_intptr, 0);
+    av_dict_set_intptr(options, "ijkapplication", (uintptr_t )app_ctx, 0);
     av_dict_set_int(options, "ijkinject-segment-index", segment_index, 0);
 
     ret = ffurl_open_whitelist(&c->inner,

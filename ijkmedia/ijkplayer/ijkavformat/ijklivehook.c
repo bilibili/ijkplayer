@@ -39,7 +39,7 @@ typedef struct {
 
     /* options */
     AVDictionary   *open_opts;
-    int64_t         app_ctx_intptr;
+    char *         app_ctx_intptr;
     AVApplicationContext *app_ctx;
 } Context;
 
@@ -191,7 +191,7 @@ static int ijklivehook_read_header(AVFormatContext *avf, AVDictionary **options)
     const char *inner_url   = NULL;
     int         ret         = -1;
 
-    c->app_ctx = (AVApplicationContext *)(intptr_t)c->app_ctx_intptr;
+    c->app_ctx = (AVApplicationContext *)av_dict_strtoptr(c->app_ctx_intptr);
     av_strstart(avf->filename, "ijklivehook:", &inner_url);
 
     c->io_control.size = sizeof(c->io_control);
@@ -292,7 +292,7 @@ fail:
 #define D AV_OPT_FLAG_DECODING_PARAM
 
 static const AVOption options[] = {
-    { "ijkapplication", "AVApplicationContext", OFFSET(app_ctx_intptr), AV_OPT_TYPE_INT64, { .i64 = 0 }, INT64_MIN, INT64_MAX, .flags = D },
+    { "ijkapplication", "AVApplicationContext", OFFSET(app_ctx_intptr), AV_OPT_TYPE_STRING, { .str = NULL }, 0, 0, .flags = D },
     { NULL }
 };
 

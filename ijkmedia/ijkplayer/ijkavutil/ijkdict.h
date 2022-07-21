@@ -103,6 +103,10 @@ int ijk_av_dict_set(IjkAVDictionary **pm, const char *key, const char *value, in
  */
 int ijk_av_dict_set_int(IjkAVDictionary **pm, const char *key, int64_t value, int flags);
 
+int ijk_av_dict_set_intptr(IjkAVDictionary **pm, const char *key, uintptr_t value, int flags);
+
+uintptr_t ijk_av_dict_get_intptr(const IjkAVDictionary *m, const char* key);
+
 /**
  * Copy entries from one AVDictionary struct into another.
  * @param dst pointer to a pointer to a AVDictionary struct. If *dst is NULL,
