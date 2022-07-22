@@ -425,6 +425,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     [self startHudTimer];
     ijkmp_start(_mediaPlayer);
+    _glView.videoPaused = false;
 }
 
 - (void)pause

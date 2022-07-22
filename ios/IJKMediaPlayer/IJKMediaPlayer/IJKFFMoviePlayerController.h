@@ -93,7 +93,7 @@ typedef enum IJKLogLevel {
 - (BOOL)isPlaying;
 - (int64_t)trafficStatistic;
 - (float)dropFrameRate;
-
+- (void)setCurrentPlaybackTime:(NSTimeInterval)currentPlaybackTime;
 - (void)pauseVideo:(BOOL)paused;
 
 - (void)setPauseInBackground:(BOOL)pause;
