@@ -15,7 +15,6 @@
  */
 
 #import "IJKDemoInputURLViewController.h"
-#import "IJKMoviePlayerViewController.h"
 
 @interface IJKDemoInputURLViewController () <UITextViewDelegate>
 
@@ -43,7 +42,9 @@
     NSURL *url = [NSURL URLWithString:self.textView.text];
     NSString *scheme = [[url scheme] lowercaseString];
     
-    if ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) {
+    if ([scheme isEqualToString:@"http"]
+        || [scheme isEqualToString:@"https"]
+        || [scheme isEqualToString:@"rtmp"]) {
         [IJKVideoViewController presentFromViewController:self withTitle:[NSString stringWithFormat:@"URL: %@", url] URL:url completion:^{
 //            [self.navigationController popViewControllerAnimated:NO];
         }];

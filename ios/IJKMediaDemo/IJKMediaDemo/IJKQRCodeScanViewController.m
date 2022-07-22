@@ -15,7 +15,6 @@
  */
 
 #import "IJKQRCodeScanViewController.h"
-#import "IJKMoviePlayerViewController.h"
 #import "Barcode.h"
 #import <AVFoundation/AVFoundation.h>
 

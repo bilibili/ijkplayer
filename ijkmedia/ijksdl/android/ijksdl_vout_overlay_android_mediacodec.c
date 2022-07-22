@@ -2,6 +2,7 @@
  * ijksdl_vout_overlay_android_mediacodec.c
  *****************************************************************************
  *
+ * Copyright (c) 2014 Bilibili
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -68,7 +69,7 @@ static void overlay_unref(SDL_VoutOverlay *overlay)
 
 static void overlay_free_l(SDL_VoutOverlay *overlay)
 {
-    AMCTRACE("SDL_Overlay(ffmpeg): overlay_free_l(%p)\n", overlay);
+    AMCTRACE("SDL_Overlay(mediacodec): overlay_free_l(%p)\n", overlay);
     if (!overlay)
         return;
 

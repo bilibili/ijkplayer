@@ -25,6 +25,7 @@
 {
     NSMutableDictionary *_keyIndexes;
     NSMutableArray      *_hudDataArray;
+    CGRect _rect;
 }
 
 - (id)init
@@ -83,11 +84,30 @@
     return cell;
 }
 
+- (void)setRect:(CGRect) rect {
+    _rect = rect;
+}
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+
+    CGRect selfFrame = _rect;
+    CGRect newFrame  = selfFrame;
+
+    newFrame.size.width   = selfFrame.size.width * 1 / 3;
+    newFrame.origin.x     = selfFrame.size.width * 2 / 3;
+
+    newFrame.size.height  = selfFrame.size.height * 8 / 8;
+    newFrame.origin.y    += selfFrame.size.height * 0 / 8;
+
+    self.tableView.frame = newFrame;
+}
+
 #pragma mark UITableViewDelegate
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 20.f;
+    return 16.f;
 }
 
 @end

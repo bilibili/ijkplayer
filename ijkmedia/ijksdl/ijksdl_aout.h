@@ -2,6 +2,7 @@
  * ijksdl_aout.h
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -48,6 +49,8 @@ struct SDL_Aout {
 
     // optional
     void   (*func_set_playback_rate)(SDL_Aout *aout, float playbackRate);
+    void   (*func_set_playback_volume)(SDL_Aout *aout, float playbackVolume);
+    int    (*func_get_audio_persecond_callbacks)(SDL_Aout *aout);
 
     // Android only
     int    (*func_get_audio_session_id)(SDL_Aout *aout);
@@ -63,9 +66,11 @@ void SDL_AoutFreeP(SDL_Aout **paout);
 
 double SDL_AoutGetLatencySeconds(SDL_Aout *aout);
 void   SDL_AoutSetDefaultLatencySeconds(SDL_Aout *aout, double latency);
+int    SDL_AoutGetAudioPerSecondCallBacks(SDL_Aout *aout);
 
 // optional
 void   SDL_AoutSetPlaybackRate(SDL_Aout *aout, float playbackRate);
+void   SDL_AoutSetPlaybackVolume(SDL_Aout *aout, float volume);
 
 // android only
 int    SDL_AoutGetAudioSessionId(SDL_Aout *aout);

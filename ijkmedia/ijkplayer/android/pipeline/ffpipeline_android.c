@@ -1,6 +1,7 @@
 /*
  * ffpipeline_android.c
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -91,6 +92,29 @@ static SDL_Aout *func_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
     return aout;
 }
 
+static IJKFF_Pipenode *func_init_video_decoder(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
+{
+    IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
+    IJKFF_Pipenode        *node = NULL;
+
+    if (ffp->mediacodec_all_videos || ffp->mediacodec_avc || ffp->mediacodec_hevc || ffp->mediacodec_mpeg2)
+        node = ffpipenode_init_decoder_from_android_mediacodec(ffp, pipeline, opaque->weak_vout);
+
+    return node;
+}
+
+static int func_config_video_decoder(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
+{
+    IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
+    int                       ret = NULL;
+
+    if (ffp->node_vdec) {
+        ret = ffpipenode_config_from_android_mediacodec(ffp, pipeline, opaque->weak_vout, ffp->node_vdec);
+    }
+
+    return ret;
+}
+
 
 inline static bool check_ffpipeline(IJKFF_Pipeline* pipeline, const char *func_name)
 {
@@ -124,9 +148,11 @@ IJKFF_Pipeline *ffpipeline_create_from_android(FFPlayer *ffp)
         goto fail;
     }
 
-    pipeline->func_destroy            = func_destroy;
-    pipeline->func_open_video_decoder = func_open_video_decoder;
-    pipeline->func_open_audio_output  = func_open_audio_output;
+    pipeline->func_destroy              = func_destroy;
+    pipeline->func_open_video_decoder   = func_open_video_decoder;
+    pipeline->func_open_audio_output    = func_open_audio_output;
+    pipeline->func_init_video_decoder   = func_init_video_decoder;
+    pipeline->func_config_video_decoder = func_config_video_decoder;
 
     return pipeline;
 fail:

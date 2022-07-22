@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2015 Bilibili
  * Copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -25,74 +26,56 @@
 #include "libavutil/log.h"
 #include "libavutil/opt.h"
 
-#include "ijkplayer/ijkavutil/opt.h"
-#include "ijkavformat.h"
+#include "libavutil/application.h"
 
 typedef struct Context {
     AVClass        *class;
     URLContext     *inner;
 
     /* options */
-    int64_t         opaque;
-    int             segment_index;
     char           *http_hook;
+    int64_t         app_ctx_intptr;
 } Context;
-
-static void *ijksegment_get_opaque(URLContext *h) {
-    Context *c = h->priv_data;
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
-#endif
-    return (void *)c->opaque;
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-}
 
 static int ijksegment_open(URLContext *h, const char *arg, int flags, AVDictionary **options)
 {
     Context *c = h->priv_data;
-    IJKAVInject_OnUrlOpenData inject_data = {0};
-    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
+    AVAppIOControl io_control = {0};
+    AVApplicationContext *app_ctx = (AVApplicationContext *)(intptr_t)c->app_ctx_intptr;
     int ret = -1;
-    void *opaque = ijksegment_get_opaque(h);
-    assert(opaque);
-
-    if (!c->opaque) {
-        av_log(h, AV_LOG_ERROR, "null opaque\n");
-        return AVERROR_EXTERNAL;
-    }
-
-    if (!inject_callback) {
-        av_log(h, AV_LOG_ERROR, "null inject_callback\n");
-        return AVERROR_EXTERNAL;
-    }
+    int segment_index = -1;
 
     av_strstart(arg, "ijksegment:", &arg);
+
     if (!arg || !*arg)
         return AVERROR_EXTERNAL;
 
-    inject_data.size = sizeof(inject_data);
-    inject_data.segment_index = (int)strtol(arg, NULL, 0);
-    strlcpy(inject_data.url,    arg,    sizeof(inject_data.url));
+    segment_index = (int)strtol(arg, NULL, 0);
+    io_control.size = sizeof(io_control);
+    io_control.segment_index = segment_index;
+    strlcpy(io_control.url,    arg,    sizeof(io_control.url));
 
-    if (opaque && inject_callback &&
-        inject_data.segment_index < 0) {
+    if (app_ctx && io_control.segment_index < 0) {
         ret = AVERROR_EXTERNAL;
         goto fail;
     }
-
-    ret = inject_callback(opaque, IJKAVINJECT_CONCAT_RESOLVE_SEGMENT, &inject_data, sizeof(inject_data));
-    if (ret || !inject_data.url[0]) {
+    ret = av_application_on_io_control(app_ctx, AVAPP_CTRL_WILL_CONCAT_SEGMENT_OPEN, &io_control);
+    if (ret || !io_control.url[0]) {
         ret = AVERROR_EXIT;
         goto fail;
     }
 
-    av_dict_set_int(options, "ijkinject-opaque",        c->opaque, 0);
-    av_dict_set_int(options, "ijkinject-segment-index", c->segment_index, 0);
+    av_dict_set_int(options, "ijkapplication", c->app_ctx_intptr, 0);
+    av_dict_set_int(options, "ijkinject-segment-index", segment_index, 0);
 
-    ret = ffurl_open_whitelist(&c->inner, inject_data.url, flags, &h->interrupt_callback, options, h->protocol_whitelist);
+    ret = ffurl_open_whitelist(&c->inner,
+                               io_control.url,
+                               flags,
+                               &h->interrupt_callback,
+                               options,
+                               h->protocol_whitelist,
+                               h->protocol_blacklist,
+                               h);
     if (ret)
         goto fail;
 
@@ -126,10 +109,7 @@ static int64_t ijksegment_seek(URLContext *h, int64_t pos, int whence)
 #define D AV_OPT_FLAG_DECODING_PARAM
 
 static const AVOption options[] = {
-    { "ijkinject-opaque",           "private data of user, passed with custom callback",
-        OFFSET(opaque),             IJKAV_OPTION_INT64(0, INT64_MIN, INT64_MAX) },
-    { "ijkinject-segment-index",    "segment index of current url",
-        OFFSET(segment_index),      IJKAV_OPTION_INT(0, 0, INT_MAX) },
+    { "ijkapplication", "AVApplicationContext", OFFSET(app_ctx_intptr), AV_OPT_TYPE_INT64, { .i64 = 0 }, INT64_MIN, INT64_MAX, .flags = D },
     { NULL }
 };
 
@@ -143,7 +123,7 @@ static const AVClass ijksegment_context_class = {
     .version    = LIBAVUTIL_VERSION_INT,
 };
 
-URLProtocol ijkff_ijksegment_protocol = {
+URLProtocol ijkimp_ff_ijksegment_protocol = {
     .name                = "ijksegment",
     .url_open2           = ijksegment_open,
     .url_read            = ijksegment_read,

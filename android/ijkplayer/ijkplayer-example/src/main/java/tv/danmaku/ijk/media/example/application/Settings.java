@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015 Bilibili
  * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,6 +62,11 @@ public class Settings {
         return mSharedPreferences.getBoolean(key, false);
     }
 
+    public boolean getMediaCodecHandleResolutionChange() {
+        String key = mAppContext.getString(R.string.pref_key_media_codec_handle_resolution_change);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
     public boolean getUsingOpenSLES() {
         String key = mAppContext.getString(R.string.pref_key_using_opensl_es);
         return mSharedPreferences.getBoolean(key, false);
@@ -88,6 +94,11 @@ public class Settings {
 
     public boolean getEnableDetachedSurfaceTextureView() {
         String key = mAppContext.getString(R.string.pref_key_enable_detached_surface_texture);
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
+    public boolean getUsingMediaDataSource() {
+        String key = mAppContext.getString(R.string.pref_key_using_mediadatasource);
         return mSharedPreferences.getBoolean(key, false);
     }
 

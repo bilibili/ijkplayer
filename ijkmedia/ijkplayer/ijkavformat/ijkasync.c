@@ -1,5 +1,6 @@
 /*
  * Input async protocol.
+ * Copyright (c) 2015 Bilibili
  * Copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of FFmpeg.
@@ -35,11 +36,10 @@
 #include "libavutil/opt.h"
 #include "libavutil/thread.h"
 #include "libavutil/time.h"
-#include "url.h"
+#include "libavformat/url.h"
 #include <stdint.h>
 
-#include "ijkplayer/ijkavutil/opt.h"
-#include "ijkavformat.h"
+#include "libavutil/application.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -82,9 +82,10 @@ typedef struct Context {
     AVIOInterruptCB interrupt_callback;
 
     /* options */
-    int64_t         opaque;
     int64_t         forwards_capacity;
     int64_t         backwards_capacity;
+    int64_t         app_ctx_intptr;
+    AVApplicationContext *app_ctx;
 } Context;
 
 static int ring_init(RingBuffer *ring, int64_t capacity, int64_t read_back_capacity)
@@ -183,35 +184,29 @@ static int wrapped_url_read(void *src, void *dst, int size)
 static void call_inject_statistic(URLContext *h)
 {
     Context *c = h->priv_data;
-    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
-    void *opaque = (void *) (intptr_t) c->opaque;
 
-    if (opaque && inject_callback) {
-        IJKAVInject_AsyncStatistic stat;
-        stat.size = sizeof(stat);
-        stat.buf_forwards  = ring_size(&c->ring);
-        stat.buf_backwards = ring_size_of_read_back(&c->ring);
-        stat.buf_capacity  = c->forwards_capacity + c->backwards_capacity;
-
-        inject_callback(opaque, IJKAVINJECT_ASYNC_STATISTIC, &stat, sizeof(stat));
+    if (c->app_ctx) {
+        AVAppAsyncStatistic statistic = {0};
+        statistic.size = sizeof(statistic);
+        statistic.buf_forwards  = ring_size(&c->ring);
+        statistic.buf_backwards = ring_size_of_read_back(&c->ring);
+        statistic.buf_capacity  = c->forwards_capacity + c->backwards_capacity;
+        av_application_on_async_statistic(c->app_ctx, &statistic);
     }
 }
 
 static void call_inject_async_fill_speed(URLContext *h, int is_full_speed, int64_t bytes, int64_t elapsed_micro)
 {
     Context *c = h->priv_data;
-    IjkAVInjectCallback inject_callback = ijkav_get_inject_callback();
-    void *opaque = (void *) (intptr_t) c->opaque;
     int64_t elapsed_milli = elapsed_micro / 1000;
 
-    if (opaque && inject_callback && bytes > 0 && elapsed_milli > 0) {
-        IJKAVInject_AsyncReadSpeed stat;
-        stat.size = sizeof(stat);
-        stat.is_full_speed = is_full_speed;
-        stat.io_bytes      = bytes;
-        stat.elapsed_milli = elapsed_milli;
-
-        inject_callback(opaque, IJKAVINJECT_ASYNC_READ_SPEED, &stat, sizeof(stat));
+    if (c->app_ctx && bytes > 0 && elapsed_milli > 0) {
+        AVAppAsyncReadSpeed speed = {0};
+        speed.size = sizeof(speed);
+        speed.is_full_speed = is_full_speed;
+        speed.io_bytes      = bytes;
+        speed.elapsed_milli = elapsed_milli;
+        av_application_on_async_read_speed(c->app_ctx, &speed);
     }
 }
 
@@ -312,12 +307,13 @@ static int async_open(URLContext *h, const char *arg, int flags, AVDictionary **
     if (ret < 0)
         goto fifo_fail;
 
-    if (c->opaque)
-        av_dict_set_int(options, "ijkinject-opaque", c->opaque, 0);
-
+    if (c->app_ctx_intptr) {
+        c->app_ctx = (AVApplicationContext *)(intptr_t)c->app_ctx_intptr;
+        av_dict_set_int(options, "ijkapplication", c->app_ctx_intptr, 0);
+    }
     /* wrap interrupt callback */
     c->interrupt_callback = h->interrupt_callback;
-    ret = ffurl_open_whitelist(&c->inner, arg, flags, &interrupt_callback, options, h->protocol_whitelist);
+    ret = ffurl_open_whitelist(&c->inner, arg, flags, &interrupt_callback, options, h->protocol_whitelist, h->protocol_blacklist, h);
     if (ret != 0) {
         av_log(h, AV_LOG_ERROR, "ffurl_open_whitelist failed : %s, %s\n", av_err2str(ret), arg);
         goto url_fail;
@@ -535,12 +531,11 @@ static int64_t async_seek(URLContext *h, int64_t pos, int whence)
 #define D AV_OPT_FLAG_DECODING_PARAM
 
 static const AVOption options[] = {
-    { "ijkinject-opaque",           "private data of user, passed with custom callback",
-        OFFSET(opaque),             IJKAV_OPTION_INT64(0, INT64_MIN, INT64_MAX) },
     { "async-forwards-capacity",    "max bytes that may be read forward in background",
-        OFFSET(forwards_capacity),  IJKAV_OPTION_INT64(128 * 1024, 128 * 1024, 128 * 1024 * 1024) },
+        OFFSET(forwards_capacity),  AV_OPT_TYPE_INT64, {.i64 = 128 * 1024}, 128 * 1024, 128 * 1024 * 1024, D },
     { "async-backwards-capacity",   "max bytes that may be seek backward without seeking in inner protocol",
-        OFFSET(backwards_capacity), IJKAV_OPTION_INT64(128 * 1024, 128 * 1024, 128 * 1024 * 1024) },
+        OFFSET(backwards_capacity), AV_OPT_TYPE_INT64, {.i64 = 128 * 1024}, 128 * 1024, 128 * 1024 * 1024, D },
+    { "ijkapplication", "AVApplicationContext", OFFSET(app_ctx_intptr), AV_OPT_TYPE_INT64, { .i64 = 0 }, INT64_MIN, INT64_MAX, .flags = D },
     {NULL},
 };
 
@@ -554,7 +549,7 @@ static const AVClass async_context_class = {
     .version    = LIBAVUTIL_VERSION_INT,
 };
 
-URLProtocol ff_async_protocol = {
+const URLProtocol ijkimp_ff_async_protocol = {
     .name                = "async",
     .url_open2           = async_open,
     .url_read            = async_read,
@@ -564,7 +559,7 @@ URLProtocol ff_async_protocol = {
     .priv_data_class     = &async_context_class,
 };
 
-#ifdef TEST
+#if 0
 
 #define TEST_SEEK_POS    (1536)
 #define TEST_STREAM_SIZE (2048)
@@ -656,7 +651,7 @@ static const AVClass async_test_context_class = {
     .version    = LIBAVUTIL_VERSION_INT,
 };
 
-URLProtocol ff_async_test_protocol = {
+const URLProtocol ff_async_test_protocol = {
     .name                = "async-test",
     .url_open2           = async_test_open,
     .url_read            = async_test_read,
@@ -677,13 +672,13 @@ int main(void)
     unsigned char buf[4096];
     AVDictionary *opts = NULL;
 
-    ffurl_register_protocol(&ff_async_protocol);
+    ffurl_register_protocol(&ijkimp_ff_async_protocol);
     ffurl_register_protocol(&ff_async_test_protocol);
 
     /*
      * test normal read
      */
-    ret = ffurl_open_whitelist(&h, "async:async-test:", AVIO_FLAG_READ, NULL, NULL, NULL);
+    ret = ffurl_open(&h, "async:async-test:", AVIO_FLAG_READ, NULL, NULL);
     printf("open: %d\n", ret);
 
     size = ffurl_size(h);
@@ -759,7 +754,7 @@ int main(void)
      */
     ffurl_close(h);
     av_dict_set_int(&opts, "async-test-read-error", -10000, 0);
-    ret = ffurl_open_whitelist(&h, "async:async-test:", AVIO_FLAG_READ, NULL, &opts, NULL);
+    ret = ffurl_open(&h, "async:async-test:", AVIO_FLAG_READ, NULL, &opts);
     printf("open: %d\n", ret);
 
     ret = ffurl_read(h, buf, 1);

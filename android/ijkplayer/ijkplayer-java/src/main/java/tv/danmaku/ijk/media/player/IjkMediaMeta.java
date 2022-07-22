@@ -15,11 +15,13 @@ public class IjkMediaMeta {
     public static final String IJKM_KEY_BITRATE = "bitrate";
     public static final String IJKM_KEY_VIDEO_STREAM = "video";
     public static final String IJKM_KEY_AUDIO_STREAM = "audio";
+    public static final String IJKM_KEY_TIMEDTEXT_STREAM = "timedtext";
 
     // stream meta
     public static final String IJKM_KEY_TYPE = "type";
     public static final String IJKM_VAL_TYPE__VIDEO = "video";
     public static final String IJKM_VAL_TYPE__AUDIO = "audio";
+    public static final String IJKM_VAL_TYPE__TIMEDTEXT = "timedtext";
     public static final String IJKM_VAL_TYPE__UNKNOWN = "unknown";
     public static final String IJKM_KEY_LANGUAGE = "language";
 
@@ -28,6 +30,7 @@ public class IjkMediaMeta {
     public static final String IJKM_KEY_CODEC_LEVEL = "codec_level";
     public static final String IJKM_KEY_CODEC_LONG_NAME = "codec_long_name";
     public static final String IJKM_KEY_CODEC_PIXEL_FORMAT = "codec_pixel_format";
+    public static final String IJKM_KEY_CODEC_PROFILE_ID = "codec_profile_id";
 
     // stream: video
     public static final String IJKM_KEY_WIDTH = "width";
@@ -109,6 +112,23 @@ public class IjkMediaMeta {
             | AV_CH_BACK_LEFT | AV_CH_BACK_CENTER | AV_CH_BACK_RIGHT);
     public static final long AV_CH_LAYOUT_STEREO_DOWNMIX = (AV_CH_STEREO_LEFT | AV_CH_STEREO_RIGHT);
 
+    public static final int FF_PROFILE_H264_CONSTRAINED = (1<<9);  // 8+1; constraint_set1_flag
+    public static final int FF_PROFILE_H264_INTRA = (1<<11);       // 8+3; constraint_set3_flag
+
+    public static final int FF_PROFILE_H264_BASELINE = 66;
+    public static final int FF_PROFILE_H264_CONSTRAINED_BASELINE = (66|FF_PROFILE_H264_CONSTRAINED);
+    public static final int FF_PROFILE_H264_MAIN = 77;
+    public static final int FF_PROFILE_H264_EXTENDED = 88;
+    public static final int FF_PROFILE_H264_HIGH = 100;
+    public static final int FF_PROFILE_H264_HIGH_10 = 110;
+    public static final int FF_PROFILE_H264_HIGH_10_INTRA = (110|FF_PROFILE_H264_INTRA);
+    public static final int FF_PROFILE_H264_HIGH_422 = 122;
+    public static final int FF_PROFILE_H264_HIGH_422_INTRA = (122|FF_PROFILE_H264_INTRA);
+    public static final int FF_PROFILE_H264_HIGH_444 = 144;
+    public static final int FF_PROFILE_H264_HIGH_444_PREDICTIVE = 244;
+    public static final int FF_PROFILE_H264_HIGH_444_INTRA = (244|FF_PROFILE_H264_INTRA);
+    public static final int FF_PROFILE_H264_CAVLC_444 = 44;
+
     public Bundle mMediaMeta;
 
     public String mFormat;
@@ -184,6 +204,7 @@ public class IjkMediaMeta {
 
         int videoStreamIndex = meta.getInt(IJKM_KEY_VIDEO_STREAM, -1);
         int audioStreamIndex = meta.getInt(IJKM_KEY_AUDIO_STREAM, -1);
+        int subtitleStreamIndex = meta.getInt(IJKM_KEY_TIMEDTEXT_STREAM, -1);
 
         ArrayList<Bundle> streams = meta
                 .getParcelableArrayList(IJKM_KEY_STREAMS);

@@ -39,6 +39,10 @@ typedef struct J4AC_android_media_AudioTrack {
     jmethodID method_getAudioSessionId;
     jmethodID method_getPlaybackParams;
     jmethodID method_setPlaybackParams;
+    jmethodID method_getStreamType;
+    jmethodID method_getSampleRate;
+    jmethodID method_getPlaybackRate;
+    jmethodID method_setPlaybackRate;
 } J4AC_android_media_AudioTrack;
 static J4AC_android_media_AudioTrack class_J4AC_android_media_AudioTrack;
 
@@ -283,6 +287,66 @@ void J4AC_android_media_AudioTrack__setPlaybackParams__catchAll(JNIEnv *env, job
     J4A_ExceptionCheck__catchAll(env);
 }
 
+jint J4AC_android_media_AudioTrack__getStreamType(JNIEnv *env, jobject thiz)
+{
+    return (*env)->CallIntMethod(env, thiz, class_J4AC_android_media_AudioTrack.method_getStreamType);
+}
+
+jint J4AC_android_media_AudioTrack__getStreamType__catchAll(JNIEnv *env, jobject thiz)
+{
+    jint ret_value = J4AC_android_media_AudioTrack__getStreamType(env, thiz);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        return 0;
+    }
+
+    return ret_value;
+}
+
+jint J4AC_android_media_AudioTrack__getSampleRate(JNIEnv *env, jobject thiz)
+{
+    return (*env)->CallIntMethod(env, thiz, class_J4AC_android_media_AudioTrack.method_getSampleRate);
+}
+
+jint J4AC_android_media_AudioTrack__getSampleRate__catchAll(JNIEnv *env, jobject thiz)
+{
+    jint ret_value = J4AC_android_media_AudioTrack__getSampleRate(env, thiz);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        return 0;
+    }
+
+    return ret_value;
+}
+
+jint J4AC_android_media_AudioTrack__getPlaybackRate(JNIEnv *env, jobject thiz)
+{
+    return (*env)->CallIntMethod(env, thiz, class_J4AC_android_media_AudioTrack.method_getPlaybackRate);
+}
+
+jint J4AC_android_media_AudioTrack__getPlaybackRate__catchAll(JNIEnv *env, jobject thiz)
+{
+    jint ret_value = J4AC_android_media_AudioTrack__getPlaybackRate(env, thiz);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        return 0;
+    }
+
+    return ret_value;
+}
+
+jint J4AC_android_media_AudioTrack__setPlaybackRate(JNIEnv *env, jobject thiz, jint sampleRateInHz)
+{
+    return (*env)->CallIntMethod(env, thiz, class_J4AC_android_media_AudioTrack.method_setPlaybackRate, sampleRateInHz);
+}
+
+jint J4AC_android_media_AudioTrack__setPlaybackRate__catchAll(JNIEnv *env, jobject thiz, jint sampleRateInHz)
+{
+    jint ret_value = J4AC_android_media_AudioTrack__setPlaybackRate(env, thiz, sampleRateInHz);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        return 0;
+    }
+
+    return ret_value;
+}
+
 int J4A_loadClass__J4AC_android_media_AudioTrack(JNIEnv *env)
 {
     int         ret                   = -1;
@@ -407,6 +471,34 @@ int J4A_loadClass__J4AC_android_media_AudioTrack(JNIEnv *env)
         if (class_J4AC_android_media_AudioTrack.method_setPlaybackParams == NULL)
             goto fail;
     }
+
+    class_id = class_J4AC_android_media_AudioTrack.id;
+    name     = "getStreamType";
+    sign     = "()I";
+    class_J4AC_android_media_AudioTrack.method_getStreamType = J4A_GetMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_android_media_AudioTrack.method_getStreamType == NULL)
+        goto fail;
+
+    class_id = class_J4AC_android_media_AudioTrack.id;
+    name     = "getSampleRate";
+    sign     = "()I";
+    class_J4AC_android_media_AudioTrack.method_getSampleRate = J4A_GetMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_android_media_AudioTrack.method_getSampleRate == NULL)
+        goto fail;
+
+    class_id = class_J4AC_android_media_AudioTrack.id;
+    name     = "getPlaybackRate";
+    sign     = "()I";
+    class_J4AC_android_media_AudioTrack.method_getPlaybackRate = J4A_GetMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_android_media_AudioTrack.method_getPlaybackRate == NULL)
+        goto fail;
+
+    class_id = class_J4AC_android_media_AudioTrack.id;
+    name     = "setPlaybackRate";
+    sign     = "(I)I";
+    class_J4AC_android_media_AudioTrack.method_setPlaybackRate = J4A_GetMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_android_media_AudioTrack.method_setPlaybackRate == NULL)
+        goto fail;
 
     J4A_ALOGD("J4ALoader: OK: '%s' loaded\n", "android.media.AudioTrack");
     ret = 0;

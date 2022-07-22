@@ -2,6 +2,7 @@
  * ijksdl_aout_android_opensles.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -248,8 +249,6 @@ static void aout_close_audio(SDL_Aout *aout)
     SDL_WaitThread(opaque->audio_tid, NULL);
     opaque->audio_tid = NULL;
 
-    freep((void **)&opaque->buffer);
-
     if (opaque->slPlayItf)
         (*opaque->slPlayItf)->SetPlayState(opaque->slPlayItf, SL_PLAYSTATE_STOPPED);
     if (opaque->slBufferQueueItf)
@@ -266,6 +265,8 @@ static void aout_close_audio(SDL_Aout *aout)
         (*opaque->slPlayerObject)->Destroy(opaque->slPlayerObject);
         opaque->slPlayerObject = NULL;
     }
+
+    freep((void **)&opaque->buffer);
 }
 
 static void aout_free_l(SDL_Aout *aout)
@@ -430,7 +431,7 @@ static int aout_open_audio(SDL_Aout *aout, const SDL_AudioSpec *desired, SDL_Aud
     return opaque->buffer_capacity;
 fail:
     aout_close_audio(aout);
-    return 0;
+    return -1;
 }
 
 static void aout_pause_audio(SDL_Aout *aout, int pause_on)

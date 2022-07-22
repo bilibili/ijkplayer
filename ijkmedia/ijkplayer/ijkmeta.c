@@ -1,6 +1,7 @@
 /*
  * ijkmeta.c
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -150,21 +151,21 @@ void ijkmeta_set_string_l(IjkMediaMeta *meta, const char *name, const char *valu
     av_dict_set(&meta->dict, name, value, 0);
 }
 
-static int64_t get_bit_rate(AVCodecContext *ctx)
+static int64_t get_bit_rate(AVCodecParameters *codecpar)
 {
     int64_t bit_rate;
     int bits_per_sample;
 
-    switch (ctx->codec_type) {
+    switch (codecpar->codec_type) {
         case AVMEDIA_TYPE_VIDEO:
         case AVMEDIA_TYPE_DATA:
         case AVMEDIA_TYPE_SUBTITLE:
         case AVMEDIA_TYPE_ATTACHMENT:
-            bit_rate = ctx->bit_rate;
+            bit_rate = codecpar->bit_rate;
             break;
         case AVMEDIA_TYPE_AUDIO:
-            bits_per_sample = av_get_bits_per_sample(ctx->codec_id);
-            bit_rate = bits_per_sample ? ctx->sample_rate * ctx->channels * bits_per_sample : ctx->bit_rate;
+            bits_per_sample = av_get_bits_per_sample(codecpar->codec_id);
+            bit_rate = bits_per_sample ? codecpar->sample_rate * codecpar->channels * bits_per_sample : codecpar->bit_rate;
             break;
         default:
             bit_rate = 0;
@@ -196,47 +197,48 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
             ijkmeta_destroy_p(&stream_meta);
 
         AVStream *st = ic->streams[i];
-        if (!st || !st->codec)
+        if (!st || !st->codecpar)
             continue;
 
         stream_meta = ijkmeta_create();
         if (!stream_meta)
             continue;
 
-        AVCodecContext *avctx = st->codec;
-        const char *codec_name = avcodec_get_name(avctx->codec_id);
+        AVCodecParameters *codecpar = st->codecpar;
+        const char *codec_name = avcodec_get_name(codecpar->codec_id);
         if (codec_name)
             ijkmeta_set_string_l(stream_meta, IJKM_KEY_CODEC_NAME, codec_name);
-        if (avctx->profile != FF_PROFILE_UNKNOWN) {
-            const AVCodec *codec = avctx->codec ? avctx->codec : avcodec_find_decoder(avctx->codec_id);
+        if (codecpar->profile != FF_PROFILE_UNKNOWN) {
+            const AVCodec *codec = avcodec_find_decoder(codecpar->codec_id);
             if (codec) {
-                const char *profile = av_get_profile_name(codec, avctx->profile);
+                ijkmeta_set_int64_l(stream_meta, IJKM_KEY_CODEC_PROFILE_ID, codecpar->profile);
+                const char *profile = av_get_profile_name(codec, codecpar->profile);
                 if (profile)
                     ijkmeta_set_string_l(stream_meta, IJKM_KEY_CODEC_PROFILE, profile);
                 if (codec->long_name)
                     ijkmeta_set_string_l(stream_meta, IJKM_KEY_CODEC_LONG_NAME, codec->long_name);
-                ijkmeta_set_int64_l(stream_meta, IJKM_KEY_CODEC_LEVEL, avctx->level);
-                if (avctx->pix_fmt != AV_PIX_FMT_NONE)
-                    ijkmeta_set_string_l(stream_meta, IJKM_KEY_CODEC_PIXEL_FORMAT, av_get_pix_fmt_name(avctx->pix_fmt));
+                ijkmeta_set_int64_l(stream_meta, IJKM_KEY_CODEC_LEVEL, codecpar->level);
+                if (codecpar->format != AV_PIX_FMT_NONE)
+                    ijkmeta_set_string_l(stream_meta, IJKM_KEY_CODEC_PIXEL_FORMAT, av_get_pix_fmt_name(codecpar->format));
             }
         }
 
-        int64_t bitrate = get_bit_rate(avctx);
+        int64_t bitrate = get_bit_rate(codecpar);
         if (bitrate > 0) {
             ijkmeta_set_int64_l(stream_meta, IJKM_KEY_BITRATE, bitrate);
         }
 
-        switch (avctx->codec_type) {
+        switch (codecpar->codec_type) {
             case AVMEDIA_TYPE_VIDEO: {
                 ijkmeta_set_string_l(stream_meta, IJKM_KEY_TYPE, IJKM_VAL_TYPE__VIDEO);
 
-                if (avctx->width > 0)
-                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_WIDTH, avctx->width);
-                if (avctx->height > 0)
-                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_HEIGHT, avctx->height);
+                if (codecpar->width > 0)
+                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_WIDTH, codecpar->width);
+                if (codecpar->height > 0)
+                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_HEIGHT, codecpar->height);
                 if (st->sample_aspect_ratio.num > 0 && st->sample_aspect_ratio.den > 0) {
-                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_SAR_NUM, avctx->sample_aspect_ratio.num);
-                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_SAR_DEN, avctx->sample_aspect_ratio.den);
+                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_SAR_NUM, codecpar->sample_aspect_ratio.num);
+                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_SAR_DEN, codecpar->sample_aspect_ratio.den);
                 }
 
                 if (st->avg_frame_rate.num > 0 && st->avg_frame_rate.den > 0) {
@@ -252,10 +254,14 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
             case AVMEDIA_TYPE_AUDIO: {
                 ijkmeta_set_string_l(stream_meta, IJKM_KEY_TYPE, IJKM_VAL_TYPE__AUDIO);
 
-                if (avctx->sample_rate)
-                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_SAMPLE_RATE, avctx->sample_rate);
-                if (avctx->channel_layout)
-                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_CHANNEL_LAYOUT, avctx->channel_layout);
+                if (codecpar->sample_rate)
+                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_SAMPLE_RATE, codecpar->sample_rate);
+                if (codecpar->channel_layout)
+                    ijkmeta_set_int64_l(stream_meta, IJKM_KEY_CHANNEL_LAYOUT, codecpar->channel_layout);
+                break;
+            }
+            case AVMEDIA_TYPE_SUBTITLE: {
+                ijkmeta_set_string_l(stream_meta, IJKM_KEY_TYPE, IJKM_VAL_TYPE__TIMEDTEXT);
                 break;
             }
             default: {
@@ -278,7 +284,7 @@ void ijkmeta_set_avformat_context_l(IjkMediaMeta *meta, AVFormatContext *ic)
 
 const char *ijkmeta_get_string_l(IjkMediaMeta *meta, const char *name)
 {
-    if (!meta || !meta->dict)
+    if (!meta || !meta->dict || !name)
         return NULL;
 
     AVDictionaryEntry *entry = av_dict_get(meta->dict, name, NULL, 0);

@@ -2,6 +2,7 @@
  * ijksdl_aout_android_audiotrack.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -92,8 +93,13 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
             while (!opaque->abort_request && opaque->pause_on) {
                 SDL_CondWaitTimeout(opaque->wakeup_cond, opaque->wakeup_mutex, 1000);
             }
-            if (!opaque->abort_request && !opaque->pause_on)
+            if (!opaque->abort_request && !opaque->pause_on) {
+                if (opaque->need_flush) {
+                    opaque->need_flush = 0;
+                    SDL_Android_AudioTrack_flush(env, atrack);
+                }
                 SDL_Android_AudioTrack_play(env, atrack);
+            }
         }
         if (opaque->need_flush) {
             opaque->need_flush = 0;
@@ -105,9 +111,7 @@ static int aout_thread_n(JNIEnv *env, SDL_Aout *aout)
         }
         if (opaque->speed_changed) {
             opaque->speed_changed = 0;
-            if (J4A_GetSystemAndroidApiLevel(env) >= 23) {
-                SDL_Android_AudioTrack_setSpeed(env, atrack, opaque->speed);
-            }
+            SDL_Android_AudioTrack_setSpeed(env, atrack, opaque->speed);
         }
         SDL_UnlockMutex(opaque->wakeup_mutex);
 

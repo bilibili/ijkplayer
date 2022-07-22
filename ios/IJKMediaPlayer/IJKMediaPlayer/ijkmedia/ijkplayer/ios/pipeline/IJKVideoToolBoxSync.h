@@ -1,8 +1,8 @@
-/*
- * url.h
+/*****************************************************************************
+ * IJKVideoToolBox.h
+ *****************************************************************************
  *
- * Copyright (c) 2003 Fabrice Bellard
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * copyright (c) 2014 Zhou Quan <zhouqicy@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,9 +21,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef FFPLAY__IJKAVFORMAT_URL_H
-#define FFPLAY__IJKAVFORMAT_URL_H
+#ifndef IJKMediaPlayer_videotoolbox_sync_h
+#define IJKMediaPlayer_videotoolbox_sync_h
 
-#include "libavformat/url.h"
+#include "ff_ffplay.h"
+
+typedef struct Ijk_VideoToolBox_Opaque Ijk_VideoToolBox_Opaque;
+
+Ijk_VideoToolBox_Opaque* videotoolbox_sync_create(FFPlayer* ffp, AVCodecContext* ic);
+
+int videotoolbox_sync_decode_frame(Ijk_VideoToolBox_Opaque* opaque);
+
+void videotoolbox_sync_free(Ijk_VideoToolBox_Opaque* opaque);
 
 #endif

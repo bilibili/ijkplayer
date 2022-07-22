@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015 Bilibili
  * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -94,7 +95,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                     String scheme = mVideoUri.getScheme();
                     if (TextUtils.isEmpty(scheme)) {
-                        Log.e(TAG, "Null unknown ccheme\n");
+                        Log.e(TAG, "Null unknown scheme\n");
                         finish();
                         return;
                     }

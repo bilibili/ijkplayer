@@ -1,6 +1,7 @@
 /*
  * IJKAVMoviePlayerController.m
  *
+ * Copyright (c) 2014 Bilibili
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -145,6 +146,7 @@ static void *KVO_AVPlayerItem_playbackBufferEmpty       = &KVO_AVPlayerItem_play
     IJKNotificationManager *_notificationManager;
 
     float _playbackRate;
+    float _playbackVolume;
 }
 
 @synthesize view                        = _view;
@@ -191,7 +193,7 @@ static IJKAVMoviePlayerController* instance;
         _playbackBufferFull     = NO;
 
         _playbackRate           = 1.0f;
-
+        _playbackVolume         = 1.0f;
         // init extra
         [self setScreenOn:YES];
 
@@ -250,6 +252,11 @@ static IJKAVMoviePlayerController* instance;
                          completionHandler:^{
                              dispatch_async( dispatch_get_main_queue(), ^{
                                  [self didPrepareToPlayAsset:asset withKeys:requestedKeys];
+                                 [[NSNotificationCenter defaultCenter]
+                                  postNotificationName:IJKMPMovieNaturalSizeAvailableNotification
+                                  object:self];
+
+                                 [self setPlaybackVolume:_playbackVolume];
                              });
                          }];
 }
@@ -319,10 +326,19 @@ static IJKAVMoviePlayerController* instance;
 - (UIImage *)thumbnailImageAtCurrentTime
 {
     AVAssetImageGenerator *imageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:_playAsset];
-    NSError *error = nil;
-    CMTime time = CMTimeMakeWithSeconds(self.currentPlaybackTime, 1);
-    CMTime actualTime;
-    CGImageRef cgImage = [imageGenerator copyCGImageAtTime:time actualTime:&actualTime error:&error];
+    CMTime expectedTime = _playerItem.currentTime;
+    CGImageRef cgImage = NULL;
+    
+    imageGenerator.requestedTimeToleranceBefore = kCMTimeZero;
+    imageGenerator.requestedTimeToleranceAfter = kCMTimeZero;
+    cgImage = [imageGenerator copyCGImageAtTime:expectedTime actualTime:NULL error:NULL];
+    
+    if (!cgImage) {
+        imageGenerator.requestedTimeToleranceBefore = kCMTimePositiveInfinity;
+        imageGenerator.requestedTimeToleranceAfter = kCMTimePositiveInfinity;
+        cgImage = [imageGenerator copyCGImageAtTime:expectedTime actualTime:NULL error:NULL];
+    }
+    
     UIImage *image = [UIImage imageWithCGImage:cgImage];
     return image;
 }
@@ -334,6 +350,7 @@ static IJKAVMoviePlayerController* instance;
 
     _seekingTime = aCurrentPlaybackTime;
     _isSeeking = YES;
+    _bufferingProgress = 0;
     [self didPlaybackStateChange];
     [self didLoadStateChange];
     if (_isPrerolling) {
@@ -444,6 +461,22 @@ static IJKAVMoviePlayerController* instance;
     return _playbackRate;
 }
 
+-(void)setPlaybackVolume:(float)playbackVolume
+{
+    _playbackVolume = playbackVolume;
+    if (_player != nil && _player.volume != playbackVolume) {
+        _player.volume = playbackVolume;
+    }
+    BOOL muted = fabs(playbackVolume) < 1e-6;
+    if (_player != nil && _player.muted != muted) {
+        _player.muted = muted;
+    }
+}
+
+-(float)playbackVolume
+{
+    return _playbackVolume;
+}
 
 - (void)didPrepareToPlayAsset:(AVURLAsset *)asset withKeys:(NSArray *)requestedKeys
 {
@@ -766,16 +799,15 @@ static IJKAVMoviePlayerController* instance;
             NSArray *timeRangeArray = playerItem.loadedTimeRanges;
             CMTime currentTime = [_player currentTime];
             
-            __block BOOL foundRange = NO;
-            __block CMTimeRange aTimeRange;
+            BOOL foundRange = NO;
+            CMTimeRange aTimeRange = {0};
             
-            [timeRangeArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            if (timeRangeArray.count) {
                 aTimeRange = [[timeRangeArray objectAtIndex:0] CMTimeRangeValue];
                 if(CMTimeRangeContainsTime(aTimeRange, currentTime)) {
-                    *stop = YES;
                     foundRange = YES;
                 }
-            }];
+            }
             
             if (foundRange) {
                 CMTime maxTime = CMTimeRangeGetEnd(aTimeRange);

@@ -1,6 +1,7 @@
 /*
  * IJKMediaPlayback.h
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -28,6 +29,13 @@ typedef NS_ENUM(NSInteger, IJKMPMovieScalingMode) {
     IJKMPMovieScalingModeAspectFit,  // Uniform scale until one dimension fits
     IJKMPMovieScalingModeAspectFill, // Uniform scale until the movie fills the visible bounds. One dimension may have clipped contents
     IJKMPMovieScalingModeFill        // Non-uniform scale. Both render dimensions will exactly match the visible bounds
+};
+
+typedef NS_ENUM(NSInteger, IJKMPMovieRotateDegrees) {
+    IJKMPMovieRotateDegrees_0,      // 0 degree, no rotation
+    IJKMPMovieRotateDegrees_90,     // rotate 90 degrees
+    IJKMPMovieRotateDegrees_180,    // rotate 180 degrees
+    IJKMPMovieRotateDegrees_270     // rotate 270 degrees
 };
 
 typedef NS_ENUM(NSInteger, IJKMPMoviePlaybackState) {
@@ -83,10 +91,14 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property(nonatomic, readonly)  BOOL isPreparedToPlay;
 @property(nonatomic, readonly)  IJKMPMoviePlaybackState playbackState;
 @property(nonatomic, readonly)  IJKMPMovieLoadState loadState;
+@property(nonatomic, readonly) int isSeekBuffering;
+@property(nonatomic, readonly) int isAudioSync;
+@property(nonatomic, readonly) int isVideoSync;
 
 @property(nonatomic, readonly) int64_t numberOfBytesTransferred;
 
 @property(nonatomic, readonly) CGSize naturalSize;
+@property(nonatomic, readonly) IJKMPMovieRotateDegrees rotateDegrees;
 @property(nonatomic) IJKMPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;
 
@@ -95,6 +107,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property (nonatomic, readonly) BOOL airPlayMediaActive;
 
 @property (nonatomic) float playbackRate;
+@property (nonatomic) float playbackVolume;
 
 - (UIImage *)thumbnailImageAtCurrentTime;
 
@@ -140,16 +153,29 @@ IJK_EXTERN NSString* const IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotifica
 // These notifications are posted when the associated movie property becomes available.
 IJK_EXTERN NSString* const IJKMPMovieNaturalSizeAvailableNotification;
 
+// Posted when video rotation property available.
+IJK_EXTERN NSString* const IJKMPMovieRotateAvailableNotification;
+IJK_EXTERN NSString* const IJKMPMovieRotateAvailableNotificationDegreesUserInfoKey; // NSNumber (IJKMPMovieRotateDegrees)
+
 // -----------------------------------------------------------------------------
 //  Extend Notifications
 
 IJK_EXTERN NSString *const IJKMPMoviePlayerVideoDecoderOpenNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerFirstVideoFrameRenderedNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerFirstAudioFrameRenderedNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerFirstAudioFrameDecodedNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerFirstVideoFrameDecodedNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerOpenInputNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerFindStreamInfoNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerComponentOpenNotification;
 
 IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteNotification;
 IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteTargetKey;
 IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteErrorKey;
+IJK_EXTERN NSString *const IJKMPMoviePlayerDidAccurateSeekCompleteCurPos;
+IJK_EXTERN NSString *const IJKMPMoviePlayerAccurateSeekCompleteNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerSeekAudioStartNotification;
+IJK_EXTERN NSString *const IJKMPMoviePlayerSeekVideoStartNotification;
 
 @end
 
@@ -157,17 +183,18 @@ IJK_EXTERN NSString *const IJKMPMoviePlayerDidSeekCompleteErrorKey;
 
 // Must equal to the defination in ijkavformat/ijkavformat.h
 typedef NS_ENUM(NSInteger, IJKMediaEvent) {
-    // Control Messages
-    IJKMediaUrlOpenEvent_ConcatResolveSegment = 0x10000,
-    IJKMediaUrlOpenEvent_TcpOpen = 0x10001,
-    IJKMediaUrlOpenEvent_HttpOpen = 0x10002,
-    IJKMediaUrlOpenEvent_LiveOpen = 0x10004,
 
     // Notify Events
-    IJKMediaEvent_WillHttpOpen = 0x12100, // attr: url
-    IJKMediaEvent_DidHttpOpen = 0x12101,  // attr: url, error, http_code
-    IJKMediaEvent_WillHttpSeek = 0x12102, // attr: url, offset
-    IJKMediaEvent_DidHttpSeek = 0x12103,  // attr: url, offset, error, http_code
+    IJKMediaEvent_WillHttpOpen         = 1,       // attr: url
+    IJKMediaEvent_DidHttpOpen          = 2,       // attr: url, error, http_code
+    IJKMediaEvent_WillHttpSeek         = 3,       // attr: url, offset
+    IJKMediaEvent_DidHttpSeek          = 4,       // attr: url, offset, error, http_code
+    // Control Message
+    IJKMediaCtrl_WillTcpOpen           = 0x20001, // IJKMediaUrlOpenData: no args
+    IJKMediaCtrl_DidTcpOpen            = 0x20002, // IJKMediaUrlOpenData: error, family, ip, port, fd
+    IJKMediaCtrl_WillHttpOpen          = 0x20003, // IJKMediaUrlOpenData: url, segmentIndex, retryCounter
+    IJKMediaCtrl_WillLiveOpen          = 0x20005, // IJKMediaUrlOpenData: url, retryCounter
+    IJKMediaCtrl_WillConcatSegmentOpen = 0x20007, // IJKMediaUrlOpenData: url, segmentIndex, retryCounter
 };
 
 #define IJKMediaEventAttrKey_url            @"url"
@@ -176,6 +203,7 @@ typedef NS_ENUM(NSInteger, IJKMediaEvent) {
 #define IJKMediaEventAttrKey_time_of_event  @"time_of_event"
 #define IJKMediaEventAttrKey_http_code      @"http_code"
 #define IJKMediaEventAttrKey_offset         @"offset"
+#define IJKMediaEventAttrKey_file_size      @"file_size"
 
 // event of IJKMediaUrlOpenEvent_xxx
 @interface IJKMediaUrlOpenData: NSObject
@@ -190,6 +218,8 @@ typedef NS_ENUM(NSInteger, IJKMediaEvent) {
 @property(nonatomic, readonly) int retryCounter;
 
 @property(nonatomic, retain) NSString *url;
+@property(nonatomic, assign) int fd;
+@property(nonatomic, strong) NSString *msg;
 @property(nonatomic) int error; // set a negative value to indicate an error has occured.
 @property(nonatomic, getter=isHandled)    BOOL handled;     // auto set to YES if url changed
 @property(nonatomic, getter=isUrlChanged) BOOL urlChanged;  // auto set to YES by url changed

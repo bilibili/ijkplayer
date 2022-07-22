@@ -1,6 +1,7 @@
 /*
  * ijkplayer_android_def.h
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -35,6 +36,7 @@ enum media_event_type {
     MEDIA_BUFFERING_UPDATE  = 3,        // arg1 = percentage, arg2 = cached duration
     MEDIA_SEEK_COMPLETE     = 4,
     MEDIA_SET_VIDEO_SIZE    = 5,        // arg1 = width, arg2 = height
+    MEDIA_GET_IMG_STATE     = 6,        // arg1 = timestamp, arg2 = result code, obj = file name
     MEDIA_TIMED_TEXT        = 99,       // not supported yet
     MEDIA_ERROR             = 100,      // arg1, arg2
     MEDIA_INFO              = 200,      // arg1, arg2
@@ -131,7 +133,16 @@ enum media_info_type {
 
     //100xx
     MEDIA_INFO_VIDEO_ROTATION_CHANGED = 10001,
-    MEDIA_INFO_AUDIO_RENDERING_START = 10002,
+    MEDIA_INFO_AUDIO_RENDERING_START  = 10002,
+    MEDIA_INFO_AUDIO_DECODED_START    = 10003,
+    MEDIA_INFO_VIDEO_DECODED_START    = 10004,
+    MEDIA_INFO_OPEN_INPUT             = 10005,
+    MEDIA_INFO_FIND_STREAM_INFO       = 10006,
+    MEDIA_INFO_COMPONENT_OPEN         = 10007,
+    MEDIA_INFO_VIDEO_SEEK_RENDERING_START = 10008,
+    MEDIA_INFO_AUDIO_SEEK_RENDERING_START = 10009,
+
+    MEDIA_INFO_MEDIA_ACCURATE_SEEK_COMPLETE = 10100,
 };
 
 typedef struct ijkmp_mediacodecinfo_context

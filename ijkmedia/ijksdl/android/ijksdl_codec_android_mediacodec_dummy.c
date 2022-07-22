@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2014 Bilibili
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -88,19 +89,19 @@ static ssize_t SDL_AMediaCodecDummy_writeInputData(SDL_AMediaCodec* acodec, size
 static ssize_t SDL_AMediaCodecDummy_dequeueInputBuffer(SDL_AMediaCodec* acodec, int64_t timeoutUs)
 {
     DMY_TRACE("%s", __func__);
-    return 0;
+    return SDL_AMediaCodec_FakeFifo_dequeueInputBuffer(&acodec->opaque->dummy_fifo, timeoutUs);
 }
 
 static sdl_amedia_status_t SDL_AMediaCodecDummy_queueInputBuffer(SDL_AMediaCodec* acodec, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags)
 {
     DMY_TRACE("%s", __func__);
-    return SDL_AMediaCodec_FakeFifo_queue(&acodec->opaque->dummy_fifo, idx, offset, size, time, flags | AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME);
+    return SDL_AMediaCodec_FakeFifo_queueInputBuffer(&acodec->opaque->dummy_fifo, idx, offset, size, time, flags | AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME);
 }
 
 static ssize_t SDL_AMediaCodecDummy_dequeueOutputBuffer(SDL_AMediaCodec* acodec, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs)
 {
     DMY_TRACE("%s", __func__);
-    return SDL_AMediaCodec_FakeFifo_dequeue(&acodec->opaque->dummy_fifo, info, timeoutUs);
+    return SDL_AMediaCodec_FakeFifo_dequeueOutputBuffer(&acodec->opaque->dummy_fifo, info, timeoutUs);
 }
 
 static sdl_amedia_status_t SDL_AMediaCodecDummy_releaseOutputBuffer(SDL_AMediaCodec* acodec, size_t idx, bool render)

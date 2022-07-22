@@ -18,6 +18,11 @@
     <string name="fps">fps</string>
     <string name="v_cache">v-cache</string>
     <string name="a_cache">a-cache</string>
+    <string name="load_cost">load-cost</string>
+    <string name="seek_cost">seek_cost</string>
+    <string name="seek_load_cost">seek_load_cost</string>
+    <string name="tcp_speed">tcp_speed</string>
+    <string name="bit_rate">bit_rate</string>
 
     <string name="media_information">Media Information</string>
     <string name="mi_player">Player</string>
@@ -36,6 +41,7 @@
     <string name="mi_channels">Channels</string>
     <string name="mi__selected_video_track">*</string>
     <string name="mi__selected_audio_track">*</string>
+    <string name="mi__selected_subtitle_track">*</string>
 
     <string name="TrackType_video">Video</string>
     <string name="TrackType_audio">Audio</string>

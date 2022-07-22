@@ -6,6 +6,7 @@ import android.os.Bundle;
 public class IjkMediaPlayer {
     private long mNativeMediaPlayer;
     private long mNativeMediaDataSource;
+    private long mNativeAndroidIO;
 
     private static void postEventFromNative(Object weakThiz, int what, int arg1, int arg2, Object obj);
     private static String onSelectCodec(Object weakThiz, String mimeType, int profile, int level);

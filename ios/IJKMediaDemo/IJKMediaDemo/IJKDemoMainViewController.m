@@ -19,7 +19,6 @@
 #import "IJKQRCodeScanViewController.h"
 #import "IJKCommon.h"
 #import "IJKDemoHistory.h"
-#import "IJKMoviePlayerViewController.h"
 #import "IJKDemoLocalFolderViewController.h"
 #import "IJKDemoSampleViewController.h"
 #import <MobileCoreServices/MobileCoreServices.h>

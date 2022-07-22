@@ -1,8 +1,8 @@
 /*
- * utils.c
+ * IJKSDLGLViewProtocol.h
  *
- * Copyright (c) 2003 Fabrice Bellard
- * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (c) 2017 Bilibili
+ * Copyright (c) 2017 raymond <raymondzheng1412@gmail.com>
  *
  * This file is part of ijkPlayer.
  *
@@ -21,19 +21,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <stdlib.h>
-#include "ijkavformat.h"
+#ifndef IJKSDLGLViewProtocol_h
+#define IJKSDLGLViewProtocol_h
 
-static IjkAVInjectCallback s_av_inject_callback = NULL;
+#import <UIKit/UIKit.h>
 
-IjkAVInjectCallback ijkav_register_inject_callback(IjkAVInjectCallback callback)
-{
-    IjkAVInjectCallback prev_callback = s_av_inject_callback;
-    s_av_inject_callback = callback;
-    return prev_callback;
-}
+typedef struct IJKOverlay IJKOverlay;
+struct IJKOverlay {
+    int w;
+    int h;
+    UInt32 format;
+    int planes;
+    UInt16 *pitches;
+    UInt8 **pixels;
+    int sar_num;
+    int sar_den;
+    CVPixelBufferRef pixel_buffer;
+};
 
-IjkAVInjectCallback ijkav_get_inject_callback()
-{
-    return s_av_inject_callback;
-}
+@protocol IJKSDLGLViewProtocol <NSObject>
+- (UIImage*) snapshot;
+@property(nonatomic, readonly) CGFloat  fps;
+@property(nonatomic)        CGFloat  scaleFactor;
+@property(nonatomic)        BOOL  isThirdGLView;
+- (void) display_pixels: (IJKOverlay *) overlay;
+@end
+
+#endif /* IJKSDLGLViewProtocol_h */

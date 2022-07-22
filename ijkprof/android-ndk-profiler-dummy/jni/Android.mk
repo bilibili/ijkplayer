@@ -1,3 +1,4 @@
+# Copyright (c) 2015 Bilibili
 # copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
 #
 # This file is part of ijkPlayer.

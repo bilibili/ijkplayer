@@ -1,6 +1,7 @@
 /*
  * IJKMPMoviePlayerController.m
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -162,6 +163,16 @@
     return 1.0f;
 }
 
+-(void)setPlaybackVolume:(float)playbackVolume
+{
+    NSLog(@"[MPMoviePlayerController setPlaybackVolume] is not supported\n");
+}
+
+-(float)playbackVolume
+{
+    return 1.0f;
+}
+
 #pragma mark Movie Notification Handlers
 
 /* Register observers for the various movie object notifications. */
@@ -190,6 +201,10 @@
     [_notificationManager addObserver:self
                              selector:@selector(IJK_dispatchMoviePlayerIsAirPlayVideoActiveDidChangeNotification:)
                                  name:MPMoviePlayerIsAirPlayVideoActiveDidChangeNotification
+                               object:self];
+    [_notificationManager addObserver:self
+                             selector:@selector(IJK_dispatchMoviePlayerNaturalSizeAvailableNotification:)
+                                 name:MPMovieNaturalSizeAvailableNotification
                                object:self];
 }
 
@@ -221,6 +236,11 @@
 - (void)IJK_dispatchMoviePlayerIsAirPlayVideoActiveDidChangeNotification:(NSNotification*)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:notification.object userInfo:notification.userInfo];
+}
+
+- (void)IJK_dispatchMoviePlayerNaturalSizeAvailableNotification:(NSNotification*)notification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMovieNaturalSizeAvailableNotification object:notification.object userInfo:notification.userInfo];
 }
 
 - (void)setPauseInBackground:(BOOL)pause

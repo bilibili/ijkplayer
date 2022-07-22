@@ -1,6 +1,7 @@
 /*
  * ff_ffplaye_options.h
  *
+ * Copyright (c) 2015 Bilibili
  * Copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -36,6 +37,12 @@
     .min = min__, \
     .max = max__, \
     .flags = AV_OPT_FLAG_DECODING_PARAM
+#define OPTION_DOUBLE(default__, min__, max__) \
+    .type = AV_OPT_TYPE_DOUBLE, \
+    { .dbl = default__ }, \
+    .min = min__, \
+    .max = max__, \
+    .flags = AV_OPT_FLAG_DECODING_PARAM
 #define OPTION_CONST(default__) \
     .type = AV_OPT_TYPE_CONST, \
     { .i64 = default__ }, \
@@ -61,6 +68,8 @@ static const AVOption ffp_context_options[] = {
     // TODO: ss
     { "nodisp",                         "disable graphical display",
         OPTION_OFFSET(display_disable), OPTION_INT(0, 0, 1) },
+    { "volume",                         "set startup volume 0=min 100=max",
+        OPTION_OFFSET(startup_volume),   OPTION_INT(100, 0, 100) },
     // FFP_MERGE: f, pix_fmt, stats
     { "fast",                           "non spec compliant optimizations",
         OPTION_OFFSET(fast),            OPTION_INT(0, 0, 1) },
@@ -73,6 +82,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(framedrop),       OPTION_INT(0, -1, 120) },
     { "seek-at-start",                  "set offset of player should be seeked",
         OPTION_OFFSET(seek_at_start),       OPTION_INT64(0, 0, INT_MAX) },
+    { "subtitle",                       "decode subtitle stream",
+        OPTION_OFFSET(subtitle),        OPTION_INT(0, 0, 1) },
     // FFP_MERGE: window_title
 #if CONFIG_AVFILTER
     { "af",                             "audio filters",
@@ -85,9 +96,12 @@ static const AVOption ffp_context_options[] = {
     // FFP_MERGE: showmode, default, i, codec, acodec, scodec, vcodec
     // TODO: autorotate
 
+    { "find_stream_info",               "read and decode the streams to fill missing information with heuristics" ,
+        OPTION_OFFSET(find_stream_info),    OPTION_INT(1, 0, 1) },
+
     // extended options in ff_ffplay.c
     { "max-fps",                        "drop frames in video whose fps is greater than max-fps",
-        OPTION_OFFSET(max_fps),         OPTION_INT(31, 0, 121) },
+        OPTION_OFFSET(max_fps),         OPTION_INT(31, -1, 121) },
 
     { "overlay-format",                 "fourcc of overlay format",
         OPTION_OFFSET(overlay_format),  OPTION_INT(SDL_FCC_RV32, INT_MIN, INT_MAX),
@@ -135,7 +149,21 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(iformat_name),        OPTION_STR(NULL) },
     { "no-time-adjust",                     "return player's real time from the media stream instead of the adjusted time",
         OPTION_OFFSET(no_time_adjust),      OPTION_INT(0, 0, 1) },
+    { "preset-5-1-center-mix-level",        "preset center-mix-level for 5.1 channel",
+        OPTION_OFFSET(preset_5_1_center_mix_level), OPTION_DOUBLE(M_SQRT1_2, -32, 32) },
 
+    { "enable-accurate-seek",                      "enable accurate seek",
+        OPTION_OFFSET(enable_accurate_seek),       OPTION_INT(0, 0, 1) },
+    { "accurate-seek-timeout",                      "accurate seek timeout",
+        OPTION_OFFSET(accurate_seek_timeout),       OPTION_INT(MAX_ACCURATE_SEEK_TIMEOUT, 0, MAX_ACCURATE_SEEK_TIMEOUT) },
+    { "skip-calc-frame-rate",                      "don't calculate real frame rate",
+        OPTION_OFFSET(skip_calc_frame_rate),       OPTION_INT(0, 0, 1) },
+    { "get-frame-mode",                      "warning, this option only for get frame",
+        OPTION_OFFSET(get_frame_mode),       OPTION_INT(0, 0, 1) },
+    { "async-init-decoder",                  "async create decoder",
+        OPTION_OFFSET(async_init_decoder),   OPTION_INT(0, 0, 1) },
+    { "video-mime-type",                    "default video mime type",
+        OPTION_OFFSET(video_mime_type),     OPTION_STR(NULL) },
 
         // iOS only options
     { "videotoolbox",                       "VideoToolbox: enable",
@@ -146,6 +174,8 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(vtb_async),           OPTION_INT(0, 0, 1) },
     { "videotoolbox-wait-async",            "VideoToolbox: call VTDecompressionSessionWaitForAsynchronousFrames()",
         OPTION_OFFSET(vtb_wait_async),      OPTION_INT(1, 0, 1) },
+    { "videotoolbox-handle-resolution-change",          "VideoToolbox: handle resolution change automatically",
+        OPTION_OFFSET(vtb_handle_resolution_change),    OPTION_INT(0, 0, 1) },
 
     // Android only options
     { "mediacodec",                             "MediaCodec: enable H264 (deprecated by 'mediacodec-avc')",
@@ -160,9 +190,23 @@ static const AVOption ffp_context_options[] = {
         OPTION_OFFSET(mediacodec_hevc),         OPTION_INT(0, 0, 1) },
     { "mediacodec-mpeg2",                       "MediaCodec: enable MPEG2VIDEO",
         OPTION_OFFSET(mediacodec_mpeg2),        OPTION_INT(0, 0, 1) },
+    { "mediacodec-mpeg4",                       "MediaCodec: enable MPEG4",
+        OPTION_OFFSET(mediacodec_mpeg4),        OPTION_INT(0, 0, 1) },
+    { "mediacodec-handle-resolution-change",                    "MediaCodec: handle resolution change automatically",
+        OPTION_OFFSET(mediacodec_handle_resolution_change),     OPTION_INT(0, 0, 1) },
     { "opensles",                           "OpenSL ES: enable",
         OPTION_OFFSET(opensles),            OPTION_INT(0, 0, 1) },
-    
+    { "soundtouch",                           "SoundTouch: enable",
+        OPTION_OFFSET(soundtouch_enable),            OPTION_INT(0, 0, 1) },
+    { "mediacodec-sync",                 "mediacodec: use msg_queue for synchronise",
+        OPTION_OFFSET(mediacodec_sync),           OPTION_INT(0, 0, 1) },
+    { "mediacodec-default-name",          "mediacodec default name",
+        OPTION_OFFSET(mediacodec_default_name),      OPTION_STR(NULL) },
+    { "ijkmeta-delay-init",          "ijkmeta delay init",
+        OPTION_OFFSET(ijkmeta_delay_init),      OPTION_INT(0, 0, 1) },
+    { "render-wait-start",          "render wait start",
+        OPTION_OFFSET(render_wait_start),      OPTION_INT(0, 0, 1) },
+
     { NULL }
 };
 

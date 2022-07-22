@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Bilibili
  * Copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -56,5 +57,8 @@
 - (int)         height      {return [_videoMeta[@IJKM_KEY_HEIGHT] intValue];}
 - (NSString *)  vcodec      {return [NSString ijk_stringBeEmptyIfNil:_videoMeta[@IJKM_KEY_CODEC_NAME]];}
 - (NSString *)  acodec      {return [NSString ijk_stringBeEmptyIfNil:_audioMeta[@IJKM_KEY_CODEC_NAME]];}
+- (int)         sampleRate    {return [_audioMeta[@IJKM_KEY_SAMPLE_RATE] intValue];}
+- (int64_t)     channelLayout {return [_audioMeta[@IJKM_KEY_CHANNEL_LAYOUT] longLongValue];}
+
 
 @end

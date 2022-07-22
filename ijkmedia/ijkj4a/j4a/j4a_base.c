@@ -77,7 +77,7 @@ int J4A_ThrowException(JNIEnv* env, const char* class_sign, const char* msg)
 
     ret = 0;
 fail:
-    J4A_DeleteLocalRef__p(env, exceptionClass);
+    J4A_DeleteLocalRef__p(env, &exceptionClass);
     return ret;
 }
 

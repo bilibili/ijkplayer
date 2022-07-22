@@ -1,6 +1,7 @@
 /*
  * ijkplayer.c
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -22,7 +23,7 @@
 
 #include "ijkplayer.h"
 #include "ijkplayer_internal.h"
-#include "version.h"
+#include "ijkversion.h"
 
 #define MP_RET_IF_FAILED(ret) \
     do { \
@@ -90,14 +91,9 @@ void ijkmp_global_set_inject_callback(ijk_inject_callback cb)
     ffp_global_set_inject_callback(cb);
 }
 
-const char *ijkmp_version_ident()
+const char *ijkmp_version()
 {
-    return LIBIJKPLAYER_IDENT;
-}
-
-unsigned int ijkmp_version_int()
-{
-    return LIBIJKPLAYER_VERSION_INT;
+    return IJKPLAYER_VERSION;
 }
 
 void ijkmp_io_stat_register(void (*cb)(const char *url, int type, int bytes))
@@ -140,13 +136,34 @@ IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
     return NULL;
 }
 
-void ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque)
+void *ijkmp_set_inject_opaque(IjkMediaPlayer *mp, void *opaque)
 {
     assert(mp);
 
     MPTRACE("%s(%p)\n", __func__, opaque);
-    ffp_set_inject_opaque(mp->ffplayer, opaque);
+    void *prev_weak_thiz = ffp_set_inject_opaque(mp->ffplayer, opaque);
     MPTRACE("%s()=void\n", __func__);
+    return prev_weak_thiz;
+}
+
+void ijkmp_set_frame_at_time(IjkMediaPlayer *mp, const char *path, int64_t start_time, int64_t end_time, int num, int definition)
+{
+    assert(mp);
+
+    MPTRACE("%s(%s,%lld,%lld,%d,%d)\n", __func__, path, start_time, end_time, num, definition);
+    ffp_set_frame_at_time(mp->ffplayer, path, start_time, end_time, num, definition);
+    MPTRACE("%s()=void\n", __func__);
+}
+
+
+void *ijkmp_set_ijkio_inject_opaque(IjkMediaPlayer *mp, void *opaque)
+{
+    assert(mp);
+
+    MPTRACE("%s(%p)\n", __func__, opaque);
+    void *prev_weak_thiz = ffp_set_ijkio_inject_opaque(mp->ffplayer, opaque);
+    MPTRACE("%s()=void\n", __func__);
+    return prev_weak_thiz;
 }
 
 void ijkmp_set_option(IjkMediaPlayer *mp, int opt_category, const char *name, const char *value)
@@ -202,6 +219,17 @@ void ijkmp_set_playback_rate(IjkMediaPlayer *mp, float rate)
     MPTRACE("%s(%f)\n", __func__, rate);
     pthread_mutex_lock(&mp->mutex);
     ffp_set_playback_rate(mp->ffplayer, rate);
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("%s()=void\n", __func__);
+}
+
+void ijkmp_set_playback_volume(IjkMediaPlayer *mp, float volume)
+{
+    assert(mp);
+
+    MPTRACE("%s(%f)\n", __func__, volume);
+    pthread_mutex_lock(&mp->mutex);
+    ffp_set_playback_volume(mp->ffplayer, volume);
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("%s()=void\n", __func__);
 }
@@ -657,6 +685,7 @@ void *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz)
     return prev_weak_thiz;
 }
 
+/* need to call msg_free_res for freeing the resouce obtained in msg */
 int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 {
     assert(mp);
@@ -676,7 +705,7 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
                 // FIXME: 1: onError() ?
                 av_log(mp->ffplayer, AV_LOG_DEBUG, "FFP_MSG_PREPARED: expecting mp_state==MP_STATE_ASYNC_PREPARING\n");
             }
-            if (ffp_is_paused_l(mp->ffplayer)) {
+            if (!mp->ffplayer->start_on_prepared) {
                 ijkmp_change_state_l(mp, MP_STATE_PAUSED);
             }
             pthread_mutex_unlock(&mp->mutex);
@@ -757,9 +786,10 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
             pthread_mutex_unlock(&mp->mutex);
             break;
         }
-
-        if (continue_wait_next_msg)
+        if (continue_wait_next_msg) {
+            msg_free_res(msg);
             continue;
+        }
 
         return retval;
     }

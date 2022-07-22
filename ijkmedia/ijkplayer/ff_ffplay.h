@@ -1,6 +1,7 @@
 /*
  * ff_ffplay.h
  *
+ * Copyright (c) 2003 Bilibili
  * Copyright (c) 2003 Fabrice Bellard
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
@@ -45,7 +46,9 @@ void      ffp_reset(FFPlayer *ffp);
 
 /* set options before ffp_prepare_async_l() */
 
-void      ffp_set_inject_opaque(FFPlayer *ffp, void *opaque);
+void     ffp_set_frame_at_time(FFPlayer *ffp, const char *path, int64_t start_time, int64_t end_time, int num, int definition);
+void     *ffp_set_inject_opaque(FFPlayer *ffp, void *opaque);
+void     *ffp_set_ijkio_inject_opaque(FFPlayer *ffp, void *opaque);
 void      ffp_set_option(FFPlayer *ffp, int opt_category, const char *name, const char *value);
 void      ffp_set_option_int(FFPlayer *ffp, int opt_category, const char *name, int64_t value);
 
@@ -100,8 +103,10 @@ int       ffp_video_thread(FFPlayer *ffp);
 
 void      ffp_set_video_codec_info(FFPlayer *ffp, const char *module, const char *codec);
 void      ffp_set_audio_codec_info(FFPlayer *ffp, const char *module, const char *codec);
+void      ffp_set_subtitle_codec_info(FFPlayer *ffp, const char *module, const char *codec);
 
 void      ffp_set_playback_rate(FFPlayer *ffp, float rate);
+void      ffp_set_playback_volume(FFPlayer *ffp, float volume);
 int       ffp_get_video_rotate_degrees(FFPlayer *ffp);
 int       ffp_set_stream_selected(FFPlayer *ffp, int stream, int selected);
 

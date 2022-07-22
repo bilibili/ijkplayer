@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Bilibili
  * copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -72,6 +73,8 @@ typedef struct IJK_GLES2_Renderer
     int     frame_height;
     int     frame_sar_num;
     int     frame_sar_den;
+
+    GLsizei last_buffer_width;
 } IJK_GLES2_Renderer;
 
 typedef struct IJK_GLES_Matrix
