@@ -15,6 +15,7 @@
  */
 
 #import "IJKDemoLocalFolderViewController.h"
+#import "IJKMoviePlayerViewController.h"
 
 @interface IJKDemoLocalFolderViewController ()
 
