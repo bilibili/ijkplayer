@@ -88,8 +88,20 @@ afterEvaluate { project ->
         }
     }
 
+    android.libraryVariants.all { variant ->
+        if(variant.buildType.name.equals("release")) {
+            def jarTask = project.tasks.create(name: "jar${variant.name.capitalize()}", type: Jar) {
+                from variant.javaCompile.destinationDir
+                exclude "**/R.class"
+                exclude "**/R\$**.class"
+                exclude "**/BuildConfig.class"
+            }
+            jarTask.dependsOn variant.javaCompile
+        }
+    }
+
     signing {
-        required { isReleaseBuild() && (gradle.taskGraph.hasTask("uploadArchives") || gradle.taskGraph.hasTask("bintrayUpload")) }
+        required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
         sign configurations.archives
     }
 
@@ -112,5 +124,6 @@ afterEvaluate { project ->
     artifacts {
         archives androidSourcesJar
         archives androidJavadocsJar
+        archives jarRelease
     }
 }

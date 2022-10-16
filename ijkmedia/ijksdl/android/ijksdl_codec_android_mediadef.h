@@ -2,6 +2,7 @@
  * ijksdl_codec_android_mediadef.h
  *****************************************************************************
  *
+ * Copyright (c) 2014 Bilibili
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -54,7 +55,7 @@ typedef enum sdl_amedia_status_t {
 #define SDL_AMIME_VIDEO_HEVC        "video/hevc"            //- H.265/HEVC video
 #define SDL_AMIME_VIDEO_MPEG2VIDEO  "video/mpeg2"           //- MPEG2 video
 #define SDL_AMIME_VIDEO_MPEG4       "video/mp4v-es"         //- MPEG4 video
-#define SDL_AMIME_VIDEO_H264        "video/3gpp"            //- H.263 video
+#define SDL_AMIME_VIDEO_H263        "video/3gpp"            //- H.263 video
 #define SDL_AMIME_AUDIO_AMR_NB      "audio/3gpp"            //- AMR narrowband audio
 #define SDL_AMIME_AUDIO_AMR_WB      "audio/amr-wb"          //- AMR wideband audio
 #define SDL_AMIME_AUDIO_MP3         "audio/mpeg"            //- MPEG1/2 audio layer III

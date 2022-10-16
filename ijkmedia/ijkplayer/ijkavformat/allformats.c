@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2003 Bilibili
  * Copyright (c) 2003 Fabrice Bellard
  * Copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
@@ -24,38 +25,19 @@
 #include "libavformat/url.h"
 #include "libavformat/version.h"
 
-#define FF_REGISTER_PROTOCOL(x)                                         \
+#define IJK_REGISTER_DEMUXER(x)                                         \
     {                                                                   \
-        extern URLProtocol ff_##x##_protocol;                           \
-        ijkav_register_protocol(&ff_##x##_protocol);                    \
+        extern AVInputFormat ijkff_##x##_demuxer;                       \
+        int ijkav_register_##x##_demuxer(AVInputFormat *demuxer, int demuxer_size);   \
+        ijkav_register_##x##_demuxer(&ijkff_##x##_demuxer, sizeof(AVInputFormat));    \
     }
 
 #define IJK_REGISTER_PROTOCOL(x)                                        \
     {                                                                   \
-        extern URLProtocol ijkff_##x##_protocol;                        \
-        ijkav_register_protocol(&ijkff_##x##_protocol);                 \
+        extern URLProtocol ijkimp_ff_##x##_protocol;                        \
+        int ijkav_register_##x##_protocol(URLProtocol *protocol, int protocol_size);\
+        ijkav_register_##x##_protocol(&ijkimp_ff_##x##_protocol, sizeof(URLProtocol));  \
     }
-
-#define IJK_REGISTER_DEMUXER(x)                                         \
-    {                                                                   \
-        extern AVInputFormat ijkff_##x##_demuxer;                       \
-        ijkav_register_input_format(&ijkff_##x##_demuxer);              \
-    }
-
-
-static struct URLProtocol *ijkav_find_protocol(const char *proto_name)
-{
-    URLProtocol *up = NULL;
-    if (!proto_name)
-        return NULL;
-    while ((up = ffurl_protocol_next(up)) != NULL) {
-        if (!up->name)
-            continue;
-        if (!strcmp(proto_name, up->name))
-            break;
-    }
-    return up;
-}
 
 static struct AVInputFormat *ijkav_find_input_format(const char *iformat_name)
 {
@@ -71,16 +53,6 @@ static struct AVInputFormat *ijkav_find_input_format(const char *iformat_name)
     return NULL;
 }
 
-static void ijkav_register_protocol(URLProtocol *protocol)
-{
-    if (ijkav_find_protocol(protocol->name)) {
-        av_log(NULL, AV_LOG_WARNING, "skip     protocol: %s (duplicated)\n", protocol->name);
-    } else {
-        av_log(NULL, AV_LOG_INFO,    "register protocol: %s\n", protocol->name);
-        ffurl_register_protocol(protocol);
-    }
-}
-
 static void ijkav_register_input_format(AVInputFormat *iformat)
 {
     if (ijkav_find_input_format(iformat->name)) {
@@ -90,6 +62,7 @@ static void ijkav_register_input_format(AVInputFormat *iformat)
         av_register_input_format(iformat);
     }
 }
+
 
 void ijkav_register_all(void)
 {
@@ -103,17 +76,17 @@ void ijkav_register_all(void)
 
     /* protocols */
     av_log(NULL, AV_LOG_INFO, "===== custom modules begin =====\n");
-    FF_REGISTER_PROTOCOL(async);
-    IJK_REGISTER_PROTOCOL(ijkhttphook);
-    IJK_REGISTER_PROTOCOL(ijkinject);
-    IJK_REGISTER_PROTOCOL(ijklongurl);
 #ifdef __ANDROID__
     IJK_REGISTER_PROTOCOL(ijkmediadatasource);
 #endif
-    IJK_REGISTER_PROTOCOL(ijksegment);
+    IJK_REGISTER_PROTOCOL(ijkio);
+    IJK_REGISTER_PROTOCOL(async);
+    IJK_REGISTER_PROTOCOL(ijklongurl);
     IJK_REGISTER_PROTOCOL(ijktcphook);
-
+    IJK_REGISTER_PROTOCOL(ijkhttphook);
+    IJK_REGISTER_PROTOCOL(ijksegment);
     /* demuxers */
     IJK_REGISTER_DEMUXER(ijklivehook);
+    IJK_REGISTER_DEMUXER(ijklas);
     av_log(NULL, AV_LOG_INFO, "===== custom modules end =====\n");
 }

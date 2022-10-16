@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Bilibili
  * copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -35,7 +36,7 @@ static void IJK_GLES2_printShaderInfo(GLuint shader)
     char    buf_stack[32];
     char   *buf_heap = NULL;
     char   *buf      = buf_stack;
-    size_t  buf_len  = sizeof(buf_stack) - 1;
+    GLsizei buf_len  = sizeof(buf_stack) - 1;
     if (info_len > sizeof(buf_stack)) {
         buf_heap = (char*) malloc(info_len + 1);
         if (buf_heap) {
@@ -53,7 +54,7 @@ static void IJK_GLES2_printShaderInfo(GLuint shader)
 
 GLuint IJK_GLES2_loadShader(GLenum shader_type, const char *shader_source)
 {
-    assert(shader);
+    assert(shader_source);
 
     GLuint shader = glCreateShader(shader_type);        IJK_GLES2_checkError("glCreateShader");
     if (!shader)

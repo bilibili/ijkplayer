@@ -2,6 +2,7 @@
  * ijksdl_log.h
  *****************************************************************************
  *
+ * Copyright (c) 2015 Bilibili
  * copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -29,6 +30,7 @@
 #ifdef __ANDROID__
 
 #include <android/log.h>
+#include "ijksdl_extra_log.h"
 
 #define IJK_LOG_UNKNOWN     ANDROID_LOG_UNKNOWN
 #define IJK_LOG_DEFAULT     ANDROID_LOG_DEFAULT
@@ -41,8 +43,13 @@
 #define IJK_LOG_FATAL       ANDROID_LOG_FATAL
 #define IJK_LOG_SILENT      ANDROID_LOG_SILENT
 
+#ifdef EXTRA_LOG_PRINT
+#define VLOG(level, TAG, ...)    ffp_log_extra_vprint(level, TAG, __VA_ARGS__)
+#define ALOG(level, TAG, ...)    ffp_log_extra_print(level, TAG, __VA_ARGS__)
+#else
 #define VLOG(level, TAG, ...)    ((void)__android_log_vprint(level, TAG, __VA_ARGS__))
 #define ALOG(level, TAG, ...)    ((void)__android_log_print(level, TAG, __VA_ARGS__))
+#endif
 
 #else
 

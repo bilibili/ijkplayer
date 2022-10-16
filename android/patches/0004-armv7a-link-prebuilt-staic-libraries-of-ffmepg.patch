@@ -1,0 +1,117 @@
+From fb17b98cfeb265e09220568df17cc493192e6ebe Mon Sep 17 00:00:00 2001
+From: ctiao <calmer91@gmail.com>
+Date: Fri, 2 Sep 2016 16:39:02 +0800
+Subject: [PATCH] armv7a: link prebuilt staic libraries of ffmepg
+
+---
+ .../src/main/jni/ffmpeg/Android.mk                 | 42 ++++++++++++++++++++--
+ .../danmaku/ijk/media/player/IjkMediaPlayer.java   |  1 -
+ ijkmedia/ijkplayer/Android.mk                      |  6 ++--
+ ijkmedia/ijksdl/Android.mk                         |  4 +--
+ 4 files changed, 44 insertions(+), 9 deletions(-)
+
+diff --git a/android/ijkplayer/ijkplayer-armv7a/src/main/jni/ffmpeg/Android.mk b/android/ijkplayer/ijkplayer-armv7a/src/main/jni/ffmpeg/Android.mk
+index ec33908..3c525bd 100644
+--- a/android/ijkplayer/ijkplayer-armv7a/src/main/jni/ffmpeg/Android.mk
++++ b/android/ijkplayer/ijkplayer-armv7a/src/main/jni/ffmpeg/Android.mk
+@@ -1,6 +1,42 @@
+ LOCAL_PATH := $(call my-dir)
++include $(CLEAR_VARS)
++LOCAL_MODULE    := avcodec
++LOCAL_SRC_FILES := $(MY_APP_FFMPEG_OUTPUT_PATH)/lib/libavcodec.a
++LOCAL_EXPORT_C_INCLUDES := $(MY_APP_FFMPEG_INCLUDE_PATH)
++LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
++include $(PREBUILT_STATIC_LIBRARY)
++
++include $(CLEAR_VARS)
++LOCAL_MODULE    := avformat
++LOCAL_SRC_FILES := $(MY_APP_FFMPEG_OUTPUT_PATH)/lib/libavformat.a
++LOCAL_EXPORT_C_INCLUDES := $(MY_APP_FFMPEG_INCLUDE_PATH)
++LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
++include $(PREBUILT_STATIC_LIBRARY)
++
++include $(CLEAR_VARS)
++LOCAL_MODULE    := swscale
++LOCAL_SRC_FILES := $(MY_APP_FFMPEG_OUTPUT_PATH)/lib/libswscale.a
++LOCAL_EXPORT_C_INCLUDES := $(MY_APP_FFMPEG_OUTPUT_PATH)/include
++LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
++include $(PREBUILT_STATIC_LIBRARY)
++
++include $(CLEAR_VARS)
++LOCAL_MODULE    := avutil
++LOCAL_SRC_FILES := $(MY_APP_FFMPEG_OUTPUT_PATH)/lib/libavutil.a
++LOCAL_EXPORT_C_INCLUDES := $(MY_APP_FFMPEG_INCLUDE_PATH)
++LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
++include $(PREBUILT_STATIC_LIBRARY)
++
++include $(CLEAR_VARS)
++LOCAL_MODULE    := avfilter
++LOCAL_SRC_FILES := $(MY_APP_FFMPEG_OUTPUT_PATH)/lib/libavfilter.a
++LOCAL_EXPORT_C_INCLUDES := $(MY_APP_FFMPEG_INCLUDE_PATH)
++LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
++include $(PREBUILT_STATIC_LIBRARY)
+ 
+ include $(CLEAR_VARS)
+-LOCAL_MODULE := ijkffmpeg
+-LOCAL_SRC_FILES := $(MY_APP_FFMPEG_OUTPUT_PATH)/libijkffmpeg.so
+-include $(PREBUILT_SHARED_LIBRARY)
+\ No newline at end of file
++LOCAL_MODULE    := swresample
++LOCAL_SRC_FILES := $(MY_APP_FFMPEG_OUTPUT_PATH)/lib/libswresample.a
++LOCAL_EXPORT_C_INCLUDES := $(MY_APP_FFMPEG_INCLUDE_PATH)
++LOCAL_C_INCLUDES += $(MY_APP_FFMPEG_INCLUDE_PATH)
++include $(PREBUILT_STATIC_LIBRARY)
+diff --git a/android/ijkplayer/ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IjkMediaPlayer.java b/android/ijkplayer/ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IjkMediaPlayer.java
+index 985f848..7ad3fe4 100755
+--- a/android/ijkplayer/ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IjkMediaPlayer.java
++++ b/android/ijkplayer/ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IjkMediaPlayer.java
+@@ -165,7 +165,6 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
+                 if (libLoader == null)
+                     libLoader = sLocalLibLoader;
+ 
+-                libLoader.loadLibrary("ijkffmpeg");
+                 libLoader.loadLibrary("ijksdl");
+                 libLoader.loadLibrary("ijkplayer");
+                 mIsLibLoaded = true;
+diff --git a/ijkmedia/ijkplayer/Android.mk b/ijkmedia/ijkplayer/Android.mk
+index 92372ab..6c9270d 100644
+--- a/ijkmedia/ijkplayer/Android.mk
++++ b/ijkmedia/ijkplayer/Android.mk
+@@ -26,7 +26,7 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+ LOCAL_CFLAGS += -mfloat-abi=soft
+ endif
+ LOCAL_CFLAGS += -std=c99
+-LOCAL_LDLIBS += -llog -landroid
++LOCAL_LDLIBS += -llog -landroid -lm -lz
+ 
+ LOCAL_C_INCLUDES += $(LOCAL_PATH)
+ LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
+@@ -59,8 +59,8 @@ LOCAL_SRC_FILES  += ijkavformat/ijkurlhook.c
+ LOCAL_SRC_FILES  += ijkavformat/ijklongurl.c
+ LOCAL_SRC_FILES  += ijkavformat/ijksegment.c
+ 
+-LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl
+-LOCAL_STATIC_LIBRARIES := android-ndk-profiler
++LOCAL_SHARED_LIBRARIES := ijksdl
++LOCAL_STATIC_LIBRARIES := avformat avcodec swscale swresample avfilter avutil android-ndk-profiler
+ 
+ LOCAL_MODULE := ijkplayer
+ include $(BUILD_SHARED_LIBRARY)
+diff --git a/ijkmedia/ijksdl/Android.mk b/ijkmedia/ijksdl/Android.mk
+index 08ebbab..4f6d804 100644
+--- a/ijkmedia/ijksdl/Android.mk
++++ b/ijkmedia/ijksdl/Android.mk
+@@ -70,8 +70,8 @@ LOCAL_SRC_FILES += android/ijksdl_vout_android_nativewindow.c
+ LOCAL_SRC_FILES += android/ijksdl_vout_android_surface.c
+ LOCAL_SRC_FILES += android/ijksdl_vout_overlay_android_mediacodec.c
+ 
+-LOCAL_SHARED_LIBRARIES := ijkffmpeg ijkj4a
+-LOCAL_STATIC_LIBRARIES := cpufeatures yuv_static
++LOCAL_STATIC_LIBRARIES := avformat avcodec swscale swresample avfilter avutil cpufeatures yuv_static
++LOCAL_SHARED_LIBRARIES := ijkj4a
+ 
+ LOCAL_MODULE := ijksdl
+ include $(BUILD_SHARED_LIBRARY)
+-- 
+2.7.4 (Apple Git-66)
+

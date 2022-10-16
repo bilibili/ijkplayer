@@ -1,6 +1,7 @@
 /*
  * IJKSDLGLView.m
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * based on https://github.com/kolyvan/kxmovie
@@ -23,123 +24,15 @@
  */
 
 #import "IJKSDLGLView.h"
-#import "IJKSDLGLShader.h"
-#import "IJKSDLGLRender.h"
-#import "IJKSDLGLRenderI420.h"
-#import "IJKSDLGLRenderRV24.h"
-#import "IJKSDLGLRenderNV12.h"
-#import "IJKSDLGLRenderI444P10LE.h"
 #include "ijksdl/ijksdl_timer.h"
 #include "ijksdl/ios/ijksdl_ios.h"
-#import "IJKSDLHudViewController.h"
+#include "ijksdl/ijksdl_gles2.h"
 
-static NSString *const g_vertexShaderString = IJK_SHADER_STRING
-(
-    attribute vec4 position;
-    attribute vec2 texcoord;
-    uniform mat4 modelViewProjectionMatrix;
-    varying vec2 v_texcoord;
-
-    void main()
-    {
-        gl_Position = modelViewProjectionMatrix * position;
-        v_texcoord = texcoord.xy;
-    }
-);
-
-static BOOL validateProgram(GLuint prog)
-{
-	GLint status;
-
-    glValidateProgram(prog);
-
-#ifdef DEBUG
-    GLint logLength;
-    glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logLength);
-    if (logLength > 0)
-    {
-        GLchar *log = (GLchar *)malloc(logLength);
-        glGetProgramInfoLog(prog, logLength, &logLength, log);
-        NSLog(@"Program validate log:\n%s", log);
-        free(log);
-    }
-#endif
-
-    glGetProgramiv(prog, GL_VALIDATE_STATUS, &status);
-    if (status == GL_FALSE) {
-		NSLog(@"Failed to validate program %d", prog);
-        return NO;
-    }
-
-	return YES;
-}
-
-static GLuint compileShader(GLenum type, NSString *shaderString)
-{
-	GLint status;
-	const GLchar *sources = (GLchar *)shaderString.UTF8String;
-
-    GLuint shader = glCreateShader(type);
-    if (shader == 0 || shader == GL_INVALID_ENUM) {
-        NSLog(@"Failed to create shader %d", type);
-        return 0;
-    }
-
-    glShaderSource(shader, 1, &sources, NULL);
-    glCompileShader(shader);
-
-#ifdef DEBUG
-	GLint logLength;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
-    if (logLength > 0)
-    {
-        GLchar *log = (GLchar *)malloc(logLength);
-        glGetShaderInfoLog(shader, logLength, &logLength, log);
-        NSLog(@"Shader compile log:\n%s", log);
-        free(log);
-    }
-#endif
-
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if (status == GL_FALSE) {
-        glDeleteShader(shader);
-		NSLog(@"Failed to compile shader:\n");
-        return 0;
-    }
-
-	return shader;
-}
-
-static void mat4f_LoadOrtho(float left, float right, float bottom, float top, float near, float far, float* mout)
-{
-	float r_l = right - left;
-	float t_b = top - bottom;
-	float f_n = far - near;
-	float tx = - (right + left) / (right - left);
-	float ty = - (top + bottom) / (top - bottom);
-	float tz = - (far + near) / (far - near);
-
-	mout[0] = 2.0f / r_l;
-	mout[1] = 0.0f;
-	mout[2] = 0.0f;
-	mout[3] = 0.0f;
-
-	mout[4] = 0.0f;
-	mout[5] = 2.0f / t_b;
-	mout[6] = 0.0f;
-	mout[7] = 0.0f;
-
-	mout[8] = 0.0f;
-	mout[9] = 0.0f;
-	mout[10] = -2.0f / f_n;
-	mout[11] = 0.0f;
-
-	mout[12] = tx;
-	mout[13] = ty;
-	mout[14] = tz;
-	mout[15] = 1.0f;
-}
-
+typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
+    IJKSDLGLViewApplicationUnknownState = 0,
+    IJKSDLGLViewApplicationForegroundState = 1,
+    IJKSDLGLViewApplicationBackgroundState = 2
+};
 
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
@@ -152,49 +45,29 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     GLuint          _renderbuffer;
     GLint           _backingWidth;
     GLint           _backingHeight;
-    GLuint          _program;
-    GLint           _uniformMatrix;
-    GLfloat         _vertices[8];
-    GLfloat         _texCoords[8];
 
-    int             _frameWidth;
-    int             _frameHeight;
-    int             _frameChroma;
-    int             _frameSarNum;
-    int             _frameSarDen;
-    int             _rightPaddingPixels;
-    GLfloat         _rightPadding;
-    int             _bytesPerPixel;
     int             _frameCount;
     
     int64_t         _lastFrameTime;
 
-    GLfloat         _prevScaleFactor;
+    IJK_GLES2_Renderer *_renderer;
+    int                 _rendererGravity;
 
-    id<IJKSDLGLRender>        _renderer;
-    CVOpenGLESTextureCacheRef _textureCache;
-
-    BOOL            _didSetContentMode;
-    BOOL            _didRelayoutSubViews;
-    BOOL            _didVerticesChanged;
-    BOOL            _didPaddingChanged;
+    BOOL            _isRenderBufferInvalidated;
 
     int             _tryLockErrorCount;
     BOOL            _didSetupGL;
     BOOL            _didStopGL;
+    BOOL            _didLockedDueToMovedToWindow;
+    BOOL            _shouldLockWhileBeingMovedToWindow;
     NSMutableArray *_registeredNotifications;
 
-    dispatch_queue_t    _renderQueue;
-
-    IJKSDLHudViewController *_hudViewController;
+    IJKSDLGLViewApplicationState _applicationState;
 }
 
-enum {
-	ATTRIBUTE_VERTEX,
-   	ATTRIBUTE_TEXCOORD,
-};
-
-static int g_ijk_gles_queue_spec_key;
+@synthesize isThirdGLView              = _isThirdGLView;
+@synthesize scaleFactor                = _scaleFactor;
+@synthesize fps                        = _fps;
 
 + (Class) layerClass
 {
@@ -206,31 +79,39 @@ static int g_ijk_gles_queue_spec_key;
     self = [super initWithFrame:frame];
     if (self) {
         _tryLockErrorCount = 0;
-
+        _shouldLockWhileBeingMovedToWindow = YES;
         self.glActiveLock = [[NSRecursiveLock alloc] init];
         _registeredNotifications = [[NSMutableArray alloc] init];
         [self registerApplicationObservers];
 
-        dispatch_queue_attr_t attr = NULL;
-        if (isIOS8OrLater()) {
-            attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL,
-                                                           QOS_CLASS_USER_INTERACTIVE,
-                                                           DISPATCH_QUEUE_PRIORITY_HIGH);
-        }
-        _renderQueue = dispatch_queue_create("ijk-gles", attr);
-        dispatch_queue_set_specific(_renderQueue,
-                                    &g_ijk_gles_queue_spec_key,
-                                    &g_ijk_gles_queue_spec_key,
-                                    NULL);
-
         _didSetupGL = NO;
-        [self setupGLOnce];
-
-        _hudViewController = [[IJKSDLHudViewController alloc] init];
-        [self addSubview:_hudViewController.tableView];
+        if ([self isApplicationActive] == YES)
+            [self setupGLOnce];
     }
 
     return self;
+}
+
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+    if (!_shouldLockWhileBeingMovedToWindow) {
+        [super willMoveToWindow:newWindow];
+        return;
+    }
+    if (newWindow && !_didLockedDueToMovedToWindow) {
+        [self lockGLActive];
+        _didLockedDueToMovedToWindow = YES;
+    }
+    [super willMoveToWindow:newWindow];
+}
+
+- (void)didMoveToWindow
+{
+    [super didMoveToWindow];
+    if (self.window && _didLockedDueToMovedToWindow) {
+        [self unlockGLActive];
+        _didLockedDueToMovedToWindow = NO;
+    }
 }
 
 - (BOOL)setupEAGLContext:(EAGLContext *)context
@@ -250,43 +131,25 @@ static int g_ijk_gles_queue_spec_key;
         return NO;
     }
 
-    CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_textureCache);
-    if (err) {
-        NSLog(@"Error at CVOpenGLESTextureCacheCreate %d\n", err);
-        return NO;
-    }
-
     GLenum glError = glGetError();
     if (GL_NO_ERROR != glError) {
         NSLog(@"failed to setup GL %x\n", glError);
         return NO;
     }
 
-    _vertices[0] = -1.0f;  // x0
-    _vertices[1] = -1.0f;  // y0
-    _vertices[2] =  1.0f;  // ..
-    _vertices[3] = -1.0f;
-    _vertices[4] = -1.0f;
-    _vertices[5] =  1.0f;
-    _vertices[6] =  1.0f;  // x3
-    _vertices[7] =  1.0f;  // y3
-
-    _texCoords[0] = 0.0f;
-    _texCoords[1] = 1.0f;
-    _texCoords[2] = 1.0f;
-    _texCoords[3] = 1.0f;
-    _texCoords[4] = 0.0f;
-    _texCoords[5] = 0.0f;
-    _texCoords[6] = 1.0f;
-    _texCoords[7] = 0.0f;
-
-    _rightPadding = 0.0f;
-
     return YES;
+}
+
+- (CAEAGLLayer *)eaglLayer
+{
+    return (CAEAGLLayer*) self.layer;
 }
 
 - (BOOL)setupGL
 {
+    if (_didSetupGL)
+        return YES;
+
     CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
     eaglLayer.opaque = YES;
     eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -297,7 +160,6 @@ static int g_ijk_gles_queue_spec_key;
     _scaleFactor = [[UIScreen mainScreen] scale];
     if (_scaleFactor < 0.1f)
         _scaleFactor = 1.0f;
-    _prevScaleFactor = _scaleFactor;
 
     [eaglLayer setContentsScale:_scaleFactor];
 
@@ -320,47 +182,37 @@ static int g_ijk_gles_queue_spec_key;
     return _didSetupGL;
 }
 
-- (BOOL)setupGLGuarded
+- (BOOL)setupGLOnce
 {
-    if (![self tryLockGLActive]) {
+    if (_didSetupGL)
+        return YES;
+
+    if (![self tryLockGLActive])
         return NO;
-    }
 
     BOOL didSetupGL = [self setupGL];
     [self unlockGLActive];
     return didSetupGL;
 }
 
-- (BOOL)setupGLOnce
-{
-    if (_didSetupGL)
-        return YES;
-
-    if ([self isApplicationActive] == NO)
-        return NO;
-
-    __block BOOL didSetup = NO;
-    if ([NSThread isMainThread]) {
-        didSetup = [self setupGLGuarded];
-    } else {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            didSetup = [self setupGLGuarded];
-        });
-    }
-
-    return didSetup;
-}
-
 - (BOOL)isApplicationActive
 {
-    UIApplicationState appState = [UIApplication sharedApplication].applicationState;
-    switch (appState) {
-        case UIApplicationStateActive:
+    switch (_applicationState) {
+        case IJKSDLGLViewApplicationForegroundState:
             return YES;
-        case UIApplicationStateInactive:
-        case UIApplicationStateBackground:
-        default:
+        case IJKSDLGLViewApplicationBackgroundState:
             return NO;
+        default: {
+            UIApplicationState appState = [UIApplication sharedApplication].applicationState;
+            switch (appState) {
+                case UIApplicationStateActive:
+                    return YES;
+                case UIApplicationStateInactive:
+                case UIApplicationStateBackground:
+                default:
+                    return NO;
+            }
+        }
     }
 }
 
@@ -369,14 +221,12 @@ static int g_ijk_gles_queue_spec_key;
     [self lockGLActive];
 
     _didStopGL = YES;
-    _renderer = nil;
-
-    if (_renderQueue) {
-        _renderQueue = nil;
-    }
 
     EAGLContext *prevContext = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:_context];
+    
+    IJK_GLES2_Renderer_reset(_renderer);
+    IJK_GLES2_Renderer_freeP(&_renderer);
 
     if (_framebuffer) {
         glDeleteFramebuffers(1, &_framebuffer);
@@ -388,15 +238,7 @@ static int g_ijk_gles_queue_spec_key;
         _renderbuffer = 0;
     }
 
-    if (_program) {
-        glDeleteProgram(_program);
-        _program = 0;
-    }
-
-    if (_textureCache) {
-        CFRelease(_textureCache);
-        _textureCache = 0;
-    }
+    glFinish();
 
     [EAGLContext setCurrentContext:prevContext];
 
@@ -410,337 +252,157 @@ static int g_ijk_gles_queue_spec_key;
 - (void)setScaleFactor:(CGFloat)scaleFactor
 {
     _scaleFactor = scaleFactor;
+    [self invalidateRenderBuffer];
 }
 
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-
-    CGRect selfFrame = self.frame;
-    CGRect newFrame  = selfFrame;
-
-    newFrame.size.width   = selfFrame.size.width * 1 / 3;
-    newFrame.origin.x     = selfFrame.size.width * 2 / 3;
-
-    newFrame.size.height  = selfFrame.size.height * 6 / 8;
-    newFrame.origin.y    += selfFrame.size.height * 1 / 8;
-
-    _hudViewController.tableView.frame = newFrame;
-
-    _didRelayoutSubViews = YES;
-}
-
-- (void)layoutOnDisplayThread
-{
-    int backingWidth  = 0;
-    int backingHeight = 0;
-    glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-    [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
-	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth);
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
-
-    if (_backingWidth != backingWidth || _backingHeight != backingHeight) {
-        _backingWidth  = backingWidth;
-        _backingHeight = backingHeight;
-        _didVerticesChanged = YES;
+    if (self.window.screen != nil) {
+        _scaleFactor = self.window.screen.scale;
     }
-
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (status != GL_FRAMEBUFFER_COMPLETE) {
-
-        NSLog(@"failed to make complete framebuffer object %x", status);
-
-	} else {
-
-        NSLog(@"OK setup GL framebuffer %d:%d", _backingWidth, _backingHeight);
-    }
+    [self invalidateRenderBuffer];
 }
 
 - (void)setContentMode:(UIViewContentMode)contentMode
 {
     [super setContentMode:contentMode];
-    _didSetContentMode = YES;
-    if (self->_renderQueue) {
-        dispatch_async(self->_renderQueue, ^(){
-            [self display:nil];
-        });
+
+    switch (contentMode) {
+        case UIViewContentModeScaleToFill:
+            _rendererGravity = IJK_GLES2_GRAVITY_RESIZE;
+            break;
+        case UIViewContentModeScaleAspectFit:
+            _rendererGravity = IJK_GLES2_GRAVITY_RESIZE_ASPECT;
+            break;
+        case UIViewContentModeScaleAspectFill:
+            _rendererGravity = IJK_GLES2_GRAVITY_RESIZE_ASPECT_FILL;
+            break;
+        default:
+            _rendererGravity = IJK_GLES2_GRAVITY_RESIZE_ASPECT;
+            break;
     }
+    [self invalidateRenderBuffer];
 }
 
-- (BOOL)setupDisplay: (SDL_VoutOverlay *) overlay
+- (BOOL)setupRenderer: (SDL_VoutOverlay *) overlay
 {
-    if (_renderer && overlay && _frameChroma != overlay->format) {
-        // TODO: if format changed?
-    }
+    if (overlay == nil)
+        return _renderer != nil;
 
-    if (_renderer == nil) {
-        if (overlay == nil) {
+    if (!IJK_GLES2_Renderer_isValid(_renderer) ||
+        !IJK_GLES2_Renderer_isFormat(_renderer, overlay->format)) {
+
+        IJK_GLES2_Renderer_reset(_renderer);
+        IJK_GLES2_Renderer_freeP(&_renderer);
+
+        _renderer = IJK_GLES2_Renderer_create(overlay);
+        if (!IJK_GLES2_Renderer_isValid(_renderer))
             return NO;
-        } else if (overlay->format == SDL_FCC__VTB) {
-            _frameChroma = overlay->format;
-            _renderer = [[IJKSDLGLRenderNV12 alloc] initWithTextureCache:_textureCache];
-            _bytesPerPixel = 1;
-            NSLog(@"OK use NV12 GL renderer");
-        } else if (overlay->format == SDL_FCC_I420) {
-            _frameChroma = overlay->format;
-            _renderer = [[IJKSDLGLRenderI420 alloc] init];
-            _bytesPerPixel = 1;
-            NSLog(@"OK use I420 GL renderer");
-        } else if (overlay->format == SDL_FCC_RV24) {
-            _frameChroma = overlay->format;
-            _renderer = [[IJKSDLGLRenderRV24 alloc] init];
-            _bytesPerPixel = 3;
-            NSLog(@"OK use RV24 GL renderer");
-        } else if (overlay->format == SDL_FCC_I444P10LE) {
-            _frameChroma = overlay->format;
-            _renderer = [[IJKSDLGLRenderI444P10LE alloc] init];
-            _bytesPerPixel = 2;
-            NSLog(@"OK use I444 GL renderer");
-        }
 
-        if (![self loadShaders]) {
+        if (!IJK_GLES2_Renderer_use(_renderer))
             return NO;
-        }
-    }
 
-    if (overlay) {
-        if (_frameWidth  != overlay->w ||
-            _frameHeight != overlay->h ||
-            _frameSarNum != overlay->sar_num ||
-            _frameSarDen != overlay->sar_den) {
-            _frameWidth  = overlay->w;
-            _frameHeight = overlay->h;
-            _frameSarNum = overlay->sar_num;
-            _frameSarDen = overlay->sar_den;
-            _didVerticesChanged = YES;
-        }
-
-        if (!overlay->is_private && overlay->pitches && _frameWidth > 0) {
-            int frameBufferWidth   = overlay->pitches[0] / _bytesPerPixel;
-            int rightPaddingPixels = frameBufferWidth - _frameWidth;
-            if (rightPaddingPixels != _rightPaddingPixels) {
-                _rightPaddingPixels = rightPaddingPixels;
-                _rightPadding       = ((GLfloat)_rightPaddingPixels) / frameBufferWidth;
-            }
-        }
+        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
     }
 
     return YES;
 }
 
-- (BOOL)loadShaders
+- (void)invalidateRenderBuffer
 {
-    BOOL result = NO;
-    GLuint vertShader = 0, fragShader = 0;
+    NSLog(@"invalidateRenderBuffer\n");
+    [self lockGLActive];
 
-	_program = glCreateProgram();
+    _isRenderBufferInvalidated = YES;
 
-    vertShader = compileShader(GL_VERTEX_SHADER, g_vertexShaderString);
-	if (!vertShader)
-        goto exit;
-
-	fragShader = compileShader(GL_FRAGMENT_SHADER, _renderer.fragmentShader);
-    if (!fragShader)
-        goto exit;
-
-	glAttachShader(_program, vertShader);
-	glAttachShader(_program, fragShader);
-	glBindAttribLocation(_program, ATTRIBUTE_VERTEX, "position");
-    glBindAttribLocation(_program, ATTRIBUTE_TEXCOORD, "texcoord");
-
-	glLinkProgram(_program);
-
-    GLint status;
-    glGetProgramiv(_program, GL_LINK_STATUS, &status);
-    if (status == GL_FALSE) {
-		NSLog(@"Failed to link program %d", _program);
-        goto exit;
-    }
-
-    result = validateProgram(_program);
-
-    _uniformMatrix = glGetUniformLocation(_program, "modelViewProjectionMatrix");
-    [_renderer resolveUniforms:_program];
-
-exit:
-
-    if (vertShader)
-        glDeleteShader(vertShader);
-    if (fragShader)
-        glDeleteShader(fragShader);
-
-    if (result) {
-
-        NSLog(@"OK setup GL programm");
-
+    if ([[NSThread currentThread] isMainThread]) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            if (_isRenderBufferInvalidated)
+                [self display:nil];
+        });
     } else {
-
-        glDeleteProgram(_program);
-        _program = 0;
+        [self display:nil];
     }
 
-    return result;
+    [self unlockGLActive];
 }
 
-- (void)updateVertices
-{
-    float width                 = _frameWidth;
-    float height                = _frameHeight;
-    const float dW              = (float)_backingWidth	/ width;
-    const float dH              = (float)_backingHeight / height;
-    float dd                    = 1.0f;
-    float nW                    = 1.0f;
-    float nH                    = 1.0f;
-
-    if (_frameSarNum > 0 && _frameSarDen > 0) {
-        width = width * _frameSarNum / _frameSarDen;
-    }
-
-    switch (self.contentMode) {
-        case UIViewContentModeScaleToFill:
-            break;
-        case UIViewContentModeCenter:
-            nW = 1.0f / dW / [UIScreen mainScreen].scale;
-            nH = 1.0f / dH / [UIScreen mainScreen].scale;
-            break;
-        case UIViewContentModeScaleAspectFill:
-            dd = MAX(dW, dH);
-            nW = (width  * dd / (float)_backingWidth );
-            nH = (height * dd / (float)_backingHeight);
-            break;
-        case UIViewContentModeScaleAspectFit:
-        default:
-            dd = MIN(dW, dH);
-            nW = (width  * dd / (float)_backingWidth );
-            nH = (height * dd / (float)_backingHeight);
-            break;
-    }
-
-    _vertices[0] = - nW;
-    _vertices[1] = - nH;
-    _vertices[2] =   nW;
-    _vertices[3] = - nH;
-    _vertices[4] = - nW;
-    _vertices[5] =   nH;
-    _vertices[6] =   nW;
-    _vertices[7] =   nH;
+- (void) display_pixels: (IJKOverlay *) overlay {
+    return;
 }
 
 - (void)display: (SDL_VoutOverlay *) overlay
 {
-    if (!dispatch_get_specific(&g_ijk_gles_queue_spec_key)) {
-        dispatch_sync(self->_renderQueue, ^() {
-            [self display:overlay];
-        });
+    if (_didSetupGL == NO)
+        return;
+
+    if ([self isApplicationActive] == NO)
+        return;
+
+    if (![self tryLockGLActive]) {
+        if (0 == (_tryLockErrorCount % 100)) {
+            NSLog(@"IJKSDLGLView:display: unable to tryLock GL active: %d\n", _tryLockErrorCount);
+        }
+        _tryLockErrorCount++;
         return;
     }
 
-    if ([self setupGLOnce]) {
-        // gles throws gpus_ReturnNotPermittedKillClient, while app is in background
-        if (![self tryLockGLActive]) {
-            if (0 == (_tryLockErrorCount % 100)) {
-                NSLog(@"IJKSDLGLView:display: unable to tryLock GL active: %d\n", _tryLockErrorCount);
-            }
-            _tryLockErrorCount++;
-            return;
-        }
-
-        _tryLockErrorCount = 0;
-        if (!_didStopGL) {
-            if (_context == nil) {
-                NSLog(@"IJKSDLGLView: nil EAGLContext\n");
-                return;
-            }
-
-            EAGLContext *prevContext = [EAGLContext currentContext];
-            [EAGLContext setCurrentContext:_context];
-            [self displayInternal:overlay];
-            [EAGLContext setCurrentContext:prevContext];
-        }
-
-        [self unlockGLActive];
+    _tryLockErrorCount = 0;
+    if (_context && !_didStopGL) {
+        EAGLContext *prevContext = [EAGLContext currentContext];
+        [EAGLContext setCurrentContext:_context];
+        [self displayInternal:overlay];
+        [EAGLContext setCurrentContext:prevContext];
     }
+
+    [self unlockGLActive];
 }
 
+// NOTE: overlay could be NULl
 - (void)displayInternal: (SDL_VoutOverlay *) overlay
 {
-    CGFloat newScaleFactor = _scaleFactor;
-    if (_prevScaleFactor != newScaleFactor) {
-        CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
-        [eaglLayer setContentsScale:newScaleFactor];
-
-        _prevScaleFactor = newScaleFactor;
-    }
-
-    if (![self setupDisplay:overlay]) {
-        NSLog(@"IJKSDLGLView: setupDisplay failed\n");
+    if (![self setupRenderer:overlay]) {
+        if (!overlay && !_renderer) {
+            NSLog(@"IJKSDLGLView: setupDisplay not ready\n");
+        } else {
+            NSLog(@"IJKSDLGLView: setupDisplay failed\n");
+        }
         return;
     }
 
-    if (_didRelayoutSubViews) {
-        _didRelayoutSubViews = NO;
-        [self layoutOnDisplayThread];
-    }
+    [[self eaglLayer] setContentsScale:_scaleFactor];
 
-    if (_didSetContentMode || _didVerticesChanged) {
-        _didSetContentMode = NO;
-        _didVerticesChanged = NO;
-        [self updateVertices];
+    if (_isRenderBufferInvalidated) {
+        NSLog(@"IJKSDLGLView: renderbufferStorage fromDrawable\n");
+        _isRenderBufferInvalidated = NO;
+
+        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+        [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
+        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
+        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
+        IJK_GLES2_Renderer_setGravity(_renderer, _rendererGravity, _backingWidth, _backingHeight);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
     glViewport(0, 0, _backingWidth, _backingHeight);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-	glUseProgram(_program);
 
-    if (overlay) {
-        [_renderer render:overlay];
-    }
+    if (!IJK_GLES2_Renderer_renderOverlay(_renderer, overlay))
+        ALOGE("[EGL] IJK_GLES2_render failed\n");
 
-    if ([_renderer prepareDisplay]) {
-        _texCoords[0] = 0.0f;
-        _texCoords[1] = 1.0f;
-        _texCoords[2] = 1.0f - _rightPadding;
-        _texCoords[3] = 1.0f;
-        _texCoords[4] = 0.0f;
-        _texCoords[5] = 0.0f;
-        _texCoords[6] = 1.0f - _rightPadding;
-        _texCoords[7] = 0.0f;
+    glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+    [_context presentRenderbuffer:GL_RENDERBUFFER];
 
-        GLfloat modelviewProj[16];
-        mat4f_LoadOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f, modelviewProj);
-        glUniformMatrix4fv(_uniformMatrix, 1, GL_FALSE, modelviewProj);
-
-        glVertexAttribPointer(ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, _vertices);
-        glEnableVertexAttribArray(ATTRIBUTE_VERTEX);
-        glVertexAttribPointer(ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, 0, 0, _texCoords);
-        glEnableVertexAttribArray(ATTRIBUTE_TEXCOORD);
-
-#if 0
-        if (!validateProgram(_program))
-        {
-            NSLog(@"Failed to validate program");
-            return;
-        }
-#endif
-
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-        [_context presentRenderbuffer:GL_RENDERBUFFER];
-
-        int64_t current = (int64_t)SDL_GetTickHR();
-        int64_t delta   = (current > _lastFrameTime) ? current - _lastFrameTime : 0;
-        if (delta <= 0) {
-            _lastFrameTime = current;
-        } else if (delta >= 1000) {
-            _fps = ((CGFloat)_frameCount) * 1000 / delta;
-            _frameCount = 0;
-            _lastFrameTime = current;
-        } else {
-            _frameCount++;
-        }
+    int64_t current = (int64_t)SDL_GetTickHR();
+    int64_t delta   = (current > _lastFrameTime) ? current - _lastFrameTime : 0;
+    if (delta <= 0) {
+        _lastFrameTime = current;
+    } else if (delta >= 1000) {
+        _fps = ((CGFloat)_frameCount) * 1000 / delta;
+        _frameCount = 0;
+        _lastFrameTime = current;
+    } else {
+        _frameCount++;
     }
 }
 
@@ -753,9 +415,7 @@ exit:
 
 - (void) unlockGLActive
 {
-    @synchronized(self) {
-        [self.glActiveLock unlock];
-    }
+    [self.glActiveLock unlock];
 }
 
 - (BOOL) tryLockGLActive
@@ -782,6 +442,14 @@ exit:
 - (void)toggleGLPaused:(BOOL)paused
 {
     [self lockGLActive];
+    if (!self.glActivePaused && paused) {
+        if (_context != nil) {
+            EAGLContext *prevContext = [EAGLContext currentContext];
+            [EAGLContext setCurrentContext:_context];
+            glFinish();
+            [EAGLContext setCurrentContext:prevContext];
+        }
+    }
     self.glActivePaused = paused;
     [self unlockGLActive];
 }
@@ -832,12 +500,15 @@ exit:
 - (void)applicationWillEnterForeground
 {
     NSLog(@"IJKSDLGLView:applicationWillEnterForeground: %d", (int)[UIApplication sharedApplication].applicationState);
+    [self setupGLOnce];
+    _applicationState = IJKSDLGLViewApplicationForegroundState;
     [self toggleGLPaused:NO];
 }
 
 - (void)applicationDidBecomeActive
 {
     NSLog(@"IJKSDLGLView:applicationDidBecomeActive: %d", (int)[UIApplication sharedApplication].applicationState);
+    [self setupGLOnce];
     [self toggleGLPaused:NO];
 }
 
@@ -845,12 +516,15 @@ exit:
 {
     NSLog(@"IJKSDLGLView:applicationWillResignActive: %d", (int)[UIApplication sharedApplication].applicationState);
     [self toggleGLPaused:YES];
+    glFinish();
 }
 
 - (void)applicationDidEnterBackground
 {
     NSLog(@"IJKSDLGLView:applicationDidEnterBackground: %d", (int)[UIApplication sharedApplication].applicationState);
+    _applicationState = IJKSDLGLViewApplicationBackgroundState;
     [self toggleGLPaused:YES];
+    glFinish();
 }
 
 - (void)applicationWillTerminate
@@ -883,6 +557,9 @@ exit:
 
 - (UIImage*)snapshotInternalOnIOS7AndLater
 {
+    if (CGSizeEqualToSize(self.bounds.size, CGSizeZero)) {
+        return nil;
+    }
     UIGraphicsBeginImageContextWithOptions(self.bounds.size, NO, 0.0);
     // Render our snapshot into the image context
     [self drawViewHierarchyInRect:self.bounds afterScreenUpdates:NO];
@@ -954,26 +631,8 @@ exit:
     return image;
 }
 
-#pragma mark IJKFFHudController
-- (void)setHudValue:(NSString *)value forKey:(NSString *)key
+- (void)setShouldLockWhileBeingMovedToWindow:(BOOL)shouldLockWhileBeingMovedToWindow
 {
-    if ([[NSThread currentThread] isMainThread]) {
-        [_hudViewController setHudValue:value forKey:key];
-    } else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self setHudValue:value forKey:key];
-        });
-    }
+    _shouldLockWhileBeingMovedToWindow = shouldLockWhileBeingMovedToWindow;
 }
-
-- (void)setShouldShowHudView:(BOOL)shouldShowHudView
-{
-    _hudViewController.tableView.hidden = !shouldShowHudView;
-}
-
-- (BOOL)shouldShowHudView
-{
-    return !_hudViewController.tableView.hidden;
-}
-
 @end

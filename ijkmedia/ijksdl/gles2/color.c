@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Bilibili
  * copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -38,7 +39,5 @@ static const GLfloat g_bt601[] = {
 };
 const GLfloat *IJK_GLES2_getColorMatrix_bt601()
 {
-    return g_bt709;
+    return g_bt601;
 }
-
-

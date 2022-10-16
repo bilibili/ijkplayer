@@ -2,6 +2,7 @@
  * ijksdl_vout_android_nativewindow.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -146,7 +147,7 @@ static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     if (!native_window) {
         if (!opaque->null_native_window_warned) {
             opaque->null_native_window_warned = 1;
-            ALOGW("voud_display_overlay_l: NULL native_window");
+            ALOGW("func_display_overlay_l: NULL native_window");
         }
         return -1;
     } else {
@@ -154,28 +155,40 @@ static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     }
 
     if (!overlay) {
-        ALOGE("voud_display_overlay_l: NULL overlay");
+        ALOGE("func_display_overlay_l: NULL overlay");
         return -1;
     }
 
     if (overlay->w <= 0 || overlay->h <= 0) {
-        ALOGE("voud_display_overlay_l: invalid overlay dimensions(%d, %d)", overlay->w, overlay->h);
+        ALOGE("func_display_overlay_l: invalid overlay dimensions(%d, %d)", overlay->w, overlay->h);
         return -1;
     }
 
     switch(overlay->format) {
     case SDL_FCC__AMC: {
+        // only ANativeWindow support
         IJK_EGL_terminate(opaque->egl);
         return SDL_VoutOverlayAMediaCodec_releaseFrame_l(overlay, NULL, true);
     }
-    case SDL_FCC_YV12:
+    case SDL_FCC_RV24:
     case SDL_FCC_I420:
-    case SDL_FCC_I444P10LE:
+    case SDL_FCC_I444P10LE: {
+        // only GLES support
+        if (opaque->egl)
+            return IJK_EGL_display(opaque->egl, native_window, overlay);
+        break;
+    }
+    case SDL_FCC_YV12:
+    case SDL_FCC_RV16:
+    case SDL_FCC_RV32: {
+        // both GLES & ANativeWindow support
         if (vout->overlay_format == SDL_FCC__GLES2 && opaque->egl)
             return IJK_EGL_display(opaque->egl, native_window, overlay);
         break;
     }
+    }
 
+    // fallback to ANativeWindow
     IJK_EGL_terminate(opaque->egl);
     return SDL_Android_NativeWindow_display_l(native_window, overlay); 
 }
@@ -250,7 +263,7 @@ static void SDL_VoutAndroid_SetNativeWindow_l(SDL_Vout *vout, ANativeWindow *nat
             SDL_VoutAndroid_invalidateAllBuffers_l(vout);
         }
         return;
-    } else
+    }
 
     IJK_EGL_terminate(opaque->egl);
     SDL_VoutAndroid_invalidateAllBuffers_l(vout);

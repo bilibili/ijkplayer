@@ -2,6 +2,7 @@
  * ijksdl_codec_android_mediaformat.c
  *****************************************************************************
  *
+ * Copyright (c) 2014 Bilibili
  * copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -38,7 +39,7 @@ sdl_amedia_status_t SDL_AMediaFormat_deleteP(SDL_AMediaFormat** aformat)
     if (!aformat)
         return SDL_AMEDIA_OK;
     sdl_amedia_status_t amc_ret = SDL_AMediaFormat_delete(*aformat);
-    aformat = NULL;
+    *aformat = NULL;
     return amc_ret;
 }
 

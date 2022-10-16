@@ -14,4 +14,5 @@
 
 - (void)setHudValue:(NSString *)value forKey:(NSString *)key;
 
+- (void)setRect:(CGRect) rect;
 @end

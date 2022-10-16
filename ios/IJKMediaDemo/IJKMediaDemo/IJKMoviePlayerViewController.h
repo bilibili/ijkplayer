@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013-2015 Bilibili
  * Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +22,11 @@
 @interface IJKVideoViewController : UIViewController
 
 @property(atomic,strong) NSURL *url;
+@property(strong,nonatomic) NSString* manifest;
 @property(atomic, retain) id<IJKMediaPlayback> player;
 
 - (id)initWithURL:(NSURL *)url;
+- (id)initWithManifest:(NSString*)manifest_string;
 
 + (void)presentFromViewController:(UIViewController *)viewController withTitle:(NSString *)title URL:(NSURL *)url completion:(void(^)())completion;
 

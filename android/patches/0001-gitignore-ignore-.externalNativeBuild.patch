@@ -1,0 +1,22 @@
+From dc4847b1e8ff5d35576f840db59aec0a3d3fc72b Mon Sep 17 00:00:00 2001
+From: ctiao <calmer91@gmail.com>
+Date: Mon, 29 Aug 2016 14:48:08 +0800
+Subject: [PATCH 1/2] gitignore: ignore ".externalNativeBuild"
+
+---
+ android/ijkplayer/.gitignore | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/android/ijkplayer/.gitignore b/android/ijkplayer/.gitignore
+index eac8754..2a3badc 100644
+--- a/android/ijkplayer/.gitignore
++++ b/android/ijkplayer/.gitignore
+@@ -6,3 +6,4 @@
+ /build
+ /captures
+ android-ndk-prof
++.externalNativeBuild
+\ No newline at end of file
+-- 
+2.7.4 (Apple Git-66)
+

@@ -21,8 +21,8 @@ group = GROUP
 version = VERSION_NAME
 
 bintray {
-    user = project.hasProperty('BINTRAY_USER') ? BINTRAY_USER : ''
-    key = project.hasProperty('BINTRAY_APIKEY') ? BINTRAY_APIKEY : ''
+    user = project.hasProperty('BINTRAY_USER') ? BINTRAY_USER : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('BINTRAY_APIKEY') ? BINTRAY_APIKEY : System.getenv('BINTRAY_APIKEY')
 
     configurations = ['archives']
 
@@ -32,6 +32,7 @@ bintray {
     pkg {
         repo = 'maven'
         name = POM_NAME
+        userOrg = POM_USER_ORG
         desc = POM_DESCRIPTION
         websiteUrl = POM_URL
         vcsUrl = POM_SCM_URL
@@ -42,7 +43,7 @@ bintray {
             name = VERSION_NAME
             gpg {
                 sign = true
-                passphrase = project.hasProperty('GPG_PASSWORD') ? GPG_PASSWORD : ''
+                passphrase = project.hasProperty('GPG_PASSWORD') ? GPG_PASSWORD : System.getenv('GPG_PASSWORD')
             }
         }
     }

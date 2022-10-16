@@ -2,6 +2,7 @@
  * android_audiotrack.h
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -28,6 +29,8 @@
 #include <jni.h>
 #include "../ijksdl_audio.h"
 #include "../ijksdl_aout.h"
+
+#define AUDIOTRACK_PLAYBACK_MAXSPEED (2)
 
 typedef struct SDL_Android_AudioTrack_Spec {
     enum StreamType {

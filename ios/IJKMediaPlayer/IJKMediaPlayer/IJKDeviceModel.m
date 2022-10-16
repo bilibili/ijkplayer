@@ -1,6 +1,7 @@
 /*
  * IJKDeviceModel.m
  *
+ * Copyright (c) 2015 Bilibili
  * Copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -89,6 +90,8 @@ inline static void IJKDeviceRegister(NSMutableDictionary *dict,
 
         IJKDeviceRegister(dict, @"iPhone8,1",   @"iPhone 6S",       kIJKDeviceRank_AppleA9Class);
         IJKDeviceRegister(dict, @"iPhone8,2",   @"iPhone 6S Plus",  kIJKDeviceRank_AppleA9Class);
+        IJKDeviceRegister(dict, @"iPhone8,4",   @"iPhone SE",       kIJKDeviceRank_AppleA9Class);
+
 
         // iPod Touch
         IJKDeviceRegister(dict, @"iPod1,1",     @"iPod Touch",      kIJKDeviceRank_Baseline);
@@ -136,6 +139,9 @@ inline static void IJKDeviceRegister(NSMutableDictionary *dict,
         IJKDeviceRegister(dict, @"iPad5,2",     @"iPad mini 4",     kIJKDeviceRank_AppleA8XClass);
         IJKDeviceRegister(dict, @"iPad5,3",     @"iPad Air 2",      kIJKDeviceRank_AppleA8XClass);
         IJKDeviceRegister(dict, @"iPad5,4",     @"iPad Air 2",      kIJKDeviceRank_AppleA8XClass);
+
+        IJKDeviceRegister(dict, @"iPad6,3",     @"iPad Pro",        kIJKDeviceRank_AppleA9XClass);
+        IJKDeviceRegister(dict, @"iPad6,4",     @"iPad Pro",        kIJKDeviceRank_AppleA9XClass);
 
         IJKDeviceRegister(dict, @"iPad6,7",     @"iPad Pro",        kIJKDeviceRank_AppleA9XClass);
         IJKDeviceRegister(dict, @"iPad6,8",     @"iPad Pro",        kIJKDeviceRank_AppleA9XClass);

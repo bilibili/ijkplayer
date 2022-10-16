@@ -2,6 +2,7 @@
  * ijksdl_thread.c
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -24,6 +25,7 @@
 #include "ijksdl_timer.h"
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
 
@@ -154,4 +156,72 @@ float SDL_SpeedSamplerAdd(SDL_SpeedSampler *sampler, int enable_log, const char 
     }
 
     return samples_per_second;
+}
+
+
+
+void SDL_SpeedSampler2Reset(SDL_SpeedSampler2 *sampler, int sample_range)
+{
+    memset(sampler, 0, sizeof(SDL_SpeedSampler2));
+    sampler->sample_range      = sample_range;
+    sampler->last_profile_tick = (int64_t)SDL_GetTickHR();
+}
+
+int64_t SDL_SpeedSampler2Add(SDL_SpeedSampler2 *sampler, int quantity)
+{
+    if (quantity < 0)
+        return 0;
+
+    int64_t sample_range  = sampler->sample_range;
+    int64_t last_tick     = sampler->last_profile_tick;
+    int64_t last_duration = sampler->last_profile_duration;
+    int64_t last_quantity = sampler->last_profile_quantity;
+    int64_t now           = (int64_t)SDL_GetTickHR();
+    int64_t elapsed       = (int64_t)llabs(now - last_tick);
+    if (elapsed < 0 || elapsed >= sample_range) {
+        // overflow, reset to initialized state
+        sampler->last_profile_tick     = now;
+        sampler->last_profile_duration = sample_range;
+        sampler->last_profile_quantity = quantity;
+        sampler->last_profile_speed    = quantity * 1000 / sample_range;
+        return sampler->last_profile_speed;
+    }
+
+    int64_t new_quantity = last_quantity + quantity;
+    int64_t new_duration = last_duration + elapsed;
+    if (new_duration > sample_range) {
+        new_quantity = new_quantity * sample_range / new_duration;
+        new_duration = sample_range;
+    }
+
+    sampler->last_profile_tick     = now;
+    sampler->last_profile_duration = new_duration;
+    sampler->last_profile_quantity = new_quantity;
+    if (new_duration > 0)
+        sampler->last_profile_speed = new_quantity * 1000 / new_duration;
+    return sampler->last_profile_speed;
+}
+
+int64_t SDL_SpeedSampler2GetSpeed(SDL_SpeedSampler2 *sampler)
+{
+    int64_t sample_range  = sampler->sample_range;
+    int64_t last_tick     = sampler->last_profile_tick;
+    int64_t last_quantity = sampler->last_profile_quantity;
+    int64_t last_duration = sampler->last_profile_duration;
+    int64_t now           = (int64_t)SDL_GetTickHR();
+    int64_t elapsed       = (int64_t)llabs(now - last_tick);
+    if (elapsed < 0 || elapsed >= sample_range)
+        return 0;
+
+    int64_t new_quantity = last_quantity;
+    int64_t new_duration = last_duration + elapsed;
+    if (new_duration > sample_range) {
+        new_quantity = new_quantity * sample_range / new_duration;
+        new_duration = sample_range;
+    }
+
+    if (new_duration <= 0)
+        return 0;
+
+    return new_quantity * 1000 / new_duration;
 }

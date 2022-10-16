@@ -1,6 +1,7 @@
 /*
  * IJKFFOptions.h
  *
+ * Copyright (c) 2013-2015 Bilibili
  * Copyright (c) 2013-2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -27,6 +28,7 @@ typedef enum IJKFFOptionCategory {
     kIJKFFOptionCategoryCodec  = 2,
     kIJKFFOptionCategorySws    = 3,
     kIJKFFOptionCategoryPlayer = 4,
+    kIJKFFOptionCategorySwr    = 5,
 } IJKFFOptionCategory;
 
 // for codec option 'skip_loop_filter' and 'skip_frame'

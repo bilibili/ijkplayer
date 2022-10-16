@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2015 Bilibili
  * copyright (c) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -62,40 +63,59 @@ void SDL_AMediaCodec_FakeFifo_destroy(SDL_AMediaCodec_FakeFifo *fifo)
     memset(fifo, 0, sizeof(SDL_AMediaCodec_FakeFifo));
 }
 
-sdl_amedia_status_t SDL_AMediaCodec_FakeFifo_queue(SDL_AMediaCodec_FakeFifo *fifo, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags)
+ssize_t SDL_AMediaCodec_FakeFifo_dequeueInputBuffer(SDL_AMediaCodec_FakeFifo* fifo, int64_t timeoutUs)
+{
+    int ret_index = -1;
+    if (fifo->should_abort)
+        return SDL_AMEDIA_ERROR_UNKNOWN;
+
+    SDL_LockMutex(fifo->mutex);
+    if (!fifo->should_abort) {
+        if (fifo->size >= FAKE_BUFFER_QUEUE_SIZE) {
+            SDL_CondWaitTimeout(fifo->wakeup_enqueue_cond, fifo->mutex, timeoutUs / 1000);
+        }
+
+        if (fifo->size < FAKE_BUFFER_QUEUE_SIZE) {
+            ret_index = fifo->end;
+        }
+    }
+    SDL_UnlockMutex(fifo->mutex);
+
+    if (fifo->should_abort)
+        return -1;
+
+    return ret_index;
+}
+
+sdl_amedia_status_t SDL_AMediaCodec_FakeFifo_queueInputBuffer(SDL_AMediaCodec_FakeFifo *fifo, size_t idx, off_t offset, size_t size, uint64_t time, uint32_t flags)
 {
     if (fifo->should_abort)
         return SDL_AMEDIA_ERROR_UNKNOWN;
 
     SDL_LockMutex(fifo->mutex);
-    while (!fifo->should_abort) {
-        if (fifo->size < FAKE_BUFFER_QUEUE_SIZE) {
-            SDL_AMediaCodec_FakeFrame *fake = &fifo->fakes[fifo->end];
-            fake->info.offset = offset;
-            fake->info.size   = size;
-            fake->info.presentationTimeUs = time;
-            fake->info.flags  = flags;
-            fake->index       = fifo->end;
-
-            FAK_TRACE("%s, %d, %lld", __func__, fifo->end, time);
-
-            fifo->end = (fifo->end + 1) % FAKE_BUFFER_QUEUE_SIZE;
-            fifo->size++;
-            SDL_CondSignal(fifo->wakeup_dequeue_cond);
-            break;
-        }
-
-        SDL_CondWaitTimeout(fifo->wakeup_enqueue_cond, fifo->mutex, 1000);
-    }
-    SDL_UnlockMutex(fifo->mutex);
-
-    if (fifo->should_abort)
+    if (fifo->size >= FAKE_BUFFER_QUEUE_SIZE) {
+        SDL_UnlockMutex(fifo->mutex);
         return SDL_AMEDIA_ERROR_UNKNOWN;
+    }
+
+    SDL_AMediaCodec_FakeFrame *fake = &fifo->fakes[fifo->end];
+    fake->info.offset = offset;
+    fake->info.size   = size;
+    fake->info.presentationTimeUs = time;
+    fake->info.flags  = flags;
+    fake->index       = fifo->end;
+
+    FAK_TRACE("%s, %d, %lld", __func__, fifo->end, time);
+
+    fifo->end = (fifo->end + 1) % FAKE_BUFFER_QUEUE_SIZE;
+    fifo->size++;
+    SDL_CondSignal(fifo->wakeup_dequeue_cond);
+    SDL_UnlockMutex(fifo->mutex);
 
     return SDL_AMEDIA_OK;
 }
 
-ssize_t SDL_AMediaCodec_FakeFifo_dequeue(SDL_AMediaCodec_FakeFifo *fifo, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs)
+ssize_t SDL_AMediaCodec_FakeFifo_dequeueOutputBuffer(SDL_AMediaCodec_FakeFifo *fifo, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs)
 {
     if (fifo->should_abort)
         return -1;

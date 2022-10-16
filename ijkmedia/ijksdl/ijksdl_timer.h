@@ -2,6 +2,7 @@
  * ijksdl_thread.h
  *****************************************************************************
  *
+ * Copyright (c) 2013 Bilibili
  * copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -65,5 +66,20 @@ typedef struct SDL_SpeedSampler
 void  SDL_SpeedSamplerReset(SDL_SpeedSampler *sampler);
 // return samples per seconds
 float SDL_SpeedSamplerAdd(SDL_SpeedSampler *sampler, int enable_log, const char *log_tag);
+
+
+
+typedef struct SDL_SpeedSampler2
+{
+    int64_t sample_range;
+    int64_t last_profile_tick;
+    int64_t last_profile_duration;
+    int64_t last_profile_quantity;
+    int64_t last_profile_speed;
+} SDL_SpeedSampler2;
+
+void    SDL_SpeedSampler2Reset(SDL_SpeedSampler2 *sampler, int sample_range);
+int64_t SDL_SpeedSampler2Add(SDL_SpeedSampler2 *sampler, int quantity);
+int64_t SDL_SpeedSampler2GetSpeed(SDL_SpeedSampler2 *sampler);
 
 #endif

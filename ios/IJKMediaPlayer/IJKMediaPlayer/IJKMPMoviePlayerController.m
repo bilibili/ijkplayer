@@ -1,6 +1,7 @@
 /*
  * IJKMPMoviePlayerController.m
  *
+ * Copyright (c) 2013 Bilibili
  * Copyright (c) 2013 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -22,8 +23,12 @@
 
 #import "IJKMPMoviePlayerController.h"
 #import "IJKAudioKit.h"
+#import "IJKNotificationManager.h"
 
 @implementation IJKMPMoviePlayerController
+{
+    IJKNotificationManager *_notificationManager;
+}
 
 @dynamic view;
 @dynamic currentPlaybackTime;
@@ -48,6 +53,8 @@
     if (self) {
         self.scalingMode = MPMovieScalingModeAspectFit;
         self.shouldAutoplay = YES;
+
+        _notificationManager = [[IJKNotificationManager alloc] init];
         [self IJK_installMovieNotificationObservers];
 
         [[IJKAudioKit sharedInstance] setupAudioSession];
@@ -156,44 +163,54 @@
     return 1.0f;
 }
 
+-(void)setPlaybackVolume:(float)playbackVolume
+{
+    NSLog(@"[MPMoviePlayerController setPlaybackVolume] is not supported\n");
+}
+
+-(float)playbackVolume
+{
+    return 1.0f;
+}
+
 #pragma mark Movie Notification Handlers
 
 /* Register observers for the various movie object notifications. */
 -(void)IJK_installMovieNotificationObservers
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(IJK_dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:)
-                                                 name:MPMediaPlaybackIsPreparedToPlayDidChangeNotification
-                                               object:self];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(IJK_dispatchMPMoviePlayerLoadStateDidChangeNotification:)
-                                                 name:MPMoviePlayerLoadStateDidChangeNotification
-                                               object:self];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(IJK_dispatchMPMoviePlayerPlaybackDidFinishNotification:)
-                                                 name:MPMoviePlayerPlaybackDidFinishNotification
-                                               object:self];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(IJK_dispatchMPMoviePlayerPlaybackStateDidChangeNotification:)
-                                                 name:MPMoviePlayerPlaybackStateDidChangeNotification
-                                               object:self];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(IJK_dispatchMoviePlayerIsAirPlayVideoActiveDidChangeNotification:)
-                                                 name:MPMoviePlayerIsAirPlayVideoActiveDidChangeNotification
-                                               object:self];
+    [_notificationManager addObserver:self
+                             selector:@selector(IJK_dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:)
+                                 name:MPMediaPlaybackIsPreparedToPlayDidChangeNotification
+                               object:self];
+
+    [_notificationManager addObserver:self
+                             selector:@selector(IJK_dispatchMPMoviePlayerLoadStateDidChangeNotification:)
+                                 name:MPMoviePlayerLoadStateDidChangeNotification
+                               object:self];
+
+    [_notificationManager addObserver:self
+                             selector:@selector(IJK_dispatchMPMoviePlayerPlaybackDidFinishNotification:)
+                                 name:MPMoviePlayerPlaybackDidFinishNotification
+                               object:self];
+
+    [_notificationManager addObserver:self
+                             selector:@selector(IJK_dispatchMPMoviePlayerPlaybackStateDidChangeNotification:)
+                                 name:MPMoviePlayerPlaybackStateDidChangeNotification
+                               object:self];
+
+    [_notificationManager addObserver:self
+                             selector:@selector(IJK_dispatchMoviePlayerIsAirPlayVideoActiveDidChangeNotification:)
+                                 name:MPMoviePlayerIsAirPlayVideoActiveDidChangeNotification
+                               object:self];
+    [_notificationManager addObserver:self
+                             selector:@selector(IJK_dispatchMoviePlayerNaturalSizeAvailableNotification:)
+                                 name:MPMovieNaturalSizeAvailableNotification
+                               object:self];
 }
 
 - (void)IJK_removeMovieNotificationObservers
 {
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerLoadStateDidChangeNotification object:self];
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:self];
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerPlaybackStateDidChangeNotification object:self];
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:MPMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:self];
+    [_notificationManager removeAllObservers:self];
 }
 
 - (void)IJK_dispatchMPMediaPlaybackIsPreparedToPlayDidChangeNotification:(NSNotification*)notification
@@ -219,6 +236,11 @@
 - (void)IJK_dispatchMoviePlayerIsAirPlayVideoActiveDidChangeNotification:(NSNotification*)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification object:notification.object userInfo:notification.userInfo];
+}
+
+- (void)IJK_dispatchMoviePlayerNaturalSizeAvailableNotification:(NSNotification*)notification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:IJKMPMovieNaturalSizeAvailableNotification object:notification.object userInfo:notification.userInfo];
 }
 
 - (void)setPauseInBackground:(BOOL)pause

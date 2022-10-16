@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013-2014 Bilibili
  * Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +28,7 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
     private OnVideoSizeChangedListener mOnVideoSizeChangedListener;
     private OnErrorListener mOnErrorListener;
     private OnInfoListener mOnInfoListener;
+    private OnTimedTextListener mOnTimedTextListener;
 
     public final void setOnPreparedListener(OnPreparedListener listener) {
         mOnPreparedListener = listener;
@@ -58,6 +60,10 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
         mOnInfoListener = listener;
     }
 
+    public final void setOnTimedTextListener(OnTimedTextListener listener) {
+        mOnTimedTextListener = listener;
+    }
+
     public void resetListeners() {
         mOnPreparedListener = null;
         mOnBufferingUpdateListener = null;
@@ -66,6 +72,7 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
         mOnVideoSizeChangedListener = null;
         mOnErrorListener = null;
         mOnInfoListener = null;
+        mOnTimedTextListener = null;
     }
 
     protected final void notifyOnPrepared() {
@@ -101,6 +108,11 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
 
     protected final boolean notifyOnInfo(int what, int extra) {
         return mOnInfoListener != null && mOnInfoListener.onInfo(this, what, extra);
+    }
+
+    protected final void notifyOnTimedText(IjkTimedText text) {
+        if (mOnTimedTextListener != null)
+            mOnTimedTextListener.onTimedText(this, text);
     }
 
     public void setDataSource(IMediaDataSource mediaDataSource) {

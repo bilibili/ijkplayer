@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013-2015 Bilibili
  * Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +34,15 @@
     [[IJKDemoHistory instance] add:historyItem];
     
     [viewController presentViewController:[[IJKVideoViewController alloc] initWithURL:url] animated:YES completion:completion];
+}
+
+- (instancetype)initWithManifest: (NSString*)manifest_string {
+    self = [self initWithNibName:@"IJKMoviePlayerViewController" bundle:nil];
+    if (self) {
+        self.url = [NSURL URLWithString:@"ijklas:"];
+        self.manifest = manifest_string;
+    }
+    return self;
 }
 
 - (instancetype)initWithURL:(NSURL *)url {
@@ -74,6 +84,11 @@
 
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
 
+    if (self.manifest != nil){
+        [options setPlayerOptionValue:@"ijklas"         forKey:@"iformat"];
+        [options setPlayerOptionIntValue:0              forKey:@"find_stream_info"];
+        [options setFormatOptionValue:self.manifest     forKey:@"manifest_string"];
+    }
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;

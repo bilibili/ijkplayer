@@ -1,6 +1,7 @@
 /*
  * h264_nal.h
  *
+ * Copyright (c) 2010-2011 Bilibili
  * Copyright (c) 2010-2011 Jean-Baptiste Kempf <jb@videolan.org>
  * Copyright (c) 2014 Zhang Rui <bbcallen@gmail.com>
  *

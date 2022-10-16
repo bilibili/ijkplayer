@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Bilibili
  * copyright (c) 2016 Zhang Rui <bbcallen@gmail.com>
  *
  * This file is part of ijkPlayer.
@@ -22,6 +23,7 @@
 
 static GLboolean yuv420p_use(IJK_GLES2_Renderer *renderer)
 {
+    ALOGI("use render yuv420p\n");
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     glUseProgram(renderer->program);            IJK_GLES2_checkError_TRACE("glUseProgram");
@@ -97,6 +99,7 @@ static GLboolean yuv420p_uploadTexture(IJK_GLES2_Renderer *renderer, SDL_VoutOve
 
 IJK_GLES2_Renderer *IJK_GLES2_Renderer_create_yuv420p()
 {
+    ALOGI("create render yuv420p\n");
     IJK_GLES2_Renderer *renderer = IJK_GLES2_Renderer_create_base(IJK_GLES2_getFragmentShader_yuv420p());
     if (!renderer)
         goto fail;
