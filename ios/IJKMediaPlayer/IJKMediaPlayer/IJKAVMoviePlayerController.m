@@ -880,8 +880,8 @@ static IJKAVMoviePlayerController* instance;
         if (_player != nil && !isFloatZero(_player.rate))
             _isPrerolling = NO;
         /* AVPlayer "rate" property value observer. */
-        [self didPlaybackStateChange];
-        [self didLoadStateChange];
+//        [self didPlaybackStateChange];
+//        [self didLoadStateChange];
     }
     else if (context == KVO_AVPlayer_currentItem)
     {
