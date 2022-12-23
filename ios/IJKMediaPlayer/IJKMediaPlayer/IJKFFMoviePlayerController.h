@@ -110,7 +110,7 @@ typedef enum IJKLogLevel {
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
 @property(nonatomic) BOOL shouldShowHudView;
-@property(nonatomic, readonly) AudioBuffer *audioBuffer;
+@property(nonatomic, retain) AVAudioPCMBuffer *avAudioPCMBuffer;
 
 - (void)setOptionValue:(NSString *)value
                 forKey:(NSString *)key

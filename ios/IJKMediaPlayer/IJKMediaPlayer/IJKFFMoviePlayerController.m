@@ -75,7 +75,7 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20210426--001
     IjkIOAppCacheStatistic _cacheStat;
     NSTimer *_hudTimer;
     IJKSDLHudViewController *_hudViewController;
-    AudioBuffer *_audioBuffer;
+    AVAudioPCMBuffer *_avAudioPCMBuffer;
 }
 
 @synthesize view = _view;
@@ -105,7 +105,7 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20210426--001
 @synthesize isAudioSync = _isAudioSync;
 @synthesize isVideoSync = _isVideoSync;
 
-@synthesize audioBuffer = _audioBuffer;
+@synthesize avAudioPCMBuffer = _avAudioPCMBuffer;
 
 #define FFP_IO_STAT_STEP (50 * 1024)
 
@@ -467,17 +467,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     return _isVideoToolboxOpen;
 }
 
-- (AVAudioPCMBuffer *)avAudioPCMBuffer {
-    if (!_mediaPlayer)
-        return nil;
-    // make a buffer
-    AudioChannelLayoutTag layoutTag = kAudioChannelLayoutTag_Stereo;
-    if (self.audioBuffer->mNumberChannels > 1) {
-        layoutTag = kAudioChannelLayoutTag_Stereo;
-    } else {
-        layoutTag = kAudioChannelLayoutTag_Mono;
-    }
-    AVAudioChannelLayout *chLayout = [[AVAudioChannelLayout alloc] initWithLayoutTag:layoutTag];
+- (AVAudioCommonFormat)avAudioFormat {
     AVAudioCommonFormat audio_format = AVAudioPCMFormatFloat32;
     int audio_frame_format = ijkmp_get_format(_mediaPlayer);
     switch (audio_frame_format) {
@@ -524,25 +514,63 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
             audio_format = AVAudioOtherFormat;
             break;
     }
+    return audio_format;
+}
+
+- (AVAudioPCMBuffer *)avAudioPCMBuffer {
+    _avAudioPCMBuffer = nil;
+    if (!_mediaPlayer)
+        return nil;
+
+    uint8_t *audio_buf;
+    if ((audio_buf = ijkmp_get_audio_buf(_mediaPlayer)) == NULL) {
+        return nil;
+    }
+    
+    int channels = ijkmp_get_channels(_mediaPlayer);
+    if (channels == 0)
+        return nil;
+    
+    AudioChannelLayoutTag layoutTag = kAudioChannelLayoutTag_Stereo;
+    if (channels > 1) {
+        layoutTag = kAudioChannelLayoutTag_Stereo;
+    } else {
+        layoutTag = kAudioChannelLayoutTag_Mono;
+    }
+    AVAudioChannelLayout *chLayout = [[AVAudioChannelLayout alloc] initWithLayoutTag:layoutTag];
     int sample_rate = ijkmp_get_sample_rate(_mediaPlayer);
     int interleaved = ijkmp_get_interleaved(_mediaPlayer);
-    AVAudioFormat *chFormat = [[AVAudioFormat alloc] initWithCommonFormat:audio_format
+    AVAudioCommonFormat avAudioCommonFormat = [self avAudioFormat];
+    AVAudioFormat *chFormat = [[AVAudioFormat alloc] initWithCommonFormat:avAudioCommonFormat
                                                                sampleRate:(double)sample_rate
                                                               interleaved:interleaved ? TRUE : FALSE
                                                             channelLayout:chLayout];
 
     int frame_capacity = ijkmp_get_frame_capacity(_mediaPlayer);
+    unsigned int size = ijkmp_get_audio_buf_size(_mediaPlayer);
     AVAudioPCMBuffer *thePCMBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:chFormat frameCapacity:frame_capacity];
     thePCMBuffer.frameLength = thePCMBuffer.frameCapacity;
-    memcpy(thePCMBuffer.floatChannelData[0], self.audioBuffer->mData, self.audioBuffer->mDataByteSize);
-
+    switch (avAudioCommonFormat) {
+        case AVAudioPCMFormatInt16:
+            memcpy(thePCMBuffer.int16ChannelData[0], audio_buf, size);
+            break;
+        case AVAudioPCMFormatInt32:
+            memcpy(thePCMBuffer.int32ChannelData[0], audio_buf, size);
+            break;
+        case AVAudioPCMFormatFloat32:
+            memcpy(thePCMBuffer.floatChannelData[0], audio_buf, size);
+            break;
+        case AVAudioPCMFormatFloat64:
+            memcpy(thePCMBuffer.floatChannelData[0], audio_buf, size);
+            break;
+        default:
+            return nil;
+            break;
+    }
+    _avAudioPCMBuffer = thePCMBuffer;
+    
     return thePCMBuffer;
 }
-
-- (AudioBuffer *)audioBuffer {
-    return ijkmp_get_audiobuffer(_mediaPlayer);
-}
-
 
 inline static int getPlayerOption(IJKFFOptionCategory category)
 {

@@ -722,12 +722,6 @@ typedef struct FFPlayer {
     char *mediacodec_default_name;
     int ijkmeta_delay_init;
     int render_wait_start;
-    
-    AudioBuffer *audioBuffer;
-    int format;
-    int sample_rate;
-    int interleaved;
-    int frame_capacity;
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))

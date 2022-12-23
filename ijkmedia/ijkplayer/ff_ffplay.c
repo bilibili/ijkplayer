@@ -598,26 +598,6 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
                                 d->next_pts = frame->pts + frame->nb_samples;
                                 d->next_pts_tb = tb;
                             }
-                            // pass out to user to process the raw audio data
-                            if (frame != NULL) {
-                                int t_data_size = av_samples_get_buffer_size(NULL,
-                                                                             frame->channels,
-                                                                             frame->nb_samples,
-                                                                             frame->format,
-                                                                             0);
-
-                                av_log(NULL, AV_LOG_INFO, "%s audio frame buffer size: %d\n", __func__, t_data_size);
-                                ffp->audioBuffer = av_mallocz(sizeof(AudioBuffer));
-                                ffp->audioBuffer->mNumberChannels = frame->channels;
-                                ffp->audioBuffer->mDataByteSize = t_data_size;
-                                ffp->audioBuffer->mData = av_mallocz(t_data_size);
-                                memcpy(ffp->audioBuffer->mData, frame->data, t_data_size);
-                                ffp->sample_rate = frame->sample_rate;
-                                // 1 if the sample format is planar, 0 if it is interleaved
-                                ffp->interleaved = av_sample_fmt_is_planar(frame->format) ? 0 : 1;
-                                ffp->frame_capacity = frame->nb_samples;
-                                ffp->format = frame->format;
-                            }
                         }
                         break;
                     default:
@@ -4041,7 +4021,6 @@ void ffp_destroy(FFPlayer *ffp)
     SDL_DestroyMutexP(&ffp->vf_mutex);
 
     msg_queue_destroy(&ffp->msg_queue);
-
 
     av_free(ffp);
 }
