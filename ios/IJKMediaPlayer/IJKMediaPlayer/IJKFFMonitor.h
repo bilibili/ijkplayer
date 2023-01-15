@@ -30,7 +30,7 @@
 @property(nonatomic) NSDictionary *audioMeta;
 
 @property(nonatomic, readonly) int64_t   duration;   // milliseconds
-@property(nonatomic, readonly) int64_t   bitrate;    // bit / sec
+@property(nonatomic, readonly) int64_t   bitrate;    // kbit / sec
 @property(nonatomic, readonly) float     fps;        // frame / sec
 @property(nonatomic, readonly) int       width;      // width
 @property(nonatomic, readonly) int       height;     // height

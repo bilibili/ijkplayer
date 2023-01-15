@@ -796,3 +796,31 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 
     return -1;
 }
+
+uint8_t *ijkmp_get_audio_buf(IjkMediaPlayer *mp) {
+    return mp->ffplayer->is->audio_buf;
+}
+
+unsigned int ijkmp_get_audio_buf_size(IjkMediaPlayer *mp) {
+    return mp->ffplayer->is->audio_buf_size;
+}
+
+int ijkmp_get_channels(IjkMediaPlayer *mp) {
+    return mp->ffplayer->is->audio_tgt.channels;
+}
+
+int ijkmp_get_format(IjkMediaPlayer *mp) {
+    return mp->ffplayer->is->audio_tgt.fmt;
+}
+
+int ijkmp_get_sample_rate(IjkMediaPlayer *mp) {
+    return mp->ffplayer->is->audio_tgt.freq;
+}
+
+int ijkmp_get_interleaved(IjkMediaPlayer *mp) {
+    return !av_sample_fmt_is_planar(mp->ffplayer->is->audio_tgt.fmt);
+}
+
+int ijkmp_get_frame_capacity(IjkMediaPlayer *mp) {
+    return mp->ffplayer->is->audio_tgt.frame_size;
+}

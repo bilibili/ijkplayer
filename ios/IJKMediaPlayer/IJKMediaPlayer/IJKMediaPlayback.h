@@ -61,6 +61,8 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
     IJKMPMovieTimeOptionExact
 };
 
+@class AVAudioPCMBuffer;
+
 @protocol IJKMediaPlayback;
 
 #pragma mark IJKMediaPlayback
@@ -102,6 +104,8 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property (nonatomic) float playbackVolume;
 
 - (UIImage *)thumbnailImageAtCurrentTime;
+
+- (AVAudioPCMBuffer *)avAudioPCMBuffer;
 
 #pragma mark Notifications
 

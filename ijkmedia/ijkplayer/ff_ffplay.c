@@ -4022,7 +4022,6 @@ void ffp_destroy(FFPlayer *ffp)
 
     msg_queue_destroy(&ffp->msg_queue);
 
-
     av_free(ffp);
 }
 

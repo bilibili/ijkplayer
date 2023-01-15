@@ -383,7 +383,6 @@ static IJKAVMoviePlayerController* instance;
 
 -(int64_t)numberOfBytesTransferred
 {
-#if 0
     if (_player == nil)
         return 0;
 
@@ -393,10 +392,42 @@ static IJKAVMoviePlayerController* instance;
 
     NSArray *events = playerItem.accessLog.events;
     if (events != nil && events.count > 0) {
-        MPMovieAccessLogEvent *currentEvent = [events objectAtIndex:events.count -1];
-        return currentEvent.numberOfBytesTransferred;
+        id obj = [events lastObject];
+        if ([obj isKindOfClass:[AVPlayerItemAccessLogEvent class]]) {
+            AVPlayerItemAccessLogEvent *event = (AVPlayerItemAccessLogEvent *)obj;
+            return event.numberOfBytesTransferred;
+        }
     }
-#endif
+
+    return 0;
+}
+
+- (int64_t)tcpSpeed {
+    if (_player == nil)
+        return 0;
+
+    AVPlayerItem *playerItem = [_player currentItem];
+    if (playerItem == nil)
+        return 0;
+    
+    int64_t downloadSpeed = 0;
+    NSArray *events = playerItem.accessLog.events;
+    if (events != nil && events.count > 0) {
+        id obj = [events lastObject];
+        if ([obj isKindOfClass:[AVPlayerItemAccessLogEvent class]]) {
+            AVPlayerItemAccessLogEvent *event = (AVPlayerItemAccessLogEvent *)obj;
+            long long numberOfBytesTransferred = event.numberOfBytesTransferred;
+            NSTimeInterval transferDuration = event.transferDuration;
+            double observedBitrate = event.observedBitrate;
+            NSLog(@"numberOfBytesTransferred: %lld, transferDuration: %f", numberOfBytesTransferred, transferDuration);
+            if (numberOfBytesTransferred > 0 && transferDuration > 0) {
+                downloadSpeed = numberOfBytesTransferred/transferDuration;
+            } else if (observedBitrate > 0) {
+                return observedBitrate/8.0;
+            }
+            return downloadSpeed;
+        }
+    }
     return 0;
 }
 
@@ -849,8 +880,8 @@ static IJKAVMoviePlayerController* instance;
         if (_player != nil && !isFloatZero(_player.rate))
             _isPrerolling = NO;
         /* AVPlayer "rate" property value observer. */
-        [self didPlaybackStateChange];
-        [self didLoadStateChange];
+//        [self didPlaybackStateChange];
+//        [self didLoadStateChange];
     }
     else if (context == KVO_AVPlayer_currentItem)
     {

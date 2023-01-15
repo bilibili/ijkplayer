@@ -29,6 +29,8 @@
 
 #include "ijkmeta.h"
 
+#import <CoreAudio/CoreAudioTypes.h>
+
 #ifndef MPTRACE
 #define MPTRACE ALOGD
 #endif
@@ -217,5 +219,14 @@ void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 /* need to call msg_free_res for freeing the resouce obtained in msg */
 int             ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block);
 void            ijkmp_set_frame_at_time(IjkMediaPlayer *mp, const char *path, int64_t start_time, int64_t end_time, int num, int definition);
+
+/* helper to let app analyze raw pcm audio data */
+uint8_t        *ijkmp_get_audio_buf(IjkMediaPlayer *mp);
+unsigned int    ijkmp_get_audio_buf_size(IjkMediaPlayer *mp);
+int             ijkmp_get_channels(IjkMediaPlayer *mp);
+int             ijkmp_get_format(IjkMediaPlayer *mp);
+int             ijkmp_get_sample_rate(IjkMediaPlayer *mp);
+int             ijkmp_get_interleaved(IjkMediaPlayer *mp);
+int             ijkmp_get_frame_capacity(IjkMediaPlayer *mp);
 
 #endif

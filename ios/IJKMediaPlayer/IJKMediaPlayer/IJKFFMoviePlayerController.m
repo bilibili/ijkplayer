@@ -24,6 +24,7 @@
 #import "IJKFFMoviePlayerController.h"
 
 #import <UIKit/UIKit.h>
+#import <AVFAudio/AVFAudio.h>
 #import "IJKSDLHudViewController.h"
 #import "IJKFFMoviePlayerDef.h"
 #import "IJKMediaPlayback.h"
@@ -34,7 +35,7 @@
 #import "ijkioapplication.h"
 #include "string.h"
 
-static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20201130--001";
+static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20210426--001";
 
 // It means you didn't call shutdown if you found this object leaked.
 @interface IJKWeakHolder : NSObject
@@ -74,6 +75,7 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20201130--001
     IjkIOAppCacheStatistic _cacheStat;
     NSTimer *_hudTimer;
     IJKSDLHudViewController *_hudViewController;
+    AVAudioPCMBuffer *_avAudioPCMBuffer;
 }
 
 @synthesize view = _view;
@@ -102,6 +104,8 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20201130--001
 @synthesize isSeekBuffering = _isSeekBuffering;
 @synthesize isAudioSync = _isAudioSync;
 @synthesize isVideoSync = _isVideoSync;
+
+@synthesize avAudioPCMBuffer = _avAudioPCMBuffer;
 
 #define FFP_IO_STAT_STEP (50 * 1024)
 
@@ -245,7 +249,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_SILENT];
 #endif
         // init audio sink
-        [[IJKAudioKit sharedInstance] setupAudioSession];
+//        [[IJKAudioKit sharedInstance] setupAudioSession];
 
         [options applyTo:_mediaPlayer];
         _pauseInBackground = NO;
@@ -461,6 +465,111 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         return NO;
 
     return _isVideoToolboxOpen;
+}
+
+- (AVAudioCommonFormat)avAudioFormat {
+    AVAudioCommonFormat audio_format = AVAudioPCMFormatFloat32;
+    int audio_frame_format = ijkmp_get_format(_mediaPlayer);
+    switch (audio_frame_format) {
+        case AV_SAMPLE_FMT_NONE:
+            audio_format = AVAudioOtherFormat;
+            break;
+        case AV_SAMPLE_FMT_U8:          ///< unsigned 8 bits
+            audio_format = AVAudioOtherFormat;
+            break;
+        case AV_SAMPLE_FMT_S16:         ///< signed 16 bits
+            audio_format = AVAudioPCMFormatInt16;
+            break;
+        case AV_SAMPLE_FMT_S32:         ///< signed 32 bits
+            audio_format = AVAudioPCMFormatInt32;
+            break;
+        case AV_SAMPLE_FMT_FLT:         ///< float
+            audio_format = AVAudioPCMFormatFloat32;
+            break;
+        case AV_SAMPLE_FMT_DBL:         ///< double
+            audio_format = AVAudioPCMFormatFloat64;
+            break;
+        case AV_SAMPLE_FMT_U8P:         ///< unsigned 8 bits, planar
+            audio_format = AVAudioOtherFormat;
+            break;
+        case AV_SAMPLE_FMT_S16P:        ///< signed 16 bits, planar
+            audio_format = AVAudioPCMFormatInt16;
+            break;
+        case AV_SAMPLE_FMT_S32P:        ///< signed 32 bits, planar
+            audio_format = AVAudioPCMFormatInt32;
+            break;
+        case AV_SAMPLE_FMT_FLTP:        ///< float, planar
+            audio_format = AVAudioPCMFormatFloat32;
+            break;
+        case AV_SAMPLE_FMT_DBLP:        ///< double, planar
+            audio_format = AVAudioPCMFormatFloat64;
+            break;
+        case AV_SAMPLE_FMT_S64:         ///< signed 64 bits
+            audio_format = AVAudioOtherFormat;
+            break;
+        case AV_SAMPLE_FMT_S64P:        ///< signed 64 bits, planar
+            audio_format = AVAudioOtherFormat;
+            break;
+        default:
+            audio_format = AVAudioOtherFormat;
+            break;
+    }
+    return audio_format;
+}
+
+- (AVAudioPCMBuffer *)avAudioPCMBuffer {
+    _avAudioPCMBuffer = nil;
+    if (!_mediaPlayer)
+        return nil;
+
+    uint8_t *audio_buf;
+    if ((audio_buf = ijkmp_get_audio_buf(_mediaPlayer)) == NULL) {
+        return nil;
+    }
+    
+    int channels = ijkmp_get_channels(_mediaPlayer);
+    if (channels == 0)
+        return nil;
+    
+    AudioChannelLayoutTag layoutTag = kAudioChannelLayoutTag_Stereo;
+    if (channels > 1) {
+        layoutTag = kAudioChannelLayoutTag_Stereo;
+    } else {
+        layoutTag = kAudioChannelLayoutTag_Mono;
+    }
+    AVAudioChannelLayout *chLayout = [[AVAudioChannelLayout alloc] initWithLayoutTag:layoutTag];
+    int sample_rate = ijkmp_get_sample_rate(_mediaPlayer);
+    int interleaved = ijkmp_get_interleaved(_mediaPlayer);
+    AVAudioCommonFormat avAudioCommonFormat = [self avAudioFormat];
+    AVAudioFormat *chFormat = [[AVAudioFormat alloc] initWithCommonFormat:avAudioCommonFormat
+                                                               sampleRate:(double)sample_rate
+                                                              interleaved:interleaved ? TRUE : FALSE
+                                                            channelLayout:chLayout];
+
+    int frame_capacity = ijkmp_get_frame_capacity(_mediaPlayer);
+    unsigned int size = ijkmp_get_audio_buf_size(_mediaPlayer);
+    AVAudioPCMBuffer *thePCMBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:chFormat frameCapacity:frame_capacity];
+    thePCMBuffer.frameLength = thePCMBuffer.frameCapacity;
+    switch (avAudioCommonFormat) {
+        case AVAudioPCMFormatInt16:
+            memcpy(thePCMBuffer.int16ChannelData[0], audio_buf, size);
+            break;
+        case AVAudioPCMFormatInt32:
+            memcpy(thePCMBuffer.int32ChannelData[0], audio_buf, size);
+            break;
+        case AVAudioPCMFormatFloat32:
+            memcpy(thePCMBuffer.floatChannelData[0], audio_buf, size);
+            break;
+        case AVAudioPCMFormatFloat64:
+            memcpy(thePCMBuffer.floatChannelData[0], audio_buf, size);
+            break;
+        default:
+            return nil;
+            break;
+    }
+    _avAudioPCMBuffer = thePCMBuffer;
+    
+    return thePCMBuffer;
 }
 
 inline static int getPlayerOption(IJKFFOptionCategory category)
@@ -988,6 +1097,13 @@ inline static NSString *formatedSpeed(int64_t bytes, int64_t elapsed_milli) {
     if (!_mediaPlayer)
         return 0;
     return ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_TRAFFIC_STATISTIC_BYTE_COUNT, 0);
+}
+
+- (int64_t)tcpSpeed
+{
+    if (!_mediaPlayer)
+        return 0;
+    return ijkmp_get_property_int64(_mediaPlayer, FFP_PROP_INT64_TCP_SPEED, 0);
 }
 
 - (float)dropFrameRate

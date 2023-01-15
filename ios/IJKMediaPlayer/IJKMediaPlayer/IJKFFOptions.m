@@ -47,7 +47,7 @@
     [options setFormatOptionIntValue:0                  forKey:@"auto_convert"];
     [options setFormatOptionIntValue:1                  forKey:@"reconnect"];
     [options setFormatOptionIntValue:30 * 1000 * 1000   forKey:@"timeout"];
-    [options setFormatOptionValue:@"ijkplayer"          forKey:@"user-agent"];
+    [options setFormatOptionValue:@"ijkplayer"          forKey:@"user_agent"];
 
     options.showHudView   = NO;
 

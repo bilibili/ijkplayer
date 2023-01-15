@@ -39,13 +39,13 @@ dependencies {
 
 ### My Build Environment
 - Common
- - Mac OS X 10.11.5
+ - Mac OS X 10.12.6
 - Android
- - [NDK r10e](http://developer.android.com/tools/sdk/ndk/index.html)
- - Android Studio 2.1.3
+ - [NDK r14b](http://developer.android.com/tools/sdk/ndk/index.html) [compile script check not working with r15b]
+ - Android Studio 2.3.3
  - Gradle 2.14.1
 - iOS
- - Xcode 7.3 (7D175)
+ - Xcode Version 8.3.3 (8E3004b)
 - [HomeBrew](http://brew.sh)
  - ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
  - brew install git

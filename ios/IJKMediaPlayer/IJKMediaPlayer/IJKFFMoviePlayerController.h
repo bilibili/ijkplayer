@@ -25,6 +25,7 @@
 #import "IJKFFMonitor.h"
 #import "IJKFFOptions.h"
 #import "IJKSDLGLViewProtocol.h"
+#import <CoreAudio/CoreAudioTypes.h>
 
 // media meta
 #define k_IJKM_KEY_FORMAT         @"format"
@@ -92,6 +93,7 @@ typedef enum IJKLogLevel {
 - (void)stop;
 - (BOOL)isPlaying;
 - (int64_t)trafficStatistic;
+- (int64_t)tcpSpeed;
 - (float)dropFrameRate;
 
 - (void)setPauseInBackground:(BOOL)pause;
@@ -108,6 +110,7 @@ typedef enum IJKLogLevel {
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
 @property(nonatomic) BOOL shouldShowHudView;
+@property(nonatomic, retain) AVAudioPCMBuffer *avAudioPCMBuffer;
 
 - (void)setOptionValue:(NSString *)value
                 forKey:(NSString *)key
@@ -153,3 +156,4 @@ void IJKFFIOStatCompleteDebugCallback(const char *url,
 void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
                                             int64_t read_bytes, int64_t total_size,
                                             int64_t elpased_time, int64_t total_duration));
+
