@@ -44,6 +44,44 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20210426--001
 @implementation IJKWeakHolder
 @end
 
+
+/// Default class to provide values from UIScreen.mainScreen for demo purposes
+/// This class does not obtain values from UIScreen.mainScreen in a thread safe way
+/// Please override implementation to enforce access on main thread only.
+@interface IJKMainScreenProvider : NSObject<IJKThreadSafeMainScreen>
+
+@end
+
+@implementation IJKMainScreenProvider
+
+- (CGFloat)scale
+{
+    return UIScreen.mainScreen.scale;
+}
+
+- (CGRect)bounds
+{
+    return UIScreen.mainScreen.bounds;
+}
+
+@end
+
+/// Default class to provide values from UIApplication for demo purposes
+/// This class does not obtain values from UIApplication in a thread safe way
+/// Please override implementation to enforce access on main thread only.
+@interface IJKApplicationStateProvider : NSObject<IJKThreadSafeApplicationState>
+
+@end
+
+@implementation IJKApplicationStateProvider
+
+- (UIApplicationState)applicationState
+{
+    return UIApplication.sharedApplication.applicationState;
+}
+
+@end
+
 @interface IJKFFMoviePlayerController()
 
 @end
@@ -68,6 +106,8 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20210426--001
     BOOL _playingBeforeInterruption;
 
     IJKNotificationManager *_notificationManager;
+    id<IJKThreadSafeMainScreen> _mainScreenProvider;
+    id<IJKThreadSafeApplicationState> _applicationStateProvider;
 
     AVAppAsyncStatistic _asyncStat;
     IjkIOAppCacheStatistic _cacheStat;
@@ -169,12 +209,16 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
                    withOptions:(IJKFFOptions *)options
 {
     return [self initWithContentURLString:aUrlString
-                   withNotificationCenter:nil
+                   withNotificationCenter:[NSNotificationCenter defaultCenter]
+                   withMainScreenProvider:[[IJKMainScreenProvider alloc] init]
+             withApplicationStateProvider:[[IJKApplicationStateProvider alloc] init]
                               withOptions:options];
 }
 
 - (id)initWithContentURLString:(NSString *)aUrlString
         withNotificationCenter:(NSNotificationCenter *)center
+        withMainScreenProvider:(id<IJKThreadSafeMainScreen>)mainScreenProvider
+  withApplicationStateProvider:(id<IJKThreadSafeApplicationState>)applicationStateProvider
                    withOptions:(IJKFFOptions *)options
 {
     if (aUrlString == nil)
@@ -213,8 +257,15 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         ijkmp_set_ijkio_inject_opaque(_mediaPlayer, (__bridge_retained void *)weakHolder);
         ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", _shouldAutoplay ? 1 : 0);
 
+        /// Add thread safe value providers (`@mainScreenProvider`, `@applicationStateProvider`)
+        _mainScreenProvider = mainScreenProvider;
+        _applicationStateProvider = applicationStateProvider;
+        
         // init video sink
-        _glView = [[IJKSDLGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        /// Pass thread safe value providers to IJKSDLGLView (`@mainScreenProvider`, `@applicationStateProvider`)
+        _glView = [[IJKSDLGLView alloc] initWithFrame:mainScreenProvider.bounds
+                               withMainScreenProvider:mainScreenProvider
+                         withApplicationStateProvider:applicationStateProvider];
         _glView.isThirdGLView = NO;
         _view = _glView;
         _hudViewController = [[IJKSDLHudViewController alloc] init];
@@ -253,11 +304,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         // init extra
         _notificationManager = [[IJKNotificationManager alloc] init];
-        if (center) {
-            _videoPlaybackNotificationCenter = center;
-        } else {
-            _videoPlaybackNotificationCenter = [NSNotificationCenter defaultCenter];
-        }
+        _videoPlaybackNotificationCenter = center;
         [self registerApplicationObservers];
     }
     return self;

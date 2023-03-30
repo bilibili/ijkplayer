@@ -82,6 +82,8 @@ typedef enum IJKLogLevel {
 
 - (id)initWithContentURLString:(NSString *)aUrlString
         withNotificationCenter:(NSNotificationCenter *)center
+        withMainScreenProvider:(id<IJKThreadSafeMainScreen>)mainScreenProvider
+  withApplicationStateProvider:(id<IJKThreadSafeApplicationState>)applicationStateProvider
                    withOptions:(IJKFFOptions *)options;
 
 - (id)initWithMoreContent:(NSURL *)aUrl

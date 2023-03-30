@@ -37,6 +37,8 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 @interface IJKSDLGLView()
 @property(atomic,strong) NSRecursiveLock *glActiveLock;
 @property(atomic) BOOL glActivePaused;
+@property id<IJKThreadSafeMainScreen> mainScreenProvider;
+@property id<IJKThreadSafeApplicationState> applicationStateProvider;
 @end
 
 @implementation IJKSDLGLView {
@@ -75,6 +77,8 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
 }
 
 - (id) initWithFrame:(CGRect)frame
+withMainScreenProvider:(id<IJKThreadSafeMainScreen>)mainScreenProvider
+     withApplicationStateProvider:(id<IJKThreadSafeApplicationState>)applicationStateProvider
 {
     self = [super initWithFrame:frame];
     if (self) {
@@ -82,6 +86,8 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         _shouldLockWhileBeingMovedToWindow = YES;
         self.glActiveLock = [[NSRecursiveLock alloc] init];
         _registeredNotifications = [[NSMutableArray alloc] init];
+        self.mainScreenProvider = mainScreenProvider;
+        self.applicationStateProvider = applicationStateProvider;
         [self registerApplicationObservers];
 
         _didSetupGL = NO;
@@ -157,7 +163,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
                                     kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
                                     nil];
 
-    _scaleFactor = [[UIScreen mainScreen] scale];
+    _scaleFactor = self.mainScreenProvider.scale;
     if (_scaleFactor < 0.1f)
         _scaleFactor = 1.0f;
 
@@ -203,7 +209,7 @@ typedef NS_ENUM(NSInteger, IJKSDLGLViewApplicationState) {
         case IJKSDLGLViewApplicationBackgroundState:
             return NO;
         default: {
-            UIApplicationState appState = [UIApplication sharedApplication].applicationState;
+            UIApplicationState appState = self.applicationStateProvider.applicationState;
             switch (appState) {
                 case UIApplicationStateActive:
                     return YES;

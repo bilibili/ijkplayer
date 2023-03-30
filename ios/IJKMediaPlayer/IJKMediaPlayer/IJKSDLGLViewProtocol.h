@@ -39,6 +39,34 @@ struct IJKOverlay {
     CVPixelBufferRef pixel_buffer;
 };
 
+/// A protocol to guarantee that non-thread safe values are accessed from
+/// an object that can guarantee thread safety.
+/// IJKFFMovieController and IJKSDLGLView will access non-thread safe
+/// values from a background thread. The object that conforms to this protocol
+/// should safely handle the access of these properties, internally setting them on main thread.
+@protocol IJKThreadSafeMainScreen
+
+/// Returns the current bounds of the screen
+@property (readonly) CGRect bounds;
+
+/// Returns the current scale of the screen
+@property (readonly) CGFloat scale;
+
+@end
+
+/// A protocol to guarantee that non-thread safe values are accessed from
+/// an object that can guarantee thread safety.
+/// IJKFFMovieController and IJKSDLGLView will access non-thread safe
+/// values from a background thread. The object that conforms to this protocol
+/// should safely handle the access of these properties, internally setting them on main thread.
+@protocol IJKThreadSafeApplicationState
+
+/// Returns the current state of the application
+@property (readonly) UIApplicationState applicationState;
+
+@end
+
+
 @protocol IJKSDLGLViewProtocol <NSObject>
 - (UIImage*) snapshot;
 @property(nonatomic, readonly) CGFloat  fps;
