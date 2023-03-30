@@ -669,7 +669,17 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
      object:self];
 
     _bufferingPosition = 0;
-    ijkmp_seek_to(_mediaPlayer, aCurrentPlaybackTime * 1000);
+    int retVal = ijkmp_seek_to(_mediaPlayer, aCurrentPlaybackTime * 1000);
+    
+    // ijkmp_seek_to can immediately fail, retVal contains the error code
+    if (retVal != 0) {
+        [self.videoPlaybackNotificationCenter
+         postNotificationName:IJKMPMoviePlayerDidSeekCompleteNotification
+         object:self
+         userInfo:@{IJKMPMoviePlayerDidSeekCompleteTargetKey: @(aCurrentPlaybackTime * 1000),
+                    IJKMPMoviePlayerDidSeekCompleteErrorKey: @(retVal)}];
+        _seeking = NO;
+    }
 }
 
 - (NSTimeInterval)currentPlaybackTime
