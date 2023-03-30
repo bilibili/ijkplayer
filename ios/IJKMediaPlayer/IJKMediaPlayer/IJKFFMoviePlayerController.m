@@ -609,10 +609,16 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     int state = ijkmp_get_state(_mediaPlayer);
     switch (state) {
         case MP_STATE_STOPPED:
-        case MP_STATE_COMPLETED:
-        case MP_STATE_ERROR:
-        case MP_STATE_END:
             mpState = IJKMPMoviePlaybackStateStopped;
+            break;
+        case MP_STATE_COMPLETED:
+            mpState = IJKMPMoviePlaybackStateCompleted;
+            break;
+        case MP_STATE_ERROR:
+            mpState = IJKMPMoviePlaybackStateError;
+            break;
+        case MP_STATE_END:
+            mpState = IJKMPMoviePlaybackStateEnd;
             break;
         case MP_STATE_IDLE:
         case MP_STATE_INITIALIZED:
@@ -634,7 +640,10 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     // IJKMPMoviePlaybackStateStopped,
     // IJKMPMoviePlaybackStateInterrupted,
     // IJKMPMoviePlaybackStateSeekingForward,
-    // IJKMPMoviePlaybackStateSeekingBackward
+    // IJKMPMoviePlaybackStateSeekingBackward,
+    // IJKMPMoviePlaybackStateCompleted,
+    // IJKMPMoviePlaybackStateError,
+    // IJKMPMoviePlaybackStateEnd
     return mpState;
 }
 
@@ -1729,6 +1738,9 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
             switch (self.playbackState) {
                 case IJKMPMoviePlaybackStatePaused:
                 case IJKMPMoviePlaybackStateStopped:
+                case IJKMPMoviePlaybackStateCompleted:
+                case IJKMPMoviePlaybackStateError:
+                case IJKMPMoviePlaybackStateEnd:
                     _playingBeforeInterruption = NO;
                     break;
                 default:
