@@ -78,6 +78,10 @@ typedef enum IJKLogLevel {
 - (id)initWithContentURLString:(NSString *)aUrlString
                    withOptions:(IJKFFOptions *)options;
 
+- (id)initWithContentURLString:(NSString *)aUrlString
+        withNotificationCenter:(NSNotificationCenter *)center
+                   withOptions:(IJKFFOptions *)options;
+
 - (id)initWithMoreContent:(NSURL *)aUrl
              withOptions:(IJKFFOptions *)options
               withGLView:(UIView<IJKSDLGLViewProtocol> *)glView;
@@ -85,6 +89,8 @@ typedef enum IJKLogLevel {
 - (id)initWithMoreContentString:(NSString *)aUrlString
                  withOptions:(IJKFFOptions *)options
                   withGLView:(UIView<IJKSDLGLViewProtocol> *)glView;
+
+@property (nonatomic, readonly) NSNotificationCenter* videoPlaybackNotificationCenter;
 
 - (void)prepareToPlay;
 - (void)play;
