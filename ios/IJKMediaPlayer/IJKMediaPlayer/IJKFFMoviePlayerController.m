@@ -63,7 +63,6 @@ static const char *kIJKFFRequiredFFmpegVersion = "ff4.0--ijk0.8.8--20210426--001
     NSInteger _bufferingTime;
     NSInteger _bufferingPosition;
 
-    BOOL _keepScreenOnWhilePlaying;
     BOOL _pauseInBackground;
     BOOL _isVideoToolboxOpen;
     BOOL _playingBeforeInterruption;
@@ -166,12 +165,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
                               withOptions:options];
 }
 
-- (void)setScreenOn: (BOOL)on
-{
-    [IJKMediaModule sharedModule].mediaModuleIdleTimerDisabled = on;
-    // [UIApplication sharedApplication].idleTimerDisabled = on;
-}
-
 - (id)initWithContentURLString:(NSString *)aUrlString
                    withOptions:(IJKFFOptions *)options
 {
@@ -260,9 +253,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         _pauseInBackground = NO;
 
         // init extra
-        _keepScreenOnWhilePlaying = YES;
-        [self setScreenOn:YES];
-
         _notificationManager = [[IJKNotificationManager alloc] init];
         if (center) {
             _videoPlaybackNotificationCenter = center;
@@ -368,9 +358,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         _pauseInBackground = NO;
 
         // init extra
-        _keepScreenOnWhilePlaying = YES;
-        [self setScreenOn:YES];
-
         _notificationManager = [[IJKNotificationManager alloc] init];
         [self registerApplicationObservers];
     }
@@ -402,8 +389,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (!_mediaPlayer)
         return;
 
-    [self setScreenOn:_keepScreenOnWhilePlaying];
-
     ijkmp_set_data_source(_mediaPlayer, [_urlString UTF8String]);
     ijkmp_set_option(_mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "safe", "0"); // for concat demuxer
 
@@ -430,8 +415,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     if (!_mediaPlayer)
         return;
 
-    [self setScreenOn:_keepScreenOnWhilePlaying];
-
     [self startHudTimer];
     ijkmp_start(_mediaPlayer);
 }
@@ -449,8 +432,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 {
     if (!_mediaPlayer)
         return;
-
-    [self setScreenOn:NO];
 
     [self stopHudTimer];
     ijkmp_stop(_mediaPlayer);
@@ -581,7 +562,6 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
 
     [self stopHudTimer];
     [self unregisterApplicationObservers];
-    [self setScreenOn:NO];
 
     [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
 }
@@ -1043,8 +1023,6 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
         case FFP_MSG_ERROR: {
             NSLog(@"FFP_MSG_ERROR: %d\n", avmsg->arg1);
 
-            [self setScreenOn:NO];
-
             [self.videoPlaybackNotificationCenter
              postNotificationName:IJKMPMoviePlayerPlaybackStateDidChangeNotification
              object:self];
@@ -1166,8 +1144,6 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             break;
         }
         case FFP_MSG_COMPLETED: {
-
-            [self setScreenOn:NO];
 
             [self.videoPlaybackNotificationCenter
              postNotificationName:IJKMPMoviePlayerPlaybackStateDidChangeNotification
