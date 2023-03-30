@@ -30,7 +30,16 @@
 
 @interface IJKSDLGLView : UIView <IJKSDLGLViewProtocol>
 
-- (id) initWithFrame:(CGRect)frame;
+
+/// Initialization method for IJKSDLGLView (a wrapper for OpenGL layer CAEAGLLayer)
+/// - Parameters:
+///   - frame: the expected frame for the view
+///   - mainScreen: a thread safe wrapper that provides access to values from UIScreen.mainScreen
+///   - application: a thread safe wrapper that provides access to values from UIApplication.sharedApplication
+- (id) initWithFrame:(CGRect)frame
+withMainScreenProvider:(id<IJKThreadSafeMainScreen>)mainScreenProvider
+withApplicationStateProvider:(id<IJKThreadSafeApplicationState>)applicationStateProvider;
+
 - (void) display: (SDL_VoutOverlay *) overlay;
 
 - (UIImage*) snapshot;

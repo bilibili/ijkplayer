@@ -26,6 +26,8 @@
 #import "IJKFFOptions.h"
 #import "IJKSDLGLViewProtocol.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 // media meta
 #define k_IJKM_KEY_FORMAT         @"format"
 #define k_IJKM_KEY_DURATION_US    @"duration_us"
@@ -78,6 +80,12 @@ typedef enum IJKLogLevel {
 - (id)initWithContentURLString:(NSString *)aUrlString
                    withOptions:(IJKFFOptions *)options;
 
+- (id)initWithContentURLString:(NSString *)aUrlString
+        withNotificationCenter:(NSNotificationCenter *)center
+        withMainScreenProvider:(id<IJKThreadSafeMainScreen>)mainScreenProvider
+  withApplicationStateProvider:(id<IJKThreadSafeApplicationState>)applicationStateProvider
+                   withOptions:(IJKFFOptions *)options;
+
 - (id)initWithMoreContent:(NSURL *)aUrl
              withOptions:(IJKFFOptions *)options
               withGLView:(UIView<IJKSDLGLViewProtocol> *)glView;
@@ -85,6 +93,8 @@ typedef enum IJKLogLevel {
 - (id)initWithMoreContentString:(NSString *)aUrlString
                  withOptions:(IJKFFOptions *)options
                   withGLView:(UIView<IJKSDLGLViewProtocol> *)glView;
+
+@property (nonatomic, readonly) NSNotificationCenter* videoPlaybackNotificationCenter;
 
 - (void)prepareToPlay;
 - (void)play;
@@ -153,3 +163,4 @@ void IJKFFIOStatCompleteDebugCallback(const char *url,
 void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
                                             int64_t read_bytes, int64_t total_size,
                                             int64_t elpased_time, int64_t total_duration));
+NS_ASSUME_NONNULL_END

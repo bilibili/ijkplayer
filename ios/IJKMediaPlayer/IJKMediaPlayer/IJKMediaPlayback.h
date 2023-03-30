@@ -24,20 +24,26 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-typedef NS_ENUM(NSInteger, IJKMPMovieScalingMode) {
+typedef NS_CLOSED_ENUM(NSInteger, IJKMPMovieScalingMode) {
     IJKMPMovieScalingModeNone,       // No scaling
     IJKMPMovieScalingModeAspectFit,  // Uniform scale until one dimension fits
     IJKMPMovieScalingModeAspectFill, // Uniform scale until the movie fills the visible bounds. One dimension may have clipped contents
     IJKMPMovieScalingModeFill        // Non-uniform scale. Both render dimensions will exactly match the visible bounds
 };
 
-typedef NS_ENUM(NSInteger, IJKMPMoviePlaybackState) {
+typedef NS_CLOSED_ENUM(NSInteger, IJKMPMoviePlaybackState) {
     IJKMPMoviePlaybackStateStopped,
     IJKMPMoviePlaybackStatePlaying,
     IJKMPMoviePlaybackStatePaused,
     IJKMPMoviePlaybackStateInterrupted,
     IJKMPMoviePlaybackStateSeekingForward,
-    IJKMPMoviePlaybackStateSeekingBackward
+    IJKMPMoviePlaybackStateSeekingBackward,
+    IJKMPMoviePlaybackStateCompleted,
+    IJKMPMoviePlaybackStateError,
+    IJKMPMoviePlaybackStateEnd,
+    IJKMPMoviePlaybackStateIdle,
+    IJKMPMoviePlaybackStateInitialized,
+    IJKMPMoviePlaybackStateAsyncPreparing
 };
 
 typedef NS_OPTIONS(NSUInteger, IJKMPMovieLoadState) {
@@ -47,7 +53,7 @@ typedef NS_OPTIONS(NSUInteger, IJKMPMovieLoadState) {
     IJKMPMovieLoadStateStalled        = 1 << 2, // Playback will be automatically paused in this state, if started
 };
 
-typedef NS_ENUM(NSInteger, IJKMPMovieFinishReason) {
+typedef NS_CLOSED_ENUM(NSInteger, IJKMPMovieFinishReason) {
     IJKMPMovieFinishReasonPlaybackEnded,
     IJKMPMovieFinishReasonPlaybackError,
     IJKMPMovieFinishReasonUserExited
@@ -56,7 +62,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieFinishReason) {
 // -----------------------------------------------------------------------------
 // Thumbnails
 
-typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
+typedef NS_CLOSED_ENUM(NSInteger, IJKMPMovieTimeOption) {
     IJKMPMovieTimeOptionNearestKeyFrame,
     IJKMPMovieTimeOptionExact
 };
@@ -138,11 +144,16 @@ IJK_EXTERN NSString* const IJKMPMoviePlayerLoadStateDidChangeNotification;
 // Posted when the movie player begins or ends playing video via AirPlay.
 IJK_EXTERN NSString* const IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification;
 
+// Posted when the buffering position of movie player changes.
+IJK_EXTERN NSString* const IJKMPMovieBufferingPositionDidChangeNotification;
+
 // -----------------------------------------------------------------------------
 // Movie Property Notifications
 
 // Calling -prepareToPlay on the movie player will begin determining movie properties asynchronously.
 // These notifications are posted when the associated movie property becomes available.
+
+// Posted when the natural size of movie player changes
 IJK_EXTERN NSString* const IJKMPMovieNaturalSizeAvailableNotification;
 
 // -----------------------------------------------------------------------------
