@@ -195,7 +195,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         // init fields
         _scalingMode = IJKMPMovieScalingModeAspectFit;
-        _shouldAutoplay = YES;
         memset(&_asyncStat, 0, sizeof(_asyncStat));
         memset(&_cacheStat, 0, sizeof(_cacheStat));
         _monitor = [[IJKFFMonitor alloc] init];
@@ -301,7 +300,6 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
         // init fields
         _scalingMode = IJKMPMovieScalingModeAspectFit;
-        _shouldAutoplay = YES;
         memset(&_asyncStat, 0, sizeof(_asyncStat));
         memset(&_cacheStat, 0, sizeof(_cacheStat));
         _monitor = [[IJKFFMonitor alloc] init];
