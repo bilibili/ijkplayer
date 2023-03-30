@@ -745,12 +745,6 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
     _scalingMode = newScalingMode;
 }
 
-// deprecated, for MPMoviePlayerController compatiable
-- (UIImage *)thumbnailImageAtTime:(NSTimeInterval)playbackTime timeOption:(IJKMPMovieTimeOption)option
-{
-    return nil;
-}
-
 - (UIImage *)thumbnailImageAtCurrentTime
 {
     if ([_view conformsToProtocol:@protocol(IJKSDLGLViewProtocol)]) {
