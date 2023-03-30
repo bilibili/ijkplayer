@@ -17,7 +17,6 @@ FOUNDATION_EXPORT const unsigned char IJKMediaFrameworkWithSSLVersionString[];
 // In this header, you should import all the public headers of your framework using statements like #import <IJKMediaFrameworkWithSSL/PublicHeader.h>
 
 #import <IJKMediaFrameworkWithSSL/IJKMediaPlayback.h>
-#import <IJKMediaFrameworkWithSSL/IJKMPMoviePlayerController.h>
 #import <IJKMediaFrameworkWithSSL/IJKFFOptions.h>
 #import <IJKMediaFrameworkWithSSL/IJKFFMoviePlayerController.h>
 #import <IJKMediaFrameworkWithSSL/IJKAVMoviePlayerController.h>
