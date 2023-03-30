@@ -24,14 +24,14 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-typedef NS_ENUM(NSInteger, IJKMPMovieScalingMode) {
+typedef NS_CLOSED_ENUM(NSInteger, IJKMPMovieScalingMode) {
     IJKMPMovieScalingModeNone,       // No scaling
     IJKMPMovieScalingModeAspectFit,  // Uniform scale until one dimension fits
     IJKMPMovieScalingModeAspectFill, // Uniform scale until the movie fills the visible bounds. One dimension may have clipped contents
     IJKMPMovieScalingModeFill        // Non-uniform scale. Both render dimensions will exactly match the visible bounds
 };
 
-typedef NS_ENUM(NSInteger, IJKMPMoviePlaybackState) {
+typedef NS_CLOSED_ENUM(NSInteger, IJKMPMoviePlaybackState) {
     IJKMPMoviePlaybackStateStopped,
     IJKMPMoviePlaybackStatePlaying,
     IJKMPMoviePlaybackStatePaused,
@@ -47,7 +47,7 @@ typedef NS_OPTIONS(NSUInteger, IJKMPMovieLoadState) {
     IJKMPMovieLoadStateStalled        = 1 << 2, // Playback will be automatically paused in this state, if started
 };
 
-typedef NS_ENUM(NSInteger, IJKMPMovieFinishReason) {
+typedef NS_CLOSED_ENUM(NSInteger, IJKMPMovieFinishReason) {
     IJKMPMovieFinishReasonPlaybackEnded,
     IJKMPMovieFinishReasonPlaybackError,
     IJKMPMovieFinishReasonUserExited
@@ -56,7 +56,7 @@ typedef NS_ENUM(NSInteger, IJKMPMovieFinishReason) {
 // -----------------------------------------------------------------------------
 // Thumbnails
 
-typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
+typedef NS_CLOSED_ENUM(NSInteger, IJKMPMovieTimeOption) {
     IJKMPMovieTimeOptionNearestKeyFrame,
     IJKMPMovieTimeOptionExact
 };
