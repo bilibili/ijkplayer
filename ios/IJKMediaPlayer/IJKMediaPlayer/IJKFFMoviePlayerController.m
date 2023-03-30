@@ -619,8 +619,14 @@ inline static int getPlayerOption(IJKFFOptionCategory category)
             mpState = IJKMPMoviePlaybackStateEnd;
             break;
         case MP_STATE_IDLE:
+            mpState = IJKMPMoviePlaybackStateIdle;
+            break;
         case MP_STATE_INITIALIZED:
+            mpState = IJKMPMoviePlaybackStateInitialized;
+            break;
         case MP_STATE_ASYNC_PREPARING:
+            mpState = IJKMPMoviePlaybackStateAsyncPreparing;
+            break;
         case MP_STATE_PAUSED:
             mpState = IJKMPMoviePlaybackStatePaused;
             break;
@@ -1734,6 +1740,9 @@ static int ijkff_inject_callback(void *opaque, int message, void *data, size_t d
         case AVAudioSessionInterruptionTypeBegan: {
             NSLog(@"IJKFFMoviePlayerController:audioSessionInterrupt: begin\n");
             switch (self.playbackState) {
+                case IJKMPMoviePlaybackStateIdle:
+                case IJKMPMoviePlaybackStateInitialized:
+                case IJKMPMoviePlaybackStateAsyncPreparing:
                 case IJKMPMoviePlaybackStatePaused:
                 case IJKMPMoviePlaybackStateStopped:
                 case IJKMPMoviePlaybackStateCompleted:

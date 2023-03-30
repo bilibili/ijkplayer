@@ -40,7 +40,10 @@ typedef NS_CLOSED_ENUM(NSInteger, IJKMPMoviePlaybackState) {
     IJKMPMoviePlaybackStateSeekingBackward,
     IJKMPMoviePlaybackStateCompleted,
     IJKMPMoviePlaybackStateError,
-    IJKMPMoviePlaybackStateEnd
+    IJKMPMoviePlaybackStateEnd,
+    IJKMPMoviePlaybackStateIdle,
+    IJKMPMoviePlaybackStateInitialized,
+    IJKMPMoviePlaybackStateAsyncPreparing
 };
 
 typedef NS_OPTIONS(NSUInteger, IJKMPMovieLoadState) {
