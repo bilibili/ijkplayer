@@ -138,11 +138,16 @@ IJK_EXTERN NSString* const IJKMPMoviePlayerLoadStateDidChangeNotification;
 // Posted when the movie player begins or ends playing video via AirPlay.
 IJK_EXTERN NSString* const IJKMPMoviePlayerIsAirPlayVideoActiveDidChangeNotification;
 
+// Posted when the buffering position of movie player changes.
+IJK_EXTERN NSString* const IJKMPMovieBufferingPositionDidChangeNotification;
+
 // -----------------------------------------------------------------------------
 // Movie Property Notifications
 
 // Calling -prepareToPlay on the movie player will begin determining movie properties asynchronously.
 // These notifications are posted when the associated movie property becomes available.
+
+// Posted when the natural size of movie player changes
 IJK_EXTERN NSString* const IJKMPMovieNaturalSizeAvailableNotification;
 
 // -----------------------------------------------------------------------------
