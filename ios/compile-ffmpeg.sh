@@ -22,8 +22,9 @@
 FF_ALL_ARCHS_IOS6_SDK="armv7 armv7s i386"
 FF_ALL_ARCHS_IOS7_SDK="armv7 armv7s arm64 i386 x86_64"
 FF_ALL_ARCHS_IOS8_SDK="armv7 arm64 i386 x86_64"
+FF_ALL_ARCHS_IOS13_SDK="arm64 x86_64"
 
-FF_ALL_ARCHS=$FF_ALL_ARCHS_IOS8_SDK
+FF_ALL_ARCHS=$FF_ALL_ARCHS_IOS13_SDK
 
 #----------
 UNI_BUILD_ROOT=`pwd`
@@ -31,6 +32,7 @@ UNI_TMP="$UNI_BUILD_ROOT/tmp"
 UNI_TMP_LLVM_VER_FILE="$UNI_TMP/llvm.ver.txt"
 FF_TARGET=$1
 FF_TARGET_EXTRA=$2
+FF_ARM64_SIMULATOR=$3
 set -e
 
 #----------
@@ -117,9 +119,17 @@ do_lipo_all () {
 }
 
 #----------
-if [ "$FF_TARGET" = "armv7" -o "$FF_TARGET" = "armv7s" -o "$FF_TARGET" = "arm64" ]; then
+if [ "$FF_TARGET" = "armv7" -o "$FF_TARGET" = "armv7s" ]; then
     echo_archs
     sh tools/do-compile-ffmpeg.sh $FF_TARGET $FF_TARGET_EXTRA
+    do_lipo_all
+elif [ "$FF_TARGET" = "arm64" ]; then
+    echo_archs
+    if [ "$FF_ARM64_SIMULATOR" = "simulator" ] ; then
+        sh tools/do-compile-ffmpeg.sh $FF_TARGET $FF_TARGET_EXTRA $FF_ARM64_SIMULATOR
+    else
+        sh tools/do-compile-ffmpeg.sh $FF_TARGET $FF_TARGET_EXTRA
+    fi
     do_lipo_all
 elif [ "$FF_TARGET" = "i386" -o "$FF_TARGET" = "x86_64" ]; then
     echo_archs

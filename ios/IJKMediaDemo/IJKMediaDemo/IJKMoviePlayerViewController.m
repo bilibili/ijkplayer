@@ -90,6 +90,7 @@
         [options setFormatOptionValue:self.manifest     forKey:@"manifest_string"];
     }
     self.player = [[IJKFFMoviePlayerController alloc] initWithContentURL:self.url withOptions:options];
+    self.player.shouldAutoplay = YES;
     self.player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     self.player.view.frame = self.view.bounds;
     self.player.scalingMode = IJKMPMovieScalingModeAspectFit;
