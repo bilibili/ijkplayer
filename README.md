@@ -228,6 +228,50 @@ cd ios
 # 
 ```
 
+### Build on iOS on M1 ###
+```
+git clone https://github.com/Pinterest/ijkplayer.git ijkplayer-ios
+cd ijkplayer-ios
+
+./init-ios.sh
+
+cd ios
+./make_xcframework.sh
+
+# Demo
+#     open ios/IJKMediaDemo/IJKMediaDemo.xcodeproj with Xcode
+#     Go to target IJKMediaDemo -> Build Phases
+#       Delete IJKMediaFramework under Target Dependencies
+#       Delete IJKMediaFramework.framework under Link Binary with Libraries
+#     File -> Add Files to ... -> Select ios/IJKMediaFramework.xcframework/
+#     Run IJKMediaDemo
+#
+# Import into Your own Application
+#     Select your project in Xcode.
+#     File -> Add Files to ... -> Select ios/IJKMediaFramework.xcframework/
+#     Select your Application's target.
+#     Build Phases -> Target Dependencies -> Select IJKMediaFramework
+#     Build Phases -> Link Binary with Libraries -> Add:
+#         IJKMediaFramework.framework
+#
+#         AudioToolbox.framework
+#         AVFoundation.framework
+#         CoreGraphics.framework
+#         CoreMedia.framework
+#         CoreVideo.framework
+#         libbz2.tbd
+#         libz.tbd
+#         MediaPlayer.framework
+#         MobileCoreServices.framework
+#         OpenGLES.framework
+#         QuartzCore.framework
+#         UIKit.framework
+#         VideoToolbox.framework
+#
+#         ... (Maybe something else, if you get any link error)
+# 
+
+```
 
 ### Support (支持) ###
 - Please do not send e-mail to me. Public technical discussion on github is preferred.

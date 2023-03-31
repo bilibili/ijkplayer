@@ -36,6 +36,7 @@ set -e
 # common defines
 FF_ARCH=$1
 FF_BUILD_OPT=$2
+FF_ARM64_SIMULATOR=$3
 echo "FF_ARCH=$FF_ARCH"
 echo "FF_BUILD_OPT=$FF_BUILD_OPT"
 if [ -z "$FF_ARCH" ]; then
@@ -66,7 +67,8 @@ FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-cross-compile"
 # FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-symver"
 
 # Developer options (useful when working on FFmpeg itself):
-FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-stripping"
+# PinterestChanges: enabled
+# FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-stripping"
 
 ##
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --arch=$FF_ARCH"
@@ -93,7 +95,6 @@ case "$FF_BUILD_OPT" in
     ;;
     *)
         FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-optimizations"
-        FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-debug"
         FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --enable-small"
     ;;
 esac
@@ -120,7 +121,6 @@ FF_XCRUN_OSVERSION=
 FF_GASPP_EXPORT=
 FF_DEP_OPENSSL_INC=
 FF_DEP_OPENSSL_LIB=
-FF_XCODE_BITCODE=
 
 if [ "$FF_ARCH" = "i386" ]; then
     FF_BUILD_NAME="ffmpeg-i386"
@@ -138,7 +138,6 @@ elif [ "$FF_ARCH" = "armv7" ]; then
     FF_BUILD_NAME="ffmpeg-armv7"
     FF_BUILD_NAME_OPENSSL=openssl-armv7
     FF_XCRUN_OSVERSION="-miphoneos-version-min=6.0"
-    FF_XCODE_BITCODE="-fembed-bitcode"
     FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --disable-asm"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
 #    FFMPEG_CFG_CPU="--cpu=cortex-a8"
@@ -147,16 +146,26 @@ elif [ "$FF_ARCH" = "armv7s" ]; then
     FF_BUILD_NAME_OPENSSL=openssl-armv7s
     FFMPEG_CFG_CPU="--cpu=swift"
     FF_XCRUN_OSVERSION="-miphoneos-version-min=6.0"
-    FF_XCODE_BITCODE="-fembed-bitcode"
     FFMPEG_CFG_FLAGS_ARM="$FFMPEG_CFG_FLAGS_ARM --disable-asm"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
 elif [ "$FF_ARCH" = "arm64" ]; then
-    FF_BUILD_NAME="ffmpeg-arm64"
-    FF_BUILD_NAME_OPENSSL=openssl-arm64
-    FF_XCRUN_OSVERSION="-miphoneos-version-min=7.0"
-    FF_XCODE_BITCODE="-fembed-bitcode"
-    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
-    FF_GASPP_EXPORT="GASPP_FIX_XCODE5=1"
+    # check if it is arm64 on simulator
+    if [ "$FF_ARM64_SIMULATOR" = "simulator" ] ; then
+        FF_BUILD_NAME="ffmpeg-arm64"
+        FF_BUILD_NAME_OPENSSL=openssl-arm64
+        FF_XCRUN_PLATFORM="iPhoneSimulator"
+        FF_XCRUN_OSVERSION="-mios-simulator-version-min=7.0"
+        FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_SIMULATOR"
+        echo "building for arm64 simulator"
+    else
+        FF_BUILD_NAME="ffmpeg-arm64"
+        FF_BUILD_NAME_OPENSSL=openssl-arm64
+        FF_XCRUN_OSVERSION="-miphoneos-version-min=8.0"
+        FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
+        FF_GASPP_EXPORT="GASPP_FIX_XCODE5=1"
+        echo "building for arm64 device"
+    fi
+
 else
     echo "unknown architecture $FF_ARCH";
     exit 1
@@ -194,7 +203,6 @@ FFMPEG_CFLAGS=
 FFMPEG_CFLAGS="$FFMPEG_CFLAGS -arch $FF_ARCH"
 FFMPEG_CFLAGS="$FFMPEG_CFLAGS $FF_XCRUN_OSVERSION"
 FFMPEG_CFLAGS="$FFMPEG_CFLAGS $FFMPEG_EXTRA_CFLAGS"
-FFMPEG_CFLAGS="$FFMPEG_CFLAGS $FF_XCODE_BITCODE"
 FFMPEG_LDFLAGS="$FFMPEG_CFLAGS"
 FFMPEG_DEP_LIBS=
 
@@ -231,6 +239,10 @@ fi
 export DEBUG_INFORMATION_FORMAT=dwarf-with-dsym
 
 cd $FF_BUILD_SOURCE
+
+echo "delete $FF_BUILD_ROOT/config.h so it could reconfig"
+rm -rf ./config.h
+
 if [ -f "./config.h" ]; then
     echo 'reuse configure'
 else
