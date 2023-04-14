@@ -166,7 +166,7 @@ uintptr_t ijk_av_dict_strtoptr(char * value) {
     if(value[0] !='0' || (value[1]|0x20)!='x') {
         return NULL;
     }
-    ptr = strtoll(value, &next, 16);
+    ptr = strtoull(value, &next, 16);
     if (next == value) {
         return NULL;
     }
