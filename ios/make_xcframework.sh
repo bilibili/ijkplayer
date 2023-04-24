@@ -66,12 +66,16 @@ lipo -info simulator.xcarchive/Products/Library/Frameworks/IJKMediaFramework.fra
 echo "===== making simulator (x86_64 and arm64)frameworks done!"
 
 echo "===== composing xcframework"
-xcodebuild -create-xcframework -framework device.xcarchive/Products/Library/Frameworks/IJKMediaFramework.framework -framework simulator.xcarchive/Products/Library/Frameworks/IJKMediaFramework.framework -output ./IJKMediaFramework.xcframework
+xcodebuild -create-xcframework -framework device.xcarchive/Products/Library/Frameworks/IJKMediaFramework.framework \
+                -debug-symbols $IOS_ROOT/device.xcarchive/dSYMS/IJKMediaFramework.framework.dSYM \
+            -framework simulator.xcarchive/Products/Library/Frameworks/IJKMediaFramework.framework \
+                -debug-symbols $IOS_ROOT/simulator.xcarchive/dSYMS/IJKMediaFramework.framework.dSYM \
+            -output ./IJKMediaFramework.xcframework
 echo "===== composing xcframework done, at: ./IJKMediaFramework.xcframework"
 
 echo "clean up IJKMediaPlayerHome build artifacts"
 rm -rf $IJKMediaPlayerHome/build
 rm -rf ./*.xcarchive
 
-echo "git reset changes to $IJKMediaPlayerHome/build"
+echo "git reset changes to $IJKMediaPlayerHome/build, people probably don't that folder at all when they switch to use xcframework"
 git checkout ./build
