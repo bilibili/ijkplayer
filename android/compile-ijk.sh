@@ -54,17 +54,17 @@ do_sub_cmd () {
 
     case $SUB_CMD in
         prof)
-            $ANDROID_NDK/ndk-build $FF_MAKEFLAGS
+            arch -x86_64 $ANDROID_NDK/ndk-build $FF_MAKEFLAGS
         ;;
         clean)
-            $ANDROID_NDK/ndk-build clean
+            arch -x86_64 $ANDROID_NDK/ndk-build clean
         ;;
         rebuild)
-            $ANDROID_NDK/ndk-build clean
-            $ANDROID_NDK/ndk-build $FF_MAKEFLAGS
+            arch -x86_64 $ANDROID_NDK/ndk-build clean
+            arch -x86_64 $ANDROID_NDK/ndk-build $FF_MAKEFLAGS
         ;;
         *)
-            $ANDROID_NDK/ndk-build $FF_MAKEFLAGS
+            arch -x86_64 $ANDROID_NDK/ndk-build $FF_MAKEFLAGS
         ;;
     esac
 }
