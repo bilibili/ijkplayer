@@ -120,6 +120,8 @@ typedef struct IJKFF_Pipenode_Opaque {
     volatile bool             abort;
 } IJKFF_Pipenode_Opaque;
 
+#include "ffamc_output_size.h"
+
 static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
 {
     IJKFF_Pipenode_Opaque        *opaque   = node->opaque;
@@ -1117,15 +1119,14 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
 
             SDL_AMediaFormat_getInt32(opaque->output_aformat, "stride",         &stride);
             SDL_AMediaFormat_getInt32(opaque->output_aformat, "slice-height",   &slice_height);
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-left",      &crop_left);
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-top",       &crop_top);
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-right",     &crop_right);
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-bottom",    &crop_bottom);
-
-            // TI decoder could crash after reconfigure
-            // ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, width, height);
-            // opaque->frame_width  = width;
-            // opaque->frame_height = height;
+            int crop_mask = 0;
+            if (SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-left", &crop_left)) crop_mask |= 1;
+            if (SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-top", &crop_top)) crop_mask |= 2;
+            if (SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-right", &crop_right)) crop_mask |= 4;
+            if (SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-bottom", &crop_bottom)) crop_mask |= 8;
+            update_output_frame_size(opaque, width, height, crop_mask,
+                crop_left, crop_top, crop_right, crop_bottom);
+            // Normal per-frame size notifications publish the updated geometry.
             ALOGI(
                 "AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n"
                 "    width-height: (%d x %d)\n"
@@ -1290,15 +1291,14 @@ static int drain_output_buffer2_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t tim
 
             SDL_AMediaFormat_getInt32(opaque->output_aformat, "stride",         &stride);
             SDL_AMediaFormat_getInt32(opaque->output_aformat, "slice-height",   &slice_height);
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-left",      &crop_left);
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-top",       &crop_top);
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-right",     &crop_right);
-            SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-bottom",    &crop_bottom);
-
-            // TI decoder could crash after reconfigure
-            // ffp_notify_msg3(ffp, FFP_MSG_VIDEO_SIZE_CHANGED, width, height);
-            // opaque->frame_width  = width;
-            // opaque->frame_height = height;
+            int crop_mask = 0;
+            if (SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-left", &crop_left)) crop_mask |= 1;
+            if (SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-top", &crop_top)) crop_mask |= 2;
+            if (SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-right", &crop_right)) crop_mask |= 4;
+            if (SDL_AMediaFormat_getInt32(opaque->output_aformat, "crop-bottom", &crop_bottom)) crop_mask |= 8;
+            update_output_frame_size(opaque, width, height, crop_mask,
+                crop_left, crop_top, crop_right, crop_bottom);
+            // Normal per-frame size notifications publish the updated geometry.
             ALOGI(
                 "AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n"
                 "    width-height: (%d x %d)\n"
